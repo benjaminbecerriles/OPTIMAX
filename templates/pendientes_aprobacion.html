@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  Productos Pendientes
+{% endblock %}
+
+{% block content %}
+  <h1>Productos Pendientes</h1>
+
+  <!-- Botón para volver al inventario -->
+  <p>
+    <a href="{{ url_for('ver_productos') }}" class="btn btn-secondary">
+      Volver al Inventario
+    </a>
+  </p>
+
+  <!-- Mensaje si no hay pendientes -->
+  {% if pendientes|length == 0 %}
+    <div class="alert alert-info">
+      No hay productos pendientes de aprobación.
+    </div>
+  {% else %}
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Código Barras</th>
+          <th>Nombre (Tentativo)</th>
+          <th>Completar Datos</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for prod in pendientes %}
+        <tr>
+          <td>{{ prod.id }}</td>
+          <td>{{ prod.codigo_barras if prod.codigo_barras else "Sin Código" }}</td>
+          <td>{{ prod.nombre if prod.nombre else "Pendiente" }}</td>
+          <td>
+            <!-- Ahora el enlace dirige a la nueva ruta /completar-datos/<id> -->
+            <a 
+              href="{{ url_for('completar_datos', prod_id=prod.id) }}" 
+              class="btn btn-sm btn-outline-primary"
+            >
+              Completar Datos
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+{% endblock %}

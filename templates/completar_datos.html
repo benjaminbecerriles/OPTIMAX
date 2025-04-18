@@ -1,0 +1,908 @@
+```html
+{% extends 'base.html' %}
+
+{% block title %}
+  Completar Datos (Producto Pendiente)
+{% endblock %}
+
+{% block content %}
+
+<style>
+  :root {
+    --color-primario: #5A67D8;
+    --color-secundario: #48BB78;
+    --color-contrast: #ffffff;
+    --color-bg: #F0F4FF;
+    --color-text: #2D3748;
+    --color-card-bg: #FFFFFF;
+    --color-border: #CBD5E0;
+    --trans-fast: 0.25s;
+    --trans-med: 0.4s;
+  }
+
+  body {
+    background: linear-gradient(180deg, #ebf0fa 0%, var(--color-bg) 50%);
+    color: var(--color-text);
+    font-family: 'Open Sans', sans-serif;
+  }
+
+  .container {
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .page-title {
+    display: flex;
+    align-items: center;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-primario);
+  }
+  .page-title i {
+    font-size: 1.8rem;
+    margin-right: 0.5rem;
+  }
+
+  .product-card {
+    background: var(--color-card-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+    padding: 1.5rem;
+    transition: box-shadow var(--trans-fast) ease;
+  }
+  .product-card:hover {
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+  }
+
+  .alert-info {
+    background-color: #E9F8FF;
+    border: 1px solid #BEE3F8;
+    color: #1E429F;
+  }
+
+  .section-box {
+    background-color: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    animation: fadeInUp var(--trans-med) ease;
+  }
+
+  @keyframes fadeInUp {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .btn-custom-primary {
+    background-color: var(--color-primario);
+    border-color: var(--color-primario);
+    color: var(--color-contrast);
+    transition: transform var(--trans-fast), box-shadow var(--trans-fast);
+  }
+  .btn-custom-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+  }
+
+  .btn-custom-secondary {
+    background-color: #A0AEC0;
+    border-color: #A0AEC0;
+    color: var(--color-contrast);
+    transition: transform var(--trans-fast), box-shadow var(--trans-fast);
+  }
+  .btn-custom-secondary:hover {
+    transform: scale(1.02);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+  }
+
+  .btn-toggle {
+    background-color: var(--color-secundario);
+    border-color: var(--color-secundario);
+    color: #fff;
+    transition: all var(--trans-fast);
+  }
+  .btn-toggle:hover {
+    background-color: #38A169;
+    transform: scale(1.03);
+  }
+
+  .form-label {
+    font-weight: 600;
+  }
+  .form-check-label {
+    margin-left: 0.5rem;
+  }
+
+  .lotes-options {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .lotes-options > div {
+    margin-right: 1rem;
+    margin-top: 0.5rem;
+  }
+
+  .stock-lote-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  input.form-control:focus, select.form-select:focus {
+    border-color: var(--color-primario);
+    box-shadow: 0 0 0 1px var(--color-primario);
+  }
+</style>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-10 offset-md-1 col-lg-8 offset-lg-2">
+      <div class="product-card">
+        <h1 class="page-title mb-3">
+          <i class="fas fa-check-circle"></i> Completar Datos del Producto
+        </h1>
+
+        <div class="alert alert-info">
+          <p class="mb-0">
+            Este producto fue detectado por IA y marcado como “pendiente”.
+            Revisa, ajusta o completa sus datos, luego aprueba para finalizar.
+          </p>
+        </div>
+
+        <form method="POST" action="" enctype="multipart/form-data">
+          <!-- FOTO -->
+          <div class="mb-3">
+            <label class="form-label fw-bold">Foto del Producto</label>
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="opcion_foto"
+                id="fotoIA"
+                value="ia"
+                checked
+              >
+              <label class="form-check-label" for="fotoIA">
+                Permitir que la IA la escoja (default)
+              </label>
+            </div>
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="opcion_foto"
+                id="fotoCargar"
+                value="cargar"
+              >
+              <label class="form-check-label" for="fotoCargar">
+                Cargar foto
+              </label>
+            </div>
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="opcion_foto"
+                id="fotoSin"
+                value="sin"
+              >
+              <label class="form-check-label" for="fotoSin">
+                Sin foto
+              </label>
+            </div>
+
+            {% if producto.foto %}
+              <p class="mt-2 mb-1"><strong>Foto actual:</strong></p>
+              <img
+                src="{{ url_for('static', filename='uploads/' ~ producto.foto) }}"
+                alt="Foto Actual"
+                style="max-width: 120px; height: auto;"
+              >
+            {% endif %}
+
+            <div class="mt-2" id="divCargarFoto" style="display:none;">
+              <input type="file" class="form-control" name="foto" id="foto">
+            </div>
+          </div>
+
+          <!-- NOMBRE -->
+          <div class="mb-3">
+            <label for="nombre" class="form-label fw-bold">
+              Nombre del Producto <span class="text-danger">*</span>
+            </label>
+            <input
+              type="text"
+              class="form-control"
+              id="nombre"
+              name="nombre"
+              value="{{ producto.nombre }}"
+              required
+            >
+            <small class="text-muted">
+              Nombre detectado por IA; ajústalo si es necesario.
+            </small>
+          </div>
+
+          <!-- ¿Viene en Lotes? -->
+          <div class="form-check form-switch mb-3">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="vieneEnLotes"
+              name="vieneEnLotes"
+              {% if producto.viene_en_lotes %}checked{% endif %}
+            >
+            <label class="form-check-label fw-bold" for="vieneEnLotes">
+              ¿Este producto viene en lotes?
+            </label>
+            <small class="text-muted d-block">
+              Activa si manejarás varios lotes.
+            </small>
+          </div>
+
+          <!-- BLOQUE LOTES -->
+          <div 
+            id="bloqueLotes"
+            class="section-box"
+            style="display:none;"
+          >
+            <div class="lotes-options">
+              <div>
+                <label for="numLotes" class="form-label fw-bold">
+                  Número de Lotes <span class="text-danger">*</span>
+                </label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="numLotes"
+                  name="numLotes"
+                  min="1"
+                  value="{{ producto.num_lotes or 1 }}"
+                >
+                <small class="text-muted d-block">
+                  ¿Cuántos lotes distintos?
+                </small>
+              </div>
+              <div>
+                <div class="form-check form-switch">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    id="mismoStockParaTodos"
+                    name="mismoStockParaTodos"
+                    {% if producto.mismo_stock_lotes %}checked{% endif %}
+                  >
+                  <label class="form-check-label fw-bold" for="mismoStockParaTodos">
+                    ¿Todos los lotes traen la misma cantidad?
+                  </label>
+                </div>
+                <small class="text-muted">
+                  Si activas, usas un único “Stock” y “Unidad” en cada lote.
+                </small>
+              </div>
+            </div>
+
+            <div id="stockUnico" style="display:none; margin-top:1rem;">
+              <div class="stock-lote-row">
+                <div>
+                  <label for="stockPorLote" class="form-label fw-bold">
+                    Stock Inicial (por Lote)
+                  </label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="stockPorLote"
+                    name="stockPorLote"
+                    min="0"
+                    value="{{ producto.stock_por_lote or 0 }}"
+                  >
+                </div>
+                <div>
+                  <label for="unidadMedidaLote" class="form-label fw-bold">
+                    Unidades
+                  </label>
+                  <select
+                    class="form-select"
+                    id="unidadMedidaLote"
+                    name="unidadMedidaLote"
+                  >
+                    <option
+                      value="piezas"
+                      {% if producto.unidad_lote == 'piezas' %}selected{% endif %}
+                    >Piezas</option>
+                    <option
+                      value="kilos"
+                      {% if producto.unidad_lote == 'kilos' %}selected{% endif %}
+                    >Kilos</option>
+                    <option
+                      value="litros"
+                      {% if producto.unidad_lote == 'litros' %}selected{% endif %}
+                    >Litros</option>
+                    <option
+                      value="gramos"
+                      {% if producto.unidad_lote == 'gramos' %}selected{% endif %}
+                    >Gramos</option>
+                    <option
+                      value="metros"
+                      {% if producto.unidad_lote == 'metros' %}selected{% endif %}
+                    >Metros</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div id="stockPorCadaLote" style="display:none; margin-top:1rem;">
+              <p class="fw-bold mb-2">
+                Ingresa stock para cada lote (misma unidad para todos):
+              </p>
+              <div class="stock-lote-row">
+                <div>
+                  <label for="unidadGlobalDistinto" class="form-label fw-bold">
+                    Unidades
+                  </label>
+                  <select
+                    class="form-select"
+                    id="unidadGlobalDistinto"
+                    name="unidadGlobalDistinto"
+                  >
+                    <option
+                      value="piezas"
+                      {% if producto.unidad_lote == 'piezas' %}selected{% endif %}
+                    >Piezas</option>
+                    <option
+                      value="kilos"
+                      {% if producto.unidad_lote == 'kilos' %}selected{% endif %}
+                    >Kilos</option>
+                    <option
+                      value="litros"
+                      {% if producto.unidad_lote == 'litros' %}selected{% endif %}
+                    >Litros</option>
+                    <option
+                      value="gramos"
+                      {% if producto.unidad_lote == 'gramos' %}selected{% endif %}
+                    >Gramos</option>
+                    <option
+                      value="metros"
+                      {% if producto.unidad_lote == 'metros' %}selected{% endif %}
+                    >Metros</option>
+                  </select>
+                </div>
+              </div>
+              <div id="contenedorLotes" class="mt-3"></div>
+            </div>
+          </div>
+
+          <!-- STOCK NORMAL (si no viene en lotes) -->
+          <div id="stockNormal" style="display:none;">
+            <div class="row g-3 align-items-end">
+              <div class="col-md-4">
+                <label for="stock" class="form-label fw-bold">
+                  Stock Inicial
+                </label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="stock"
+                  name="stock"
+                  min="0"
+                  value="{{ producto.stock or 0 }}"
+                >
+              </div>
+              <div class="col-md-4">
+                <label for="unidadMedida" class="form-label fw-bold">
+                  Unidades
+                </label>
+                <select
+                  class="form-select"
+                  id="unidadMedida"
+                  name="unidadMedida"
+                >
+                  <option
+                    value="piezas"
+                    {% if producto.unidad == 'piezas' %}selected{% endif %}
+                  >Piezas</option>
+                  <option
+                    value="kilos"
+                    {% if producto.unidad == 'kilos' %}selected{% endif %}
+                  >Kilos</option>
+                  <option
+                    value="litros"
+                    {% if producto.unidad == 'litros' %}selected{% endif %}
+                  >Litros</option>
+                  <option
+                    value="gramos"
+                    {% if producto.unidad == 'gramos' %}selected{% endif %}
+                  >Gramos</option>
+                  <option
+                    value="metros"
+                    {% if producto.unidad == 'metros' %}selected{% endif %}
+                  >Metros</option>
+                </select>
+              </div>
+            </div>
+            <small class="text-muted">
+              El costo y precio de venta se calculan por esta unidad.
+            </small>
+          </div>
+
+          <!-- COSTO -->
+          <div class="mb-3 mt-3">
+            <label class="form-label fw-bold" id="costoLabel">
+              Costo (por <span id="costoLabelUnit">pieza</span>)
+            </label>
+            <input 
+              type="number"
+              step="0.01"
+              class="form-control"
+              id="costo"
+              name="costo"
+              value="{{ producto.costo or 0.0 }}"
+            >
+          </div>
+
+          <!-- PRECIO DE VENTA -->
+          <div class="mb-3">
+            <label class="form-label fw-bold" id="precioLabel">
+              Precio de Venta (por <span id="precioLabelUnit">pieza</span>)
+            </label>
+            <input 
+              type="number"
+              step="0.01"
+              class="form-control"
+              id="precio_venta"
+              name="precio_venta"
+              value="{{ producto.precio_venta or 0.0 }}"
+            >
+          </div>
+
+          <!-- CATEGORÍA -->
+          <div class="mb-3">
+            <label id="categoryLabel" class="form-label fw-bold">
+              Categoría (opcional)
+            </label>
+            <!-- Radio “Existente” => si cat_encontrada es True, se checked -->
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="categoria_option"
+                id="catExistente"
+                value="existente"
+                {% if cat_encontrada %}checked{% endif %}
+              >
+              <label class="form-check-label" for="catExistente">
+                Elegir una existente
+              </label>
+            </div>
+            <!-- Radio “Nueva” => si cat_encontrada es False, se checked -->
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="categoria_option"
+                id="catNueva"
+                value="nueva"
+                {% if not cat_encontrada %}checked{% endif %}
+              >
+              <label class="form-check-label" for="catNueva">
+                Crear una nueva
+              </label>
+            </div>
+
+            <!-- DIV EXISTENTE -->
+            <div class="mt-2" id="divExistente">
+              <select
+                class="form-select"
+                name="categoria_existente"
+                id="categoria_existente"
+              >
+                <option value="">
+                  -Selecciona una opción-
+                </option>
+                {% if categories %}
+                  {% for cat in categories %}
+                    <option
+                      value="{{ cat.nombre }}"
+                      data-custom-properties='{"color": "{{ cat.color }}"}'
+                      {% if cat_encontrada and (cat.nombre == producto.categoria) %}selected{% endif %}
+                    >
+                      {{ cat.nombre }}
+                    </option>
+                  {% endfor %}
+                {% endif %}
+              </select>
+              <small class="text-muted d-block">
+                Elige alguna de las categorías ya existentes.
+              </small>
+            </div>
+
+            <!-- DIV NUEVA -->
+            <div class="mt-2" id="divNueva" style="display:none;">
+              <input
+                type="text"
+                class="form-control"
+                name="categoria_nueva"
+                id="categoria_nueva"
+                placeholder="Introduce la nueva categoría"
+                {% if not cat_encontrada %}value="{{ producto.categoria }}"{% endif %}
+              >
+              <small class="text-muted d-block">
+                Si ninguna coincide, define aquí una nueva.
+              </small>
+            </div>
+          </div>
+
+          <!-- CÓDIGO DE BARRAS -->
+          <div class="mb-3">
+            <label class="form-label fw-bold" for="codigo_barras">
+              Código de Barras
+            </label>
+            <input
+              type="text"
+              class="form-control"
+              id="codigo_barras"
+              name="codigo_barras"
+              value="{{ producto.codigo_barras or '' }}"
+            >
+            <small class="text-muted">
+              Detectado por IA/escáner; ajústalo si es necesario.
+            </small>
+          </div>
+
+          <!-- CONFIGURACIÓN AVANZADA -->
+          <div class="mt-4 mb-3">
+            <button type="button" class="btn btn-toggle" id="toggleAvanzado">
+              Mostrar Configuración Avanzada
+            </button>
+          </div>
+          <div 
+            id="configAvanzada"
+            class="section-box"
+            style="display:none;"
+          >
+            <h5 class="mb-3">Configuración Avanzada (Opcional)</h5>
+
+            <div class="mb-3">
+              <label for="proveedor" class="form-label fw-bold">
+                Proveedor (opcional)
+              </label>
+              <input
+                type="text"
+                class="form-control"
+                id="proveedor"
+                name="proveedor"
+                value="{{ producto.proveedor or '' }}"
+              >
+            </div>
+            <div class="mb-3">
+              <label for="ubicacion" class="form-label fw-bold">
+                Ubicación (opcional)
+              </label>
+              <input
+                type="text"
+                class="form-control"
+                id="ubicacion"
+                name="ubicacion"
+                value="{{ producto.ubicacion or '' }}"
+              >
+            </div>
+            <div class="mb-3">
+              <label for="tasa_impuesto" class="form-label fw-bold">
+                Tasa de Impuesto (opcional)
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                class="form-control"
+                id="tasa_impuesto"
+                name="tasa_impuesto"
+                value="{{ producto.tasa_impuesto or 0.0 }}"
+              >
+            </div>
+            <div class="mb-3">
+              <label for="descuento" class="form-label fw-bold">
+                Descuento Promocional % (opcional)
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                class="form-control"
+                id="descuento"
+                name="descuento"
+                value="{{ producto.descuento or 0.0 }}"
+              >
+            </div>
+            <div class="mb-3">
+              <label for="fecha_caducidad" class="form-label fw-bold">
+                Fecha de Caducidad (opcional)
+              </label>
+              <input
+                type="date"
+                class="form-control"
+                id="fecha_caducidad"
+                name="fecha_caducidad"
+                value="{% if producto.fecha_caducidad %}{{ producto.fecha_caducidad|format_date('YYYY-MM-DD') }}{% endif %}"
+              >
+            </div>
+          </div>
+
+          <!-- BOTONES FINALES -->
+          <div class="mt-4">
+            <button type="submit" class="btn btn-custom-primary">
+              Aprobar
+            </button>
+            <a
+              href="{{ url_for('pendientes_aprobacion') }}"
+              class="btn btn-custom-secondary ms-2"
+            >
+              Cancelar
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
+<script>
+/** =============== COSTO/PRECIO => "por X" =============== */
+const unidadMedida = document.getElementById("unidadMedida");
+const unidadMedidaLote = document.getElementById("unidadMedidaLote");
+const unidadGlobalDistinto = document.getElementById("unidadGlobalDistinto");
+const costoLabelUnit = document.getElementById("costoLabelUnit");
+const precioLabelUnit = document.getElementById("precioLabelUnit");
+const singularMap = {
+  "piezas": "pieza",
+  "kilos": "kilo",
+  "litros": "litro",
+  "gramos": "gramo",
+  "metros": "metro"
+};
+
+function setCostoPrecioUnit(unit) {
+  const singular = singularMap[unit] || unit;
+  if (costoLabelUnit) costoLabelUnit.textContent = singular;
+  if (precioLabelUnit) precioLabelUnit.textContent = singular;
+}
+
+function updateCostoPrecio() {
+  const checkLotes = document.getElementById("vieneEnLotes");
+  const checkMismo = document.getElementById("mismoStockParaTodos");
+  if (!checkLotes || !checkMismo) return;
+
+  // Si NO viene en lotes => usamos "unidadMedida"
+  if (!checkLotes.checked) {
+    if (unidadMedida) setCostoPrecioUnit(unidadMedida.value);
+  } else {
+    // Viene en lotes
+    if (checkMismo.checked) {
+      // Mismo stock => "unidadMedidaLote"
+      if (unidadMedidaLote) setCostoPrecioUnit(unidadMedidaLote.value);
+    } else {
+      // Distinto stock => "unidadGlobalDistinto"
+      if (unidadGlobalDistinto) setCostoPrecioUnit(unidadGlobalDistinto.value);
+    }
+  }
+}
+if (unidadMedida) unidadMedida.addEventListener("change", updateCostoPrecio);
+if (unidadMedidaLote) unidadMedidaLote.addEventListener("change", updateCostoPrecio);
+if (unidadGlobalDistinto) unidadGlobalDistinto.addEventListener("change", updateCostoPrecio);
+
+/** =============== Lógica “¿Viene en Lotes?” =============== */
+function toggleLotes() {
+  const vieneEnLotesEl = document.getElementById("vieneEnLotes");
+  const bloqueLotesEl = document.getElementById("bloqueLotes");
+  const stockNormalEl = document.getElementById("stockNormal");
+  const numLotesEl = document.getElementById("numLotes");
+  const mismoStockEl = document.getElementById("mismoStockParaTodos");
+
+  if (!vieneEnLotesEl) return;
+  if (vieneEnLotesEl.checked) {
+    stockNormalEl.style.display = "none";
+    bloqueLotesEl.style.display = "block";
+  } else {
+    stockNormalEl.style.display = "block";
+    bloqueLotesEl.style.display = "none";
+    numLotesEl.value = 1;
+    mismoStockEl.checked = false;
+  }
+  toggleMismoStock();
+  updateCostoPrecio();
+}
+
+function toggleMismoStock() {
+  const vieneEnLotesEl = document.getElementById("vieneEnLotes");
+  const mismoStockEl = document.getElementById("mismoStockParaTodos");
+  const stockUnicoEl = document.getElementById("stockUnico");
+  const stockPorCadaLoteEl = document.getElementById("stockPorCadaLote");
+
+  if (!vieneEnLotesEl || !vieneEnLotesEl.checked) {
+    stockUnicoEl.style.display = "none";
+    stockPorCadaLoteEl.style.display = "none";
+    return;
+  }
+  if (mismoStockEl.checked) {
+    stockUnicoEl.style.display = "block";
+    stockPorCadaLoteEl.style.display = "none";
+  } else {
+    stockUnicoEl.style.display = "none";
+    stockPorCadaLoteEl.style.display = "block";
+    generarCamposLotes();
+  }
+  updateCostoPrecio();
+}
+
+function generarCamposLotes() {
+  const contenedorLotesEl = document.getElementById("contenedorLotes");
+  const numLotesEl = document.getElementById("numLotes");
+  if (!contenedorLotesEl) return;
+  contenedorLotesEl.innerHTML = "";
+  const lotes = parseInt(numLotesEl.value) || 1;
+  for (let i = 1; i <= lotes; i++) {
+    const div = document.createElement("div");
+    div.classList.add("mb-3");
+    div.innerHTML = `
+      <label class="form-label fw-bold">
+        Stock Inicial Lote #${i}
+      </label>
+      <input
+        type="number"
+        min="0"
+        value="0"
+        class="form-control"
+        name="stock_lote_${i}"
+        id="stock_lote_${i}"
+      >
+    `;
+    contenedorLotesEl.appendChild(div);
+  }
+}
+
+/** =============== Foto (IA, Cargar, Sin) =============== */
+const fotoOpciones = document.getElementsByName("opcion_foto");
+const divCargarFotoEl = document.getElementById("divCargarFoto");
+function checkFotoOpcion() {
+  for (let opt of fotoOpciones) {
+    if (opt.checked && opt.value === "cargar") {
+      divCargarFotoEl.style.display = "block";
+    } else if (opt.checked) {
+      divCargarFotoEl.style.display = "none";
+    }
+  }
+}
+for (let opt of fotoOpciones) {
+  opt.addEventListener("change", checkFotoOpcion);
+}
+
+/** =============== Configuración Avanzada =============== */
+const toggleAvanzadoBtn = document.getElementById("toggleAvanzado");
+const configAvanzadaEl = document.getElementById("configAvanzada");
+let avanzadoVisible = false;
+if (toggleAvanzadoBtn && configAvanzadaEl) {
+  toggleAvanzadoBtn.addEventListener("click", () => {
+    avanzadoVisible = !avanzadoVisible;
+    configAvanzadaEl.style.display = avanzadoVisible ? "block" : "none";
+    toggleAvanzadoBtn.textContent = avanzadoVisible
+      ? "Ocultar Configuración Avanzada"
+      : "Mostrar Configuración Avanzada";
+  });
+}
+
+/** =============== Categoría “Existente” vs “Nueva” =============== */
+const catExistenteRadio = document.getElementById("catExistente");
+const catNuevaRadio = document.getElementById("catNueva");
+const divExistenteEl = document.getElementById("divExistente");
+const divNuevaEl = document.getElementById("divNueva");
+
+function toggleCategoria() {
+  if (catExistenteRadio.checked) {
+    divExistenteEl.style.display = "block";
+    divNuevaEl.style.display = "none";
+  } else {
+    divExistenteEl.style.display = "none";
+    divNuevaEl.style.display = "block";
+  }
+}
+catExistenteRadio.addEventListener("change", toggleCategoria);
+catNuevaRadio.addEventListener("change", toggleCategoria);
+
+/** =============== Choices.js para la categoría existente =============== */
+const categorySelect = document.getElementById("categoria_existente");
+if (categorySelect) {
+  new Choices(categorySelect, {
+    searchEnabled: false,
+    callbackOnCreateTemplates: function (template) {
+      return {
+        item: (classNames, data) => {
+          if (data.value === "") {
+            return template(`
+              <div 
+                class="${classNames.item} ${classNames.itemSelectable}"
+                data-item
+                data-id="${data.id}"
+                data-value="${data.value}"
+                ${data.active ? 'aria-selected="true"' : ''}
+                ${data.disabled ? 'aria-disabled="true"' : ''}
+              >
+                ${data.value}
+              </div>
+            `);
+          }
+          let color = data.customProperties && data.customProperties.color ? data.customProperties.color : "#000000";
+          return template(`
+            <div 
+              class="${classNames.item} ${classNames.itemSelectable}"
+              data-item 
+              data-id="${data.id}" 
+              data-value="${data.value}"
+              ${data.active ? 'aria-selected="true"' : ''}
+              ${data.disabled ? 'aria-disabled="true"' : ''}
+            >
+              <span 
+                class="color-indicator"
+                style="display:inline-block; width:10px; height:10px; background-color:${color}; border-radius:50%; margin-right:5px;"
+              ></span>
+              ${data.value}
+            </div>
+          `);
+        },
+        choice: (classNames, data) => {
+          if (data.value === "") {
+            return template(`
+              <div 
+                class="${classNames.item} ${classNames.itemChoice}"
+                data-choice
+                ${data.disabled ? 'data-choice-disabled aria-disabled="true"' : 'data-choice-selectable'}
+                data-id="${data.id}"
+                data-value="${data.value}"
+                ${data.groupId > 0 ? 'role="treeitem"' : 'role="option"'}
+              >
+                ${data.value}
+              </div>
+            `);
+          }
+          let color = data.customProperties && data.customProperties.color ? data.customProperties.color : "#000000";
+          return template(`
+            <div 
+              class="${classNames.item} ${classNames.itemChoice}"
+              data-choice
+              ${data.disabled ? 'data-choice-disabled aria-disabled="true"' : 'data-choice-selectable'}
+              data-id="${data.id}"
+              data-value="${data.value}"
+              ${data.groupId > 0 ? 'role="treeitem"' : 'role="option"'}
+            >
+              <span 
+                class="color-indicator"
+                style="display:inline-block; width:10px; height:10px; background-color:${color}; border-radius:50%; margin-right:5px;"
+              ></span>
+              ${data.value}
+            </div>
+          `);
+        }
+      };
+    }
+  });
+}
+
+/** =============== Init on DOMContentLoaded =============== */
+window.addEventListener("DOMContentLoaded", () => {
+  toggleLotes();
+  toggleCategoria();
+  checkFotoOpcion();
+  updateCostoPrecio();
+});
+</script>
+{% endblock %}
+```

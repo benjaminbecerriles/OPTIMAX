@@ -1,0 +1,139 @@
+{# templates/partial/column_selector.html #}
+<div class="dropdown d-inline-block">
+  <button 
+    class="btn btn-sm btn-outline-secondary dropdown-toggle" 
+    type="button" 
+    data-bs-toggle="dropdown" 
+    aria-expanded="false"
+  >
+    Configurar Columnas
+  </button>
+
+  <div class="dropdown-menu p-3" style="min-width: 200px;">
+    <h6 class="dropdown-header text-secondary px-0">
+      Selecciona las columnas a mostrar
+    </h6>
+
+    <!-- Ejemplo de checkboxes para cada columna -->
+    <!-- Ajusta los 'id' y 'name' según tu lógica de front/backend -->
+    
+    <div class="form-check mb-1">
+      <input 
+        class="form-check-input" 
+        type="checkbox" 
+        id="colID" 
+        name="colID" 
+        checked
+      >
+      <label class="form-check-label" for="colID">ID</label>
+    </div>
+
+    <div class="form-check mb-1">
+      <input 
+        class="form-check-input" 
+        type="checkbox" 
+        id="colNombre" 
+        name="colNombre" 
+        checked
+      >
+      <label class="form-check-label" for="colNombre">Nombre</label>
+    </div>
+
+    <div class="form-check mb-1">
+      <input 
+        class="form-check-input" 
+        type="checkbox" 
+        id="colStock" 
+        name="colStock" 
+        checked
+      >
+      <label class="form-check-label" for="colStock">Stock</label>
+    </div>
+
+    <div class="form-check mb-1">
+      <input 
+        class="form-check-input" 
+        type="checkbox" 
+        id="colCosto" 
+        name="colCosto" 
+        checked
+      >
+      <label class="form-check-label" for="colCosto">Costo</label>
+    </div>
+
+    <div class="form-check mb-1">
+      <input 
+        class="form-check-input" 
+        type="checkbox" 
+        id="colPrecio" 
+        name="colPrecio" 
+        checked
+      >
+      <label class="form-check-label" for="colPrecio">Precio Venta</label>
+    </div>
+
+    <div class="form-check mb-1">
+      <input 
+        class="form-check-input" 
+        type="checkbox" 
+        id="colGanancia" 
+        name="colGanancia" 
+        checked
+      >
+      <label class="form-check-label" for="colGanancia">Ganancia</label>
+    </div>
+
+    <div class="form-check mb-1">
+      <input 
+        class="form-check-input" 
+        type="checkbox" 
+        id="colCategoria" 
+        name="colCategoria" 
+        checked
+      >
+      <label class="form-check-label" for="colCategoria">Categoría</label>
+    </div>
+
+    <div class="form-check mb-1">
+      <input 
+        class="form-check-input" 
+        type="checkbox" 
+        id="colCodigoBarras" 
+        name="colCodigoBarras" 
+        checked
+      >
+      <label class="form-check-label" for="colCodigoBarras">Código Barras</label>
+    </div>
+
+    <div class="form-check mb-1">
+      <input 
+        class="form-check-input" 
+        type="checkbox" 
+        id="colAprobado" 
+        name="colAprobado" 
+        checked
+      >
+      <label class="form-check-label" for="colAprobado">Aprobado</label>
+    </div>
+
+    <div class="form-check mb-1">
+      <input 
+        class="form-check-input" 
+        type="checkbox" 
+        id="colAcciones" 
+        name="colAcciones" 
+        checked
+      >
+      <label class="form-check-label" for="colAcciones">Acciones</label>
+    </div>
+
+    {# Aquí podrías añadir más opciones si deseas #}
+    
+    <hr class="dropdown-divider">
+
+    <!-- Botón Opcional para 'Aplicar' o 'Cerrar' si deseas disparar evento JS -->
+    <button class="btn btn-sm btn-primary">
+      Aplicar
+    </button>
+  </div>
+</div>

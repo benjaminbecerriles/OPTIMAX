@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  Nuevo Producto
+{% endblock %}
+
+{% block content %}
+<style>
+  /* Contenedor centrado, con espacio extra abajo para el botón CANCELAR */
+  .nuevo-producto-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem 10rem; /* agrandamos padding-bottom para ubicar el botón más abajo */
+    text-align: center;
+    position: relative; /* para posicionar el botón absolutamente */
+  }
+
+  /* Título principal */
+  .nuevo-producto-container h1 {
+    font-size: 2.4rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Subtítulo / descripción */
+  .nuevo-producto-container p {
+    font-size: 1rem;
+    color: #666;
+    max-width: 800px;
+    margin: 0.5rem auto 2rem auto;
+    line-height: 1.5;
+  }
+
+  /* Fila de tarjetas (3) */
+  .cards-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: center;
+  }
+
+  /* Cada tarjeta */
+  .producto-card {
+    background-color: #fff;
+    width: 280px; 
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding-bottom: 1rem;
+  }
+
+  /* Video 1:1, sin control de usuario */
+  .producto-card video {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    pointer-events: none; /* no se puede pausar ni interactuar */
+  }
+
+  /* Título de la tarjeta */
+  .producto-card h3 {
+    margin: 1rem 0 0.5rem 0;
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  /* Descripción dentro de la tarjeta */
+  .producto-card p {
+    font-size: 0.95rem;
+    color: #555;
+    margin: 0 1rem 1.5rem 1rem;
+    line-height: 1.4;
+  }
+
+  /* Botón "AGREGAR" */
+  .btn-agregar {
+    background-color: #e52e2e;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0.6rem 1.2rem;
+    transition: background-color 0.3s;
+  }
+  .btn-agregar:hover {
+    background-color: #c72323;
+  }
+
+  /* Botón "CANCELAR" posicionado más abajo a la derecha */
+  .cancel-btn {
+    background-color: #ccc;
+    color: #333;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0.7rem 1.5rem;
+    text-decoration: none;
+    transition: background-color 0.3s;
+
+    position: absolute;
+    right: 2rem;
+    /* bottom se ubica dentro del padding-bottom de .nuevo-producto-container */
+    bottom: 2rem;
+  }
+  .cancel-btn:hover {
+    background-color: #999;
+  }
+</style>
+
+<div class="nuevo-producto-container">
+  <!-- Encabezado -->
+  <h1>AGREGAR PRODUCTO</h1>
+  <p>
+    Utiliza esta opción para registrar un nuevo producto en el sistema y asignarle su primer stock.
+    <br>
+    <span style="color:#e52e2e;">
+      Si solo deseas añadir más existencias a un producto ya registrado, esta no es la opción adecuada
+    </span>
+  </p>
+
+  <!-- Fila de 3 tarjetas (videos) -->
+  <div class="cards-row">
+    <!-- Tarjeta 1: producto.MOV -->
+    <div class="producto-card">
+      <video
+        src="{{ url_for('static', filename='vid/producto.MOV') }}"
+        autoplay
+        loop
+        muted
+        playsinline
+      >
+        Tu navegador no soporta video en HTML5.
+      </video>
+      <h3>Con código de barras</h3>
+      <p>
+        Ideal para productos empacados con un código 
+        como: botanas, enlatados, bebidas, etc.
+      </p>
+      <a href="{{ url_for('agregar_producto') }}" class="btn-agregar">AGREGAR</a>
+    </div>
+
+    <!-- Tarjeta 2: croquetas.mp4 -->
+    <div class="producto-card">
+      <video
+        src="{{ url_for('static', filename='vid/croquetas.mp4') }}"
+        autoplay
+        loop
+        muted
+        playsinline
+      >
+        Tu navegador no soporta video en HTML5.
+      </video>
+      <h3>Sin código de barras</h3>
+      <p>
+        Ideal para productos sin etiqueta 
+        como: artesanales, a granel empacado, etc.
+      </p>
+      <a href="{{ url_for('agregar_producto') }}" class="btn-agregar">AGREGAR</a>
+    </div>
+
+    <!-- Tarjeta 3: aguacates.mp4 -->
+    <div class="producto-card">
+      <video
+        src="{{ url_for('static', filename='vid/aguacates.mp4') }}"
+        autoplay
+        loop
+        muted
+        playsinline
+      >
+        Tu navegador no soporta video en HTML5.
+      </video>
+      <h3>A granel</h3>
+      <p>
+        Ideal para productos sueltos como: frutas, verduras, arroz, croquetas, etc.
+      </p>
+      <a href="{{ url_for('agregar_producto') }}" class="btn-agregar">AGREGAR</a>
+    </div>
+  </div>
+
+  <!-- Botón CANCELAR, más abajo a la derecha -->
+  <a href="http://127.0.0.1:5000/productos" class="cancel-btn">
+    CANCELAR
+  </a>
+</div>
+{% endblock %}
+

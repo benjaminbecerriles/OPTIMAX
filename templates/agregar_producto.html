@@ -1,0 +1,1471 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  Agregar producto con código de barras
+{% endblock %}
+
+{% block content %}
+<style>
+  /*******************************************************************************
+   * ESTILOS GLOBALES Y DISEÑO BÁSICO
+   ******************************************************************************/
+  /* 1) TODO EN BLANCO */
+  html, body {
+    margin: 0;
+    padding: 0;
+    background-color: #fff; /* Fondo completamente blanco */
+    font-family: 'Open Sans', sans-serif;
+  }
+
+  .card-form {
+    /* Borde y fondo sutil */
+    background-color: #fff; /* Blanco también */
+    border-radius: 0;       /* Sin esquinas redondeadas */
+    box-shadow: none;       /* Sin sombra */
+    padding: 1.5rem;
+    margin: 0;              /* Sin margen extra */
+  }
+
+  /* 2) Mantener DOS columnas: Izquierda (foto) y Derecha (form) */
+  .row-form {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  .col-left {
+    /* Ancho para la foto grande */
+    flex: 0 0 auto;
+    width: 570px;
+    border-right: 1px solid #ddd;
+    padding-right: 1rem;
+  }
+  .col-right {
+    flex: 1;
+    min-width: 300px;
+    padding-left: 1rem;
+    position: relative;
+  }
+
+  /* FOTO Container */
+  .foto-container {
+    text-align: left;
+    margin-bottom: 1rem;
+    position: relative;
+  }
+
+  .foto-placeholder {
+    width: 100%;
+    height: 570px;
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    margin: 0 auto 1rem auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #999;
+    font-weight: 600;
+    position: relative;
+    background-color: #fff; /* Blanco */
+  }
+  .foto-placeholder img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+  .remove-image {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: rgba(255,255,255,0.8);
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    line-height: 28px;
+    text-align: center;
+    padding: 0;
+    display: none;
+  }
+  .foto-placeholder.has-image .remove-image {
+    display: block;
+  }
+
+  /* Menú (3 puntitos) */
+  .no-image-icon {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #ccc;
+    color: #fff;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .foto-dropdown {
+    position: absolute;
+    top: 40px;
+    right: 5px;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    z-index: 100;
+    display: none;
+  }
+  .foto-dropdown .dropdown-item {
+    display: block;
+    width: 100%;
+    border: none;
+    background: transparent;
+    padding: 0.5rem 1rem;
+    text-align: left;
+    cursor: pointer;
+  }
+  .foto-dropdown .dropdown-item:hover {
+    background-color: #f0f0f0;
+  }
+
+  /* Form Controls */
+  .form-group {
+    margin-bottom: 1rem;
+    position: relative;
+    padding-top: 1.2rem; /* espacio para la etiqueta flotante */
+  }
+  ::placeholder {
+    text-transform: uppercase;
+    font-weight: normal;
+    color: #888;
+  }
+  .form-control {
+    text-transform: uppercase;
+    font-weight: bold;
+    padding: 0.5rem;
+    line-height: 1.5;
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+
+  .floating-label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: 0.9rem;
+    color: #888;
+    text-transform: capitalize;
+  }
+
+  /* Favorito & Venta */
+  .heart-icon {
+    font-size: 24px;
+    color: gray;
+    cursor: pointer;
+    transition: color 0.3s;
+  }
+  .heart-icon.active {
+    color: red;
+  }
+  .venta-icon {
+    width: 24px;
+    height: auto;
+    cursor: pointer;
+    transition: opacity 0.3s;
+    object-fit: contain;
+  }
+
+  /* Recuadro Morado "¿Este es tu producto?" */
+  #scanFoundContainer {
+    display: none; 
+    background-color: #D48AD4;
+    color: #fff;
+    padding: 1rem;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+  }
+  .scanFoundInner {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+  }
+  .scanFoundImageBox {
+    width: 100px;
+    height: 100px;
+    background-color: #fff;
+    border-radius: 6px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .scanFoundImageBox img {
+    max-width: 100%;
+    max-height: 100%;
+    display: block;
+  }
+  .scanFoundText {
+    flex: 1;
+  }
+  .scanFoundTitle {
+    font-weight: bold;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+  }
+  .scanFoundName {
+    font-weight: bold;
+    font-size: 1rem;
+    margin-bottom: 0.2rem;
+  }
+  .scanFoundCode {
+    font-size: 0.95rem;
+  }
+  .scanFoundRow {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .scanFoundButtons {
+    margin-top: 1rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+  }
+  .btn-scanYes {
+    background-color: #2ecc71;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .btn-scanNo {
+    background-color: #e74c3c;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font-weight: 600;
+  }
+
+  /* Toggle y Caducidad */
+  .toggle-button {
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    background-color: #f2f2f2;
+    padding: 0.25rem 0.75rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.3s;
+    color: #333;
+  }
+  .toggle-button.active {
+    background-color: #f2f2f2;
+    color: #333;
+  }
+
+  .caducidad-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    max-width: 420px;
+    margin-bottom: 1rem;
+  }
+  .caducidad-row {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .form-check {
+    width: auto;
+    border: none;
+    text-align: left;
+  }
+  .form-check-input {
+    display: none;
+  }
+  .form-check-label {
+    display: inline-block;
+    background-color: #fff;
+    color: #333;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 0.25rem 0.6rem;
+    cursor: pointer;
+    white-space: nowrap;
+    font-size: 0.9rem;
+    transition: background-color 0.3s, border-color 0.3s;
+  }
+  .form-check-label:hover {
+    background-color: #f2f2f2;
+  }
+  .form-check.selected .form-check-label {
+    background-color: #007BFF;
+    border-color: #007BFF;
+    color: #fff;
+  }
+
+  /* Botones GUARDAR (Rojo), CANCELAR (Gris) */
+  .btn-submit {
+    background-color: #e52e2e;
+    color: #fff;
+    border: none;
+    padding: 0.7rem 1.5rem;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-right: 1rem;
+    transition: background-color 0.3s;
+  }
+  .btn-submit:hover {
+    background-color: #c72323;
+  }
+  .btn-cancel {
+    background-color: #ccc;
+    color: #333;
+    border: none;
+    padding: 0.7rem 1.5rem;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  .btn-cancel:hover {
+    background-color: #999;
+  }
+
+  /* Escáner Lector (animación) */
+  @keyframes blink {
+    0%   { opacity: 1; }
+    50%  { opacity: 0.3; }
+    100% { opacity: 1; }
+  }
+  .scan-active {
+    animation: blink 1s infinite;
+  }
+
+  /* Autocomplete Sugerencias */
+  #autocomplete-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    max-height: 300px;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid #ccc;
+    z-index: 1000;
+    display: none;
+  }
+  .autocomplete-item {
+    padding: 0.5rem;
+    cursor: pointer;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+  }
+  .autocomplete-item:hover {
+    background-color: #e0f7ff;
+  }
+  .autocomplete-item img {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    margin-right: 0.5rem;
+  }
+  .autocomplete-text {
+    display: flex;
+    flex-direction: column;
+  }
+  .autocomplete-code {
+    font-weight: bold;
+  }
+  .autocomplete-name {
+    font-size: 0.9rem;
+    color: #555;
+  }
+
+  /* Input con iconos en la misma fila */
+  .input-icon-group {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 0 0.5rem;
+    width: 100%;
+    background-color: #fff;
+  }
+  .input-icon-group input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background-color: transparent; /* sin color extra */
+    padding: 0.5rem;
+    text-transform: uppercase;
+    font-weight: bold;
+  }
+  .input-icon-group img {
+    margin-left: 0.5rem;
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+  }
+</style>
+
+<div class="card-form">
+  <div class="row-form">
+    <!-- Col Izquierda: Foto + Checks -->
+    <div class="col-left">
+      <div class="foto-container">
+        <div class="foto-placeholder" id="fotoPlaceholder">
+          <button type="button" class="no-image-icon" id="btnCargarFoto">&#8942;</button>
+          <div class="foto-dropdown" id="fotoDropdown" style="display:none;">
+            <button type="button" class="dropdown-item btn btn-secondary" id="dropdownCargarFoto">Cargar imagen</button>
+            <button type="button" class="dropdown-item btn btn-secondary" id="dropdownGenerarIA">Generar con IA</button>
+          </div>
+        </div>
+        <input type="file" id="fotoInput" name="foto" style="display:none;" accept="image/*">
+        <input type="hidden" name="ia_foto_filename" id="ia_foto_filename" value="">
+        <!-- 1) NUEVO: Hidden para capturar la URL de la imagen que se ve en pantalla -->
+        <input type="hidden" name="displayed_image_url" id="displayed_image_url" value="">
+      </div>
+
+      <div class="extra-checks" style="display: flex; flex-direction: column; gap: 0.5rem;">
+        <div id="favoritoContainer" style="display: inline-flex; align-items: center; gap: 0.5rem;">
+          <span id="heartIcon" class="heart-icon">&#9825;</span>
+          <span>Marcar como Favorito</span>
+          <input type="hidden" name="es_favorito" id="es_favorito" value="0">
+        </div>
+
+        <div id="ventaContainer" style="display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem;">
+          <img id="ventaIcon" src="{{ url_for('static', filename='img/1.png') }}" class="venta-icon">
+          <span>Producto a la Venta</span>
+          <input type="hidden" name="esta_a_la_venta" id="esta_a_la_venta" value="1">
+        </div>
+      </div>
+    </div>
+
+    <!-- Col Derecha: Recuadro Morado + Form -->
+    <div class="col-right">
+      <div id="scanFoundContainer">
+        <div class="scanFoundRow" id="scanFoundRow"></div>
+        <div class="scanFoundButtons">
+          <button type="button" class="btn-scanYes" id="btnScanYes">Sí</button>
+          <button type="button" class="btn-scanNo" id="btnScanNo">No</button>
+        </div>
+      </div>
+
+      <!-- Título en la parte superior -->
+      <h3 style="
+        font-weight: bold;
+        color: #000;
+        text-transform: uppercase;
+        margin-bottom: 1rem;
+        font-size: 1.2rem;
+      ">
+        Agregar producto con código de barras
+      </h3>
+
+      <!-- Form Principal -->
+      <form method="POST" action="" enctype="multipart/form-data">
+        <!-- IMPORTANTE: Para que el back sepa si es 'existente' (por default) -->
+        <input type="hidden" name="categoria_option" value="existente">
+        <!-- IMPORTANTE: Para saber si caducidad está activado o no -->
+        <input type="hidden" name="toggle_caducidad_estado" id="toggle_caducidad_estado" value="DESACTIVADO">
+
+        <!-- Código de Barras + Iconos en la misma línea -->
+        <div class="form-group">
+          <div class="input-icon-group">
+            <input 
+              type="text"
+              id="codigo_barras_externo"
+              name="codigo_barras_externo"
+              placeholder="INGRESAR CÓDIGO DE BARRAS"
+            >
+            <!-- Icono Lector Físico -->
+            <img 
+              id="scanIcon"
+              src="{{ url_for('static', filename='img/3.png') }}"
+              alt="Escanear con Lector"
+            >
+            <!-- Icono Cámara QuaggaJS -->
+            <img 
+              id="cameraIcon"
+              src="{{ url_for('static', filename='img/4.png') }}"
+              alt="Escanear con Cámara"
+              onclick="iniciarEscaneoQuagga()"
+            >
+          </div>
+          <!-- Contenedor de autocomplete -->
+          <div id="autocomplete-results"></div>
+        </div>
+
+        <!-- Nombre -->
+        <div class="form-group">
+          <input 
+            type="text"
+            class="form-control"
+            id="nombre"
+            name="nombre"
+            placeholder="NOMBRE DEL PRODUCTO"
+          >
+        </div>
+
+        <!-- Stock Inicial -->
+        <div class="form-group">
+          <input 
+            type="number"
+            class="form-control"
+            id="stock"
+            name="stock"
+            min="0"
+            placeholder="STOCK INICIAL"
+          >
+        </div>
+
+        <!-- Costo / Precio -->
+        <div class="d-flex gap-3" style="align-items: center; margin-top:1rem;">
+          <div class="form-group" style="flex:1;">
+            <input
+              type="text"
+              step="0.01"
+              class="form-control"
+              id="costo"
+              name="costo"
+              required
+              oninput="formatCostRealtime(this)"
+              placeholder="COSTO"
+            >
+          </div>
+          <div class="form-group" style="flex:1;">
+            <input
+              type="text"
+              step="0.01"
+              class="form-control"
+              id="precio_venta"
+              name="precio_venta"
+              required
+              oninput="formatCostRealtime(this)"
+              placeholder="PRECIO DE VENTA"
+            >
+          </div>
+        </div>
+
+        <!-- Marca -->
+        <div class="form-group" style="margin-top:1rem;">
+          <input
+            type="text"
+            class="form-control"
+            id="marca"
+            name="marca"
+            placeholder="MARCA"
+          >
+        </div>
+
+        <!-- Categoría (Choices.js) -->
+        <div class="form-group">
+          <select class="form-select" name="categoria_existente" id="categoria_existente">
+            <option value="" disabled selected hidden>-SELECCIONA UNA CATEGORÍA-</option>
+            <option value="abarrotes secos" data-custom-properties='{"color": "#FFA500"}'>Abarrotes secos</option>
+            <option value="enlatados y conservas" data-custom-properties='{"color": "#DAA520"}'>Enlatados y conservas</option>
+            <option value="botanas, dulces y snacks" data-custom-properties='{"color": "#FF69B4"}'>Botanas, dulces y snacks</option>
+            <option value="bebidas no alcohólicas" data-custom-properties='{"color": "#1E90FF"}'>Bebidas no alcohólicas</option>
+            <option value="bebidas alcohólicas" data-custom-properties='{"color": "#800080"}'>Bebidas alcohólicas</option>
+            <option value="panadería y repostería" data-custom-properties='{"color": "#D2B48C"}'>Panadería y repostería</option>
+            <option value="lácteos y huevos" data-custom-properties='{"color": "#F5DEB3"}'>Lácteos y huevos</option>
+            <option value="carnes frías y embutidos" data-custom-properties='{"color": "#B22222"}'>Carnes frías y embutidos</option>
+            <option value="congelados y refrigerados" data-custom-properties='{"color": "#00CED1"}'>Congelados y refrigerados</option>
+            <option value="frutas y verduras frescas" data-custom-properties='{"color": "#32CD32"}'>Frutas y verduras frescas</option>
+            <option value="productos de limpieza y hogar" data-custom-properties='{"color": "#87CEFA"}'>Productos de limpieza y hogar</option>
+            <option value="cuidado personal e higiene" data-custom-properties='{"color": "#FFC0CB"}'>Cuidado personal e higiene</option>
+            <option value="medicamentos de mostrador (otc)" data-custom-properties='{"color": "#FF6347"}'>Medicamentos de mostrador (OTC)</option>
+            <option value="productos para bebés" data-custom-properties='{"color": "#FFB6C1"}'>Productos para bebés</option>
+            <option value="productos para mascotas" data-custom-properties='{"color": "#8FBC8F"}'>Productos para mascotas</option>
+            <option value="artículos de papelería" data-custom-properties='{"color": "#9370DB"}'>Artículos de papelería</option>
+            <option value="ferretería básica" data-custom-properties='{"color": "#708090"}'>Ferretería básica</option>
+            <option value="otros (miscelánea)" data-custom-properties='{"color": "#A9A9A9"}'>Otros (miscelánea)</option>
+          </select>
+        </div>
+
+        <!-- Toggle "¿TIENE FECHA DE CADUCIDAD?" -->
+        <div class="d-flex align-items-center mb-3" style="margin-top:1rem; gap:0.5rem;">
+          <span class="fw-bold" style="margin:0;">¿TIENE FECHA DE CADUCIDAD?</span>
+          <button type="button" id="btnToggleCaducidad" class="toggle-button">DESACTIVADO</button>
+        </div>
+
+        <!-- Opciones de Caducidad -->
+        <div id="caducidadOpcionesContainer" style="display:none; margin-top:0.5rem;">
+          <p class="text-muted" style="margin-bottom:0.5rem;">
+            A partir de hoy, ¿en qué lapso aproximado caducan tus productos?
+          </p>
+          <div class="caducidad-options">
+            <!-- Fila 1 -->
+            <div class="caducidad-row">
+              <div class="form-check" data-id="1 día">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="caducidad_lapso"
+                  id="cad1dia"
+                  value="1 día"
+                >
+                <label class="form-check-label caducidad-label" for="cad1dia">1 DÍA</label>
+              </div>
+              <div class="form-check" data-id="3 días">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="caducidad_lapso"
+                  id="cad3dias"
+                  value="3 días"
+                >
+                <label class="form-check-label caducidad-label" for="cad3dias">3 DÍAS</label>
+              </div>
+              <div class="form-check" data-id="1 semana">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="caducidad_lapso"
+                  id="cad1sem"
+                  value="1 semana"
+                >
+                <label class="form-check-label caducidad-label" for="cad1sem">1 SEMANA</label>
+              </div>
+              <div class="form-check" data-id="2 semanas">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="caducidad_lapso"
+                  id="cad2sem"
+                  value="2 semanas"
+                >
+                <label class="form-check-label caducidad-label" for="cad2sem">2 SEMANAS</label>
+              </div>
+              <div class="form-check" data-id="1 mes">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="caducidad_lapso"
+                  id="cad1mes"
+                  value="1 mes"
+                >
+                <label class="form-check-label caducidad-label" for="cad1mes">1 MES</label>
+              </div>
+            </div>
+            <!-- Fila 2 -->
+            <div class="caducidad-row">
+              <div class="form-check" data-id="3 meses">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="caducidad_lapso"
+                  id="cad3meses"
+                  value="3 meses"
+                >
+                <label class="form-check-label caducidad-label" for="cad3meses">3 MESES</label>
+              </div>
+              <div class="form-check" data-id="6 meses">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="caducidad_lapso"
+                  id="cad6meses"
+                  value="6 meses"
+                >
+                <label class="form-check-label caducidad-label" for="cad6meses">6 MESES</label>
+              </div>
+              <div class="form-check" data-id="1 año">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="caducidad_lapso"
+                  id="cad1ano"
+                  value="1 año"
+                >
+                <label class="form-check-label caducidad-label" for="cad1ano">1 AÑO</label>
+              </div>
+              <div class="form-check" data-id="2 años">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="caducidad_lapso"
+                  id="cad2anos"
+                  value="2 años"
+                >
+                <label class="form-check-label caducidad-label" for="cad2anos">2 AÑOS</label>
+              </div>
+              <div class="form-check" data-id="más de 3 años">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="caducidad_lapso"
+                  id="cad3anos"
+                  value="más de 3 años"
+                >
+                <label class="form-check-label caducidad-label" for="cad3anos">MÁS DE 3 AÑOS</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BOTONES FINAL (Guardar = Rojo, Cancelar = Gris) -->
+        <div class="text-end" style="margin-top:2rem; margin-bottom:0.5rem;">
+          <button type="submit" class="btn-submit">GUARDAR</button>
+          <a href="{{ url_for('ver_productos') }}" class="btn-cancel">CANCELAR</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- SCRIPTS (Choices, etc.) -->
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+<script>
+  /* ===========================================================
+   * 1) Resaltar coincidencias en MORADO
+   * ===========================================================
+   */
+  function highlightMatch(text, query) {
+    const index = text.toLowerCase().indexOf(query.toLowerCase());
+    if (index === -1) return text;
+    const before = text.slice(0, index);
+    const match  = text.slice(index, index + query.length);
+    const after  = text.slice(index + query.length);
+    return before + "<span style='color: #FF0080; font-weight:bold;'>" + match + "</span>" + after;
+  }
+
+  /* ===========================================================
+   * 2) Notificación centrada (7s)
+   * ===========================================================
+   */
+  function showCenteredNotification(message) {
+    const notif = document.createElement("div");
+    notif.textContent = message;
+    notif.style.position = "fixed";
+    notif.style.top = "50%";
+    notif.style.left = "50%";
+    notif.style.transform = "translate(-50%, -50%)";
+    notif.style.backgroundColor = "#ffcccc";
+    notif.style.color = "#900";
+    notif.style.padding = "20px";
+    notif.style.border = "1px solid #900";
+    notif.style.borderRadius = "4px";
+    notif.style.textAlign = "center";
+    notif.style.zIndex = "9999";
+    notif.style.fontSize = "1rem";
+    document.body.appendChild(notif);
+    setTimeout(() => { notif.remove(); }, 7000);
+  }
+
+  /* ===========================================================
+   * 3) Formatear Costo en tiempo real
+   * ===========================================================
+   */
+  function formatCostRealtime(input) {
+    let value = input.value;
+    if (value.startsWith("$")) {
+      value = value.substring(1);
+    }
+    value = value.replace(/,/g, "").replace(/[^\d.]/g, "");
+    let match = value.match(/^(\d*)(\.?)(\d{0,3})/);
+    if (match) {
+      let intPart = match[1];
+      let dot = match[2];
+      let decPart = match[3];
+      let formattedInt = intPart ? Number(intPart).toLocaleString("en-US") : "";
+      let result = formattedInt;
+      if (dot) {
+        result += ".";
+      }
+      result += decPart;
+      if (result !== "") {
+        result = "$" + result;
+      }
+      input.value = result;
+      input.setSelectionRange(input.value.length, input.value.length);
+    }
+  }
+
+  /* ===========================================================
+   * 4) FLOATING LABELS
+   * ===========================================================
+   */
+  function updateFloatingLabel(input) {
+    let container = input.parentElement;
+    let floatingLabel = container.querySelector(".floating-label");
+    if (!floatingLabel) {
+      floatingLabel = document.createElement("div");
+      floatingLabel.className = "floating-label";
+      container.insertBefore(floatingLabel, input);
+    }
+    if (input.value.trim() !== "") {
+      floatingLabel.textContent = input.getAttribute("placeholder");
+      floatingLabel.style.display = "block";
+    } else {
+      floatingLabel.style.display = "none";
+    }
+  }
+  document.addEventListener("DOMContentLoaded", function() {
+    const inputs = document.querySelectorAll(
+      "#codigo_barras_externo, #nombre, #stock, #costo, #precio_venta, #marca"
+    );
+    inputs.forEach(input => {
+      updateFloatingLabel(input);
+      input.addEventListener("input", () => {
+        updateFloatingLabel(input);
+        if (input.id === "codigo_barras_externo") {
+          hideScanFoundContainer();
+        }
+      });
+    });
+  });
+
+  /* ===========================================================
+   * 5) FOTOGRAFÍA Y MENÚ
+   * ===========================================================
+   */
+  function attachRemoveImageListener() {
+    const fotoPlaceholder = document.getElementById("fotoPlaceholder");
+    const btnRemove = fotoPlaceholder.querySelector(".remove-image");
+    if (btnRemove) {
+      btnRemove.addEventListener("click", function () {
+        fotoPlaceholder.innerHTML = `
+          <button type="button" class="no-image-icon" id="btnCargarFoto">&#8942;</button>
+          <div class="foto-dropdown" id="fotoDropdown" style="display:none;">
+            <button type="button" class="dropdown-item btn btn-secondary" id="dropdownCargarFoto">Cargar imagen</button>
+            <button type="button" class="dropdown-item btn btn-secondary" id="dropdownGenerarIA">Generar con IA</button>
+          </div>`;
+        fotoPlaceholder.classList.remove("has-image");
+        document.getElementById("ia_foto_filename").value = "";
+        document.getElementById("fotoInput").value = "";
+        // Reiniciar displayed_image_url también
+        document.getElementById("displayed_image_url").value = "";
+        rebindPhotoDropdownEvents();
+      });
+    }
+  }
+  function rebindPhotoDropdownEvents() {
+    const newBtnCargarFoto = document.getElementById("btnCargarFoto");
+    const newFotoDropdown = document.getElementById("fotoDropdown");
+    const newDropdownCargarFoto = document.getElementById("dropdownCargarFoto");
+    const newDropdownGenerarIA = document.getElementById("dropdownGenerarIA");
+    const fotoInput = document.getElementById("fotoInput");
+
+    newBtnCargarFoto.addEventListener("click", function(e) {
+      e.stopPropagation();
+      newFotoDropdown.style.display = newFotoDropdown.style.display === "block" ? "none" : "block";
+    });
+
+    newDropdownCargarFoto.addEventListener("click", function() {
+      fotoInput.click();
+      newFotoDropdown.style.display = "none";
+    });
+
+    newDropdownGenerarIA.addEventListener("click", generatePhotoWithIA);
+
+    fotoInput.addEventListener("change", function(e) {
+      if (this.files && this.files[0]) {
+        const file = this.files[0];
+        const objectURL = URL.createObjectURL(file);
+        const fotoPlaceholder = document.getElementById("fotoPlaceholder");
+        fotoPlaceholder.innerHTML = `
+          <img src="${objectURL}" alt="Foto Local Seleccionada">
+          <button type="button" class="remove-image" id="removeImageBtn">&times;</button>
+        `;
+        fotoPlaceholder.classList.add("has-image");
+        // GUARDAR en displayed_image_url
+        document.getElementById("displayed_image_url").value = objectURL;
+
+        attachRemoveImageListener();
+      }
+    });
+  }
+  if (document.getElementById("btnCargarFoto")) {
+    rebindPhotoDropdownEvents();
+  }
+
+  function generatePhotoWithIA() {
+    const barcodeInput = document.getElementById("codigo_barras_externo");
+    const nombreInput = document.getElementById("nombre");
+    const fotoDropdown = document.getElementById("fotoDropdown");
+    fotoDropdown.style.display = "none";
+
+    if (!barcodeInput.value || !nombreInput.value) {
+      showCenteredNotification("Debes ingresar un CÓDIGO DE BARRAS y el NOMBRE DEL PRODUCTO para generar una imagen con IA.");
+      return;
+    }
+    fetch("/api/buscar-imagen", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nombre: nombreInput.value.trim(), codigo: barcodeInput.value.trim() })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.status === "success" && data.image_url) {
+        const fotoPlaceholder = document.getElementById("fotoPlaceholder");
+        // Sacamos solo el nombre del archivo final
+        // (sin prefijar "uploads/").
+        const finalFilename = data.image_url.split("uploads/")[1];
+
+        fotoPlaceholder.innerHTML = `
+          <img src="${data.image_url}" alt="Imagen IA">
+          <button type="button" class="remove-image" id="removeImageBtn">&times;</button>
+        `;
+        fotoPlaceholder.classList.add("has-image");
+
+        // Guardamos *solo* el nombre final en ia_foto_filename
+        document.getElementById("ia_foto_filename").value = finalFilename || "";
+        // Y guardamos la URL completa en displayed_image_url
+        document.getElementById("displayed_image_url").value = data.image_url;
+
+        attachRemoveImageListener();
+      } else {
+        alert(data.message || "No se pudo obtener la imagen");
+      }
+    })
+    .catch(error => {
+      console.error("Error al buscar la imagen:", error);
+      alert("Ocurrió un error al buscar la imagen.");
+    });
+  }
+
+  /* ===========================================================
+   * 6) AUTOCOMPLETE
+   * ===========================================================
+   */
+  function removeAccents(str) {
+    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  }
+  const inputExterno = document.getElementById("codigo_barras_externo");
+  const autoContainer = document.getElementById("autocomplete-results");
+  if (inputExterno) {
+    inputExterno.addEventListener("input", function() {
+      let query = this.value.trim();
+      if(!query) {
+        autoContainer.innerHTML = "";
+        autoContainer.style.display = "none";
+        return;
+      }
+      fetch("/api/autocomplete?q=" + encodeURIComponent(query))
+        .then(response => response.json())
+        .then(data => {
+          let results = data.results || [];
+          results = results.slice(0, 4);
+          if(results.length === 0) {
+            autoContainer.innerHTML = "";
+            autoContainer.style.display = "none";
+            return;
+          }
+          let html = "";
+          results.forEach(item => {
+            const codigoResaltado = highlightMatch(item.codigo_barras, query);
+            html += `
+              <div class="autocomplete-item"
+                   data-id="${item.id}"
+                   data-nombre="${item.nombre}"
+                   data-marca="${item.marca}"
+                   data-imagen="${item.url_imagen}"
+                   data-categoria="${item.categoria || ''}">
+                ${
+                  item.url_imagen
+                  ? `<img src="${item.url_imagen}" alt="Imagen">`
+                  : `<div style="width:40px; height:40px; background:#ccc; margin-right:0.5rem;"></div>`
+                }
+                <div class="autocomplete-text">
+                  <div class="autocomplete-code">${codigoResaltado}</div>
+                  <div class="autocomplete-name">${item.nombre}</div>
+                </div>
+              </div>`;
+          });
+          autoContainer.innerHTML = html;
+          autoContainer.style.display = "block";
+        })
+        .catch(err => {
+          console.error("Error en autocomplete", err);
+        });
+    });
+  }
+
+  let categoryChoices;
+  if (document.getElementById("categoria_existente")) {
+    categoryChoices = new Choices("#categoria_existente", {
+      searchEnabled: false,
+      placeholder: false,
+      callbackOnCreateTemplates: function(template) {
+        return {
+          item: (classNames, data) => {
+            if (data.value === "") {
+              return template(`
+                <div
+                  class="${classNames.item} ${classNames.itemSelectable}"
+                  data-item data-id="${data.id}" data-value="${data.value}"
+                  ${data.active ? 'aria-selected="true"' : ''}
+                  ${data.disabled ? 'aria-disabled="true"' : ''}>
+                  -SELECCIONA UNA CATEGORÍA-
+                </div>
+              `);
+            }
+            let color = "#000000";
+            if (data.customProperties && data.customProperties.color) {
+              color = data.customProperties.color;
+            }
+            return template(`
+              <div
+                class="${classNames.item} ${classNames.itemSelectable}"
+                data-item data-id="${data.id}" data-value="${data.value}"
+                ${data.active ? 'aria-selected="true"' : ''}
+                ${data.disabled ? 'aria-disabled="true"' : ''}>
+                <span
+                  style="display:inline-block; width:12px; height:12px; background-color:${color};
+                         border-radius:50%; margin-right:8px;">
+                </span>
+                ${data.label}
+              </div>
+            `);
+          },
+          choice: (classNames, data) => {
+            if (data.value === "") {
+              return template(`
+                <div
+                  class="${classNames.item} ${classNames.itemChoice}"
+                  data-choice
+                  style="display:none;"
+                  ${data.disabled ? 'data-choice-disabled aria-disabled="true"' : 'data-choice-selectable'}
+                  data-id="${data.id}" data-value="${data.value}">
+                  -SELECCIONA UNA CATEGORÍA-
+                </div>
+              `);
+            }
+            let color = "#000000";
+            if (data.customProperties && data.customProperties.color) {
+              color = data.customProperties.color;
+            }
+            return template(`
+              <div
+                class="${classNames.item} ${classNames.itemChoice}"
+                data-choice
+                ${data.disabled ? 'data-choice-disabled aria-disabled="true"' : 'data-choice-selectable'}
+                data-id="${data.id}" data-value="${data.value}">
+                <span
+                  style="display:inline-block; width:12px; height:12px; background-color:${color};
+                         border-radius:50%; margin-right:8px;">
+                </span>
+                ${data.label}
+              </div>
+            `);
+          }
+        };
+      }
+    });
+  }
+
+  if (autoContainer) {
+    autoContainer.addEventListener("click", function(e) {
+      const target = e.target.closest(".autocomplete-item");
+      if(!target) return;
+      const codBarras = target.querySelector(".autocomplete-code").innerText;
+      const nombreProd = target.getAttribute("data-nombre");
+      const marcaProd = target.getAttribute("data-marca");
+      const imagenURL = target.getAttribute("data-imagen");
+      const cat = target.getAttribute("data-categoria") || "";
+
+      document.getElementById("codigo_barras_externo").value = codBarras;
+      document.getElementById("nombre").value = nombreProd;
+      document.getElementById("marca").value = marcaProd;
+
+      if(imagenURL) {
+        let fotoPlaceholder = document.getElementById("fotoPlaceholder");
+        fotoPlaceholder.innerHTML = `
+          <img src="${imagenURL}" alt="Imagen del Producto">
+          <button type="button" class="remove-image" id="removeImageBtn">&times;</button>`;
+        fotoPlaceholder.classList.add("has-image");
+        document.getElementById("ia_foto_filename").value = imagenURL.split("/").pop();
+
+        // IMPORTANTE: guardamos la imagen que se ve en displayed_image_url
+        document.getElementById("displayed_image_url").value = imagenURL;
+
+        attachRemoveImageListener();
+      }
+
+      if (cat) {
+        const catDB = removeAccents(cat.toLowerCase().trim());
+        const catSelect = document.getElementById("categoria_existente");
+        for (let i = 0; i < catSelect.options.length; i++) {
+          const rawOption = catSelect.options[i].value;
+          const catOption = removeAccents(rawOption.toLowerCase().trim());
+          if (catOption === catDB) {
+            if (categoryChoices) {
+              categoryChoices.setChoiceByValue(rawOption);
+            } else {
+              catSelect.value = rawOption;
+            }
+            break;
+          }
+        }
+      }
+      autoContainer.innerHTML = "";
+      autoContainer.style.display = "none";
+    });
+  }
+  document.addEventListener("click", function(e) {
+    if (!e.target.closest("#codigo_barras_externo") && !e.target.closest("#autocomplete-results")) {
+      autoContainer.style.display = "none";
+    }
+  });
+
+  /* ===========================================================
+   * 7) TOGGLE: Favorito / Producto a la Venta
+   * ===========================================================
+   */
+  const favoritoContainer = document.getElementById("favoritoContainer");
+  const heartIcon = document.getElementById("heartIcon");
+  const esFavoritoInput = document.getElementById("es_favorito");
+  if (favoritoContainer && heartIcon && esFavoritoInput) {
+    favoritoContainer.addEventListener("click", () => {
+      if (esFavoritoInput.value === "0") {
+        esFavoritoInput.value = "1";
+        heartIcon.classList.add("active");
+        heartIcon.innerHTML = "&#9829;";
+      } else {
+        esFavoritoInput.value = "0";
+        heartIcon.classList.remove("active");
+        heartIcon.innerHTML = "&#9825;";
+      }
+    });
+  }
+
+  const ventaContainer = document.getElementById("ventaContainer");
+  const ventaIcon = document.getElementById("ventaIcon");
+  const estaAVentaInput = document.getElementById("esta_a_la_venta");
+  if (ventaContainer && ventaIcon && estaAVentaInput) {
+    ventaContainer.addEventListener("click", () => {
+      if (estaAVentaInput.value === "1") {
+        estaAVentaInput.value = "0";
+        ventaIcon.src = "{{ url_for('static', filename='img/2.png') }}";
+      } else {
+        estaAVentaInput.value = "1";
+        ventaIcon.src = "{{ url_for('static', filename='img/1.png') }}";
+      }
+    });
+  }
+
+  /* ===========================================================
+   * 8) TOGGLE: FECHA DE CADUCIDAD
+   * ===========================================================
+   */
+  const btnToggleCaducidad = document.getElementById("btnToggleCaducidad");
+  const caducidadOpciones = document.getElementById("caducidadOpcionesContainer");
+  const hiddenCaducidadEstado = document.getElementById("toggle_caducidad_estado");
+
+  if (btnToggleCaducidad && caducidadOpciones && hiddenCaducidadEstado) {
+    btnToggleCaducidad.addEventListener("click", () => {
+      if (btnToggleCaducidad.classList.contains("active")) {
+        // Desactivar
+        btnToggleCaducidad.classList.remove("active");
+        btnToggleCaducidad.textContent = "DESACTIVADO";
+        caducidadOpciones.style.display = "none";
+        hiddenCaducidadEstado.value = "DESACTIVADO";
+      } else {
+        // Activar
+        btnToggleCaducidad.classList.add("active");
+        btnToggleCaducidad.textContent = "ACTIVADO";
+        caducidadOpciones.style.display = "block";
+        hiddenCaducidadEstado.value = "ACTIVADO";
+      }
+    });
+  }
+
+  document.querySelectorAll(".caducidad-options .form-check").forEach(fc => {
+    const radio = fc.querySelector("input[type='radio']");
+    if (radio) {
+      radio.addEventListener("change", () => {
+        document.querySelectorAll(".caducidad-options .form-check").forEach(el => el.classList.remove("selected"));
+        if (radio.checked) {
+          fc.classList.add("selected");
+        }
+      });
+    }
+  });
+
+  /* ===========================================================
+   * 10) Lector Físico (Barcode Scanner)
+   * ===========================================================
+   */
+  function initBarcodeScanner(scanIconSelector, inputSelector, options) {
+    const threshold = (options && options.threshold) || 150;
+    const timeoutDuration = (options && options.timeoutDuration) || 1000;
+    const scanIcon = document.querySelector(scanIconSelector);
+    const inputElement = document.querySelector(inputSelector);
+    if (!scanIcon || !inputElement) {
+      console.error("Barcode scanner: ícono o input no encontrados.");
+      return;
+    }
+    let scanningActive = false;
+    let scannedString = "";
+    let lastTime = null;
+    let scanTimeoutId = null;
+
+    function resetScanner() {
+      scanningActive = false;
+      scannedString = "";
+      lastTime = null;
+      if (scanTimeoutId) {
+        clearTimeout(scanTimeoutId);
+        scanTimeoutId = null;
+      }
+      document.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("click", onDocumentClick);
+      scanIcon.classList.remove("scan-active");
+    }
+    function onKeyDown(e) {
+      if (!scanningActive) return;
+      const currentTime = Date.now();
+      if (lastTime && (currentTime - lastTime > threshold)) {
+        scannedString = "";
+      }
+      lastTime = currentTime;
+      if (e.key === "Enter") {
+        if (scannedString.length >= 3) {
+          inputElement.value = scannedString;
+          onScannedBarcode(scannedString);
+        }
+        resetScanner();
+        e.preventDefault();
+        return;
+      } else if (e.key.length === 1) {
+        scannedString += e.key;
+      }
+      if (scanTimeoutId) clearTimeout(scanTimeoutId);
+      scanTimeoutId = setTimeout(() => {
+        if (scannedString.length >= 3) {
+          inputElement.value = scannedString;
+          onScannedBarcode(scannedString);
+        }
+        resetScanner();
+      }, timeoutDuration);
+    }
+    function onDocumentClick(e) {
+      if (!scanIcon.contains(e.target) && !inputElement.contains(e.target)) {
+        resetScanner();
+      }
+    }
+    function startScanning() {
+      if (scanningActive) {
+        resetScanner();
+        return;
+      }
+      scanningActive = true;
+      scannedString = "";
+      lastTime = null;
+      document.addEventListener("keydown", onKeyDown);
+      document.addEventListener("click", onDocumentClick);
+      scanIcon.classList.add("scan-active");
+    }
+    scanIcon.addEventListener("click", function(e) {
+      e.stopPropagation();
+      if (scanningActive) {
+        resetScanner();
+      } else {
+        startScanning();
+      }
+    });
+  }
+  window.initBarcodeScanner = initBarcodeScanner;
+  if (document.getElementById("scanIcon")) {
+    initBarcodeScanner("#scanIcon", "#codigo_barras_externo", { threshold: 150, timeoutDuration: 1000 });
+  }
+
+  /* ===========================================================
+   * 11) QuaggaJS (Cámara)
+   * ===========================================================
+   */
+  function iniciarEscaneoQuagga() {
+    const modal = document.getElementById("modalEscaneoCamara");
+    if (!modal) return;
+    modal.style.display = "block";
+    const videoContainer = document.getElementById("videoContainer");
+    if (!videoContainer) return;
+    Quagga.init(
+      {
+        inputStream: {
+          type: "LiveStream",
+          target: videoContainer,
+          constraints: { facingMode: "environment" }
+        },
+        decoder: { readers: ["code_128_reader", "ean_reader", "upc_reader", "code_39_reader"] }
+      },
+      function (err) {
+        if (err) {
+          console.error("Error al iniciar Quagga:", err);
+          cerrarModalEscaner();
+          return;
+        }
+        Quagga.start();
+      }
+    );
+    Quagga.onDetected(function (result) {
+      if (!result || !result.codeResult) return;
+      const codigoDetectado = result.codeResult.code;
+      const inputExterno = document.getElementById("codigo_barras_externo");
+      if (inputExterno) {
+        inputExterno.value = codigoDetectado;
+      }
+      onScannedBarcode(codigoDetectado);
+      Quagga.stop();
+      cerrarModalEscaner();
+    });
+  }
+  function cerrarModalEscaner() {
+    if (Quagga) {
+      Quagga.stop();
+    }
+    const modal = document.getElementById("modalEscaneoCamara");
+    if (modal) {
+      modal.style.display = "none";
+    }
+  }
+
+  /* ===========================================================
+   * 12) Recuadro Morado "¿Este es tu producto?"
+   * ===========================================================
+   */
+  const scanFoundContainer = document.getElementById("scanFoundContainer");
+  const scanFoundRow = document.getElementById("scanFoundRow");
+  const btnScanYes = document.getElementById("btnScanYes");
+  const btnScanNo = document.getElementById("btnScanNo");
+
+  function hideScanFoundContainer() {
+    if (scanFoundContainer) {
+      scanFoundContainer.style.display = "none";
+      scanFoundRow.innerHTML = "";
+    }
+  }
+
+  function onScannedBarcode(code) {
+    fetch("/api/find-by-code?codigo=" + encodeURIComponent(code))
+      .then(res => res.json())
+      .then(data => {
+        if (!data.found) {
+          hideScanFoundContainer();
+          return;
+        }
+        showScanFound(data);
+      })
+      .catch(err => {
+        console.error("Error en find-by-code:", err);
+      });
+  }
+
+  function showScanFound(info) {
+    if (!scanFoundContainer || !scanFoundRow) return;
+    scanFoundRow.innerHTML = `
+      <div class="scanFoundInner">
+        <div class="scanFoundImageBox">
+          <img src="${info.url_imagen || ''}" alt="Producto Escaneado"
+               onerror="this.src='https://via.placeholder.com/80';" />
+        </div>
+        <div class="scanFoundText">
+          <div class="scanFoundTitle">¿ESTE ES TU PRODUCTO?</div>
+          <div class="scanFoundName">${info.nombre || 'Producto sin nombre'}</div>
+          <div class="scanFoundCode">Código: ${info.codigo_barras || ''}</div>
+        </div>
+      </div>
+    `;
+    scanFoundContainer.style.display = "block";
+
+    btnScanYes.onclick = () => {
+      const nombreInput = document.getElementById("nombre");
+      const marcaInput = document.getElementById("marca");
+      const fotoPlaceholder = document.getElementById("fotoPlaceholder");
+      if (nombreInput) nombreInput.value = info.nombre || '';
+      if (marcaInput) marcaInput.value = info.marca || '';
+
+      if (info.url_imagen) {
+        fotoPlaceholder.innerHTML = `
+          <img src="${info.url_imagen}" alt="Imagen del Producto">
+          <button type="button" class="remove-image" id="removeImageBtn">&times;</button>
+        `;
+        fotoPlaceholder.classList.add("has-image");
+        document.getElementById("ia_foto_filename").value = info.url_imagen.split("/").pop();
+
+        // También guardamos la URL en displayed_image_url
+        document.getElementById("displayed_image_url").value = info.url_imagen;
+
+        attachRemoveImageListener();
+      }
+
+      if (info.categoria) {
+        const cat = removeAccents(info.categoria.toLowerCase().trim());
+        const catSelect = document.getElementById("categoria_existente");
+        for (let i = 0; i < catSelect.options.length; i++) {
+          const rawOption = catSelect.options[i].value;
+          const catOption = removeAccents(rawOption.toLowerCase().trim());
+          if (catOption === cat) {
+            if (categoryChoices) {
+              categoryChoices.setChoiceByValue(rawOption);
+            } else {
+              catSelect.value = rawOption;
+            }
+            break;
+          }
+        }
+      }
+      hideScanFoundContainer();
+    };
+
+    btnScanNo.onclick = () => {
+      hideScanFoundContainer();
+    };
+  }
+
+  // Vincular el estado "toggle_caducidad_estado" con el hidden input
+  // (ya se hace en la parte del toggle en "btnToggleCaducidad" si se requiere)
+</script>
+
+<!-- Modal QuaggaJS -->
+<div 
+  id="modalEscaneoCamara" 
+  style="display:none; 
+         position:fixed; top:0; left:0; width:100%; height:100%;
+         background-color:rgba(0,0,0,0.8); 
+         z-index:9999;"
+>
+  <button 
+    type="button"
+    style="position:absolute; top:20px; right:20px; font-size:24px;
+           background-color:#fff; border:none; border-radius:50%;
+           width:40px; height:40px; cursor:pointer;"
+    onclick="cerrarModalEscaner()"
+  >
+    X
+  </button>
+  <h2 style="color:#fff; text-align:center; margin-top:20px;">
+    Escaneo con Cámara
+  </h2>
+  <p style="color:#fff; text-align:center; max-width:600px; margin:10px auto;">
+    IMPORTANTE: Asegúrate de contar con buena iluminación y evita sombras.
+    Verifica que el código se lea correctamente,
+    ya que la cámara es menos precisa que un lector físico.
+  </p>
+  <div
+    id="videoContainer"
+    style="position:relative; margin:20px auto; width:80%;
+           max-width:600px; background-color:#000;"
+  ></div>
+  <div
+    style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%);
+           border:2px dashed #00ff00; width:80%; max-width:300px; height:200px;
+           pointer-events:none;"
+  >
+  </div>
+</div>
+{% endblock %}

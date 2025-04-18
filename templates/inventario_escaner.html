@@ -1,0 +1,89 @@
+```html
+{% extends 'base.html' %}
+
+{% block title %}
+  Captura Rápida con IA
+{% endblock %}
+
+{% block content %}
+<!-- ENCABEZADO ROJO PRINCIPAL -->
+<div 
+  class="d-flex align-items-center justify-content-between"
+  style="
+    background-color: #e52e2e; 
+    color: #fff; 
+    padding: 1rem 1.5rem; 
+    border-radius: 8px; 
+    margin-bottom: 1.5rem;
+  "
+>
+  <h2 class="m-0" style="font-weight: 600;">Captura de Productos con IA</h2>
+  
+  <!-- (Opcional) Algún toggle o botón extra, si lo deseas. Por ahora se deja vacío -->
+  <!--
+  <div>
+    <button type="button" class="btn btn-outline-light">Opción 1</button>
+    <button type="button" class="btn btn-outline-light">Opción 2</button>
+  </div>
+  -->
+</div>
+
+<!-- CONTENIDO PRINCIPAL -->
+<div class="card p-4" style="border: 1px solid #ddd; border-radius: 8px;">
+  <!-- Mensajes de confirmación o error -->
+  {% if mensajes %}
+    <div class="mb-4">
+      {% for msg in mensajes %}
+        <div class="alert alert-info">{{ msg }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- Descripción / Instrucciones -->
+  <div class="alert alert-secondary mb-4">
+    <p class="fw-bold mb-2">¿Cómo funciona?</p>
+    <ul class="mb-2" style="list-style: disc; padding-left: 1.2rem;">
+      <li>Elige cómo escanear: lector físico o cámara.</li>
+      <li>Escanea tus productos sin detenerte; la IA sugerirá <em>nombre, foto y categoría</em> al instante.</li>
+      <li>Termina ajustando precios, stock y detalles cuando finalices.</li>
+    </ul>
+    <p class="mb-1">
+      <strong>Ahorra tiempo:</strong> la IA rellena gran parte de la información, dejando menos para ti.
+    </p>
+  </div>
+
+  <!-- FORMULARIO DE ESCANEO -->
+  <form method="POST" action="{{ url_for('inventario_escaner') }}">
+    <div class="mb-3">
+      <label for="codigo_barras" class="form-label fw-bold" style="text-transform:uppercase;">Código de Barras</label>
+      <input
+        type="text"
+        id="codigo_barras"
+        name="codigo_barras"
+        class="form-control"
+        placeholder="Apunta tu escáner aquí..."
+        autofocus
+      >
+    </div>
+
+    <!-- BOTONES DE ESCANEO -->
+    <div class="d-flex flex-wrap gap-2 mt-3">
+      <!-- Escanear con Lector -->
+      <button type="submit" class="btn btn-primary" style="font-weight: 600;">
+        Escanear con Lector
+      </button>
+
+      <!-- Escanear con Cámara (Quagga) -->
+      <button 
+        type="button" 
+        class="btn btn-success" 
+        style="font-weight: 600;"
+        onclick="iniciarEscaneoQuagga()"
+      >
+        Escanear con Cámara
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}
+```

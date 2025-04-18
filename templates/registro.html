@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  Registro de Empresa
+{% endblock %}
+
+{% block content %}
+  <h1>Registro de Empresa</h1>
+  
+  <form method="POST" action="{{ url_for('registro') }}" class="mt-4">
+    <!-- Nombre -->
+    <div class="mb-3">
+      <label for="nombre" class="form-label">Nombre:</label>
+      <input type="text" name="nombre" id="nombre" class="form-control" required>
+    </div>
+
+    <!-- Email -->
+    <div class="mb-3">
+      <label for="email" class="form-label">Email:</label>
+      <input type="email" name="email" id="email" class="form-control" required>
+    </div>
+
+    <!-- Password -->
+    <div class="mb-3">
+      <label for="password" class="form-label">Password:</label>
+      <input type="password" name="password" id="password" class="form-control" required>
+    </div>
+
+    <!-- Código de Membresía -->
+    <div class="mb-3">
+      <label for="codigo" class="form-label">Código de Membresía (opcional):</label>
+      <input type="text" name="codigo" id="codigo" class="form-control">
+    </div>
+
+    <!-- Botón de registro -->
+    <button type="submit" class="btn btn-primary">Registrarse</button>
+  </form>
+
+  <p class="mt-3">
+    <a href="{{ url_for('index') }}" class="btn btn-secondary">Volver</a>
+  </p>
+{% endblock %}

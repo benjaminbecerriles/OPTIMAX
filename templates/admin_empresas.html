@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Empresas Registradas
+{% endblock %}
+
+{% block content %}
+  <h1 class="mb-4">Empresas Registradas</h1>
+
+  <p>
+    <a href="{{ url_for('admin_panel') }}" class="btn btn-secondary">
+      Volver al Panel de Admin
+    </a>
+  </p>
+
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Email</th>
+        <th>¿Es Admin?</th>
+        <th>Código Asignado</th>
+        <th>¿Activo?</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for e in empresas %}
+      <tr>
+        <td>{{ e.id }}</td>
+        <td>{{ e.nombre }}</td>
+        <td>{{ e.email }}</td>
+        <td>{{ 'Sí' if e.is_admin else 'No' }}</td>
+
+        {# Relación UNO-A-UNO: e.codigo_asignado #}
+        {% set cod = e.codigo_asignado %}
+        {% if cod %}
+          <td>{{ cod.codigo }}</td>
+          <td>{{ 'Sí' if cod.esta_activo else 'No' }}</td>
+        {% else %}
+          <td>- Sin Código -</td>
+          <td>-</td>
+        {% endif %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  Códigos Asignados
+{% endblock %}
+
+{% block content %}
+  <h1>Códigos Asignados</h1>
+  <p>
+    <!-- Usa url_for si quieres más flexibilidad -->
+    <a href="{{ url_for('admin_panel') }}" class="btn btn-secondary">
+      Volver al Panel Admin
+    </a>
+  </p>
+
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Código</th>
+        <th>Activo?</th>
+        <th>Empresa ID</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in codigos %}
+      <tr>
+        <td>{{ c.id }}</td>
+        <td>{{ c.codigo }}</td>
+        <td>{{ 'Sí' if c.esta_activo else 'No' }}</td>
+        <td>{{ c.empresa_id }}</td>
+        <td>
+          <!-- Ajusta la ruta con url_for para que sea dinámico -->
+          <a href="{{ url_for('toggle_asignado', cod_id=c.id) }}" 
+             class="btn btn-sm btn-outline-info">
+            Toggle
+          </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

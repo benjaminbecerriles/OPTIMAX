@@ -1,0 +1,170 @@
+```html
+{% extends 'base.html' %}
+
+{% block title %}
+  Inventario de Productos
+{% endblock %}
+
+{% block summary %}
+{# Si no se pasan los totales desde app.py, se calculan aquí #}
+{% set stock_total = 0 %}
+{% set ventas_totales = 0 %}
+{% for p in productos %}
+  {% set stock_total = stock_total + (p.stock or 0) %}
+  {% set ventas_totales = ventas_totales + (p.ventas_totales if p.ventas_totales is defined else 0) %}
+{% endfor %}
+<div class="text-muted small">
+  Mostrando {{ productos|length }} de {{ total_productos if total_productos is defined else 'XX' }} productos |
+  Stock total: {{ stock_total }} |
+  Ventas totales: {{ ventas_totales }}
+</div>
+{% endblock %}
+
+{% block content %}
+  <!-- Título grande y frase pequeña debajo -->
+  <h1 class="mt-2">Inventario</h1>
+  <p class="text-muted" style="margin-top:-8px;">
+    Administra aquí tus productos de forma eficiente
+  </p>
+
+  <!-- FILA DE BOTONES PRINCIPALES -->
+  <div class="mb-3 d-flex gap-2">
+    <!-- Botón "Agregar Nuevo" -> /nuevo-producto -->
+    <a href="{{ url_for('nuevo_producto') }}" class="btn btn-primary">Agregar Nuevo</a>
+
+    <!-- Botón "Reabastecer" -> /reabastecer (Ruta nueva) -->
+    <a href="{{ url_for('reabastecer_listado') }}" class="btn btn-secondary">
+      Reabastecer
+    </a>
+
+    <!-- Botón "Pendientes" -> /pendientes-aprobacion -->
+    <a href="{{ url_for('pendientes_aprobacion') }}" class="btn btn-warning">Pendientes</a>
+  </div>
+
+  <!-- FILTRO Aprobados/Pendientes/Todos + BÚSQUEDA -->
+  <div class="row mb-3">
+    <!-- Filtro de Aprobación -->
+    <div class="col-md-4">
+      <label for="filtroAprobacion" class="form-label fw-bold">Filtrar por Aprobación:</label>
+      <select
+        id="filtroAprobacion"
+        name="filtroAprobacion"
+        class="form-select"
+        form="filtroForm"
+      >
+        <option value="aprobados" {% if filtro_aprobacion == 'aprobados' %}selected{% endif %}>Aprobados</option>
+        <option value="pendientes" {% if filtro_aprobacion == 'pendientes' %}selected{% endif %}>Pendientes</option>
+        <option value="todos" {% if filtro_aprobacion == 'todos' %}selected{% endif %}>Todos</option>
+      </select>
+    </div>
+
+    <!-- Barra de Búsqueda -->
+    <div class="col-md-8 d-flex align-items-end">
+      <form
+        id="filtroForm"
+        method="GET"
+        action="{{ url_for('ver_productos') }}"
+        class="w-100"
+      >
+        <div class="input-group">
+          <input
+            type="text"
+            name="q"
+            class="form-control"
+            placeholder="Buscar por nombre, categoría, código..."
+            value="{{ termino_busqueda if termino_busqueda else '' }}"
+          >
+          <button class="btn btn-outline-secondary" type="submit">
+            Buscar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- TABLA PRINCIPAL DE PRODUCTOS -->
+  <div class="table-responsive">
+    <table class="table table-striped align-middle">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Foto</th>
+          <th>Nombre</th>
+          <th>Stock</th>
+          <th>Costo</th>
+          <th>Precio de Venta</th>
+          <th>Ganancia</th>
+          <th>Categoría</th>
+          <th>Código Barras</th>
+          <th># Ventas Totales</th>
+          <th># Ventas Este Mes</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in productos %}
+        <tr>
+          <td>{{ p.id }}</td>
+          <td>
+            {% if p.foto %}
+              <img
+                src="{{ url_for('static', filename='uploads/' ~ p.foto) }}"
+                alt="Foto de {{ p.nombre }}"
+                style="width: 50px; height: auto;"
+              >
+            {% else %}
+              <span class="text-muted">Sin Foto</span>
+            {% endif %}
+          </td>
+          <td>{{ p.nombre }}</td>
+          <td>{{ p.stock }}</td>
+          <td>{{ p.costo if p.costo is not none else 0.0 }}</td>
+          <td>{{ p.precio_venta if p.precio_venta is not none else 0.0 }}</td>
+          <td>{{ ((p.precio_venta or 0) - (p.costo or 0)) | round(2) }}</td>
+          <td>{{ p.categoria if p.categoria else "N/A" }}</td>
+          <td>
+            {% if p.codigo_barras_externo %}
+              {{ p.codigo_barras_externo }}
+            {% elif p.codigo_interno %}
+              {{ p.codigo_interno }}
+            {% else %}
+              <span class="text-muted">Sin Código</span>
+            {% endif %}
+          </td>
+          <td>{{ p.ventas_totales if p.ventas_totales is defined else 0 }}</td>
+          <td>{{ p.ventas_mes if p.ventas_mes is defined else 0 }}</td>
+          <td>
+            <a
+              href="{{ url_for('editar_producto', prod_id=p.id) }}"
+              class="btn btn-sm btn-outline-info"
+            >
+              Editar
+            </a>
+            <a
+              href="{{ url_for('eliminar_producto', prod_id=p.id) }}"
+              class="btn btn-sm btn-outline-danger"
+            >
+              Eliminar
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Mensaje si no hay productos -->
+  {% if productos|length == 0 %}
+    <div class="alert alert-info">
+      No hay productos registrados aún.
+    </div>
+  {% endif %}
+
+  <!-- BOTÓN DE EXPORTAR (Abajo a la Derecha) -->
+  <div class="text-end mt-3">
+    <a href="#" class="btn btn-outline-dark">
+      Exportar
+    </a>
+  </div>
+{% endblock %}
+```

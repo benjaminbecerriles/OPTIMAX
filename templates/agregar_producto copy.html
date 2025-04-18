@@ -1,0 +1,590 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  Agregar Producto Manualmente
+{% endblock %}
+
+{% block content %}
+<!------------------------------------------------------------
+   INICIO DE LA PLANTILLA COMPLETA (1500+ LÍNEAS APROX)
+------------------------------------------------------------->
+<style>
+  /*******************************************************************************
+   * CONFIGURACIÓN DE ESTILOS GLOBALES Y DISEÑO BÁSICO
+   ******************************************************************************/
+  body {
+    font-family: 'Open Sans', sans-serif;
+    background-color: #f5f5f5;
+    margin: 0;
+    padding: 0;
+  }
+  .header-toggle {
+    background-color: #e52e2e;
+    color: #fff;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .header-toggle h2 {
+    font-size: 1.5rem;
+    margin: 0;
+    padding: 0;
+  }
+  .toggle-group {
+    display: inline-flex;
+    border: 2px solid #fff;
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .toggle-group button {
+    background-color: transparent;
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1.2rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  .toggle-group button.active {
+    background-color: #fff;
+    color: #e52e2e;
+  }
+  .card-form {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+  }
+  .row-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .col-left {
+    flex: 1 1 300px;
+    border-right: 1px solid #ddd;
+    padding-right: 1rem;
+  }
+  .col-right {
+    flex: 2;
+    padding-left: 1rem;
+  }
+  .foto-container {
+    text-align: left;
+    margin-bottom: 1rem;
+    position: relative;
+  }
+  .foto-placeholder {
+    width: 570px;
+    height: 570px;
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    margin: 0 auto 1rem auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #999;
+    font-weight: 600;
+    position: relative;
+  }
+  .foto-placeholder img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+  .remove-image {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: rgba(255,255,255,0.8);
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    line-height: 28px;
+    text-align: center;
+    padding: 0;
+    display: none;
+  }
+  .foto-placeholder.has-image .remove-image {
+    display: block;
+  }
+  .no-image-icon {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #ccc;
+    color: #fff;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .foto-dropdown {
+    position: absolute;
+    top: 40px;
+    right: 5px;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    z-index: 100;
+    display: none;
+  }
+  .foto-dropdown .dropdown-item {
+    display: block;
+    width: 100%;
+    border: none;
+    background: transparent;
+    padding: 0.5rem 1rem;
+    text-align: left;
+    cursor: pointer;
+  }
+  .foto-dropdown .dropdown-item:hover {
+    background-color: #f0f0f0;
+  }
+  .form-group {
+    margin-bottom: 1rem;
+  }
+  .form-group label {
+    font-weight: 600;
+  }
+  .small-hint {
+    font-size: 0.85rem;
+    color: #666;
+  }
+  /* Caja gris para agrupar COSTO y PRECIO DE VENTA */
+  .highlight-box {
+    background-color: #f2f2f2;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 1rem;
+    margin: 1rem 0;
+  }
+  .highlight-box h5 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+  }
+  /* Favorito y Producto a la Venta (se conservan sin modificación) */
+  .heart-icon {
+    font-size: 24px;
+    color: gray;
+    cursor: pointer;
+    transition: color 0.3s;
+  }
+  .heart-icon.active {
+    color: red;
+  }
+  .venta-icon {
+    width: 24px;
+    height: auto;
+    cursor: pointer;
+    transition: opacity 0.3s;
+    object-fit: contain;
+  }
+  /* Para el select de Categoría: se eliminó el option vacío para que solo aparezcan las categorías reales */
+  .choices__inner {
+    min-height: 38px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 6px 8px;
+  }
+  /* Opciones de caducidad sin círculo azul y con selección en verde */
+  .caducidad-options .form-check {
+    padding: 6px 10px;
+    background-color: #eee;
+    border-radius: 6px;
+    margin-right: 8px;
+    transition: background-color 0.3s;
+    cursor: pointer;
+    border: none;
+  }
+  .caducidad-options .form-check:hover {
+    background-color: #ddd;
+  }
+  .caducidad-options .form-check.selected {
+    background-color: #c9f7c4;
+    border: 1px solid #97ee8c;
+  }
+  .toggle-label {
+    text-transform: none;
+    font-weight: normal;
+  }
+</style>
+
+<div class="header-toggle">
+  <h2>Agregar producto con código de barras</h2>
+</div>
+
+<div class="card-form">
+  <form method="POST" action="" enctype="multipart/form-data">
+    <!-- Input hidden para IA (se conserva) -->
+    <input type="hidden" id="ia_foto_filename" name="ia_foto_filename" value="">
+    <div class="row-form">
+      <!-- COLUMNA IZQUIERDA: Imagen, Favorito, y Producto a la Venta -->
+      <div class="col-left">
+        <div class="foto-container">
+          <div class="foto-placeholder" id="fotoPlaceholder">
+            <button type="button" class="no-image-icon" id="btnCargarFoto">&#8942;</button>
+            <div class="foto-dropdown" id="fotoDropdown">
+              <button type="button" class="dropdown-item btn btn-secondary" id="dropdownCargarFoto">
+                Cargar imagen
+              </button>
+              <button type="button" class="dropdown-item btn btn-secondary" id="dropdownGenerarIA">
+                Generar con IA
+              </button>
+            </div>
+          </div>
+          <input type="file" id="fotoInput" name="foto" style="display:none;" accept="image/*">
+        </div>
+        <div class="extra-checks">
+          <div id="favoritoContainer" style="display: inline-flex; align-items: center; gap: 0.5rem;">
+            <span id="heartIcon" class="heart-icon">&#9825;</span>
+            <span>Marcar como Favorito</span>
+            <input type="hidden" name="es_favorito" id="es_favorito" value="0">
+          </div>
+          <div id="ventaContainer" style="display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem;">
+            <img id="ventaIcon" src="{{ url_for('static', filename='img/1.png') }}" class="venta-icon">
+            <span>Producto a la Venta</span>
+            <input type="hidden" name="esta_a_la_venta" id="esta_a_la_venta" value="1">
+          </div>
+        </div>
+      </div>
+
+      <!-- COLUMNA DERECHA -->
+      <div class="col-right">
+        <!-- CÓDIGO DE BARRAS -->
+        <div class="form-group" style="border:1px solid #ddd; padding:1rem; border-radius:6px;">
+          <label for="codigo_barras_externo" class="fw-bold">Ingresar Código de Barras</label>
+          <div class="d-flex align-items-center" style="gap:0.5rem;">
+            <input type="text" class="form-control" id="codigo_barras_externo" name="codigo_barras_externo" style="flex:1;">
+            <!-- Ícono de escaneo (3.png) -->
+            <img id="scanIcon" src="{{ url_for('static', filename='img/3.png') }}" alt="Escanear" style="cursor:pointer; width:24px; height:24px;">
+            <!-- Ícono de cámara (4.png) -->
+            <img id="cameraIcon" src="{{ url_for('static', filename='img/4.png') }}" alt="Escanear con Cámara" style="cursor:pointer; width:24px; height:24px; margin-left:5px;" onclick="iniciarEscaneoQuagga()">
+          </div>
+        </div>
+
+        <!-- NOMBRE DEL PRODUCTO -->
+        <div class="form-group" style="margin-top:1rem;">
+          <label for="nombre" class="fw-bold">Nombre del Producto</label>
+          <input type="text" class="form-control" id="nombre" name="nombre">
+        </div>
+
+        <!-- STOCK Y UNIDADES -->
+        <div class="d-flex gap-3" style="align-items: flex-end; margin-top:1rem;">
+          <div class="form-group" style="flex:1;">
+            <label for="stock" class="fw-bold">Stock Inicial</label>
+            <input type="number" class="form-control" id="stock" name="stock" min="0">
+            <small class="small-hint">Cantidad inicial de producto.</small>
+          </div>
+          <div class="form-group" style="min-width:140px;">
+            <label for="unidadMedida" class="fw-bold">Unidades</label>
+            <select class="form-select" id="unidadMedida" name="unidadMedida">
+              <option value="piezas" selected>Piezas</option>
+              <option value="kilos">Kilos</option>
+              <option value="litros">Litros</option>
+              <option value="gramos">Gramos</option>
+              <option value="metros">Metros</option>
+            </select>
+            <small class="small-hint">Tipo de unidad para el stock inicial.</small>
+          </div>
+        </div>
+
+        <!-- CAJA GRIS PARA COSTO Y PRECIO DE VENTA -->
+        <div class="highlight-box">
+          <h5>Costo y Precio de Venta</h5>
+          <!-- COSTO -->
+          <div class="form-group">
+            <label class="fw-bold" id="costoLabel">Costo (por <span id="costoLabelUnit">pieza</span>)</label>
+            <input type="text" step="0.01" class="form-control" id="costo" name="costo" required oninput="formatCommasRealtime(this)">
+            <small class="small-hint">Precio que pagas al proveedor, por unidad.</small>
+          </div>
+          <!-- PRECIO DE VENTA -->
+          <div class="form-group" style="margin-top:1rem;">
+            <label class="fw-bold" id="precioLabel">Precio de Venta (por <span id="precioLabelUnit">pieza</span>)</label>
+            <input type="text" step="0.01" class="form-control" id="precio_venta" name="precio_venta" required oninput="formatCommasRealtime(this)">
+            <small class="small-hint">Precio al que vendes cada unidad.</small>
+          </div>
+        </div>
+
+        <!-- MARCA -->
+        <div class="form-group">
+          <label for="marca" class="fw-bold">Marca</label>
+          <input type="text" class="form-control" id="marca" name="marca">
+        </div>
+
+        <!-- CATEGORÍA: SÓLO OPCIÓN EXISTENTE (sin opción vacía) -->
+        <div class="form-group">
+          <label class="fw-bold" id="categoryLabel">Categoría</label>
+          <select class="form-select" name="categoria_existente" id="categoria_existente">
+            {% for cat in categories %}
+              <option value="{{ cat.nombre }}" data-custom-properties='{"color": "{{ cat.color }}"}'>{{ cat.nombre }}</option>
+            {% endfor %}
+          </select>
+          <small class="small-hint">Verás un círculo con el color de la categoría seleccionada.</small>
+        </div>
+
+        <!-- TOGGLE FECHA DE CADUCIDAD -->
+        <div class="form-check form-switch" style="margin-top:1rem;">
+          <input class="form-check-input" type="checkbox" id="toggleCaducidad" name="toggleCaducidad">
+          <label class="form-check-label" for="toggleCaducidad" style="text-transform:none; font-weight:normal;">¿Tiene fecha de caducidad?</label>
+        </div>
+        <!-- OPCIONES DE CADUCIDAD (máximo 2 filas, sin círculo azul) -->
+        <div id="caducidadOpcionesContainer" style="display:none; margin-top:0.5rem;">
+          <p class="text-muted" style="margin-bottom:0.5rem;">Selecciona un lapso de tiempo en el que tu producto caduca:</p>
+          <div class="caducidad-options" style="display: flex; flex-wrap: wrap;">
+            <div class="form-check" data-id="1 día">
+              <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad1dia" value="1 día">
+              <label class="form-check-label" for="cad1dia">1 día</label>
+            </div>
+            <div class="form-check" data-id="3 días">
+              <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad3dias" value="3 días">
+              <label class="form-check-label" for="cad3dias">3 días</label>
+            </div>
+            <div class="form-check" data-id="1 semana">
+              <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad1sem" value="1 semana">
+              <label class="form-check-label" for="cad1sem">1 semana</label>
+            </div>
+            <div class="form-check" data-id="2 semanas">
+              <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad2sem" value="2 semanas">
+              <label class="form-check-label" for="cad2sem">2 semanas</label>
+            </div>
+            <div class="form-check" data-id="1 mes">
+              <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad1mes" value="1 mes">
+              <label class="form-check-label" for="cad1mes">1 mes</label>
+            </div>
+            <div class="form-check" data-id="3 meses">
+              <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad3meses" value="3 meses">
+              <label class="form-check-label" for="cad3meses">3 meses</label>
+            </div>
+            <div class="form-check" data-id="6 meses">
+              <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad6meses" value="6 meses">
+              <label class="form-check-label" for="cad6meses">6 meses</label>
+            </div>
+            <div class="form-check" data-id="1 año">
+              <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad1ano" value="1 año">
+              <label class="form-check-label" for="cad1ano">1 año</label>
+            </div>
+            <div class="form-check" data-id="2 años">
+              <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad2anos" value="2 años">
+              <label class="form-check-label" for="cad2anos">2 años</label>
+            </div>
+            <div class="form-check" data-id="más de 3 años">
+              <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad3anos" value="más de 3 años">
+              <label class="form-check-label" for="cad3anos">más de 3 años</label>
+            </div>
+          </div>
+        </div>
+      </div> <!-- FIN col-right -->
+    </div> <!-- FIN row-form -->
+
+    <!-- BOTONES GUARDAR Y CANCELAR CON MARGEN SUPERIOR -->
+    <div class="text-end" style="margin-top:2rem; margin-bottom:0.5rem;">
+      <button type="submit" class="btn-submit" style="margin-right:0.5rem;">Guardar</button>
+      <a href="{{ url_for('ver_productos') }}" class="btn-cancel btn-cancel-principal">Cancelar</a>
+    </div>
+  </form>
+</div>
+
+<!-- CHOICES.JS y Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+
+  // Notificación centrada
+  function showCenteredNotification(msg) {
+    const notif = document.createElement("div");
+    notif.textContent = msg;
+    notif.style.position = "fixed";
+    notif.style.top = "50%";
+    notif.style.left = "50%";
+    notif.style.transform = "translate(-50%, -50%)";
+    notif.style.backgroundColor = "#ffcccc";
+    notif.style.color = "#900";
+    notif.style.padding = "20px";
+    notif.style.border = "1px solid #900";
+    notif.style.borderRadius = "4px";
+    notif.style.textAlign = "center";
+    notif.style.zIndex = 9999;
+    notif.style.fontSize = "1rem";
+    document.body.appendChild(notif);
+    setTimeout(() => { notif.remove(); }, 5000);
+  }
+
+  // Formateo en tiempo real de costo y precio
+  function formatCommasRealtime(input) {
+    let originalValue = input.value;
+    let value = originalValue.replace(/,/g, "").replace(/[^\d.]/g, "");
+    const firstDecimal = value.indexOf('.');
+    if (firstDecimal !== -1) {
+      value = value.slice(0, firstDecimal + 1) + value.slice(firstDecimal + 1).replace(/\./g, "");
+    }
+    const parts = value.split('.');
+    let integerPart = parts[0];
+    let decimalPart = parts[1] || "";
+    let formattedInteger = integerPart.length ? parseInt(integerPart, 10).toLocaleString("en-US") : "";
+    input.value = formattedInteger + (decimalPart ? "." + decimalPart : "");
+    input.setSelectionRange(input.value.length, input.value.length);
+  }
+
+  // Actualizar labels de unidad
+  const unidadMedida = document.getElementById("unidadMedida");
+  const costoLabelUnit = document.getElementById("costoLabelUnit");
+  const precioLabelUnit = document.getElementById("precioLabelUnit");
+  const singularMap = {
+    "piezas": "pieza",
+    "kilos": "kilo",
+    "litros": "litro",
+    "gramos": "gramo",
+    "metros": "metro"
+  };
+  function updateLabelsByUnit() {
+    if (!unidadMedida) return;
+    const sel = unidadMedida.value;
+    const singular = singularMap[sel] || sel;
+    if(costoLabelUnit) costoLabelUnit.textContent = singular;
+    if(precioLabelUnit) precioLabelUnit.textContent = singular;
+  }
+  if(unidadMedida){
+    unidadMedida.addEventListener("change", updateLabelsByUnit);
+    updateLabelsByUnit();
+  }
+
+  // Opciones de caducidad sin anillo azul
+  const toggleCad = document.getElementById("toggleCaducidad");
+  const cadContainer = document.getElementById("caducidadOpcionesContainer");
+  const cadChecks = document.querySelectorAll(".caducidad-options .form-check");
+  if (toggleCad && cadContainer) {
+    toggleCad.addEventListener("change", () => {
+      cadContainer.style.display = toggleCad.checked ? "block" : "none";
+    });
+  }
+  cadChecks.forEach(check => {
+    const radio = check.querySelector("input[type='radio']");
+    if(radio){
+      radio.addEventListener("change", ()=>{
+        cadChecks.forEach(fc => fc.classList.remove("selected"));
+        check.classList.add("selected");
+      });
+    }
+  });
+
+  // Configuración de Choices.js para Categoría (sin opción vacía)
+  const categorySelect = document.getElementById("categoria_existente");
+  if(categorySelect){
+    new Choices(categorySelect, {
+      searchEnabled: false,
+      placeholder: false,
+      shouldSort: false,
+      callbackOnCreateTemplates: function(template) {
+        return {
+          item: (classNames, data) => {
+            let color = "#000";
+            if(data.customProperties && data.customProperties.color){
+              color = data.customProperties.color;
+            }
+            return template(`
+              <div class="${classNames.item} ${classNames.itemSelectable}"
+                   data-item data-id="${data.id}" data-value="${data.value}"
+                   ${data.active ? 'aria-selected="true"' : ''} ${data.disabled ? 'aria-disabled="true"' : ''}>
+                <span style="display:inline-block; width:12px; height:12px; background-color:${color}; border-radius:50%; margin-right:6px;"></span>
+                ${data.label}
+              </div>
+            `);
+          },
+          choice: (classNames, data) => {
+            let color = "#000";
+            if(data.customProperties && data.customProperties.color){
+              color = data.customProperties.color;
+            }
+            return template(`
+              <div class="${classNames.item} ${classNames.itemChoice}"
+                   data-choice data-id="${data.id}" data-value="${data.value}"
+                   ${data.disabled ? 'data-choice-disabled aria-disabled="true"' : 'data-choice-selectable'}>
+                <span style="display:inline-block; width:12px; height:12px; background-color:${color}; border-radius:50%; margin-right:6px;"></span>
+                ${data.label}
+              </div>
+            `);
+          }
+        };
+      }
+    });
+  }
+
+  // Integración con Quagga para escaneo con cámara (4.png)
+  function iniciarEscaneoQuagga() {
+    const modal = document.getElementById("modalEscaneoCamara");
+    if (!modal) return;
+    modal.style.display = "block";
+    const videoContainer = document.getElementById("videoContainer");
+    if (!videoContainer) return;
+    Quagga.init({
+      inputStream: {
+        type: "LiveStream",
+        target: videoContainer,
+        constraints: { facingMode: "environment" }
+      },
+      decoder: { readers: ["code_128_reader", "ean_reader", "upc_reader", "code_39_reader"] }
+    }, function (err) {
+      if (err) {
+        console.error("Error Quagga init:", err);
+        cerrarModalEscaner();
+        return;
+      }
+      Quagga.start();
+    });
+    Quagga.onDetected(function (result) {
+      if (!result || !result.codeResult) return;
+      const codigoDetectado = result.codeResult.code;
+      const inputExterno = document.getElementById("codigo_barras_externo");
+      if (inputExterno) inputExterno.value = codigoDetectado;
+      Quagga.stop();
+      cerrarModalEscaner();
+    });
+  }
+  function cerrarModalEscaner() {
+    if (Quagga) Quagga.stop();
+    const modal = document.getElementById("modalEscaneoCamara");
+    if (modal) modal.style.display = "none";
+  }
+  
+  // Escáner físico (3.png) con initBarcodeScanner
+  if (document.getElementById("scanIcon")) {
+    initBarcodeScanner("#scanIcon", "#codigo_barras_externo", {
+      threshold: 150,
+      timeoutDuration: 1000
+    });
+  }
+});
+</script>
+
+<!-- MODAL QUAGGA -->
+<div id="modalEscaneoCamara" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0,0,0,0.8); z-index:9999;">
+  <button type="button" style="position:absolute; top:20px; right:20px; font-size:24px; background-color:#fff; border:none; border-radius:50%; width:40px; height:40px; cursor:pointer;" onclick="cerrarModalEscaner()">X</button>
+  <h2 style="color:#fff; text-align:center; margin-top:20px;">Escaneo con Cámara</h2>
+  <p style="color:#fff; text-align:center; max-width:600px; margin:10px auto;">
+    IMPORTANTE: Asegúrate de contar con buena iluminación y evita sombras. Verifica que el código se lea correctamente; la cámara es menos precisa que el lector físico.
+  </p>
+  <div id="videoContainer" style="position:relative; margin:20px auto; width:80%; max-width:600px; background-color:#000;"></div>
+  <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); border:2px dashed #00ff00; width:80%; max-width:300px; height:200px; pointer-events:none;"></div>
+</div>
+
+<!-- BOTONES GUARDAR Y CANCELAR CON MARGEN SUPERIOR (2rem) -->
+<div class="text-end" style="margin-top:2rem; margin-bottom:0.5rem;">
+  <button type="submit" class="btn-submit" style="margin-right:0.5rem;">Guardar</button>
+  <a href="{{ url_for('ver_productos') }}" class="btn-cancel btn-cancel-principal">Cancelar</a>
+</div>
+{% endblock %}

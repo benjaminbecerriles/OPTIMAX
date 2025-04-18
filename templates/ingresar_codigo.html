@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  Ingresar Código de Membresía
+{% endblock %}
+
+{% block content %}
+  <h1>Ingresar Código de Membresía</h1>
+  <form method="POST" action="{{ url_for('ingresar_codigo') }}">
+    <div class="mb-3">
+      <label for="codigo" class="form-label">Código de Membresía:</label>
+      <input type="text" class="form-control" id="codigo" name="codigo" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Asignar Código</button>
+  </form>
+
+  <p class="mt-3">
+    <a href="{{ url_for('index') }}" class="btn btn-secondary">Volver al inicio</a>
+  </p>
+{% endblock %}

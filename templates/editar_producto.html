@@ -1,0 +1,515 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  Editar Producto
+{% endblock %}
+
+{% block content %}
+<h1>Editar Producto</h1>
+
+<form method="POST" action="">
+  <!-- 1. Nombre -->
+  <div class="mb-3">
+    <label for="nombre" class="form-label fw-bold">Nombre <span style="color:red;">*</span></label>
+    <input
+      type="text"
+      class="form-control"
+      id="nombre"
+      name="nombre"
+      value="{{ producto.nombre }}"
+      required
+    >
+    <small class="text-muted">Nombre comercial o descriptivo.</small>
+  </div>
+
+  <!-- 2. ¿Viene en Lotes? -->
+  <div class="form-check form-switch mb-3">
+    <input
+      class="form-check-input"
+      type="checkbox"
+      id="vieneEnLotes"
+      name="vieneEnLotes"
+      {% if producto.viene_en_lotes %}checked{% endif %}
+    >
+    <label class="form-check-label fw-bold" for="vieneEnLotes">
+      ¿Este producto viene en lotes?
+    </label>
+    <small class="text-muted d-block">
+      Activa si este producto se maneja con múltiples lotes.
+    </small>
+  </div>
+
+  <!-- BLOQUE LOTES (si “vieneEnLotes” = true) -->
+  <div id="bloqueLotes" style="display:none; border:1px solid #ddd; padding:10px; margin-bottom:1rem;">
+    <div class="row g-3 align-items-end mb-3">
+      <div class="col-md-4">
+        <label for="numLotes" class="form-label fw-bold">
+          Número de Lotes <span style="color:red;">*</span>
+        </label>
+        <input
+          type="number"
+          class="form-control"
+          id="numLotes"
+          name="numLotes"
+          min="1"
+          value="{{ producto.num_lotes or 1 }}"
+        >
+      </div>
+      <div class="col-md-8">
+        <div class="form-check form-switch">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            id="mismoStockParaTodos"
+            name="mismoStockParaTodos"
+            {% if producto.mismo_stock_lotes %}checked{% endif %}
+          >
+          <label class="form-check-label fw-bold" for="mismoStockParaTodos">
+            ¿Todos los lotes traen la misma cantidad?
+          </label>
+          <small class="text-muted d-block">
+            Si activas, hay un solo “stock por lote.”  
+            Si no, cada lote tendrá su propio stock y unidad.
+          </small>
+        </div>
+      </div>
+    </div>
+
+    <!-- OPCIÓN A: Stock/Unidad Único -->
+    <div id="stockUnico" style="display:none;">
+      <div class="row g-3 align-items-end">
+        <div class="col-md-4">
+          <label for="stockPorLote" class="form-label fw-bold">
+            Stock Inicial (por Lote)
+          </label>
+          <input
+            type="number"
+            class="form-control"
+            id="stockPorLote"
+            name="stockPorLote"
+            min="0"
+            value="{{ producto.stock_por_lote or 0 }}"
+          >
+        </div>
+        <div class="col-md-4">
+          <label for="unidadMedidaLote" class="form-label fw-bold">Unidades</label>
+          <select
+            class="form-select"
+            id="unidadMedidaLote"
+            name="unidadMedidaLote"
+          >
+            <option value="piezas" {% if producto.unidad_lote == 'piezas' %}selected{% endif %}>Piezas</option>
+            <option value="kilos" {% if producto.unidad_lote == 'kilos' %}selected{% endif %}>Kilos</option>
+            <!-- etc. -->
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- OPCIÓN B: Distinto stock por lote -->
+    <div id="stockPorCadaLote" style="display:none;">
+      <p class="fw-bold mb-2">Editar cada lote:</p>
+      <div id="contenedorLotes">
+        <!-- Si deseas mostrar la info de lotes existentes, 
+             haz algo como:
+             {% for lote in producto.lotes %}
+               <p>Lote #{{ loop.index }} => Stock: {{ lote.stock }} / Unidad: {{ lote.unidad }}</p>
+             {% endfor %}
+        -->
+      </div>
+    </div>
+  </div>
+
+  <!-- STOCK NORMAL (si “vieneEnLotes”=false) -->
+  <div id="stockNormal">
+    <div class="mb-3">
+      <label for="stock" class="form-label fw-bold">Stock</label>
+      <input 
+        type="number"
+        class="form-control"
+        id="stock"
+        name="stock"
+        value="{{ producto.stock or 0 }}"
+      >
+    </div>
+    <div class="mb-3">
+      <label for="unidadMedida" class="form-label fw-bold">Unidad</label>
+      <select
+        class="form-select"
+        id="unidadMedida"
+        name="unidadMedida"
+      >
+        <option value="piezas" {% if producto.unidad == 'piezas' %}selected{% endif %}>Piezas</option>
+        <option value="kilos" {% if producto.unidad == 'kilos' %}selected{% endif %}>Kilos</option>
+        <!-- etc. -->
+      </select>
+    </div>
+  </div>
+
+  <!-- COSTO y PRECIO (por X) -->
+  <div class="mb-3">
+    <label class="form-label fw-bold" id="costoLabel">
+      Costo (por <span id="costoLabelUnit">pieza</span>)
+    </label>
+    <input
+      type="number"
+      step="0.01"
+      class="form-control"
+      id="costo"
+      name="costo"
+      value="{{ producto.costo or 0.0 }}"
+    >
+  </div>
+  <div class="mb-3">
+    <label class="form-label fw-bold" id="precioLabel">
+      Precio de Venta (por <span id="precioLabelUnit">pieza</span>)
+    </label>
+    <input
+      type="number"
+      step="0.01"
+      class="form-control"
+      id="precio_venta"
+      name="precio_venta"
+      value="{{ producto.precio_venta or 0.0 }}"
+    >
+  </div>
+
+  <!-- Categoría -->
+  <div class="mb-3">
+    <label for="categoria" class="form-label fw-bold">Categoría (opcional)</label>
+    <input
+      type="text"
+      class="form-control"
+      id="categoria"
+      name="categoria"
+      value="{{ producto.categoria or '' }}"
+    >
+  </div>
+
+  <!-- ¿Código de Barras? -->
+  <div class="form-check form-switch mb-3">
+    <input
+      class="form-check-input"
+      type="checkbox"
+      id="usaCodigoBarras"
+      name="usaCodigoBarras"
+      {% if producto.usa_codigo_barras %}checked{% endif %}
+    >
+    <label class="form-check-label fw-bold" for="usaCodigoBarras">
+      ¿Este producto maneja código de barras?
+    </label>
+  </div>
+
+  <!-- Opciones CB -->
+  <div id="opcionesCodigo" style="display:none;">
+    <!-- Campo externo -->
+    <div class="mb-3" id="campoCodigoExterno">
+      <label for="codigo_barras_externo" class="form-label fw-bold">
+        Código de Barras (externo)
+      </label>
+      <input
+        type="text"
+        class="form-control"
+        id="codigo_barras_externo"
+        name="codigo_barras_externo"
+        value="{{ producto.codigo_barras_externo or '' }}"
+      >
+    </div>
+
+    <div class="form-check form-switch mb-3">
+      <input
+        class="form-check-input"
+        type="checkbox"
+        id="crearInterno"
+        name="crearInterno"
+        {% if producto.codigo_interno %}checked{% endif %}
+      >
+      <label class="form-check-label fw-bold" for="crearInterno">
+        ¿Crear/usar un código de barras interno?
+      </label>
+    </div>
+
+    <div id="bloqueGenerar" style="display:none;">
+      <button type="button" class="btn btn-outline-secondary" id="btnGenerarCodigo">
+        Generar Código Interno
+      </button>
+      <div class="mt-2">
+        <label for="codigo_interno" class="form-label fw-bold">
+          Código Interno Generado:
+        </label>
+        <input
+          type="text"
+          class="form-control"
+          id="codigo_interno"
+          name="codigo_interno"
+          readonly
+          value="{{ producto.codigo_interno or '' }}"
+        >
+      </div>
+    </div>
+  </div>
+
+  <!-- Config Avanzada -->
+  <div class="mt-3">
+    <button type="button" class="btn btn-light" id="toggleAvanzado">
+      Mostrar Configuración Avanzada
+    </button>
+  </div>
+  <div id="configAvanzada" style="display:none; border:1px solid #ddd; padding:10px;">
+    <h5 class="mb-3">Configuración Avanzada</h5>
+
+    <!-- Proveedor -->
+    <div class="mb-3">
+      <label for="proveedor" class="form-label fw-bold">
+        Proveedor (opcional)
+      </label>
+      <input
+        type="text"
+        class="form-control"
+        id="proveedor"
+        name="proveedor"
+        value="{{ producto.proveedor or '' }}"
+      >
+    </div>
+
+    <!-- Ubicación -->
+    <div class="mb-3">
+      <label for="ubicacion" class="form-label fw-bold">
+        Ubicación (opcional)
+      </label>
+      <input
+        type="text"
+        class="form-control"
+        id="ubicacion"
+        name="ubicacion"
+        value="{{ producto.ubicacion or '' }}"
+      >
+    </div>
+
+    <!-- Fecha de Caducidad -->
+    <div class="mb-3">
+      <label for="fecha_caducidad" class="form-label fw-bold">
+        Fecha de Caducidad (opcional)
+      </label>
+      <input
+        type="date"
+        class="form-control"
+        id="fecha_caducidad"
+        name="fecha_caducidad"
+        value="{{ producto.fecha_caducidad|format_date('YYYY-MM-DD') if producto.fecha_caducidad else '' }}"
+      >
+    </div>
+
+    <!-- Impuesto -->
+    <div class="mb-3">
+      <label for="tasa_impuesto" class="form-label fw-bold">
+        Tasa de Impuesto (opcional)
+      </label>
+      <input
+        type="number"
+        step="0.01"
+        class="form-control"
+        id="tasa_impuesto"
+        name="tasa_impuesto"
+        value="{{ producto.tasa_impuesto or 0.0 }}"
+      >
+    </div>
+
+    <!-- Descuento -->
+    <div class="mb-3">
+      <label for="descuento" class="form-label fw-bold">
+        Descuento Promocional % (opcional)
+      </label>
+      <input
+        type="number"
+        step="0.01"
+        class="form-control"
+        id="descuento"
+        name="descuento"
+        value="{{ producto.descuento or 0.0 }}"
+      >
+    </div>
+  </div>
+
+  <!-- Botón final (aprobar vs. guardar) -->
+  {% if not producto.is_approved %}
+    <button type="submit" class="btn btn-success">Aprobar</button>
+  {% else %}
+    <button type="submit" class="btn btn-primary">Guardar</button>
+  {% endif %}
+</form>
+
+<p class="mt-3">
+  <a href="{{ url_for('ver_productos') }}" class="btn btn-link">
+    Volver a Productos
+  </a>
+</p>
+
+<!-- Scripts similares a “agregar_producto.html” -->
+<script>
+/** 1) Manejo de singular/plural */
+const unidadMedida = document.getElementById("unidadMedida");
+const costoLabelUnit = document.getElementById("costoLabelUnit");
+const precioLabelUnit = document.getElementById("precioLabelUnit");
+if (unidadMedida) {
+  const singularMap = {
+    "piezas": "pieza",
+    "kilos": "kilo",
+    "litros": "litro",
+    "gramos": "gramo",
+    "metros": "metro"
+  };
+
+  function updateUnidad() {
+    const selected = unidadMedida.value;
+    const singular = singularMap[selected] || selected;
+    if (costoLabelUnit) costoLabelUnit.textContent = singular;
+    if (precioLabelUnit) precioLabelUnit.textContent = singular;
+  }
+  unidadMedida.addEventListener("change", updateUnidad);
+  updateUnidad();
+}
+
+/** 2) Lógica “¿Viene en Lotes?” */
+const vieneEnLotes = document.getElementById("vieneEnLotes");
+const bloqueLotes = document.getElementById("bloqueLotes");
+const numLotes = document.getElementById("numLotes");
+const mismoStockParaTodos = document.getElementById("mismoStockParaTodos");
+const stockUnico = document.getElementById("stockUnico");
+const stockPorCadaLote = document.getElementById("stockPorCadaLote");
+const contenedorLotes = document.getElementById("contenedorLotes");
+const stockNormal = document.getElementById("stockNormal");
+
+function toggleLotes() {
+  if (!vieneEnLotes) return;
+  if (vieneEnLotes.checked) {
+    stockNormal.style.display = "none";
+    bloqueLotes.style.display = "block";
+  } else {
+    stockNormal.style.display = "block";
+    bloqueLotes.style.display = "none";
+    numLotes.value = 1;
+    mismoStockParaTodos.checked = false;
+  }
+  toggleMismoStock();
+}
+
+function toggleMismoStock() {
+  if (!vieneEnLotes || !vieneEnLotes.checked) {
+    if (stockUnico) stockUnico.style.display = "none";
+    if (stockPorCadaLote) stockPorCadaLote.style.display = "none";
+    return;
+  }
+  if (mismoStockParaTodos.checked) {
+    stockUnico.style.display = "block";
+    stockPorCadaLote.style.display = "none";
+  } else {
+    stockUnico.style.display = "none";
+    stockPorCadaLote.style.display = "block";
+    generarCamposLotes();
+  }
+}
+
+function generarCamposLotes() {
+  if (!contenedorLotes) return;
+  const lotes = parseInt(numLotes.value) || 1;
+  contenedorLotes.innerHTML = "";
+  
+  // Campos vacíos si deseas permitir edición lote por lote
+  for (let i = 1; i <= lotes; i++) {
+    const div = document.createElement("div");
+    div.classList.add("mb-3");
+    div.innerHTML = `
+      <label class="form-label fw-bold">
+        Stock Inicial Lote #${i}
+      </label>
+      <div class="row g-2">
+        <div class="col-6">
+          <input type="number" min="0" value="0" class="form-control"
+            name="stock_lote_${i}" id="stock_lote_${i}">
+        </div>
+        <div class="col-6">
+          <select class="form-select" name="unidad_lote_${i}" id="unidad_lote_${i}">
+            <option value="piezas">Piezas</option>
+            <option value="kilos">Kilos</option>
+            <option value="litros">Litros</option>
+            <option value="gramos">Gramos</option>
+            <option value="metros">Metros</option>
+          </select>
+        </div>
+      </div>
+    `;
+    contenedorLotes.appendChild(div);
+  }
+}
+
+// Listeners
+if (vieneEnLotes) {
+  vieneEnLotes.addEventListener("change", toggleLotes);
+  mismoStockParaTodos.addEventListener("change", toggleMismoStock);
+  numLotes.addEventListener("change", () => {
+    if (vieneEnLotes.checked && !mismoStockParaTodos.checked) {
+      generarCamposLotes();
+    }
+  });
+  toggleLotes();
+}
+
+/** 3) Manejo de “¿Maneja código de barras?” */
+const usaCB = document.getElementById("usaCodigoBarras");
+const opcionesCB = document.getElementById("opcionesCodigo");
+const crearInt = document.getElementById("crearInterno");
+const bloqueGenerar = document.getElementById("bloqueGenerar");
+const btnGenerar = document.getElementById("btnGenerarCodigo");
+const campoInterno = document.getElementById("codigo_interno");
+const campoExterno = document.getElementById("campoCodigoExterno");
+
+function toggleCB() {
+  if (!opcionesCB) return;
+  opcionesCB.style.display = usaCB && usaCB.checked ? "block" : "none";
+  if (usaCB && !usaCB.checked) {
+    crearInt.checked = false;
+  }
+  toggleCrearInterno();
+}
+function toggleCrearInterno() {
+  if (!crearInt || !campoExterno || !bloqueGenerar) return;
+  
+  campoExterno.style.display = crearInt.checked ? "none" : "block";
+  bloqueGenerar.style.display = (crearInt.checked && usaCB.checked) ? "block" : "none";
+}
+function generarCodigoInterno() {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let randomCode = "";
+  for (let i = 0; i < 8; i++) {
+    randomCode += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  if (campoInterno) {
+    campoInterno.value = "INT-" + randomCode;
+  }
+}
+
+// Listeners
+if (usaCB) {
+  usaCB.addEventListener("change", toggleCB);
+  if (crearInt) crearInt.addEventListener("change", toggleCrearInterno);
+  if (btnGenerar) btnGenerar.addEventListener("click", generarCodigoInterno);
+  toggleCB();
+}
+
+/** 4) Config Avanzada (proveedor, ubicación, etc.) */
+const toggleAvanzado = document.getElementById("toggleAvanzado");
+const configAvanzada = document.getElementById("configAvanzada");
+let avanzadoVisible = false;
+
+if (toggleAvanzado && configAvanzada) {
+  toggleAvanzado.addEventListener("click", () => {
+    avanzadoVisible = !avanzadoVisible;
+    configAvanzada.style.display = avanzadoVisible ? "block" : "none";
+    toggleAvanzado.textContent = avanzadoVisible
+      ? "Ocultar Configuración Avanzada"
+      : "Mostrar Configuración Avanzada";
+  });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  Códigos Disponibles
+{% endblock %}
+
+{% block content %}
+  <h1>Códigos Disponibles</h1>
+
+  <p>
+    <!-- Enlaces (usando url_for en lugar de rutas absolutas) -->
+    <a href="{{ url_for('admin_panel') }}" class="btn btn-secondary">Volver al Panel Admin</a>
+    <a href="{{ url_for('generar_disponible') }}" class="btn btn-primary">Generar Nuevo Código</a>
+  </p>
+  
+  <!-- Tabla principal -->
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Código</th>
+        <th>Activo?</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in codigos %}
+      <tr>
+        <td>{{ c.id }}</td>
+        <td>{{ c.codigo }}</td>
+        <td>{{ 'Sí' if c.esta_activo else 'No' }}</td>
+        <td>
+          <a href="{{ url_for('eliminar_disponible', cod_id=c.id) }}" 
+             class="btn btn-sm btn-outline-danger">
+            Eliminar
+          </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  Panel Admin
+{% endblock %}
+
+{% block content %}
+  <h1>Panel de Administración</h1>
+
+  <p class="mt-3">
+    <!-- Usa 'url_for' para enlazar con tus rutas definidas en app.py -->
+    <a href="{{ url_for('admin_empresas') }}" class="btn btn-primary">Ver Empresas</a>
+    <a href="{{ url_for('admin_disponibles') }}" class="btn btn-primary">Códigos Disponibles</a>
+    <a href="{{ url_for('admin_asignados') }}" class="btn btn-primary">Códigos Asignados</a>
+    <a href="{{ url_for('index') }}" class="btn btn-secondary">Inicio</a>
+  </p>
+
+{% endblock %}
