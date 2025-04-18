@@ -441,6 +441,10 @@ def agregar_producto():
         print("DEBUG: precio_str =>", precio_str)
         print("DEBUG: marca =>", marca)
 
+        # Obtener ia_foto_filename para debugging
+        ia_foto_filename = request.form.get("ia_foto_filename", "").strip()
+        print("DEBUG: ia_foto_filename =>", ia_foto_filename)
+
         # Categoría
         cat_option = request.form.get('categoria_option', 'existente')
         if cat_option == 'existente':
@@ -492,7 +496,7 @@ def agregar_producto():
         print("DEBUG: precio_val =>", precio_val)
 
         # =======================================
-        # 3) Procesar foto - CÓDIGO MEJORADO
+        # 3) Procesar foto - CÓDIGO MEJORADO Y CORREGIDO
         # =======================================
         foto_final = None
         
@@ -519,43 +523,52 @@ def agregar_producto():
             else:
                 print("DEBUG: allowed_file => False (formato no permitido)")
         else:
-            print("DEBUG: No se subió archivo en 'foto', revisando ia_foto_filename")
+            print("DEBUG: No se subió archivo en 'foto'")
             
-        # B. Si no hay archivo subido, revisamos ia_foto_filename
+        # B. Si no hay archivo subido, revisamos displayed_image_url
         if not foto_final:
             displayed_url = request.form.get("displayed_image_url", "").strip()
             print("DEBUG: displayed_image_url =>", displayed_url)
             
             if displayed_url:
-                print("==== DATOS DE LA IMAGEN ====")
-                print(f"Valor de displayed_image_url: '{displayed_url}'")
-                print(f"Tipo de displayed_image_url: {type(displayed_url)}")
-                print(f"¿URL externa? {displayed_url.startswith(('http://', 'https://'))}")
-                print(f"¿URL local? {displayed_url.startswith('/static/uploads/')}")
-    
-        
-        # C. NUEVO: Verificar displayed_image_url si no tenemos imagen aún
-        if not foto_final:
-            displayed_url = request.form.get("displayed_image_url", "").strip()
-            print("DEBUG: displayed_image_url =>", displayed_url)
-            
-            if displayed_url:
-                print("DEBUG: Procesando displayed_image_url =>", displayed_url)
+                # CORRECCIÓN: Manejar correctamente tanto URLs como solo nombres de archivo
                 
-                # Caso 1: Es una imagen local (ya guardada en el servidor)
+                # Caso 1: Es una URL local completa
                 if displayed_url.startswith("/static/uploads/"):
                     img_filename = displayed_url.split("/uploads/")[1]
-                    old_path = os.path.join(app.config['UPLOAD_FOLDER'], img_filename)
-                    print("DEBUG: old_path (local) =>", old_path)
-                    
-                    if os.path.exists(old_path):
-                        # La imagen ya existe en el servidor, la usamos directamente
+                    filepath = os.path.join(app.config['UPLOAD_FOLDER'], img_filename)
+                    if os.path.exists(filepath):
                         foto_final = img_filename
-                        print("DEBUG: imagen local existente =>", foto_final)
+                        print(f"DEBUG: Usando imagen de ruta completa => {img_filename}")
                     else:
-                        print("DEBUG: imagen local NO existe en el servidor")
+                        print(f"DEBUG: La imagen en ruta completa no existe => {filepath}")
                 
-                # Caso 2: Es una URL externa (http/https)
+                # Caso 2: Es solo un nombre de archivo (lo que está ocurriendo en este caso)
+                elif "/" not in displayed_url:
+                    filepath = os.path.join(app.config['UPLOAD_FOLDER'], displayed_url)
+                    if os.path.exists(filepath):
+                        foto_final = displayed_url
+                        print(f"DEBUG: Usando displayed_image_url como nombre de archivo => {displayed_url}")
+                    else:
+                        print(f"DEBUG: El archivo no existe en uploads => {filepath}")
+                        
+                        # Intentar usar ia_foto_filename como respaldo
+                        if ia_foto_filename:
+                            ia_filepath = os.path.join(app.config['UPLOAD_FOLDER'], ia_foto_filename)
+                            if os.path.exists(ia_filepath):
+                                foto_final = ia_foto_filename
+                                print(f"DEBUG: Usando ia_foto_filename como respaldo => {ia_foto_filename}")
+                            else:
+                                print(f"DEBUG: El archivo IA no existe en uploads => {ia_filepath}")
+                                
+                                # Último intento: buscar una imagen usando SerpAPI
+                                if nombre and codigo_barras_externo:
+                                    search_filename = buscar_imagen_google_images(nombre, codigo_barras_externo)
+                                    if search_filename:
+                                        foto_final = search_filename
+                                        print(f"DEBUG: Imagen generada por SerpAPI => {search_filename}")
+                
+                # Caso 3: Es una URL externa (http/https)
                 elif displayed_url.startswith(("http://", "https://")):
                     try:
                         print("DEBUG: Descargando imagen de URL externa =>", displayed_url)
@@ -569,10 +582,10 @@ def agregar_producto():
                             
                             # Genera nombre único
                             unique_name = f"{uuid.uuid4().hex}.{ext}"
-                            save_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_name)
+                            filepath = os.path.join(app.config['UPLOAD_FOLDER'], unique_name)
                             
                             # Guardar la imagen
-                            with open(save_path, 'wb') as f:
+                            with open(filepath, 'wb') as f:
                                 for chunk in response.iter_content(1024):
                                     f.write(chunk)
                             
@@ -755,7 +768,8 @@ def api_buscar_imagen():
     image_url = url_for('static', filename=f'uploads/{imagen_filename}', _external=False)
     return jsonify({
         "status": "success",
-        "image_url": image_url
+        "image_url": image_url,
+        "filename": imagen_filename
     })
 
 ##############################################

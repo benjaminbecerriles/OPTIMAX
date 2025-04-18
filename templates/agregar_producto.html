@@ -422,61 +422,61 @@
 </style>
 
 <div class="card-form">
-  <div class="row-form">
-    <!-- Col Izquierda: Foto + Checks -->
-    <div class="col-left">
-      <div class="foto-container">
-        <div class="foto-placeholder" id="fotoPlaceholder">
-          <button type="button" class="no-image-icon" id="btnCargarFoto">&#8942;</button>
-          <div class="foto-dropdown" id="fotoDropdown" style="display:none;">
-            <button type="button" class="dropdown-item btn btn-secondary" id="dropdownCargarFoto">Cargar imagen</button>
-            <button type="button" class="dropdown-item btn btn-secondary" id="dropdownGenerarIA">Generar con IA</button>
+  <!-- AQUÍ ESTÁ LA CORRECCIÓN: El form ahora abarca TODO el contenido -->
+  <form method="POST" action="" enctype="multipart/form-data">
+    <div class="row-form">
+      <!-- Col Izquierda: Foto + Checks -->
+      <div class="col-left">
+        <div class="foto-container">
+          <div class="foto-placeholder" id="fotoPlaceholder">
+            <button type="button" class="no-image-icon" id="btnCargarFoto">&#8942;</button>
+            <div class="foto-dropdown" id="fotoDropdown" style="display:none;">
+              <button type="button" class="dropdown-item btn btn-secondary" id="dropdownCargarFoto">Cargar imagen</button>
+              <button type="button" class="dropdown-item btn btn-secondary" id="dropdownGenerarIA">Generar con IA</button>
+            </div>
+          </div>
+          <input type="file" id="fotoInput" name="foto" style="display:none;" accept="image/*">
+          <input type="hidden" name="ia_foto_filename" id="ia_foto_filename" value="">
+          <!-- 1) NUEVO: Hidden para capturar la URL de la imagen que se ve en pantalla -->
+          <input type="hidden" name="displayed_image_url" id="displayed_image_url" value="">
+        </div>
+
+        <div class="extra-checks" style="display: flex; flex-direction: column; gap: 0.5rem;">
+          <div id="favoritoContainer" style="display: inline-flex; align-items: center; gap: 0.5rem;">
+            <span id="heartIcon" class="heart-icon">&#9825;</span>
+            <span>Marcar como Favorito</span>
+            <input type="hidden" name="es_favorito" id="es_favorito" value="0">
+          </div>
+
+          <div id="ventaContainer" style="display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem;">
+            <img id="ventaIcon" src="{{ url_for('static', filename='img/1.png') }}" class="venta-icon">
+            <span>Producto a la Venta</span>
+            <input type="hidden" name="esta_a_la_venta" id="esta_a_la_venta" value="1">
           </div>
         </div>
-        <input type="file" id="fotoInput" name="foto" style="display:none;" accept="image/*">
-        <input type="hidden" name="ia_foto_filename" id="ia_foto_filename" value="">
-        <!-- 1) NUEVO: Hidden para capturar la URL de la imagen que se ve en pantalla -->
-        <input type="hidden" name="displayed_image_url" id="displayed_image_url" value="">
       </div>
 
-      <div class="extra-checks" style="display: flex; flex-direction: column; gap: 0.5rem;">
-        <div id="favoritoContainer" style="display: inline-flex; align-items: center; gap: 0.5rem;">
-          <span id="heartIcon" class="heart-icon">&#9825;</span>
-          <span>Marcar como Favorito</span>
-          <input type="hidden" name="es_favorito" id="es_favorito" value="0">
+      <!-- Col Derecha: Recuadro Morado + Form -->
+      <div class="col-right">
+        <div id="scanFoundContainer">
+          <div class="scanFoundRow" id="scanFoundRow"></div>
+          <div class="scanFoundButtons">
+            <button type="button" class="btn-scanYes" id="btnScanYes">Sí</button>
+            <button type="button" class="btn-scanNo" id="btnScanNo">No</button>
+          </div>
         </div>
 
-        <div id="ventaContainer" style="display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem;">
-          <img id="ventaIcon" src="{{ url_for('static', filename='img/1.png') }}" class="venta-icon">
-          <span>Producto a la Venta</span>
-          <input type="hidden" name="esta_a_la_venta" id="esta_a_la_venta" value="1">
-        </div>
-      </div>
-    </div>
+        <!-- Título en la parte superior -->
+        <h3 style="
+          font-weight: bold;
+          color: #000;
+          text-transform: uppercase;
+          margin-bottom: 1rem;
+          font-size: 1.2rem;
+        ">
+          Agregar producto con código de barras
+        </h3>
 
-    <!-- Col Derecha: Recuadro Morado + Form -->
-    <div class="col-right">
-      <div id="scanFoundContainer">
-        <div class="scanFoundRow" id="scanFoundRow"></div>
-        <div class="scanFoundButtons">
-          <button type="button" class="btn-scanYes" id="btnScanYes">Sí</button>
-          <button type="button" class="btn-scanNo" id="btnScanNo">No</button>
-        </div>
-      </div>
-
-      <!-- Título en la parte superior -->
-      <h3 style="
-        font-weight: bold;
-        color: #000;
-        text-transform: uppercase;
-        margin-bottom: 1rem;
-        font-size: 1.2rem;
-      ">
-        Agregar producto con código de barras
-      </h3>
-
-      <!-- Form Principal -->
-      <form method="POST" action="" enctype="multipart/form-data">
         <!-- IMPORTANTE: Para que el back sepa si es 'existente' (por default) -->
         <input type="hidden" name="categoria_option" value="existente">
         <!-- IMPORTANTE: Para saber si caducidad está activado o no -->
@@ -716,21 +716,18 @@
             </div>
           </div>
         </div>
+      </div>
+      <!-- FIN col-right -->
+    </div>
+    <!-- FIN row-form -->
 
-        <!-- BOTONES FINAL (Guardar = Rojo, Cancelar = Gris) -->
-        <script>
-            // Script de depuración para verificar los valores justo antes de enviar
-            document.querySelector('form').addEventListener('submit', function() {
-              console.log('Valores antes de enviar el formulario:');
-              console.log('displayed_image_url:', document.getElementById('displayed_image_url').value);
-              console.log('ia_foto_filename:', document.getElementById('ia_foto_filename').value);
-            });
-          </script>
-          
-          <div class="text-end" style="margin-top:2rem; margin-bottom:0.5rem;">
-            <button type="submit" class="btn-submit" style="margin-right:0.5rem;">Guardar</button>
-            <a href="{{ url_for('ver_productos') }}" class="btn-cancel btn-cancel-principal">Cancelar</a>
-          </div>
+    <!-- BOTONES GUARDAR / CANCELAR -->
+    <div class="text-end" style="margin-top:2rem; margin-bottom:0.5rem;">
+      <button type="submit" class="btn-submit" style="margin-right:0.5rem;">GUARDAR</button>
+      <a href="{{ url_for('ver_productos') }}" class="btn-cancel">CANCELAR</a>
+    </div>
+  </form>
+</div>
 
 <!-- SCRIPTS (Choices, etc.) -->
 <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
@@ -1083,10 +1080,7 @@
                 data-item data-id="${data.id}" data-value="${data.value}"
                 ${data.active ? 'aria-selected="true"' : ''}
                 ${data.disabled ? 'aria-disabled="true"' : ''}>
-                <span
-                  style="display:inline-block; width:12px; height:12px; background-color:${color};
-                         border-radius:50%; margin-right:8px;">
-                </span>
+                <span style="display:inline-block; width:12px; height:12px; background-color:${color}; border-radius:50%; margin-right:6px;"></span>
                 ${data.label}
               </div>
             `);
@@ -1114,10 +1108,7 @@
                 data-choice
                 ${data.disabled ? 'data-choice-disabled aria-disabled="true"' : 'data-choice-selectable'}
                 data-id="${data.id}" data-value="${data.value}">
-                <span
-                  style="display:inline-block; width:12px; height:12px; background-color:${color};
-                         border-radius:50%; margin-right:8px;">
-                </span>
+                <span style="display:inline-block; width:12px; height:12px; background-color:${color}; border-radius:50%; margin-right:6px;"></span>
                 ${data.label}
               </div>
             `);
