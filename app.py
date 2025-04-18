@@ -492,91 +492,99 @@ def agregar_producto():
         print("DEBUG: precio_val =>", precio_val)
 
         # =======================================
-        # 3) Procesar foto
+        # 3) Procesar foto - CÓDIGO MEJORADO
         # =======================================
         foto_final = None
-
+        
+        # A. Primero verificamos si hay un archivo subido
         file = request.files.get('foto')
         print("DEBUG: file =>", file)
-        if file:
+        if file and file.filename:
             print("DEBUG: file.filename =>", file.filename)
-        else:
-            print("DEBUG: No se subió nada en 'foto'")
+            if allowed_file(file.filename):
+                print("DEBUG: allowed_file => True")
+                original_name = secure_filename(file.filename)
+                print("DEBUG: secure_filename =>", original_name)
 
-        if file and allowed_file(file.filename):
-            print("DEBUG: allowed_file => True")
-            original_name = secure_filename(file.filename)
-            print("DEBUG: secure_filename =>", original_name)
+                ext = original_name.rsplit('.', 1)[1].lower()
+                unique_name = f"{uuid.uuid4().hex}.{ext}"
+                print("DEBUG: unique_name =>", unique_name)
 
-            ext = original_name.rsplit('.', 1)[1].lower()
-            unique_name = f"{uuid.uuid4().hex}.{ext}"
-            print("DEBUG: unique_name =>", unique_name)
-
-            if not os.path.exists(app.config['UPLOAD_FOLDER']):
-                os.makedirs(app.config['UPLOAD_FOLDER'])
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], unique_name)
-            file.save(filepath)
-            foto_final = unique_name
-            print("DEBUG: Se guardó foto_local =>", foto_final)
-        else:
-            print("DEBUG: allowed_file => False (o file vacío)")
-            ia_foto = request.form.get("ia_foto_filename", "").strip()
-            print("DEBUG: ia_foto_filename =>", ia_foto)
-            if ia_foto:
-                old_path = os.path.join(app.config['UPLOAD_FOLDER'], ia_foto)
-                print("DEBUG: old_path =>", old_path)
-                exists_flag = os.path.exists(old_path)
-                print("DEBUG: os.path.exists(old_path)? =>", exists_flag)
-                if exists_flag:
-                    foto_final = ia_foto
-                    print("DEBUG: se asigna foto_final =>", foto_final)
-                else:
-                    foto_final = None
-                    print("DEBUG: no existe en disco => foto_final=None")
-
-        # (NUEVO) Revisar displayed_image_url
-        displayed_url = request.form.get("displayed_image_url", "").strip()
-        print("DEBUG: displayed_image_url =>", displayed_url)
-
-        if not foto_final and displayed_url:
-            print("DEBUG: Manejo 'displayed_image_url' =>", displayed_url)
-            # Ver si es local "/static/uploads/" o remoto "http..."
-            if displayed_url.startswith("/static/uploads/"):
-                old_name = displayed_url.split("/uploads/")[-1]
-                old_path = os.path.join(app.config['UPLOAD_FOLDER'], old_name)
-                print("DEBUG: old_path =>", old_path)
-                if os.path.exists(old_path):
-                    ext_local = old_name.rsplit('.', 1)[-1].lower()
-                    new_unique_local = f"{uuid.uuid4().hex}.{ext_local}"
-                    new_path_local = os.path.join(app.config['UPLOAD_FOLDER'], new_unique_local)
-                    os.rename(old_path, new_path_local)
-                    foto_final = new_unique_local
-                    print("DEBUG: rename local =>", foto_final)
-                else:
-                    print("DEBUG: no existe old_path => no se hace nada")
-            elif displayed_url.startswith("http"):
-                try:
-                    print("DEBUG: Download from =>", displayed_url)
-                    r = requests.get(displayed_url, stream=True)
-                    if r.status_code == 200:
-                        ext_remote = displayed_url.rsplit('.', 1)[-1].split('?')[0]
-                        if ext_remote.lower() not in ALLOWED_EXTENSIONS:
-                            ext_remote = "jpg"
-                        new_unique_remote = f"{uuid.uuid4().hex}.{ext_remote}"
-                        new_path_remote = os.path.join(app.config['UPLOAD_FOLDER'], new_unique_remote)
-                        with open(new_path_remote, "wb") as f:
-                            for chunk in r.iter_content(1024):
-                                f.write(chunk)
-                        foto_final = new_unique_remote
-                        print("DEBUG: downloaded =>", foto_final)
-                    else:
-                        print("DEBUG: request fail => status", r.status_code)
-                except Exception as e:
-                    print("DEBUG: error al descargar =>", e)
+                if not os.path.exists(app.config['UPLOAD_FOLDER']):
+                    os.makedirs(app.config['UPLOAD_FOLDER'])
+                filepath = os.path.join(app.config['UPLOAD_FOLDER'], unique_name)
+                file.save(filepath)
+                foto_final = unique_name
+                print("DEBUG: Se guardó foto_local =>", foto_final)
             else:
-                print("DEBUG: displayed_image_url no local ni http =>", displayed_url)
-
-        print("DEBUG: foto_final =>", foto_final)
+                print("DEBUG: allowed_file => False (formato no permitido)")
+        else:
+            print("DEBUG: No se subió archivo en 'foto', revisando ia_foto_filename")
+            
+        # B. Si no hay archivo subido, revisamos ia_foto_filename
+        if not foto_final:
+            displayed_url = request.form.get("displayed_image_url", "").strip()
+            print("DEBUG: displayed_image_url =>", displayed_url)
+            
+            if displayed_url:
+                print("==== DATOS DE LA IMAGEN ====")
+                print(f"Valor de displayed_image_url: '{displayed_url}'")
+                print(f"Tipo de displayed_image_url: {type(displayed_url)}")
+                print(f"¿URL externa? {displayed_url.startswith(('http://', 'https://'))}")
+                print(f"¿URL local? {displayed_url.startswith('/static/uploads/')}")
+    
+        
+        # C. NUEVO: Verificar displayed_image_url si no tenemos imagen aún
+        if not foto_final:
+            displayed_url = request.form.get("displayed_image_url", "").strip()
+            print("DEBUG: displayed_image_url =>", displayed_url)
+            
+            if displayed_url:
+                print("DEBUG: Procesando displayed_image_url =>", displayed_url)
+                
+                # Caso 1: Es una imagen local (ya guardada en el servidor)
+                if displayed_url.startswith("/static/uploads/"):
+                    img_filename = displayed_url.split("/uploads/")[1]
+                    old_path = os.path.join(app.config['UPLOAD_FOLDER'], img_filename)
+                    print("DEBUG: old_path (local) =>", old_path)
+                    
+                    if os.path.exists(old_path):
+                        # La imagen ya existe en el servidor, la usamos directamente
+                        foto_final = img_filename
+                        print("DEBUG: imagen local existente =>", foto_final)
+                    else:
+                        print("DEBUG: imagen local NO existe en el servidor")
+                
+                # Caso 2: Es una URL externa (http/https)
+                elif displayed_url.startswith(("http://", "https://")):
+                    try:
+                        print("DEBUG: Descargando imagen de URL externa =>", displayed_url)
+                        response = requests.get(displayed_url, stream=True)
+                        
+                        if response.status_code == 200:
+                            # Extrae extensión de la URL o usa jpg por defecto
+                            ext = displayed_url.rsplit('.', 1)[-1].split('?')[0].lower()
+                            if ext not in ALLOWED_EXTENSIONS:
+                                ext = "jpg"
+                            
+                            # Genera nombre único
+                            unique_name = f"{uuid.uuid4().hex}.{ext}"
+                            save_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_name)
+                            
+                            # Guardar la imagen
+                            with open(save_path, 'wb') as f:
+                                for chunk in response.iter_content(1024):
+                                    f.write(chunk)
+                            
+                            foto_final = unique_name
+                            print("DEBUG: Imagen descargada y guardada =>", foto_final)
+                        else:
+                            print(f"DEBUG: Error al descargar imagen, código {response.status_code}")
+                    except Exception as e:
+                        print(f"DEBUG: Error al procesar URL externa: {e}")
+        
+        print("DEBUG: foto_final final =>", foto_final)
+        
         # =======================================
         # 4) Crear el producto
         # =======================================
@@ -586,7 +594,8 @@ def agregar_producto():
             costo=costo_val,
             precio_venta=precio_val,
             categoria=categoria_normalizada,
-            foto=foto_final,
+            foto=foto_final,  # Ahora tenemos la foto correcta
+            url_imagen=request.form.get("displayed_image_url", "").strip(),  # Guardamos también la URL
             is_approved=True,
             empresa_id=session['user_id'],
             codigo_barras_externo=codigo_barras_externo,

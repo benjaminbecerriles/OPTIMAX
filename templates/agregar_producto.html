@@ -718,14 +718,19 @@
         </div>
 
         <!-- BOTONES FINAL (Guardar = Rojo, Cancelar = Gris) -->
-        <div class="text-end" style="margin-top:2rem; margin-bottom:0.5rem;">
-          <button type="submit" class="btn-submit">GUARDAR</button>
-          <a href="{{ url_for('ver_productos') }}" class="btn-cancel">CANCELAR</a>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
+        <script>
+            // Script de depuración para verificar los valores justo antes de enviar
+            document.querySelector('form').addEventListener('submit', function() {
+              console.log('Valores antes de enviar el formulario:');
+              console.log('displayed_image_url:', document.getElementById('displayed_image_url').value);
+              console.log('ia_foto_filename:', document.getElementById('ia_foto_filename').value);
+            });
+          </script>
+          
+          <div class="text-end" style="margin-top:2rem; margin-bottom:0.5rem;">
+            <button type="submit" class="btn-submit" style="margin-right:0.5rem;">Guardar</button>
+            <a href="{{ url_for('ver_productos') }}" class="btn-cancel btn-cancel-principal">Cancelar</a>
+          </div>
 
 <!-- SCRIPTS (Choices, etc.) -->
 <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
@@ -846,9 +851,8 @@
           </div>`;
         fotoPlaceholder.classList.remove("has-image");
         document.getElementById("ia_foto_filename").value = "";
-        document.getElementById("fotoInput").value = "";
-        // Reiniciar displayed_image_url también
-        document.getElementById("displayed_image_url").value = "";
+        document.getElementById("fotoInput").value = ""; // Limpiar el input file
+        document.getElementById("displayed_image_url").value = ""; // Limpiar la URL
         rebindPhotoDropdownEvents();
       });
     }
@@ -882,9 +886,10 @@
           <button type="button" class="remove-image" id="removeImageBtn">&times;</button>
         `;
         fotoPlaceholder.classList.add("has-image");
-        // GUARDAR en displayed_image_url
-        document.getElementById("displayed_image_url").value = objectURL;
-
+        
+        // IMPORTANTE: NO guardar objectURL en displayed_image_url cuando se carga archivo local
+        document.getElementById("displayed_image_url").value = "";
+        
         attachRemoveImageListener();
       }
     });
@@ -903,6 +908,18 @@
       showCenteredNotification("Debes ingresar un CÓDIGO DE BARRAS y el NOMBRE DEL PRODUCTO para generar una imagen con IA.");
       return;
     }
+    
+    // Mostrar un indicador de carga
+    const fotoPlaceholder = document.getElementById("fotoPlaceholder");
+    fotoPlaceholder.innerHTML = `
+      <div style="text-align: center; padding: 20px;">
+        <p>Buscando imagen...</p>
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+      </div>
+    `;
+    
     fetch("/api/buscar-imagen", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -911,30 +928,72 @@
     .then(res => res.json())
     .then(data => {
       if (data.status === "success" && data.image_url) {
-        const fotoPlaceholder = document.getElementById("fotoPlaceholder");
-        // Sacamos solo el nombre del archivo final
-        // (sin prefijar "uploads/").
-        const finalFilename = data.image_url.split("uploads/")[1];
+        // Cargar la imagen para verificar que sea accesible
+        const testImg = new Image();
+        testImg.onload = function() {
+          // La imagen se cargó correctamente, mostrarla
+          fotoPlaceholder.innerHTML = `
+            <img src="${data.image_url}" alt="Imagen IA">
+            <button type="button" class="remove-image" id="removeImageBtn">&times;</button>
+          `;
+          fotoPlaceholder.classList.add("has-image");
 
-        fotoPlaceholder.innerHTML = `
-          <img src="${data.image_url}" alt="Imagen IA">
-          <button type="button" class="remove-image" id="removeImageBtn">&times;</button>
-        `;
-        fotoPlaceholder.classList.add("has-image");
+          // Guardar el nombre del archivo en ia_foto_filename
+          // La API ahora devuelve tanto image_url como filename
+          if (data.filename) {
+            document.getElementById("ia_foto_filename").value = data.filename;
+          } else {
+            // Extraer el nombre del archivo de la URL si no viene como propiedad separada
+            const filename = data.image_url.split("/uploads/")[1];
+            document.getElementById("ia_foto_filename").value = filename || "";
+          }
+          
+          // Guardar la URL en displayed_image_url
+          document.getElementById("displayed_image_url").value = data.image_url;
 
-        // Guardamos *solo* el nombre final en ia_foto_filename
-        document.getElementById("ia_foto_filename").value = finalFilename || "";
-        // Y guardamos la URL completa en displayed_image_url
-        document.getElementById("displayed_image_url").value = data.image_url;
-
-        attachRemoveImageListener();
+          attachRemoveImageListener();
+        };
+        
+        testImg.onerror = function() {
+          // Si la imagen no puede cargarse
+          fotoPlaceholder.innerHTML = `
+            <button type="button" class="no-image-icon" id="btnCargarFoto">&#8942;</button>
+            <div class="foto-dropdown" id="fotoDropdown" style="display:none;">
+              <button type="button" class="dropdown-item btn btn-secondary" id="dropdownCargarFoto">Cargar imagen</button>
+              <button type="button" class="dropdown-item btn btn-secondary" id="dropdownGenerarIA">Generar con IA</button>
+            </div>
+          `;
+          showCenteredNotification("La imagen no pudo cargarse. Intenta de nuevo o carga una imagen manualmente.");
+          rebindPhotoDropdownEvents();
+        };
+        
+        // Iniciar la carga de la imagen
+        testImg.src = data.image_url;
+        
       } else {
-        alert(data.message || "No se pudo obtener la imagen");
+        // Manejar errores
+        fotoPlaceholder.innerHTML = `
+          <button type="button" class="no-image-icon" id="btnCargarFoto">&#8942;</button>
+          <div class="foto-dropdown" id="fotoDropdown" style="display:none;">
+            <button type="button" class="dropdown-item btn btn-secondary" id="dropdownCargarFoto">Cargar imagen</button>
+            <button type="button" class="dropdown-item btn btn-secondary" id="dropdownGenerarIA">Generar con IA</button>
+          </div>
+        `;
+        showCenteredNotification(data.message || "No se pudo obtener la imagen");
+        rebindPhotoDropdownEvents();
       }
     })
     .catch(error => {
       console.error("Error al buscar la imagen:", error);
-      alert("Ocurrió un error al buscar la imagen.");
+      fotoPlaceholder.innerHTML = `
+        <button type="button" class="no-image-icon" id="btnCargarFoto">&#8942;</button>
+        <div class="foto-dropdown" id="fotoDropdown" style="display:none;">
+          <button type="button" class="dropdown-item btn btn-secondary" id="dropdownCargarFoto">Cargar imagen</button>
+          <button type="button" class="dropdown-item btn btn-secondary" id="dropdownGenerarIA">Generar con IA</button>
+        </div>
+      `;
+      showCenteredNotification("Ocurrió un error al buscar la imagen.");
+      rebindPhotoDropdownEvents();
     });
   }
 
@@ -1426,9 +1485,6 @@
       hideScanFoundContainer();
     };
   }
-
-  // Vincular el estado "toggle_caducidad_estado" con el hidden input
-  // (ya se hace en la parte del toggle en "btnToggleCaducidad" si se requiere)
 </script>
 
 <!-- Modal QuaggaJS -->
