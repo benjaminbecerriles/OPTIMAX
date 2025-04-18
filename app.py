@@ -6,6 +6,7 @@ import uuid  # <--- NUEVO para generar nombres únicos
 import time
 import threading
 import sys
+import shutil  # Para operaciones de archivos
 
 from flask import Flask, request, render_template, session, redirect, url_for, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -65,6 +66,48 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+def download_image_with_headers(url, filepath):
+    """
+    Intenta descargar una imagen con diferentes cabeceras y agentes de usuario.
+    Algunas páginas bloquean descargas sin un User-Agent adecuado.
+    """
+    headers_list = [
+        # Firefox en Windows
+        {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0",
+            "Accept": "image/jpeg, image/png, image/*;q=0.8",
+            "Referer": url
+        },
+        # Chrome en Mac
+        {
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36",
+            "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8"
+        },
+        # Safari en iPhone
+        {
+            "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1"
+        }
+    ]
+    
+    for headers in headers_list:
+        try:
+            print(f"DEBUG: Intentando descargar {url} con cabeceras: {headers}")
+            response = requests.get(url, headers=headers, stream=True, timeout=10)
+            if response.status_code == 200:
+                if not os.path.exists(os.path.dirname(filepath)):
+                    os.makedirs(os.path.dirname(filepath))
+                
+                with open(filepath, "wb") as f:
+                    for chunk in response.iter_content(1024):
+                        f.write(chunk)
+                print(f"DEBUG: Descarga exitosa para {url}")
+                return True
+            print(f"DEBUG: Error al descargar {url}, código {response.status_code}")
+        except Exception as e:
+            print(f"DEBUG: Excepción al descargar {url}: {e}")
+    
+    return False
+
 ##############################################
 # FUNCIONES AUXILIARES
 ##############################################
@@ -113,16 +156,16 @@ def buscar_imagen_google_images(nombre_producto, codigo_barras_externo=None):
             first_image = images[0]
             image_url = first_image.get("thumbnail") or first_image.get("original")
             if image_url:
-                img_response = requests.get(image_url, stream=True)
-                if img_response.status_code == 200:
-                    ext = image_url.rsplit('.', 1)[-1].split('?')[0]
-                    filename = secure_filename(f"{random.randint(100000,999999)}.{ext}")
-                    if not os.path.exists(UPLOAD_FOLDER):
-                        os.makedirs(UPLOAD_FOLDER)
-                    filepath = os.path.join(UPLOAD_FOLDER, filename)
-                    with open(filepath, "wb") as f:
-                        for chunk in img_response.iter_content(1024):
-                            f.write(chunk)
+                # Usar la función mejorada para descargar
+                ext = image_url.rsplit('.', 1)[-1].split('?')[0]
+                if ext not in ALLOWED_EXTENSIONS:
+                    ext = "jpg"
+                filename = secure_filename(f"{random.randint(100000,999999)}.{ext}")
+                if not os.path.exists(UPLOAD_FOLDER):
+                    os.makedirs(UPLOAD_FOLDER)
+                filepath = os.path.join(UPLOAD_FOLDER, filename)
+                
+                if download_image_with_headers(image_url, filepath):
                     print("Imagen descargada y guardada como:", filename)
                     return filename
     except Exception as e:
@@ -445,6 +488,10 @@ def agregar_producto():
         ia_foto_filename = request.form.get("ia_foto_filename", "").strip()
         print("DEBUG: ia_foto_filename =>", ia_foto_filename)
 
+        # Obtener displayed_image_url
+        displayed_url = request.form.get("displayed_image_url", "").strip()
+        print("DEBUG: displayed_image_url =>", displayed_url)
+
         # Categoría
         cat_option = request.form.get('categoria_option', 'existente')
         if cat_option == 'existente':
@@ -525,76 +572,88 @@ def agregar_producto():
         else:
             print("DEBUG: No se subió archivo en 'foto'")
             
-        # B. Si no hay archivo subido, revisamos displayed_image_url
-        if not foto_final:
-            displayed_url = request.form.get("displayed_image_url", "").strip()
-            print("DEBUG: displayed_image_url =>", displayed_url)
+        # B. Si no hay archivo subido, revisamos ia_foto_filename como primera opción
+        if not foto_final and ia_foto_filename:
+            ia_filepath = os.path.join(app.config['UPLOAD_FOLDER'], ia_foto_filename)
+            if os.path.exists(ia_filepath):
+                foto_final = ia_foto_filename
+                print(f"DEBUG: Usando ia_foto_filename existente => {ia_foto_filename}")
+            else:
+                print(f"DEBUG: El archivo IA no existe en uploads => {ia_filepath}")
+        
+        # C. Si no tenemos foto aún, intentamos displayed_image_url
+        if not foto_final and displayed_url:
+            # Caso 1: Es una URL local completa
+            if displayed_url.startswith("/static/uploads/"):
+                img_filename = displayed_url.split("/uploads/")[1]
+                filepath = os.path.join(app.config['UPLOAD_FOLDER'], img_filename)
+                if os.path.exists(filepath):
+                    foto_final = img_filename
+                    print(f"DEBUG: Usando imagen de ruta completa => {img_filename}")
+                else:
+                    print(f"DEBUG: La imagen en ruta completa no existe => {filepath}")
             
-            if displayed_url:
-                # CORRECCIÓN: Manejar correctamente tanto URLs como solo nombres de archivo
-                
-                # Caso 1: Es una URL local completa
-                if displayed_url.startswith("/static/uploads/"):
-                    img_filename = displayed_url.split("/uploads/")[1]
-                    filepath = os.path.join(app.config['UPLOAD_FOLDER'], img_filename)
-                    if os.path.exists(filepath):
-                        foto_final = img_filename
-                        print(f"DEBUG: Usando imagen de ruta completa => {img_filename}")
+            # Caso 2: Es solo un nombre de archivo
+            elif "/" not in displayed_url:
+                filepath = os.path.join(app.config['UPLOAD_FOLDER'], displayed_url)
+                if os.path.exists(filepath):
+                    foto_final = displayed_url
+                    print(f"DEBUG: Usando displayed_image_url como nombre de archivo => {displayed_url}")
+                else:
+                    print(f"DEBUG: El archivo no existe en uploads => {filepath}")
+            
+            # Caso 3: Es una URL externa (http/https)
+            elif displayed_url.startswith(("http://", "https://")):
+                try:
+                    print(f"DEBUG: Descargando imagen de URL externa => {displayed_url}")
+                    
+                    # Extraer extensión de la URL o usar jpg por defecto
+                    ext = displayed_url.rsplit('.', 1)[-1].split('?')[0].lower()
+                    if ext not in ALLOWED_EXTENSIONS:
+                        ext = "jpg"
+                    
+                    # Genera nombre único
+                    unique_name = f"{uuid.uuid4().hex}.{ext}"
+                    filepath = os.path.join(app.config['UPLOAD_FOLDER'], unique_name)
+                    
+                    # Intenta descargar con cabeceras personalizadas
+                    if download_image_with_headers(displayed_url, filepath):
+                        foto_final = unique_name
+                        print(f"DEBUG: Imagen descargada y guardada => {foto_final}")
                     else:
-                        print(f"DEBUG: La imagen en ruta completa no existe => {filepath}")
+                        print(f"DEBUG: No se pudo descargar la imagen con cabeceras personalizadas")
+                except Exception as e:
+                    print(f"DEBUG: Error al procesar URL externa: {e}")
+        
+        # D. Como último recurso, buscar con SerpAPI
+        if not foto_final and nombre and codigo_barras_externo:
+            print(f"DEBUG: Intentando buscar imagen con SerpAPI para: {nombre} {codigo_barras_externo}")
+            search_filename = buscar_imagen_google_images(nombre, codigo_barras_externo)
+            if search_filename:
+                foto_final = search_filename
+                print(f"DEBUG: Imagen generada por SerpAPI => {search_filename}")
+            else:
+                print(f"DEBUG: No se pudo generar imagen con SerpAPI")
                 
-                # Caso 2: Es solo un nombre de archivo (lo que está ocurriendo en este caso)
-                elif "/" not in displayed_url:
-                    filepath = os.path.join(app.config['UPLOAD_FOLDER'], displayed_url)
-                    if os.path.exists(filepath):
-                        foto_final = displayed_url
-                        print(f"DEBUG: Usando displayed_image_url como nombre de archivo => {displayed_url}")
-                    else:
-                        print(f"DEBUG: El archivo no existe en uploads => {filepath}")
-                        
-                        # Intentar usar ia_foto_filename como respaldo
-                        if ia_foto_filename:
-                            ia_filepath = os.path.join(app.config['UPLOAD_FOLDER'], ia_foto_filename)
-                            if os.path.exists(ia_filepath):
-                                foto_final = ia_foto_filename
-                                print(f"DEBUG: Usando ia_foto_filename como respaldo => {ia_foto_filename}")
-                            else:
-                                print(f"DEBUG: El archivo IA no existe en uploads => {ia_filepath}")
-                                
-                                # Último intento: buscar una imagen usando SerpAPI
-                                if nombre and codigo_barras_externo:
-                                    search_filename = buscar_imagen_google_images(nombre, codigo_barras_externo)
-                                    if search_filename:
-                                        foto_final = search_filename
-                                        print(f"DEBUG: Imagen generada por SerpAPI => {search_filename}")
-                
-                # Caso 3: Es una URL externa (http/https)
-                elif displayed_url.startswith(("http://", "https://")):
-                    try:
-                        print("DEBUG: Descargando imagen de URL externa =>", displayed_url)
-                        response = requests.get(displayed_url, stream=True)
-                        
-                        if response.status_code == 200:
-                            # Extrae extensión de la URL o usa jpg por defecto
-                            ext = displayed_url.rsplit('.', 1)[-1].split('?')[0].lower()
-                            if ext not in ALLOWED_EXTENSIONS:
-                                ext = "jpg"
-                            
-                            # Genera nombre único
-                            unique_name = f"{uuid.uuid4().hex}.{ext}"
-                            filepath = os.path.join(app.config['UPLOAD_FOLDER'], unique_name)
-                            
-                            # Guardar la imagen
-                            with open(filepath, 'wb') as f:
-                                for chunk in response.iter_content(1024):
-                                    f.write(chunk)
-                            
-                            foto_final = unique_name
-                            print("DEBUG: Imagen descargada y guardada =>", foto_final)
-                        else:
-                            print(f"DEBUG: Error al descargar imagen, código {response.status_code}")
-                    except Exception as e:
-                        print(f"DEBUG: Error al procesar URL externa: {e}")
+                # E. Usar imagen predeterminada según categoría
+                categoria_norm = categoria_normalizada.lower() if categoria_normalizada else "otros"
+                if "botanas" in categoria_norm or "dulces" in categoria_norm or "snacks" in categoria_norm:
+                    default_img = "default_snack.jpg"
+                elif "bebidas" in categoria_norm:
+                    default_img = "default_drink.jpg"
+                elif "frutas" in categoria_norm or "verduras" in categoria_norm:
+                    default_img = "default_fruit.jpg"
+                else:
+                    default_img = "default_product.jpg"
+                    
+                # Verificar que existe o copiar desde static/img a uploads
+                default_path = os.path.join(BASE_DIR, 'static', 'img', default_img)
+                if os.path.exists(default_path):
+                    dest_path = os.path.join(UPLOAD_FOLDER, default_img)
+                    if not os.path.exists(dest_path):
+                        shutil.copy2(default_path, dest_path)
+                    foto_final = default_img
+                    print(f"DEBUG: Usando imagen predeterminada: {default_img}")
         
         print("DEBUG: foto_final final =>", foto_final)
         
@@ -608,7 +667,7 @@ def agregar_producto():
             precio_venta=precio_val,
             categoria=categoria_normalizada,
             foto=foto_final,  # Ahora tenemos la foto correcta
-            url_imagen=request.form.get("displayed_image_url", "").strip(),  # Guardamos también la URL
+            url_imagen=displayed_url,  # Guardamos también la URL
             is_approved=True,
             empresa_id=session['user_id'],
             codigo_barras_externo=codigo_barras_externo,
