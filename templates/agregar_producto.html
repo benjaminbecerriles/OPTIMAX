@@ -476,6 +476,42 @@
     border-radius: 2px;
     transition: width 0.3s;
   }
+  
+  /* Modal de advertencia para código duplicado */
+  .barcode-warning-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+    border: 1px solid #e74c3c;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    padding: 20px;
+    z-index: 10000;
+    width: 90%;
+    max-width: 400px;
+    display: none;
+  }
+  
+  .barcode-warning-content {
+    text-align: center;
+  }
+  
+  .barcode-warning-content h3 {
+    color: #e74c3c;
+    margin-top: 0;
+  }
+  
+  .barcode-warning-content p {
+    margin-bottom: 20px;
+  }
+  
+  .warning-icon {
+    font-size: 48px;
+    color: #e74c3c;
+    margin-bottom: 15px;
+  }
 </style>
 
 <div class="card-form">
@@ -796,6 +832,15 @@
   <div class="loading-text">Guardando producto...</div>
 </div>
 
+<!-- Modal de advertencia para código duplicado -->
+<div class="barcode-warning-modal" id="barcodeWarningModal">
+  <div class="barcode-warning-content">
+    <div class="warning-icon">⚠️</div>
+    <h3>Código Duplicado</h3>
+    <p id="warningMessage">Ya existe un producto con este código de barras en tu inventario.</p>
+  </div>
+</div>
+
 <!-- Modal QuaggaJS -->
 <div 
   id="modalEscaneoCamara" 
@@ -889,6 +934,23 @@
       }
       activeNotification = null;
     }, duration);
+  }
+
+  /* ===========================================================
+   * 2.5) NUEVA FUNCIÓN PARA MOSTRAR MODAL DE ADVERTENCIA DE CÓDIGO DUPLICADO
+   * ===========================================================
+   */
+  function showBarcodeWarningModal(code) {
+    const modal = document.getElementById("barcodeWarningModal");
+    const message = document.getElementById("warningMessage");
+    message.textContent = `Ya existe un producto con el código de barras ${code} en tu inventario.`;
+    
+    modal.style.display = "block";
+    
+    // Ocultar modal después de 4 segundos
+    setTimeout(() => {
+      modal.style.display = "none";
+    }, 4000);
   }
 
   /* ===========================================================
@@ -1607,6 +1669,60 @@
   });
 
   /* ===========================================================
+   * 9) VERIFICACIÓN DE CÓDIGOS DE BARRAS DUPLICADOS
+   * ===========================================================
+   */
+  // Variable para controlar si el código de barras es válido
+  let codigoBarrasValido = true;
+
+  // Función para verificar si un código de barras ya existe
+  function verificarCodigoBarras(codigo) {
+    if (!codigo || codigo.trim() === "") {
+      return Promise.resolve(false); // No hay código que verificar
+    }
+    
+    return fetch(`/api/check_barcode_exists?codigo=${encodeURIComponent(codigo)}&t=${Date.now()}`)
+      .then(response => response.json())
+      .then(data => data.exists)
+      .catch(error => {
+        console.error("Error verificando código de barras:", error);
+        return false; // En caso de error, asumimos que no existe
+      });
+  }
+
+  // Debounce para la verificación de código de barras
+  const verificarCodigoDebounced = debounce(function(codigo) {
+    verificarCodigoBarras(codigo).then(exists => {
+      codigoBarrasValido = !exists;
+      
+      // Actualizar la UI basada en el resultado
+      const submitBtn = document.getElementById("submitBtn");
+      
+      if (exists) {
+        // Si ya existe, mostrar una indicación visual
+        inputExterno.style.borderColor = "#e74c3c";
+      } else {
+        // Si no existe, restaurar estilos
+        inputExterno.style.borderColor = "";
+      }
+    });
+  }, 300);
+
+  // Asignar el evento de input para verificación
+  if (inputExterno) {
+    inputExterno.addEventListener("input", function() {
+      const codigo = this.value.trim();
+      if (codigo.length > 0) {
+        verificarCodigoDebounced(codigo);
+      } else {
+        // Restaurar estilos si el campo está vacío
+        this.style.borderColor = "";
+        codigoBarrasValido = true;
+      }
+    });
+  }
+
+  /* ===========================================================
    * 10) Lector Físico (Barcode Scanner) - Optimizado
    * ===========================================================
    */
@@ -1821,47 +1937,57 @@
       return;
     }
     
-    // Mostrar indicador de carga
-    if (scanFoundContainer && scanFoundRow) {
-      scanFoundContainer.style.display = "block";
-      scanFoundRow.innerHTML = `
-        <div class="text-center py-3">
-          <div class="spinner-border text-light" role="status">
-            <span class="visually-hidden">Cargando...</span>
+    // Verificar también si ya existe en nuestro inventario
+    verificarCodigoBarras(code).then(exists => {
+      if (exists) {
+        // Si ya existe, mostrar mensaje de advertencia
+        showBarcodeWarningModal(code);
+        codigoBarrasValido = false;
+        return;
+      }
+      
+      // Mostrar indicador de carga
+      if (scanFoundContainer && scanFoundRow) {
+        scanFoundContainer.style.display = "block";
+        scanFoundRow.innerHTML = `
+          <div class="text-center py-3">
+            <div class="spinner-border text-light" role="status">
+              <span class="visually-hidden">Cargando...</span>
+            </div>
+            <p class="mt-2 mb-0">Buscando información...</p>
           </div>
-          <p class="mt-2 mb-0">Buscando información...</p>
-        </div>
-      `;
-    }
-    
-    // Evitar caché del navegador con timestamp
-    fetch(`/api/find_by_code?codigo=${encodeURIComponent(code)}&t=${Date.now()}`)
-      .then(res => res.json())
-      .then(data => {
-        if (!data.found) {
+        `;
+      }
+      
+      // Evitar caché del navegador con timestamp
+      fetch(`/api/find_by_code?codigo=${encodeURIComponent(code)}&t=${Date.now()}`)
+        .then(res => res.json())
+        .then(data => {
+          if (!data.found) {
+            hideScanFoundContainer();
+            return;
+          }
+          
+          // Guardar en caché para futuras búsquedas
+          scannedCodesCache.set(code, data);
+          
+          // Guardar en caché del Service Worker
+          if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+            navigator.serviceWorker.controller.postMessage({
+              type: 'CACHE_API_RESPONSE',
+              endpoint: `/api/find_by_code?codigo=${encodeURIComponent(code)}`,
+              data: data,
+              expiry: Date.now() + (60 * 60 * 1000) // 1 hora
+            });
+          }
+          
+          showScanFound(data);
+        })
+        .catch(err => {
+          console.error("Error en find-by-code:", err);
           hideScanFoundContainer();
-          return;
-        }
-        
-        // Guardar en caché para futuras búsquedas
-        scannedCodesCache.set(code, data);
-        
-        // Guardar en caché del Service Worker
-        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-          navigator.serviceWorker.controller.postMessage({
-            type: 'CACHE_API_RESPONSE',
-            endpoint: `/api/find_by_code?codigo=${encodeURIComponent(code)}`,
-            data: data,
-            expiry: Date.now() + (60 * 60 * 1000) // 1 hora
-          });
-        }
-        
-        showScanFound(data);
-      })
-      .catch(err => {
-        console.error("Error en find-by-code:", err);
-        hideScanFoundContainer();
-      });
+        });
+    });
   }
 
   function showScanFound(info) {
@@ -1948,6 +2074,45 @@
     btnScanNo.onclick = hideScanFoundContainer;
   }
   
+  /* ===========================================================
+   * 13) ENVÍO DEL FORMULARIO / VALIDACIÓN FINAL
+   * ===========================================================
+   */
+  // Referencias a elementos de carga
+  const loadingOverlay = document.getElementById("loadingOverlay");
+  const productForm = document.getElementById("productForm");
+  const submitBtn = document.getElementById("submitBtn");
+  
+  // Manejar el envío del formulario
+  if (productForm) {
+    productForm.addEventListener("submit", function(e) {
+      // Verificar si el código de barras es válido
+      const codigoBarras = document.getElementById("codigo_barras_externo").value.trim();
+      
+      if (codigoBarras) {
+        // Prevenir envío por defecto
+        e.preventDefault();
+        
+        // Verificar el código de barras
+        verificarCodigoBarras(codigoBarras).then(exists => {
+          if (exists) {
+            // Mostrar alerta modal si el código ya existe
+            showBarcodeWarningModal(codigoBarras);
+          } else {
+            // Si todo está bien, mostrar overlay de carga
+            loadingOverlay.style.display = "flex";
+            
+            // Enviar el formulario manualmente
+            productForm.submit();
+          }
+        });
+      } else {
+        // Si no hay código de barras, continuar normalmente
+        loadingOverlay.style.display = "flex";
+      }
+    });
+  }
+  
   // Añadir Service Worker para mejorar la cache del navegador
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
@@ -1963,13 +2128,6 @@
 
   // Inicializar eventos al cargar la página
   document.addEventListener("DOMContentLoaded", function() {
-    // Referencias a elementos de carga
-    const loadingOverlay = document.getElementById("loadingOverlay");
-    const productForm = document.getElementById("productForm");
-    const submitBtn = document.getElementById("submitBtn");
-    const imageProgressBar = document.getElementById("imageProgressBar");
-    const imageProgressContainer = document.querySelector(".image-upload-progress");
-    
     // Inicializar etiquetas flotantes para campos específicos
     const inputs = document.querySelectorAll(
       "#codigo_barras_externo, #nombre, #stock, #costo, #precio_venta, #marca"
@@ -1985,47 +2143,6 @@
       });
     });
     
-    // Optimización para prevenir envíos múltiples y mostrar progreso
-    productForm.addEventListener("submit", function(e) {
-      // Si el formulario ya está enviándose, cancelar este envío
-      if (productForm.getAttribute("data-submitting") === "true") {
-        e.preventDefault();
-        return false;
-      }
-      
-      // Verificación rápida de valores obligatorios
-      const nombre = document.getElementById("nombre").value.trim();
-      if (!nombre) {
-        e.preventDefault();
-        showCenteredNotification("Por favor, ingresa el nombre del producto.");
-        return false;
-      }
-      
-      // Preprocesamiento de imágenes - evaluar tamaño rápidamente y prevenir cuellos de botella
-      const fileInput = document.getElementById("fotoInput");
-      if (fileInput.files && fileInput.files[0]) {
-        const file = fileInput.files[0];
-        if (file.size > 5 * 1024 * 1024) { // 5MB
-          e.preventDefault();
-          showCenteredNotification("La imagen es demasiado grande (máximo 5MB).");
-          return false;
-        }
-      }
-      
-      // Mostrar overlay de carga
-      loadingOverlay.style.display = "flex";
-      
-      // Marcar el formulario como "enviando"
-      productForm.setAttribute("data-submitting", "true");
-      
-      // Deshabilitar el botón y mostrar estado de carga
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = 'Guardando...';
-      
-      // No detener el formulario, dejarlo continuar
-      return true;
-    });
-    
     // Manejo optimizado de carga de imágenes
     const fotoInput = document.getElementById("fotoInput");
     if (fotoInput) {
@@ -2038,6 +2155,9 @@
           }
           
           // Mostrar progreso para archivos grandes
+          const imageProgressContainer = document.querySelector(".image-upload-progress");
+          const imageProgressBar = document.getElementById("imageProgressBar");
+          
           if (file.size > 1 * 1024 * 1024) { // 1MB
             imageProgressContainer.style.display = "block";
             
