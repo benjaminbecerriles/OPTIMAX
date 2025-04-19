@@ -9,7 +9,7 @@ import sys
 import shutil  # Para operaciones de archivos
 import urllib.parse  # Para codificar parámetros de URL
 
-from flask import Flask, request, render_template, session, redirect, url_for, jsonify
+from flask import Flask, request, render_template, session, redirect, url_for, jsonify, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from functools import wraps
@@ -114,6 +114,8 @@ def download_image_with_headers(url, filepath):
 ##############################################
 def normalizar_categoria(cat: str) -> str:
     """Elimina acentos, pone en minúscula y quita espacios extras."""
+    if not cat:
+        return ""
     cat = cat.strip().lower()
     import unicodedata
     cat = unicodedata.normalize("NFKD", cat)
@@ -292,7 +294,7 @@ migrate = Migrate(app, db)
 @app.after_request
 def no_cache(response):
     response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, private, max-age=0"
-    response.headers["Expires"] = 0
+    response.headers["Expires"] = "0"
     response.headers["Pragma"] = "no-cache"
     return response
 
@@ -496,225 +498,179 @@ def ver_productos():
 @login_requerido
 def agregar_producto():
     if request.method == 'POST':
-        # =======================================
-        # 1) Recoger campos del formulario
-        # =======================================
-        codigo_barras_externo = request.form.get("codigo_barras_externo", "").strip()
-        nombre = request.form.get("nombre", "").strip()
-        stock_str = request.form.get("stock", "0").strip()
-        costo_str = request.form.get("costo", "$0").strip()
-        precio_str = request.form.get("precio_venta", "$0").strip()
-        marca = request.form.get("marca", "").strip()
-
-        print("\n=== DEBUG COMIENZA ===")
-        print("DEBUG: codigo_barras_externo =>", codigo_barras_externo)
-        print("DEBUG: nombre =>", nombre)
-        print("DEBUG: stock_str =>", stock_str)
-        print("DEBUG: costo_str =>", costo_str)
-        print("DEBUG: precio_str =>", precio_str)
-        print("DEBUG: marca =>", marca)
-
-        # Obtener ia_foto_filename para debugging
-        ia_foto_filename = request.form.get("ia_foto_filename", "").strip()
-        print("DEBUG: ia_foto_filename =>", ia_foto_filename)
-
-        # Obtener displayed_image_url
-        displayed_url = request.form.get("displayed_image_url", "").strip()
-        print("DEBUG: displayed_image_url =>", displayed_url)
-
-        # Categoría
-        cat_option = request.form.get('categoria_option', 'existente')
-        if cat_option == 'existente':
-            categoria = request.form.get('categoria_existente', '').strip()
-        else:
-            categoria = request.form.get('categoria_nueva', '').strip()
-        categoria_normalizada = normalizar_categoria(categoria)
-        print("DEBUG: categoria_normalizada =>", categoria_normalizada)
-
-        # Favorito
-        es_favorito_val = request.form.get("es_favorito", "0")
-        es_favorito_bool = (es_favorito_val == "1")
-        print("DEBUG: es_favorito_val =>", es_favorito_val, "| bool =>", es_favorito_bool)
-
-        # A la venta
-        esta_a_la_venta_val = request.form.get("esta_a_la_venta", "1")
-        esta_a_la_venta_bool = (esta_a_la_venta_val == "1")
-        print("DEBUG: esta_a_la_venta_val =>", esta_a_la_venta_val, "| bool =>", esta_a_la_venta_bool)
-
-        # Caducidad
-        toggle_caducidad = request.form.get("toggle_caducidad_estado", "DESACTIVADO")
-        has_caducidad = (toggle_caducidad == "ACTIVADO")
-        print("DEBUG: toggle_caducidad =>", toggle_caducidad, "| has_caducidad =>", has_caducidad)
-
-        caducidad_lapso = None
-        if has_caducidad:
-            caducidad_lapso = request.form.get("caducidad_lapso", None)
-        print("DEBUG: caducidad_lapso =>", caducidad_lapso)
-
-        # Parse numéricos
         try:
-            stock_int = int(stock_str)
-        except:
-            stock_int = 0
-        print("DEBUG: stock_int =>", stock_int)
+            # =======================================
+            # 1) Recoger campos del formulario
+            # =======================================
+            codigo_barras_externo = request.form.get("codigo_barras_externo", "").strip()
+            nombre = request.form.get("nombre", "").strip()
+            stock_str = request.form.get("stock", "0").strip()
+            costo_str = request.form.get("costo", "$0").strip()
+            precio_str = request.form.get("precio_venta", "$0").strip()
+            marca = request.form.get("marca", "").strip()
 
-        def parse_money(value_str):
-            if value_str.startswith("$"):
-                value_str = value_str[1:]
-            value_str = value_str.replace(",", "")
+            # Obtener ia_foto_filename para debugging
+            ia_foto_filename = request.form.get("ia_foto_filename", "").strip()
+            
+            # Obtener displayed_image_url - IMPORTANTE
+            displayed_url = request.form.get("displayed_image_url", "").strip()
+
+            # Categoría
+            cat_option = request.form.get('categoria_option', 'existente')
+            if cat_option == 'existente':
+                categoria = request.form.get('categoria_existente', '').strip()
+            else:
+                categoria = request.form.get('categoria_nueva', '').strip()
+            categoria_normalizada = normalizar_categoria(categoria)
+
+            # Favorito
+            es_favorito_val = request.form.get("es_favorito", "0")
+            es_favorito_bool = (es_favorito_val == "1")
+
+            # A la venta
+            esta_a_la_venta_val = request.form.get("esta_a_la_venta", "1")
+            esta_a_la_venta_bool = (esta_a_la_venta_val == "1")
+
+            # Caducidad
+            toggle_caducidad = request.form.get("toggle_caducidad_estado", "DESACTIVADO")
+            has_caducidad = (toggle_caducidad == "ACTIVADO")
+
+            caducidad_lapso = None
+            if has_caducidad:
+                caducidad_lapso = request.form.get("caducidad_lapso", None)
+
+            # Parse numéricos
             try:
-                return float(value_str)
+                stock_int = int(stock_str)
             except:
-                return 0.0
+                stock_int = 0
 
-        costo_val = parse_money(costo_str)
-        precio_val = parse_money(precio_str)
-        print("DEBUG: costo_val =>", costo_val)
-        print("DEBUG: precio_val =>", precio_val)
+            def parse_money(value_str):
+                if value_str.startswith("$"):
+                    value_str = value_str[1:]
+                value_str = value_str.replace(",", "")
+                try:
+                    return float(value_str)
+                except:
+                    return 0.0
 
-        # =======================================
-        # 3) Procesar foto - VERSIÓN MEJORADA
-        # =======================================
-        foto_final = None
-        
-        # A. Primero verificamos si hay un archivo subido directamente
-        file = request.files.get('foto')
-        print("DEBUG: file =>", file)
-        if file and file.filename:
-            print("DEBUG: file.filename =>", file.filename)
-            if allowed_file(file.filename):
-                print("DEBUG: allowed_file => True")
+            costo_val = parse_money(costo_str)
+            precio_val = parse_money(precio_str)
+
+            # =======================================
+            # 2) Procesar foto - VERSIÓN OPTIMIZADA
+            # =======================================
+            foto_final = None
+            
+            # A. Primero verificamos si hay un archivo subido directamente
+            file = request.files.get('foto')
+            if file and file.filename and allowed_file(file.filename):
                 original_name = secure_filename(file.filename)
-                print("DEBUG: secure_filename =>", original_name)
-
                 ext = original_name.rsplit('.', 1)[1].lower()
                 unique_name = f"{uuid.uuid4().hex}.{ext}"
-                print("DEBUG: unique_name =>", unique_name)
-
+                
                 if not os.path.exists(app.config['UPLOAD_FOLDER']):
                     os.makedirs(app.config['UPLOAD_FOLDER'])
                 filepath = os.path.join(app.config['UPLOAD_FOLDER'], unique_name)
                 file.save(filepath)
                 foto_final = unique_name
-                print("DEBUG: Se guardó foto_local =>", foto_final)
-            else:
-                print("DEBUG: allowed_file => False (formato no permitido)")
-        else:
-            print("DEBUG: No se subió archivo en 'foto'")
             
-        # B. Si no hay archivo subido, verificamos si ia_foto_filename existe físicamente
-        if not foto_final and ia_foto_filename:
-            ia_filepath = os.path.join(app.config['UPLOAD_FOLDER'], ia_foto_filename)
-            if os.path.exists(ia_filepath):
-                foto_final = ia_foto_filename
-                print(f"DEBUG: Usando ia_foto_filename existente => {ia_foto_filename}")
-            else:
-                print(f"DEBUG: El archivo IA referenciado no existe: {ia_filepath}")
-                # No limpiamos ia_foto_filename aquí
-        
-        # C. Si no tenemos foto aún, intentamos con displayed_image_url
-        if not foto_final and displayed_url:
-            # Caso 1: Es una URL local completa (/static/uploads/...)
-            if displayed_url.startswith("/static/uploads/"):
-                img_filename = displayed_url.split("/uploads/")[1]
-                filepath = os.path.join(app.config['UPLOAD_FOLDER'], img_filename)
-                if os.path.exists(filepath):
-                    foto_final = img_filename
-                    print(f"DEBUG: Usando imagen de ruta local completa => {img_filename}")
-                else:
-                    print(f"DEBUG: La imagen en ruta local no existe => {filepath}")
-            
-            # Caso 2: Es solo un nombre de archivo
-            elif "/" not in displayed_url:
-                filepath = os.path.join(app.config['UPLOAD_FOLDER'], displayed_url)
-                if os.path.exists(filepath):
-                    foto_final = displayed_url
-                    print(f"DEBUG: Usando displayed_image_url como nombre de archivo => {displayed_url}")
-                else:
-                    print(f"DEBUG: El archivo no existe en uploads => {filepath}")
-            
-            # Caso 3: Es una URL externa (http/https)
-            elif displayed_url.startswith(("http://", "https://")):
-                try:
-                    print(f"DEBUG: Descargando imagen de URL externa => {displayed_url}")
-                    
-                    # Extraer extensión de la URL o usar jpg por defecto
-                    ext = displayed_url.rsplit('.', 1)[-1].split('?')[0].lower()
-                    if ext not in ALLOWED_EXTENSIONS:
-                        ext = "jpg"
-                    
-                    # Genera nombre único
-                    unique_name = f"{uuid.uuid4().hex}.{ext}"
-                    filepath = os.path.join(app.config['UPLOAD_FOLDER'], unique_name)
-                    
-                    # Intenta descargar con cabeceras personalizadas
-                    if download_image_with_headers(displayed_url, filepath):
-                        foto_final = unique_name
-                        print(f"DEBUG: Imagen descargada y guardada => {foto_final}")
-                    else:
-                        print(f"DEBUG: No se pudo descargar la imagen con cabeceras personalizadas")
-                except Exception as e:
-                    print(f"DEBUG: Error al procesar URL externa: {e}")
-        
-        # D. Como último recurso, buscar con SerpAPI - SIEMPRE intentamos esto si aún no tenemos foto
-        if not foto_final and nombre:
-            print(f"DEBUG: Intentando buscar imagen con SerpAPI para: {nombre} {codigo_barras_externo}")
-            search_filename = buscar_imagen_google_images(nombre, codigo_barras_externo)
-            if search_filename:
-                foto_final = search_filename
-                print(f"DEBUG: Imagen generada por SerpAPI => {search_filename}")
-            else:
-                print(f"DEBUG: No se pudo generar imagen con SerpAPI")
+            # B. Si no hay archivo subido y hay displayed_url, procesarlo
+            elif displayed_url:
+                # Caso 1: URL local completa (/static/uploads/...)
+                if displayed_url.startswith("/static/uploads/"):
+                    img_filename = displayed_url.split("/uploads/")[1]
+                    filepath = os.path.join(UPLOAD_FOLDER, img_filename)
+                    if os.path.exists(filepath):
+                        foto_final = img_filename
                 
-                # E. Usar imagen predeterminada según categoría
-                categoria_norm = categoria_normalizada.lower() if categoria_normalizada else "otros"
-                if "botanas" in categoria_norm or "dulces" in categoria_norm or "snacks" in categoria_norm:
-                    default_img = "default_snack.jpg"
-                elif "bebidas" in categoria_norm:
-                    default_img = "default_drink.jpg"
-                elif "frutas" in categoria_norm or "verduras" in categoria_norm:
-                    default_img = "default_fruit.jpg"
+                # Caso 2: Solo nombre de archivo
+                elif "/" not in displayed_url:
+                    filepath = os.path.join(UPLOAD_FOLDER, displayed_url)
+                    if os.path.exists(filepath):
+                        foto_final = displayed_url
+                
+                # Caso 3: URL externa (http/https)
+                elif displayed_url.startswith(("http://", "https://")):
+                    try:
+                        # Extraer extensión de la URL o usar jpg por defecto
+                        ext = displayed_url.rsplit('.', 1)[-1].split('?')[0].lower()
+                        if ext not in ALLOWED_EXTENSIONS:
+                            ext = "jpg"
+                        
+                        # Genera nombre único
+                        unique_name = f"{uuid.uuid4().hex}.{ext}"
+                        filepath = os.path.join(app.config['UPLOAD_FOLDER'], unique_name)
+                        
+                        # Intenta descargar con cabeceras personalizadas
+                        if download_image_with_headers(displayed_url, filepath):
+                            foto_final = unique_name
+            
+                    except Exception as e:
+                        print(f"DEBUG: Error al procesar URL externa: {e}")
+            
+            # C. Si no hay archivo subido ni URL válida, verificar si ia_foto_filename existe físicamente
+            if not foto_final and ia_foto_filename:
+                ia_filepath = os.path.join(app.config['UPLOAD_FOLDER'], ia_foto_filename)
+                if os.path.exists(ia_filepath):
+                    foto_final = ia_foto_filename
+            
+            # D. Como último recurso, buscar con SerpAPI
+            if not foto_final and nombre:
+                search_filename = buscar_imagen_google_images(nombre, codigo_barras_externo)
+                if search_filename:
+                    foto_final = search_filename
                 else:
-                    default_img = "default_product.jpg"
-                    
-                # Verificar que existe o copiar desde static/img a uploads
-                default_path = os.path.join(BASE_DIR, 'static', 'img', default_img)
-                if os.path.exists(default_path):
-                    dest_path = os.path.join(UPLOAD_FOLDER, default_img)
-                    if not os.path.exists(dest_path):
-                        shutil.copy2(default_path, dest_path)
-                    foto_final = default_img
-                    print(f"DEBUG: Usando imagen predeterminada: {default_img}")
-        
-        print("DEBUG: foto_final final =>", foto_final)
-        
-        # =======================================
-        # 4) Crear el producto
-        # =======================================
-        nuevo = Producto(
-            nombre=nombre,
-            stock=stock_int,
-            costo=costo_val,
-            precio_venta=precio_val,
-            categoria=categoria_normalizada,
-            foto=foto_final,  # Ahora tenemos la foto correcta
-            url_imagen=displayed_url,  # Guardamos también la URL
-            is_approved=True,
-            empresa_id=session['user_id'],
-            codigo_barras_externo=codigo_barras_externo,
-            marca=marca,
-            es_favorito=es_favorito_bool,
-            esta_a_la_venta=esta_a_la_venta_bool,
-            has_caducidad=has_caducidad,
-            metodo_caducidad=caducidad_lapso if has_caducidad else None
-        )
-        print("DEBUG: Creando producto =>", nuevo)
+                    # E. Usar imagen predeterminada según categoría
+                    categoria_norm = categoria_normalizada.lower() if categoria_normalizada else "otros"
+                    if "botanas" in categoria_norm or "dulces" in categoria_norm or "snacks" in categoria_norm:
+                        default_img = "default_snack.jpg"
+                    elif "bebidas" in categoria_norm:
+                        default_img = "default_drink.jpg"
+                    elif "frutas" in categoria_norm or "verduras" in categoria_norm:
+                        default_img = "default_fruit.jpg"
+                    else:
+                        default_img = "default_product.jpg"
+                        
+                    # Verificar que existe o copiar desde static/img a uploads
+                    default_path = os.path.join(BASE_DIR, 'static', 'img', default_img)
+                    if os.path.exists(default_path):
+                        dest_path = os.path.join(UPLOAD_FOLDER, default_img)
+                        if not os.path.exists(dest_path):
+                            shutil.copy2(default_path, dest_path)
+                        foto_final = default_img
+            
+            # =======================================
+            # 3) Crear el producto
+            # =======================================
+            nuevo = Producto(
+                nombre=nombre,
+                stock=stock_int,
+                costo=costo_val,
+                precio_venta=precio_val,
+                categoria=categoria_normalizada,
+                categoria_color=obtener_o_generar_color_categoria(categoria_normalizada),
+                foto=foto_final,
+                url_imagen=displayed_url,
+                is_approved=True,
+                empresa_id=session['user_id'],
+                codigo_barras_externo=codigo_barras_externo,
+                marca=marca,
+                es_favorito=es_favorito_bool,
+                esta_a_la_venta=esta_a_la_venta_bool,
+                has_caducidad=has_caducidad,
+                metodo_caducidad=caducidad_lapso
+            )
 
-        db.session.add(nuevo)
-        db.session.commit()
+            db.session.add(nuevo)
+            db.session.commit()
+            flash('Producto guardado exitosamente', 'success')
 
-        print("DEBUG: Producto creado con ID =>", nuevo.id)
-        print("DEBUG: FIN COMIENZA ===\n")
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al guardar el producto: {str(e)}', 'danger')
+            print(f"ERROR al guardar producto: {str(e)}")
+            
         return redirect(url_for('ver_productos'))
 
     else:
