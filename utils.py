@@ -16,6 +16,15 @@ def normalizar_categoria(cat):
     cat = cat.encode("ascii", "ignore").decode("ascii")
     return cat
 
+def normalize_categoria_if_needed(categoria):
+    """
+    Normaliza la categoría solo si es necesario (si no es None).
+    Similar a normalizar_categoria pero verifica si es None primero.
+    """
+    if categoria is None:
+        return None
+    return normalizar_categoria(categoria)
+
 def generar_color_aleatorio():
     """Genera un color hexadecimal aleatorio."""
     import random

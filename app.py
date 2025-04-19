@@ -279,8 +279,8 @@ db.init_app(app)
 migrate = Migrate(app, db)
 
 # Inicialización antes de la primera solicitud
-@app.before_first_request
-def setup_application():
+# Inicialización en la creación de la aplicación
+with app.app_context():
     # Asegurar que existan las imágenes predeterminadas
     ensure_default_images(BASE_DIR, UPLOAD_FOLDER)
     
@@ -288,9 +288,9 @@ def setup_application():
     try:
         requests.get('https://serpapi.com', timeout=2)
         app.config['SERPAPI_AVAILABLE'] = True
-    except:
+    except Exception as e:
         app.config['SERPAPI_AVAILABLE'] = False
-        print("AVISO: SerpAPI no disponible, usando imágenes predeterminadas")
+        print(f"AVISO: SerpAPI no disponible, usando imágenes predeterminadas: {e}")
 
 ##############################
 # Desactivar caché globalmente
