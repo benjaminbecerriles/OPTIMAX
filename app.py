@@ -2,12 +2,12 @@ import os
 import random
 import string
 import unicodedata
-import uuid  # <--- NUEVO para generar nombres únicos
+import uuid
 import time
 import threading
 import sys
-import shutil  # Para operaciones de archivos
-import urllib.parse  # Para codificar parámetros de URL
+import shutil
+import urllib.parse
 
 from flask import Flask, request, render_template, session, redirect, url_for, jsonify, flash
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -23,6 +23,14 @@ from models.models import Empresa, CodigoDisponible, CodigoAsignado, Producto, C
 
 # (NUEVO) IMPORTA la función para leer Google Sheets
 from sheets import leer_hoja  # Asegúrate de tener 'sheets.py' con leer_hoja()
+
+# Importar funciones de utils
+from utils import (
+    process_image, async_download_image, parse_money, normalize_categoria_if_needed,
+    optimize_db_session, cleanup_db_session, ensure_default_images,
+    find_similar_product_image, find_similar_catalog_image, normalizar_categoria,
+    obtener_o_generar_color_categoria
+)
 
 # Integración OPENAI (si la usas para otros fines)
 import openai
@@ -112,27 +120,9 @@ def download_image_with_headers(url, filepath):
 ##############################################
 # FUNCIONES AUXILIARES
 ##############################################
-def normalizar_categoria(cat: str) -> str:
-    """Elimina acentos, pone en minúscula y quita espacios extras."""
-    if not cat:
-        return ""
-    cat = cat.strip().lower()
-    import unicodedata
-    cat = unicodedata.normalize("NFKD", cat)
-    cat = cat.encode("ascii", "ignore").decode("ascii")
-    return cat
-
 def generar_color_aleatorio() -> str:
     r = lambda: random.randint(0, 255)
     return f"#{r():02X}{r():02X}{r():02X}"
-
-def obtener_o_generar_color_categoria(cat_norm):
-    if not cat_norm:
-        return None
-    existente = Producto.query.filter_by(categoria=cat_norm).first()
-    if existente and existente.categoria_color:
-        return existente.categoria_color
-    return generar_color_aleatorio()
 
 def buscar_imagen_google_images(nombre_producto, codigo_barras_externo=None):
     """
@@ -287,6 +277,20 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 db.init_app(app)
 migrate = Migrate(app, db)
+
+# Inicialización antes de la primera solicitud
+@app.before_first_request
+def setup_application():
+    # Asegurar que existan las imágenes predeterminadas
+    ensure_default_images(BASE_DIR, UPLOAD_FOLDER)
+    
+    # Verificar si SerpAPI está disponible (opcional)
+    try:
+        requests.get('https://serpapi.com', timeout=2)
+        app.config['SERPAPI_AVAILABLE'] = True
+    except:
+        app.config['SERPAPI_AVAILABLE'] = False
+        print("AVISO: SerpAPI no disponible, usando imágenes predeterminadas")
 
 ##############################
 # Desactivar caché globalmente
@@ -499,22 +503,19 @@ def ver_productos():
 def agregar_producto():
     if request.method == 'POST':
         try:
+            # Optimizar la sesión de base de datos
+            session_db = optimize_db_session(db.session)
+            
             # =======================================
             # 1) Recoger campos del formulario
             # =======================================
             codigo_barras_externo = request.form.get("codigo_barras_externo", "").strip()
             nombre = request.form.get("nombre", "").strip()
-            stock_str = request.form.get("stock", "0").strip()
+            stock_str = request.form.get("stock", "0").strip() 
             costo_str = request.form.get("costo", "$0").strip()
             precio_str = request.form.get("precio_venta", "$0").strip()
             marca = request.form.get("marca", "").strip()
-
-            # Obtener ia_foto_filename para debugging
-            ia_foto_filename = request.form.get("ia_foto_filename", "").strip()
             
-            # Obtener displayed_image_url - IMPORTANTE
-            displayed_url = request.form.get("displayed_image_url", "").strip()
-
             # Categoría
             cat_option = request.form.get('categoria_option', 'existente')
             if cat_option == 'existente':
@@ -522,136 +523,52 @@ def agregar_producto():
             else:
                 categoria = request.form.get('categoria_nueva', '').strip()
             categoria_normalizada = normalizar_categoria(categoria)
-
+            
             # Favorito
-            es_favorito_val = request.form.get("es_favorito", "0")
+            es_favorito_val = request.form.get("es_favorito", "0") 
             es_favorito_bool = (es_favorito_val == "1")
-
+            
             # A la venta
             esta_a_la_venta_val = request.form.get("esta_a_la_venta", "1")
             esta_a_la_venta_bool = (esta_a_la_venta_val == "1")
-
+            
             # Caducidad
             toggle_caducidad = request.form.get("toggle_caducidad_estado", "DESACTIVADO")
             has_caducidad = (toggle_caducidad == "ACTIVADO")
-
+            
             caducidad_lapso = None
             if has_caducidad:
                 caducidad_lapso = request.form.get("caducidad_lapso", None)
-
+            
             # Parse numéricos
             try:
                 stock_int = int(stock_str)
             except:
                 stock_int = 0
-
-            def parse_money(value_str):
-                if value_str.startswith("$"):
-                    value_str = value_str[1:]
-                value_str = value_str.replace(",", "")
-                try:
-                    return float(value_str)
-                except:
-                    return 0.0
-
+                    
             costo_val = parse_money(costo_str)
             precio_val = parse_money(precio_str)
-
-            # =======================================
-            # 2) Procesar foto - VERSIÓN OPTIMIZADA
-            # =======================================
-            foto_final = None
             
-            # A. Primero verificamos si hay un archivo subido directamente
-            file = request.files.get('foto')
-            if file and file.filename and allowed_file(file.filename):
-                original_name = secure_filename(file.filename)
-                ext = original_name.rsplit('.', 1)[1].lower()
-                unique_name = f"{uuid.uuid4().hex}.{ext}"
-                
-                if not os.path.exists(app.config['UPLOAD_FOLDER']):
-                    os.makedirs(app.config['UPLOAD_FOLDER'])
-                filepath = os.path.join(app.config['UPLOAD_FOLDER'], unique_name)
-                file.save(filepath)
-                foto_final = unique_name
-            
-            # B. Si no hay archivo subido y hay displayed_url, procesarlo
-            elif displayed_url:
-                # Caso 1: URL local completa (/static/uploads/...)
-                if displayed_url.startswith("/static/uploads/"):
-                    img_filename = displayed_url.split("/uploads/")[1]
-                    filepath = os.path.join(UPLOAD_FOLDER, img_filename)
-                    if os.path.exists(filepath):
-                        foto_final = img_filename
-                
-                # Caso 2: Solo nombre de archivo
-                elif "/" not in displayed_url:
-                    filepath = os.path.join(UPLOAD_FOLDER, displayed_url)
-                    if os.path.exists(filepath):
-                        foto_final = displayed_url
-                
-                # Caso 3: URL externa (http/https)
-                elif displayed_url.startswith(("http://", "https://")):
-                    try:
-                        # Extraer extensión de la URL o usar jpg por defecto
-                        ext = displayed_url.rsplit('.', 1)[-1].split('?')[0].lower()
-                        if ext not in ALLOWED_EXTENSIONS:
-                            ext = "jpg"
-                        
-                        # Genera nombre único
-                        unique_name = f"{uuid.uuid4().hex}.{ext}"
-                        filepath = os.path.join(app.config['UPLOAD_FOLDER'], unique_name)
-                        
-                        # Intenta descargar con cabeceras personalizadas
-                        if download_image_with_headers(displayed_url, filepath):
-                            foto_final = unique_name
-            
-                    except Exception as e:
-                        print(f"DEBUG: Error al procesar URL externa: {e}")
-            
-            # C. Si no hay archivo subido ni URL válida, verificar si ia_foto_filename existe físicamente
-            if not foto_final and ia_foto_filename:
-                ia_filepath = os.path.join(app.config['UPLOAD_FOLDER'], ia_foto_filename)
-                if os.path.exists(ia_filepath):
-                    foto_final = ia_foto_filename
-            
-            # D. Como último recurso, buscar con SerpAPI
-            if not foto_final and nombre:
-                search_filename = buscar_imagen_google_images(nombre, codigo_barras_externo)
-                if search_filename:
-                    foto_final = search_filename
-                else:
-                    # E. Usar imagen predeterminada según categoría
-                    categoria_norm = categoria_normalizada.lower() if categoria_normalizada else "otros"
-                    if "botanas" in categoria_norm or "dulces" in categoria_norm or "snacks" in categoria_norm:
-                        default_img = "default_snack.jpg"
-                    elif "bebidas" in categoria_norm:
-                        default_img = "default_drink.jpg"
-                    elif "frutas" in categoria_norm or "verduras" in categoria_norm:
-                        default_img = "default_fruit.jpg"
-                    else:
-                        default_img = "default_product.jpg"
-                        
-                    # Verificar que existe o copiar desde static/img a uploads
-                    default_path = os.path.join(BASE_DIR, 'static', 'img', default_img)
-                    if os.path.exists(default_path):
-                        dest_path = os.path.join(UPLOAD_FOLDER, default_img)
-                        if not os.path.exists(dest_path):
-                            shutil.copy2(default_path, dest_path)
-                        foto_final = default_img
+            # Asegurar que existen las imágenes predeterminadas
+            ensure_default_images(BASE_DIR, UPLOAD_FOLDER)
             
             # =======================================
-            # 3) Crear el producto
+            # 2) Procesamiento optimizado de imagen
+            # =======================================
+            foto_final = process_image(request, UPLOAD_FOLDER, BASE_DIR, allowed_file)
+            
+            # =======================================
+            # 3) Crear el producto (sin esperar operaciones costosas)
             # =======================================
             nuevo = Producto(
                 nombre=nombre,
                 stock=stock_int,
-                costo=costo_val,
+                costo=costo_val, 
                 precio_venta=precio_val,
                 categoria=categoria_normalizada,
                 categoria_color=obtener_o_generar_color_categoria(categoria_normalizada),
                 foto=foto_final,
-                url_imagen=displayed_url,
+                url_imagen=request.form.get("displayed_image_url", ""),
                 is_approved=True,
                 empresa_id=session['user_id'],
                 codigo_barras_externo=codigo_barras_externo,
@@ -661,25 +578,32 @@ def agregar_producto():
                 has_caducidad=has_caducidad,
                 metodo_caducidad=caducidad_lapso
             )
-
+            
+            # Guardar en la base de datos
             db.session.add(nuevo)
             db.session.commit()
+            
+            # Limpiar sesión para liberar recursos
+            cleanup_db_session(db.session)
+            
             flash('Producto guardado exitosamente', 'success')
-
+            
         except Exception as e:
             db.session.rollback()
             flash(f'Error al guardar el producto: {str(e)}', 'danger')
             print(f"ERROR al guardar producto: {str(e)}")
-            
+        
         return redirect(url_for('ver_productos'))
-
+        
     else:
+        # GET - Cargar página de agregar producto
+        # Optimizar: Usamos una consulta más eficiente
         categorias_db = (
             db.session.query(Producto.categoria, Producto.categoria_color)
             .filter(Producto.categoria.isnot(None))
             .filter(Producto.categoria != '')
-            .filter(Producto.url_imagen != '')
             .distinct()
+            .limit(50)  # Limitar cantidad para que sea más rápido
             .all()
         )
         categories_list = [
@@ -746,8 +670,17 @@ def api_autocomplete():
     if not q:
         return jsonify({"results": []})
 
+    # Consulta optimizada con límite y selección específica de campos
     referencias = (
         CatalogoGlobal.query
+        .with_entities(
+            CatalogoGlobal.id,
+            CatalogoGlobal.codigo_barras,
+            CatalogoGlobal.nombre,
+            CatalogoGlobal.marca,
+            CatalogoGlobal.url_imagen,
+            CatalogoGlobal.categoria
+        )
         .filter(CatalogoGlobal.codigo_barras.ilike(f"%{q}%"))
         .limit(10)
         .all()
@@ -775,7 +708,15 @@ def api_find_by_code():
     if not code:
         return jsonify({"found": False})
 
+    # Optimizado: usar 'get' para búsqueda exacta por clave
     ref = CatalogoGlobal.query.filter_by(codigo_barras=code).first()
+    
+    # Búsqueda parcial si no encontramos coincidencia exacta y el código es suficientemente largo
+    if not ref and len(code) > 7:
+        ref = CatalogoGlobal.query.filter(
+            CatalogoGlobal.codigo_barras.startswith(code[:7])
+        ).first()
+    
     if not ref:
         return jsonify({"found": False})
 
@@ -806,23 +747,59 @@ def api_buscar_imagen():
 
     print(f"DEBUG API: Buscando imagen para nombre='{nombre}', codigo='{codigo}'")
     
-    imagen_filename = buscar_imagen_google_images(nombre, codigo)
-    if not imagen_filename:
+    # 1. Primero buscar en productos similares (rápido)
+    producto_similar = find_similar_product_image(nombre, db.session, Producto)
+    
+    if producto_similar and producto_similar.foto:
+        image_url = url_for('static', filename=f'uploads/{producto_similar.foto}', _external=False)
         return jsonify({
-            "status": "error",
-            "message": "No se pudo obtener la imagen. Verifica tu conexión o intenta con otro nombre/código."
+            "status": "success",
+            "image_url": image_url,
+            "filename": producto_similar.foto,
+            "message": "Imagen encontrada en base de datos"
         })
-
-    # Crear URL completa para la imagen
-    image_url = url_for('static', filename=f'uploads/{imagen_filename}', _external=False)
     
-    print(f"DEBUG API: Imagen encontrada: {image_url}, filename: {imagen_filename}")
+    # 2. Segundo, buscar en catálogo global
+    catalogo_similar = find_similar_catalog_image(nombre, db.session, CatalogoGlobal)
     
+    if catalogo_similar and catalogo_similar.url_imagen:
+        # Intentar obtener solo el nombre de archivo
+        if "/uploads/" in catalogo_similar.url_imagen:
+            filename = catalogo_similar.url_imagen.split("/uploads/")[-1]
+        else:
+            # Generar nombre aleatorio
+            filename = f"{uuid.uuid4().hex}.jpg"
+            
+        # Descargar en segundo plano si es URL externa
+        if catalogo_similar.url_imagen.startswith(("http://", "https://")):
+            async_download_image(
+                catalogo_similar.url_imagen, 
+                os.path.join(UPLOAD_FOLDER, filename)
+            )
+            
+        return jsonify({
+            "status": "success",
+            "image_url": catalogo_similar.url_imagen,
+            "filename": filename,
+            "message": "Imagen encontrada en catálogo global"
+        })
+    
+    # 3. AQUÍ usamos SerpAPI - solo cuando el usuario hizo clic en "Generar con IA"
+    # Esto es lo que consume recursos de SerpAPI, pero solo sucede cuando se solicita explícitamente
+    imagen_filename = buscar_imagen_google_images(nombre, codigo)
+    if imagen_filename:
+        image_url = url_for('static', filename=f'uploads/{imagen_filename}', _external=False)
+        return jsonify({
+            "status": "success",
+            "image_url": image_url,
+            "filename": imagen_filename,
+            "message": "Imagen encontrada correctamente"
+        })
+    
+    # Si no se encontró imagen
     return jsonify({
-        "status": "success",
-        "image_url": image_url,
-        "filename": imagen_filename,
-        "message": "Imagen encontrada correctamente"
+        "status": "error",
+        "message": "No se pudo obtener la imagen. Verifica tu conexión o intenta con otro nombre/código."
     })
 
 ##############################################
