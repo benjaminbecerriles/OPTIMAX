@@ -1208,8 +1208,9 @@
    */
   // Caché de resultados para autocomplete
   const autoCompleteCache = new Map();
+  let lastAbortController = null;
   
-  // Función debounce para limitar llamadas a la API
+  // Función debounce mejorada para limitar llamadas a la API
   function debounce(func, wait) {
     let timeout;
     return function(...args) {
@@ -1226,9 +1227,24 @@
   const inputExterno = document.getElementById("codigo_barras_externo");
   const autoContainer = document.getElementById("autocomplete-results");
   
+  // Precargar prefijos comunes para mejorar el rendimiento
+  function prefetchCommonPrefixes() {
+    // Verificar si el navegador soporta Service Worker
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+      // Prefijos comunes para productos en México
+      const commonPrefixes = ['7', '75', '750', '8', '80', '9', '90'];
+      
+      // Enviar mensaje al Service Worker para precargar
+      navigator.serviceWorker.controller.postMessage({
+        type: 'PREFETCH_AUTOCOMPLETE',
+        prefixes: commonPrefixes
+      });
+    }
+  }
+  
   if (inputExterno) {
     const fetchResults = debounce(function(query) {
-      // Si ya está en caché, usar ese valor
+      // Si ya está en caché, usar ese valor inmediatamente
       if (autoCompleteCache.has(query)) {
         displayAutocompleteResults(autoCompleteCache.get(query));
         return;
@@ -1241,24 +1257,55 @@
         return;
       }
       
-      // Hacer petición a la API
-      fetch(`/api/autocomplete?q=${encodeURIComponent(query)}&t=${Date.now()}`)
-        .then(response => response.json())
+      // Cancelar solicitud anterior si existe
+      if (lastAbortController) {
+        lastAbortController.abort();
+      }
+      
+      // Crear nuevo controlador para esta solicitud
+      lastAbortController = new AbortController();
+      const signal = lastAbortController.signal;
+      
+      // Hacer petición a la API - optimizada con timeout corto
+      fetch(`/api/autocomplete?q=${encodeURIComponent(query)}&t=${Date.now()}`, {
+        signal,
+        headers: {
+          'Cache-Control': 'max-age=3600',
+          'Pragma': 'no-cache'
+        }
+      })
+        .then(response => {
+          if (!response.ok) throw new Error('Error en la respuesta de red');
+          return response.json();
+        })
         .then(data => {
           // Guardar en caché
           autoCompleteCache.set(query, data);
+          
+          // Guardar en caché del Service Worker si está disponible
+          if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+            navigator.serviceWorker.controller.postMessage({
+              type: 'CACHE_API_RESPONSE',
+              endpoint: `/api/autocomplete?q=${query}`,
+              data: data,
+              expiry: Date.now() + (30 * 60 * 1000) // 30 minutos
+            });
+          }
+          
           displayAutocompleteResults(data);
         })
         .catch(err => {
-          console.error("Error en autocomplete", err);
-          autoContainer.innerHTML = "";
-          autoContainer.style.display = "none";
+          if (err.name !== 'AbortError') {
+            console.error("Error en autocomplete", err);
+            autoContainer.innerHTML = "";
+            autoContainer.style.display = "none";
+          }
         });
-    }, 250); // 250ms de delay para evitar muchas llamadas
+    }, 50); // Reducido a 50ms para mayor sensación de inmediatez
     
     function displayAutocompleteResults(data) {
       let results = data.results || [];
-      results = results.slice(0, 4); // Limitar a 4 resultados
+      results = results.slice(0, 4); // Limitar a 4 resultados para rendimiento
       
       if (results.length === 0) {
         autoContainer.innerHTML = "";
@@ -1294,9 +1341,51 @@
       autoContainer.style.display = "block";
     }
     
+    // Usar requestIdleCallback para cargar de manera optimizada
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(() => {
+        prefetchCommonPrefixes();
+      });
+    } else {
+      // Fallback para navegadores que no soportan requestIdleCallback
+      setTimeout(prefetchCommonPrefixes, 1000);
+    }
+    
     inputExterno.addEventListener("input", function() {
       let query = this.value.trim();
-      fetchResults(query);
+      if (query.length > 0) {
+        fetchResults(query);
+      } else {
+        autoContainer.innerHTML = "";
+        autoContainer.style.display = "none";
+      }
+    });
+    
+    // Optimización: prefetch del primer carácter en keydown
+    inputExterno.addEventListener("keydown", function(e) {
+      // Solo procesar teclas alfanuméricas (no especiales como Shift, Ctrl, etc)
+      if (e.key.length === 1 && this.value.length === 0) {
+        const firstChar = e.key.trim();
+        if (firstChar && !autoCompleteCache.has(firstChar)) {
+          // Pre-fetch del primer carácter mientras el usuario sigue escribiendo
+          setTimeout(() => {
+            if (!autoCompleteCache.has(firstChar)) {
+              fetch(`/api/autocomplete?q=${encodeURIComponent(firstChar)}&t=${Date.now()}`, {
+                headers: {
+                  'Cache-Control': 'max-age=3600'
+                }
+              })
+                .then(response => response.json())
+                .then(data => {
+                  autoCompleteCache.set(firstChar, data);
+                })
+                .catch(err => {
+                  console.log("Error en prefetch:", err);
+                });
+            }
+          }, 10);
+        }
+      }
     });
   }
 
@@ -1756,6 +1845,17 @@
         
         // Guardar en caché para futuras búsquedas
         scannedCodesCache.set(code, data);
+        
+        // Guardar en caché del Service Worker
+        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+          navigator.serviceWorker.controller.postMessage({
+            type: 'CACHE_API_RESPONSE',
+            endpoint: `/api/find_by_code?codigo=${encodeURIComponent(code)}`,
+            data: data,
+            expiry: Date.now() + (60 * 60 * 1000) // 1 hora
+          });
+        }
+        
         showScanFound(data);
       })
       .catch(err => {
