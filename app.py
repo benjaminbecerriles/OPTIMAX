@@ -516,6 +516,19 @@ def agregar_producto():
             precio_str = request.form.get("precio_venta", "$0").strip()
             marca = request.form.get("marca", "").strip()
             
+            # NUEVO: Verificar duplicados si hay código de barras
+            if codigo_barras_externo:
+                # Buscar productos con el mismo código (solo en los productos de esta empresa)
+                producto_existente = Producto.query.filter_by(
+                    empresa_id=session['user_id'],
+                    codigo_barras_externo=codigo_barras_externo
+                ).first()
+                
+                if producto_existente:
+                    # Si existe, devolver mensaje de error
+                    flash(f'Error: Ya existe un producto con el código de barras {codigo_barras_externo}', 'danger')
+                    return redirect(url_for('agregar_producto'))
+            
             # Categoría
             cat_option = request.form.get('categoria_option', 'existente')
             if cat_option == 'existente':
@@ -820,6 +833,23 @@ def api_buscar_imagen():
         "status": "error",
         "message": "No se pudo obtener la imagen. Verifica tu conexión o intenta con otro nombre/código."
     })
+
+##############################
+# NUEVO ENDPOINT: verificar código de barras existente
+##############################
+@app.route('/api/check_barcode_exists', methods=['GET'])
+@login_requerido
+def check_barcode_exists():
+    codigo = request.args.get('codigo', '').strip()
+    if not codigo:
+        return jsonify({"exists": False})
+    
+    producto_existente = Producto.query.filter_by(
+        empresa_id=session['user_id'],
+        codigo_barras_externo=codigo
+    ).first()
+    
+    return jsonify({"exists": producto_existente is not None})
 
 ##############################################
 # FUNCIÓN DE SINCRONIZACIÓN
