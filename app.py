@@ -543,11 +543,11 @@ def agregar_producto():
         print("DEBUG: precio_val =>", precio_val)
 
         # =======================================
-        # 3) Procesar foto - CÓDIGO MEJORADO Y CORREGIDO
+        # 3) Procesar foto - VERSIÓN MEJORADA
         # =======================================
         foto_final = None
         
-        # A. Primero verificamos si hay un archivo subido
+        # A. Primero verificamos si hay un archivo subido directamente
         file = request.files.get('foto')
         print("DEBUG: file =>", file)
         if file and file.filename:
@@ -572,26 +572,27 @@ def agregar_producto():
         else:
             print("DEBUG: No se subió archivo en 'foto'")
             
-        # B. Si no hay archivo subido, revisamos ia_foto_filename como primera opción
+        # B. Si no hay archivo subido, verificamos si ia_foto_filename existe físicamente
         if not foto_final and ia_foto_filename:
             ia_filepath = os.path.join(app.config['UPLOAD_FOLDER'], ia_foto_filename)
             if os.path.exists(ia_filepath):
                 foto_final = ia_foto_filename
                 print(f"DEBUG: Usando ia_foto_filename existente => {ia_foto_filename}")
             else:
-                print(f"DEBUG: El archivo IA no existe en uploads => {ia_filepath}")
+                print(f"DEBUG: El archivo IA referenciado no existe: {ia_filepath}")
+                # No limpiamos ia_foto_filename aquí
         
-        # C. Si no tenemos foto aún, intentamos displayed_image_url
+        # C. Si no tenemos foto aún, intentamos con displayed_image_url
         if not foto_final and displayed_url:
-            # Caso 1: Es una URL local completa
+            # Caso 1: Es una URL local completa (/static/uploads/...)
             if displayed_url.startswith("/static/uploads/"):
                 img_filename = displayed_url.split("/uploads/")[1]
                 filepath = os.path.join(app.config['UPLOAD_FOLDER'], img_filename)
                 if os.path.exists(filepath):
                     foto_final = img_filename
-                    print(f"DEBUG: Usando imagen de ruta completa => {img_filename}")
+                    print(f"DEBUG: Usando imagen de ruta local completa => {img_filename}")
                 else:
-                    print(f"DEBUG: La imagen en ruta completa no existe => {filepath}")
+                    print(f"DEBUG: La imagen en ruta local no existe => {filepath}")
             
             # Caso 2: Es solo un nombre de archivo
             elif "/" not in displayed_url:
@@ -625,8 +626,8 @@ def agregar_producto():
                 except Exception as e:
                     print(f"DEBUG: Error al procesar URL externa: {e}")
         
-        # D. Como último recurso, buscar con SerpAPI
-        if not foto_final and nombre and codigo_barras_externo:
+        # D. Como último recurso, buscar con SerpAPI - SIEMPRE intentamos esto si aún no tenemos foto
+        if not foto_final and nombre:
             print(f"DEBUG: Intentando buscar imagen con SerpAPI para: {nombre} {codigo_barras_externo}")
             search_filename = buscar_imagen_google_images(nombre, codigo_barras_externo)
             if search_filename:
