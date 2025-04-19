@@ -503,12 +503,7 @@ def ver_productos():
 def agregar_producto():
     if request.method == 'POST':
         try:
-            # Optimizar la sesión de base de datos
-            session_db = optimize_db_session(db.session)
-            
-            # =======================================
-            # 1) Recoger campos del formulario
-            # =======================================
+            # Recoger campos del formulario
             codigo_barras_externo = request.form.get("codigo_barras_externo", "").strip()
             nombre = request.form.get("nombre", "").strip()
             stock_str = request.form.get("stock", "0").strip() 
@@ -537,42 +532,79 @@ def agregar_producto():
                 categoria = request.form.get('categoria_nueva', '').strip()
             categoria_normalizada = normalizar_categoria(categoria)
             
-            # Favorito
-            es_favorito_val = request.form.get("es_favorito", "0") 
-            es_favorito_bool = (es_favorito_val == "1")
-            
-            # A la venta
-            esta_a_la_venta_val = request.form.get("esta_a_la_venta", "1")
-            esta_a_la_venta_bool = (esta_a_la_venta_val == "1")
+            # Favorito y a la venta
+            es_favorito_bool = (request.form.get("es_favorito", "0") == "1")
+            esta_a_la_venta_bool = (request.form.get("esta_a_la_venta", "1") == "1")
             
             # Caducidad
-            toggle_caducidad = request.form.get("toggle_caducidad_estado", "DESACTIVADO")
-            has_caducidad = (toggle_caducidad == "ACTIVADO")
-            
-            caducidad_lapso = None
-            if has_caducidad:
-                caducidad_lapso = request.form.get("caducidad_lapso", None)
+            has_caducidad = (request.form.get("toggle_caducidad_estado", "DESACTIVADO") == "ACTIVADO")
+            caducidad_lapso = request.form.get("caducidad_lapso", None) if has_caducidad else None
             
             # Parse numéricos
             try:
                 stock_int = int(stock_str)
             except:
                 stock_int = 0
-                    
+            
             costo_val = parse_money(costo_str)
             precio_val = parse_money(precio_str)
             
-            # Asegurar que existen las imágenes predeterminadas
-            ensure_default_images(BASE_DIR, UPLOAD_FOLDER)
+            # ===== MANEJO SIMPLIFICADO DE IMÁGENES =====
+            foto_final = None
             
-            # =======================================
-            # 2) Procesamiento optimizado de imagen
-            # =======================================
-            foto_final = process_image(request, UPLOAD_FOLDER, BASE_DIR, allowed_file)
+            # 1. Primero intentar usar el archivo subido
+            if request.files.get('foto') and request.files['foto'].filename:
+                file = request.files['foto']
+                if allowed_file(file.filename):
+                    # Generar nombre único
+                    ext = file.filename.rsplit('.', 1)[1].lower()
+                    filename = f"{uuid.uuid4().hex}.{ext}"
+                    
+                    # Guardar archivo
+                    if not os.path.exists(UPLOAD_FOLDER):
+                        os.makedirs(UPLOAD_FOLDER)
+                    
+                    file.save(os.path.join(UPLOAD_FOLDER, filename))
+                    foto_final = filename
             
-            # =======================================
-            # 3) Crear el producto (sin esperar operaciones costosas)
-            # =======================================
+            # 2. Si no hay archivo, usar displayed_image_url o ia_foto_filename
+            if not foto_final:
+                displayed_url = request.form.get("displayed_image_url", "").strip()
+                ia_filename = request.form.get("ia_foto_filename", "").strip()
+                
+                if ia_filename and os.path.exists(os.path.join(UPLOAD_FOLDER, ia_filename)):
+                    # Usar el archivo IA que ya existe
+                    foto_final = ia_filename
+                elif displayed_url:
+                    # Es una URL - intentar descargar o usar nombre de archivo
+                    if "/uploads/" in displayed_url:
+                        # Es local, extraer nombre
+                        foto_final = displayed_url.split("/uploads/")[-1]
+                    elif displayed_url.startswith(("http://", "https://")):
+                        # Es externa, descargar
+                        try:
+                            ext = "jpg"  # Default
+                            filename = f"{uuid.uuid4().hex}.{ext}"
+                            filepath = os.path.join(UPLOAD_FOLDER, filename)
+                            
+                            # Descarga síncrona para asegurar que se complete
+                            response = requests.get(displayed_url, timeout=10)
+                            if response.status_code == 200:
+                                if not os.path.exists(os.path.dirname(filepath)):
+                                    os.makedirs(os.path.dirname(filepath))
+                                
+                                with open(filepath, "wb") as f:
+                                    f.write(response.content)
+                                
+                                foto_final = filename
+                        except Exception as e:
+                            print(f"Error descargando imagen: {e}")
+            
+            # 3. Si todo falla, usar imagen predeterminada
+            if not foto_final:
+                foto_final = "default_product.jpg"
+                
+            # Crear el producto
             nuevo = Producto(
                 nombre=nombre,
                 stock=stock_int,
@@ -595,10 +627,6 @@ def agregar_producto():
             # Guardar en la base de datos
             db.session.add(nuevo)
             db.session.commit()
-            
-            # Limpiar sesión para liberar recursos
-            cleanup_db_session(db.session)
-            
             flash('Producto guardado exitosamente', 'success')
             
         except Exception as e:
@@ -610,7 +638,6 @@ def agregar_producto():
         
     else:
         # GET - Cargar página de agregar producto
-        # Optimizar: Usamos una consulta más eficiente
         categorias_db = (
             db.session.query(Producto.categoria, Producto.categoria_color)
             .filter(Producto.categoria.isnot(None))
@@ -628,14 +655,170 @@ def agregar_producto():
 @app.route('/editar-producto/<int:prod_id>', methods=['GET','POST'])
 @login_requerido
 def editar_producto(prod_id):
-    # (Mantén inalterado o implementa si gustas)
-    pass
+    """Edita un producto existente."""
+    producto = Producto.query.get_or_404(prod_id)
+    
+    # Verificar que el producto pertenece a la empresa actual
+    if producto.empresa_id != session.get('user_id'):
+        flash('No tienes permiso para editar este producto.', 'danger')
+        return redirect(url_for('ver_productos'))
+    
+    if request.method == 'POST':
+        try:
+            # Recoger datos del formulario
+            nombre = request.form.get("nombre", "").strip()
+            stock_str = request.form.get("stock", "0").strip() 
+            costo_str = request.form.get("costo", "$0").strip()
+            precio_str = request.form.get("precio_venta", "$0").strip()
+            marca = request.form.get("marca", "").strip()
+            
+            # Categoría
+            cat_option = request.form.get('categoria_option', 'existente')
+            if cat_option == 'existente':
+                categoria = request.form.get('categoria_existente', '').strip()
+            else:
+                categoria = request.form.get('categoria_nueva', '').strip()
+            categoria_normalizada = normalizar_categoria(categoria)
+            
+            # Favorito y a la venta
+            es_favorito_bool = (request.form.get("es_favorito", "0") == "1")
+            esta_a_la_venta_bool = (request.form.get("esta_a_la_venta", "1") == "1")
+            
+            # Caducidad
+            has_caducidad = (request.form.get("toggle_caducidad_estado", "DESACTIVADO") == "ACTIVADO")
+            caducidad_lapso = request.form.get("caducidad_lapso", None) if has_caducidad else None
+            
+            # Parse numéricos
+            try:
+                stock_int = int(stock_str)
+            except:
+                stock_int = 0
+            
+            costo_val = parse_money(costo_str)
+            precio_val = parse_money(precio_str)
+            
+            # ===== MANEJO SIMPLIFICADO DE IMÁGENES =====
+            nueva_foto = None
+            
+            # 1. Intentar usar el archivo subido
+            if request.files.get('foto') and request.files['foto'].filename:
+                file = request.files['foto']
+                if allowed_file(file.filename):
+                    # Generar nombre único
+                    ext = file.filename.rsplit('.', 1)[1].lower()
+                    filename = f"{uuid.uuid4().hex}.{ext}"
+                    
+                    # Guardar archivo
+                    if not os.path.exists(UPLOAD_FOLDER):
+                        os.makedirs(UPLOAD_FOLDER)
+                    
+                    file.save(os.path.join(UPLOAD_FOLDER, filename))
+                    nueva_foto = filename
+            
+            # 2. Si no hay archivo, usar displayed_image_url o ia_foto_filename
+            if not nueva_foto:
+                displayed_url = request.form.get("displayed_image_url", "").strip()
+                ia_filename = request.form.get("ia_foto_filename", "").strip()
+                
+                if ia_filename and os.path.exists(os.path.join(UPLOAD_FOLDER, ia_filename)):
+                    # Usar el archivo IA que ya existe
+                    nueva_foto = ia_filename
+                elif displayed_url:
+                    # Es una URL - intentar descargar o usar nombre de archivo
+                    if "/uploads/" in displayed_url:
+                        # Es local, extraer nombre
+                        nueva_foto = displayed_url.split("/uploads/")[-1]
+                    elif displayed_url.startswith(("http://", "https://")):
+                        # Es externa, descargar
+                        try:
+                            ext = "jpg"  # Default
+                            filename = f"{uuid.uuid4().hex}.{ext}"
+                            filepath = os.path.join(UPLOAD_FOLDER, filename)
+                            
+                            # Descarga síncrona para asegurar que se complete
+                            response = requests.get(displayed_url, timeout=10)
+                            if response.status_code == 200:
+                                if not os.path.exists(os.path.dirname(filepath)):
+                                    os.makedirs(os.path.dirname(filepath))
+                                
+                                with open(filepath, "wb") as f:
+                                    f.write(response.content)
+                                
+                                nueva_foto = filename
+                        except Exception as e:
+                            print(f"Error descargando imagen: {e}")
+            
+            # Actualizar el producto con los nuevos datos
+            producto.nombre = nombre
+            producto.stock = stock_int
+            producto.costo = costo_val
+            producto.precio_venta = precio_val
+            producto.categoria = categoria_normalizada
+            producto.categoria_color = obtener_o_generar_color_categoria(categoria_normalizada)
+            
+            # Actualizar foto solo si hay una nueva
+            if nueva_foto:
+                producto.foto = nueva_foto
+                producto.url_imagen = request.form.get("displayed_image_url", "")
+            
+            # Actualizar otros campos
+            producto.codigo_barras_externo = request.form.get("codigo_barras_externo", "").strip()
+            producto.marca = marca
+            producto.es_favorito = es_favorito_bool
+            producto.esta_a_la_venta = esta_a_la_venta_bool
+            producto.has_caducidad = has_caducidad
+            producto.metodo_caducidad = caducidad_lapso
+            
+            # Guardar en la base de datos
+            db.session.commit()
+            flash('Producto actualizado exitosamente', 'success')
+            
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al actualizar el producto: {str(e)}', 'danger')
+            print(f"ERROR al actualizar producto: {str(e)}")
+        
+        return redirect(url_for('ver_productos'))
+    
+    # GET - Cargar página de editar producto
+    categorias_db = (
+        db.session.query(Producto.categoria, Producto.categoria_color)
+        .filter(Producto.categoria.isnot(None))
+        .filter(Producto.categoria != '')
+        .distinct()
+        .limit(50)
+        .all()
+    )
+    categories_list = [
+        {"nombre": c[0], "color": c[1] if c[1] else "#000000"}
+        for c in categorias_db
+    ]
+    
+    # Verificar si la categoría del producto existe en la lista
+    cat_encontrada = any(cat["nombre"] == producto.categoria for cat in categories_list)
+    
+    return render_template(
+        'editar_producto.html', 
+        producto=producto,
+        categories=categories_list,
+        cat_encontrada=cat_encontrada
+    )
 
 @app.route('/eliminar-producto/<int:prod_id>')
 @login_requerido
 def eliminar_producto(prod_id):
-    # (Mantén inalterado o implementa si gustas)
-    pass
+    """Elimina un producto del inventario."""
+    try:
+        producto = Producto.query.get_or_404(prod_id)
+        db.session.delete(producto)
+        db.session.commit()
+        flash('Producto eliminado correctamente', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error al eliminar el producto: {str(e)}', 'danger')
+    
+    # Esta línea es crucial - asegura que siempre se devuelva una respuesta
+    return redirect(url_for('ver_productos'))
 
 ##############################
 # ESCÁNER / CAPTURA RÁPIDA
