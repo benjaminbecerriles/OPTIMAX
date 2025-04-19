@@ -1188,10 +1188,11 @@
       imageProgressBar.style.width = `${progress}%`;
     }, 100);
     
-    // Llamada a la API con caché
+    // Llamada a la API con parámetro adicional para forzar búsqueda nueva
     const queryParams = {
       nombre: nombreInput.value.trim(),
       codigo: barcodeInput.value.trim(),
+      forceSearch: true, // Este es el nuevo parámetro para forzar la búsqueda
       cacheBuster: Date.now() // Evitar caché en navegador para solicitudes únicas
     };
     

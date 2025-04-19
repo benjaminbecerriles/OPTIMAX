@@ -730,7 +730,7 @@ def api_find_by_code():
     })
 
 ##############################
-# NUEVO ENDPOINT: /api/buscar-imagen
+# ENDPOINT: /api/buscar-imagen
 ##############################
 @app.route('/api/buscar-imagen', methods=['POST'])
 @login_requerido
@@ -738,6 +738,7 @@ def api_buscar_imagen():
     data = request.get_json() or {}
     nombre = data.get("nombre", "").strip()
     codigo = data.get("codigo", "").strip()
+    force_search = data.get("forceSearch", False)  # Nuevo parámetro
 
     if not nombre:
         return jsonify({
@@ -745,8 +746,26 @@ def api_buscar_imagen():
             "message": "Debes proporcionar al menos el nombre del producto para generar la imagen."
         })
 
-    print(f"DEBUG API: Buscando imagen para nombre='{nombre}', codigo='{codigo}'")
+    print(f"DEBUG API: Buscando imagen para nombre='{nombre}', codigo='{codigo}', force_search={force_search}")
     
+    # Si force_search es True, saltamos directamente a buscar con SerpAPI
+    if force_search:
+        imagen_filename = buscar_imagen_google_images(nombre, codigo)
+        if imagen_filename:
+            image_url = url_for('static', filename=f'uploads/{imagen_filename}', _external=False)
+            return jsonify({
+                "status": "success",
+                "image_url": image_url,
+                "filename": imagen_filename,
+                "message": "Imagen encontrada correctamente (búsqueda forzada)"
+            })
+        else:
+            return jsonify({
+                "status": "error",
+                "message": "No se pudo obtener la imagen. Verifica tu conexión o intenta con otro nombre/código."
+            })
+    
+    # Proceso normal si no es forzado
     # 1. Primero buscar en productos similares (rápido)
     producto_similar = find_similar_product_image(nombre, db.session, Producto)
     
