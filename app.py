@@ -7,6 +7,7 @@ import time
 import threading
 import sys
 import shutil  # Para operaciones de archivos
+import urllib.parse  # Para codificar parámetros de URL
 
 from flask import Flask, request, render_template, session, redirect, url_for, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -147,31 +148,60 @@ def buscar_imagen_google_images(nombre_producto, codigo_barras_externo=None):
         "num": "9"
     }
     print(f"Buscando imagen en Google Images para: {query}")
-
+    print(f"URL SerpAPI: https://serpapi.com/search?{urllib.parse.urlencode(params)}")
+    
     try:
         response = requests.get("https://serpapi.com/search", params=params)
+        # Verificar el código de estado HTTP
+        if response.status_code != 200:
+            print(f"Error: SerpAPI devolvió código {response.status_code}")
+            print(f"Respuesta: {response.text}")
+            return None
+            
         data = response.json()
+        
+        # Verificar si hay un error en la respuesta JSON
+        if "error" in data:
+            print(f"Error de SerpAPI: {data['error']}")
+            return None
+            
+        # Verificar si hay resultados de imágenes
         images = data.get("images_results", [])
-        if images:
-            first_image = images[0]
-            image_url = first_image.get("thumbnail") or first_image.get("original")
-            if image_url:
-                # Usar la función mejorada para descargar
-                ext = image_url.rsplit('.', 1)[-1].split('?')[0]
-                if ext not in ALLOWED_EXTENSIONS:
-                    ext = "jpg"
-                filename = secure_filename(f"{random.randint(100000,999999)}.{ext}")
-                if not os.path.exists(UPLOAD_FOLDER):
-                    os.makedirs(UPLOAD_FOLDER)
-                filepath = os.path.join(UPLOAD_FOLDER, filename)
-                
-                if download_image_with_headers(image_url, filepath):
-                    print("Imagen descargada y guardada como:", filename)
-                    return filename
+        if not images:
+            print("No se encontraron imágenes para esta consulta")
+            return None
+            
+        # Usar la primera imagen encontrada
+        first_image = images[0]
+        image_url = first_image.get("thumbnail") or first_image.get("original")
+        
+        if not image_url:
+            print("URL de imagen no encontrada en la respuesta")
+            return None
+            
+        # Descargar la imagen
+        print(f"Intentando descargar imagen desde: {image_url}")
+        ext = image_url.rsplit('.', 1)[-1].split('?')[0]
+        if ext not in ALLOWED_EXTENSIONS:
+            ext = "jpg"
+        filename = secure_filename(f"{random.randint(100000,999999)}.{ext}")
+        
+        if not os.path.exists(UPLOAD_FOLDER):
+            os.makedirs(UPLOAD_FOLDER)
+        filepath = os.path.join(UPLOAD_FOLDER, filename)
+        
+        # Intentar descargar con diferentes cabeceras
+        if download_image_with_headers(image_url, filepath):
+            print("Imagen descargada y guardada como:", filename)
+            return filename
+        else:
+            print(f"No se pudo descargar la imagen desde {image_url}")
+            return None
     except Exception as e:
-        print("Error al buscar imagen con google_images:", e)
-
-    return None
+        print(f"Error completo al buscar imagen con google_images: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return None
 
 ##############################################
 # GPT (opcional) - sin cambios
@@ -812,24 +842,31 @@ def api_buscar_imagen():
     nombre = data.get("nombre", "").strip()
     codigo = data.get("codigo", "").strip()
 
-    if not nombre or not codigo:
+    if not nombre:
         return jsonify({
             "status": "error",
-            "message": "Debes proporcionar 'nombre' y 'codigo' para generar la imagen."
+            "message": "Debes proporcionar al menos el nombre del producto para generar la imagen."
         })
 
+    print(f"DEBUG API: Buscando imagen para nombre='{nombre}', codigo='{codigo}'")
+    
     imagen_filename = buscar_imagen_google_images(nombre, codigo)
     if not imagen_filename:
         return jsonify({
             "status": "error",
-            "message": "No se pudo obtener la imagen de SerpAPI."
+            "message": "No se pudo obtener la imagen. Verifica tu conexión o intenta con otro nombre/código."
         })
 
+    # Crear URL completa para la imagen
     image_url = url_for('static', filename=f'uploads/{imagen_filename}', _external=False)
+    
+    print(f"DEBUG API: Imagen encontrada: {image_url}, filename: {imagen_filename}")
+    
     return jsonify({
         "status": "success",
         "image_url": image_url,
-        "filename": imagen_filename
+        "filename": imagen_filename,
+        "message": "Imagen encontrada correctamente"
     })
 
 ##############################################

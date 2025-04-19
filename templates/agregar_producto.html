@@ -901,8 +901,8 @@
     const fotoDropdown = document.getElementById("fotoDropdown");
     fotoDropdown.style.display = "none";
 
-    if (!barcodeInput.value || !nombreInput.value) {
-      showCenteredNotification("Debes ingresar un CÓDIGO DE BARRAS y el NOMBRE DEL PRODUCTO para generar una imagen con IA.");
+    if (!nombreInput.value) {
+      showCenteredNotification("Debes ingresar al menos el NOMBRE DEL PRODUCTO para generar una imagen con IA.");
       return;
     }
     
@@ -917,16 +917,29 @@
       </div>
     `;
     
+    // Llamada a la API
     fetch("/api/buscar-imagen", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nombre: nombreInput.value.trim(), codigo: barcodeInput.value.trim() })
+      body: JSON.stringify({ 
+          nombre: nombreInput.value.trim(), 
+          codigo: barcodeInput.value.trim() 
+      })
     })
-    .then(res => res.json())
+    .then(res => {
+        // Verificar si la respuesta es válida
+        if (!res.ok) {
+            throw new Error(`Error HTTP: ${res.status}`);
+        }
+        return res.json();
+    })
     .then(data => {
+      console.log("Respuesta de API:", data); // Log para depuración
+      
       if (data.status === "success" && data.image_url) {
         // Cargar la imagen para verificar que sea accesible
         const testImg = new Image();
+        
         testImg.onload = function() {
           // La imagen se cargó correctamente, mostrarla
           fotoPlaceholder.innerHTML = `
@@ -935,24 +948,16 @@
           `;
           fotoPlaceholder.classList.add("has-image");
 
-          // Guardar el nombre del archivo en ia_foto_filename
-          // La API ahora devuelve tanto image_url como filename
-          if (data.filename) {
-            document.getElementById("ia_foto_filename").value = data.filename;
-          } else {
-            // Extraer el nombre del archivo de la URL si no viene como propiedad separada
-            const filename = data.image_url.split("/uploads/")[1];
-            document.getElementById("ia_foto_filename").value = filename || "";
-          }
-          
-          // Guardar la URL en displayed_image_url
+          // Guardar el nombre del archivo y la URL
+          document.getElementById("ia_foto_filename").value = data.filename || "";
           document.getElementById("displayed_image_url").value = data.image_url;
 
           attachRemoveImageListener();
         };
         
         testImg.onerror = function() {
-          // Si la imagen no puede cargarse
+          // Error al cargar la imagen
+          console.error("No se pudo cargar la imagen:", data.image_url);
           fotoPlaceholder.innerHTML = `
             <button type="button" class="no-image-icon" id="btnCargarFoto">&#8942;</button>
             <div class="foto-dropdown" id="fotoDropdown" style="display:none;">
@@ -989,7 +994,7 @@
           <button type="button" class="dropdown-item btn btn-secondary" id="dropdownGenerarIA">Generar con IA</button>
         </div>
       `;
-      showCenteredNotification("Ocurrió un error al buscar la imagen.");
+      showCenteredNotification("Ocurrió un error al buscar la imagen: " + error.message);
       rebindPhotoDropdownEvents();
     });
   }
@@ -1359,12 +1364,14 @@
           cerrarModalEscaner();
           return;
         }
+        console.log("Quagga inicializado correctamente");
         Quagga.start();
       }
     );
     Quagga.onDetected(function (result) {
       if (!result || !result.codeResult) return;
       const codigoDetectado = result.codeResult.code;
+      console.log("Código detectado:", codigoDetectado);
       const inputExterno = document.getElementById("codigo_barras_externo");
       if (inputExterno) {
         inputExterno.value = codigoDetectado;
@@ -1514,5 +1521,6 @@
            pointer-events:none;"
   >
   </div>
+</div>
 </div>
 {% endblock %}
