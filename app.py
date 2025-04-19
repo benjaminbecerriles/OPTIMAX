@@ -262,6 +262,25 @@ def buscar_nombre_categoria_por_barcode(codigo_barras):
     titulos = buscar_titulos_serpapi(codigo_barras)
     return gpt_extraer_nombre_categoria(titulos)
 
+# Función para truncar URLs largas de manera segura
+def truncar_url(url, max_length=95):
+    """
+    Trunca una URL para que quepa en un campo de longitud limitada.
+    Si la URL es muy larga, toma solo el nombre del archivo o parte de él.
+    """
+    if not url or len(url) <= max_length:
+        return url
+    
+    # Extraer el nombre del archivo (parte después del último '/')
+    nombre_archivo = url.split('/')[-1]
+    
+    # Si el nombre de archivo es demasiado largo, tomar los últimos caracteres
+    if len(nombre_archivo) > max_length:
+        return nombre_archivo[-max_length:]
+    
+    # Si el nombre de archivo es lo suficientemente corto, úsalo
+    return nombre_archivo
+
 ##############################################
 # FLASK APP
 ##############################################
@@ -603,6 +622,9 @@ def agregar_producto():
             # 3. Si todo falla, usar imagen predeterminada
             if not foto_final:
                 foto_final = "default_product.jpg"
+            
+            # Usar la nueva función para truncar la URL para asegurar que quepa en la columna
+            url_imagen_truncada = truncar_url(request.form.get("displayed_image_url", "").strip(), 95)
                 
             # Crear el producto
             nuevo = Producto(
@@ -613,7 +635,7 @@ def agregar_producto():
                 categoria=categoria_normalizada,
                 categoria_color=obtener_o_generar_color_categoria(categoria_normalizada),
                 foto=foto_final,
-                url_imagen=request.form.get("displayed_image_url", ""),
+                url_imagen=url_imagen_truncada,  # Usando la URL truncada
                 is_approved=True,
                 empresa_id=session['user_id'],
                 codigo_barras_externo=codigo_barras_externo,
@@ -748,6 +770,9 @@ def editar_producto(prod_id):
                         except Exception as e:
                             print(f"Error descargando imagen: {e}")
             
+            # Usar la nueva función para truncar la URL para asegurar que quepa en la columna
+            url_imagen_truncada = truncar_url(request.form.get("displayed_image_url", "").strip(), 95)
+            
             # Actualizar el producto con los nuevos datos
             producto.nombre = nombre
             producto.stock = stock_int
@@ -759,7 +784,7 @@ def editar_producto(prod_id):
             # Actualizar foto solo si hay una nueva
             if nueva_foto:
                 producto.foto = nueva_foto
-                producto.url_imagen = request.form.get("displayed_image_url", "")
+                producto.url_imagen = url_imagen_truncada  # Usando la URL truncada
             
             # Actualizar otros campos
             producto.codigo_barras_externo = request.form.get("codigo_barras_externo", "").strip()
@@ -1053,6 +1078,9 @@ def sync_gsheet_to_catalogo():
         categoria = row[3].strip()
         unidad = row[4].strip()
         url_img = row[5].strip()
+
+        # Truncar URL si es demasiado larga para evitar errores
+        url_img = truncar_url(url_img, 95)
 
         codigos_sheet.add(codigo)
 
