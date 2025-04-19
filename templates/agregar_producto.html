@@ -955,123 +955,11 @@
       floatingLabel.style.display = "none";
     }
   }
-  
-  document.addEventListener("DOMContentLoaded", function() {
-    // Referencias a elementos de carga
-    const loadingOverlay = document.getElementById("loadingOverlay");
-    const productForm = document.getElementById("productForm");
-    const submitBtn = document.getElementById("submitBtn");
-    const imageProgressBar = document.getElementById("imageProgressBar");
-    const imageProgressContainer = document.querySelector(".image-upload-progress");
-    
-    // Inicializar etiquetas flotantes para campos específicos
-    const inputs = document.querySelectorAll(
-      "#codigo_barras_externo, #nombre, #stock, #costo, #precio_venta, #marca"
-    );
-    
-    inputs.forEach(input => {
-      updateFloatingLabel(input);
-      input.addEventListener("input", () => {
-        updateFloatingLabel(input);
-        if (input.id === "codigo_barras_externo") {
-          hideScanFoundContainer();
-        }
-      });
-    });
-    
-    // Optimización para prevenir envíos múltiples y mostrar progreso
-    productForm.addEventListener("submit", function(e) {
-      // Si el formulario ya está enviándose, cancelar este envío
-      if (productForm.getAttribute("data-submitting") === "true") {
-        e.preventDefault();
-        return false;
-      }
-      
-      // Verificación rápida de valores obligatorios
-      const nombre = document.getElementById("nombre").value.trim();
-      if (!nombre) {
-        e.preventDefault();
-        showCenteredNotification("Por favor, ingresa el nombre del producto.");
-        return false;
-      }
-      
-      // Preprocesamiento de imágenes - evaluar tamaño rápidamente y prevenir cuellos de botella
-      const fileInput = document.getElementById("fotoInput");
-      if (fileInput.files && fileInput.files[0]) {
-        const file = fileInput.files[0];
-        if (file.size > 5 * 1024 * 1024) { // 5MB
-          e.preventDefault();
-          showCenteredNotification("La imagen es demasiado grande (máximo 5MB).");
-          return false;
-        }
-      }
-      
-      // Mostrar overlay de carga
-      loadingOverlay.style.display = "flex";
-      
-      // Marcar el formulario como "enviando"
-      productForm.setAttribute("data-submitting", "true");
-      
-      // Deshabilitar el botón y mostrar estado de carga
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = 'Guardando...';
-      
-      // No detener el formulario, dejarlo continuar
-      return true;
-    });
-    
-    // Manejo optimizado de carga de imágenes
-    const fotoInput = document.getElementById("fotoInput");
-    if (fotoInput) {
-      fotoInput.addEventListener("change", function(e) {
-        if (this.files && this.files[0]) {
-          const file = this.files[0];
-          if (file.size > 5 * 1024 * 1024) { // 5MB
-            showCenteredNotification("La imagen es demasiado grande (máximo 5MB).");
-            return;
-          }
-          
-          // Mostrar progreso para archivos grandes
-          if (file.size > 1 * 1024 * 1024) { // 1MB
-            imageProgressContainer.style.display = "block";
-            
-            // Simulación de progreso (ya que no hay evento real)
-            let progress = 0;
-            const interval = setInterval(() => {
-              progress += 5;
-              if (progress > 100) {
-                clearInterval(interval);
-                imageProgressContainer.style.display = "none";
-              } else {
-                imageProgressBar.style.width = `${progress}%`;
-              }
-            }, 50);
-          }
-          
-          // Crear blob URL para vista previa inmediata
-          const objectURL = URL.createObjectURL(file);
-          const fotoPlaceholder = document.getElementById("fotoPlaceholder");
-          
-          fotoPlaceholder.innerHTML = `
-            <img src="${objectURL}" alt="Foto Local Seleccionada">
-            <button type="button" class="remove-image" id="removeImageBtn">&times;</button>
-          `;
-          fotoPlaceholder.classList.add("has-image");
-          
-          // NO guardar objectURL como displayed_image_url para archivos locales
-          document.getElementById("displayed_image_url").value = "";
-          
-          attachRemoveImageListener();
-        }
-      });
-    }
-  });
 
   /* ===========================================================
-   * 5) FOTOGRAFÍA Y MENÚ (optimizado)
+   * 5) FOTOGRAFÍA Y MENÚ (mejorado)
    * ===========================================================
    */
-  // Mejorar rendimiento usando delegate pattern para eventos
   function attachRemoveImageListener() {
     const fotoPlaceholder = document.getElementById("fotoPlaceholder");
     const btnRemove = fotoPlaceholder.querySelector(".remove-image");
@@ -1093,60 +981,87 @@
         document.getElementById("fotoInput").value = "";
         document.getElementById("displayed_image_url").value = "";
         
-        // Importante: reasignar eventos al menú recién creado
-        setTimeout(rebindPhotoDropdownEvents, 0);
+        // Importante: vincular eventos al menú recién creado
+        setTimeout(bindPhotoEvents, 0);
       });
     }
   }
-  
-  function rebindPhotoDropdownEvents() {
+
+  // Nueva función mejorada para vincular eventos del menú de fotos
+  function bindPhotoEvents() {
+    // Obtener referencias a todos los elementos necesarios
+    const fotoPlaceholder = document.getElementById("fotoPlaceholder");
     const btnCargarFoto = document.getElementById("btnCargarFoto");
     const fotoDropdown = document.getElementById("fotoDropdown");
     const dropdownCargarFoto = document.getElementById("dropdownCargarFoto");
     const dropdownGenerarIA = document.getElementById("dropdownGenerarIA");
     const fotoInput = document.getElementById("fotoInput");
 
-    // Si no existen los elementos, salir
-    if (!btnCargarFoto || !fotoDropdown || !dropdownCargarFoto || !dropdownGenerarIA || !fotoInput) {
-      console.log("No se encontraron todos los elementos necesarios para el dropdown");
+    // Verificar que todos los elementos existan
+    if (!fotoPlaceholder || !btnCargarFoto || !fotoDropdown || 
+        !dropdownCargarFoto || !dropdownGenerarIA || !fotoInput) {
+      console.error("No se encontraron todos los elementos necesarios para el menú de fotos");
       return;
     }
 
-    // Evento para mostrar/ocultar el dropdown
-    btnCargarFoto.addEventListener("click", function(e) {
+    // Limpiar todos los listeners anteriores para evitar duplicados
+    const newBtnCargarFoto = btnCargarFoto.cloneNode(true);
+    btnCargarFoto.parentNode.replaceChild(newBtnCargarFoto, btnCargarFoto);
+    
+    const newDropdownCargarFoto = dropdownCargarFoto.cloneNode(true);
+    dropdownCargarFoto.parentNode.replaceChild(newDropdownCargarFoto, dropdownCargarFoto);
+    
+    const newDropdownGenerarIA = dropdownGenerarIA.cloneNode(true);
+    dropdownGenerarIA.parentNode.replaceChild(newDropdownGenerarIA, dropdownGenerarIA);
+
+    // Asignar nuevos event listeners
+    // 1. Mostrar/ocultar el menú cuando se hace clic en los tres puntos
+    newBtnCargarFoto.addEventListener("click", function(e) {
       e.stopPropagation();
-      fotoDropdown.style.display = fotoDropdown.style.display === "block" ? "none" : "block";
+      const isVisible = fotoDropdown.style.display === "block";
+      fotoDropdown.style.display = isVisible ? "none" : "block";
     });
 
-    // Evento para cargar imagen desde PC
-    dropdownCargarFoto.addEventListener("click", function() {
+    // 2. Abrir selector de archivos cuando se hace clic en "Cargar imagen"
+    newDropdownCargarFoto.addEventListener("click", function(e) {
+      e.stopPropagation();
       fotoInput.click();
       fotoDropdown.style.display = "none";
     });
 
-    // Evento para generar con IA
-    dropdownGenerarIA.addEventListener("click", function() {
+    // 3. Generar imagen con IA cuando se hace clic en "Generar con IA"
+    newDropdownGenerarIA.addEventListener("click", function(e) {
+      e.stopPropagation();
       generatePhotoWithIA();
       fotoDropdown.style.display = "none";
     });
 
-    // Cerrar dropdown al hacer clic fuera
+    // 4. Cerrar el menú al hacer clic fuera
     document.addEventListener("click", function(e) {
-      if (!e.target.closest("#btnCargarFoto") && !e.target.closest("#fotoDropdown")) {
+      if (!e.target.closest("#btnCargarFoto") && 
+          !e.target.closest("#fotoDropdown") && 
+          fotoDropdown.style.display === "block") {
         fotoDropdown.style.display = "none";
       }
     });
+
+    // Observador para detectar cambios en el DOM y volver a vincular si es necesario
+    const observer = new MutationObserver(function(mutations) {
+      mutations.forEach(function(mutation) {
+        if (mutation.type === 'childList' && 
+            (mutation.target === fotoPlaceholder || 
+             mutation.target.closest("#fotoPlaceholder"))) {
+          // Si el placeholder cambió, revincular eventos
+          setTimeout(bindPhotoEvents, 0);
+          observer.disconnect();
+        }
+      });
+    });
+
+    // Configurar el observador para observar cambios en los hijos
+    observer.observe(fotoPlaceholder, { childList: true, subtree: true });
   }
   
-  // Aseguramos que los eventos se inicialicen correctamente al cargar la página
-  document.addEventListener("DOMContentLoaded", function() {
-    console.log("DOM cargado, inicializando eventos del menú de foto");
-    rebindPhotoDropdownEvents();
-  });
-  
-  // También lo llamamos directamente para asegurar compatibilidad
-  rebindPhotoDropdownEvents();
-
   function generatePhotoWithIA() {
     const barcodeInput = document.getElementById("codigo_barras_externo");
     const nombreInput = document.getElementById("nombre");
@@ -1248,7 +1163,7 @@
             </div>
           `;
           showCenteredNotification("La imagen no pudo cargarse. Intenta de nuevo o carga una imagen manualmente.");
-          rebindPhotoDropdownEvents();
+          setTimeout(bindPhotoEvents, 0);
         };
         
         // Iniciar la carga de la imagen
@@ -1264,7 +1179,7 @@
         `;
         showCenteredNotification(data.message || "No se pudo obtener la imagen");
         // Dar tiempo para que el DOM se actualice antes de asignar eventos
-        setTimeout(rebindPhotoDropdownEvents, 0);
+        setTimeout(bindPhotoEvents, 0);
       }
     })
     .catch(error => {
@@ -1283,7 +1198,7 @@
       `;
       showCenteredNotification("Ocurrió un error al buscar la imagen: " + error.message);
       // Dar tiempo para que el DOM se actualice antes de asignar eventos
-      setTimeout(rebindPhotoDropdownEvents, 0);
+      setTimeout(bindPhotoEvents, 0);
     });
   }
 
@@ -1945,5 +1860,120 @@
         });
     });
   }
+
+  // Inicializar eventos al cargar la página
+  document.addEventListener("DOMContentLoaded", function() {
+    // Referencias a elementos de carga
+    const loadingOverlay = document.getElementById("loadingOverlay");
+    const productForm = document.getElementById("productForm");
+    const submitBtn = document.getElementById("submitBtn");
+    const imageProgressBar = document.getElementById("imageProgressBar");
+    const imageProgressContainer = document.querySelector(".image-upload-progress");
+    
+    // Inicializar etiquetas flotantes para campos específicos
+    const inputs = document.querySelectorAll(
+      "#codigo_barras_externo, #nombre, #stock, #costo, #precio_venta, #marca"
+    );
+    
+    inputs.forEach(input => {
+      updateFloatingLabel(input);
+      input.addEventListener("input", () => {
+        updateFloatingLabel(input);
+        if (input.id === "codigo_barras_externo") {
+          hideScanFoundContainer();
+        }
+      });
+    });
+    
+    // Optimización para prevenir envíos múltiples y mostrar progreso
+    productForm.addEventListener("submit", function(e) {
+      // Si el formulario ya está enviándose, cancelar este envío
+      if (productForm.getAttribute("data-submitting") === "true") {
+        e.preventDefault();
+        return false;
+      }
+      
+      // Verificación rápida de valores obligatorios
+      const nombre = document.getElementById("nombre").value.trim();
+      if (!nombre) {
+        e.preventDefault();
+        showCenteredNotification("Por favor, ingresa el nombre del producto.");
+        return false;
+      }
+      
+      // Preprocesamiento de imágenes - evaluar tamaño rápidamente y prevenir cuellos de botella
+      const fileInput = document.getElementById("fotoInput");
+      if (fileInput.files && fileInput.files[0]) {
+        const file = fileInput.files[0];
+        if (file.size > 5 * 1024 * 1024) { // 5MB
+          e.preventDefault();
+          showCenteredNotification("La imagen es demasiado grande (máximo 5MB).");
+          return false;
+        }
+      }
+      
+      // Mostrar overlay de carga
+      loadingOverlay.style.display = "flex";
+      
+      // Marcar el formulario como "enviando"
+      productForm.setAttribute("data-submitting", "true");
+      
+      // Deshabilitar el botón y mostrar estado de carga
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = 'Guardando...';
+      
+      // No detener el formulario, dejarlo continuar
+      return true;
+    });
+    
+    // Manejo optimizado de carga de imágenes
+    const fotoInput = document.getElementById("fotoInput");
+    if (fotoInput) {
+      fotoInput.addEventListener("change", function(e) {
+        if (this.files && this.files[0]) {
+          const file = this.files[0];
+          if (file.size > 5 * 1024 * 1024) { // 5MB
+            showCenteredNotification("La imagen es demasiado grande (máximo 5MB).");
+            return;
+          }
+          
+          // Mostrar progreso para archivos grandes
+          if (file.size > 1 * 1024 * 1024) { // 1MB
+            imageProgressContainer.style.display = "block";
+            
+            // Simulación de progreso (ya que no hay evento real)
+            let progress = 0;
+            const interval = setInterval(() => {
+              progress += 5;
+              if (progress > 100) {
+                clearInterval(interval);
+                imageProgressContainer.style.display = "none";
+              } else {
+                imageProgressBar.style.width = `${progress}%`;
+              }
+            }, 50);
+          }
+          
+          // Crear blob URL para vista previa inmediata
+          const objectURL = URL.createObjectURL(file);
+          const fotoPlaceholder = document.getElementById("fotoPlaceholder");
+          
+          fotoPlaceholder.innerHTML = `
+            <img src="${objectURL}" alt="Foto Local Seleccionada">
+            <button type="button" class="remove-image" id="removeImageBtn">&times;</button>
+          `;
+          fotoPlaceholder.classList.add("has-image");
+          
+          // NO guardar objectURL como displayed_image_url para archivos locales
+          document.getElementById("displayed_image_url").value = "";
+          
+          attachRemoveImageListener();
+        }
+      });
+    }
+
+    // Inicializar eventos del menú de fotos
+    bindPhotoEvents();
+  });
 </script>
 {% endblock %}
