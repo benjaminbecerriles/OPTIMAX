@@ -1,4 +1,3 @@
-```html
 {% extends 'base.html' %}
 
 {% block title %}
@@ -143,6 +142,7 @@
             <a
               href="{{ url_for('eliminar_producto', prod_id=p.id) }}"
               class="btn btn-sm btn-outline-danger"
+              onclick="return confirm('¿Estás seguro de que deseas eliminar este producto? Esta acción no se puede deshacer.');"
             >
               Eliminar
             </a>
@@ -167,4 +167,3 @@
     </a>
   </div>
 {% endblock %}
-```
