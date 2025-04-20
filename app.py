@@ -64,6 +64,11 @@ VALID_CATEGORIES = {
     "productos para mascotas",
     "artículos de papelería",
     "ferretería básica",
+    "artesanías y manualidades",
+    "productos a granel",
+    "productos orgánicos",
+    "productos gourmet",
+    "suplementos alimenticios",
     "otros (miscelánea)"
 }
 
@@ -674,6 +679,130 @@ def agregar_producto():
         ]
         return render_template('agregar_producto.html', categories=categories_list)
 
+@app.route('/agregar-sin-codigo', methods=['GET','POST'])
+@login_requerido
+def agregar_sin_codigo():
+    if request.method == 'POST':
+        try:
+            # Recoger campos del formulario
+            nombre = request.form.get("nombre", "").strip()
+            stock_str = request.form.get("stock", "0").strip() 
+            costo_str = request.form.get("costo", "$0").strip()
+            precio_str = request.form.get("precio_venta", "$0").strip()
+            marca = request.form.get("marca", "").strip()
+            
+            # Categoría
+            cat_option = request.form.get('categoria_option', 'existente')
+            if cat_option == 'existente':
+                categoria = request.form.get('categoria_existente', '').strip()
+            else:
+                categoria = request.form.get('categoria_nueva', '').strip()
+            categoria_normalizada = normalizar_categoria(categoria)
+            
+            # Favorito y a la venta
+            es_favorito_bool = (request.form.get("es_favorito", "0") == "1")
+            esta_a_la_venta_bool = (request.form.get("esta_a_la_venta", "1") == "1")
+            
+            # Caducidad
+            has_caducidad = (request.form.get("toggle_caducidad_estado", "DESACTIVADO") == "ACTIVADO")
+            caducidad_lapso = request.form.get("caducidad_lapso", None) if has_caducidad else None
+            
+            # Campos extras para productos sin código
+            tipo_medida = request.form.get("tipo_medida", "").strip()
+            unidad_medida = request.form.get("unidad_medida", "").strip()
+            fabricacion = request.form.get("fabricacion", "").strip()
+            origen = request.form.get("origen", "").strip()
+            
+            # Parse numéricos
+            try:
+                stock_int = int(stock_str)
+            except:
+                stock_int = 0
+            
+            costo_val = parse_money(costo_str)
+            precio_val = parse_money(precio_str)
+            
+            # Generar código de barras único que empieza con 1901
+            codigo_barras_externo = generar_codigo_unico()
+            
+            # Manejo de imagen
+            foto_final = process_image(request, UPLOAD_FOLDER, BASE_DIR)
+            if not foto_final:
+                foto_final = "default_product.jpg"
+            
+            # Usar la función para truncar la URL para asegurar que quepa en la columna
+            url_imagen_truncada = truncar_url(request.form.get("displayed_image_url", "").strip(), 95)
+                
+            # Crear el producto
+            nuevo = Producto(
+                nombre=nombre,
+                stock=stock_int,
+                costo=costo_val, 
+                precio_venta=precio_val,
+                categoria=categoria_normalizada,
+                categoria_color=obtener_o_generar_color_categoria(categoria_normalizada),
+                foto=foto_final,
+                url_imagen=url_imagen_truncada,
+                is_approved=True,
+                empresa_id=session['user_id'],
+                codigo_barras_externo=codigo_barras_externo,
+                marca=marca,
+                es_favorito=es_favorito_bool,
+                esta_a_la_venta=esta_a_la_venta_bool,
+                has_caducidad=has_caducidad,
+                metodo_caducidad=caducidad_lapso,
+                # Campos adicionales
+                tipo_medida=tipo_medida,
+                unidad_medida=unidad_medida,
+                fabricacion=fabricacion,
+                origen=origen
+            )
+            
+            # Guardar en la base de datos
+            db.session.add(nuevo)
+            db.session.commit()
+            flash('Producto sin código de barras guardado exitosamente', 'success')
+            
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al guardar el producto: {str(e)}', 'danger')
+            print(f"ERROR al guardar producto sin código: {str(e)}")
+        
+        return redirect(url_for('ver_productos'))
+        
+    else:
+        # GET - Cargar página de agregar producto sin código
+        categorias_db = (
+            db.session.query(Producto.categoria, Producto.categoria_color)
+            .filter(Producto.categoria.isnot(None))
+            .filter(Producto.categoria != '')
+            .distinct()
+            .limit(50)
+            .all()
+        )
+        categories_list = [
+            {"nombre": c[0], "color": c[1] if c[1] else "#000000"}
+            for c in categorias_db
+        ]
+        return render_template('agregar_sin_codigo.html', categories=categories_list)
+
+# Función para generar código de barras único que inicia con 1901
+def generar_codigo_unico():
+    # Prefijo fijo "1901"
+    prefijo = "1901"
+    
+    # Generar parte aleatoria (8 dígitos)
+    aleatorio = ''.join([str(random.randint(0, 9)) for _ in range(8)])
+    
+    # Verificar si ya existe en la base de datos
+    codigo_completo = f"{prefijo}{aleatorio}"
+    while Producto.query.filter_by(codigo_barras_externo=codigo_completo).first():
+        # Si existe, generar otro aleatorio
+        aleatorio = ''.join([str(random.randint(0, 9)) for _ in range(8)])
+        codigo_completo = f"{prefijo}{aleatorio}"
+    
+    return codigo_completo
+
 @app.route('/editar-producto/<int:prod_id>', methods=['GET','POST'])
 @login_requerido
 def editar_producto(prod_id):
@@ -793,6 +922,16 @@ def editar_producto(prod_id):
             producto.esta_a_la_venta = esta_a_la_venta_bool
             producto.has_caducidad = has_caducidad
             producto.metodo_caducidad = caducidad_lapso
+            
+            # Actualizar campos específicos si existen
+            if request.form.get("tipo_medida"):
+                producto.tipo_medida = request.form.get("tipo_medida")
+            if request.form.get("unidad_medida"):
+                producto.unidad_medida = request.form.get("unidad_medida")
+            if request.form.get("fabricacion"):
+                producto.fabricacion = request.form.get("fabricacion")
+            if request.form.get("origen"):
+                producto.origen = request.form.get("origen")
             
             # Guardar en la base de datos
             db.session.commit()

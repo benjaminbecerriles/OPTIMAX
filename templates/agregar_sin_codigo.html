@@ -1,0 +1,1400 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  Agregar producto sin código de barras
+{% endblock %}
+
+{% block content %}
+<style>
+  /*******************************************************************************
+   * ESTILOS GLOBALES Y DISEÑO BÁSICO
+   ******************************************************************************/
+  /* 1) TODO EN BLANCO */
+  html, body {
+    margin: 0;
+    padding: 0;
+    background-color: #fff; /* Fondo completamente blanco */
+    font-family: 'Open Sans', sans-serif;
+  }
+
+  .card-form {
+    /* Borde y fondo sutil */
+    background-color: #fff; /* Blanco también */
+    border-radius: 0;       /* Sin esquinas redondeadas */
+    box-shadow: none;       /* Sin sombra */
+    padding: 1.5rem;
+    margin: 0;              /* Sin margen extra */
+  }
+
+  /* 2) Mantener DOS columnas: Izquierda (foto) y Derecha (form) */
+  .row-form {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  .col-left {
+    /* Ancho para la foto grande */
+    flex: 0 0 auto;
+    width: 570px;
+    border-right: 1px solid #ddd;
+    padding-right: 1rem;
+  }
+  .col-right {
+    flex: 1;
+    min-width: 300px;
+    padding-left: 1rem;
+    position: relative;
+  }
+
+  /* FOTO Container */
+  .foto-container {
+    text-align: left;
+    margin-bottom: 1rem;
+    position: relative;
+  }
+
+  .foto-placeholder {
+    width: 100%;
+    height: 570px;
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    margin: 0 auto 1rem auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #999;
+    font-weight: 600;
+    position: relative;
+    background-color: #fff; /* Blanco */
+  }
+  .foto-placeholder img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+  .remove-image {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: rgba(255,255,255,0.8);
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    line-height: 28px;
+    text-align: center;
+    padding: 0;
+    display: none;
+  }
+  .foto-placeholder.has-image .remove-image {
+    display: block;
+  }
+
+  /* Menú (3 puntitos) */
+  .no-image-icon {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #ccc;
+    color: #fff;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .foto-dropdown {
+    position: absolute;
+    top: 40px;
+    right: 5px;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    z-index: 100;
+    display: none;
+  }
+  .foto-dropdown .dropdown-item {
+    display: block;
+    width: 100%;
+    border: none;
+    background: transparent;
+    padding: 0.5rem 1rem;
+    text-align: left;
+    cursor: pointer;
+  }
+  .foto-dropdown .dropdown-item:hover {
+    background-color: #f0f0f0;
+  }
+
+  /* Form Controls */
+  .form-group {
+    margin-bottom: 1rem;
+    position: relative;
+    padding-top: 1.2rem; /* espacio para la etiqueta flotante */
+  }
+  ::placeholder {
+    text-transform: uppercase;
+    font-weight: normal;
+    color: #888;
+  }
+  .form-control {
+    text-transform: uppercase;
+    font-weight: bold;
+    padding: 0.5rem;
+    line-height: 1.5;
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+
+  .floating-label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: 0.9rem;
+    color: #888;
+    text-transform: capitalize;
+  }
+
+  /* Favorito & Venta */
+  .heart-icon {
+    font-size: 24px;
+    color: gray;
+    cursor: pointer;
+    transition: color 0.3s;
+  }
+  .heart-icon.active {
+    color: red;
+  }
+  .venta-icon {
+    width: 24px;
+    height: auto;
+    cursor: pointer;
+    transition: opacity 0.3s;
+    object-fit: contain;
+  }
+
+  /* Toggle y Caducidad */
+  .toggle-button {
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    background-color: #f2f2f2;
+    padding: 0.25rem 0.75rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.3s;
+    color: #333;
+  }
+  .toggle-button.active {
+    background-color: #f2f2f2;
+    color: #333;
+  }
+
+  .caducidad-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    max-width: 420px;
+    margin-bottom: 1rem;
+  }
+  .caducidad-row {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .form-check {
+    width: auto;
+    border: none;
+    text-align: left;
+  }
+  .form-check-input {
+    display: none;
+  }
+  .form-check-label {
+    display: inline-block;
+    background-color: #fff;
+    color: #333;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 0.25rem 0.6rem;
+    cursor: pointer;
+    white-space: nowrap;
+    font-size: 0.9rem;
+    transition: background-color 0.3s, border-color 0.3s;
+  }
+  .form-check-label:hover {
+    background-color: #f2f2f2;
+  }
+  .form-check.selected .form-check-label {
+    background-color: #007BFF;
+    border-color: #007BFF;
+    color: #fff;
+  }
+
+  /* Botones GUARDAR (Rojo), CANCELAR (Gris) */
+  .btn-submit {
+    background-color: #e52e2e;
+    color: #fff;
+    border: none;
+    padding: 0.7rem 1.5rem;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-right: 1rem;
+    transition: background-color 0.3s;
+  }
+  .btn-submit:hover {
+    background-color: #c72323;
+  }
+  .btn-cancel {
+    background-color: #ccc;
+    color: #333;
+    border: none;
+    padding: 0.7rem 1.5rem;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  .btn-cancel:hover {
+    background-color: #999;
+  }
+
+  /* Input con iconos en la misma fila */
+  .input-icon-group {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 0 0.5rem;
+    width: 100%;
+    background-color: #fff;
+  }
+  .input-icon-group input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background-color: transparent; /* sin color extra */
+    padding: 0.5rem;
+    text-transform: uppercase;
+    font-weight: bold;
+  }
+  .input-icon-group img {
+    margin-left: 0.5rem;
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+  }
+
+  /* Overlay de carga */
+  .loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.8);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    display: none;
+  }
+  
+  .spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #e52e2e;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 15px;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .loading-text {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+  }
+
+  /* Barra de progreso para imagen */
+  .image-upload-progress {
+    width: 100%;
+    height: 4px;
+    background-color: #f3f3f3;
+    position: relative;
+    margin-top: 10px;
+    border-radius: 2px;
+    overflow: hidden;
+    display: none;
+  }
+  
+  .image-upload-progress-bar {
+    height: 100%;
+    background-color: #4CAF50;
+    width: 0%;
+    border-radius: 2px;
+    transition: width 0.3s;
+  }
+
+  /* Estilos para las tarjetas de tipo de medida */
+  .medida-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin: 1rem 0;
+  }
+
+  .medida-card {
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 1rem;
+    width: calc(33.333% - 1rem);
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .medida-card:hover {
+    border-color: #007BFF;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+
+  .medida-card.selected {
+    background-color: #e8f4ff;
+    border-color: #007BFF;
+  }
+
+  .medida-card img {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Campos específicos para productos sin código */
+  .info-box {
+    background-color: #f8f9fa;
+    border-left: 4px solid #007BFF;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+  }
+  
+  .info-title {
+    font-weight: 600;
+    color: #007BFF;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Badge del código generado */
+  .codigo-badge {
+    display: inline-block;
+    background-color: #e8f4ff;
+    color: #0056b3;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    border: 1px dashed #0056b3;
+  }
+</style>
+
+<div class="card-form">
+  <!-- AQUÍ ESTÁ LA CORRECCIÓN: El form ahora abarca TODO el contenido -->
+  <form method="POST" action="" enctype="multipart/form-data" id="productForm">
+    <div class="row-form">
+      <!-- Col Izquierda: Foto + Checks -->
+      <div class="col-left">
+        <div class="foto-container">
+          <div class="foto-placeholder" id="fotoPlaceholder">
+            <button type="button" class="no-image-icon" id="btnCargarFoto">&#8942;</button>
+            <div class="foto-dropdown" id="fotoDropdown" style="display:none;">
+              <button type="button" class="dropdown-item btn btn-secondary" id="dropdownCargarFoto">Cargar imagen</button>
+              <button type="button" class="dropdown-item btn btn-secondary" id="dropdownGenerarIA">Generar con IA</button>
+            </div>
+          </div>
+          <input type="file" id="fotoInput" name="foto" style="display:none;" accept="image/*">
+          <input type="hidden" name="ia_foto_filename" id="ia_foto_filename" value="">
+          <!-- Hidden para capturar la URL de la imagen que se ve en pantalla -->
+          <input type="hidden" name="displayed_image_url" id="displayed_image_url" value="">
+          <!-- Barra de progreso para imágenes -->
+          <div class="image-upload-progress">
+            <div class="image-upload-progress-bar" id="imageProgressBar"></div>
+          </div>
+        </div>
+
+        <div class="extra-checks" style="display: flex; flex-direction: column; gap: 0.5rem;">
+          <div id="favoritoContainer" style="display: inline-flex; align-items: center; gap: 0.5rem;">
+            <span id="heartIcon" class="heart-icon">&#9825;</span>
+            <span>Marcar como Favorito</span>
+            <input type="hidden" name="es_favorito" id="es_favorito" value="0">
+          </div>
+
+          <div id="ventaContainer" style="display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem;">
+            <img id="ventaIcon" src="{{ url_for('static', filename='img/1.png') }}" class="venta-icon">
+            <span>Producto a la Venta</span>
+            <input type="hidden" name="esta_a_la_venta" id="esta_a_la_venta" value="1">
+          </div>
+        </div>
+      </div>
+
+      <!-- Col Derecha: Form -->
+      <div class="col-right">
+        <!-- Título en la parte superior -->
+        <h3 style="
+          font-weight: bold;
+          color: #000;
+          text-transform: uppercase;
+          margin-bottom: 1rem;
+          font-size: 1.2rem;
+        ">
+          Agregar producto sin código de barras
+        </h3>
+
+        <!-- Información sobre el código autogenerado -->
+        <div class="info-box">
+          <div class="info-title">Código de barras autogenerado</div>
+          <p class="mb-1">Este producto recibirá un código único que iniciará con "1901" seguido de 8 dígitos aleatorios.</p>
+          <p class="mb-0">Este código se asignará automáticamente al guardar el producto.</p>
+        </div>
+
+        <!-- IMPORTANTE: Para que el back sepa si es 'existente' (por default) -->
+        <input type="hidden" name="categoria_option" value="existente">
+        <!-- IMPORTANTE: Para saber si caducidad está activado o no -->
+        <input type="hidden" name="toggle_caducidad_estado" id="toggle_caducidad_estado" value="DESACTIVADO">
+
+        <!-- Nombre -->
+        <div class="form-group">
+          <input 
+            type="text"
+            class="form-control"
+            id="nombre"
+            name="nombre"
+            placeholder="NOMBRE DEL PRODUCTO"
+            required
+          >
+        </div>
+
+        <!-- Tipo de Medida -->
+        <div class="form-group">
+          <label class="form-label fw-bold">Tipo de Medida:</label>
+          <div class="medida-options">
+            <div class="medida-card" data-value="unidad">
+              <img src="{{ url_for('static', filename='img/unidad.png') }}" alt="Unidad">
+              <div>Por Unidad</div>
+            </div>
+            <div class="medida-card" data-value="peso">
+              <img src="{{ url_for('static', filename='img/peso.png') }}" alt="Peso">
+              <div>Por Peso</div>
+            </div>
+            <div class="medida-card" data-value="volumen">
+              <img src="{{ url_for('static', filename='img/volumen.png') }}" alt="Volumen">
+              <div>Por Volumen</div>
+            </div>
+          </div>
+          <input type="hidden" id="tipo_medida" name="tipo_medida" value="">
+        </div>
+
+        <!-- Unidad de Medida (cambia según el tipo seleccionado) -->
+        <div class="form-group" id="unidadMedidaContainer" style="display:none;">
+          <label class="form-label fw-bold">Unidad de Medida:</label>
+          <select class="form-control" id="unidad_medida" name="unidad_medida">
+            <!-- Opciones se cargarán dinámicamente según el tipo de medida -->
+          </select>
+        </div>
+
+        <!-- Stock Inicial -->
+        <div class="form-group">
+          <input 
+            type="number"
+            class="form-control"
+            id="stock"
+            name="stock"
+            min="0"
+            placeholder="STOCK INICIAL"
+          >
+        </div>
+
+        <!-- Costo / Precio -->
+        <div class="d-flex gap-3" style="align-items: center; margin-top:1rem;">
+          <div class="form-group" style="flex:1;">
+            <input
+              type="text"
+              step="0.01"
+              class="form-control"
+              id="costo"
+              name="costo"
+              required
+              oninput="formatCostRealtime(this)"
+              placeholder="COSTO"
+            >
+          </div>
+          <div class="form-group" style="flex:1;">
+            <input
+              type="text"
+              step="0.01"
+              class="form-control"
+              id="precio_venta"
+              name="precio_venta"
+              required
+              oninput="formatCostRealtime(this)"
+              placeholder="PRECIO DE VENTA"
+            >
+          </div>
+        </div>
+
+        <!-- Fabricación -->
+        <div class="form-group" style="margin-top:1rem;">
+          <select class="form-control" id="fabricacion" name="fabricacion">
+            <option value="" disabled selected>TIPO DE FABRICACIÓN</option>
+            <option value="artesanal">Artesanal</option>
+            <option value="industrial">Industrial</option>
+            <option value="casero">Casero</option>
+            <option value="importado">Importado</option>
+          </select>
+        </div>
+
+        <!-- Marca o Productor -->
+        <div class="form-group" style="margin-top:1rem;">
+          <input
+            type="text"
+            class="form-control"
+            id="marca"
+            name="marca"
+            placeholder="MARCA O PRODUCTOR"
+          >
+        </div>
+
+        <!-- Origen del Producto -->
+        <div class="form-group" style="margin-top:1rem;">
+          <input
+            type="text"
+            class="form-control"
+            id="origen"
+            name="origen"
+            placeholder="ORIGEN DEL PRODUCTO (OPCIONAL)"
+          >
+        </div>
+
+        <!-- Categoría (Choices.js) -->
+        <div class="form-group">
+          <select class="form-select" name="categoria_existente" id="categoria_existente">
+            <option value="" disabled selected hidden>-SELECCIONA UNA CATEGORÍA-</option>
+            <option value="abarrotes secos" data-custom-properties='{"color": "#FFA500"}'>Abarrotes secos</option>
+            <option value="enlatados y conservas" data-custom-properties='{"color": "#DAA520"}'>Enlatados y conservas</option>
+            <option value="botanas, dulces y snacks" data-custom-properties='{"color": "#FF69B4"}'>Botanas, dulces y snacks</option>
+            <option value="bebidas no alcohólicas" data-custom-properties='{"color": "#1E90FF"}'>Bebidas no alcohólicas</option>
+            <option value="bebidas alcohólicas" data-custom-properties='{"color": "#800080"}'>Bebidas alcohólicas</option>
+            <option value="panadería y repostería" data-custom-properties='{"color": "#D2B48C"}'>Panadería y repostería</option>
+            <option value="lácteos y huevos" data-custom-properties='{"color": "#F5DEB3"}'>Lácteos y huevos</option>
+            <option value="carnes frías y embutidos" data-custom-properties='{"color": "#B22222"}'>Carnes frías y embutidos</option>
+            <option value="congelados y refrigerados" data-custom-properties='{"color": "#00CED1"}'>Congelados y refrigerados</option>
+            <option value="frutas y verduras frescas" data-custom-properties='{"color": "#32CD32"}'>Frutas y verduras frescas</option>
+            <option value="productos de limpieza y hogar" data-custom-properties='{"color": "#87CEFA"}'>Productos de limpieza y hogar</option>
+            <option value="cuidado personal e higiene" data-custom-properties='{"color": "#FFC0CB"}'>Cuidado personal e higiene</option>
+            <option value="medicamentos de mostrador (otc)" data-custom-properties='{"color": "#FF6347"}'>Medicamentos de mostrador (OTC)</option>
+            <option value="productos para bebés" data-custom-properties='{"color": "#FFB6C1"}'>Productos para bebés</option>
+            <option value="productos para mascotas" data-custom-properties='{"color": "#8FBC8F"}'>Productos para mascotas</option>
+            <option value="artículos de papelería" data-custom-properties='{"color": "#9370DB"}'>Artículos de papelería</option>
+            <option value="ferretería básica" data-custom-properties='{"color": "#708090"}'>Ferretería básica</option>
+            <option value="artesanías y manualidades" data-custom-properties='{"color": "#CD5C5C"}'>Artesanías y manualidades</option>
+            <option value="productos a granel" data-custom-properties='{"color": "#D2B48C"}'>Productos a granel</option>
+            <option value="productos orgánicos" data-custom-properties='{"color": "#556B2F"}'>Productos orgánicos</option>
+            <option value="productos gourmet" data-custom-properties='{"color": "#8B4513"}'>Productos gourmet</option>
+            <option value="suplementos alimenticios" data-custom-properties='{"color": "#9ACD32"}'>Suplementos alimenticios</option>
+            <option value="otros (miscelánea)" data-custom-properties='{"color": "#A9A9A9"}'>Otros (miscelánea)</option>
+          </select>
+        </div>
+
+        <!-- Toggle "¿TIENE FECHA DE CADUCIDAD?" -->
+        <div class="d-flex align-items-center mb-3" style="margin-top:1rem; gap:0.5rem;">
+          <span class="fw-bold" style="margin:0;">¿TIENE FECHA DE CADUCIDAD?</span>
+          <button type="button" id="btnToggleCaducidad" class="toggle-button">DESACTIVADO</button>
+        </div>
+
+        <!-- Opciones de Caducidad -->
+        <div id="caducidadOpcionesContainer" style="display:none; margin-top:0.5rem;">
+          <p class="text-muted" style="margin-bottom:0.5rem;">
+            A partir de hoy, ¿en qué lapso aproximado caducan tus productos?
+          </p>
+          <div class="caducidad-options">
+            <!-- Fila 1 -->
+            <div class="caducidad-row">
+              <div class="form-check" data-id="1 día">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="caducidad_lapso"
+                  id="cad1dia"
+                  value="1 día"
+                >
+                <label class="form-check-label caducidad-label" for="cad1dia">1 DÍA</label>
+              </div>
+              <div class="form-check" data-id="3 días">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="caducidad_lapso"
+                  id="cad3dias"
+                  value="3 días"
+                >
+                <label class="form-check-label caducidad-label" for="cad3dias">3 DÍAS</label>
+              </div>
+              <div class="form-check" data-id="1 semana">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="caducidad_lapso"
+                  id="cad1sem"
+                  value="1 semana"
+                >
+                <label class="form-check-label caducidad-label" for="cad1sem">1 SEMANA</label>
+              </div>
+              <div class="form-check" data-id="2 semanas">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="caducidad_lapso"
+                  id="cad2sem"
+                  value="2 semanas"
+                >
+                <label class="form-check-label caducidad-label" for="cad2sem">2 SEMANAS</label>
+              </div>
+              <div class="form-check" data-id="1 mes">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="caducidad_lapso"
+                  id="cad1mes"
+                  value="1 mes"
+                >
+                <label class="form-check-label caducidad-label" for="cad1mes">1 MES</label>
+              </div>
+            </div>
+            <!-- Fila 2 -->
+            <div class="caducidad-row">
+              <div class="form-check" data-id="3 meses">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="caducidad_lapso"
+                  id="cad3meses"
+                  value="3 meses"
+                >
+                <label class="form-check-label caducidad-label" for="cad3meses">3 MESES</label>
+              </div>
+              <div class="form-check" data-id="6 meses">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="caducidad_lapso"
+                  id="cad6meses"
+                  value="6 meses"
+                >
+                <label class="form-check-label caducidad-label" for="cad6meses">6 MESES</label>
+              </div>
+              <div class="form-check" data-id="1 año">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="caducidad_lapso"
+                  id="cad1ano"
+                  value="1 año"
+                >
+                <label class="form-check-label caducidad-label" for="cad1ano">1 AÑO</label>
+              </div>
+              <div class="form-check" data-id="2 años">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="caducidad_lapso"
+                  id="cad2anos"
+                  value="2 años"
+                >
+                <label class="form-check-label caducidad-label" for="cad2anos">2 AÑOS</label>
+              </div>
+              <div class="form-check" data-id="más de 3 años">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="caducidad_lapso"
+                  id="cad3anos"
+                  value="más de 3 años"
+                >
+                <label class="form-check-label caducidad-label" for="cad3anos">MÁS DE 3 AÑOS</label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- FIN col-right -->
+    </div>
+    <!-- FIN row-form -->
+
+    <!-- BOTONES GUARDAR / CANCELAR -->
+    <div class="text-end" style="margin-top:2rem; margin-bottom:0.5rem;">
+      <button type="submit" id="submitBtn" class="btn-submit" style="margin-right:0.5rem;">GUARDAR</button>
+      <a href="{{ url_for('ver_productos') }}" class="btn-cancel">CANCELAR</a>
+    </div>
+  </form>
+</div>
+
+<!-- Overlay de carga -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text">Guardando producto...</div>
+</div>
+
+<!-- SCRIPTS -->
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+<script>
+  /* ===========================================================
+   * 1) Resaltar coincidencias en MORADO
+   * ===========================================================
+   */
+  function highlightMatch(text, query) {
+    const index = text.toLowerCase().indexOf(query.toLowerCase());
+    if (index === -1) return text;
+    const before = text.slice(0, index);
+    const match  = text.slice(index, index + query.length);
+    const after  = text.slice(index + query.length);
+    return before + "<span style='color: #FF0080; font-weight:bold;'>" + match + "</span>" + after;
+  }
+
+  /* ===========================================================
+   * 2) Notificación centrada (optimizado para 3s)
+   * ===========================================================
+   */
+  // Cache del elemento notificación para reutilizarlo
+  let activeNotification = null;
+  let notifTimeout = null;
+
+  function showCenteredNotification(message, duration = 3000) {
+    // Limpiar notificación anterior
+    if (activeNotification) {
+      document.body.removeChild(activeNotification);
+      clearTimeout(notifTimeout);
+    }
+    
+    // Crear nueva notificación
+    const notif = document.createElement("div");
+    notif.textContent = message;
+    notif.style.position = "fixed";
+    notif.style.top = "50%";
+    notif.style.left = "50%";
+    notif.style.transform = "translate(-50%, -50%)";
+    notif.style.backgroundColor = "#ffcccc";
+    notif.style.color = "#900";
+    notif.style.padding = "20px";
+    notif.style.border = "1px solid #900";
+    notif.style.borderRadius = "4px";
+    notif.style.textAlign = "center";
+    notif.style.zIndex = "9999";
+    notif.style.fontSize = "1rem";
+    document.body.appendChild(notif);
+    
+    activeNotification = notif;
+    notifTimeout = setTimeout(() => { 
+      if (notif.parentNode) {
+        document.body.removeChild(notif);
+      }
+      activeNotification = null;
+    }, duration);
+  }
+
+  /* ===========================================================
+   * 3) Formatear Costo en tiempo real (optimizado)
+   * ===========================================================
+   */
+  // Cache expresiones regulares
+  const numericRegex = /[^\d.]/g;
+  const moneyPattern = /^(\d*)(\.?)(\d{0,3})/;
+  
+  function formatCostRealtime(input) {
+    let value = input.value;
+    if (value.startsWith("$")) {
+      value = value.substring(1);
+    }
+    value = value.replace(/,/g, "").replace(numericRegex, "");
+    
+    const match = value.match(moneyPattern);
+    if (match) {
+      let intPart = match[1];
+      let dot = match[2];
+      let decPart = match[3];
+      let formattedInt = intPart ? Number(intPart).toLocaleString("en-US") : "";
+      let result = formattedInt;
+      if (dot) {
+        result += ".";
+      }
+      result += decPart;
+      if (result !== "") {
+        result = "$" + result;
+      }
+      input.value = result;
+      input.setSelectionRange(input.value.length, input.value.length);
+    }
+  }
+
+  /* ===========================================================
+   * 4) FLOATING LABELS
+   * ===========================================================
+   */
+  // Cache para etiquetas flotantes
+  const floatingLabels = new Map();
+  
+  function updateFloatingLabel(input) {
+    if (!floatingLabels.has(input)) {
+      let container = input.parentElement;
+      let floatingLabel = container.querySelector(".floating-label");
+      
+      if (!floatingLabel) {
+        floatingLabel = document.createElement("div");
+        floatingLabel.className = "floating-label";
+        container.insertBefore(floatingLabel, input);
+      }
+      
+      floatingLabels.set(input, floatingLabel);
+    }
+    
+    const floatingLabel = floatingLabels.get(input);
+    
+    if (input.value.trim() !== "") {
+      floatingLabel.textContent = input.getAttribute("placeholder");
+      floatingLabel.style.display = "block";
+    } else {
+      floatingLabel.style.display = "none";
+    }
+  }
+
+  /* ===========================================================
+   * 5) FOTOGRAFÍA Y MENÚ (mejorado)
+   * ===========================================================
+   */
+  function attachRemoveImageListener() {
+    const fotoPlaceholder = document.getElementById("fotoPlaceholder");
+    const btnRemove = fotoPlaceholder.querySelector(".remove-image");
+    
+    if (btnRemove) {
+      btnRemove.addEventListener("click", function (e) {
+        e.stopPropagation(); // Prevenir burbujas de eventos
+        
+        // Recrear menú con estructura correcta
+        fotoPlaceholder.innerHTML = `
+          <button type="button" class="no-image-icon" id="btnCargarFoto">&#8942;</button>
+          <div class="foto-dropdown" id="fotoDropdown" style="display:none;">
+            <button type="button" class="dropdown-item btn btn-secondary" id="dropdownCargarFoto">Cargar imagen</button>
+            <button type="button" class="dropdown-item btn btn-secondary" id="dropdownGenerarIA">Generar con IA</button>
+          </div>`;
+        
+        fotoPlaceholder.classList.remove("has-image");
+        document.getElementById("ia_foto_filename").value = "";
+        document.getElementById("fotoInput").value = "";
+        document.getElementById("displayed_image_url").value = "";
+        
+        // Importante: vincular eventos al menú recién creado
+        setTimeout(bindPhotoEvents, 0);
+      });
+    }
+  }
+
+  // Nueva función mejorada para vincular eventos del menú de fotos
+  function bindPhotoEvents() {
+    // Obtener referencias a todos los elementos necesarios
+    const fotoPlaceholder = document.getElementById("fotoPlaceholder");
+    const btnCargarFoto = document.getElementById("btnCargarFoto");
+    const fotoDropdown = document.getElementById("fotoDropdown");
+    const dropdownCargarFoto = document.getElementById("dropdownCargarFoto");
+    const dropdownGenerarIA = document.getElementById("dropdownGenerarIA");
+    const fotoInput = document.getElementById("fotoInput");
+
+    // Verificar que todos los elementos existan
+    if (!fotoPlaceholder || !btnCargarFoto || !fotoDropdown || 
+        !dropdownCargarFoto || !dropdownGenerarIA || !fotoInput) {
+      console.error("No se encontraron todos los elementos necesarios para el menú de fotos");
+      return;
+    }
+
+    // Limpiar todos los listeners anteriores para evitar duplicados
+    const newBtnCargarFoto = btnCargarFoto.cloneNode(true);
+    btnCargarFoto.parentNode.replaceChild(newBtnCargarFoto, btnCargarFoto);
+    
+    const newDropdownCargarFoto = dropdownCargarFoto.cloneNode(true);
+    dropdownCargarFoto.parentNode.replaceChild(newDropdownCargarFoto, dropdownCargarFoto);
+    
+    const newDropdownGenerarIA = dropdownGenerarIA.cloneNode(true);
+    dropdownGenerarIA.parentNode.replaceChild(newDropdownGenerarIA, dropdownGenerarIA);
+
+    // Asignar nuevos event listeners
+    // 1. Mostrar/ocultar el menú cuando se hace clic en los tres puntos
+    newBtnCargarFoto.addEventListener("click", function(e) {
+      e.stopPropagation();
+      const isVisible = fotoDropdown.style.display === "block";
+      fotoDropdown.style.display = isVisible ? "none" : "block";
+    });
+
+    // 2. Abrir selector de archivos cuando se hace clic en "Cargar imagen"
+    newDropdownCargarFoto.addEventListener("click", function(e) {
+      e.stopPropagation();
+      fotoInput.click();
+      fotoDropdown.style.display = "none";
+    });
+
+    // 3. Generar imagen con IA cuando se hace clic en "Generar con IA"
+    newDropdownGenerarIA.addEventListener("click", function(e) {
+      e.stopPropagation();
+      generatePhotoWithIA();
+      fotoDropdown.style.display = "none";
+    });
+
+    // 4. Cerrar el menú al hacer clic fuera
+    document.addEventListener("click", function(e) {
+      if (!e.target.closest("#btnCargarFoto") && 
+          !e.target.closest("#fotoDropdown") && 
+          fotoDropdown.style.display === "block") {
+        fotoDropdown.style.display = "none";
+      }
+    });
+
+    // Observador para detectar cambios en el DOM y volver a vincular si es necesario
+    const observer = new MutationObserver(function(mutations) {
+      mutations.forEach(function(mutation) {
+        if (mutation.type === 'childList' && 
+            (mutation.target === fotoPlaceholder || 
+             mutation.target.closest("#fotoPlaceholder"))) {
+          // Si el placeholder cambió, revincular eventos
+          setTimeout(bindPhotoEvents, 0);
+          observer.disconnect();
+        }
+      });
+    });
+
+    // Configurar el observador para observar cambios en los hijos
+    observer.observe(fotoPlaceholder, { childList: true, subtree: true });
+  }
+  
+  function generatePhotoWithIA() {
+    const nombreInput = document.getElementById("nombre");
+    const fotoDropdown = document.getElementById("fotoDropdown");
+    const imageProgressContainer = document.querySelector(".image-upload-progress");
+    const imageProgressBar = document.getElementById("imageProgressBar");
+    
+    if (fotoDropdown) {
+      fotoDropdown.style.display = "none";
+    }
+
+    if (!nombreInput.value) {
+      showCenteredNotification("Debes ingresar al menos el NOMBRE DEL PRODUCTO para generar una imagen con IA.");
+      return;
+    }
+    
+    // Mostrar un indicador de carga
+    const fotoPlaceholder = document.getElementById("fotoPlaceholder");
+    fotoPlaceholder.innerHTML = `
+      <div style="text-align: center; padding: 20px;">
+        <p>Buscando imagen...</p>
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+      </div>
+    `;
+    
+    // Mostrar barra de progreso
+    imageProgressContainer.style.display = "block";
+    imageProgressBar.style.width = "0%";
+    
+    // Simulación de progreso para feedback visual
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += 3;
+      if (progress > 95) {
+        progress = 95; // Mantener en 95% hasta que termine
+      }
+      imageProgressBar.style.width = `${progress}%`;
+    }, 100);
+    
+    // Llamada a la API con parámetro adicional para forzar búsqueda nueva
+    const queryParams = {
+      nombre: nombreInput.value.trim(),
+      forceSearch: true, // Este es el nuevo parámetro para forzar la búsqueda
+      cacheBuster: Date.now() // Evitar caché en navegador para solicitudes únicas
+    };
+    
+    // Usar el caché de navegador para peticiones idénticas
+    fetch("/api/buscar-imagen", {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json",
+        "Cache-Control": "max-age=3600"  // Cachear por 1 hora
+      },
+      body: JSON.stringify(queryParams)
+    })
+    .then(res => {
+      if (!res.ok) {
+        throw new Error(`Error HTTP: ${res.status}`);
+      }
+      return res.json();
+    })
+    .then(data => {
+      // Limpiar intervalo y completar barra
+      clearInterval(interval);
+      imageProgressBar.style.width = "100%";
+      
+      // Ocultar barra después de 500ms
+      setTimeout(() => {
+        imageProgressContainer.style.display = "none";
+      }, 500);
+      
+      if (data.status === "success" && data.image_url) {
+        // Pre-cargar imagen para verificar
+        const testImg = new Image();
+        testImg.onload = function() {
+          fotoPlaceholder.innerHTML = `
+            <img src="${data.image_url}" alt="Imagen IA">
+            <button type="button" class="remove-image" id="removeImageBtn">&times;</button>
+          `;
+          fotoPlaceholder.classList.add("has-image");
+
+          // Guardar el nombre del archivo y la URL
+          document.getElementById("ia_foto_filename").value = data.filename || "";
+          document.getElementById("displayed_image_url").value = data.image_url;
+
+          attachRemoveImageListener();
+        };
+        
+        testImg.onerror = function() {
+          console.error("No se pudo cargar la imagen:", data.image_url);
+          fotoPlaceholder.innerHTML = `
+            <button type="button" class="no-image-icon" id="btnCargarFoto">&#8942;</button>
+            <div class="foto-dropdown" id="fotoDropdown" style="display:none;">
+              <button type="button" class="dropdown-item btn btn-secondary" id="dropdownCargarFoto">Cargar imagen</button>
+              <button type="button" class="dropdown-item btn btn-secondary" id="dropdownGenerarIA">Generar con IA</button>
+            </div>
+          `;
+          showCenteredNotification("La imagen no pudo cargarse. Intenta de nuevo o carga una imagen manualmente.");
+          setTimeout(bindPhotoEvents, 0);
+        };
+        
+        // Iniciar la carga de la imagen
+        testImg.src = data.image_url;
+      } else {
+        // Reconstruir menú con estructura correcta en caso de error
+        fotoPlaceholder.innerHTML = `
+          <button type="button" class="no-image-icon" id="btnCargarFoto">&#8942;</button>
+          <div class="foto-dropdown" id="fotoDropdown" style="display:none;">
+            <button type="button" class="dropdown-item btn btn-secondary" id="dropdownCargarFoto">Cargar imagen</button>
+            <button type="button" class="dropdown-item btn btn-secondary" id="dropdownGenerarIA">Generar con IA</button>
+          </div>
+        `;
+        showCenteredNotification(data.message || "No se pudo obtener la imagen");
+        // Dar tiempo para que el DOM se actualice antes de asignar eventos
+        setTimeout(bindPhotoEvents, 0);
+      }
+    })
+    .catch(error => {
+      // Limpiar intervalo y ocultar barra
+      clearInterval(interval);
+      imageProgressContainer.style.display = "none";
+      
+      console.error("Error al buscar la imagen:", error);
+      // Reconstruir menú con estructura correcta en caso de error
+      fotoPlaceholder.innerHTML = `
+        <button type="button" class="no-image-icon" id="btnCargarFoto">&#8942;</button>
+        <div class="foto-dropdown" id="fotoDropdown" style="display:none;">
+          <button type="button" class="dropdown-item btn btn-secondary" id="dropdownCargarFoto">Cargar imagen</button>
+          <button type="button" class="dropdown-item btn btn-secondary" id="dropdownGenerarIA">Generar con IA</button>
+        </div>
+      `;
+      showCenteredNotification("Ocurrió un error al buscar la imagen: " + error.message);
+      // Dar tiempo para que el DOM se actualice antes de asignar eventos
+      setTimeout(bindPhotoEvents, 0);
+    });
+  }
+
+  /* ===========================================================
+   * 6) TOGGLE: Favorito / Producto a la Venta
+   * ===========================================================
+   */
+  const favoritoContainer = document.getElementById("favoritoContainer");
+  const heartIcon = document.getElementById("heartIcon");
+  const esFavoritoInput = document.getElementById("es_favorito");
+  
+  if (favoritoContainer && heartIcon && esFavoritoInput) {
+    favoritoContainer.addEventListener("click", () => {
+      if (esFavoritoInput.value === "0") {
+        esFavoritoInput.value = "1";
+        heartIcon.classList.add("active");
+        heartIcon.innerHTML = "&#9829;";
+      } else {
+        esFavoritoInput.value = "0";
+        heartIcon.classList.remove("active");
+        heartIcon.innerHTML = "&#9825;";
+      }
+    });
+  }
+
+  const ventaContainer = document.getElementById("ventaContainer");
+  const ventaIcon = document.getElementById("ventaIcon");
+  const estaAVentaInput = document.getElementById("esta_a_la_venta");
+  
+  if (ventaContainer && ventaIcon && estaAVentaInput) {
+    ventaContainer.addEventListener("click", () => {
+      if (estaAVentaInput.value === "1") {
+        estaAVentaInput.value = "0";
+        ventaIcon.src = "{{ url_for('static', filename='img/2.png') }}";
+      } else {
+        estaAVentaInput.value = "1";
+        ventaIcon.src = "{{ url_for('static', filename='img/1.png') }}";
+      }
+    });
+  }
+
+  /* ===========================================================
+   * 7) TOGGLE: FECHA DE CADUCIDAD
+   * ===========================================================
+   */
+  const btnToggleCaducidad = document.getElementById("btnToggleCaducidad");
+  const caducidadOpciones = document.getElementById("caducidadOpcionesContainer");
+  const hiddenCaducidadEstado = document.getElementById("toggle_caducidad_estado");
+
+  if (btnToggleCaducidad && caducidadOpciones && hiddenCaducidadEstado) {
+    btnToggleCaducidad.addEventListener("click", () => {
+      if (btnToggleCaducidad.classList.contains("active")) {
+        // Desactivar
+        btnToggleCaducidad.classList.remove("active");
+        btnToggleCaducidad.textContent = "DESACTIVADO";
+        caducidadOpciones.style.display = "none";
+        hiddenCaducidadEstado.value = "DESACTIVADO";
+      } else {
+        // Activar
+        btnToggleCaducidad.classList.add("active");
+        btnToggleCaducidad.textContent = "ACTIVADO";
+        caducidadOpciones.style.display = "block";
+        hiddenCaducidadEstado.value = "ACTIVADO";
+      }
+    });
+  }
+
+  document.querySelectorAll(".caducidad-options .form-check").forEach(fc => {
+    const radio = fc.querySelector("input[type='radio']");
+    if (radio) {
+      radio.addEventListener("change", () => {
+        document.querySelectorAll(".caducidad-options .form-check").forEach(el => el.classList.remove("selected"));
+        if (radio.checked) {
+          fc.classList.add("selected");
+        }
+      });
+    }
+  });
+  
+  /* ===========================================================
+   * 8) MANEJO DE TIPO DE MEDIDA
+   * ===========================================================
+   */
+  const medidaCards = document.querySelectorAll('.medida-card');
+  const tipoMedidaInput = document.getElementById('tipo_medida');
+  const unidadMedidaContainer = document.getElementById('unidadMedidaContainer');
+  const unidadMedidaSelect = document.getElementById('unidad_medida');
+  
+  // Opciones para cada tipo de medida
+  const opcionesMedida = {
+    unidad: [
+      { value: 'pieza', text: 'Pieza' },
+      { value: 'paquete', text: 'Paquete' },
+      { value: 'caja', text: 'Caja' },
+      { value: 'docena', text: 'Docena' },
+      { value: 'par', text: 'Par' }
+    ],
+    peso: [
+      { value: 'gramo', text: 'Gramo (g)' },
+      { value: 'kilogramo', text: 'Kilogramo (kg)' },
+      { value: 'libra', text: 'Libra (lb)' },
+      { value: 'onza', text: 'Onza (oz)' }
+    ],
+    volumen: [
+      { value: 'mililitro', text: 'Mililitro (ml)' },
+      { value: 'litro', text: 'Litro (l)' },
+      { value: 'galon', text: 'Galón' },
+      { value: 'onza_liquida', text: 'Onza líquida (fl oz)' }
+    ]
+  };
+
+  // Cargar opciones según el tipo de medida seleccionado
+  function cargarOpcionesMedida(tipo) {
+    if (!unidadMedidaSelect) return;
+    
+    // Limpiar opciones actuales
+    unidadMedidaSelect.innerHTML = '';
+    
+    // Agregar opciones según el tipo
+    if (opcionesMedida[tipo]) {
+      opcionesMedida[tipo].forEach(opcion => {
+        const option = document.createElement('option');
+        option.value = opcion.value;
+        option.textContent = opcion.text;
+        unidadMedidaSelect.appendChild(option);
+      });
+      
+      // Mostrar el contenedor
+      unidadMedidaContainer.style.display = 'block';
+    }
+  }
+  
+  // Asignar eventos a las tarjetas de medida
+  medidaCards.forEach(card => {
+    card.addEventListener('click', () => {
+      // Quitar selección de todas las tarjetas
+      medidaCards.forEach(c => c.classList.remove('selected'));
+      
+      // Seleccionar esta tarjeta
+      card.classList.add('selected');
+      
+      // Obtener el valor y actualizar el input oculto
+      const valor = card.getAttribute('data-value');
+      tipoMedidaInput.value = valor;
+      
+      // Cargar las opciones correspondientes
+      cargarOpcionesMedida(valor);
+    });
+  });
+
+  /* ===========================================================
+   * 9) ENVÍO DEL FORMULARIO / VALIDACIÓN FINAL
+   * ===========================================================
+   */
+  // Referencias a elementos de carga
+  const loadingOverlay = document.getElementById("loadingOverlay");
+  const productForm = document.getElementById("productForm");
+  const submitBtn = document.getElementById("submitBtn");
+  
+  // Manejar el envío del formulario
+  if (productForm) {
+    productForm.addEventListener("submit", function(e) {
+      // Validar que se haya seleccionado un tipo de medida
+      if (!tipoMedidaInput.value) {
+        e.preventDefault();
+        showCenteredNotification("Por favor, selecciona un tipo de medida para el producto.");
+        return;
+      }
+      
+      // Mostrar overlay de carga
+      loadingOverlay.style.display = "flex";
+    });
+  }
+
+  let categoryChoices;
+  if (document.getElementById("categoria_existente")) {
+    // Inicializar una sola vez
+    categoryChoices = new Choices("#categoria_existente", {
+      searchEnabled: false,
+      placeholder: false,
+      callbackOnCreateTemplates: function(template) {
+        return {
+          item: (classNames, data) => {
+            if (data.value === "") {
+              return template(`
+                <div
+                  class="${classNames.item} ${classNames.itemSelectable}"
+                  data-item data-id="${data.id}" data-value="${data.value}"
+                  ${data.active ? 'aria-selected="true"' : ''}
+                  ${data.disabled ? 'aria-disabled="true"' : ''}>
+                  -SELECCIONA UNA CATEGORÍA-
+                </div>
+              `);
+            }
+        };
+      }
+    });
+  }
+
+  // Manejo optimizado de carga de imágenes
+  const fotoInput = document.getElementById("fotoInput");
+  if (fotoInput) {
+    fotoInput.addEventListener("change", function(e) {
+      if (this.files && this.files[0]) {
+        const file = this.files[0];
+        if (file.size > 5 * 1024 * 1024) { // 5MB
+          showCenteredNotification("La imagen es demasiado grande (máximo 5MB).");
+          return;
+        }
+        
+        // Mostrar progreso para archivos grandes
+        const imageProgressContainer = document.querySelector(".image-upload-progress");
+        const imageProgressBar = document.getElementById("imageProgressBar");
+        
+        if (file.size > 1 * 1024 * 1024) { // 1MB
+          imageProgressContainer.style.display = "block";
+          
+          // Simulación de progreso (ya que no hay evento real)
+          let progress = 0;
+          const interval = setInterval(() => {
+            progress += 5;
+            if (progress > 100) {
+              clearInterval(interval);
+              imageProgressContainer.style.display = "none";
+            } else {
+              imageProgressBar.style.width = `${progress}%`;
+            }
+          }, 50);
+        }
+        
+        // Crear blob URL para vista previa inmediata
+        const objectURL = URL.createObjectURL(file);
+        const fotoPlaceholder = document.getElementById("fotoPlaceholder");
+        
+        fotoPlaceholder.innerHTML = `
+          <img src="${objectURL}" alt="Foto Local Seleccionada">
+          <button type="button" class="remove-image" id="removeImageBtn">&times;</button>
+        `;
+        fotoPlaceholder.classList.add("has-image");
+        
+        // NO guardar objectURL como displayed_image_url para archivos locales
+        document.getElementById("displayed_image_url").value = "";
+        
+        attachRemoveImageListener();
+      }
+    });
+  }
+
+  // Inicializar eventos al cargar la página
+  document.addEventListener("DOMContentLoaded", function() {
+    // Inicializar etiquetas flotantes para campos específicos
+    const inputs = document.querySelectorAll(
+      "#nombre, #stock, #costo, #precio_venta, #marca, #origen"
+    );
+    
+    inputs.forEach(input => {
+      updateFloatingLabel(input);
+      input.addEventListener("input", () => {
+        updateFloatingLabel(input);
+      });
+    });
+    
+    // Inicializar eventos del menú de fotos
+    bindPhotoEvents();
+  });
+            let color = "#000000";
+            if (data.customProperties && data.customProperties.color) {
+              color = data.customProperties.color;
+            }
+            return template(`
+              <div
+                class="${classNames.item} ${classNames.itemSelectable}"
+                data-item data-id="${data.id}" data-value="${data.value}"
+                ${data.active ? 'aria-selected="true"' : ''}
+                ${data.disabled ? 'aria-disabled="true"' : ''}>
+                <span style="display:inline-block; width:12px; height:12px; background-color:${
+                </script>
+                {% endblock %}
