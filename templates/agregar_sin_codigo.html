@@ -266,32 +266,6 @@
     background-color: #999;
   }
 
-  /* Input con iconos en la misma fila */
-  .input-icon-group {
-    display: inline-flex;
-    align-items: center;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    padding: 0 0.5rem;
-    width: 100%;
-    background-color: #fff;
-  }
-  .input-icon-group input {
-    flex: 1;
-    border: none;
-    outline: none;
-    background-color: transparent; /* sin color extra */
-    padding: 0.5rem;
-    text-transform: uppercase;
-    font-weight: bold;
-  }
-  .input-icon-group img {
-    margin-left: 0.5rem;
-    cursor: pointer;
-    width: 24px;
-    height: 24px;
-  }
-
   /* Overlay de carga */
   .loading-overlay {
     position: fixed;
@@ -383,21 +357,6 @@
     margin-bottom: 0.5rem;
   }
 
-  /* Campos específicos para productos sin código */
-  .info-box {
-    background-color: #f8f9fa;
-    border-left: 4px solid #007BFF;
-    padding: 1rem;
-    margin-bottom: 1rem;
-    border-radius: 4px;
-  }
-  
-  .info-title {
-    font-weight: 600;
-    color: #007BFF;
-    margin-bottom: 0.5rem;
-  }
-
   /* Badge del código generado */
   .codigo-badge {
     display: inline-block;
@@ -409,10 +368,39 @@
     margin-bottom: 1rem;
     border: 1px dashed #0056b3;
   }
+  
+  /* Estilos para el campo de unidad de medida */
+  .unidad-medida-container {
+    position: relative;
+  }
+  
+  .unidad-medida-container select {
+    appearance: none;
+    -webkit-appearance: none;
+    padding-right: 30px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23333' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 16px 16px;
+  }
+  
+  /* Estilo para campo de stock con unidad */
+  .stock-unit-container {
+    position: relative;
+  }
+  
+  .stock-unit-suffix {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #777;
+    font-size: 0.9rem;
+    pointer-events: none;
+  }
 </style>
 
 <div class="card-form">
-  <!-- AQUÍ ESTÁ LA CORRECCIÓN: El form ahora abarca TODO el contenido -->
   <form method="POST" action="" enctype="multipart/form-data" id="productForm">
     <div class="row-form">
       <!-- Col Izquierda: Foto + Checks -->
@@ -463,11 +451,13 @@
           Agregar producto sin código de barras
         </h3>
 
-        <!-- Información sobre el código autogenerado -->
-        <div class="info-box">
-          <div class="info-title">Código de barras autogenerado</div>
-          <p class="mb-1">Este producto recibirá un código único que iniciará con "1901" seguido de 8 dígitos aleatorios.</p>
-          <p class="mb-0">Este código se asignará automáticamente al guardar el producto.</p>
+        <!-- Información del código de barras autogenerado -->
+        <div style="margin-bottom: 1.5rem;">
+          <p style="margin-bottom: 0.5rem;"><strong>Tu nuevo código de barras es:</strong></p>
+          <div class="codigo-badge" id="codigoGeneradoBadge">
+            <!-- Código cargado por JS -->
+          </div>
+          <input type="hidden" id="codigo_barras_externo" name="codigo_barras_externo" value="">
         </div>
 
         <!-- IMPORTANTE: Para que el back sepa si es 'existente' (por default) -->
@@ -491,7 +481,7 @@
         <div class="form-group">
           <label class="form-label fw-bold">Tipo de Medida:</label>
           <div class="medida-options">
-            <div class="medida-card" data-value="unidad">
+            <div class="medida-card selected" data-value="unidad">
               <img src="{{ url_for('static', filename='img/unidad.png') }}" alt="Unidad">
               <div>Por Unidad</div>
             </div>
@@ -504,32 +494,39 @@
               <div>Por Volumen</div>
             </div>
           </div>
-          <input type="hidden" id="tipo_medida" name="tipo_medida" value="">
+          <input type="hidden" id="tipo_medida" name="tipo_medida" value="unidad">
         </div>
 
         <!-- Unidad de Medida (cambia según el tipo seleccionado) -->
-        <div class="form-group" id="unidadMedidaContainer" style="display:none;">
+        <div class="form-group" id="unidadMedidaContainer">
           <label class="form-label fw-bold">Unidad de Medida:</label>
-          <select class="form-control" id="unidad_medida" name="unidad_medida">
-            <!-- Opciones se cargarán dinámicamente según el tipo de medida -->
-          </select>
+          <div class="unidad-medida-container">
+            <select class="form-control" id="unidad_medida" name="unidad_medida">
+              <!-- Opciones cargadas dinámicamente por JS -->
+            </select>
+          </div>
         </div>
 
         <!-- Stock Inicial -->
         <div class="form-group">
-          <input 
-            type="number"
-            class="form-control"
-            id="stock"
-            name="stock"
-            min="0"
-            placeholder="STOCK INICIAL"
-          >
+          <label class="form-label fw-bold" id="stockLabel">Stock Inicial (por pieza):</label>
+          <div class="stock-unit-container">
+            <input 
+              type="number"
+              class="form-control"
+              id="stock"
+              name="stock"
+              min="0"
+              placeholder="STOCK INICIAL"
+            >
+            <span class="stock-unit-suffix" id="stockUnitSuffix">PIEZAS</span>
+          </div>
         </div>
 
         <!-- Costo / Precio -->
         <div class="d-flex gap-3" style="align-items: center; margin-top:1rem;">
           <div class="form-group" style="flex:1;">
+            <label class="form-label fw-bold" id="costoLabel">Costo (por pieza):</label>
             <input
               type="text"
               step="0.01"
@@ -538,10 +535,11 @@
               name="costo"
               required
               oninput="formatCostRealtime(this)"
-              placeholder="COSTO"
+              placeholder="COSTO POR PIEZA"
             >
           </div>
           <div class="form-group" style="flex:1;">
+            <label class="form-label fw-bold" id="precioLabel">Precio de Venta (por pieza):</label>
             <input
               type="text"
               step="0.01"
@@ -550,41 +548,19 @@
               name="precio_venta"
               required
               oninput="formatCostRealtime(this)"
-              placeholder="PRECIO DE VENTA"
+              placeholder="PRECIO POR PIEZA"
             >
           </div>
         </div>
 
-        <!-- Fabricación -->
-        <div class="form-group" style="margin-top:1rem;">
-          <select class="form-control" id="fabricacion" name="fabricacion">
-            <option value="" disabled selected>TIPO DE FABRICACIÓN</option>
-            <option value="artesanal">Artesanal</option>
-            <option value="industrial">Industrial</option>
-            <option value="casero">Casero</option>
-            <option value="importado">Importado</option>
-          </select>
-        </div>
-
-        <!-- Marca o Productor -->
+        <!-- Marca -->
         <div class="form-group" style="margin-top:1rem;">
           <input
             type="text"
             class="form-control"
             id="marca"
             name="marca"
-            placeholder="MARCA O PRODUCTOR"
-          >
-        </div>
-
-        <!-- Origen del Producto -->
-        <div class="form-group" style="margin-top:1rem;">
-          <input
-            type="text"
-            class="form-control"
-            id="origen"
-            name="origen"
-            placeholder="ORIGEN DEL PRODUCTO (OPCIONAL)"
+            placeholder="MARCA (EJ. GENÉRICO)"
           >
         </div>
 
@@ -760,24 +736,200 @@
 <!-- SCRIPTS -->
 <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 <script>
-  /* ===========================================================
-   * 1) Resaltar coincidencias en MORADO
-   * ===========================================================
+  // Cache de códigos generados para evitar duplicados
+  const generatedCodes = new Set();
+  
+  /**
+   * Genera un código de barras único que inicia con 1901 seguido de 8 dígitos aleatorios
    */
-  function highlightMatch(text, query) {
-    const index = text.toLowerCase().indexOf(query.toLowerCase());
-    if (index === -1) return text;
-    const before = text.slice(0, index);
-    const match  = text.slice(index, index + query.length);
-    const after  = text.slice(index + query.length);
-    return before + "<span style='color: #FF0080; font-weight:bold;'>" + match + "</span>" + after;
+  function generateUniqueBarcode() {
+    const prefix = "1901";
+    let randomPart;
+    let barcode;
+    
+    // Generar un código único que no esté en la caché
+    do {
+      // Generar 8 dígitos aleatorios
+      randomPart = Array.from({length: 8}, () => Math.floor(Math.random() * 10)).join('');
+      barcode = prefix + randomPart;
+    } while (generatedCodes.has(barcode));
+    
+    // Agregar a la caché
+    generatedCodes.add(barcode);
+    return barcode;
   }
 
   /* ===========================================================
-   * 2) Notificación centrada (optimizado para 3s)
+   * 1) INICIALIZACIÓN PRINCIPAL
    * ===========================================================
    */
-  // Cache del elemento notificación para reutilizarlo
+  // Generar código de barras al cargar la página
+  document.addEventListener("DOMContentLoaded", function() {
+    // Generar código de barras único
+    const barcode = generateUniqueBarcode();
+    const codigoGeneradoBadge = document.getElementById("codigoGeneradoBadge");
+    const codigoInput = document.getElementById("codigo_barras_externo");
+    
+    if (codigoGeneradoBadge) {
+      codigoGeneradoBadge.textContent = barcode;
+    }
+    
+    if (codigoInput) {
+      codigoInput.value = barcode;
+    }
+
+    // Inicializar unidades de medida
+    initializeMeasureUnits();
+    
+    // Inicializar etiquetas flotantes para campos específicos
+    const inputs = document.querySelectorAll(
+      "#nombre, #stock, #costo, #precio_venta, #marca"
+    );
+    
+    inputs.forEach(input => {
+      updateFloatingLabel(input);
+      input.addEventListener("input", () => {
+        updateFloatingLabel(input);
+      });
+    });
+    
+    // Inicializar eventos del menú de fotos
+    bindPhotoEvents();
+  });
+
+  /* ===========================================================
+   * 2) MANEJO DE TIPO DE MEDIDA Y UNIDADES
+   * ===========================================================
+   */
+  // Opciones para cada tipo de medida
+  const opcionesMedida = {
+    unidad: [
+      { value: 'pieza', text: 'Pieza', singular: 'pieza', plural: 'piezas' },
+      { value: 'paquete', text: 'Paquete', singular: 'paquete', plural: 'paquetes' },
+      { value: 'caja', text: 'Caja', singular: 'caja', plural: 'cajas' },
+      { value: 'docena', text: 'Docena', singular: 'docena', plural: 'docenas' },
+      { value: 'par', text: 'Par', singular: 'par', plural: 'pares' }
+    ],
+    peso: [
+      { value: 'gramo', text: 'Gramo (g)', singular: 'gramo', plural: 'gramos' },
+      { value: 'kilogramo', text: 'Kilogramo (kg)', singular: 'kilogramo', plural: 'kilogramos' },
+      { value: 'libra', text: 'Libra (lb)', singular: 'libra', plural: 'libras' },
+      { value: 'onza', text: 'Onza (oz)', singular: 'onza', plural: 'onzas' }
+    ],
+    volumen: [
+      { value: 'mililitro', text: 'Mililitro (ml)', singular: 'mililitro', plural: 'mililitros' },
+      { value: 'litro', text: 'Litro (l)', singular: 'litro', plural: 'litros' },
+      { value: 'galon', text: 'Galón', singular: 'galón', plural: 'galones' },
+      { value: 'onza_liquida', text: 'Onza líquida (fl oz)', singular: 'onza líquida', plural: 'onzas líquidas' }
+    ]
+  };
+  
+  // Inicializar unidades de medida según el tipo seleccionado
+  function initializeMeasureUnits() {
+    const medidaCards = document.querySelectorAll('.medida-card');
+    const tipoMedidaInput = document.getElementById('tipo_medida');
+    const unidadMedidaSelect = document.getElementById('unidad_medida');
+    
+    // Establecer 'unidad' como valor por defecto
+    tipoMedidaInput.value = 'unidad';
+    
+    // Cargar opciones de unidad por defecto
+    cargarOpcionesMedida('unidad');
+    
+    // Establecer 'pieza' como valor por defecto para unidades
+    if (unidadMedidaSelect) {
+      unidadMedidaSelect.value = 'pieza';
+      actualizarEtiquetasUnidad('pieza');
+    }
+    
+    // Asignar eventos a las tarjetas de medida
+    medidaCards.forEach(card => {
+      card.addEventListener('click', () => {
+        // Quitar selección de todas las tarjetas
+        medidaCards.forEach(c => c.classList.remove('selected'));
+        
+        // Seleccionar esta tarjeta
+        card.classList.add('selected');
+        
+        // Obtener el valor y actualizar el input oculto
+        const valor = card.getAttribute('data-value');
+        tipoMedidaInput.value = valor;
+        
+        // Cargar las opciones correspondientes
+        cargarOpcionesMedida(valor);
+      });
+    });
+  }
+  
+  // Cargar opciones según el tipo de medida seleccionado
+  function cargarOpcionesMedida(tipo) {
+    const unidadMedidaSelect = document.getElementById('unidad_medida');
+    if (!unidadMedidaSelect) return;
+    
+    // Limpiar opciones actuales
+    unidadMedidaSelect.innerHTML = '';
+    
+    // Agregar opciones según el tipo
+    if (opcionesMedida[tipo]) {
+      opcionesMedida[tipo].forEach(opcion => {
+        const option = document.createElement('option');
+        option.value = opcion.value;
+        option.textContent = opcion.text;
+        option.setAttribute('data-singular', opcion.singular);
+        option.setAttribute('data-plural', opcion.plural);
+        unidadMedidaSelect.appendChild(option);
+      });
+      
+      // Seleccionar la primera opción
+      unidadMedidaSelect.selectedIndex = 0;
+      
+      // Actualizar etiquetas de unidad
+      const selectedOption = unidadMedidaSelect.options[unidadMedidaSelect.selectedIndex];
+      const unidadValue = selectedOption.value;
+      actualizarEtiquetasUnidad(unidadValue);
+      
+      // Añadir evento de cambio
+      unidadMedidaSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const unidadValue = selectedOption.value;
+        actualizarEtiquetasUnidad(unidadValue);
+      });
+    }
+  }
+  
+  // Actualizar etiquetas de unidad en los campos de stock, costo y precio
+  function actualizarEtiquetasUnidad(unidadValue) {
+    const unidadMedidaSelect = document.getElementById('unidad_medida');
+    const selectedOption = Array.from(unidadMedidaSelect.options).find(option => option.value === unidadValue);
+    
+    if (!selectedOption) return;
+    
+    const singular = selectedOption.getAttribute('data-singular');
+    const plural = selectedOption.getAttribute('data-plural');
+    
+    // Actualizar etiquetas
+    const stockLabel = document.getElementById('stockLabel');
+    const costoLabel = document.getElementById('costoLabel');
+    const precioLabel = document.getElementById('precioLabel');
+    const stockUnitSuffix = document.getElementById('stockUnitSuffix');
+    
+    if (stockLabel) stockLabel.textContent = `Stock Inicial (por ${singular}):`;
+    if (costoLabel) costoLabel.textContent = `Costo (por ${singular}):`;
+    if (precioLabel) precioLabel.textContent = `Precio de Venta (por ${singular}):`;
+    if (stockUnitSuffix) stockUnitSuffix.textContent = plural.toUpperCase();
+    
+    // Actualizar placeholders
+    const costoInput = document.getElementById('costo');
+    const precioInput = document.getElementById('precio_venta');
+    
+    if (costoInput) costoInput.placeholder = `COSTO POR ${singular.toUpperCase()}`;
+    if (precioInput) precioInput.placeholder = `PRECIO POR ${singular.toUpperCase()}`;
+  }
+
+  /* ===========================================================
+   * 3) Notificación centrada
+   * ===========================================================
+   */
   let activeNotification = null;
   let notifTimeout = null;
 
@@ -815,7 +967,7 @@
   }
 
   /* ===========================================================
-   * 3) Formatear Costo en tiempo real (optimizado)
+   * 4) Formatear Costo en tiempo real (optimizado)
    * ===========================================================
    */
   // Cache expresiones regulares
@@ -849,7 +1001,7 @@
   }
 
   /* ===========================================================
-   * 4) FLOATING LABELS
+   * 5) FLOATING LABELS
    * ===========================================================
    */
   // Cache para etiquetas flotantes
@@ -880,7 +1032,7 @@
   }
 
   /* ===========================================================
-   * 5) FOTOGRAFÍA Y MENÚ (mejorado)
+   * 6) FOTOGRAFÍA Y MENÚ (mejorado)
    * ===========================================================
    */
   function attachRemoveImageListener() {
@@ -1124,7 +1276,7 @@
   }
 
   /* ===========================================================
-   * 6) TOGGLE: Favorito / Producto a la Venta
+   * 7) TOGGLE: Favorito / Producto a la Venta
    * ===========================================================
    */
   const favoritoContainer = document.getElementById("favoritoContainer");
@@ -1162,7 +1314,7 @@
   }
 
   /* ===========================================================
-   * 7) TOGGLE: FECHA DE CADUCIDAD
+   * 8) TOGGLE: FECHA DE CADUCIDAD
    * ===========================================================
    */
   const btnToggleCaducidad = document.getElementById("btnToggleCaducidad");
@@ -1200,77 +1352,6 @@
   });
   
   /* ===========================================================
-   * 8) MANEJO DE TIPO DE MEDIDA
-   * ===========================================================
-   */
-  const medidaCards = document.querySelectorAll('.medida-card');
-  const tipoMedidaInput = document.getElementById('tipo_medida');
-  const unidadMedidaContainer = document.getElementById('unidadMedidaContainer');
-  const unidadMedidaSelect = document.getElementById('unidad_medida');
-  
-  // Opciones para cada tipo de medida
-  const opcionesMedida = {
-    unidad: [
-      { value: 'pieza', text: 'Pieza' },
-      { value: 'paquete', text: 'Paquete' },
-      { value: 'caja', text: 'Caja' },
-      { value: 'docena', text: 'Docena' },
-      { value: 'par', text: 'Par' }
-    ],
-    peso: [
-      { value: 'gramo', text: 'Gramo (g)' },
-      { value: 'kilogramo', text: 'Kilogramo (kg)' },
-      { value: 'libra', text: 'Libra (lb)' },
-      { value: 'onza', text: 'Onza (oz)' }
-    ],
-    volumen: [
-      { value: 'mililitro', text: 'Mililitro (ml)' },
-      { value: 'litro', text: 'Litro (l)' },
-      { value: 'galon', text: 'Galón' },
-      { value: 'onza_liquida', text: 'Onza líquida (fl oz)' }
-    ]
-  };
-
-  // Cargar opciones según el tipo de medida seleccionado
-  function cargarOpcionesMedida(tipo) {
-    if (!unidadMedidaSelect) return;
-    
-    // Limpiar opciones actuales
-    unidadMedidaSelect.innerHTML = '';
-    
-    // Agregar opciones según el tipo
-    if (opcionesMedida[tipo]) {
-      opcionesMedida[tipo].forEach(opcion => {
-        const option = document.createElement('option');
-        option.value = opcion.value;
-        option.textContent = opcion.text;
-        unidadMedidaSelect.appendChild(option);
-      });
-      
-      // Mostrar el contenedor
-      unidadMedidaContainer.style.display = 'block';
-    }
-  }
-  
-  // Asignar eventos a las tarjetas de medida
-  medidaCards.forEach(card => {
-    card.addEventListener('click', () => {
-      // Quitar selección de todas las tarjetas
-      medidaCards.forEach(c => c.classList.remove('selected'));
-      
-      // Seleccionar esta tarjeta
-      card.classList.add('selected');
-      
-      // Obtener el valor y actualizar el input oculto
-      const valor = card.getAttribute('data-value');
-      tipoMedidaInput.value = valor;
-      
-      // Cargar las opciones correspondientes
-      cargarOpcionesMedida(valor);
-    });
-  });
-
-  /* ===========================================================
    * 9) ENVÍO DEL FORMULARIO / VALIDACIÓN FINAL
    * ===========================================================
    */
@@ -1282,10 +1363,26 @@
   // Manejar el envío del formulario
   if (productForm) {
     productForm.addEventListener("submit", function(e) {
-      // Validar que se haya seleccionado un tipo de medida
-      if (!tipoMedidaInput.value) {
+      // Verificar campos requeridos
+      const nombre = document.getElementById("nombre").value.trim();
+      const tipo_medida = document.getElementById("tipo_medida").value;
+      const unidad_medida = document.getElementById("unidad_medida").value;
+      
+      if (!nombre) {
+        e.preventDefault();
+        showCenteredNotification("Por favor, ingresa el nombre del producto.");
+        return;
+      }
+      
+      if (!tipo_medida) {
         e.preventDefault();
         showCenteredNotification("Por favor, selecciona un tipo de medida para el producto.");
+        return;
+      }
+      
+      if (!unidad_medida) {
+        e.preventDefault();
+        showCenteredNotification("Por favor, selecciona una unidad de medida para el producto.");
         return;
       }
       
@@ -1314,6 +1411,49 @@
                 </div>
               `);
             }
+            let color = "#000000";
+            if (data.customProperties && data.customProperties.color) {
+              color = data.customProperties.color;
+            }
+            return template(`
+              <div
+                class="${classNames.item} ${classNames.itemSelectable}"
+                data-item data-id="${data.id}" data-value="${data.value}"
+                ${data.active ? 'aria-selected="true"' : ''}
+                ${data.disabled ? 'aria-disabled="true"' : ''}>
+                <span style="display:inline-block; width:12px; height:12px; background-color:${color}; border-radius:50%; margin-right:6px;"></span>
+                ${data.label}
+              </div>
+            `);
+          },
+          choice: (classNames, data) => {
+            if (data.value === "") {
+              return template(`
+                <div
+                  class="${classNames.item} ${classNames.itemChoice}"
+                  data-choice
+                  style="display:none;"
+                  ${data.disabled ? 'data-choice-disabled aria-disabled="true"' : 'data-choice-selectable'}
+                  data-id="${data.id}" data-value="${data.value}">
+                  -SELECCIONA UNA CATEGORÍA-
+                </div>
+              `);
+            }
+            let color = "#000000";
+            if (data.customProperties && data.customProperties.color) {
+              color = data.customProperties.color;
+            }
+            return template(`
+              <div
+                class="${classNames.item} ${classNames.itemChoice}"
+                data-choice
+                ${data.disabled ? 'data-choice-disabled aria-disabled="true"' : 'data-choice-selectable'}
+                data-id="${data.id}" data-value="${data.value}">
+                <span style="display:inline-block; width:12px; height:12px; background-color:${color}; border-radius:50%; margin-right:6px;"></span>
+                ${data.label}
+              </div>
+            `);
+          }
         };
       }
     });
@@ -1367,34 +1507,5 @@
       }
     });
   }
-
-  // Inicializar eventos al cargar la página
-  document.addEventListener("DOMContentLoaded", function() {
-    // Inicializar etiquetas flotantes para campos específicos
-    const inputs = document.querySelectorAll(
-      "#nombre, #stock, #costo, #precio_venta, #marca, #origen"
-    );
-    
-    inputs.forEach(input => {
-      updateFloatingLabel(input);
-      input.addEventListener("input", () => {
-        updateFloatingLabel(input);
-      });
-    });
-    
-    // Inicializar eventos del menú de fotos
-    bindPhotoEvents();
-  });
-            let color = "#000000";
-            if (data.customProperties && data.customProperties.color) {
-              color = data.customProperties.color;
-            }
-            return template(`
-              <div
-                class="${classNames.item} ${classNames.itemSelectable}"
-                data-item data-id="${data.id}" data-value="${data.value}"
-                ${data.active ? 'aria-selected="true"' : ''}
-                ${data.disabled ? 'aria-disabled="true"' : ''}>
-                <span style="display:inline-block; width:12px; height:12px; background-color:${
-                </script>
-                {% endblock %}
+</script>
+{% endblock %}
