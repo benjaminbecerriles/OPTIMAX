@@ -786,6 +786,66 @@
   });
 
   /* ===========================================================
+   * Función para validar que el elemento input del código de barras exista y tenga valor
+   * ===========================================================
+   */
+  function validateBarcodeInput() {
+    const barcodeInput = document.getElementById("codigo_barras_externo");
+    
+    if (!barcodeInput || !barcodeInput.value || barcodeInput.value.trim() === "") {
+      // Si no existe o está vacío, generar uno nuevo
+      const barcode = generateUniqueBarcode();
+      
+      if (barcodeInput) {
+        barcodeInput.value = barcode;
+      } else {
+        console.error("El campo de código de barras no existe en el DOM");
+      }
+      
+      // También actualizar el elemento visual si existe
+      const codigoMostrado = document.getElementById("codigoMostrado");
+      if (codigoMostrado) {
+        codigoMostrado.textContent = barcode;
+      }
+      
+      return barcode;
+    }
+    
+    return barcodeInput.value;
+  }
+
+  /* ===========================================================
+   * Función para validar el formulario antes de enviar
+   * ===========================================================
+   */
+  function validateForm(e) {
+    // Asegurarse de que el código de barras esté presente
+    const barcode = validateBarcodeInput();
+    
+    if (!barcode || !barcode.startsWith("1901")) {
+      e.preventDefault(); // Detener el envío
+      showCenteredNotification("Error: No se pudo generar un código de barras válido");
+      return false;
+    }
+    
+    // Verificar que el nombre no esté vacío
+    const nombreInput = document.getElementById("nombre");
+    if (!nombreInput || !nombreInput.value || nombreInput.value.trim() === "") {
+      e.preventDefault();
+      showCenteredNotification("Error: El nombre del producto es obligatorio");
+      return false;
+    }
+    
+    // Mostrar el overlay de carga
+    const loadingOverlay = document.getElementById("loadingOverlay");
+    if (loadingOverlay) {
+      loadingOverlay.style.display = "flex";
+    }
+    
+    return true;
+  }
+
+  /* ===========================================================
    * 2) Notificación centrada
    * ===========================================================
    */
@@ -1221,24 +1281,21 @@
   // Referencias a elementos de carga
   const loadingOverlay = document.getElementById("loadingOverlay");
   const productForm = document.getElementById("productForm");
-  const submitBtn = document.getElementById("submitBtn");
   
-  // Manejar el envío del formulario
-  if (productForm) {
-    productForm.addEventListener("submit", function(e) {
-      // Verificar campos requeridos
-      const nombre = document.getElementById("nombre").value.trim();
+  // Agregar el event listener al formulario
+  document.addEventListener("DOMContentLoaded", function() {
+    const productForm = document.getElementById("productForm");
+    
+    if (productForm) {
+      // Sobrescribir el event listener existente (si lo hay)
+      productForm.onsubmit = function(e) {
+        return validateForm(e);
+      };
       
-      if (!nombre) {
-        e.preventDefault();
-        showCenteredNotification("Por favor, ingresa el nombre del producto.");
-        return;
-      }
-      
-      // Mostrar overlay de carga
-      loadingOverlay.style.display = "flex";
-    });
-  }
+      // También validar cuando se carga la página
+      validateBarcodeInput();
+    }
+  });
 
   let categoryChoices;
   if (document.getElementById("categoria_existente")) {

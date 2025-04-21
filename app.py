@@ -691,6 +691,15 @@ def agregar_sin_codigo():
             precio_str = request.form.get("precio_venta", "$0").strip()
             marca = request.form.get("marca", "").strip()
             
+            # Obtener el código de barras externo del formulario
+            codigo_barras_externo = request.form.get("codigo_barras_externo", "").strip()
+            
+            # Verificar que el código comience con "1901", si no, generar uno nuevo
+            if not codigo_barras_externo or not codigo_barras_externo.startswith("1901"):
+                codigo_barras_externo = generar_codigo_unico()
+                
+            print(f"DEBUG: Usando código de barras: {codigo_barras_externo}")
+            
             # Categoría
             cat_option = request.form.get('categoria_option', 'existente')
             if cat_option == 'existente':
@@ -707,12 +716,6 @@ def agregar_sin_codigo():
             has_caducidad = (request.form.get("toggle_caducidad_estado", "DESACTIVADO") == "ACTIVADO")
             caducidad_lapso = request.form.get("caducidad_lapso", None) if has_caducidad else None
             
-            # Campos extras para productos sin código
-            tipo_medida = request.form.get("tipo_medida", "").strip()
-            unidad_medida = request.form.get("unidad_medida", "").strip()
-            fabricacion = request.form.get("fabricacion", "").strip()
-            origen = request.form.get("origen", "").strip()
-            
             # Parse numéricos
             try:
                 stock_int = int(stock_str)
@@ -722,9 +725,6 @@ def agregar_sin_codigo():
             costo_val = parse_money(costo_str)
             precio_val = parse_money(precio_str)
             
-            # Generar código de barras único que empieza con 1901
-            codigo_barras_externo = generar_codigo_unico()
-            
             # Manejo de imagen
             foto_final = process_image(request, UPLOAD_FOLDER, BASE_DIR)
             if not foto_final:
@@ -733,7 +733,7 @@ def agregar_sin_codigo():
             # Usar la función para truncar la URL para asegurar que quepa en la columna
             url_imagen_truncada = truncar_url(request.form.get("displayed_image_url", "").strip(), 95)
                 
-            # Crear el producto
+            # Crear el producto con solo los campos válidos
             nuevo = Producto(
                 nombre=nombre,
                 stock=stock_int,
@@ -750,12 +750,9 @@ def agregar_sin_codigo():
                 es_favorito=es_favorito_bool,
                 esta_a_la_venta=esta_a_la_venta_bool,
                 has_caducidad=has_caducidad,
-                metodo_caducidad=caducidad_lapso,
-                # Campos adicionales
-                tipo_medida=tipo_medida,
-                unidad_medida=unidad_medida,
-                fabricacion=fabricacion,
-                origen=origen
+                metodo_caducidad=caducidad_lapso
+                # Eliminados los campos que no existen en el modelo
+                # tipo_medida, unidad_medida, fabricacion, origen
             )
             
             # Guardar en la base de datos
@@ -768,6 +765,7 @@ def agregar_sin_codigo():
             flash(f'Error al guardar el producto: {str(e)}', 'danger')
             print(f"ERROR al guardar producto sin código: {str(e)}")
         
+        # Redirección corregida
         return redirect(url_for('ver_productos'))
         
     else:
@@ -785,23 +783,6 @@ def agregar_sin_codigo():
             for c in categorias_db
         ]
         return render_template('agregar_sin_codigo.html', categories=categories_list)
-
-# Función para generar código de barras único que inicia con 1901
-def generar_codigo_unico():
-    # Prefijo fijo "1901"
-    prefijo = "1901"
-    
-    # Generar parte aleatoria (8 dígitos)
-    aleatorio = ''.join([str(random.randint(0, 9)) for _ in range(8)])
-    
-    # Verificar si ya existe en la base de datos
-    codigo_completo = f"{prefijo}{aleatorio}"
-    while Producto.query.filter_by(codigo_barras_externo=codigo_completo).first():
-        # Si existe, generar otro aleatorio
-        aleatorio = ''.join([str(random.randint(0, 9)) for _ in range(8)])
-        codigo_completo = f"{prefijo}{aleatorio}"
-    
-    return codigo_completo
 
 @app.route('/editar-producto/<int:prod_id>', methods=['GET','POST'])
 @login_requerido
@@ -995,7 +976,12 @@ def inventario_escaner():
 @app.route('/pendientes_aprobacion')
 @login_requerido
 def pendientes_aprobacion():
-    pass
+    empresa_id = session['user_id']
+    pendientes = Producto.query.filter_by(
+        empresa_id=empresa_id, 
+        is_approved=False
+    ).all()
+    return render_template('pendientes_aprobacion.html', pendientes=pendientes)
 
 @app.route('/completar-datos/<int:prod_id>', methods=['GET','POST'])
 @login_requerido
