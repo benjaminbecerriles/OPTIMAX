@@ -287,6 +287,18 @@ def truncar_url(url, max_length=95):
     return nombre_archivo
 
 ##############################################
+# FUNCIÓN PARA GENERAR CÓDIGO ÚNICO PARA PRODUCTOS A GRANEL
+##############################################
+def generar_codigo_a_granel():
+    """
+    Genera un código único para productos a granel con formato GRA-XXXXXXXX.
+    """
+    prefix = "GRA-"
+    caracteres = string.ascii_uppercase + string.digits
+    codigo_aleatorio = ''.join(random.choice(caracteres) for _ in range(8))
+    return prefix + codigo_aleatorio
+
+##############################################
 # FLASK APP
 ##############################################
 app = Flask(__name__)
@@ -784,6 +796,163 @@ def agregar_sin_codigo():
         ]
         return render_template('agregar_sin_codigo.html', categories=categories_list)
 
+@app.route('/agregar-a-granel', methods=['GET', 'POST'])
+@login_requerido
+def agregar_a_granel():
+    if request.method == 'POST':
+        try:
+            # Recoger campos del formulario
+            nombre = request.form.get("nombre", "").strip()
+            stock_str = request.form.get("stock", "0").strip() 
+            costo_str = request.form.get("costo", "$0").strip()
+            precio_str = request.form.get("precio_venta", "$0").strip()
+            marca = request.form.get("marca", "").strip()
+            origen = request.form.get("origen", "").strip()
+            
+            # Tipo y unidad de medida
+            tipo_medida = request.form.get("tipo_medida", "").strip()
+            unidad_medida = request.form.get("unidad_medida", "").strip()
+            
+            # Generar código de barras único para productos a granel
+            codigo_barras_externo = request.form.get("codigo_barras_externo", "").strip()
+            if not codigo_barras_externo:
+                codigo_barras_externo = generar_codigo_a_granel()
+            
+            # Categoría
+            cat_option = request.form.get('categoria_option', 'existente')
+            if cat_option == 'existente':
+                categoria = request.form.get('categoria_existente', '').strip()
+            else:
+                categoria = request.form.get('categoria_nueva', '').strip()
+            categoria_normalizada = normalizar_categoria(categoria)
+            
+            # Favorito y a la venta
+            es_favorito_bool = (request.form.get("es_favorito", "0") == "1")
+            esta_a_la_venta_bool = (request.form.get("esta_a_la_venta", "1") == "1")
+            
+            # Caducidad
+            has_caducidad = (request.form.get("toggle_caducidad_estado", "DESACTIVADO") == "ACTIVADO")
+            caducidad_lapso = request.form.get("caducidad_lapso", None) if has_caducidad else None
+            
+            # Parse numéricos
+            try:
+                stock_int = int(stock_str)
+            except:
+                stock_int = 0
+            
+            costo_val = parse_money(costo_str)
+            precio_val = parse_money(precio_str)
+            
+            # ===== MANEJO SIMPLIFICADO DE IMÁGENES =====
+            foto_final = None
+            
+            # 1. Primero intentar usar el archivo subido
+            if request.files.get('foto') and request.files['foto'].filename:
+                file = request.files['foto']
+                if allowed_file(file.filename):
+                    # Generar nombre único
+                    ext = file.filename.rsplit('.', 1)[1].lower()
+                    filename = f"{uuid.uuid4().hex}.{ext}"
+                    
+                    # Guardar archivo
+                    if not os.path.exists(UPLOAD_FOLDER):
+                        os.makedirs(UPLOAD_FOLDER)
+                    
+                    file.save(os.path.join(UPLOAD_FOLDER, filename))
+                    foto_final = filename
+            
+            # 2. Si no hay archivo, usar displayed_image_url o ia_foto_filename
+            if not foto_final:
+                displayed_url = request.form.get("displayed_image_url", "").strip()
+                ia_filename = request.form.get("ia_foto_filename", "").strip()
+                
+                if ia_filename and os.path.exists(os.path.join(UPLOAD_FOLDER, ia_filename)):
+                    # Usar el archivo IA que ya existe
+                    foto_final = ia_filename
+                elif displayed_url:
+                    # Es una URL - intentar descargar o usar nombre de archivo
+                    if "/uploads/" in displayed_url:
+                        # Es local, extraer nombre
+                        foto_final = displayed_url.split("/uploads/")[-1]
+                    elif displayed_url.startswith(("http://", "https://")):
+                        # Es externa, descargar
+                        try:
+                            ext = "jpg"  # Default
+                            filename = f"{uuid.uuid4().hex}.{ext}"
+                            filepath = os.path.join(UPLOAD_FOLDER, filename)
+                            
+                            # Descarga síncrona para asegurar que se complete
+                            response = requests.get(displayed_url, timeout=10)
+                            if response.status_code == 200:
+                                if not os.path.exists(os.path.dirname(filepath)):
+                                    os.makedirs(os.path.dirname(filepath))
+                                
+                                with open(filepath, "wb") as f:
+                                    f.write(response.content)
+                                
+                                foto_final = filename
+                        except Exception as e:
+                            print(f"Error descargando imagen: {e}")
+            
+            # 3. Si todo falla, usar imagen predeterminada
+            if not foto_final:
+                foto_final = "default_product.jpg"
+            
+            # Usar la nueva función para truncar la URL para asegurar que quepa en la columna
+            url_imagen_truncada = truncar_url(request.form.get("displayed_image_url", "").strip(), 95)
+                
+            # Crear el producto
+            nuevo = Producto(
+                nombre=nombre,
+                stock=stock_int,
+                costo=costo_val, 
+                precio_venta=precio_val,
+                categoria=categoria_normalizada,
+                categoria_color=obtener_o_generar_color_categoria(categoria_normalizada),
+                foto=foto_final,
+                url_imagen=url_imagen_truncada,
+                is_approved=True,
+                empresa_id=session['user_id'],
+                codigo_barras_externo=codigo_barras_externo,
+                marca=marca,
+                es_favorito=es_favorito_bool,
+                esta_a_la_venta=esta_a_la_venta_bool,
+                has_caducidad=has_caducidad,
+                metodo_caducidad=caducidad_lapso,
+                # Nuevos campos específicos para productos a granel
+                tipo_medida=tipo_medida,
+                unidad_medida=unidad_medida,
+                origen=origen
+            )
+            
+            # Guardar en la base de datos
+            db.session.add(nuevo)
+            db.session.commit()
+            flash('Producto a granel guardado exitosamente', 'success')
+            
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al guardar el producto a granel: {str(e)}', 'danger')
+            print(f"ERROR al guardar producto a granel: {str(e)}")
+        
+        return redirect(url_for('ver_productos'))
+        
+    else:
+        # GET - Cargar página de agregar producto a granel
+        categorias_db = (
+            db.session.query(Producto.categoria, Producto.categoria_color)
+            .filter(Producto.categoria.isnot(None))
+            .filter(Producto.categoria != '')
+            .distinct()
+            .limit(50)
+            .all()
+        )
+        categories_list = [
+            {"nombre": c[0], "color": c[1] if c[1] else "#000000"}
+            for c in categorias_db
+        ]
+        return render_template('agregar_a_granel.html', categories=categories_list)
+
 @app.route('/editar-producto/<int:prod_id>', methods=['GET','POST'])
 @login_requerido
 def editar_producto(prod_id):
@@ -971,7 +1140,7 @@ def eliminar_producto(prod_id):
 @app.route('/inventario-escaner', methods=['GET','POST'])
 @login_requerido
 def inventario_escaner():
-    pass
+    return render_template('inventario_escaner.html')
 
 @app.route('/pendientes_aprobacion')
 @login_requerido
@@ -986,7 +1155,60 @@ def pendientes_aprobacion():
 @app.route('/completar-datos/<int:prod_id>', methods=['GET','POST'])
 @login_requerido
 def completar_datos(prod_id):
-    pass
+    producto = Producto.query.get_or_404(prod_id)
+    
+    # Verificar que el producto pertenece a la empresa actual
+    if producto.empresa_id != session.get('user_id'):
+        flash('No tienes permiso para editar este producto.', 'danger')
+        return redirect(url_for('pendientes_aprobacion'))
+    
+    if request.method == 'POST':
+        try:
+            # Actualizar campos...
+            producto.nombre = request.form.get('nombre', '')
+            producto.stock = int(request.form.get('stock', 0))
+            producto.costo = float(request.form.get('costo', 0))
+            producto.precio_venta = float(request.form.get('precio_venta', 0))
+            
+            # Categoría
+            cat_option = request.form.get('categoria_option')
+            if cat_option == 'existente':
+                producto.categoria = request.form.get('categoria_existente', '')
+            else:
+                producto.categoria = request.form.get('categoria_nueva', '')
+            
+            # Aprobar el producto
+            producto.is_approved = True
+            
+            db.session.commit()
+            flash('Producto aprobado y actualizado con éxito.')
+            return redirect(url_for('pendientes_aprobacion'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al actualizar: {str(e)}')
+    
+    # Obtener lista de categorías
+    categorias_db = (
+        db.session.query(Producto.categoria, Producto.categoria_color)
+        .filter(Producto.categoria.isnot(None))
+        .filter(Producto.categoria != '')
+        .distinct()
+        .all()
+    )
+    categories_list = [
+        {"nombre": c[0], "color": c[1] if c[1] else "#000000"}
+        for c in categorias_db
+    ]
+    
+    # Verificar si la categoría del producto existe en la lista
+    cat_encontrada = any(cat["nombre"] == producto.categoria for cat in categories_list)
+    
+    return render_template(
+        'completar_datos.html',
+        producto=producto,
+        categories=categories_list,
+        cat_encontrada=cat_encontrada
+    )
 
 @app.route('/nuevo-producto')
 @login_requerido
@@ -999,12 +1221,32 @@ def nuevo_producto():
 @app.route('/reabastecer', methods=['GET'])
 @login_requerido
 def reabastecer_listado():
-    pass
+    # Obtener productos aprobados de la empresa
+    empresa_id = session['user_id']
+    productos = Producto.query.filter_by(empresa_id=empresa_id, is_approved=True).all()
+    return render_template('reabastecer_listado.html', productos=productos)
 
 @app.route('/reabastecer-producto/<int:prod_id>', methods=['GET','POST'])
 @login_requerido
 def reabastecer_producto(prod_id):
-    pass
+    producto = Producto.query.get_or_404(prod_id)
+    
+    # Verificar que el producto pertenece a la empresa actual
+    if producto.empresa_id != session.get('user_id'):
+        return "No tienes permiso para reabastecer este producto."
+    
+    if request.method == 'POST':
+        try:
+            stock_to_add = int(request.form.get('stock_to_add', 0))
+            producto.stock += stock_to_add
+            db.session.commit()
+            flash(f'Se han añadido {stock_to_add} unidades al stock de {producto.nombre}.', 'success')
+            return redirect(url_for('reabastecer_listado'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al reabastecer: {str(e)}', 'danger')
+    
+    return render_template('reabastecer_producto.html', producto=producto)
 
 ##############################
 # AUTOCOMPLETE CON CatalogoGlobal
@@ -1168,7 +1410,7 @@ def api_buscar_imagen():
     })
 
 ##############################
-# NUEVO ENDPOINT: verificar código de barras existente
+# ENDPOINT: /api/check_barcode_exists
 ##############################
 @app.route('/api/check_barcode_exists', methods=['GET'])
 @login_requerido
