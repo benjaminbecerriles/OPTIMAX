@@ -1287,6 +1287,44 @@ def api_autocomplete():
     return jsonify({"results": results})
 
 ##############################
+# ENDPOINT: /api/autocomplete_by_name
+##############################
+@app.route('/api/autocomplete_by_name', methods=['GET'])
+@login_requerido
+def api_autocomplete_by_name():
+    q = request.args.get('q', '').strip()
+    if not q:
+        return jsonify({"results": []})
+
+    # Consulta optimizada con límite y selección específica de campos
+    referencias = (
+        CatalogoGlobal.query
+        .with_entities(
+            CatalogoGlobal.id,
+            CatalogoGlobal.codigo_barras,
+            CatalogoGlobal.nombre,
+            CatalogoGlobal.marca,
+            CatalogoGlobal.url_imagen,
+            CatalogoGlobal.categoria
+        )
+        .filter(CatalogoGlobal.nombre.ilike(f"%{q}%"))
+        .limit(10)
+        .all()
+    )
+
+    results = []
+    for ref in referencias:
+        results.append({
+            "id": ref.id,
+            "codigo_barras": ref.codigo_barras,
+            "nombre": ref.nombre,
+            "marca": ref.marca if ref.marca else "",
+            "url_imagen": ref.url_imagen or "",
+            "categoria": ref.categoria or ""
+        })
+    return jsonify({"results": results})
+
+##############################
 # ENDPOINT /api/find-by-code
 ##############################
 @app.route('/api/find_by_code', methods=['GET'])

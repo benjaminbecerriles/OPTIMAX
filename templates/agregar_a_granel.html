@@ -1197,7 +1197,8 @@
       const signal = lastAbortController.signal;
       
       // Hacer petición a la API - optimizada con timeout corto
-      fetch(`/api/autocomplete?q=${encodeURIComponent(query)}&t=${Date.now()}`, {
+      // AQUÍ ESTÁ EL CAMBIO IMPORTANTE: Ahora usamos /api/autocomplete_by_name
+      fetch(`/api/autocomplete_by_name?q=${encodeURIComponent(query)}&t=${Date.now()}`, {
         signal,
         headers: {
           'Cache-Control': 'max-age=3600',
@@ -1221,7 +1222,7 @@
             autoContainer.style.display = "none";
           }
         });
-    }, 50);
+    }, 50); // Reducido a 50ms para mayor sensación de inmediatez
     
     function displayAutocompleteResults(data) {
       let results = data.results || [];
