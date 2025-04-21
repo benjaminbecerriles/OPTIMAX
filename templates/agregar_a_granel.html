@@ -9,21 +9,19 @@
   /*******************************************************************************
    * ESTILOS GLOBALES Y DISEÑO BÁSICO
    ******************************************************************************/
-  /* 1) TODO EN BLANCO */
   html, body {
     margin: 0;
     padding: 0;
-    background-color: #fff; /* Fondo completamente blanco */
+    background-color: #fff;
     font-family: 'Open Sans', sans-serif;
   }
 
   .card-form {
-    /* Borde y fondo sutil */
-    background-color: #fff; /* Blanco también */
-    border-radius: 0;       /* Sin esquinas redondeadas */
-    box-shadow: none;       /* Sin sombra */
+    background-color: #fff;
+    border-radius: 0;
+    box-shadow: none;
     padding: 1.5rem;
-    margin: 0;              /* Sin margen extra */
+    margin: 0;
   }
 
   /* 2) Mantener DOS columnas: Izquierda (foto) y Derecha (form) */
@@ -33,7 +31,6 @@
     gap: 1rem;
   }
   .col-left {
-    /* Ancho para la foto grande */
     flex: 0 0 auto;
     width: 570px;
     border-right: 1px solid #ddd;
@@ -65,7 +62,7 @@
     color: #999;
     font-weight: 600;
     position: relative;
-    background-color: #fff; /* Blanco */
+    background-color: #fff;
   }
   .foto-placeholder img {
     max-width: 100%;
@@ -135,32 +132,95 @@
 
   /* Form Controls */
   .form-group {
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
     position: relative;
-    padding-top: 1.2rem; /* espacio para la etiqueta flotante */
-  }
-  ::placeholder {
-    text-transform: uppercase;
-    font-weight: normal;
-    color: #888;
-  }
-  .form-control {
-    text-transform: uppercase;
-    font-weight: bold;
-    padding: 0.5rem;
-    line-height: 1.5;
-    width: 100%;
-    border: 1px solid #ccc;
-    border-radius: 4px;
   }
 
-  .floating-label {
+  .form-control {
+    padding: 0.75rem;
+    font-size: 1rem;
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-weight: 600;
+  }
+
+  /* Paso a paso */
+  .step-container {
+    background-color: #fff;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+  }
+
+  .step-number {
     position: absolute;
-    top: 0;
-    left: 0;
+    top: -15px;
+    left: 15px;
+    background-color: #e52e2e;
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 16px;
+  }
+
+  /* Nuevos estilos para opciones de venta con imágenes más pequeñas */
+  .sell-options {
+    display: flex;
+    justify-content: space-around;
+    gap: 20px;
+    margin-bottom: 1rem;
+  }
+  
+  .sell-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    padding: 12px;
+    width: 120px;
+    height: 140px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  
+  .sell-option:hover {
+    border-color: #aaa;
+    background-color: #f9f9f9;
+  }
+  
+  .sell-option.active {
+    border-color: #e52e2e;
+    background-color: rgba(229, 46, 46, 0.05);
+  }
+  
+  .sell-option-image {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    margin-bottom: 10px;
+  }
+  
+  .sell-option-text {
+    text-align: center;
+    font-weight: bold;
+    margin: 0;
     font-size: 0.9rem;
-    color: #888;
-    text-transform: capitalize;
+  }
+  
+  .sell-examples {
+    display: block;
+    color: #666;
+    font-size: 0.85rem;
+    margin-top: 1rem;
   }
 
   /* Favorito & Venta */
@@ -197,40 +257,43 @@
     color: #333;
   }
 
+  /* Estilos mejorados para opciones de caducidad */
   .caducidad-options {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
-    max-width: 420px;
     margin-bottom: 1rem;
   }
-  .caducidad-row {
-    display: flex;
-    gap: 0.5rem;
-  }
+  
   .form-check {
+    margin-right: 5px;
+    margin-bottom: 5px;
     width: auto;
     border: none;
     text-align: left;
   }
+  
   .form-check-input {
     display: none;
   }
+  
   .form-check-label {
     display: inline-block;
     background-color: #fff;
     color: #333;
     border: 1px solid #ccc;
     border-radius: 6px;
-    padding: 0.25rem 0.6rem;
+    padding: 0.5rem 0.8rem;
     cursor: pointer;
     white-space: nowrap;
     font-size: 0.9rem;
     transition: background-color 0.3s, border-color 0.3s;
   }
+  
   .form-check-label:hover {
     background-color: #f2f2f2;
   }
+  
   .form-check.selected .form-check-label {
     background-color: #007BFF;
     border-color: #007BFF;
@@ -322,76 +385,25 @@
     border-radius: 2px;
     transition: width 0.3s;
   }
-  
-  /* Estilos para tipo de venta por granel */
-  .sell-type-container {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    margin-bottom: 1.5rem;
-  }
-  
-  .sell-type-option {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    cursor: pointer;
-    opacity: 0.7;
-    transition: all 0.3s;
-    border: 2px solid transparent;
-    border-radius: 8px;
-    padding: 10px;
-    width: 120px;
-  }
-  
-  .sell-type-option:hover {
-    opacity: 0.9;
-  }
-  
-  .sell-type-option.active {
-    opacity: 1;
-    border-color: #007BFF;
-    background-color: rgba(0, 123, 255, 0.05);
-  }
-  
-  .sell-type-option img {
-    width: 60px;
-    height: 60px;
-    object-fit: contain;
-    margin-bottom: 10px;
-  }
-  
-  .sell-type-option p {
-    text-align: center;
-    font-weight: 600;
-    margin: 0;
-  }
 
-  /* Estilos para unidades específicas */
-  .unit-options {
-    display: none;
-    margin-top: 1rem;
-  }
-  
-  .unit-option {
-    display: inline-block;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    padding: 0.5rem 1rem;
-    margin-right: 0.5rem;
-    margin-bottom: 0.5rem;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  
-  .unit-option:hover {
-    background-color: #f8f9fa;
-  }
-  
-  .unit-option.active {
-    background-color: #007BFF;
-    color: white;
-    border-color: #0056b3;
+  /* Selector mejorado */
+  .custom-select {
+    display: block;
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #495057;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 16px 12px;
   }
 
   /* Autocomplete Sugerencias */
@@ -442,6 +454,73 @@
     font-size: 0.85rem;
     color: #666;
   }
+
+  /* Estilo para placeholders flotantes */
+  .form-floating {
+    position: relative;
+  }
+  
+  .form-floating > .form-control,
+  .form-floating > .custom-select {
+    height: calc(3.5rem + 2px);
+    padding: 1rem 0.75rem;
+  }
+  
+  .form-floating > label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 1rem 0.75rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    pointer-events: none;
+    border: 1px solid transparent;
+    transform-origin: 0 0;
+    transition: opacity .1s ease-in-out, transform .1s ease-in-out;
+    color: #6c757d;
+  }
+  
+  .form-floating > .form-control:focus,
+  .form-floating > .form-control:not(:placeholder-shown),
+  .form-floating > .custom-select:focus,
+  .form-floating > .custom-select:not([value=""]):not([value="0"]) {
+    padding-top: 1.625rem;
+    padding-bottom: 0.625rem;
+  }
+  
+  .form-floating > .form-control:focus ~ label,
+  .form-floating > .form-control:not(:placeholder-shown) ~ label,
+  .form-floating > .custom-select:focus ~ label,
+  .form-floating > .custom-select:not([value=""]):not([value="0"]) ~ label {
+    opacity: .65;
+    transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+    color: #212529;
+    background-color: #fff;
+    height: auto;
+    padding: 0 0.2rem;
+    margin-left: 0.5rem;
+  }
+  
+  /* Ajuste para label en select con Choices.js */
+  .form-floating .choices__inner {
+    padding-top: 1.625rem;
+    padding-bottom: 0.625rem;
+    min-height: calc(3.5rem + 2px);
+  }
+  
+  .form-floating .choices.is-focused ~ label,
+  .form-floating .choices.has-value ~ label {
+    opacity: .65;
+    transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+    color: #212529;
+    background-color: #fff;
+    height: auto;
+    padding: 0 0.2rem;
+    margin-left: 0.5rem;
+  }
 </style>
 
 <div class="card-form">
@@ -489,288 +568,220 @@
           font-weight: bold;
           color: #000;
           text-transform: uppercase;
-          margin-bottom: 1rem;
+          margin-bottom: 1.5rem;
           font-size: 1.2rem;
         ">
           Agregar producto a granel
         </h3>
 
-        <!-- IMPORTANTE: Para que el back sepa si es 'existente' (por default) -->
+        <!-- CAMPOS OCULTOS -->
         <input type="hidden" name="categoria_option" value="existente">
-        <!-- IMPORTANTE: Para saber si caducidad está activado o no -->
         <input type="hidden" name="toggle_caducidad_estado" id="toggle_caducidad_estado" value="DESACTIVADO">
-        <!-- Hidden para el código de barras interno generado -->
         <input type="hidden" id="codigo_barras_externo" name="codigo_barras_externo" value="">
+        <input type="hidden" name="tipo_medida" id="tipo_medida" value="">
 
-        <!-- Nombre -->
-        <div class="form-group">
-          <input 
-            type="text"
-            class="form-control"
-            id="nombre"
-            name="nombre"
-            placeholder="NOMBRE DEL PRODUCTO"
-            required
-          >
-          <!-- Contenedor de autocomplete -->
-          <div id="autocomplete-results"></div>
-        </div>
-
-        <!-- Se vende por (opciones con imágenes) -->
-        <div class="form-group">
-          <label class="form-label" style="margin-bottom: 0.5rem;">Se vende por:</label>
-          <div class="sell-type-container">
-            <div class="sell-type-option" data-value="peso" id="sellByWeight">
-              <img src="{{ url_for('static', filename='img/peso.png') }}" alt="Peso">
-              <p>Peso</p>
-            </div>
-            <div class="sell-type-option" data-value="pieza" id="sellByUnit">
-              <img src="{{ url_for('static', filename='img/unidad.png') }}" alt="Pieza">
-              <p>Pieza</p>
-            </div>
-            <div class="sell-type-option" data-value="volumen" id="sellByVolume">
-              <img src="{{ url_for('static', filename='img/volumen.png') }}" alt="Volumen">
-              <p>Volumen</p>
-            </div>
-          </div>
-          <!-- Campo oculto para almacenar el tipo seleccionado -->
-          <input type="hidden" name="tipo_medida" id="tipo_medida" value="">
-        </div>
-
-        <!-- Unidades específicas (aparecen según la selección anterior) -->
-        <div class="form-group">
-          <label class="form-label">Unidad de medida:</label>
+        <!-- PASO 1: QUÉ PRODUCTO -->
+        <div class="step-container">
+          <div class="step-number">1</div>
           
-          <!-- Opciones para PESO -->
-          <div class="unit-options" id="weightOptions">
-            <div class="unit-option" data-value="KG">Kilogramos (KG)</div>
-            <div class="unit-option" data-value="G">Gramos (G)</div>
-            <div class="unit-option" data-value="LB">Libras (LB)</div>
-            <div class="unit-option" data-value="OZ">Onzas (OZ)</div>
-          </div>
-          
-          <!-- Opciones para PIEZA -->
-          <div class="unit-options" id="unitOptions">
-            <div class="unit-option" data-value="UNIDAD">Por unidad</div>
-            <div class="unit-option" data-value="PAR">Por par</div>
-            <div class="unit-option" data-value="PAQUETE">Por paquete</div>
-            <div class="unit-option" data-value="DOCENA">Por docena</div>
-            <div class="unit-option" data-value="CAJA">Por caja</div>
-          </div>
-          
-          <!-- Opciones para VOLUMEN -->
-          <div class="unit-options" id="volumeOptions">
-            <div class="unit-option" data-value="L">Litros (L)</div>
-            <div class="unit-option" data-value="ML">Mililitros (ML)</div>
-            <div class="unit-option" data-value="GAL">Galones (GAL)</div>
-            <div class="unit-option" data-value="OZ_LIQ">Onzas líquidas (OZ)</div>
-          </div>
-          
-          <!-- Campo oculto para almacenar la unidad seleccionada -->
-          <input type="hidden" name="unidad_medida" id="unidad_medida" value="">
-        </div>
-
-        <!-- Stock Inicial -->
-        <div class="form-group">
-          <input 
-            type="number"
-            class="form-control"
-            id="stock"
-            name="stock"
-            min="0"
-            placeholder="STOCK INICIAL"
-            required
-          >
-        </div>
-
-        <!-- Costo / Precio -->
-        <div class="d-flex gap-3" style="align-items: center; margin-top:1rem;">
-          <div class="form-group" style="flex:1;">
-            <input
+          <!-- Nombre del producto con placeholder flotante -->
+          <div class="form-floating">
+            <input 
               type="text"
-              step="0.01"
               class="form-control"
-              id="costo"
-              name="costo"
+              id="nombre"
+              name="nombre"
+              placeholder=" "
               required
-              oninput="formatCostRealtime(this)"
-              placeholder="COSTO"
+              autocomplete="off"
             >
-          </div>
-          <div class="form-group" style="flex:1;">
-            <input
-              type="text"
-              step="0.01"
-              class="form-control"
-              id="precio_venta"
-              name="precio_venta"
-              required
-              oninput="formatCostRealtime(this)"
-              placeholder="PRECIO DE VENTA"
-            >
+            <label for="nombre">Nombre del producto</label>
+            <!-- Contenedor de autocomplete -->
+            <div id="autocomplete-results"></div>
           </div>
         </div>
 
-        <!-- Marca -->
-        <div class="form-group" style="margin-top:1rem;">
-          <input
-            type="text"
-            class="form-control"
-            id="marca"
-            name="marca"
-            placeholder="MARCA (OPCIONAL)"
-          >
-        </div>
-
-        <!-- Origen (nuevo campo para productos a granel) -->
-        <div class="form-group">
-          <input
-            type="text"
-            class="form-control"
-            id="origen"
-            name="origen"
-            placeholder="ORIGEN (OPCIONAL)"
-          >
-        </div>
-
-        <!-- Categoría (Choices.js) -->
-        <div class="form-group">
-          <select class="form-select" name="categoria_existente" id="categoria_existente">
-            <option value="" disabled selected hidden>-SELECCIONA UNA CATEGORÍA-</option>
-            <option value="productos a granel" data-custom-properties='{"color": "#8B4513"}'>Productos a granel</option>
-            <option value="abarrotes secos" data-custom-properties='{"color": "#FFA500"}'>Abarrotes secos</option>
-            <option value="frutas y verduras frescas" data-custom-properties='{"color": "#32CD32"}'>Frutas y verduras frescas</option>
-            <option value="legumbres y semillas" data-custom-properties='{"color": "#DAA520"}'>Legumbres y semillas</option>
-            <option value="especias y condimentos" data-custom-properties='{"color": "#FF6347"}'>Especias y condimentos</option>
-            <option value="frutos secos" data-custom-properties='{"color": "#D2691E"}'>Frutos secos</option>
-            <option value="cereales y harinas" data-custom-properties='{"color": "#F5DEB3"}'>Cereales y harinas</option>
-            <option value="dulces y golosinas" data-custom-properties='{"color": "#FF69B4"}'>Dulces y golosinas</option>
-            <option value="café y té" data-custom-properties='{"color": "#8B4513"}'>Café y té</option>
-            <option value="productos orgánicos" data-custom-properties='{"color": "#3CB371"}'>Productos orgánicos</option>
-            <option value="productos gourmet" data-custom-properties='{"color": "#800080"}'>Productos gourmet</option>
-            <option value="otros (miscelánea)" data-custom-properties='{"color": "#A9A9A9"}'>Otros (miscelánea)</option>
-          </select>
-        </div>
-
-        <!-- Toggle "¿TIENE FECHA DE CADUCIDAD?" -->
-        <div class="d-flex align-items-center mb-3" style="margin-top:1rem; gap:0.5rem;">
-          <span class="fw-bold" style="margin:0;">¿TIENE FECHA DE CADUCIDAD?</span>
-          <button type="button" id="btnToggleCaducidad" class="toggle-button">DESACTIVADO</button>
-        </div>
-
-        <!-- Opciones de Caducidad -->
-        <div id="caducidadOpcionesContainer" style="display:none; margin-top:0.5rem;">
-          <p class="text-muted" style="margin-bottom:0.5rem;">
-            A partir de hoy, ¿en qué lapso aproximado caducan tus productos?
-          </p>
-          <div class="caducidad-options">
-            <!-- Fila 1 -->
-            <div class="caducidad-row">
-              <div class="form-check" data-id="1 día">
-                <input
-                  class="form-check-input"
-                  type="radio"
-                  name="caducidad_lapso"
-                  id="cad1dia"
-                  value="1 día"
-                >
-                <label class="form-check-label caducidad-label" for="cad1dia">1 DÍA</label>
-              </div>
-              <div class="form-check" data-id="3 días">
-                <input
-                  class="form-check-input"
-                  type="radio"
-                  name="caducidad_lapso"
-                  id="cad3dias"
-                  value="3 días"
-                >
-                <label class="form-check-label caducidad-label" for="cad3dias">3 DÍAS</label>
-              </div>
-              <div class="form-check" data-id="1 semana">
-                <input
-                  class="form-check-input"
-                  type="radio"
-                  name="caducidad_lapso"
-                  id="cad1sem"
-                  value="1 semana"
-                >
-                <label class="form-check-label caducidad-label" for="cad1sem">1 SEMANA</label>
-              </div>
-              <div class="form-check" data-id="2 semanas">
-                <input
-                  class="form-check-input"
-                  type="radio"
-                  name="caducidad_lapso"
-                  id="cad2sem"
-                  value="2 semanas"
-                >
-                <label class="form-check-label caducidad-label" for="cad2sem">2 SEMANAS</label>
-              </div>
-              <div class="form-check" data-id="1 mes">
-                <input
-                  class="form-check-input"
-                  type="radio"
-                  name="caducidad_lapso"
-                  id="cad1mes"
-                  value="1 mes"
-                >
-                <label class="form-check-label caducidad-label" for="cad1mes">1 MES</label>
-              </div>
+        <!-- PASO 2: CÓMO SE VENDE -->
+        <div class="step-container">
+          <div class="step-number">2</div>
+          <h4 style="margin-top: 0; margin-bottom: 1rem; font-size: 0.9rem; color: #666;">¿Cómo se vende?</h4>
+          
+          <div class="sell-options">
+            <!-- Opción: Por Unidad -->
+            <div class="sell-option" data-value="pieza" id="sellByUnit">
+              <img src="{{ url_for('static', filename='img/unidad.png') }}" alt="Por Unidad" class="sell-option-image">
+              <p class="sell-option-text">Por UNIDAD</p>
             </div>
-            <!-- Fila 2 -->
-            <div class="caducidad-row">
-              <div class="form-check" data-id="3 meses">
-                <input
-                  class="form-check-input"
-                  type="radio"
-                  name="caducidad_lapso"
-                  id="cad3meses"
-                  value="3 meses"
-                >
-                <label class="form-check-label caducidad-label" for="cad3meses">3 MESES</label>
-              </div>
-              <div class="form-check" data-id="6 meses">
-                <input
-                  class="form-check-input"
-                  type="radio"
-                  name="caducidad_lapso"
-                  id="cad6meses"
-                  value="6 meses"
-                >
-                <label class="form-check-label caducidad-label" for="cad6meses">6 MESES</label>
-              </div>
-              <div class="form-check" data-id="1 año">
-                <input
-                  class="form-check-input"
-                  type="radio"
-                  name="caducidad_lapso"
-                  id="cad1ano"
-                  value="1 año"
-                >
-                <label class="form-check-label caducidad-label" for="cad1ano">1 AÑO</label>
-              </div>
-              <div class="form-check" data-id="2 años">
-                <input
-                  class="form-check-input"
-                  type="radio"
-                  name="caducidad_lapso"
-                  id="cad2anos"
-                  value="2 años"
-                >
-                <label class="form-check-label caducidad-label" for="cad2anos">2 AÑOS</label>
-              </div>
-              <div class="form-check" data-id="más de 3 años">
-                <input
-                  class="form-check-input"
-                  type="radio"
-                  name="caducidad_lapso"
-                  id="cad3anos"
-                  value="más de 3 años"
-                >
-                <label class="form-check-label caducidad-label" for="cad3anos">MÁS DE 3 AÑOS</label>
-              </div>
+            
+            <!-- Opción: Por Peso -->
+            <div class="sell-option" data-value="peso" id="sellByWeight">
+              <img src="{{ url_for('static', filename='img/peso.png') }}" alt="Por Peso" class="sell-option-image">
+              <p class="sell-option-text">Por PESO</p>
+            </div>
+            
+            <!-- Opción: Por Medida -->
+            <div class="sell-option" data-value="volumen" id="sellByVolume">
+              <img src="{{ url_for('static', filename='img/regla.png') }}" alt="Por Medida" class="sell-option-image">
+              <p class="sell-option-text">Por MEDIDA</p>
             </div>
           </div>
+          
+          <div class="sell-examples">
+            <strong>Ejemplos:</strong> 
+            • Unidad: lata, botella, huevo 
+            • Peso: queso, azúcar, frijol 
+            • Medida: tela, cinta, papel
+          </div>
+        </div>
+
+        <!-- PASO 3: MEDIDAS Y PRECIOS -->
+        <div class="step-container">
+          <div class="step-number">3</div>
+          
+          <!-- Unidad de medida con placeholder flotante -->
+          <div class="form-floating mb-3">
+            <select class="custom-select" id="unidadMedidaSelect" name="unidad_medida">
+              <option value="" disabled selected></option>
+            </select>
+            <label for="unidadMedidaSelect">Unidad de medida</label>
+          </div>
+          
+          <!-- Stock con placeholder flotante -->
+          <div class="form-floating mb-3">
+            <input 
+              type="number"
+              class="form-control"
+              id="stock"
+              name="stock"
+              min="0"
+              step="0.01"
+              placeholder=" "
+              required
+            >
+            <label for="stock">Stock inicial <span id="stockUnit" style="font-weight: 600;">-</span></label>
+          </div>
+          
+          <div style="display: flex; gap: 20px;">
+            <!-- Costo con placeholder flotante -->
+            <div class="form-floating" style="flex: 1;">
+              <input
+                type="text"
+                class="form-control"
+                id="costo"
+                name="costo"
+                required
+                oninput="formatCostRealtime(this)"
+                placeholder=" "
+              >
+              <label for="costo">Costo por <span id="costoUnit">-</span></label>
+            </div>
+            
+            <!-- Precio de venta con placeholder flotante -->
+            <div class="form-floating" style="flex: 1;">
+              <input
+                type="text"
+                class="form-control"
+                id="precio_venta"
+                name="precio_venta"
+                required
+                oninput="formatCostRealtime(this)"
+                placeholder=" "
+              >
+              <label for="precio_venta">Precio de venta por <span id="precioUnit">-</span></label>
+            </div>
+          </div>
+        </div>
+
+        <!-- PASO 4: CATEGORÍA Y CADUCIDAD -->
+        <div class="step-container">
+          <div class="step-number">4</div>
+          
+          <!-- Categoría con placeholder flotante -->
+          <div class="form-floating mb-3">
+            <select class="form-select custom-select" name="categoria_existente" id="categoria_existente">
+              <option value="" disabled selected></option>
+              <option value="abarrotes secos" data-custom-properties='{"color": "#FFA500"}'>Abarrotes secos</option>
+              <option value="enlatados y conservas" data-custom-properties='{"color": "#DAA520"}'>Enlatados y conservas</option>
+              <option value="botanas, dulces y snacks" data-custom-properties='{"color": "#FF69B4"}'>Botanas, dulces y snacks</option>
+              <option value="bebidas no alcohólicas" data-custom-properties='{"color": "#1E90FF"}'>Bebidas no alcohólicas</option>
+              <option value="bebidas alcohólicas" data-custom-properties='{"color": "#800080"}'>Bebidas alcohólicas</option>
+              <option value="panadería y repostería" data-custom-properties='{"color": "#D2B48C"}'>Panadería y repostería</option>
+              <option value="lácteos y huevos" data-custom-properties='{"color": "#F5DEB3"}'>Lácteos y huevos</option>
+              <option value="carnes frías y embutidos" data-custom-properties='{"color": "#B22222"}'>Carnes frías y embutidos</option>
+              <option value="congelados y refrigerados" data-custom-properties='{"color": "#00CED1"}'>Congelados y refrigerados</option>
+              <option value="frutas y verduras frescas" data-custom-properties='{"color": "#32CD32"}'>Frutas y verduras frescas</option>
+              <option value="productos de limpieza y hogar" data-custom-properties='{"color": "#87CEFA"}'>Productos de limpieza y hogar</option>
+              <option value="cuidado personal e higiene" data-custom-properties='{"color": "#FFC0CB"}'>Cuidado personal e higiene</option>
+              <option value="medicamentos de mostrador (otc)" data-custom-properties='{"color": "#FF6347"}'>Medicamentos de mostrador (OTC)</option>
+              <option value="productos para bebés" data-custom-properties='{"color": "#FFB6C1"}'>Productos para bebés</option>
+              <option value="productos para mascotas" data-custom-properties='{"color": "#8FBC8F"}'>Productos para mascotas</option>
+              <option value="artículos de papelería" data-custom-properties='{"color": "#9370DB"}'>Artículos de papelería</option>
+              <option value="ferretería básica" data-custom-properties='{"color": "#708090"}'>Ferretería básica</option>
+              <option value="productos a granel" data-custom-properties='{"color": "#8B4513"}'>Productos a granel</option>
+              <option value="productos orgánicos" data-custom-properties='{"color": "#3CB371"}'>Productos orgánicos</option>
+              <option value="productos gourmet" data-custom-properties='{"color": "#800080"}'>Productos gourmet</option>
+              <option value="otros (miscelánea)" data-custom-properties='{"color": "#A9A9A9"}'>Otros (miscelánea)</option>
+            </select>
+            <label for="categoria_existente">Categoría</label>
+          </div>
+
+          <!-- Toggle "¿TIENE FECHA DE CADUCIDAD?" -->
+          <div style="margin-top: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+              <label style="font-size: 0.9rem; color: #666;">¿Tiene fecha de caducidad?</label>
+              <button type="button" id="btnToggleCaducidad" class="toggle-button">NO</button>
+            </div>
+            
+            <!-- Opciones de Caducidad (mejorada) -->
+            <div id="caducidadOpcionesContainer" style="display:none; margin-top:0.5rem;">
+              <p style="font-size: 0.9rem; color: #666; margin-bottom: 0.75rem;">
+                ¿En qué lapso aproximado caducan tus productos a partir de hoy?
+              </p>
+              <div class="caducidad-options">
+                <div class="form-check" data-id="1 día">
+                  <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad1dia" value="1 día">
+                  <label class="form-check-label" for="cad1dia">1 DÍA</label>
+                </div>
+                <div class="form-check" data-id="3 días">
+                  <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad3dias" value="3 días">
+                  <label class="form-check-label" for="cad3dias">3 DÍAS</label>
+                </div>
+                <div class="form-check" data-id="1 semana">
+                  <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad1sem" value="1 semana">
+                  <label class="form-check-label" for="cad1sem">1 SEMANA</label>
+                </div>
+                <div class="form-check" data-id="2 semanas">
+                  <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad2sem" value="2 semanas">
+                  <label class="form-check-label" for="cad2sem">2 SEMANAS</label>
+                </div>
+                <div class="form-check" data-id="1 mes">
+                  <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad1mes" value="1 mes">
+                  <label class="form-check-label" for="cad1mes">1 MES</label>
+                </div>
+                <div class="form-check" data-id="3 meses">
+                  <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad3meses" value="3 meses">
+                  <label class="form-check-label" for="cad3meses">3 MESES</label>
+                </div>
+                <div class="form-check" data-id="6 meses">
+                  <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad6meses" value="6 meses">
+                  <label class="form-check-label" for="cad6meses">6 MESES</label>
+                </div>
+                <div class="form-check" data-id="1 año">
+                  <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad1ano" value="1 año">
+                  <label class="form-check-label" for="cad1ano">1 AÑO</label>
+                </div>
+                <div class="form-check" data-id="2 años">
+                  <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad2anos" value="2 años">
+                  <label class="form-check-label" for="cad2anos">2 AÑOS</label>
+                </div>
+                <div class="form-check" data-id="más de 3 años">
+                  <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad3anos" value="más de 3 años">
+                  <label class="form-check-label" for="cad3anos">+3 AÑOS</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
       <!-- FIN col-right -->
@@ -880,37 +891,7 @@
   }
 
   /* ===========================================================
-   * 4) FLOATING LABELS
-   * ===========================================================
-   */
-  const floatingLabels = new Map();
-  
-  function updateFloatingLabel(input) {
-    if (!floatingLabels.has(input)) {
-      let container = input.parentElement;
-      let floatingLabel = container.querySelector(".floating-label");
-      
-      if (!floatingLabel) {
-        floatingLabel = document.createElement("div");
-        floatingLabel.className = "floating-label";
-        container.insertBefore(floatingLabel, input);
-      }
-      
-      floatingLabels.set(input, floatingLabel);
-    }
-    
-    const floatingLabel = floatingLabels.get(input);
-    
-    if (input.value.trim() !== "") {
-      floatingLabel.textContent = input.getAttribute("placeholder");
-      floatingLabel.style.display = "block";
-    } else {
-      floatingLabel.style.display = "none";
-    }
-  }
-
-  /* ===========================================================
-   * 5) FOTOGRAFÍA Y MENÚ
+   * 4) FOTOGRAFÍA Y MENÚ
    * ===========================================================
    */
   function attachRemoveImageListener() {
@@ -1151,7 +1132,7 @@
   }
 
   /* ===========================================================
-   * 6) AUTOCOMPLETE para productos a granel
+   * 5) AUTOCOMPLETE para productos a granel (MODIFICADO PARA MÍNIMO 3 CARACTERES)
    * ===========================================================
    */
   function debounce(func, wait) {
@@ -1174,16 +1155,16 @@
   
   if (nombreInput && autoContainer) {
     const fetchResults = debounce(function(query) {
-      // Si ya está en caché, usar ese valor inmediatamente
-      if (autoCompleteCache.has(query)) {
-        displayAutocompleteResults(autoCompleteCache.get(query));
+      // Verificar longitud mínima de 3 caracteres (NUEVO)
+      if (!query || query.length < 3) {
+        autoContainer.innerHTML = "";
+        autoContainer.style.display = "none";
         return;
       }
       
-      // Si cadena vacía, limpiar resultados
-      if (!query) {
-        autoContainer.innerHTML = "";
-        autoContainer.style.display = "none";
+      // Si ya está en caché, usar ese valor inmediatamente
+      if (autoCompleteCache.has(query)) {
+        displayAutocompleteResults(autoCompleteCache.get(query));
         return;
       }
       
@@ -1196,8 +1177,7 @@
       lastAbortController = new AbortController();
       const signal = lastAbortController.signal;
       
-      // Hacer petición a la API - optimizada con timeout corto
-      // AQUÍ ESTÁ EL CAMBIO IMPORTANTE: Ahora usamos /api/autocomplete_by_name
+      // Hacer petición a la API
       fetch(`/api/autocomplete_by_name?q=${encodeURIComponent(query)}&t=${Date.now()}`, {
         signal,
         headers: {
@@ -1222,7 +1202,7 @@
             autoContainer.style.display = "none";
           }
         });
-    }, 50); // Reducido a 50ms para mayor sensación de inmediatez
+    }, 200); // Aumentado a 200ms para evitar demasiadas solicitudes
     
     function displayAutocompleteResults(data) {
       let results = data.results || [];
@@ -1263,7 +1243,7 @@
     
     nombreInput.addEventListener("input", function() {
       let query = this.value.trim();
-      if (query.length > 0) {
+      if (query.length >= 3) { // MODIFICADO: Mínimo 3 caracteres
         fetchResults(query);
       } else {
         autoContainer.innerHTML = "";
@@ -1278,19 +1258,11 @@
       
       // Extraer datos del elemento
       const nombreProd = target.getAttribute("data-nombre");
-      const marcaProd = target.getAttribute("data-marca");
       const imagenURL = target.getAttribute("data-imagen");
       const cat = target.getAttribute("data-categoria") || "";
 
       // Completar campos de formulario
       document.getElementById("nombre").value = nombreProd;
-      if (marcaProd) {
-        document.getElementById("marca").value = marcaProd;
-      }
-
-      // Actualizar etiquetas flotantes
-      updateFloatingLabel(document.getElementById("nombre"));
-      updateFloatingLabel(document.getElementById("marca"));
 
       // Manejar imagen si existe
       if (imagenURL) {
@@ -1341,7 +1313,7 @@
   }
 
   /* ===========================================================
-   * 7) TOGGLE: Favorito / Producto a la Venta
+   * 6) TOGGLE: Favorito / Producto a la Venta
    * ===========================================================
    */
   const favoritoContainer = document.getElementById("favoritoContainer");
@@ -1379,7 +1351,7 @@
   }
 
   /* ===========================================================
-   * 8) TOGGLE: FECHA DE CADUCIDAD
+   * 7) TOGGLE: FECHA DE CADUCIDAD - MEJORADO
    * ===========================================================
    */
   const btnToggleCaducidad = document.getElementById("btnToggleCaducidad");
@@ -1388,16 +1360,14 @@
 
   if (btnToggleCaducidad && caducidadOpciones && hiddenCaducidadEstado) {
     btnToggleCaducidad.addEventListener("click", () => {
-      if (btnToggleCaducidad.classList.contains("active")) {
+      if (btnToggleCaducidad.textContent === "SÍ") {
         // Desactivar
-        btnToggleCaducidad.classList.remove("active");
-        btnToggleCaducidad.textContent = "DESACTIVADO";
+        btnToggleCaducidad.textContent = "NO";
         caducidadOpciones.style.display = "none";
         hiddenCaducidadEstado.value = "DESACTIVADO";
       } else {
         // Activar
-        btnToggleCaducidad.classList.add("active");
-        btnToggleCaducidad.textContent = "ACTIVADO";
+        btnToggleCaducidad.textContent = "SÍ";
         caducidadOpciones.style.display = "block";
         hiddenCaducidadEstado.value = "ACTIVADO";
       }
@@ -1417,16 +1387,86 @@
   });
 
   /* ===========================================================
-   * 9) Opciones de tipo de venta (peso, pieza, volumen)
+   * 8) Opciones de tipo de venta y unidades mejoradas (NUEVO)
    * ===========================================================
    */
-  const sellTypeOptions = document.querySelectorAll('.sell-type-option');
-  const weightOptions = document.getElementById('weightOptions');
-  const unitOptions = document.getElementById('unitOptions');
-  const volumeOptions = document.getElementById('volumeOptions');
+  // Definir las unidades para cada tipo de venta
+  const unidadesPorTipo = {
+    'pieza': [
+      { value: 'UNIDAD', label: 'Pieza', abrev: 'pza' },
+      { value: 'PAR', label: 'Par', abrev: 'par' },
+      { value: 'DOCENA', label: 'Docena', abrev: 'doc' },
+      { value: 'CAJA', label: 'Caja', abrev: 'caja' },
+      { value: 'PAQUETE', label: 'Paquete', abrev: 'paq' }
+    ],
+    'peso': [
+      { value: 'KG', label: 'Kilogramos', abrev: 'kg' },
+      { value: 'G', label: 'Gramos', abrev: 'g' },
+      { value: 'LB', label: 'Libras', abrev: 'lb' },
+      { value: 'OZ', label: 'Onzas', abrev: 'oz' }
+    ],
+    'volumen': [
+      { value: 'L', label: 'Litros', abrev: 'L' },
+      { value: 'ML', label: 'Mililitros', abrev: 'ml' },
+      { value: 'M', label: 'Metros', abrev: 'm' },
+      { value: 'CM', label: 'Centímetros', abrev: 'cm' },
+      { value: 'M2', label: 'Metros cuadrados', abrev: 'm²' }
+    ]
+  };
+
+  // Referencia al selector de unidades y tipo de venta
+  const unidadMedidaSelect = document.getElementById('unidadMedidaSelect');
   const tipoMedidaInput = document.getElementById('tipo_medida');
-  const unidadMedidaInput = document.getElementById('unidad_medida');
+  const sellOptions = document.querySelectorAll('.sell-option');
   const codigoBarrasInput = document.getElementById('codigo_barras_externo');
+  const stockUnitSpan = document.getElementById('stockUnit');
+  const costoUnitSpan = document.getElementById('costoUnit');
+  const precioUnitSpan = document.getElementById('precioUnit');
+
+  // Función para actualizar el dropdown de unidades según el tipo seleccionado
+  function actualizarUnidadesDropdown(tipoSeleccionado) {
+    if (!unidadMedidaSelect) return;
+    
+    // Limpiar opciones actuales
+    unidadMedidaSelect.innerHTML = '';
+    
+    // Añadir opción por defecto
+    const defaultOption = document.createElement('option');
+    defaultOption.value = '';
+    defaultOption.disabled = true;
+    defaultOption.selected = true;
+    unidadMedidaSelect.appendChild(defaultOption);
+    
+    // Si hay un tipo seleccionado y existen unidades para ese tipo
+    if (tipoSeleccionado && unidadesPorTipo[tipoSeleccionado]) {
+      // Añadir opciones según el tipo
+      unidadesPorTipo[tipoSeleccionado].forEach(unidad => {
+        const option = document.createElement('option');
+        option.value = unidad.value;
+        option.textContent = unidad.label;
+        option.setAttribute('data-abrev', unidad.abrev);
+        unidadMedidaSelect.appendChild(option);
+      });
+    }
+  }
+
+  // Función para actualizar unidades mostradas en etiquetas
+  function actualizarEtiquetasUnidad() {
+    const selectedOption = unidadMedidaSelect.options[unidadMedidaSelect.selectedIndex];
+    if (selectedOption && selectedOption.value) {
+      const abrev = selectedOption.getAttribute('data-abrev') || selectedOption.value;
+      
+      // Actualizar etiquetas de unidad
+      if (stockUnitSpan) stockUnitSpan.textContent = abrev;
+      if (costoUnitSpan) costoUnitSpan.textContent = abrev;
+      if (precioUnitSpan) precioUnitSpan.textContent = abrev;
+    } else {
+      // Resetear si no hay selección
+      if (stockUnitSpan) stockUnitSpan.textContent = '-';
+      if (costoUnitSpan) costoUnitSpan.textContent = '-';
+      if (precioUnitSpan) precioUnitSpan.textContent = '-';
+    }
+  }
 
   // Generar código único para productos a granel
   function generateGranelCode() {
@@ -1446,11 +1486,11 @@
     }
   });
 
-  // Evento para los tipos de venta por granel
-  sellTypeOptions.forEach(option => {
+  // Evento para los tipos de venta (opciones con iconos)
+  sellOptions.forEach(option => {
     option.addEventListener('click', function() {
       // Eliminar clase active de todas las opciones
-      sellTypeOptions.forEach(opt => opt.classList.remove('active'));
+      sellOptions.forEach(opt => opt.classList.remove('active'));
       
       // Agregar clase active a la opción clickeada
       this.classList.add('active');
@@ -1458,136 +1498,33 @@
       // Obtener el valor de la opción
       const value = this.getAttribute('data-value');
       
-      // Ocultar todas las opciones de unidad
-      weightOptions.style.display = 'none';
-      unitOptions.style.display = 'none';
-      volumeOptions.style.display = 'none';
-      
-      // Mostrar las opciones correspondientes
-      if (value === 'peso') {
-        weightOptions.style.display = 'block';
-        // Establecer valor por defecto para tipo de medida
-        tipoMedidaInput.value = 'peso';
-      } else if (value === 'pieza') {
-        unitOptions.style.display = 'block';
-        tipoMedidaInput.value = 'pieza';
-      } else if (value === 'volumen') {
-        volumeOptions.style.display = 'block';
-        tipoMedidaInput.value = 'volumen';
+      // Establecer valor para el tipo de medida
+      if (tipoMedidaInput) {
+        tipoMedidaInput.value = value;
       }
       
-      // Desactivar todas las opciones de unidad
-      document.querySelectorAll('.unit-option').forEach(unit => {
-        unit.classList.remove('active');
-      });
-      
-      // Limpiar el valor de unidad de medida
-      unidadMedidaInput.value = '';
+      // Actualizar dropdown de unidades
+      actualizarUnidadesDropdown(value);
     });
   });
 
-  // Evento para las opciones de unidad
-  document.querySelectorAll('.unit-option').forEach(option => {
-    option.addEventListener('click', function() {
-      // Obtener el contenedor padre
-      const parent = this.parentElement;
-      
-      // Desactivar todas las opciones en el mismo contenedor
-      parent.querySelectorAll('.unit-option').forEach(unit => {
-        unit.classList.remove('active');
-      });
-      
-      // Activar la opción clickeada
-      this.classList.add('active');
-      
-      // Establecer el valor en el input oculto
-      unidadMedidaInput.value = this.getAttribute('data-value');
-    });
-  });
-
-  // Establecer valores por defecto al cargar
-  document.addEventListener('DOMContentLoaded', function() {
-    // Seleccionar la opción "peso" por defecto
-    const defaultOption = document.getElementById('sellByWeight');
-    if (defaultOption) {
-      defaultOption.click();
-      
-      // Seleccionar "KG" como unidad por defecto para peso
-      const defaultUnit = weightOptions.querySelector('[data-value="KG"]');
-      if (defaultUnit) {
-        defaultUnit.click();
-      }
-    }
-  });
-
-  /* ===========================================================
-   * 10) ENVÍO DEL FORMULARIO / VALIDACIÓN FINAL
-   * ===========================================================
-   */
-  // Referencias a elementos de carga
-  const loadingOverlay = document.getElementById("loadingOverlay");
-  const productForm = document.getElementById("productForm");
-  const submitBtn = document.getElementById("submitBtn");
-  
-  // Manejar el envío del formulario
-  if (productForm) {
-    productForm.addEventListener("submit", function(e) {
-      e.preventDefault();
-      
-      // Validar que se haya seleccionado un tipo de venta
-      const tipoMedida = document.getElementById("tipo_medida").value;
-      if (!tipoMedida) {
-        showCenteredNotification("Debes seleccionar un tipo de venta (peso, pieza o volumen)");
-        return;
-      }
-      
-      // Validar que se haya seleccionado una unidad de medida
-      const unidadMedida = document.getElementById("unidad_medida").value;
-      if (!unidadMedida) {
-        showCenteredNotification("Debes seleccionar una unidad de medida específica");
-        return;
-      }
-      
-      // Validar que el nombre no esté vacío
-      const nombre = document.getElementById("nombre").value.trim();
-      if (!nombre) {
-        showCenteredNotification("El nombre del producto es obligatorio");
-        return;
-      }
-      
-      // Validar que se haya ingresado un stock
-      const stock = document.getElementById("stock").value;
-      if (!stock) {
-        showCenteredNotification("Debes ingresar un stock inicial");
-        return;
-      }
-      
-      // Validar que se hayan ingresado costo y precio de venta
-      const costo = document.getElementById("costo").value;
-      const precioVenta = document.getElementById("precio_venta").value;
-      if (!costo || !precioVenta) {
-        showCenteredNotification("Debes ingresar tanto el costo como el precio de venta");
-        return;
-      }
-      
-      // Mostrar overlay de carga
-      loadingOverlay.style.display = "flex";
-      
-      // Enviar el formulario
-      this.submit();
-    });
+  // Evento para cuando cambia la unidad de medida
+  if (unidadMedidaSelect) {
+    unidadMedidaSelect.addEventListener('change', actualizarEtiquetasUnidad);
   }
-  
+
   /* ===========================================================
-   * 11) Inicialización de Choices.js para categorías
+   * 9) Inicialización de Choices.js para categorías
    * ===========================================================
    */
   let categoryChoices;
   if (document.getElementById("categoria_existente")) {
     // Inicializar una sola vez
     categoryChoices = new Choices("#categoria_existente", {
-      searchEnabled: false,
-      placeholder: false,
+      searchEnabled: true,
+      searchPlaceholderValue: "Buscar categoría...",
+      placeholder: true,
+      placeholderValue: "Selecciona una categoría...",
       callbackOnCreateTemplates: function(template) {
         return {
           item: (classNames, data) => {
@@ -1598,7 +1535,7 @@
                   data-item data-id="${data.id}" data-value="${data.value}"
                   ${data.active ? 'aria-selected="true"' : ''}
                   ${data.disabled ? 'aria-disabled="true"' : ''}>
-                  -SELECCIONA UNA CATEGORÍA-
+                  Selecciona una categoría...
                 </div>
               `);
             }
@@ -1626,7 +1563,7 @@
                   style="display:none;"
                   ${data.disabled ? 'data-choice-disabled aria-disabled="true"' : 'data-choice-selectable'}
                   data-id="${data.id}" data-value="${data.value}">
-                  -SELECCIONA UNA CATEGORÍA-
+                  Selecciona una categoría...
                 </div>
               `);
             }
@@ -1651,7 +1588,7 @@
   }
 
   /* ===========================================================
-   * 12) Manejo de archivos de imagen
+   * 10) Manejo de archivos de imagen
    * ===========================================================
    */
   // Manejo optimizado de carga de imágenes
@@ -1704,29 +1641,88 @@
   }
 
   /* ===========================================================
+   * 11) VALIDACIÓN Y ENVÍO DE FORMULARIO 
+   * ===========================================================
+   */
+  // Referencias a elementos de carga
+  const loadingOverlay = document.getElementById("loadingOverlay");
+  const productForm = document.getElementById("productForm");
+  const submitBtn = document.getElementById("submitBtn");
+  
+  // Manejar el envío del formulario
+  if (productForm) {
+    productForm.addEventListener("submit", function(e) {
+      e.preventDefault();
+      
+      // Paso 1: Validar nombre del producto
+      const nombre = document.getElementById("nombre").value.trim();
+      if (!nombre) {
+        showCenteredNotification("Debes ingresar el nombre del producto");
+        return;
+      }
+      
+      // Paso 2: Validar tipo de venta
+      const tipoMedida = document.getElementById("tipo_medida").value;
+      if (!tipoMedida) {
+        showCenteredNotification("Debes seleccionar cómo se vende el producto (Unidad, Peso o Medida)");
+        return;
+      }
+      
+      // Paso 3: Validar unidad de medida
+      const unidadMedida = document.getElementById("unidadMedidaSelect").value;
+      if (!unidadMedida) {
+        showCenteredNotification("Debes seleccionar una unidad de medida específica");
+        return;
+      }
+      
+      // Validar que se haya ingresado un stock
+      const stock = document.getElementById("stock").value;
+      if (!stock) {
+        showCenteredNotification("Debes ingresar el stock inicial");
+        return;
+      }
+      
+      // Validar que se hayan ingresado costo y precio de venta
+      const costo = document.getElementById("costo").value;
+      const precioVenta = document.getElementById("precio_venta").value;
+      if (!costo || !precioVenta) {
+        showCenteredNotification("Debes ingresar tanto el costo como el precio de venta");
+        return;
+      }
+      
+      // Validar categoría
+      const categoria = document.getElementById("categoria_existente").value;
+      if (!categoria) {
+        showCenteredNotification("Por favor, selecciona una categoría para tu producto");
+        return;
+      }
+      
+      // Mostrar overlay de carga
+      loadingOverlay.style.display = "flex";
+      
+      // Enviar el formulario
+      this.submit();
+    });
+  }
+
+  /* ===========================================================
    * INICIALIZACIÓN
    * ===========================================================
    */
   document.addEventListener("DOMContentLoaded", function() {
-    // Inicializar etiquetas flotantes
-    const inputs = document.querySelectorAll(
-      "#nombre, #stock, #costo, #precio_venta, #marca, #origen"
-    );
-    
-    inputs.forEach(input => {
-      updateFloatingLabel(input);
-      input.addEventListener("input", () => {
-        updateFloatingLabel(input);
-      });
-    });
-    
-    // Inicializar eventos del menú de fotos
-    bindPhotoEvents();
-    
     // Generar código de barras para el producto
     const codigoBarrasInput = document.getElementById("codigo_barras_externo");
     if (codigoBarrasInput && !codigoBarrasInput.value) {
       codigoBarrasInput.value = generateGranelCode();
+    }
+    
+    // Inicializar eventos del menú de fotos
+    bindPhotoEvents();
+    
+    // Seleccionar la opción "Por PESO" por defecto al cargar
+    const defaultOption = document.getElementById('sellByWeight');
+    if (defaultOption) {
+      defaultOption.click();
     }
   });
 </script>
