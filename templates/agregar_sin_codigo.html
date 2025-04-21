@@ -414,29 +414,58 @@
     pointer-events: none;
   }
 
-  /* Estilo para la etiqueta flotante */
-  .input-container {
+  /* Estilo para la etiqueta flotante mejorada */
+  .form-floating {
     position: relative;
   }
-
-  .input-label {
+  
+  .form-floating > label {
     position: absolute;
-    left: 10px;
+    top: 0;
+    left: 0;
+    height: 100%;
+    padding: 1rem 0.75rem;
+    pointer-events: none;
+    border: 1px solid transparent;
+    transform-origin: 0 0;
+    transition: opacity .1s ease-in-out, transform .1s ease-in-out;
+    color: #888;
+    text-transform: uppercase;
+  }
+  
+  .form-floating > .form-control:focus ~ label,
+  .form-floating > .form-control:not(:placeholder-shown) ~ label {
+    opacity: .65;
+    transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+    background-color: white;
+    height: auto;
+    padding: 0 5px;
+    z-index: 5;
+  }
+  
+  .form-floating > .form-control:-webkit-autofill ~ label {
+    opacity: .65;
+    transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+    background-color: white;
+    height: auto;
+    padding: 0 5px;
+    z-index: 5;
+  }
+  
+  /* Ajustes para unidades en los campos flotantes */
+  .form-floating-with-unit > label {
+    padding-right: 60px; /* Espacio para la unidad */
+  }
+  
+  .form-unit-suffix {
+    position: absolute;
+    right: 10px;
     top: 50%;
     transform: translateY(-50%);
-    color: #888;
-    transition: all 0.3s;
-    pointer-events: none;
-    text-transform: uppercase;
+    color: #777;
     font-size: 0.9rem;
-  }
-
-  .input-label.active {
-    top: 0;
-    font-size: 0.8rem;
-    transform: translateY(-50%);
-    background-color: white;
-    padding: 0 5px;
+    pointer-events: none;
+    z-index: 4;
   }
 
   /* Reducir el espacio entre nombre y código generado */
@@ -553,65 +582,66 @@
           </div>
         </div>
 
-        <!-- Stock Inicial - Con label flotante y unidad a la derecha -->
+        <!-- Stock Inicial - Con floating label correcto -->
         <div class="form-group">
-          <div class="stock-unit-container">
+          <div class="form-floating">
             <input 
               type="number"
               class="form-control"
               id="stock"
               name="stock"
               min="0"
-              placeholder="STOCK INICIAL"
+              placeholder=" "
             >
-            <span class="stock-unit-suffix" id="stockUnitSuffix">PIEZAS</span>
-            <div class="input-label" id="stockLabel">STOCK INICIAL</div>
+            <label for="stock">STOCK INICIAL</label>
+            <span class="form-unit-suffix" id="stockUnitSuffix">PIEZAS</span>
           </div>
         </div>
 
-        <!-- Costo / Precio - Con etiquetas flotantes que muestran la unidad -->
+        <!-- Costo / Precio - Con etiquetas flotantes mejoradas -->
         <div class="d-flex gap-3" style="align-items: center; margin-top:1rem;">
           <div class="form-group" style="flex:1;">
-            <div class="input-container">
+            <div class="form-floating form-floating-with-unit">
               <input
                 type="text"
-                step="0.01"
                 class="form-control"
                 id="costo"
                 name="costo"
                 required
+                placeholder=" "
                 oninput="formatCostRealtime(this)"
-                placeholder="COSTO"
               >
-              <div class="input-label" id="costoLabel">COSTO</div>
+              <label for="costo" id="costoLabel">COSTO</label>
             </div>
           </div>
           <div class="form-group" style="flex:1;">
-            <div class="input-container">
+            <div class="form-floating form-floating-with-unit">
               <input
                 type="text"
-                step="0.01"
                 class="form-control"
                 id="precio_venta"
                 name="precio_venta"
                 required
+                placeholder=" "
                 oninput="formatCostRealtime(this)"
-                placeholder="PRECIO DE VENTA"
               >
-              <div class="input-label" id="precioLabel">PRECIO DE VENTA</div>
+              <label for="precio_venta" id="precioLabel">PRECIO DE VENTA</label>
             </div>
           </div>
         </div>
 
         <!-- Marca -->
         <div class="form-group" style="margin-top:1rem;">
-          <input
-            type="text"
-            class="form-control"
-            id="marca"
-            name="marca"
-            placeholder="MARCA (EJ. GENÉRICO)"
-          >
+          <div class="form-floating">
+            <input
+              type="text"
+              class="form-control"
+              id="marca"
+              name="marca"
+              placeholder=" "
+            >
+            <label for="marca">MARCA (EJ. GENÉRICO)</label>
+          </div>
         </div>
 
         <!-- Categoría (Choices.js) -->
@@ -845,9 +875,6 @@
     
     // Inicializar eventos del menú de fotos
     bindPhotoEvents();
-    
-    // Activar comportamiento de labels flotantes para Stock, Costo y Precio
-    handleFloatingLabels();
   });
 
   /* ===========================================================
@@ -965,185 +992,15 @@
     if (stockUnitSuffix) stockUnitSuffix.textContent = plural.toUpperCase();
     
     // Actualizar labels de costo y precio
-    const stockInput = document.getElementById('stock');
-    const costoInput = document.getElementById('costo');
-    const precioInput = document.getElementById('precio_venta');
-    const stockLabel = document.getElementById('stockLabel');
     const costoLabel = document.getElementById('costoLabel');
     const precioLabel = document.getElementById('precioLabel');
     
-    // Si los campos tienen valor, actualizar los labels con la unidad
-    if (stockLabel) stockLabel.textContent = `STOCK INICIAL`;
-    
     if (costoLabel) {
-      if (costoInput && costoInput.value) {
-        costoLabel.textContent = `COSTO (POR ${singular.toUpperCase()})`;
-        costoLabel.classList.add('active');
-      } else {
-        costoLabel.textContent = `COSTO`;
-      }
+      costoLabel.textContent = `COSTO (POR ${singular.toUpperCase()})`;
     }
     
     if (precioLabel) {
-      if (precioInput && precioInput.value) {
-        precioLabel.textContent = `PRECIO DE VENTA (POR ${singular.toUpperCase()})`;
-        precioLabel.classList.add('active');
-      } else {
-        precioLabel.textContent = `PRECIO DE VENTA`;
-      }
-    }
-  }
-
-  // Función para manejar los labels flotantes
-  function handleFloatingLabels() {
-    // Stock Input
-    const stockInput = document.getElementById('stock');
-    const stockLabel = document.getElementById('stockLabel');
-    const unidadMedidaSelect = document.getElementById('unidad_medida');
-    
-    if (stockInput && stockLabel) {
-      // Configuración inicial basada en si hay valor
-      if (stockInput.value) {
-        stockLabel.classList.add('active');
-      }
-      
-      // Añadir evento input
-      stockInput.addEventListener('input', function() {
-        if (this.value) {
-          stockLabel.classList.add('active');
-        } else {
-          stockLabel.classList.remove('active');
-        }
-      });
-      
-      // Añadir evento focus
-      stockInput.addEventListener('focus', function() {
-        stockLabel.classList.add('active');
-      });
-      
-      // Añadir evento blur
-      stockInput.addEventListener('blur', function() {
-        if (!this.value) {
-          stockLabel.classList.remove('active');
-        }
-      });
-    }
-    
-    // Costo Input
-    const costoInput = document.getElementById('costo');
-    const costoLabel = document.getElementById('costoLabel');
-    
-    if (costoInput && costoLabel && unidadMedidaSelect) {
-      const selectedOption = unidadMedidaSelect.options[unidadMedidaSelect.selectedIndex];
-      const singular = selectedOption ? selectedOption.getAttribute('data-singular') : 'pieza';
-      
-      // Configuración inicial
-      if (costoInput.value) {
-        costoLabel.classList.add('active');
-        costoLabel.textContent = `COSTO (POR ${singular.toUpperCase()})`;
-      }
-      
-      // Añadir evento input
-      costoInput.addEventListener('input', function() {
-        const selectedOption = unidadMedidaSelect.options[unidadMedidaSelect.selectedIndex];
-        const singular = selectedOption ? selectedOption.getAttribute('data-singular') : 'pieza';
-        
-        if (this.value) {
-          costoLabel.classList.add('active');
-          costoLabel.textContent = `COSTO (POR ${singular.toUpperCase()})`;
-        } else {
-          costoLabel.classList.remove('active');
-          costoLabel.textContent = 'COSTO';
-        }
-      });
-      
-      // Añadir evento focus
-      costoInput.addEventListener('focus', function() {
-        const selectedOption = unidadMedidaSelect.options[unidadMedidaSelect.selectedIndex];
-        const singular = selectedOption ? selectedOption.getAttribute('data-singular') : 'pieza';
-        
-        costoLabel.classList.add('active');
-        costoLabel.textContent = `COSTO (POR ${singular.toUpperCase()})`;
-      });
-      
-      // Añadir evento blur
-      costoInput.addEventListener('blur', function() {
-        if (!this.value) {
-          costoLabel.classList.remove('active');
-          costoLabel.textContent = 'COSTO';
-        }
-      });
-    }
-    
-    // Precio Venta Input
-    const precioInput = document.getElementById('precio_venta');
-    const precioLabel = document.getElementById('precioLabel');
-    
-    if (precioInput && precioLabel && unidadMedidaSelect) {
-      const selectedOption = unidadMedidaSelect.options[unidadMedidaSelect.selectedIndex];
-      const singular = selectedOption ? selectedOption.getAttribute('data-singular') : 'pieza';
-      
-      // Configuración inicial
-      if (precioInput.value) {
-        precioLabel.classList.add('active');
-        precioLabel.textContent = `PRECIO DE VENTA (POR ${singular.toUpperCase()})`;
-      }
-      
-      // Añadir evento input
-      precioInput.addEventListener('input', function() {
-        const selectedOption = unidadMedidaSelect.options[unidadMedidaSelect.selectedIndex];
-        const singular = selectedOption ? selectedOption.getAttribute('data-singular') : 'pieza';
-        
-        if (this.value) {
-          precioLabel.classList.add('active');
-          precioLabel.textContent = `PRECIO DE VENTA (POR ${singular.toUpperCase()})`;
-        } else {
-          precioLabel.classList.remove('active');
-          precioLabel.textContent = 'PRECIO DE VENTA';
-        }
-      });
-      
-      // Añadir evento focus
-      precioInput.addEventListener('focus', function() {
-        const selectedOption = unidadMedidaSelect.options[unidadMedidaSelect.selectedIndex];
-        const singular = selectedOption ? selectedOption.getAttribute('data-singular') : 'pieza';
-        
-        precioLabel.classList.add('active');
-        precioLabel.textContent = `PRECIO DE VENTA (POR ${singular.toUpperCase()})`;
-      });
-      
-      // Añadir evento blur
-      precioInput.addEventListener('blur', function() {
-        if (!this.value) {
-          precioLabel.classList.remove('active');
-          precioLabel.textContent = 'PRECIO DE VENTA';
-        }
-      });
-    }
-    
-    // Actualizar labels cuando cambia la unidad de medida
-    if (unidadMedidaSelect) {
-      unidadMedidaSelect.addEventListener('change', function() {
-        const selectedOption = this.options[this.selectedIndex];
-        const singular = selectedOption ? selectedOption.getAttribute('data-singular') : 'pieza';
-        const plural = selectedOption ? selectedOption.getAttribute('data-plural') : 'piezas';
-        
-        // Actualizar stock suffix
-        const stockUnitSuffix = document.getElementById('stockUnitSuffix');
-        if (stockUnitSuffix) stockUnitSuffix.textContent = plural.toUpperCase();
-        
-        // Actualizar costo label si tiene valor o está en foco
-        if (costoInput && (costoInput.value || document.activeElement === costoInput) && costoLabel) {
-          costoLabel.classList.add('active');
-          costoLabel.textContent = `COSTO (POR ${singular.toUpperCase()})`;
-        }
-        
-        // Actualizar precio label si tiene valor o está en foco
-        if (precioInput && (precioInput.value || document.activeElement === precioInput) && precioLabel) {
-          precioLabel.classList.add('active');
-          precioLabel.textContent = `PRECIO DE VENTA (POR ${singular.toUpperCase()})`;
-        }
-      });
+      precioLabel.textContent = `PRECIO DE VENTA (POR ${singular.toUpperCase()})`;
     }
   }
 
@@ -1217,37 +1074,11 @@
         result = "$" + result;
       }
       input.value = result;
-      input.setSelectionRange(input.value.length, input.value.length);
       
-      // Actualizar el label flotante
-      const inputId = input.id;
-      const label = document.getElementById(`${inputId}Label`);
-      
-      if (label) {
-        if (input.value) {
-          label.classList.add('active');
-          
-          // Obtener la unidad en singular
-          const unidadMedidaSelect = document.getElementById('unidad_medida');
-          if (unidadMedidaSelect) {
-            const selectedOption = unidadMedidaSelect.options[unidadMedidaSelect.selectedIndex];
-            const singular = selectedOption ? selectedOption.getAttribute('data-singular') : 'pieza';
-            
-            if (inputId === 'costo') {
-              label.textContent = `COSTO (POR ${singular.toUpperCase()})`;
-            } else if (inputId === 'precio_venta') {
-              label.textContent = `PRECIO DE VENTA (POR ${singular.toUpperCase()})`;
-            }
-          }
-        } else {
-          label.classList.remove('active');
-          if (inputId === 'costo') {
-            label.textContent = 'COSTO';
-          } else if (inputId === 'precio_venta') {
-            label.textContent = 'PRECIO DE VENTA';
-          }
-        }
-      }
+      // Posicionar cursor al final
+      setTimeout(() => {
+        input.setSelectionRange(input.value.length, input.value.length);
+      }, 0);
     }
   }
 
