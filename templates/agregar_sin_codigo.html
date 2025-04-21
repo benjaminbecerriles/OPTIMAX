@@ -351,10 +351,19 @@
     border-color: #007BFF;
   }
 
+  /* Mejorar visualización de imágenes en medida-card */
   .medida-card img {
-    width: 48px;
-    height: 48px;
+    width: 90px;
+    height: 90px;
+    object-fit: contain;
     margin-bottom: 0.5rem;
+  }
+
+  .medida-card-label {
+    display: block;
+    margin-top: 8px;
+    font-weight: 600;
+    color: #333;
   }
 
   /* Badge del código generado */
@@ -367,6 +376,11 @@
     font-weight: 600;
     margin-bottom: 1rem;
     border: 1px dashed #0056b3;
+  }
+  
+  /* Reducir espacio entre el nombre del producto y el código generado */
+  .codigo-info {
+    margin-bottom: 1rem;
   }
   
   /* Estilos para el campo de unidad de medida */
@@ -397,6 +411,35 @@
     color: #777;
     font-size: 0.9rem;
     pointer-events: none;
+  }
+
+  /* Estilo para la etiqueta flotante */
+  .input-container {
+    position: relative;
+  }
+
+  .input-label {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888;
+    transition: all 0.3s;
+    pointer-events: none;
+  }
+
+  .input-label.active {
+    top: 0;
+    font-size: 0.8rem;
+    transform: translateY(-50%);
+    background-color: white;
+    padding: 0 5px;
+  }
+
+  /* Reducir el espacio entre nombre y código generado */
+  .codigo-container {
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
   }
 </style>
 
@@ -451,9 +494,9 @@
           Agregar producto sin código de barras
         </h3>
 
-        <!-- Información del código de barras autogenerado -->
-        <div style="margin-bottom: 1.5rem;">
-          <p style="margin-bottom: 0.5rem;"><strong>Tu nuevo código de barras es:</strong></p>
+        <!-- Información del código de barras autogenerado - Espacio reducido -->
+        <div class="codigo-container">
+          <p style="margin-bottom: 0.25rem;"><strong>Tu nuevo código de barras es:</strong></p>
           <div class="codigo-badge" id="codigoGeneradoBadge">
             <!-- Código cargado por JS -->
           </div>
@@ -483,15 +526,15 @@
           <div class="medida-options">
             <div class="medida-card selected" data-value="unidad">
               <img src="{{ url_for('static', filename='img/unidad.png') }}" alt="Unidad">
-              <div>Por Unidad</div>
+              <span class="medida-card-label">Por Unidad</span>
             </div>
             <div class="medida-card" data-value="peso">
               <img src="{{ url_for('static', filename='img/peso.png') }}" alt="Peso">
-              <div>Por Peso</div>
+              <span class="medida-card-label">Por Peso</span>
             </div>
             <div class="medida-card" data-value="volumen">
               <img src="{{ url_for('static', filename='img/volumen.png') }}" alt="Volumen">
-              <div>Por Volumen</div>
+              <span class="medida-card-label">Por Volumen</span>
             </div>
           </div>
           <input type="hidden" id="tipo_medida" name="tipo_medida" value="unidad">
@@ -507,49 +550,55 @@
           </div>
         </div>
 
-        <!-- Stock Inicial -->
+        <!-- Stock Inicial - Modificado para usar un label flotante -->
         <div class="form-group">
-          <label class="form-label fw-bold" id="stockLabel">Stock Inicial (por pieza):</label>
-          <div class="stock-unit-container">
-            <input 
-              type="number"
-              class="form-control"
-              id="stock"
-              name="stock"
-              min="0"
-              placeholder="STOCK INICIAL"
-            >
-            <span class="stock-unit-suffix" id="stockUnitSuffix">PIEZAS</span>
+          <div class="input-container">
+            <div class="stock-unit-container">
+              <input 
+                type="number"
+                class="form-control stock-input"
+                id="stock"
+                name="stock"
+                min="0"
+                placeholder="STOCK INICIAL"
+              >
+              <span class="stock-unit-suffix" id="stockUnitSuffix">PIEZAS</span>
+            </div>
+            <label for="stock" class="input-label" id="stockLabel">STOCK INICIAL</label>
           </div>
         </div>
 
         <!-- Costo / Precio -->
         <div class="d-flex gap-3" style="align-items: center; margin-top:1rem;">
           <div class="form-group" style="flex:1;">
-            <label class="form-label fw-bold" id="costoLabel">Costo (por pieza):</label>
-            <input
-              type="text"
-              step="0.01"
-              class="form-control"
-              id="costo"
-              name="costo"
-              required
-              oninput="formatCostRealtime(this)"
-              placeholder="COSTO POR PIEZA"
-            >
+            <div class="input-container">
+              <input
+                type="text"
+                step="0.01"
+                class="form-control"
+                id="costo"
+                name="costo"
+                required
+                oninput="formatCostRealtime(this)"
+                placeholder="COSTO"
+              >
+              <label for="costo" class="input-label" id="costoLabel">COSTO</label>
+            </div>
           </div>
           <div class="form-group" style="flex:1;">
-            <label class="form-label fw-bold" id="precioLabel">Precio de Venta (por pieza):</label>
-            <input
-              type="text"
-              step="0.01"
-              class="form-control"
-              id="precio_venta"
-              name="precio_venta"
-              required
-              oninput="formatCostRealtime(this)"
-              placeholder="PRECIO POR PIEZA"
-            >
+            <div class="input-container">
+              <input
+                type="text"
+                step="0.01"
+                class="form-control"
+                id="precio_venta"
+                name="precio_venta"
+                required
+                oninput="formatCostRealtime(this)"
+                placeholder="PRECIO DE VENTA"
+              >
+              <label for="precio_venta" class="input-label" id="precioLabel">PRECIO DE VENTA</label>
+            </div>
           </div>
         </div>
 
@@ -795,6 +844,9 @@
     
     // Inicializar eventos del menú de fotos
     bindPhotoEvents();
+    
+    // Activar comportamiento de labels flotantes para Stock, Costo y Precio
+    handleFloatingLabels();
   });
 
   /* ===========================================================
@@ -907,23 +959,166 @@
     const singular = selectedOption.getAttribute('data-singular');
     const plural = selectedOption.getAttribute('data-plural');
     
-    // Actualizar etiquetas
-    const stockLabel = document.getElementById('stockLabel');
-    const costoLabel = document.getElementById('costoLabel');
-    const precioLabel = document.getElementById('precioLabel');
+    // Actualizar el sufijo de stock
     const stockUnitSuffix = document.getElementById('stockUnitSuffix');
-    
-    if (stockLabel) stockLabel.textContent = `Stock Inicial (por ${singular}):`;
-    if (costoLabel) costoLabel.textContent = `Costo (por ${singular}):`;
-    if (precioLabel) precioLabel.textContent = `Precio de Venta (por ${singular}):`;
     if (stockUnitSuffix) stockUnitSuffix.textContent = plural.toUpperCase();
     
-    // Actualizar placeholders
+    // Verificar si los inputs tienen valor para actualizar los labels
+    const stockInput = document.getElementById('stock');
     const costoInput = document.getElementById('costo');
     const precioInput = document.getElementById('precio_venta');
     
-    if (costoInput) costoInput.placeholder = `COSTO POR ${singular.toUpperCase()}`;
-    if (precioInput) precioInput.placeholder = `PRECIO POR ${singular.toUpperCase()}`;
+    if (stockInput && stockInput.value) {
+      const stockLabel = document.getElementById('stockLabel');
+      if (stockLabel) stockLabel.textContent = `STOCK INICIAL`;
+    }
+    
+    if (costoInput && costoInput.value) {
+      const costoLabel = document.getElementById('costoLabel');
+      if (costoLabel) costoLabel.textContent = `COSTO (POR ${singular.toUpperCase()})`;
+    }
+    
+    if (precioInput && precioInput.value) {
+      const precioLabel = document.getElementById('precioLabel');
+      if (precioLabel) precioLabel.textContent = `PRECIO DE VENTA (POR ${singular.toUpperCase()})`;
+    }
+  }
+
+  // Función para manejar los labels flotantes
+  function handleFloatingLabels() {
+    // Stock Input
+    const stockInput = document.getElementById('stock');
+    const stockLabel = document.getElementById('stockLabel');
+    
+    if (stockInput && stockLabel) {
+      // Configuración inicial basada en si hay valor
+      if (stockInput.value) {
+        stockLabel.classList.add('active');
+      }
+      
+      // Añadir evento input
+      stockInput.addEventListener('input', function() {
+        if (this.value) {
+          stockLabel.classList.add('active');
+          stockLabel.textContent = 'STOCK INICIAL';
+        } else {
+          stockLabel.classList.remove('active');
+          stockLabel.textContent = 'STOCK INICIAL';
+        }
+      });
+      
+      // Añadir evento focus
+      stockInput.addEventListener('focus', function() {
+        stockLabel.classList.add('active');
+      });
+      
+      // Añadir evento blur
+      stockInput.addEventListener('blur', function() {
+        if (!this.value) {
+          stockLabel.classList.remove('active');
+        }
+      });
+    }
+    
+    // Costo Input
+    const costoInput = document.getElementById('costo');
+    const costoLabel = document.getElementById('costoLabel');
+    const unidadMedidaSelect = document.getElementById('unidad_medida');
+    
+    if (costoInput && costoLabel && unidadMedidaSelect) {
+      const selectedOption = unidadMedidaSelect.options[unidadMedidaSelect.selectedIndex];
+      const singular = selectedOption ? selectedOption.getAttribute('data-singular') : 'pieza';
+      
+      // Configuración inicial
+      if (costoInput.value) {
+        costoLabel.classList.add('active');
+        costoLabel.textContent = `COSTO (POR ${singular.toUpperCase()})`;
+      }
+      
+      // Añadir evento input
+      costoInput.addEventListener('input', function() {
+        if (this.value) {
+          costoLabel.classList.add('active');
+          costoLabel.textContent = `COSTO (POR ${singular.toUpperCase()})`;
+        } else {
+          costoLabel.classList.remove('active');
+          costoLabel.textContent = 'COSTO';
+        }
+      });
+      
+      // Añadir evento focus
+      costoInput.addEventListener('focus', function() {
+        costoLabel.classList.add('active');
+      });
+      
+      // Añadir evento blur
+      costoInput.addEventListener('blur', function() {
+        if (!this.value) {
+          costoLabel.classList.remove('active');
+        }
+      });
+    }
+    
+    // Precio Venta Input
+    const precioInput = document.getElementById('precio_venta');
+    const precioLabel = document.getElementById('precioLabel');
+    
+    if (precioInput && precioLabel && unidadMedidaSelect) {
+      const selectedOption = unidadMedidaSelect.options[unidadMedidaSelect.selectedIndex];
+      const singular = selectedOption ? selectedOption.getAttribute('data-singular') : 'pieza';
+      
+      // Configuración inicial
+      if (precioInput.value) {
+        precioLabel.classList.add('active');
+        precioLabel.textContent = `PRECIO DE VENTA (POR ${singular.toUpperCase()})`;
+      }
+      
+      // Añadir evento input
+      precioInput.addEventListener('input', function() {
+        if (this.value) {
+          precioLabel.classList.add('active');
+          precioLabel.textContent = `PRECIO DE VENTA (POR ${singular.toUpperCase()})`;
+        } else {
+          precioLabel.classList.remove('active');
+          precioLabel.textContent = 'PRECIO DE VENTA';
+        }
+      });
+      
+      // Añadir evento focus
+      precioInput.addEventListener('focus', function() {
+        precioLabel.classList.add('active');
+      });
+      
+      // Añadir evento blur
+      precioInput.addEventListener('blur', function() {
+        if (!this.value) {
+          precioLabel.classList.remove('active');
+        }
+      });
+    }
+    
+    // Actualizar labels cuando cambia la unidad de medida
+    if (unidadMedidaSelect) {
+      unidadMedidaSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const singular = selectedOption ? selectedOption.getAttribute('data-singular') : 'pieza';
+        const plural = selectedOption ? selectedOption.getAttribute('data-plural') : 'piezas';
+        
+        // Actualizar stock suffix
+        const stockUnitSuffix = document.getElementById('stockUnitSuffix');
+        if (stockUnitSuffix) stockUnitSuffix.textContent = plural.toUpperCase();
+        
+        // Actualizar costo label si tiene valor
+        if (costoInput && costoInput.value && costoLabel.classList.contains('active')) {
+          costoLabel.textContent = `COSTO (POR ${singular.toUpperCase()})`;
+        }
+        
+        // Actualizar precio label si tiene valor
+        if (precioInput && precioInput.value && precioLabel.classList.contains('active')) {
+          precioLabel.textContent = `PRECIO DE VENTA (POR ${singular.toUpperCase()})`;
+        }
+      });
+    }
   }
 
   /* ===========================================================
