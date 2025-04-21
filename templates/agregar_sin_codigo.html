@@ -1,4 +1,3 @@
-```html
 {% extends 'base.html' %}
 
 {% block title %}
@@ -182,6 +181,83 @@
     object-fit: contain;
   }
 
+  /* Recuadro Morado "¿Este es tu producto?" */
+  #scanFoundContainer {
+    display: none; 
+    background-color: #D48AD4;
+    color: #fff;
+    padding: 1rem;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+  }
+  .scanFoundInner {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+  }
+  .scanFoundImageBox {
+    width: 100px;
+    height: 100px;
+    background-color: #fff;
+    border-radius: 6px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .scanFoundImageBox img {
+    max-width: 100%;
+    max-height: 100%;
+    display: block;
+  }
+  .scanFoundText {
+    flex: 1;
+  }
+  .scanFoundTitle {
+    font-weight: bold;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+  }
+  .scanFoundName {
+    font-weight: bold;
+    font-size: 1rem;
+    margin-bottom: 0.2rem;
+  }
+  .scanFoundCode {
+    font-size: 0.95rem;
+  }
+  .scanFoundRow {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .scanFoundButtons {
+    margin-top: 1rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+  }
+  .btn-scanYes {
+    background-color: #2ecc71;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .btn-scanNo {
+    background-color: #e74c3c;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font-weight: 600;
+  }
+
   /* Toggle y Caducidad */
   .toggle-button {
     border: 1px solid #ccc;
@@ -324,49 +400,6 @@
     transition: width 0.3s;
   }
 
-  /* Estilos para las tarjetas de tipo de medida */
-  .medida-options {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    margin: 1rem 0;
-  }
-
-  .medida-card {
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    padding: 1rem;
-    width: calc(33.333% - 1rem);
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.3s;
-  }
-
-  .medida-card:hover {
-    border-color: #007BFF;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  }
-
-  .medida-card.selected {
-    background-color: #e8f4ff;
-    border-color: #007BFF;
-  }
-
-  /* Mejorar visualización de imágenes en medida-card */
-  .medida-card img {
-    width: 90px;
-    height: 90px;
-    object-fit: contain;
-    margin-bottom: 0.5rem;
-  }
-
-  .medida-card-label {
-    display: block;
-    margin-top: 8px;
-    font-weight: 600;
-    color: #333;
-  }
-
   /* Badge del código generado */
   .codigo-badge {
     display: inline-block;
@@ -384,90 +417,6 @@
     margin-bottom: 1rem;
   }
   
-  /* Estilos para el campo de unidad de medida */
-  .unidad-medida-container {
-    position: relative;
-  }
-  
-  .unidad-medida-container select {
-    appearance: none;
-    -webkit-appearance: none;
-    padding-right: 30px;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23333' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 8px center;
-    background-size: 16px 16px;
-  }
-  
-  /* Estilo para campo de stock con unidad */
-  .stock-unit-container {
-    position: relative;
-  }
-  
-  .stock-unit-suffix {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #777;
-    font-size: 0.9rem;
-    pointer-events: none;
-  }
-
-  /* Estilo para la etiqueta flotante mejorada */
-  .form-floating {
-    position: relative;
-  }
-  
-  .form-floating > label {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    padding: 1rem 0.75rem;
-    pointer-events: none;
-    border: 1px solid transparent;
-    transform-origin: 0 0;
-    transition: opacity .1s ease-in-out, transform .1s ease-in-out;
-    color: #888;
-    text-transform: uppercase;
-  }
-  
-  .form-floating > .form-control:focus ~ label,
-  .form-floating > .form-control:not(:placeholder-shown) ~ label {
-    opacity: .65;
-    transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
-    background-color: white;
-    height: auto;
-    padding: 0 5px;
-    z-index: 5;
-  }
-  
-  .form-floating > .form-control:-webkit-autofill ~ label {
-    opacity: .65;
-    transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
-    background-color: white;
-    height: auto;
-    padding: 0 5px;
-    z-index: 5;
-  }
-  
-  /* Ajustes para unidades en los campos flotantes */
-  .form-floating-with-unit > label {
-    padding-right: 60px; /* Espacio para la unidad */
-  }
-  
-  .form-unit-suffix {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #777;
-    font-size: 0.9rem;
-    pointer-events: none;
-    z-index: 4;
-  }
-
   /* Reducir el espacio entre nombre y código generado */
   .codigo-container {
     margin-top: 0.5rem;
@@ -526,11 +475,13 @@
           Agregar producto sin código de barras
         </h3>
 
-        <!-- Información del código de barras autogenerado - Espacio reducido -->
-        <div class="codigo-container">
-          <p style="margin-bottom: 0.25rem;"><strong>Tu nuevo código de barras es:</strong></p>
-          <div class="codigo-badge" id="codigoGeneradoBadge">
-            <!-- Código cargado por JS -->
+        <!-- Información del código de barras autogenerado -->
+        <div class="form-group">
+          <div class="codigo-badge" id="codigoGeneradoBadge" style="display: flex; align-items: center; justify-content: flex-start; padding: 0.75rem 1rem; margin-bottom: 0.75rem; font-size: 1rem;">
+            <span style="margin-right: 0.5rem; color: #333; font-weight: 500;">Tu nuevo código de barras es:</span>
+            <span style="font-family: monospace; font-weight: 700; letter-spacing: 0.5px;" id="codigoMostrado">
+              <!-- Código cargado por JS -->
+            </span>
           </div>
           <input type="hidden" id="codigo_barras_externo" name="codigo_barras_externo" value="">
         </div>
@@ -552,96 +503,55 @@
           >
         </div>
 
-        <!-- Tipo de Medida -->
+        <!-- Stock Inicial -->
         <div class="form-group">
-          <label class="form-label fw-bold">Tipo de Medida:</label>
-          <div class="medida-options">
-            <div class="medida-card selected" data-value="unidad">
-              <img src="{{ url_for('static', filename='img/unidad.png') }}" alt="Unidad">
-              <span class="medida-card-label">Por Unidad</span>
-            </div>
-            <div class="medida-card" data-value="peso">
-              <img src="{{ url_for('static', filename='img/peso.png') }}" alt="Peso">
-              <span class="medida-card-label">Por Peso</span>
-            </div>
-            <div class="medida-card" data-value="volumen">
-              <img src="{{ url_for('static', filename='img/volumen.png') }}" alt="Volumen">
-              <span class="medida-card-label">Por Volumen</span>
-            </div>
-          </div>
-          <input type="hidden" id="tipo_medida" name="tipo_medida" value="unidad">
+          <input 
+            type="number"
+            class="form-control"
+            id="stock"
+            name="stock"
+            min="0"
+            placeholder="STOCK INICIAL"
+          >
         </div>
 
-        <!-- Unidad de Medida (cambia según el tipo seleccionado) -->
-        <div class="form-group" id="unidadMedidaContainer">
-          <label class="form-label fw-bold">Unidad de Medida:</label>
-          <div class="unidad-medida-container">
-            <select class="form-control" id="unidad_medida" name="unidad_medida">
-              <!-- Opciones cargadas dinámicamente por JS -->
-            </select>
-          </div>
-        </div>
-
-        <!-- Stock Inicial - Con floating label correcto -->
-        <div class="form-group">
-          <div class="form-floating">
-            <input 
-              type="number"
-              class="form-control"
-              id="stock"
-              name="stock"
-              min="0"
-              placeholder=" "
-            >
-            <label for="stock">STOCK INICIAL</label>
-            <span class="form-unit-suffix" id="stockUnitSuffix">PIEZAS</span>
-          </div>
-        </div>
-
-        <!-- Costo / Precio - Con etiquetas flotantes mejoradas -->
+        <!-- Costo / Precio -->
         <div class="d-flex gap-3" style="align-items: center; margin-top:1rem;">
           <div class="form-group" style="flex:1;">
-            <div class="form-floating form-floating-with-unit">
-              <input
-                type="text"
-                class="form-control"
-                id="costo"
-                name="costo"
-                required
-                placeholder=" "
-                oninput="formatCostRealtime(this)"
-              >
-              <label for="costo" id="costoLabel">COSTO</label>
-            </div>
+            <input
+              type="text"
+              step="0.01"
+              class="form-control"
+              id="costo"
+              name="costo"
+              required
+              oninput="formatCostRealtime(this)"
+              placeholder="COSTO"
+            >
           </div>
           <div class="form-group" style="flex:1;">
-            <div class="form-floating form-floating-with-unit">
-              <input
-                type="text"
-                class="form-control"
-                id="precio_venta"
-                name="precio_venta"
-                required
-                placeholder=" "
-                oninput="formatCostRealtime(this)"
-              >
-              <label for="precio_venta" id="precioLabel">PRECIO DE VENTA</label>
-            </div>
+            <input
+              type="text"
+              step="0.01"
+              class="form-control"
+              id="precio_venta"
+              name="precio_venta"
+              required
+              oninput="formatCostRealtime(this)"
+              placeholder="PRECIO DE VENTA"
+            >
           </div>
         </div>
 
         <!-- Marca -->
         <div class="form-group" style="margin-top:1rem;">
-          <div class="form-floating">
-            <input
-              type="text"
-              class="form-control"
-              id="marca"
-              name="marca"
-              placeholder=" "
-            >
-            <label for="marca">MARCA (EJ. GENÉRICO)</label>
-          </div>
+          <input
+            type="text"
+            class="form-control"
+            id="marca"
+            name="marca"
+            placeholder="MARCA"
+          >
         </div>
 
         <!-- Categoría (Choices.js) -->
@@ -665,11 +575,6 @@
             <option value="productos para mascotas" data-custom-properties='{"color": "#8FBC8F"}'>Productos para mascotas</option>
             <option value="artículos de papelería" data-custom-properties='{"color": "#9370DB"}'>Artículos de papelería</option>
             <option value="ferretería básica" data-custom-properties='{"color": "#708090"}'>Ferretería básica</option>
-            <option value="artesanías y manualidades" data-custom-properties='{"color": "#CD5C5C"}'>Artesanías y manualidades</option>
-            <option value="productos a granel" data-custom-properties='{"color": "#D2B48C"}'>Productos a granel</option>
-            <option value="productos orgánicos" data-custom-properties='{"color": "#556B2F"}'>Productos orgánicos</option>
-            <option value="productos gourmet" data-custom-properties='{"color": "#8B4513"}'>Productos gourmet</option>
-            <option value="suplementos alimenticios" data-custom-properties='{"color": "#9ACD32"}'>Suplementos alimenticios</option>
             <option value="otros (miscelánea)" data-custom-properties='{"color": "#A9A9A9"}'>Otros (miscelánea)</option>
           </select>
         </div>
@@ -851,19 +756,22 @@
     const codigoInput = document.getElementById("codigo_barras_externo");
     
     if (codigoGeneradoBadge) {
-      codigoGeneradoBadge.textContent = barcode;
+      const codigoMostrado = document.getElementById("codigoMostrado");
+      if (codigoMostrado) {
+        codigoMostrado.textContent = barcode;
+      } else {
+        // Fallback por si no encuentra el elemento específico
+        codigoGeneradoBadge.innerHTML = `<span style="margin-right: 0.5rem; color: #333; font-weight: 500;">Tu nuevo código de barras es:</span><span style="font-family: monospace; font-weight: 700; letter-spacing: 0.5px;">${barcode}</span>`;
+      }
     }
     
     if (codigoInput) {
       codigoInput.value = barcode;
     }
-
-    // Inicializar unidades de medida
-    initializeMeasureUnits();
     
     // Inicializar etiquetas flotantes para campos específicos
     const inputs = document.querySelectorAll(
-      "#nombre, #marca"
+      "#nombre, #stock, #costo, #precio_venta, #marca"
     );
     
     inputs.forEach(input => {
@@ -878,134 +786,7 @@
   });
 
   /* ===========================================================
-   * 2) MANEJO DE TIPO DE MEDIDA Y UNIDADES
-   * ===========================================================
-   */
-  // Opciones para cada tipo de medida
-  const opcionesMedida = {
-    unidad: [
-      { value: 'pieza', text: 'Pieza', singular: 'pieza', plural: 'piezas' },
-      { value: 'paquete', text: 'Paquete', singular: 'paquete', plural: 'paquetes' },
-      { value: 'caja', text: 'Caja', singular: 'caja', plural: 'cajas' },
-      { value: 'docena', text: 'Docena', singular: 'docena', plural: 'docenas' },
-      { value: 'par', text: 'Par', singular: 'par', plural: 'pares' }
-    ],
-    peso: [
-      { value: 'gramo', text: 'Gramo (g)', singular: 'gramo', plural: 'gramos' },
-      { value: 'kilogramo', text: 'Kilogramo (kg)', singular: 'kilogramo', plural: 'kilogramos' },
-      { value: 'libra', text: 'Libra (lb)', singular: 'libra', plural: 'libras' },
-      { value: 'onza', text: 'Onza (oz)', singular: 'onza', plural: 'onzas' }
-    ],
-    volumen: [
-      { value: 'mililitro', text: 'Mililitro (ml)', singular: 'mililitro', plural: 'mililitros' },
-      { value: 'litro', text: 'Litro (l)', singular: 'litro', plural: 'litros' },
-      { value: 'galon', text: 'Galón', singular: 'galón', plural: 'galones' },
-      { value: 'onza_liquida', text: 'Onza líquida (fl oz)', singular: 'onza líquida', plural: 'onzas líquidas' }
-    ]
-  };
-  
-  // Inicializar unidades de medida según el tipo seleccionado
-  function initializeMeasureUnits() {
-    const medidaCards = document.querySelectorAll('.medida-card');
-    const tipoMedidaInput = document.getElementById('tipo_medida');
-    const unidadMedidaSelect = document.getElementById('unidad_medida');
-    
-    // Establecer 'unidad' como valor por defecto
-    tipoMedidaInput.value = 'unidad';
-    
-    // Cargar opciones de unidad por defecto
-    cargarOpcionesMedida('unidad');
-    
-    // Establecer 'pieza' como valor por defecto para unidades
-    if (unidadMedidaSelect) {
-      unidadMedidaSelect.value = 'pieza';
-      actualizarEtiquetasUnidad('pieza');
-    }
-    
-    // Asignar eventos a las tarjetas de medida
-    medidaCards.forEach(card => {
-      card.addEventListener('click', () => {
-        // Quitar selección de todas las tarjetas
-        medidaCards.forEach(c => c.classList.remove('selected'));
-        
-        // Seleccionar esta tarjeta
-        card.classList.add('selected');
-        
-        // Obtener el valor y actualizar el input oculto
-        const valor = card.getAttribute('data-value');
-        tipoMedidaInput.value = valor;
-        
-        // Cargar las opciones correspondientes
-        cargarOpcionesMedida(valor);
-      });
-    });
-  }
-  
-  // Cargar opciones según el tipo de medida seleccionado
-  function cargarOpcionesMedida(tipo) {
-    const unidadMedidaSelect = document.getElementById('unidad_medida');
-    if (!unidadMedidaSelect) return;
-    
-    // Limpiar opciones actuales
-    unidadMedidaSelect.innerHTML = '';
-    
-    // Agregar opciones según el tipo
-    if (opcionesMedida[tipo]) {
-      opcionesMedida[tipo].forEach(opcion => {
-        const option = document.createElement('option');
-        option.value = opcion.value;
-        option.textContent = opcion.text;
-        option.setAttribute('data-singular', opcion.singular);
-        option.setAttribute('data-plural', opcion.plural);
-        unidadMedidaSelect.appendChild(option);
-      });
-      
-      // Seleccionar la primera opción
-      unidadMedidaSelect.selectedIndex = 0;
-      
-      // Actualizar etiquetas de unidad
-      const selectedOption = unidadMedidaSelect.options[unidadMedidaSelect.selectedIndex];
-      const unidadValue = selectedOption.value;
-      actualizarEtiquetasUnidad(unidadValue);
-      
-      // Añadir evento de cambio
-      unidadMedidaSelect.addEventListener('change', function() {
-        const selectedOption = this.options[this.selectedIndex];
-        const unidadValue = selectedOption.value;
-        actualizarEtiquetasUnidad(unidadValue);
-      });
-    }
-  }
-  
-  // Actualizar etiquetas de unidad en los campos de stock, costo y precio
-  function actualizarEtiquetasUnidad(unidadValue) {
-    const unidadMedidaSelect = document.getElementById('unidad_medida');
-    const selectedOption = Array.from(unidadMedidaSelect.options).find(option => option.value === unidadValue);
-    
-    if (!selectedOption) return;
-    
-    const singular = selectedOption.getAttribute('data-singular');
-    const plural = selectedOption.getAttribute('data-plural');
-    
-    // Actualizar el sufijo de stock
-    const stockUnitSuffix = document.getElementById('stockUnitSuffix');
-    if (stockUnitSuffix) stockUnitSuffix.textContent = plural.toUpperCase();
-    
-    // Actualizar labels de costo y precio
-    const costoLabel = document.getElementById('costoLabel');
-    const precioLabel = document.getElementById('precioLabel');
-    
-    if (costoLabel) {
-      costoLabel.textContent = `COSTO (POR ${singular.toUpperCase()})`;
-    }
-    
-    if (precioLabel) {
-      precioLabel.textContent = `PRECIO DE VENTA (POR ${singular.toUpperCase()})`;
-    }
-  }
-
-  /* ===========================================================
-   * 3) Notificación centrada
+   * 2) Notificación centrada
    * ===========================================================
    */
   let activeNotification = null;
@@ -1045,7 +826,7 @@
   }
 
   /* ===========================================================
-   * 4) Formatear Costo en tiempo real (optimizado)
+   * 3) Formatear Costo en tiempo real (optimizado)
    * ===========================================================
    */
   // Cache expresiones regulares
@@ -1083,7 +864,7 @@
   }
 
   /* ===========================================================
-   * 5) FLOATING LABELS
+   * 4) FLOATING LABELS
    * ===========================================================
    */
   // Cache para etiquetas flotantes
@@ -1114,7 +895,7 @@
   }
 
   /* ===========================================================
-   * 6) FOTOGRAFÍA Y MENÚ (mejorado)
+   * 5) FOTOGRAFÍA Y MENÚ (mejorado)
    * ===========================================================
    */
   function attachRemoveImageListener() {
@@ -1358,7 +1139,7 @@
   }
 
   /* ===========================================================
-   * 7) TOGGLE: Favorito / Producto a la Venta
+   * 6) TOGGLE: Favorito / Producto a la Venta
    * ===========================================================
    */
   const favoritoContainer = document.getElementById("favoritoContainer");
@@ -1396,7 +1177,7 @@
   }
 
   /* ===========================================================
-   * 8) TOGGLE: FECHA DE CADUCIDAD
+   * 7) TOGGLE: FECHA DE CADUCIDAD
    * ===========================================================
    */
   const btnToggleCaducidad = document.getElementById("btnToggleCaducidad");
@@ -1434,7 +1215,7 @@
   });
   
   /* ===========================================================
-   * 9) ENVÍO DEL FORMULARIO / VALIDACIÓN FINAL
+   * 8) ENVÍO DEL FORMULARIO / VALIDACIÓN FINAL
    * ===========================================================
    */
   // Referencias a elementos de carga
@@ -1447,24 +1228,10 @@
     productForm.addEventListener("submit", function(e) {
       // Verificar campos requeridos
       const nombre = document.getElementById("nombre").value.trim();
-      const tipo_medida = document.getElementById("tipo_medida").value;
-      const unidad_medida = document.getElementById("unidad_medida").value;
       
       if (!nombre) {
         e.preventDefault();
         showCenteredNotification("Por favor, ingresa el nombre del producto.");
-        return;
-      }
-      
-      if (!tipo_medida) {
-        e.preventDefault();
-        showCenteredNotification("Por favor, selecciona un tipo de medida para el producto.");
-        return;
-      }
-      
-      if (!unidad_medida) {
-        e.preventDefault();
-        showCenteredNotification("Por favor, selecciona una unidad de medida para el producto.");
         return;
       }
       
