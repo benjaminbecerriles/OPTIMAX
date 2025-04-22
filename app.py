@@ -271,19 +271,66 @@ def buscar_nombre_categoria_por_barcode(codigo_barras):
 def truncar_url(url, max_length=95):
     """
     Trunca una URL para que quepa en un campo de longitud limitada.
-    Si la URL es muy larga, toma solo el nombre del archivo o parte de él.
+    Preserva el protocolo y dominio para URLs externas.
     """
     if not url or len(url) <= max_length:
         return url
     
-    # Extraer el nombre del archivo (parte después del último '/')
-    nombre_archivo = url.split('/')[-1]
+    # Verificar si es una URL externa
+    if url.startswith(('http://', 'https://')):
+        try:
+            # Dividir la URL en partes
+            from urllib.parse import urlparse
+            parsed_url = urlparse(url)
+            base = f"{parsed_url.scheme}://{parsed_url.netloc}"
+            path = parsed_url.path
+            query = parsed_url.query
+            
+            # Si solo la base ya es demasiado larga
+            if len(base) >= max_length - 5:
+                return base[:max_length-5] + "..."
+            
+            # Calcular cuánto espacio queda para el path y query
+            remaining = max_length - len(base) - 4  # -4 para "/..."
+            
+            # Extraer el nombre del archivo
+            filename = path.split('/')[-1] if '/' in path else path
+            
+            # Si hay espacio para el nombre completo y no hay query
+            if len(filename) <= remaining and not query:
+                return f"{base}/.../{filename}"
+            
+            # Si hay query, incluirla parcialmente si hay espacio
+            if query and len(filename) + len(query) + 1 <= remaining:  # +1 por el "?"
+                return f"{base}/.../{filename}?{query}"
+            
+            # Si no hay espacio suficiente para todo, truncar adecuadamente
+            if len(filename) <= remaining:
+                return f"{base}/.../{filename}"
+            
+            # Si el nombre es demasiado largo, truncarlo
+            return f"{base}/.../{filename[:remaining]}"
+        except:
+            # Si hay algún error, caer al método original pero preservando el dominio
+            pass
     
-    # Si el nombre de archivo es demasiado largo, tomar los últimos caracteres
+    # Método original para URLs que no son externas o en caso de error
+    try:
+        # Intentar preservar al menos el dominio para URLs externas
+        if url.startswith(('http://', 'https://')):
+            from urllib.parse import urlparse
+            parsed = urlparse(url)
+            domain = parsed.netloc
+            if domain and len(domain) + 8 <= max_length:  # 8 caracteres para "https://" y "..."
+                return f"{parsed.scheme}://{domain}/..."
+            
+    except:
+        pass
+    
+    # Si todo falla, usar el método original
+    nombre_archivo = url.split('/')[-1]
     if len(nombre_archivo) > max_length:
         return nombre_archivo[-max_length:]
-    
-    # Si el nombre de archivo es lo suficientemente corto, úsalo
     return nombre_archivo
 
 ##############################################
@@ -1485,7 +1532,7 @@ def sync_gsheet_to_catalogo():
         url_img = row[5].strip()
 
         # Truncar URL si es demasiado larga para evitar errores
-        url_img = truncar_url(url_img, 95)
+        url_img = truncar_url(url_img, 295)  # Usar 295 para la columna de 300 caracteres
 
         codigos_sheet.add(codigo)
 

@@ -215,13 +215,6 @@
     margin: 0;
     font-size: 0.9rem;
   }
-  
-  .sell-examples {
-    display: block;
-    color: #666;
-    font-size: 0.85rem;
-    margin-top: 1rem;
-  }
 
   /* Favorito & Venta */
   .heart-icon {
@@ -387,7 +380,7 @@
   }
 
   /* Selector mejorado */
-  .custom-select {
+  .form-select {
     display: block;
     width: 100%;
     padding: 0.75rem;
@@ -455,71 +448,30 @@
     color: #666;
   }
 
-  /* Estilo para placeholders flotantes */
+  /* Estilo para placeholders flotantes (ya no se usan, pero dejamos por compatibilidad) */
   .form-floating {
     position: relative;
   }
   
-  .form-floating > .form-control,
-  .form-floating > .custom-select {
-    height: calc(3.5rem + 2px);
-    padding: 1rem 0.75rem;
+  /* Estilos para labels y campos de entrada estándar */
+  .form-label {
+    font-weight: 600;
+    color: #333;
   }
   
-  .form-floating > label {
-    position: absolute;
-    top: 0;
-    left: 0;
+  .form-control {
+    padding: 0.75rem;
+    font-size: 1rem;
     width: 100%;
-    height: 100%;
-    padding: 1rem 0.75rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    pointer-events: none;
-    border: 1px solid transparent;
-    transform-origin: 0 0;
-    transition: opacity .1s ease-in-out, transform .1s ease-in-out;
-    color: #6c757d;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-weight: 600;
   }
   
-  .form-floating > .form-control:focus,
-  .form-floating > .form-control:not(:placeholder-shown),
-  .form-floating > .custom-select:focus,
-  .form-floating > .custom-select:not([value=""]):not([value="0"]) {
-    padding-top: 1.625rem;
-    padding-bottom: 0.625rem;
-  }
-  
-  .form-floating > .form-control:focus ~ label,
-  .form-floating > .form-control:not(:placeholder-shown) ~ label,
-  .form-floating > .custom-select:focus ~ label,
-  .form-floating > .custom-select:not([value=""]):not([value="0"]) ~ label {
-    opacity: .65;
-    transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
-    color: #212529;
-    background-color: #fff;
-    height: auto;
-    padding: 0 0.2rem;
-    margin-left: 0.5rem;
-  }
-  
-  /* Ajuste para label en select con Choices.js */
-  .form-floating .choices__inner {
-    padding-top: 1.625rem;
-    padding-bottom: 0.625rem;
-    min-height: calc(3.5rem + 2px);
-  }
-  
-  .form-floating .choices.is-focused ~ label,
-  .form-floating .choices.has-value ~ label {
-    opacity: .65;
-    transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
-    color: #212529;
-    background-color: #fff;
-    height: auto;
-    padding: 0 0.2rem;
-    margin-left: 0.5rem;
+  .form-control:focus {
+    border-color: #80bdff;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
   }
 </style>
 
@@ -584,18 +536,18 @@
         <div class="step-container">
           <div class="step-number">1</div>
           
-          <!-- Nombre del producto con placeholder flotante -->
-          <div class="form-floating">
+          <!-- Nombre del producto con label normal (no flotante) -->
+          <div class="form-group">
+            <label for="nombre" class="form-label mb-2">Nombre del producto</label>
             <input 
               type="text"
               class="form-control"
               id="nombre"
               name="nombre"
-              placeholder=" "
+              placeholder="Ingresa el nombre del producto"
               required
               autocomplete="off"
             >
-            <label for="nombre">Nombre del producto</label>
             <!-- Contenedor de autocomplete -->
             <div id="autocomplete-results"></div>
           </div>
@@ -607,30 +559,23 @@
           <h4 style="margin-top: 0; margin-bottom: 1rem; font-size: 0.9rem; color: #666;">¿Cómo se vende?</h4>
           
           <div class="sell-options">
-            <!-- Opción: Por Unidad -->
-            <div class="sell-option" data-value="pieza" id="sellByUnit">
-              <img src="{{ url_for('static', filename='img/unidad.png') }}" alt="Por Unidad" class="sell-option-image">
-              <p class="sell-option-text">Por UNIDAD</p>
-            </div>
-            
-            <!-- Opción: Por Peso -->
+            <!-- Opción: Por Peso (ahora primero) -->
             <div class="sell-option" data-value="peso" id="sellByWeight">
               <img src="{{ url_for('static', filename='img/peso.png') }}" alt="Por Peso" class="sell-option-image">
               <p class="sell-option-text">Por PESO</p>
             </div>
             
-            <!-- Opción: Por Medida -->
+            <!-- Opción: Por Unidad (ahora segundo) -->
+            <div class="sell-option" data-value="pieza" id="sellByUnit">
+              <img src="{{ url_for('static', filename='img/unidad.png') }}" alt="Por Unidad" class="sell-option-image">
+              <p class="sell-option-text">Por UNIDAD</p>
+            </div>
+            
+            <!-- Opción: Por Medida (ahora tercero) -->
             <div class="sell-option" data-value="volumen" id="sellByVolume">
               <img src="{{ url_for('static', filename='img/regla.png') }}" alt="Por Medida" class="sell-option-image">
               <p class="sell-option-text">Por MEDIDA</p>
             </div>
-          </div>
-          
-          <div class="sell-examples">
-            <strong>Ejemplos:</strong> 
-            • Unidad: lata, botella, huevo 
-            • Peso: queso, azúcar, frijol 
-            • Medida: tela, cinta, papel
           </div>
         </div>
 
@@ -638,16 +583,34 @@
         <div class="step-container">
           <div class="step-number">3</div>
           
-          <!-- Unidad de medida con placeholder flotante -->
-          <div class="form-floating mb-3">
-            <select class="custom-select" id="unidadMedidaSelect" name="unidad_medida">
-              <option value="" disabled selected></option>
+          <!-- Unidad de medida con label normal (no flotante) -->
+          <div class="mb-3">
+            <label for="unidadMedidaSelect" class="form-label mb-2">Unidad de medida</label>
+            <select class="form-select" id="unidadMedidaSelect" name="unidad_medida">
+              <option value="" disabled selected>Selecciona una unidad</option>
+              <!-- Opciones para PESO -->
+              <option value="KG" data-type="peso">Kilogramos</option>
+              <option value="G" data-type="peso">Gramos</option>
+              <option value="LB" data-type="peso">Libras</option>
+              <option value="OZ" data-type="peso">Onzas</option>
+              <!-- Opciones para UNIDAD -->
+              <option value="UNIDAD" data-type="pieza">Pieza</option>
+              <option value="PAR" data-type="pieza">Par</option>
+              <option value="DOCENA" data-type="pieza">Docena</option>
+              <option value="CAJA" data-type="pieza">Caja</option>
+              <option value="PAQUETE" data-type="pieza">Paquete</option>
+              <!-- Opciones para VOLUMEN/MEDIDA -->
+              <option value="L" data-type="volumen">Litros</option>
+              <option value="ML" data-type="volumen">Mililitros</option>
+              <option value="M" data-type="volumen">Metros</option>
+              <option value="CM" data-type="volumen">Centímetros</option>
+              <option value="M2" data-type="volumen">Metros cuadrados</option>
             </select>
-            <label for="unidadMedidaSelect">Unidad de medida</label>
           </div>
           
-          <!-- Stock con placeholder flotante -->
-          <div class="form-floating mb-3">
+          <!-- Stock con label normal (no flotante) -->
+          <div class="mb-3">
+            <label for="stock" class="form-label mb-2">Stock inicial <span id="stockUnit" style="font-weight: 600;">-</span></label>
             <input 
               type="number"
               class="form-control"
@@ -655,15 +618,15 @@
               name="stock"
               min="0"
               step="0.01"
-              placeholder=" "
+              placeholder="Ingresa el stock inicial"
               required
             >
-            <label for="stock">Stock inicial <span id="stockUnit" style="font-weight: 600;">-</span></label>
           </div>
           
           <div style="display: flex; gap: 20px;">
-            <!-- Costo con placeholder flotante -->
-            <div class="form-floating" style="flex: 1;">
+            <!-- Costo con label normal (no flotante) -->
+            <div class="mb-3" style="flex: 1;">
+              <label for="costo" class="form-label mb-2">Costo por <span id="costoUnit">-</span></label>
               <input
                 type="text"
                 class="form-control"
@@ -671,13 +634,13 @@
                 name="costo"
                 required
                 oninput="formatCostRealtime(this)"
-                placeholder=" "
+                placeholder="Ingresa el costo"
               >
-              <label for="costo">Costo por <span id="costoUnit">-</span></label>
             </div>
             
-            <!-- Precio de venta con placeholder flotante -->
-            <div class="form-floating" style="flex: 1;">
+            <!-- Precio de venta con label normal (no flotante) -->
+            <div class="mb-3" style="flex: 1;">
+              <label for="precio_venta" class="form-label mb-2">Precio de venta por <span id="precioUnit">-</span></label>
               <input
                 type="text"
                 class="form-control"
@@ -685,9 +648,8 @@
                 name="precio_venta"
                 required
                 oninput="formatCostRealtime(this)"
-                placeholder=" "
+                placeholder="Ingresa el precio de venta"
               >
-              <label for="precio_venta">Precio de venta por <span id="precioUnit">-</span></label>
             </div>
           </div>
         </div>
@@ -696,10 +658,10 @@
         <div class="step-container">
           <div class="step-number">4</div>
           
-          <!-- Categoría con placeholder flotante -->
-          <div class="form-floating mb-3">
-            <select class="form-select custom-select" name="categoria_existente" id="categoria_existente">
-              <option value="" disabled selected></option>
+          <div class="mb-3">
+            <label for="categoria_existente" class="form-label mb-2">Categoría</label>
+            <select class="form-select" name="categoria_existente" id="categoria_existente">
+              <option value="" disabled selected hidden>-SELECCIONA UNA CATEGORÍA-</option>
               <option value="abarrotes secos" data-custom-properties='{"color": "#FFA500"}'>Abarrotes secos</option>
               <option value="enlatados y conservas" data-custom-properties='{"color": "#DAA520"}'>Enlatados y conservas</option>
               <option value="botanas, dulces y snacks" data-custom-properties='{"color": "#FF69B4"}'>Botanas, dulces y snacks</option>
@@ -722,14 +684,13 @@
               <option value="productos gourmet" data-custom-properties='{"color": "#800080"}'>Productos gourmet</option>
               <option value="otros (miscelánea)" data-custom-properties='{"color": "#A9A9A9"}'>Otros (miscelánea)</option>
             </select>
-            <label for="categoria_existente">Categoría</label>
           </div>
 
           <!-- Toggle "¿TIENE FECHA DE CADUCIDAD?" -->
           <div style="margin-top: 1rem;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
               <label style="font-size: 0.9rem; color: #666;">¿Tiene fecha de caducidad?</label>
-              <button type="button" id="btnToggleCaducidad" class="toggle-button">NO</button>
+              <button type="button" id="btnToggleCaducidad" class="toggle-button">DESACTIVADO</button>
             </div>
             
             <!-- Opciones de Caducidad (mejorada) -->
@@ -1360,14 +1321,14 @@
 
   if (btnToggleCaducidad && caducidadOpciones && hiddenCaducidadEstado) {
     btnToggleCaducidad.addEventListener("click", () => {
-      if (btnToggleCaducidad.textContent === "SÍ") {
+      if (btnToggleCaducidad.textContent === "ACTIVADO") {
         // Desactivar
-        btnToggleCaducidad.textContent = "NO";
+        btnToggleCaducidad.textContent = "DESACTIVADO";
         caducidadOpciones.style.display = "none";
         hiddenCaducidadEstado.value = "DESACTIVADO";
       } else {
         // Activar
-        btnToggleCaducidad.textContent = "SÍ";
+        btnToggleCaducidad.textContent = "ACTIVADO";
         caducidadOpciones.style.display = "block";
         hiddenCaducidadEstado.value = "ACTIVADO";
       }
@@ -1423,38 +1384,51 @@
   const costoUnitSpan = document.getElementById('costoUnit');
   const precioUnitSpan = document.getElementById('precioUnit');
 
-  // Función para actualizar el dropdown de unidades según el tipo seleccionado
-  function actualizarUnidadesDropdown(tipoSeleccionado) {
+  // Función para filtrar opciones de unidad según el tipo seleccionado
+  function filtrarOpcionesUnidad(tipoSeleccionado) {
     if (!unidadMedidaSelect) return;
     
-    // Limpiar opciones actuales
-    unidadMedidaSelect.innerHTML = '';
+    // Mostrar solo las opciones correspondientes al tipo seleccionado
+    Array.from(unidadMedidaSelect.options).forEach(option => {
+      const dataType = option.getAttribute('data-type');
+      if (option.value === "") return; // Mantener opción default
+      
+      if (dataType === tipoSeleccionado) {
+        option.style.display = "";
+      } else {
+        option.style.display = "none";
+      }
+    });
     
-    // Añadir opción por defecto
-    const defaultOption = document.createElement('option');
-    defaultOption.value = '';
-    defaultOption.disabled = true;
-    defaultOption.selected = true;
-    unidadMedidaSelect.appendChild(defaultOption);
-    
-    // Si hay un tipo seleccionado y existen unidades para ese tipo
-    if (tipoSeleccionado && unidadesPorTipo[tipoSeleccionado]) {
-      // Añadir opciones según el tipo
-      unidadesPorTipo[tipoSeleccionado].forEach(unidad => {
-        const option = document.createElement('option');
-        option.value = unidad.value;
-        option.textContent = unidad.label;
-        option.setAttribute('data-abrev', unidad.abrev);
-        unidadMedidaSelect.appendChild(option);
-      });
+    // Seleccionar primera opción disponible según el tipo
+    let defaultValue = "";
+    if (tipoSeleccionado === 'peso') {
+      defaultValue = "KG"; // Kilogramos por defecto para PESO
+    } else if (tipoSeleccionado === 'pieza') {
+      defaultValue = "UNIDAD"; // Pieza por defecto para UNIDAD
+    } else if (tipoSeleccionado === 'volumen') {
+      defaultValue = "L"; // Litros por defecto para VOLUMEN
     }
+    
+    // Establecer opción por defecto
+    if (defaultValue) {
+      for (let i = 0; i < unidadMedidaSelect.options.length; i++) {
+        if (unidadMedidaSelect.options[i].value === defaultValue) {
+          unidadMedidaSelect.selectedIndex = i;
+          break;
+        }
+      }
+    }
+    
+    // Actualizar unidades en etiquetas
+    actualizarEtiquetasUnidad();
   }
 
   // Función para actualizar unidades mostradas en etiquetas
   function actualizarEtiquetasUnidad() {
     const selectedOption = unidadMedidaSelect.options[unidadMedidaSelect.selectedIndex];
     if (selectedOption && selectedOption.value) {
-      const abrev = selectedOption.getAttribute('data-abrev') || selectedOption.value;
+      const abrev = selectedOption.value; // Usar el valor como abreviatura
       
       // Actualizar etiquetas de unidad
       if (stockUnitSpan) stockUnitSpan.textContent = abrev;
@@ -1503,8 +1477,8 @@
         tipoMedidaInput.value = value;
       }
       
-      // Actualizar dropdown de unidades
-      actualizarUnidadesDropdown(value);
+      // Filtrar y actualizar dropdown de unidades según el tipo seleccionado
+      filtrarOpcionesUnidad(value);
     });
   });
 
@@ -1514,17 +1488,15 @@
   }
 
   /* ===========================================================
-   * 9) Inicialización de Choices.js para categorías
+   * 9) Inicialización de Choices.js para categorías - IGUAL QUE EN AGREGAR_PRODUCTO
    * ===========================================================
    */
   let categoryChoices;
   if (document.getElementById("categoria_existente")) {
-    // Inicializar una sola vez
+    // Inicializar una sola vez, EXACTAMENTE como en agregar_producto.html
     categoryChoices = new Choices("#categoria_existente", {
-      searchEnabled: true,
-      searchPlaceholderValue: "Buscar categoría...",
-      placeholder: true,
-      placeholderValue: "Selecciona una categoría...",
+      searchEnabled: false,
+      placeholder: false,
       callbackOnCreateTemplates: function(template) {
         return {
           item: (classNames, data) => {
@@ -1535,7 +1507,7 @@
                   data-item data-id="${data.id}" data-value="${data.value}"
                   ${data.active ? 'aria-selected="true"' : ''}
                   ${data.disabled ? 'aria-disabled="true"' : ''}>
-                  Selecciona una categoría...
+                  -SELECCIONA UNA CATEGORÍA-
                 </div>
               `);
             }
@@ -1563,7 +1535,7 @@
                   style="display:none;"
                   ${data.disabled ? 'data-choice-disabled aria-disabled="true"' : 'data-choice-selectable'}
                   data-id="${data.id}" data-value="${data.value}">
-                  Selecciona una categoría...
+                  -SELECCIONA UNA CATEGORÍA-
                 </div>
               `);
             }
