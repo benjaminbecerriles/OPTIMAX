@@ -5,147 +5,500 @@
 {% endblock %}
 
 {% block summary %}
-{# Si no se pasan los totales desde app.py, se calculan aquí #}
-{% set stock_total = 0 %}
-{% set ventas_totales = 0 %}
-{% for p in productos %}
-  {% set stock_total = stock_total + (p.stock or 0) %}
-  {% set ventas_totales = ventas_totales + (p.ventas_totales if p.ventas_totales is defined else 0) %}
-{% endfor %}
 <div class="text-muted small">
-  Mostrando {{ productos|length }} de {{ total_productos if total_productos is defined else 'XX' }} productos |
-  Stock total: {{ stock_total }} |
-  Ventas totales: {{ ventas_totales }}
+  Mostrando {{ productos|length }} de {{ total_productos if total_productos is defined else 'XX' }} productos | Stock total: {{ productos|sum(attribute='stock') }} | Valor inventario: ${{ (productos|sum(attribute='precio_venta') * productos|sum(attribute='stock'))|round(2) }}
 </div>
 {% endblock %}
 
 {% block content %}
-  <!-- Título grande y frase pequeña debajo -->
-  <h1 class="mt-2">Inventario</h1>
-  <p class="text-muted" style="margin-top:-8px;">
-    Administra aquí tus productos de forma eficiente
-  </p>
-
-  <!-- FILA DE BOTONES PRINCIPALES -->
-  <div class="mb-3 d-flex gap-2">
-    <!-- Botón "Agregar Nuevo" -> /nuevo-producto -->
-    <a href="{{ url_for('nuevo_producto') }}" class="btn btn-primary">Agregar Nuevo</a>
-
-    <!-- Botón "Reabastecer" -> /reabastecer (Ruta nueva) -->
-    <a href="{{ url_for('reabastecer_listado') }}" class="btn btn-secondary">
-      Reabastecer
-    </a>
-
-    <!-- Botón "Pendientes" -> /pendientes-aprobacion -->
-    <a href="{{ url_for('pendientes_aprobacion') }}" class="btn btn-warning">Pendientes</a>
+  <!-- Título y botones -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h1 class="mb-0">Inventario</h1>
+      <p class="text-muted">Administra aquí tus productos de forma eficiente</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('nuevo_producto') }}" class="btn btn-primary">Agregar Nuevo</a>
+      <a href="{{ url_for('reabastecer_listado') }}" class="btn btn-secondary">Reabastecer</a>
+      <a href="{{ url_for('pendientes_aprobacion') }}" class="btn btn-warning">Pendientes</a>
+    </div>
   </div>
 
-  <!-- FILTRO Aprobados/Pendientes/Todos + BÚSQUEDA -->
+  <!-- Barra de herramientas -->
   <div class="row mb-3">
-    <!-- Filtro de Aprobación -->
     <div class="col-md-4">
-      <label for="filtroAprobacion" class="form-label fw-bold">Filtrar por Aprobación:</label>
-      <select
-        id="filtroAprobacion"
-        name="filtroAprobacion"
-        class="form-select"
-        form="filtroForm"
-      >
-        <option value="aprobados" {% if filtro_aprobacion == 'aprobados' %}selected{% endif %}>Aprobados</option>
-        <option value="pendientes" {% if filtro_aprobacion == 'pendientes' %}selected{% endif %}>Pendientes</option>
-        <option value="todos" {% if filtro_aprobacion == 'todos' %}selected{% endif %}>Todos</option>
+      <div class="input-group">
+        <span class="input-group-text"><i class="bi bi-search"></i></span>
+        <input type="text" id="searchInput" class="form-control" placeholder="Buscar por nombre, SKU o marca..." value="{{ termino_busqueda if termino_busqueda else '' }}">
+      </div>
+    </div>
+    <div class="col-md-3">
+      <select id="filtroCategoria" class="form-select">
+        <option value="">Todas las categorías</option>
+        <!-- Aquí irían las categorías dinámicas -->
       </select>
     </div>
-
-    <!-- Barra de Búsqueda -->
-    <div class="col-md-8 d-flex align-items-end">
-      <form
-        id="filtroForm"
-        method="GET"
-        action="{{ url_for('ver_productos') }}"
-        class="w-100"
-      >
-        <div class="input-group">
-          <input
-            type="text"
-            name="q"
-            class="form-control"
-            placeholder="Buscar por nombre, categoría, código..."
-            value="{{ termino_busqueda if termino_busqueda else '' }}"
-          >
-          <button class="btn btn-outline-secondary" type="submit">
-            Buscar
-          </button>
-        </div>
-      </form>
+    <div class="col-md-5 d-flex justify-content-end gap-2">
+      <div class="dropdown">
+        <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownColumnas" data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="bi bi-columns"></i> Columnas
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="dropdownColumnas">
+          <li><a class="dropdown-item" href="#"><input type="checkbox" checked> SKU</a></li>
+          <li><a class="dropdown-item" href="#"><input type="checkbox" checked> Categoría</a></li>
+          <li><a class="dropdown-item" href="#"><input type="checkbox" checked> Stock</a></li>
+          <li><a class="dropdown-item" href="#"><input type="checkbox" checked> Precio</a></li>
+        </ul>
+      </div>
+      <button class="btn btn-outline-secondary">
+        <i class="bi bi-download"></i> Exportar Excel
+      </button>
+      <div class="dropdown">
+        <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownAcciones" data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="bi bi-gear"></i> Acciones masivas
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="dropdownAcciones">
+          <li><a class="dropdown-item" href="#">Cambiar categoría</a></li>
+          <li><a class="dropdown-item" href="#">Modificar precios</a></li>
+          <li><a class="dropdown-item" href="#">Cambiar visibilidad</a></li>
+          <li><a class="dropdown-item" href="#">Marcar como favoritos</a></li>
+        </ul>
+      </div>
     </div>
   </div>
 
-  <!-- TABLA PRINCIPAL DE PRODUCTOS -->
+  <!-- Estilos para la tabla y componentes -->
+  <style>
+    /* Estilos para la miniatura del producto */
+    .product-thumb {
+      width: 60px;
+      height: 60px;
+      object-fit: contain;
+      border: 1px solid #dee2e6;
+      border-radius: 4px;
+    }
+    
+    /* Estilos para el chevron expandible */
+    .chevron {
+      cursor: pointer;
+      transition: transform 0.2s;
+      display: inline-block;
+      font-size: 16px;
+      width: 24px;
+      text-align: center;
+    }
+    
+    .chevron.expanded {
+      transform: rotate(90deg);
+    }
+    
+    /* Estilos para tooltip de categoría */
+    .category-tooltip {
+      position: relative;
+      display: inline-block;
+    }
+    
+    .category-tooltip .category-tooltip-text {
+      visibility: hidden;
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      border-radius: 6px;
+      padding: 5px 10px;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      opacity: 0;
+      transition: opacity 0.3s;
+      white-space: nowrap;
+      font-weight: 500;
+      font-size: 14px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+    
+    .category-tooltip .category-tooltip-text::after {
+      content: "";
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      margin-left: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: #333 transparent transparent transparent;
+    }
+    
+    .category-tooltip:hover .category-tooltip-text {
+      visibility: visible;
+      opacity: 1;
+    }
+    
+    /* Estilos para expandir detalle */
+    .row-detail {
+      display: none;
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-top: 1px solid #dee2e6;
+    }
+    
+    /* Menú de acciones */
+    .actions-menu {
+      position: relative;
+      display: inline-block;
+    }
+    
+    .actions-dot {
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 18px;
+    }
+    
+    .actions-dropdown {
+      display: none;
+      position: absolute;
+      right: 0;
+      background-color: white;
+      min-width: 180px;
+      border: 1px solid #dee2e6;
+      border-radius: 4px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      z-index: 1;
+    }
+    
+    .actions-dropdown a {
+      color: black;
+      padding: 8px 12px;
+      text-decoration: none;
+      display: block;
+      font-size: 14px;
+    }
+    
+    .actions-dropdown a:hover {
+      background-color: #f1f1f1;
+    }
+    
+    /* Estilos para pestañas en detalle expandido */
+    .nav-tabs .nav-link {
+      font-size: 0.85rem;
+      padding: 0.4rem 0.8rem;
+    }
+    
+    /* Estilos para tablas internas */
+    .inner-table {
+      font-size: 0.9rem;
+    }
+    
+    .inner-table th, .inner-table td {
+      padding: 0.4rem;
+    }
+    
+    /* Estilos para metadatos */
+    .metadata-item {
+      display: inline-block;
+      margin-right: 20px;
+      font-size: 0.9rem;
+    }
+    
+    .metadata-label {
+      font-weight: 500;
+      color: #6c757d;
+    }
+    
+    /* Iconos para favorito y visibilidad */
+    .icon-fav, .icon-vis {
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+    }
+    
+    /* Separación entre nombre y marca */
+    .product-name {
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+    
+    .product-brand {
+      font-size: 0.85rem;
+      color: #6c757d;
+    }
+    
+    /* Separación entre columnas */
+    .table-column-separated th,
+    .table-column-separated td {
+      border-right: 1px solid #dee2e6;
+      padding-left: 12px;
+      padding-right: 12px;
+    }
+    
+    .table-column-separated th:last-child,
+    .table-column-separated td:last-child {
+      border-right: none;
+    }
+    
+    /* Filas zebra estrictas - controladas con clases explícitas */
+    .row-white {
+      background-color: #ffffff !important;
+    }
+    
+    .row-gray {
+      background-color: #f8f9fa !important;
+    }
+    
+    /* Detalle siempre con fondo claro */
+    .detail-row {
+      background-color: #f8f9fa !important;
+    }
+  </style>
+
+  <!-- Tabla principal con filas expandibles -->
   <div class="table-responsive">
-    <table class="table table-striped align-middle">
-      <thead>
+    <table class="table align-middle border-top table-column-separated" id="productsTable">
+      <thead class="table-light">
         <tr>
-          <th>ID</th>
-          <th>Foto</th>
-          <th>Nombre</th>
-          <th>Stock</th>
-          <th>Costo</th>
-          <th>Precio de Venta</th>
-          <th>Ganancia</th>
-          <th>Categoría</th>
-          <th>Código Barras</th>
-          <th># Ventas Totales</th>
-          <th># Ventas Este Mes</th>
-          <th>Acciones</th>
+          <th style="width: 30px;" class="text-center"></th>
+          <th style="width: 60px;" class="text-center">FOTO</th>
+          <th style="width: 130px;" class="text-center">SKU</th>
+          <th class="text-center">NOMBRE</th>
+          <th class="text-center">MARCA</th>
+          <th style="width: 50px;" class="text-center">CAT</th>
+          <th style="width: 90px;" class="text-center">STOCK</th>
+          <th style="width: 90px;" class="text-center">PRECIO</th>
+          <th style="width: 40px;" class="text-center">MENÚ</th>
+          <th style="width: 30px;" class="text-center">FAV</th>
+          <th style="width: 30px;" class="text-center">VIS</th>
         </tr>
       </thead>
       <tbody>
         {% for p in productos %}
-        <tr>
-          <td>{{ p.id }}</td>
-          <td>
+        <tr class="product-row {% if loop.index0 % 2 == 0 %}row-white{% else %}row-gray{% endif %}" data-id="{{ p.id }}">
+          <td class="text-center">
+            <span class="chevron" onclick="toggleDetail({{ p.id }})">&#9654;</span>
+          </td>
+          <td class="text-center">
             {% if p.foto %}
-              <img
-                src="{{ url_for('static', filename='uploads/' ~ p.foto) }}"
-                alt="Foto de {{ p.nombre }}"
-                style="width: 50px; height: auto;"
-              >
+            <img src="{{ url_for('static', filename='uploads/' ~ p.foto) }}" alt="Foto" 
+                 class="product-thumb">
             {% else %}
-              <span class="text-muted">Sin Foto</span>
+            <div class="bg-light rounded product-thumb" style="display: inline-block;"></div>
             {% endif %}
           </td>
-          <td>{{ p.nombre }}</td>
-          <td>{{ p.stock }}</td>
-          <td>{{ p.costo if p.costo is not none else 0.0 }}</td>
-          <td>{{ p.precio_venta if p.precio_venta is not none else 0.0 }}</td>
-          <td>{{ ((p.precio_venta or 0) - (p.costo or 0)) | round(2) }}</td>
-          <td>{{ p.categoria if p.categoria else "N/A" }}</td>
-          <td>
-            {% if p.codigo_barras_externo %}
-              {{ p.codigo_barras_externo }}
-            {% elif p.codigo_interno %}
-              {{ p.codigo_interno }}
+          <td class="text-center">
+            <span style="font-family: monospace; font-size: 0.9rem; font-weight: 500;">
+              {% if p.codigo_barras_externo %}
+                {{ p.codigo_barras_externo }}
+              {% else %}
+                SKU-{{ '%05d' % p.id }}
+              {% endif %}
+            </span>
+          </td>
+          <td class="text-center">
+            <div style="line-height: 1.2;" class="product-name">
+              {{ p.nombre }}
+            </div>
+          </td>
+          <td class="text-center">
+            {% if p.marca %}
+              {{ p.marca }}
             {% else %}
-              <span class="text-muted">Sin Código</span>
+              <span class="text-muted">No definida</span>
             {% endif %}
           </td>
-          <td>{{ p.ventas_totales if p.ventas_totales is defined else 0 }}</td>
-          <td>{{ p.ventas_mes if p.ventas_mes is defined else 0 }}</td>
-          <td>
-            <a
-              href="{{ url_for('editar_producto', prod_id=p.id) }}"
-              class="btn btn-sm btn-outline-info"
-            >
-              Editar
-            </a>
-            <a
-              href="{{ url_for('eliminar_producto', prod_id=p.id) }}"
-              class="btn btn-sm btn-outline-danger"
-              onclick="return confirm('¿Estás seguro de que deseas eliminar este producto? Esta acción no se puede deshacer.');"
-            >
-              Eliminar
-            </a>
+          <td class="text-center">
+            <!-- Categoría con círculo de color y tooltip -->
+            {% set cat_color = p.categoria_color|default('#CCCCCC') %}
+            {% if p.categoria == 'abarrotes secos' %}
+              {% set cat_color = '#FFA500' %}
+            {% elif p.categoria == 'enlatados y conservas' %}
+              {% set cat_color = '#DAA520' %}
+            {% elif p.categoria == 'botanas, dulces y snacks' %}
+              {% set cat_color = '#FF69B4' %}
+            {% elif p.categoria == 'bebidas no alcohólicas' %}
+              {% set cat_color = '#1E90FF' %}
+            {% elif p.categoria == 'bebidas alcohólicas' %}
+              {% set cat_color = '#800080' %}
+            {% elif p.categoria == 'panadería y repostería' %}
+              {% set cat_color = '#D2B48C' %}
+            {% elif p.categoria == 'lácteos y huevos' %}
+              {% set cat_color = '#F5DEB3' %}
+            {% elif p.categoria == 'carnes frías y embutidos' %}
+              {% set cat_color = '#B22222' %}
+            {% elif p.categoria == 'congelados y refrigerados' %}
+              {% set cat_color = '#00CED1' %}
+            {% elif p.categoria == 'frutas y verduras frescas' %}
+              {% set cat_color = '#32CD32' %}
+            {% elif p.categoria == 'productos de limpieza y hogar' %}
+              {% set cat_color = '#87CEFA' %}
+            {% elif p.categoria == 'cuidado personal e higiene' %}
+              {% set cat_color = '#FFC0CB' %}
+            {% elif p.categoria == 'medicamentos de mostrador (otc)' %}
+              {% set cat_color = '#FF6347' %}
+            {% elif p.categoria == 'productos para bebés' %}
+              {% set cat_color = '#FFB6C1' %}
+            {% elif p.categoria == 'productos para mascotas' %}
+              {% set cat_color = '#8FBC8F' %}
+            {% elif p.categoria == 'artículos de papelería' %}
+              {% set cat_color = '#9370DB' %}
+            {% elif p.categoria == 'ferretería básica' %}
+              {% set cat_color = '#708090' %}
+            {% elif p.categoria == 'otros (miscelánea)' %}
+              {% set cat_color = '#A9A9A9' %}
+            {% endif %}
+
+            <div class="category-tooltip">
+              <span class="d-inline-block rounded-circle" 
+                    style="width:14px; height:14px; background-color:{{ cat_color }}; border: 1px solid rgba(0,0,0,0.1);">
+              </span>
+              <span class="category-tooltip-text">{{ p.categoria|default('Sin categoría')|title }}</span>
+            </div>
+          </td>
+          <td class="text-center fw-medium">
+            {% if p.stock < p.alerta_stock|default(5) and p.stock > 0 %}
+              <span class="text-warning">{{ p.stock }} piezas</span>
+            {% elif p.stock <= 0 %}
+              <span class="text-danger">{{ p.stock }} piezas</span>
+            {% else %}
+              {{ p.stock }} piezas
+            {% endif %}
+          </td>
+          <td class="text-center fw-medium">$ {{ p.precio_venta|default(0)|round(2) }}</td>
+          <td class="text-center">
+            <div class="actions-menu">
+              <span class="actions-dot" onclick="toggleActionsMenu(event, this)">⋯</span>
+              <div class="actions-dropdown">
+                <a href="#" onclick="addStock({{ p.id }})">Añadir existencias</a>
+                <a href="#" onclick="changePrice({{ p.id }})">Cambiar precio</a>
+                <a href="#" onclick="changeCost({{ p.id }})">Cambiar costo</a>
+                <a href="{{ url_for('editar_producto', prod_id=p.id) }}">Editar producto</a>
+                <a href="#" onclick="toggleVisibility({{ p.id }})">{% if p.esta_a_la_venta %}Ocultar producto{% else %}Mostrar producto{% endif %}</a>
+                <a href="#" onclick="toggleFavorite({{ p.id }})">{% if p.es_favorito %}Quitar de favoritos{% else %}Marcar como favorito{% endif %}</a>
+                <a href="#" onclick="setLocation({{ p.id }})">Definir ubicación</a>
+                <a href="#" onclick="printLabels({{ p.id }})">Imprimir etiquetas</a>
+                <a href="#" onclick="confirmDelete({{ p.id }}, '{{ p.nombre }}')">Eliminar producto</a>
+              </div>
+            </div>
+          </td>
+          <td class="text-center">
+            <span class="fav-toggle" data-id="{{ p.id }}" data-status="{{ p.es_favorito|default(false) }}">
+              {% if p.es_favorito %}
+                <span class="heart-icon active" style="font-size: 20px; color: red; cursor: pointer;">&#9829;</span>
+              {% else %}
+                <span class="heart-icon" style="font-size: 20px; color: gray; cursor: pointer;">&#9825;</span>
+              {% endif %}
+            </span>
+          </td>
+          <td class="text-center">
+            <span class="vis-toggle" data-id="{{ p.id }}" data-status="{{ p.esta_a_la_venta|default(true) }}">
+              {% if p.esta_a_la_venta %}
+                <img src="{{ url_for('static', filename='img/1.png') }}" class="venta-icon" style="width:24px; cursor:pointer;">
+              {% else %}
+                <img src="{{ url_for('static', filename='img/2.png') }}" class="venta-icon" style="width:24px; cursor:pointer;">
+              {% endif %}
+            </span>
+          </td>
+        </tr>
+        <!-- Detalle expandible -->
+        <tr id="detail-row-{{ p.id }}" class="d-none detail-row">
+          <td colspan="11" class="p-0">
+            <div class="row-detail p-3">
+              <!-- Tabs de información adicional -->
+              <ul class="nav nav-tabs" id="detail-tabs-{{ p.id }}" role="tablist">
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link active" id="lotes-tab-{{ p.id }}" data-bs-toggle="tab" data-bs-target="#lotes-content-{{ p.id }}" type="button" role="tab" aria-controls="lotes-content-{{ p.id }}" aria-selected="true">Lotes y Caducidad</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="historico-tab-{{ p.id }}" data-bs-toggle="tab" data-bs-target="#historico-content-{{ p.id }}" type="button" role="tab" aria-controls="historico-content-{{ p.id }}" aria-selected="false">Histórico de Costos</button>
+                </li>
+              </ul>
+              
+              <!-- Contenido de las tabs -->
+              <div class="tab-content mt-3" id="detail-content-{{ p.id }}">
+                <!-- Tab Lotes y Caducidad -->
+                <div class="tab-pane fade show active" id="lotes-content-{{ p.id }}" role="tabpanel" aria-labelledby="lotes-tab-{{ p.id }}">
+                  <div class="table-responsive">
+                    <table class="table table-sm inner-table">
+                      <thead>
+                        <tr>
+                          <th>Lote</th>
+                          <th>Caduca</th>
+                          <th>Stock</th>
+                          <th>Costo</th>
+                          <th>Entrada</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <!-- Ejemplo de lotes - En producción se debería generar dinámicamente -->
+                        <tr>
+                          <td>#1</td>
+                          <td>{% if p.has_caducidad %}15-Jun-25{% else %}N/A{% endif %}</td>
+                          <td>{{ (p.stock / 2)|round|int if p.stock > 1 else p.stock }} piezas</td>
+                          <td>$ {{ p.costo|default(0)|round(2) }}</td>
+                          <td>02-Mar-25</td>
+                        </tr>
+                        {% if p.stock > 1 %}
+                        <tr>
+                          <td>#2</td>
+                          <td>{% if p.has_caducidad %}30-Jul-25{% else %}N/A{% endif %}</td>
+                          <td>{{ (p.stock / 2)|round|int }} piezas</td>
+                          <td>$ {{ (p.costo * 1.05)|default(0)|round(2) }}</td>
+                          <td>28-Mar-25</td>
+                        </tr>
+                        {% endif %}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                
+                <!-- Tab Histórico de Costos -->
+                <div class="tab-pane fade" id="historico-content-{{ p.id }}" role="tabpanel" aria-labelledby="historico-tab-{{ p.id }}">
+                  <div class="table-responsive">
+                    <table class="table table-sm inner-table">
+                      <thead>
+                        <tr>
+                          <th>Fecha</th>
+                          <th>Proveedor</th>
+                          <th>Costo</th>
+                          <th>Cantidad</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <!-- Ejemplo de histórico - En producción se debería generar dinámicamente -->
+                        <tr>
+                          <td>02-Mar-25</td>
+                          <td>{{ p.proveedor|default('No definido') }}</td>
+                          <td>$ {{ p.costo|default(0)|round(2) }}</td>
+                          <td>{{ (p.stock / 2)|round|int if p.stock > 1 else p.stock }} piezas</td>
+                        </tr>
+                        {% if p.stock > 1 %}
+                        <tr>
+                          <td>28-Mar-25</td>
+                          <td>{{ p.proveedor|default('No definido') }}</td>
+                          <td>$ {{ (p.costo * 1.05)|default(0)|round(2) }}</td>
+                          <td>{{ (p.stock / 2)|round|int }} piezas</td>
+                        </tr>
+                        {% endif %}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Metadatos rápidos -->
+              <div class="mt-3 pt-2 border-top">
+                <div class="metadata-item">
+                  <span class="metadata-label">Proveedor:</span> 
+                  <span>{{ p.proveedor|default('No definido') }}</span>
+                </div>
+                <div class="metadata-item">
+                  <span class="metadata-label">Ubicación:</span> 
+                  <span>{{ p.ubicacion|default('No definida') }}</span>
+                </div>
+                <div class="metadata-item">
+                  <span class="metadata-label">Unidad:</span> 
+                  <span>piezas</span>
+                </div>
+              </div>
+            </div>
           </td>
         </tr>
         {% endfor %}
@@ -155,15 +508,212 @@
 
   <!-- Mensaje si no hay productos -->
   {% if productos|length == 0 %}
-    <div class="alert alert-info">
-      No hay productos registrados aún.
-    </div>
+  <div class="alert alert-info">
+    No hay productos que coincidan con los criterios seleccionados.
+  </div>
   {% endif %}
 
-  <!-- BOTÓN DE EXPORTAR (Abajo a la Derecha) -->
-  <div class="text-end mt-3">
-    <a href="#" class="btn btn-outline-dark">
-      Exportar
-    </a>
+  <!-- Modal de confirmación para eliminar -->
+  <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Confirmar eliminación</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>¿Estás seguro de que deseas eliminar el producto "<span id="deleteProductName"></span>"?</p>
+          <p class="text-danger">Esta acción no se puede deshacer.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <a href="#" id="confirmDelete" class="btn btn-danger">Eliminar</a>
+        </div>
+      </div>
+    </div>
   </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Asegurarse de que Bootstrap Icons esté incluido
+    if (!document.querySelector('link[href*="bootstrap-icons"]')) {
+      const linkElement = document.createElement('link');
+      linkElement.rel = 'stylesheet';
+      linkElement.href = 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css';
+      document.head.appendChild(linkElement);
+    }
+    
+    // Inicializar los tooltips de Bootstrap
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    // Aplicar rayado zebra explícitamente - esto es redundante pero asegura que se aplique
+    const rows = document.querySelectorAll('.product-row');
+    rows.forEach((row, index) => {
+      if (index % 2 === 0) {
+        row.classList.add('row-white');
+        row.classList.remove('row-gray');
+      } else {
+        row.classList.add('row-gray');
+        row.classList.remove('row-white');
+      }
+    });
+    
+    // Toggle para Favoritos
+    document.querySelectorAll('.fav-toggle').forEach(function(toggle) {
+      toggle.addEventListener('click', function() {
+        const id = this.getAttribute('data-id');
+        const heartIcon = this.querySelector('.heart-icon');
+        const currentStatus = heartIcon.classList.contains('active');
+        
+        // Toggle visual
+        if (currentStatus) {
+          heartIcon.classList.remove('active');
+          heartIcon.style.color = 'gray';
+          heartIcon.innerHTML = '&#9825;';
+        } else {
+          heartIcon.classList.add('active');
+          heartIcon.style.color = 'red';
+          heartIcon.innerHTML = '&#9829;';
+        }
+        
+        // AJAX para actualizar en la base de datos
+        fetch('/api/toggle-favorito/' + id, {
+          method: 'POST'
+        }).catch(error => {
+          console.error('Error:', error);
+          // Revertir cambio visual si hay error
+          if (currentStatus) {
+            heartIcon.classList.add('active');
+            heartIcon.style.color = 'red';
+            heartIcon.innerHTML = '&#9829;';
+          } else {
+            heartIcon.classList.remove('active');
+            heartIcon.style.color = 'gray';
+            heartIcon.innerHTML = '&#9825;';
+          }
+        });
+      });
+    });
+    
+    // Toggle para Visibilidad
+    document.querySelectorAll('.vis-toggle').forEach(function(toggle) {
+      toggle.addEventListener('click', function() {
+        const id = this.getAttribute('data-id');
+        const ventaIcon = this.querySelector('.venta-icon');
+        const currentStatus = this.getAttribute('data-status') === 'true';
+        
+        // Toggle visual
+        if (currentStatus) {
+          ventaIcon.src = "{{ url_for('static', filename='img/2.png') }}";
+          this.setAttribute('data-status', 'false');
+        } else {
+          ventaIcon.src = "{{ url_for('static', filename='img/1.png') }}";
+          this.setAttribute('data-status', 'true');
+        }
+        
+        // AJAX para actualizar en la base de datos
+        fetch('/api/toggle-visibilidad/' + id, {
+          method: 'POST'
+        }).catch(error => {
+          console.error('Error:', error);
+          // Revertir cambio visual si hay error
+          if (currentStatus) {
+            ventaIcon.src = "{{ url_for('static', filename='img/1.png') }}";
+            this.setAttribute('data-status', 'true');
+          } else {
+            ventaIcon.src = "{{ url_for('static', filename='img/2.png') }}";
+            this.setAttribute('data-status', 'false');
+          }
+        });
+      });
+    });
+    
+    // Cerrar todos los menús al hacer clic en cualquier lugar
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.actions-dot') && !e.target.closest('.actions-dropdown')) {
+        document.querySelectorAll('.actions-dropdown').forEach(function(menu) {
+          menu.style.display = 'none';
+        });
+      }
+    });
+    
+    // Modal de confirmación
+    window.deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+  });
+  
+  // Función para expandir/colapsar el detalle de la fila
+  function toggleDetail(id) {
+    const detailRow = document.getElementById(`detail-row-${id}`);
+    const chevron = document.querySelector(`.product-row[data-id="${id}"] .chevron`);
+    
+    if (detailRow.classList.contains('d-none')) {
+      detailRow.classList.remove('d-none');
+      chevron.textContent = '▼';
+      chevron.classList.add('expanded');
+    } else {
+      detailRow.classList.add('d-none');
+      chevron.textContent = '▶';
+      chevron.classList.remove('expanded');
+    }
+  }
+  
+  // Función para mostrar/ocultar el menú de acciones
+  function toggleActionsMenu(event, dot) {
+    event.stopPropagation(); // Prevenir propagación
+    
+    const dropdown = dot.nextElementSibling;
+    const isVisible = dropdown.style.display === 'block';
+    
+    // Cerrar todos los menús abiertos primero
+    document.querySelectorAll('.actions-dropdown').forEach(menu => {
+      menu.style.display = 'none';
+    });
+    
+    // Abrir/cerrar el menú actual
+    dropdown.style.display = isVisible ? 'none' : 'block';
+  }
+  
+  // Funciones para acciones del menú
+  function confirmDelete(id, name) {
+    document.getElementById('deleteProductName').textContent = name;
+    document.getElementById('confirmDelete').href = "/eliminar-producto/" + id;
+    window.deleteModal.show();
+  }
+  
+  function toggleFavorite(id) {
+    const toggle = document.querySelector(`.fav-toggle[data-id="${id}"]`);
+    toggle.click();
+  }
+  
+  function toggleVisibility(id) {
+    const toggle = document.querySelector(`.vis-toggle[data-id="${id}"]`);
+    toggle.click();
+  }
+  
+  // Estas funciones necesitarán implementación adicional en producción
+  function addStock(id) {
+    alert("Función pendiente: Añadir existencias al producto " + id);
+  }
+  
+  function changePrice(id) {
+    alert("Función pendiente: Cambiar precio del producto " + id);
+  }
+  
+  function changeCost(id) {
+    alert("Función pendiente: Cambiar costo del producto " + id);
+  }
+  
+  function setLocation(id) {
+    alert("Función pendiente: Definir ubicación del producto " + id);
+  }
+  
+  function printLabels(id) {
+    alert("Función pendiente: Imprimir etiquetas para el producto " + id);
+  }
+</script>
 {% endblock %}

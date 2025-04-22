@@ -9,21 +9,19 @@
   /*******************************************************************************
    * ESTILOS GLOBALES Y DISEÑO BÁSICO
    ******************************************************************************/
-  /* 1) TODO EN BLANCO */
   html, body {
     margin: 0;
     padding: 0;
-    background-color: #fff; /* Fondo completamente blanco */
+    background-color: #fff;
     font-family: 'Open Sans', sans-serif;
   }
 
   .card-form {
-    /* Borde y fondo sutil */
-    background-color: #fff; /* Blanco también */
-    border-radius: 0;       /* Sin esquinas redondeadas */
-    box-shadow: none;       /* Sin sombra */
+    background-color: #fff;
+    border-radius: 0;
+    box-shadow: none;
     padding: 1.5rem;
-    margin: 0;              /* Sin margen extra */
+    margin: 0;
   }
 
   /* 2) Mantener DOS columnas: Izquierda (foto) y Derecha (form) */
@@ -33,7 +31,6 @@
     gap: 1rem;
   }
   .col-left {
-    /* Ancho para la foto grande */
     flex: 0 0 auto;
     width: 570px;
     border-right: 1px solid #ddd;
@@ -65,7 +62,7 @@
     color: #999;
     font-weight: 600;
     position: relative;
-    background-color: #fff; /* Blanco */
+    background-color: #fff;
   }
   .foto-placeholder img {
     max-width: 100%;
@@ -137,30 +134,41 @@
   .form-group {
     margin-bottom: 1rem;
     position: relative;
-    padding-top: 1.2rem; /* espacio para la etiqueta flotante */
-  }
-  ::placeholder {
-    text-transform: uppercase;
-    font-weight: normal;
-    color: #888;
-  }
-  .form-control {
-    text-transform: uppercase;
-    font-weight: bold;
-    padding: 0.5rem;
-    line-height: 1.5;
-    width: 100%;
-    border: 1px solid #ccc;
-    border-radius: 4px;
   }
 
-  .floating-label {
+  .form-control {
+    padding: 0.75rem;
+    font-size: 1rem;
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-weight: 600;
+  }
+
+  /* Paso a paso - NUEVO ESTILO como en agregar-a-granel */
+  .step-container {
+    background-color: #fff;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    padding: 1.2rem;
+    margin-bottom: 1rem;
+    position: relative;
+  }
+
+  .step-number {
     position: absolute;
-    top: 0;
-    left: 0;
-    font-size: 0.9rem;
-    color: #888;
-    text-transform: capitalize;
+    top: -15px;
+    left: 15px;
+    background-color: #e52e2e;
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 16px;
   }
 
   /* Favorito & Venta */
@@ -181,83 +189,6 @@
     object-fit: contain;
   }
 
-  /* Recuadro Morado "¿Este es tu producto?" */
-  #scanFoundContainer {
-    display: none; 
-    background-color: #D48AD4;
-    color: #fff;
-    padding: 1rem;
-    border-radius: 6px;
-    margin-bottom: 1rem;
-  }
-  .scanFoundInner {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 1rem;
-  }
-  .scanFoundImageBox {
-    width: 100px;
-    height: 100px;
-    background-color: #fff;
-    border-radius: 6px;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .scanFoundImageBox img {
-    max-width: 100%;
-    max-height: 100%;
-    display: block;
-  }
-  .scanFoundText {
-    flex: 1;
-  }
-  .scanFoundTitle {
-    font-weight: bold;
-    font-size: 1.1rem;
-    margin-bottom: 0.5rem;
-    text-transform: uppercase;
-  }
-  .scanFoundName {
-    font-weight: bold;
-    font-size: 1rem;
-    margin-bottom: 0.2rem;
-  }
-  .scanFoundCode {
-    font-size: 0.95rem;
-  }
-  .scanFoundRow {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-  .scanFoundButtons {
-    margin-top: 1rem;
-    display: flex;
-    gap: 1rem;
-    justify-content: flex-end;
-  }
-  .btn-scanYes {
-    background-color: #2ecc71;
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    padding: 0.5rem 1rem;
-    cursor: pointer;
-    font-weight: 600;
-  }
-  .btn-scanNo {
-    background-color: #e74c3c;
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    padding: 0.5rem 1rem;
-    cursor: pointer;
-    font-weight: 600;
-  }
-
   /* Toggle y Caducidad */
   .toggle-button {
     border: 1px solid #ccc;
@@ -274,40 +205,43 @@
     color: #333;
   }
 
+  /* Estilos mejorados para opciones de caducidad */
   .caducidad-options {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
-    max-width: 420px;
     margin-bottom: 1rem;
   }
-  .caducidad-row {
-    display: flex;
-    gap: 0.5rem;
-  }
+  
   .form-check {
+    margin-right: 5px;
+    margin-bottom: 5px;
     width: auto;
     border: none;
     text-align: left;
   }
+  
   .form-check-input {
     display: none;
   }
+  
   .form-check-label {
     display: inline-block;
     background-color: #fff;
     color: #333;
     border: 1px solid #ccc;
     border-radius: 6px;
-    padding: 0.25rem 0.6rem;
+    padding: 0.5rem 0.8rem;
     cursor: pointer;
     white-space: nowrap;
     font-size: 0.9rem;
     transition: background-color 0.3s, border-color 0.3s;
   }
+  
   .form-check-label:hover {
     background-color: #f2f2f2;
   }
+  
   .form-check.selected .form-check-label {
     background-color: #007BFF;
     border-color: #007BFF;
@@ -403,24 +337,40 @@
   /* Badge del código generado */
   .codigo-badge {
     display: inline-block;
-    background-color: #e8f4ff;
-    color: #0056b3;
+    background-color: #f8f9fa;
+    color: #333;
     padding: 0.5rem 1rem;
     border-radius: 4px;
     font-weight: 600;
-    margin-bottom: 1rem;
-    border: 1px dashed #0056b3;
+    margin-bottom: 0.5rem;
+    border: 1px dashed #ccc;
   }
   
-  /* Reducir espacio entre el nombre del producto y el código generado */
-  .codigo-info {
-    margin-bottom: 1rem;
+  /* NUEVOS ESTILOS PARA ETIQUETAS FLOTANTES */
+  .floating-label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: 0.85rem;
+    color: #888;
+    text-transform: capitalize;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   
-  /* Reducir el espacio entre nombre y código generado */
-  .codigo-container {
-    margin-top: 0.5rem;
-    margin-bottom: 1rem;
+  .form-group {
+    margin-bottom: 0.8rem;
+    position: relative;
+    padding-top: 1.2rem; /* espacio para la etiqueta flotante */
+  }
+  
+  ::placeholder {
+    text-transform: uppercase;
+    font-weight: normal;
+    color: #888;
+    font-size: 0.8rem;
   }
 </style>
 
@@ -475,226 +425,187 @@
           Agregar producto sin código de barras
         </h3>
 
-        <!-- Información del código de barras autogenerado -->
-        <div class="form-group">
-          <div class="codigo-badge" id="codigoGeneradoBadge" style="display: flex; align-items: center; justify-content: flex-start; padding: 0.75rem 1rem; margin-bottom: 0.75rem; font-size: 1rem;">
-            <span style="margin-right: 0.5rem; color: #333; font-weight: 500;">Tu nuevo código de barras es:</span>
-            <span style="font-family: monospace; font-weight: 700; letter-spacing: 0.5px;" id="codigoMostrado">
-              <!-- Código cargado por JS -->
-            </span>
-          </div>
-          <input type="hidden" id="codigo_barras_externo" name="codigo_barras_externo" value="">
-        </div>
-
-        <!-- IMPORTANTE: Para que el back sepa si es 'existente' (por default) -->
-        <input type="hidden" name="categoria_option" value="existente">
-        <!-- IMPORTANTE: Para saber si caducidad está activado o no -->
-        <input type="hidden" name="toggle_caducidad_estado" id="toggle_caducidad_estado" value="DESACTIVADO">
-
-        <!-- Nombre -->
-        <div class="form-group">
-          <input 
-            type="text"
-            class="form-control"
-            id="nombre"
-            name="nombre"
-            placeholder="NOMBRE DEL PRODUCTO"
-            required
-          >
-        </div>
-
-        <!-- Stock Inicial -->
-        <div class="form-group">
-          <input 
-            type="number"
-            class="form-control"
-            id="stock"
-            name="stock"
-            min="0"
-            placeholder="STOCK INICIAL"
-          >
-        </div>
-
-        <!-- Costo / Precio -->
-        <div class="d-flex gap-3" style="align-items: center; margin-top:1rem;">
-          <div class="form-group" style="flex:1;">
-            <input
-              type="text"
-              step="0.01"
-              class="form-control"
-              id="costo"
-              name="costo"
-              required
-              oninput="formatCostRealtime(this)"
-              placeholder="COSTO"
-            >
-          </div>
-          <div class="form-group" style="flex:1;">
-            <input
-              type="text"
-              step="0.01"
-              class="form-control"
-              id="precio_venta"
-              name="precio_venta"
-              required
-              oninput="formatCostRealtime(this)"
-              placeholder="PRECIO DE VENTA"
-            >
-          </div>
-        </div>
-
-        <!-- Marca -->
-        <div class="form-group" style="margin-top:1rem;">
-          <input
-            type="text"
-            class="form-control"
-            id="marca"
-            name="marca"
-            placeholder="MARCA"
-          >
-        </div>
-
-        <!-- Categoría (Choices.js) -->
-        <div class="form-group">
-          <select class="form-select" name="categoria_existente" id="categoria_existente">
-            <option value="" disabled selected hidden>-SELECCIONA UNA CATEGORÍA-</option>
-            <option value="abarrotes secos" data-custom-properties='{"color": "#FFA500"}'>Abarrotes secos</option>
-            <option value="enlatados y conservas" data-custom-properties='{"color": "#DAA520"}'>Enlatados y conservas</option>
-            <option value="botanas, dulces y snacks" data-custom-properties='{"color": "#FF69B4"}'>Botanas, dulces y snacks</option>
-            <option value="bebidas no alcohólicas" data-custom-properties='{"color": "#1E90FF"}'>Bebidas no alcohólicas</option>
-            <option value="bebidas alcohólicas" data-custom-properties='{"color": "#800080"}'>Bebidas alcohólicas</option>
-            <option value="panadería y repostería" data-custom-properties='{"color": "#D2B48C"}'>Panadería y repostería</option>
-            <option value="lácteos y huevos" data-custom-properties='{"color": "#F5DEB3"}'>Lácteos y huevos</option>
-            <option value="carnes frías y embutidos" data-custom-properties='{"color": "#B22222"}'>Carnes frías y embutidos</option>
-            <option value="congelados y refrigerados" data-custom-properties='{"color": "#00CED1"}'>Congelados y refrigerados</option>
-            <option value="frutas y verduras frescas" data-custom-properties='{"color": "#32CD32"}'>Frutas y verduras frescas</option>
-            <option value="productos de limpieza y hogar" data-custom-properties='{"color": "#87CEFA"}'>Productos de limpieza y hogar</option>
-            <option value="cuidado personal e higiene" data-custom-properties='{"color": "#FFC0CB"}'>Cuidado personal e higiene</option>
-            <option value="medicamentos de mostrador (otc)" data-custom-properties='{"color": "#FF6347"}'>Medicamentos de mostrador (OTC)</option>
-            <option value="productos para bebés" data-custom-properties='{"color": "#FFB6C1"}'>Productos para bebés</option>
-            <option value="productos para mascotas" data-custom-properties='{"color": "#8FBC8F"}'>Productos para mascotas</option>
-            <option value="artículos de papelería" data-custom-properties='{"color": "#9370DB"}'>Artículos de papelería</option>
-            <option value="ferretería básica" data-custom-properties='{"color": "#708090"}'>Ferretería básica</option>
-            <option value="otros (miscelánea)" data-custom-properties='{"color": "#A9A9A9"}'>Otros (miscelánea)</option>
-          </select>
-        </div>
-
-        <!-- Toggle "¿TIENE FECHA DE CADUCIDAD?" -->
-        <div class="d-flex align-items-center mb-3" style="margin-top:1rem; gap:0.5rem;">
-          <span class="fw-bold" style="margin:0;">¿TIENE FECHA DE CADUCIDAD?</span>
-          <button type="button" id="btnToggleCaducidad" class="toggle-button">DESACTIVADO</button>
-        </div>
-
-        <!-- Opciones de Caducidad -->
-        <div id="caducidadOpcionesContainer" style="display:none; margin-top:0.5rem;">
-          <p class="text-muted" style="margin-bottom:0.5rem;">
-            A partir de hoy, ¿en qué lapso aproximado caducan tus productos?
-          </p>
-          <div class="caducidad-options">
-            <!-- Fila 1 -->
-            <div class="caducidad-row">
-              <div class="form-check" data-id="1 día">
-                <input
-                  class="form-check-input"
-                  type="radio"
-                  name="caducidad_lapso"
-                  id="cad1dia"
-                  value="1 día"
-                >
-                <label class="form-check-label caducidad-label" for="cad1dia">1 DÍA</label>
-              </div>
-              <div class="form-check" data-id="3 días">
-                <input
-                  class="form-check-input"
-                  type="radio"
-                  name="caducidad_lapso"
-                  id="cad3dias"
-                  value="3 días"
-                >
-                <label class="form-check-label caducidad-label" for="cad3dias">3 DÍAS</label>
-              </div>
-              <div class="form-check" data-id="1 semana">
-                <input
-                  class="form-check-input"
-                  type="radio"
-                  name="caducidad_lapso"
-                  id="cad1sem"
-                  value="1 semana"
-                >
-                <label class="form-check-label caducidad-label" for="cad1sem">1 SEMANA</label>
-              </div>
-              <div class="form-check" data-id="2 semanas">
-                <input
-                  class="form-check-input"
-                  type="radio"
-                  name="caducidad_lapso"
-                  id="cad2sem"
-                  value="2 semanas"
-                >
-                <label class="form-check-label caducidad-label" for="cad2sem">2 SEMANAS</label>
-              </div>
-              <div class="form-check" data-id="1 mes">
-                <input
-                  class="form-check-input"
-                  type="radio"
-                  name="caducidad_lapso"
-                  id="cad1mes"
-                  value="1 mes"
-                >
-                <label class="form-check-label caducidad-label" for="cad1mes">1 MES</label>
-              </div>
+        <!-- PASO 1: INFORMACIÓN DEL CÓDIGO -->
+        <div class="step-container">
+          <div class="step-number">1</div>
+          
+          <!-- Información del código de barras autogenerado -->
+          <div class="form-group" style="margin-bottom: 0;">
+            <div class="codigo-badge" id="codigoGeneradoBadge" style="display: flex; align-items: center; justify-content: flex-start; padding: 0.5rem 0.8rem; margin-bottom: 0; font-size: 0.9rem;">
+              <span style="margin-right: 0.5rem; color: #333; font-weight: 500;">Tu nuevo código de barras es:</span>
+              <span style="font-family: monospace; font-weight: 700; letter-spacing: 0.5px;" id="codigoMostrado">
+                <!-- Código cargado por JS -->
+              </span>
             </div>
-            <!-- Fila 2 -->
-            <div class="caducidad-row">
-              <div class="form-check" data-id="3 meses">
-                <input
-                  class="form-check-input"
-                  type="radio"
-                  name="caducidad_lapso"
-                  id="cad3meses"
-                  value="3 meses"
-                >
-                <label class="form-check-label caducidad-label" for="cad3meses">3 MESES</label>
-              </div>
-              <div class="form-check" data-id="6 meses">
-                <input
-                  class="form-check-input"
-                  type="radio"
-                  name="caducidad_lapso"
-                  id="cad6meses"
-                  value="6 meses"
-                >
-                <label class="form-check-label caducidad-label" for="cad6meses">6 MESES</label>
-              </div>
-              <div class="form-check" data-id="1 año">
-                <input
-                  class="form-check-input"
-                  type="radio"
-                  name="caducidad_lapso"
-                  id="cad1ano"
-                  value="1 año"
-                >
-                <label class="form-check-label caducidad-label" for="cad1ano">1 AÑO</label>
-              </div>
-              <div class="form-check" data-id="2 años">
-                <input
-                  class="form-check-input"
-                  type="radio"
-                  name="caducidad_lapso"
-                  id="cad2anos"
-                  value="2 años"
-                >
-                <label class="form-check-label caducidad-label" for="cad2anos">2 AÑOS</label>
-              </div>
-              <div class="form-check" data-id="más de 3 años">
-                <input
-                  class="form-check-input"
-                  type="radio"
-                  name="caducidad_lapso"
-                  id="cad3anos"
-                  value="más de 3 años"
-                >
-                <label class="form-check-label caducidad-label" for="cad3anos">MÁS DE 3 AÑOS</label>
+            <input type="hidden" id="codigo_barras_externo" name="codigo_barras_externo" value="">
+          </div>
+        </div>
+
+        <!-- PASO 2: INFORMACIÓN BÁSICA -->
+        <div class="step-container">
+          <div class="step-number">2</div>
+
+          <!-- IMPORTANTE: Para que el back sepa si es 'existente' (por default) -->
+          <input type="hidden" name="categoria_option" value="existente">
+          <!-- IMPORTANTE: Para saber si caducidad está activado o no -->
+          <input type="hidden" name="toggle_caducidad_estado" id="toggle_caducidad_estado" value="DESACTIVADO">
+
+          <!-- Nombre -->
+          <div class="form-group">
+            <div class="floating-label" style="display: none;" id="nombreFloatingLabel">Nombre del producto</div>
+            <input 
+              type="text"
+              class="form-control"
+              id="nombre"
+              name="nombre"
+              placeholder="NOMBRE DEL PRODUCTO"
+              required
+            >
+          </div>
+
+          <!-- Marca -->
+          <div class="form-group" style="margin-bottom: 0;">
+            <div class="floating-label" style="display: none;" id="marcaFloatingLabel">Marca</div>
+            <input
+              type="text"
+              class="form-control"
+              id="marca"
+              name="marca"
+              placeholder="MARCA"
+            >
+          </div>
+        </div>
+
+        <!-- PASO 3: INVENTARIO Y PRECIOS -->
+        <div class="step-container">
+          <div class="step-number">3</div>
+
+          <!-- Stock Inicial -->
+          <div class="form-group">
+            <div class="floating-label" style="display: none;" id="stockFloatingLabel">Stock inicial</div>
+            <input 
+              type="number"
+              class="form-control"
+              id="stock"
+              name="stock"
+              min="0"
+              placeholder="STOCK INICIAL"
+            >
+          </div>
+
+          <!-- Costo / Precio -->
+          <div class="d-flex gap-3" style="align-items: center; margin-bottom: 0;">
+            <div class="form-group" style="flex:1; margin-bottom: 0;">
+              <div class="floating-label" style="display: none;" id="costoFloatingLabel">Costo</div>
+              <input
+                type="text"
+                step="0.01"
+                class="form-control"
+                id="costo"
+                name="costo"
+                required
+                oninput="formatCostRealtime(this)"
+                placeholder="COSTO"
+              >
+            </div>
+            <div class="form-group" style="flex:1; margin-bottom: 0;">
+              <div class="floating-label" style="display: none;" id="precio_ventaFloatingLabel">Precio de venta</div>
+              <input
+                type="text"
+                step="0.01"
+                class="form-control"
+                id="precio_venta"
+                name="precio_venta"
+                required
+                oninput="formatCostRealtime(this)"
+                placeholder="PRECIO DE VENTA"
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- PASO 4: CATEGORÍA Y CADUCIDAD -->
+        <div class="step-container">
+          <div class="step-number">4</div>
+
+          <!-- Categoría (Choices.js) -->
+          <div class="form-group">
+            <select class="form-select" name="categoria_existente" id="categoria_existente">
+              <option value="" disabled selected hidden>-SELECCIONA UNA CATEGORÍA-</option>
+              <option value="abarrotes secos" data-custom-properties='{"color": "#FFA500"}'>Abarrotes secos</option>
+              <option value="enlatados y conservas" data-custom-properties='{"color": "#DAA520"}'>Enlatados y conservas</option>
+              <option value="botanas, dulces y snacks" data-custom-properties='{"color": "#FF69B4"}'>Botanas, dulces y snacks</option>
+              <option value="bebidas no alcohólicas" data-custom-properties='{"color": "#1E90FF"}'>Bebidas no alcohólicas</option>
+              <option value="bebidas alcohólicas" data-custom-properties='{"color": "#800080"}'>Bebidas alcohólicas</option>
+              <option value="panadería y repostería" data-custom-properties='{"color": "#D2B48C"}'>Panadería y repostería</option>
+              <option value="lácteos y huevos" data-custom-properties='{"color": "#F5DEB3"}'>Lácteos y huevos</option>
+              <option value="carnes frías y embutidos" data-custom-properties='{"color": "#B22222"}'>Carnes frías y embutidos</option>
+              <option value="congelados y refrigerados" data-custom-properties='{"color": "#00CED1"}'>Congelados y refrigerados</option>
+              <option value="frutas y verduras frescas" data-custom-properties='{"color": "#32CD32"}'>Frutas y verduras frescas</option>
+              <option value="productos de limpieza y hogar" data-custom-properties='{"color": "#87CEFA"}'>Productos de limpieza y hogar</option>
+              <option value="cuidado personal e higiene" data-custom-properties='{"color": "#FFC0CB"}'>Cuidado personal e higiene</option>
+              <option value="medicamentos de mostrador (otc)" data-custom-properties='{"color": "#FF6347"}'>Medicamentos de mostrador (OTC)</option>
+              <option value="productos para bebés" data-custom-properties='{"color": "#FFB6C1"}'>Productos para bebés</option>
+              <option value="productos para mascotas" data-custom-properties='{"color": "#8FBC8F"}'>Productos para mascotas</option>
+              <option value="artículos de papelería" data-custom-properties='{"color": "#9370DB"}'>Artículos de papelería</option>
+              <option value="ferretería básica" data-custom-properties='{"color": "#708090"}'>Ferretería básica</option>
+              <option value="otros (miscelánea)" data-custom-properties='{"color": "#A9A9A9"}'>Otros (miscelánea)</option>
+            </select>
+          </div>
+
+          <!-- Toggle "¿TIENE FECHA DE CADUCIDAD?" -->
+          <div style="margin-top: 0.5rem; margin-bottom: 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+              <label style="font-size: 0.9rem; color: #666;">¿Tiene fecha de caducidad?</label>
+              <button type="button" id="btnToggleCaducidad" class="toggle-button">DESACTIVADO</button>
+            </div>
+            
+            <!-- Opciones de Caducidad -->
+            <div id="caducidadOpcionesContainer" style="display:none; margin-top:0.5rem;">
+              <p class="text-muted" style="margin-bottom:0.5rem; font-size: 0.85rem;">
+                A partir de hoy, ¿en qué lapso aproximado caducan tus productos?
+              </p>
+              <div class="caducidad-options">
+                <div class="form-check" data-id="1 día">
+                  <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad1dia" value="1 día">
+                  <label class="form-check-label" for="cad1dia">1 DÍA</label>
+                </div>
+                <div class="form-check" data-id="3 días">
+                  <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad3dias" value="3 días">
+                  <label class="form-check-label" for="cad3dias">3 DÍAS</label>
+                </div>
+                <div class="form-check" data-id="1 semana">
+                  <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad1sem" value="1 semana">
+                  <label class="form-check-label" for="cad1sem">1 SEMANA</label>
+                </div>
+                <div class="form-check" data-id="2 semanas">
+                  <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad2sem" value="2 semanas">
+                  <label class="form-check-label" for="cad2sem">2 SEMANAS</label>
+                </div>
+                <div class="form-check" data-id="1 mes">
+                  <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad1mes" value="1 mes">
+                  <label class="form-check-label" for="cad1mes">1 MES</label>
+                </div>
+                <div class="form-check" data-id="3 meses">
+                  <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad3meses" value="3 meses">
+                  <label class="form-check-label" for="cad3meses">3 MESES</label>
+                </div>
+                <div class="form-check" data-id="6 meses">
+                  <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad6meses" value="6 meses">
+                  <label class="form-check-label" for="cad6meses">6 MESES</label>
+                </div>
+                <div class="form-check" data-id="1 año">
+                  <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad1ano" value="1 año">
+                  <label class="form-check-label" for="cad1ano">1 AÑO</label>
+                </div>
+                <div class="form-check" data-id="2 años">
+                  <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad2anos" value="2 años">
+                  <label class="form-check-label" for="cad2anos">2 AÑOS</label>
+                </div>
+                <div class="form-check" data-id="más de 3 años">
+                  <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad3anos" value="más de 3 años">
+                  <label class="form-check-label" for="cad3anos">+3 AÑOS</label>
+                </div>
               </div>
             </div>
           </div>
@@ -705,7 +616,7 @@
     <!-- FIN row-form -->
 
     <!-- BOTONES GUARDAR / CANCELAR -->
-    <div class="text-end" style="margin-top:2rem; margin-bottom:0.5rem;">
+    <div class="text-end" style="margin-top:1.5rem; margin-bottom:0.5rem;">
       <button type="submit" id="submitBtn" class="btn-submit" style="margin-right:0.5rem;">GUARDAR</button>
       <a href="{{ url_for('ver_productos') }}" class="btn-cancel">CANCELAR</a>
     </div>
@@ -771,7 +682,7 @@
     
     // Inicializar etiquetas flotantes para campos específicos
     const inputs = document.querySelectorAll(
-      "#nombre, #stock, #costo, #precio_venta, #marca"
+      "#nombre, #marca, #stock, #costo, #precio_venta"
     );
     
     inputs.forEach(input => {
@@ -783,6 +694,73 @@
     
     // Inicializar eventos del menú de fotos
     bindPhotoEvents();
+
+    // Inicializar Choices.js para categorías
+    if (document.getElementById("categoria_existente")) {
+      new Choices("#categoria_existente", {
+        searchEnabled: false,
+        placeholder: false,
+        callbackOnCreateTemplates: function(template) {
+          return {
+            item: (classNames, data) => {
+              if (data.value === "") {
+                return template(`
+                  <div
+                    class="${classNames.item} ${classNames.itemSelectable}"
+                    data-item data-id="${data.id}" data-value="${data.value}"
+                    ${data.active ? 'aria-selected="true"' : ''}
+                    ${data.disabled ? 'aria-disabled="true"' : ''}>
+                    -SELECCIONA UNA CATEGORÍA-
+                  </div>
+                `);
+              }
+              let color = "#000000";
+              if (data.customProperties && data.customProperties.color) {
+                color = data.customProperties.color;
+              }
+              return template(`
+                <div
+                  class="${classNames.item} ${classNames.itemSelectable}"
+                  data-item data-id="${data.id}" data-value="${data.value}"
+                  ${data.active ? 'aria-selected="true"' : ''}
+                  ${data.disabled ? 'aria-disabled="true"' : ''}>
+                  <span style="display:inline-block; width:12px; height:12px; background-color:${color}; border-radius:50%; margin-right:6px;"></span>
+                  ${data.label}
+                </div>
+              `);
+            },
+            choice: (classNames, data) => {
+              if (data.value === "") {
+                return template(`
+                  <div
+                    class="${classNames.item} ${classNames.itemChoice}"
+                    data-choice
+                    style="display:none;"
+                    ${data.disabled ? 'data-choice-disabled aria-disabled="true"' : 'data-choice-selectable'}
+                    data-id="${data.id}" data-value="${data.value}">
+                    -SELECCIONA UNA CATEGORÍA-
+                  </div>
+                `);
+              }
+              let color = "#000000";
+              if (data.customProperties && data.customProperties.color) {
+                color = data.customProperties.color;
+              }
+              return template(`
+                <div
+                  class="${classNames.item} ${classNames.itemChoice}"
+                  data-choice
+                  ${data.disabled ? 'data-choice-disabled aria-disabled="true"' : 'data-choice-selectable'}
+                  data-id="${data.id}" data-value="${data.value}">
+                  <span style="display:inline-block; width:12px; height:12px; background-color:${color}; border-radius:50%; margin-right:6px;"></span>
+                  ${data.label}
+                </div>
+              `);
+            }
+          };
+        }
+      });
+    }
   });
 
   /* ===========================================================
@@ -915,11 +893,7 @@
         result = "$" + result;
       }
       input.value = result;
-      
-      // Posicionar cursor al final
-      setTimeout(() => {
-        input.setSelectionRange(input.value.length, input.value.length);
-      }, 0);
+      input.setSelectionRange(input.value.length, input.value.length);
     }
   }
 
@@ -927,27 +901,16 @@
    * 4) FLOATING LABELS
    * ===========================================================
    */
-  // Cache para etiquetas flotantes
-  const floatingLabels = new Map();
-  
   function updateFloatingLabel(input) {
-    if (!floatingLabels.has(input)) {
-      let container = input.parentElement;
-      let floatingLabel = container.querySelector(".floating-label");
-      
-      if (!floatingLabel) {
-        floatingLabel = document.createElement("div");
-        floatingLabel.className = "floating-label";
-        container.insertBefore(floatingLabel, input);
-      }
-      
-      floatingLabels.set(input, floatingLabel);
-    }
+    if (!input) return;
     
-    const floatingLabel = floatingLabels.get(input);
+    const floatingLabelId = input.id + 'FloatingLabel';
+    const floatingLabel = document.getElementById(floatingLabelId);
+    
+    if (!floatingLabel) return;
     
     if (input.value.trim() !== "") {
-      floatingLabel.textContent = input.getAttribute("placeholder");
+      floatingLabel.textContent = input.placeholder;
       floatingLabel.style.display = "block";
     } else {
       floatingLabel.style.display = "none";
@@ -1246,15 +1209,13 @@
 
   if (btnToggleCaducidad && caducidadOpciones && hiddenCaducidadEstado) {
     btnToggleCaducidad.addEventListener("click", () => {
-      if (btnToggleCaducidad.classList.contains("active")) {
+      if (btnToggleCaducidad.textContent === "ACTIVADO") {
         // Desactivar
-        btnToggleCaducidad.classList.remove("active");
         btnToggleCaducidad.textContent = "DESACTIVADO";
         caducidadOpciones.style.display = "none";
         hiddenCaducidadEstado.value = "DESACTIVADO";
       } else {
         // Activar
-        btnToggleCaducidad.classList.add("active");
         btnToggleCaducidad.textContent = "ACTIVADO";
         caducidadOpciones.style.display = "block";
         hiddenCaducidadEstado.value = "ACTIVADO";
@@ -1296,74 +1257,6 @@
       validateBarcodeInput();
     }
   });
-
-  let categoryChoices;
-  if (document.getElementById("categoria_existente")) {
-    // Inicializar una sola vez
-    categoryChoices = new Choices("#categoria_existente", {
-      searchEnabled: false,
-      placeholder: false,
-      callbackOnCreateTemplates: function(template) {
-        return {
-          item: (classNames, data) => {
-            if (data.value === "") {
-              return template(`
-                <div
-                  class="${classNames.item} ${classNames.itemSelectable}"
-                  data-item data-id="${data.id}" data-value="${data.value}"
-                  ${data.active ? 'aria-selected="true"' : ''}
-                  ${data.disabled ? 'aria-disabled="true"' : ''}>
-                  -SELECCIONA UNA CATEGORÍA-
-                </div>
-              `);
-            }
-            let color = "#000000";
-            if (data.customProperties && data.customProperties.color) {
-              color = data.customProperties.color;
-            }
-            return template(`
-              <div
-                class="${classNames.item} ${classNames.itemSelectable}"
-                data-item data-id="${data.id}" data-value="${data.value}"
-                ${data.active ? 'aria-selected="true"' : ''}
-                ${data.disabled ? 'aria-disabled="true"' : ''}>
-                <span style="display:inline-block; width:12px; height:12px; background-color:${color}; border-radius:50%; margin-right:6px;"></span>
-                ${data.label}
-              </div>
-            `);
-          },
-          choice: (classNames, data) => {
-            if (data.value === "") {
-              return template(`
-                <div
-                  class="${classNames.item} ${classNames.itemChoice}"
-                  data-choice
-                  style="display:none;"
-                  ${data.disabled ? 'data-choice-disabled aria-disabled="true"' : 'data-choice-selectable'}
-                  data-id="${data.id}" data-value="${data.value}">
-                  -SELECCIONA UNA CATEGORÍA-
-                </div>
-              `);
-            }
-            let color = "#000000";
-            if (data.customProperties && data.customProperties.color) {
-              color = data.customProperties.color;
-            }
-            return template(`
-              <div
-                class="${classNames.item} ${classNames.itemChoice}"
-                data-choice
-                ${data.disabled ? 'data-choice-disabled aria-disabled="true"' : 'data-choice-selectable'}
-                data-id="${data.id}" data-value="${data.value}">
-                <span style="display:inline-block; width:12px; height:12px; background-color:${color}; border-radius:50%; margin-right:6px;"></span>
-                ${data.label}
-              </div>
-            `);
-          }
-        };
-      }
-    });
-  }
 
   // Manejo optimizado de carga de imágenes
   const fotoInput = document.getElementById("fotoInput");

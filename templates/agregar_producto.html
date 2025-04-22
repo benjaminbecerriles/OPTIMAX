@@ -9,21 +9,19 @@
   /*******************************************************************************
    * ESTILOS GLOBALES Y DISEÑO BÁSICO
    ******************************************************************************/
-  /* 1) TODO EN BLANCO */
   html, body {
     margin: 0;
     padding: 0;
-    background-color: #fff; /* Fondo completamente blanco */
+    background-color: #fff;
     font-family: 'Open Sans', sans-serif;
   }
 
   .card-form {
-    /* Borde y fondo sutil */
-    background-color: #fff; /* Blanco también */
-    border-radius: 0;       /* Sin esquinas redondeadas */
-    box-shadow: none;       /* Sin sombra */
+    background-color: #fff;
+    border-radius: 0;
+    box-shadow: none;
     padding: 1.5rem;
-    margin: 0;              /* Sin margen extra */
+    margin: 0;
   }
 
   /* 2) Mantener DOS columnas: Izquierda (foto) y Derecha (form) */
@@ -33,7 +31,6 @@
     gap: 1rem;
   }
   .col-left {
-    /* Ancho para la foto grande */
     flex: 0 0 auto;
     width: 570px;
     border-right: 1px solid #ddd;
@@ -65,7 +62,7 @@
     color: #999;
     font-weight: 600;
     position: relative;
-    background-color: #fff; /* Blanco */
+    background-color: #fff;
   }
   .foto-placeholder img {
     max-width: 100%;
@@ -133,34 +130,71 @@
     background-color: #f0f0f0;
   }
 
-  /* Form Controls */
-  .form-group {
+  /* Paso a paso */
+  .step-container {
+    background-color: #fff;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    padding: 1.2rem;
     margin-bottom: 1rem;
     position: relative;
-    padding-top: 1.2rem; /* espacio para la etiqueta flotante */
-  }
-  ::placeholder {
-    text-transform: uppercase;
-    font-weight: normal;
-    color: #888;
-  }
-  .form-control {
-    text-transform: uppercase;
-    font-weight: bold;
-    padding: 0.5rem;
-    line-height: 1.5;
-    width: 100%;
-    border: 1px solid #ccc;
-    border-radius: 4px;
   }
 
-  .floating-label {
+  .step-number {
     position: absolute;
-    top: 0;
-    left: 0;
-    font-size: 0.9rem;
-    color: #888;
-    text-transform: capitalize;
+    top: -15px;
+    left: 15px;
+    background-color: #e52e2e;
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 16px;
+  }
+
+  /* Form Controls */
+  .form-group {
+    margin-bottom: 0.8rem;
+    position: relative;
+  }
+
+  .form-control {
+    padding: 0.75rem;
+    font-size: 1rem;
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-weight: 600;
+  }
+
+  /* Input con iconos en la misma fila */
+  .input-icon-group {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 0 0.5rem;
+    width: 100%;
+    background-color: #fff;
+  }
+  .input-icon-group input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background-color: transparent;
+    padding: 0.75rem 0.5rem;
+    text-transform: uppercase;
+    font-weight: bold;
+  }
+  .input-icon-group img {
+    margin-left: 0.5rem;
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
   }
 
   /* Favorito & Venta */
@@ -274,40 +308,43 @@
     color: #333;
   }
 
+  /* Opciones de Caducidad */
   .caducidad-options {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
-    max-width: 420px;
     margin-bottom: 1rem;
   }
-  .caducidad-row {
-    display: flex;
-    gap: 0.5rem;
-  }
+  
   .form-check {
+    margin-right: 5px;
+    margin-bottom: 5px;
     width: auto;
     border: none;
     text-align: left;
   }
+  
   .form-check-input {
     display: none;
   }
+  
   .form-check-label {
     display: inline-block;
     background-color: #fff;
     color: #333;
     border: 1px solid #ccc;
     border-radius: 6px;
-    padding: 0.25rem 0.6rem;
+    padding: 0.5rem 0.8rem;
     cursor: pointer;
     white-space: nowrap;
     font-size: 0.9rem;
     transition: background-color 0.3s, border-color 0.3s;
   }
+  
   .form-check-label:hover {
     background-color: #f2f2f2;
   }
+  
   .form-check.selected .form-check-label {
     background-color: #007BFF;
     border-color: #007BFF;
@@ -392,32 +429,6 @@
   .autocomplete-name {
     font-size: 0.9rem;
     color: #555;
-  }
-
-  /* Input con iconos en la misma fila */
-  .input-icon-group {
-    display: inline-flex;
-    align-items: center;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    padding: 0 0.5rem;
-    width: 100%;
-    background-color: #fff;
-  }
-  .input-icon-group input {
-    flex: 1;
-    border: none;
-    outline: none;
-    background-color: transparent; /* sin color extra */
-    padding: 0.5rem;
-    text-transform: uppercase;
-    font-weight: bold;
-  }
-  .input-icon-group img {
-    margin-left: 0.5rem;
-    cursor: pointer;
-    width: 24px;
-    height: 24px;
   }
 
   /* Overlay de carga */
@@ -512,6 +523,33 @@
     color: #e74c3c;
     margin-bottom: 15px;
   }
+
+  /* NUEVOS ESTILOS PARA ETIQUETAS FLOTANTES */
+  .floating-label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: 0.85rem;
+    color: #888;
+    text-transform: capitalize;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .form-group {
+    margin-bottom: 0.8rem;
+    position: relative;
+    padding-top: 1.2rem; /* espacio para la etiqueta flotante */
+  }
+  
+  ::placeholder {
+    text-transform: uppercase;
+    font-weight: normal;
+    color: #888;
+    font-size: 0.8rem;
+  }
 </style>
 
 <div class="card-form">
@@ -574,241 +612,203 @@
           Agregar producto con código de barras
         </h3>
 
-        <!-- IMPORTANTE: Para que el back sepa si es 'existente' (por default) -->
-        <input type="hidden" name="categoria_option" value="existente">
-        <!-- IMPORTANTE: Para saber si caducidad está activado o no -->
-        <input type="hidden" name="toggle_caducidad_estado" id="toggle_caducidad_estado" value="DESACTIVADO">
+        <!-- PASO 1: CÓDIGO DE BARRAS -->
+        <div class="step-container">
+          <div class="step-number">1</div>
+          
+          <!-- IMPORTANTE: Para que el back sepa si es 'existente' (por default) -->
+          <input type="hidden" name="categoria_option" value="existente">
+          <!-- IMPORTANTE: Para saber si caducidad está activado o no -->
+          <input type="hidden" name="toggle_caducidad_estado" id="toggle_caducidad_estado" value="DESACTIVADO">
 
-        <!-- Código de Barras + Iconos en la misma línea -->
-        <div class="form-group">
-          <div class="input-icon-group">
+          <!-- Código de Barras + Iconos en la misma línea -->
+          <div class="form-group" style="margin-bottom: 0;">
+            <div class="floating-label" style="display: none;" id="codigo_barras_externoFloatingLabel">Código de barras</div>
+            <div class="input-icon-group">
+              <input 
+                type="text"
+                id="codigo_barras_externo"
+                name="codigo_barras_externo"
+                placeholder="INGRESAR CÓDIGO DE BARRAS"
+              >
+              <!-- Icono Lector Físico -->
+              <img 
+                id="scanIcon"
+                src="{{ url_for('static', filename='img/3.png') }}"
+                alt="Escanear con Lector"
+              >
+              <!-- Icono Cámara QuaggaJS -->
+              <img 
+                id="cameraIcon"
+                src="{{ url_for('static', filename='img/4.png') }}"
+                alt="Escanear con Cámara"
+                onclick="iniciarEscaneoQuagga()"
+              >
+            </div>
+            <!-- Contenedor de autocomplete -->
+            <div id="autocomplete-results"></div>
+          </div>
+        </div>
+
+        <!-- PASO 2: INFORMACIÓN BÁSICA -->
+        <div class="step-container">
+          <div class="step-number">2</div>
+
+          <!-- Nombre -->
+          <div class="form-group">
+            <div class="floating-label" style="display: none;" id="nombreFloatingLabel">Nombre del producto</div>
             <input 
               type="text"
-              id="codigo_barras_externo"
-              name="codigo_barras_externo"
-              placeholder="INGRESAR CÓDIGO DE BARRAS"
-            >
-            <!-- Icono Lector Físico -->
-            <img 
-              id="scanIcon"
-              src="{{ url_for('static', filename='img/3.png') }}"
-              alt="Escanear con Lector"
-            >
-            <!-- Icono Cámara QuaggaJS -->
-            <img 
-              id="cameraIcon"
-              src="{{ url_for('static', filename='img/4.png') }}"
-              alt="Escanear con Cámara"
-              onclick="iniciarEscaneoQuagga()"
+              class="form-control"
+              id="nombre"
+              name="nombre"
+              placeholder="NOMBRE DEL PRODUCTO"
             >
           </div>
-          <!-- Contenedor de autocomplete -->
-          <div id="autocomplete-results"></div>
-        </div>
 
-        <!-- Nombre -->
-        <div class="form-group">
-          <input 
-            type="text"
-            class="form-control"
-            id="nombre"
-            name="nombre"
-            placeholder="NOMBRE DEL PRODUCTO"
-          >
-        </div>
-
-        <!-- Stock Inicial -->
-        <div class="form-group">
-          <input 
-            type="number"
-            class="form-control"
-            id="stock"
-            name="stock"
-            min="0"
-            placeholder="STOCK INICIAL"
-          >
-        </div>
-
-        <!-- Costo / Precio -->
-        <div class="d-flex gap-3" style="align-items: center; margin-top:1rem;">
-          <div class="form-group" style="flex:1;">
+          <!-- Marca -->
+          <div class="form-group" style="margin-bottom: 0;">
+            <div class="floating-label" style="display: none;" id="marcaFloatingLabel">Marca</div>
             <input
               type="text"
-              step="0.01"
               class="form-control"
-              id="costo"
-              name="costo"
-              required
-              oninput="formatCostRealtime(this)"
-              placeholder="COSTO"
-            >
-          </div>
-          <div class="form-group" style="flex:1;">
-            <input
-              type="text"
-              step="0.01"
-              class="form-control"
-              id="precio_venta"
-              name="precio_venta"
-              required
-              oninput="formatCostRealtime(this)"
-              placeholder="PRECIO DE VENTA"
+              id="marca"
+              name="marca"
+              placeholder="MARCA"
             >
           </div>
         </div>
 
-        <!-- Marca -->
-        <div class="form-group" style="margin-top:1rem;">
-          <input
-            type="text"
-            class="form-control"
-            id="marca"
-            name="marca"
-            placeholder="MARCA"
-          >
-        </div>
+        <!-- PASO 3: INVENTARIO Y PRECIOS -->
+        <div class="step-container">
+          <div class="step-number">3</div>
 
-        <!-- Categoría (Choices.js) -->
-        <div class="form-group">
-          <select class="form-select" name="categoria_existente" id="categoria_existente">
-            <option value="" disabled selected hidden>-SELECCIONA UNA CATEGORÍA-</option>
-            <option value="abarrotes secos" data-custom-properties='{"color": "#FFA500"}'>Abarrotes secos</option>
-            <option value="enlatados y conservas" data-custom-properties='{"color": "#DAA520"}'>Enlatados y conservas</option>
-            <option value="botanas, dulces y snacks" data-custom-properties='{"color": "#FF69B4"}'>Botanas, dulces y snacks</option>
-            <option value="bebidas no alcohólicas" data-custom-properties='{"color": "#1E90FF"}'>Bebidas no alcohólicas</option>
-            <option value="bebidas alcohólicas" data-custom-properties='{"color": "#800080"}'>Bebidas alcohólicas</option>
-            <option value="panadería y repostería" data-custom-properties='{"color": "#D2B48C"}'>Panadería y repostería</option>
-            <option value="lácteos y huevos" data-custom-properties='{"color": "#F5DEB3"}'>Lácteos y huevos</option>
-            <option value="carnes frías y embutidos" data-custom-properties='{"color": "#B22222"}'>Carnes frías y embutidos</option>
-            <option value="congelados y refrigerados" data-custom-properties='{"color": "#00CED1"}'>Congelados y refrigerados</option>
-            <option value="frutas y verduras frescas" data-custom-properties='{"color": "#32CD32"}'>Frutas y verduras frescas</option>
-            <option value="productos de limpieza y hogar" data-custom-properties='{"color": "#87CEFA"}'>Productos de limpieza y hogar</option>
-            <option value="cuidado personal e higiene" data-custom-properties='{"color": "#FFC0CB"}'>Cuidado personal e higiene</option>
-            <option value="medicamentos de mostrador (otc)" data-custom-properties='{"color": "#FF6347"}'>Medicamentos de mostrador (OTC)</option>
-            <option value="productos para bebés" data-custom-properties='{"color": "#FFB6C1"}'>Productos para bebés</option>
-            <option value="productos para mascotas" data-custom-properties='{"color": "#8FBC8F"}'>Productos para mascotas</option>
-            <option value="artículos de papelería" data-custom-properties='{"color": "#9370DB"}'>Artículos de papelería</option>
-            <option value="ferretería básica" data-custom-properties='{"color": "#708090"}'>Ferretería básica</option>
-            <option value="otros (miscelánea)" data-custom-properties='{"color": "#A9A9A9"}'>Otros (miscelánea)</option>
-          </select>
-        </div>
+          <!-- Stock Inicial -->
+          <div class="form-group">
+            <div class="floating-label" style="display: none;" id="stockFloatingLabel">Stock inicial</div>
+            <input 
+              type="number"
+              class="form-control"
+              id="stock"
+              name="stock"
+              min="0"
+              placeholder="STOCK INICIAL"
+            >
+          </div>
 
-        <!-- Toggle "¿TIENE FECHA DE CADUCIDAD?" -->
-        <div class="d-flex align-items-center mb-3" style="margin-top:1rem; gap:0.5rem;">
-          <span class="fw-bold" style="margin:0;">¿TIENE FECHA DE CADUCIDAD?</span>
-          <button type="button" id="btnToggleCaducidad" class="toggle-button">DESACTIVADO</button>
-        </div>
-
-        <!-- Opciones de Caducidad -->
-        <div id="caducidadOpcionesContainer" style="display:none; margin-top:0.5rem;">
-          <p class="text-muted" style="margin-bottom:0.5rem;">
-            A partir de hoy, ¿en qué lapso aproximado caducan tus productos?
-          </p>
-          <div class="caducidad-options">
-            <!-- Fila 1 -->
-            <div class="caducidad-row">
-              <div class="form-check" data-id="1 día">
-                <input
-                  class="form-check-input"
-                  type="radio"
-                  name="caducidad_lapso"
-                  id="cad1dia"
-                  value="1 día"
-                >
-                <label class="form-check-label caducidad-label" for="cad1dia">1 DÍA</label>
-              </div>
-              <div class="form-check" data-id="3 días">
-                <input
-                  class="form-check-input"
-                  type="radio"
-                  name="caducidad_lapso"
-                  id="cad3dias"
-                  value="3 días"
-                >
-                <label class="form-check-label caducidad-label" for="cad3dias">3 DÍAS</label>
-              </div>
-              <div class="form-check" data-id="1 semana">
-                <input
-                  class="form-check-input"
-                  type="radio"
-                  name="caducidad_lapso"
-                  id="cad1sem"
-                  value="1 semana"
-                >
-                <label class="form-check-label caducidad-label" for="cad1sem">1 SEMANA</label>
-              </div>
-              <div class="form-check" data-id="2 semanas">
-                <input
-                  class="form-check-input"
-                  type="radio"
-                  name="caducidad_lapso"
-                  id="cad2sem"
-                  value="2 semanas"
-                >
-                <label class="form-check-label caducidad-label" for="cad2sem">2 SEMANAS</label>
-              </div>
-              <div class="form-check" data-id="1 mes">
-                <input
-                  class="form-check-input"
-                  type="radio"
-                  name="caducidad_lapso"
-                  id="cad1mes"
-                  value="1 mes"
-                >
-                <label class="form-check-label caducidad-label" for="cad1mes">1 MES</label>
-              </div>
+          <!-- Costo / Precio -->
+          <div class="d-flex gap-3" style="align-items: center; margin-bottom: 0;">
+            <div class="form-group" style="flex:1; margin-bottom: 0;">
+              <div class="floating-label" style="display: none;" id="costoFloatingLabel">Costo</div>
+              <input
+                type="text"
+                step="0.01"
+                class="form-control"
+                id="costo"
+                name="costo"
+                required
+                oninput="formatCostRealtime(this)"
+                placeholder="COSTO"
+              >
             </div>
-            <!-- Fila 2 -->
-            <div class="caducidad-row">
-              <div class="form-check" data-id="3 meses">
-                <input
-                  class="form-check-input"
-                  type="radio"
-                  name="caducidad_lapso"
-                  id="cad3meses"
-                  value="3 meses"
-                >
-                <label class="form-check-label caducidad-label" for="cad3meses">3 MESES</label>
-              </div>
-              <div class="form-check" data-id="6 meses">
-                <input
-                  class="form-check-input"
-                  type="radio"
-                  name="caducidad_lapso"
-                  id="cad6meses"
-                  value="6 meses"
-                >
-                <label class="form-check-label caducidad-label" for="cad6meses">6 MESES</label>
-              </div>
-              <div class="form-check" data-id="1 año">
-                <input
-                  class="form-check-input"
-                  type="radio"
-                  name="caducidad_lapso"
-                  id="cad1ano"
-                  value="1 año"
-                >
-                <label class="form-check-label caducidad-label" for="cad1ano">1 AÑO</label>
-              </div>
-              <div class="form-check" data-id="2 años">
-                <input
-                  class="form-check-input"
-                  type="radio"
-                  name="caducidad_lapso"
-                  id="cad2anos"
-                  value="2 años"
-                >
-                <label class="form-check-label caducidad-label" for="cad2anos">2 AÑOS</label>
-              </div>
-              <div class="form-check" data-id="más de 3 años">
-                <input
-                  class="form-check-input"
-                  type="radio"
-                  name="caducidad_lapso"
-                  id="cad3anos"
-                  value="más de 3 años"
-                >
-                <label class="form-check-label caducidad-label" for="cad3anos">MÁS DE 3 AÑOS</label>
+            <div class="form-group" style="flex:1; margin-bottom: 0;">
+              <div class="floating-label" style="display: none;" id="precio_ventaFloatingLabel">Precio de venta</div>
+              <input
+                type="text"
+                step="0.01"
+                class="form-control"
+                id="precio_venta"
+                name="precio_venta"
+                required
+                oninput="formatCostRealtime(this)"
+                placeholder="PRECIO DE VENTA"
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- PASO 4: CATEGORÍA Y CADUCIDAD -->
+        <div class="step-container">
+          <div class="step-number">4</div>
+
+          <!-- Categoría (Choices.js) -->
+          <div class="form-group">
+            <select class="form-select" name="categoria_existente" id="categoria_existente">
+              <option value="" disabled selected hidden>-SELECCIONA UNA CATEGORÍA-</option>
+              <option value="abarrotes secos" data-custom-properties='{"color": "#FFA500"}'>Abarrotes secos</option>
+              <option value="enlatados y conservas" data-custom-properties='{"color": "#DAA520"}'>Enlatados y conservas</option>
+              <option value="botanas, dulces y snacks" data-custom-properties='{"color": "#FF69B4"}'>Botanas, dulces y snacks</option>
+              <option value="bebidas no alcohólicas" data-custom-properties='{"color": "#1E90FF"}'>Bebidas no alcohólicas</option>
+              <option value="bebidas alcohólicas" data-custom-properties='{"color": "#800080"}'>Bebidas alcohólicas</option>
+              <option value="panadería y repostería" data-custom-properties='{"color": "#D2B48C"}'>Panadería y repostería</option>
+              <option value="lácteos y huevos" data-custom-properties='{"color": "#F5DEB3"}'>Lácteos y huevos</option>
+              <option value="carnes frías y embutidos" data-custom-properties='{"color": "#B22222"}'>Carnes frías y embutidos</option>
+              <option value="congelados y refrigerados" data-custom-properties='{"color": "#00CED1"}'>Congelados y refrigerados</option>
+              <option value="frutas y verduras frescas" data-custom-properties='{"color": "#32CD32"}'>Frutas y verduras frescas</option>
+              <option value="productos de limpieza y hogar" data-custom-properties='{"color": "#87CEFA"}'>Productos de limpieza y hogar</option>
+              <option value="cuidado personal e higiene" data-custom-properties='{"color": "#FFC0CB"}'>Cuidado personal e higiene</option>
+              <option value="medicamentos de mostrador (otc)" data-custom-properties='{"color": "#FF6347"}'>Medicamentos de mostrador (OTC)</option>
+              <option value="productos para bebés" data-custom-properties='{"color": "#FFB6C1"}'>Productos para bebés</option>
+              <option value="productos para mascotas" data-custom-properties='{"color": "#8FBC8F"}'>Productos para mascotas</option>
+              <option value="artículos de papelería" data-custom-properties='{"color": "#9370DB"}'>Artículos de papelería</option>
+              <option value="ferretería básica" data-custom-properties='{"color": "#708090"}'>Ferretería básica</option>
+              <option value="otros (miscelánea)" data-custom-properties='{"color": "#A9A9A9"}'>Otros (miscelánea)</option>
+            </select>
+          </div>
+
+          <!-- Toggle "¿TIENE FECHA DE CADUCIDAD?" -->
+          <div style="margin-top: 0.5rem; margin-bottom: 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+              <label style="font-size: 0.9rem; color: #666;">¿Tiene fecha de caducidad?</label>
+              <button type="button" id="btnToggleCaducidad" class="toggle-button">DESACTIVADO</button>
+            </div>
+            
+            <!-- Opciones de Caducidad -->
+            <div id="caducidadOpcionesContainer" style="display:none; margin-top:0.5rem;">
+              <p class="text-muted" style="margin-bottom:0.5rem; font-size: 0.85rem;">
+                A partir de hoy, ¿en qué lapso aproximado caducan tus productos?
+              </p>
+              <div class="caducidad-options">
+                <div class="form-check" data-id="1 día">
+                  <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad1dia" value="1 día">
+                  <label class="form-check-label" for="cad1dia">1 DÍA</label>
+                </div>
+                <div class="form-check" data-id="3 días">
+                  <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad3dias" value="3 días">
+                  <label class="form-check-label" for="cad3dias">3 DÍAS</label>
+                </div>
+                <div class="form-check" data-id="1 semana">
+                  <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad1sem" value="1 semana">
+                  <label class="form-check-label" for="cad1sem">1 SEMANA</label>
+                </div>
+                <div class="form-check" data-id="2 semanas">
+                  <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad2sem" value="2 semanas">
+                  <label class="form-check-label" for="cad2sem">2 SEMANAS</label>
+                </div>
+                <div class="form-check" data-id="1 mes">
+                  <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad1mes" value="1 mes">
+                  <label class="form-check-label" for="cad1mes">1 MES</label>
+                </div>
+                <div class="form-check" data-id="3 meses">
+                  <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad3meses" value="3 meses">
+                  <label class="form-check-label" for="cad3meses">3 MESES</label>
+                </div>
+                <div class="form-check" data-id="6 meses">
+                  <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad6meses" value="6 meses">
+                  <label class="form-check-label" for="cad6meses">6 MESES</label>
+                </div>
+                <div class="form-check" data-id="1 año">
+                  <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad1ano" value="1 año">
+                  <label class="form-check-label" for="cad1ano">1 AÑO</label>
+                </div>
+                <div class="form-check" data-id="2 años">
+                  <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad2anos" value="2 años">
+                  <label class="form-check-label" for="cad2anos">2 AÑOS</label>
+                </div>
+                <div class="form-check" data-id="más de 3 años">
+                  <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad3anos" value="más de 3 años">
+                  <label class="form-check-label" for="cad3anos">+3 AÑOS</label>
+                </div>
               </div>
             </div>
           </div>
@@ -819,7 +819,7 @@
     <!-- FIN row-form -->
 
     <!-- BOTONES GUARDAR / CANCELAR -->
-    <div class="text-end" style="margin-top:2rem; margin-bottom:0.5rem;">
+    <div class="text-end" style="margin-top:1.5rem; margin-bottom:0.5rem;">
       <button type="submit" id="submitBtn" class="btn-submit" style="margin-right:0.5rem;">GUARDAR</button>
       <a href="{{ url_for('ver_productos') }}" class="btn-cancel">CANCELAR</a>
     </div>
@@ -995,23 +995,29 @@
   const floatingLabels = new Map();
   
   function updateFloatingLabel(input) {
-    if (!floatingLabels.has(input)) {
-      let container = input.parentElement;
-      let floatingLabel = container.querySelector(".floating-label");
+    if (!input) return;
+    
+    // Corregir el ID para precio_venta - puede ser precio_ventaFloatingLabel o precioVentaFloatingLabel
+    let floatingLabelId;
+    if (input.id === "precio_venta") {
+      const posibleId1 = "precio_ventaFloatingLabel";
+      const posibleId2 = "precioVentaFloatingLabel";
       
-      if (!floatingLabel) {
-        floatingLabel = document.createElement("div");
-        floatingLabel.className = "floating-label";
-        container.insertBefore(floatingLabel, input);
-      }
+      // Intentar con ambos posibles IDs
+      const label1 = document.getElementById(posibleId1);
+      const label2 = document.getElementById(posibleId2);
       
-      floatingLabels.set(input, floatingLabel);
+      floatingLabelId = label1 ? posibleId1 : (label2 ? posibleId2 : input.id + 'FloatingLabel');
+    } else {
+      floatingLabelId = input.id + 'FloatingLabel';
     }
     
-    const floatingLabel = floatingLabels.get(input);
+    const floatingLabel = document.getElementById(floatingLabelId);
+    
+    if (!floatingLabel) return;
     
     if (input.value.trim() !== "") {
-      floatingLabel.textContent = input.getAttribute("placeholder");
+      floatingLabel.textContent = input.placeholder;
       floatingLabel.style.display = "block";
     } else {
       floatingLabel.style.display = "none";
@@ -1421,6 +1427,9 @@
         autoContainer.innerHTML = "";
         autoContainer.style.display = "none";
       }
+      
+      // Manejar las etiquetas flotantes
+      updateFloatingLabel(this);
     });
     
     // Optimización: prefetch del primer carácter en keydown
@@ -1640,15 +1649,13 @@
 
   if (btnToggleCaducidad && caducidadOpciones && hiddenCaducidadEstado) {
     btnToggleCaducidad.addEventListener("click", () => {
-      if (btnToggleCaducidad.classList.contains("active")) {
+      if (btnToggleCaducidad.textContent === "ACTIVADO") {
         // Desactivar
-        btnToggleCaducidad.classList.remove("active");
         btnToggleCaducidad.textContent = "DESACTIVADO";
         caducidadOpciones.style.display = "none";
         hiddenCaducidadEstado.value = "DESACTIVADO";
       } else {
         // Activar
-        btnToggleCaducidad.classList.add("active");
         btnToggleCaducidad.textContent = "ACTIVADO";
         caducidadOpciones.style.display = "block";
         hiddenCaducidadEstado.value = "ACTIVADO";
