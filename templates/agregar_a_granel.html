@@ -448,30 +448,47 @@
     color: #666;
   }
 
-  /* Estilo para placeholders flotantes (ya no se usan, pero dejamos por compatibilidad) */
-  .form-floating {
+  /* NUEVOS ESTILOS PARA ETIQUETAS FLOTANTES (similar a agregar_producto.html) */
+  .form-group {
+    margin-bottom: 1rem;
     position: relative;
+    padding-top: 1.2rem; /* espacio para la etiqueta flotante */
   }
   
-  /* Estilos para labels y campos de entrada estándar */
-  .form-label {
-    font-weight: 600;
-    color: #333;
+  ::placeholder {
+    text-transform: uppercase;
+    font-weight: normal;
+    color: #888;
+    font-size: 0.8rem; /* Reducir tamaño de los placeholders */
   }
   
   .form-control {
-    padding: 0.75rem;
-    font-size: 1rem;
+    text-transform: uppercase;
+    font-weight: bold;
+    padding: 0.5rem;
+    line-height: 1.5;
     width: 100%;
     border: 1px solid #ccc;
-    border-radius: 6px;
-    font-weight: 600;
+    border-radius: 4px;
+    font-size: 0.85rem; /* Reducir tamaño de texto para que quepa más */
+  }
+
+  .floating-label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: 0.85rem; /* Reducir tamaño de texto */
+    color: #888;
+    text-transform: capitalize;
+    width: 100%; /* Asegurar que ocupe todo el ancho disponible */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   
-  .form-control:focus {
-    border-color: #80bdff;
-    outline: 0;
-    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+  /* Estilo para campos de precio y costo más anchos */
+  .precio-field {
+    min-width: 200px; /* Reducir ligeramente para evitar desbordamiento */
   }
 </style>
 
@@ -536,15 +553,15 @@
         <div class="step-container">
           <div class="step-number">1</div>
           
-          <!-- Nombre del producto con label normal (no flotante) -->
+          <!-- Nombre del producto con ETIQUETA FLOTANTE -->
           <div class="form-group">
-            <label for="nombre" class="form-label mb-2">Nombre del producto</label>
+            <div class="floating-label" style="display: none;" id="nombreFloatingLabel">Nombre del producto</div>
             <input 
               type="text"
               class="form-control"
               id="nombre"
               name="nombre"
-              placeholder="Ingresa el nombre del producto"
+              placeholder="INGRESA EL NOMBRE DEL PRODUCTO"
               required
               autocomplete="off"
             >
@@ -589,28 +606,28 @@
             <select class="form-select" id="unidadMedidaSelect" name="unidad_medida">
               <option value="" disabled selected>Selecciona una unidad</option>
               <!-- Opciones para PESO -->
-              <option value="KG" data-type="peso">Kilogramos</option>
-              <option value="G" data-type="peso">Gramos</option>
-              <option value="LB" data-type="peso">Libras</option>
-              <option value="OZ" data-type="peso">Onzas</option>
+              <option value="KG" data-type="peso" data-singular="Kilogramo" data-plural="Kilogramos">Kilogramos</option>
+              <option value="G" data-type="peso" data-singular="Gramo" data-plural="Gramos">Gramos</option>
+              <option value="LB" data-type="peso" data-singular="Libra" data-plural="Libras">Libras</option>
+              <option value="OZ" data-type="peso" data-singular="Onza" data-plural="Onzas">Onzas</option>
               <!-- Opciones para UNIDAD -->
-              <option value="UNIDAD" data-type="pieza">Pieza</option>
-              <option value="PAR" data-type="pieza">Par</option>
-              <option value="DOCENA" data-type="pieza">Docena</option>
-              <option value="CAJA" data-type="pieza">Caja</option>
-              <option value="PAQUETE" data-type="pieza">Paquete</option>
+              <option value="UNIDAD" data-type="pieza" data-singular="Unidad" data-plural="Unidades">Pieza</option>
+              <option value="PAR" data-type="pieza" data-singular="Par" data-plural="Pares">Par</option>
+              <option value="DOCENA" data-type="pieza" data-singular="Docena" data-plural="Docenas">Docena</option>
+              <option value="CAJA" data-type="pieza" data-singular="Caja" data-plural="Cajas">Caja</option>
+              <option value="PAQUETE" data-type="pieza" data-singular="Paquete" data-plural="Paquetes">Paquete</option>
               <!-- Opciones para VOLUMEN/MEDIDA -->
-              <option value="L" data-type="volumen">Litros</option>
-              <option value="ML" data-type="volumen">Mililitros</option>
-              <option value="M" data-type="volumen">Metros</option>
-              <option value="CM" data-type="volumen">Centímetros</option>
-              <option value="M2" data-type="volumen">Metros cuadrados</option>
+              <option value="L" data-type="volumen" data-singular="Litro" data-plural="Litros">Litros</option>
+              <option value="ML" data-type="volumen" data-singular="Mililitro" data-plural="Mililitros">Mililitros</option>
+              <option value="M" data-type="volumen" data-singular="Metro" data-plural="Metros">Metros</option>
+              <option value="CM" data-type="volumen" data-singular="Centímetro" data-plural="Centímetros">Centímetros</option>
+              <option value="M2" data-type="volumen" data-singular="Metro cuadrado" data-plural="Metros cuadrados">Metros cuadrados</option>
             </select>
           </div>
           
-          <!-- Stock con label normal (no flotante) -->
-          <div class="mb-3">
-            <label for="stock" class="form-label mb-2">Stock inicial <span id="stockUnit" style="font-weight: 600;">-</span></label>
+          <!-- Stock con ETIQUETA FLOTANTE -->
+          <div class="form-group">
+            <div class="floating-label" style="display: none;" id="stockFloatingLabel"></div>
             <input 
               type="number"
               class="form-control"
@@ -618,15 +635,15 @@
               name="stock"
               min="0"
               step="0.01"
-              placeholder="Ingresa el stock inicial"
+              placeholder="INGRESA EL STOCK INICIAL"
               required
             >
           </div>
           
-          <div style="display: flex; gap: 20px;">
-            <!-- Costo con label normal (no flotante) -->
-            <div class="mb-3" style="flex: 1;">
-              <label for="costo" class="form-label mb-2">Costo por <span id="costoUnit">-</span></label>
+          <div style="display: flex; gap: 5px;"> <!-- Reducir el gap entre campos -->
+            <!-- Costo con ETIQUETA FLOTANTE -->
+            <div class="form-group precio-field" style="flex: 1;">
+              <div class="floating-label" style="display: none;" id="costoFloatingLabel"></div>
               <input
                 type="text"
                 class="form-control"
@@ -634,13 +651,13 @@
                 name="costo"
                 required
                 oninput="formatCostRealtime(this)"
-                placeholder="Ingresa el costo"
+                placeholder="COSTO POR"
               >
             </div>
             
-            <!-- Precio de venta con label normal (no flotante) -->
-            <div class="mb-3" style="flex: 1;">
-              <label for="precio_venta" class="form-label mb-2">Precio de venta por <span id="precioUnit">-</span></label>
+            <!-- Precio de venta con ETIQUETA FLOTANTE -->
+            <div class="form-group precio-field" style="flex: 1;">
+              <div class="floating-label" style="display: none;" id="precio_ventaFloatingLabel"></div>
               <input
                 type="text"
                 class="form-control"
@@ -648,7 +665,7 @@
                 name="precio_venta"
                 required
                 oninput="formatCostRealtime(this)"
-                placeholder="Ingresa el precio de venta"
+                placeholder="PRECIO POR"
               >
             </div>
           </div>
@@ -1210,6 +1227,9 @@
         autoContainer.innerHTML = "";
         autoContainer.style.display = "none";
       }
+      
+      // Manejar las etiquetas flotantes
+      updateFloatingLabel(this);
     });
     
     // Usar delegación de eventos para mejorar rendimiento
@@ -1224,6 +1244,7 @@
 
       // Completar campos de formulario
       document.getElementById("nombre").value = nombreProd;
+      updateFloatingLabel(document.getElementById("nombre"));
 
       // Manejar imagen si existe
       if (imagenURL) {
@@ -1351,38 +1372,20 @@
    * 8) Opciones de tipo de venta y unidades mejoradas (NUEVO)
    * ===========================================================
    */
-  // Definir las unidades para cada tipo de venta
-  const unidadesPorTipo = {
-    'pieza': [
-      { value: 'UNIDAD', label: 'Pieza', abrev: 'pza' },
-      { value: 'PAR', label: 'Par', abrev: 'par' },
-      { value: 'DOCENA', label: 'Docena', abrev: 'doc' },
-      { value: 'CAJA', label: 'Caja', abrev: 'caja' },
-      { value: 'PAQUETE', label: 'Paquete', abrev: 'paq' }
-    ],
-    'peso': [
-      { value: 'KG', label: 'Kilogramos', abrev: 'kg' },
-      { value: 'G', label: 'Gramos', abrev: 'g' },
-      { value: 'LB', label: 'Libras', abrev: 'lb' },
-      { value: 'OZ', label: 'Onzas', abrev: 'oz' }
-    ],
-    'volumen': [
-      { value: 'L', label: 'Litros', abrev: 'L' },
-      { value: 'ML', label: 'Mililitros', abrev: 'ml' },
-      { value: 'M', label: 'Metros', abrev: 'm' },
-      { value: 'CM', label: 'Centímetros', abrev: 'cm' },
-      { value: 'M2', label: 'Metros cuadrados', abrev: 'm²' }
-    ]
-  };
-
   // Referencia al selector de unidades y tipo de venta
   const unidadMedidaSelect = document.getElementById('unidadMedidaSelect');
   const tipoMedidaInput = document.getElementById('tipo_medida');
   const sellOptions = document.querySelectorAll('.sell-option');
   const codigoBarrasInput = document.getElementById('codigo_barras_externo');
-  const stockUnitSpan = document.getElementById('stockUnit');
-  const costoUnitSpan = document.getElementById('costoUnit');
-  const precioUnitSpan = document.getElementById('precioUnit');
+  
+  // Referencias a los campos con etiquetas flotantes
+  const stockInput = document.getElementById('stock');
+  const stockFloatingLabel = document.getElementById('stockFloatingLabel');
+  const costoInput = document.getElementById('costo');
+  const costoFloatingLabel = document.getElementById('costoFloatingLabel');
+  const precioInput = document.getElementById('precio_venta');
+  const precioFloatingLabel = document.getElementById('precioVentaFloatingLabel');
+  const nombreFloatingLabel = document.getElementById('nombreFloatingLabel');
 
   // Función para filtrar opciones de unidad según el tipo seleccionado
   function filtrarOpcionesUnidad(tipoSeleccionado) {
@@ -1420,25 +1423,40 @@
       }
     }
     
-    // Actualizar unidades en etiquetas
-    actualizarEtiquetasUnidad();
+    // Actualizar placeholders y etiquetas flotantes
+    actualizarPlaceholders();
   }
 
-  // Función para actualizar unidades mostradas en etiquetas
-  function actualizarEtiquetasUnidad() {
+  // Función para actualizar placeholders según la unidad seleccionada
+  function actualizarPlaceholders() {
     const selectedOption = unidadMedidaSelect.options[unidadMedidaSelect.selectedIndex];
+    
     if (selectedOption && selectedOption.value) {
-      const abrev = selectedOption.value; // Usar el valor como abreviatura
+      // Obtener los textos singular y plural de la unidad
+      let unitSingular = selectedOption.getAttribute('data-singular') || selectedOption.value;
+      let unitPlural = selectedOption.getAttribute('data-plural') || (unitSingular + 's');
       
-      // Actualizar etiquetas de unidad
-      if (stockUnitSpan) stockUnitSpan.textContent = abrev;
-      if (costoUnitSpan) costoUnitSpan.textContent = abrev;
-      if (precioUnitSpan) precioUnitSpan.textContent = abrev;
-    } else {
-      // Resetear si no hay selección
-      if (stockUnitSpan) stockUnitSpan.textContent = '-';
-      if (costoUnitSpan) costoUnitSpan.textContent = '-';
-      if (precioUnitSpan) precioUnitSpan.textContent = '-';
+      // Corregir caso especial para "UNIDAD" para que muestre "PIEZA"
+      if (selectedOption.value === "UNIDAD") {
+        unitSingular = "Pieza";
+        unitPlural = "Piezas";
+      }
+      
+      // Actualizar placeholders de los campos - Textos ultracortos
+      if (stockInput) {
+        stockInput.placeholder = `STOCK EN ${unitPlural.toUpperCase()}`;
+        updateFloatingLabel(stockInput);
+      }
+      
+      if (costoInput) {
+        costoInput.placeholder = `COSTO POR ${unitSingular.toUpperCase()}`;
+        updateFloatingLabel(costoInput);
+      }
+      
+      if (precioInput) {
+        precioInput.placeholder = `PRECIO POR ${unitSingular.toUpperCase()}`;
+        updateFloatingLabel(precioInput);
+      }
     }
   }
 
@@ -1451,6 +1469,37 @@
       randomPart += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     return prefix + randomPart;
+  }
+
+  // Función para actualizar las etiquetas flotantes basado en el contenido de los campos
+  function updateFloatingLabel(input) {
+    if (!input) return;
+    
+    // Corregir el ID para precio_venta - puede ser precio_ventaFloatingLabel o precioVentaFloatingLabel
+    let floatingLabelId;
+    if (input.id === "precio_venta") {
+      const posibleId1 = "precio_ventaFloatingLabel";
+      const posibleId2 = "precioVentaFloatingLabel";
+      
+      // Intentar con ambos posibles IDs
+      const label1 = document.getElementById(posibleId1);
+      const label2 = document.getElementById(posibleId2);
+      
+      floatingLabelId = label1 ? posibleId1 : (label2 ? posibleId2 : input.id + 'FloatingLabel');
+    } else {
+      floatingLabelId = input.id + 'FloatingLabel';
+    }
+    
+    const floatingLabel = document.getElementById(floatingLabelId);
+    
+    if (!floatingLabel) return;
+    
+    if (input.value.trim() !== "") {
+      floatingLabel.textContent = input.placeholder;
+      floatingLabel.style.display = "block";
+    } else {
+      floatingLabel.style.display = "none";
+    }
   }
 
   // Inicializar código único al cargar la página
@@ -1484,7 +1533,32 @@
 
   // Evento para cuando cambia la unidad de medida
   if (unidadMedidaSelect) {
-    unidadMedidaSelect.addEventListener('change', actualizarEtiquetasUnidad);
+    unidadMedidaSelect.addEventListener('change', actualizarPlaceholders);
+  }
+
+  // Eventos para actualizar las etiquetas flotantes cuando cambia el contenido de los campos
+  if (nombreInput) {
+    nombreInput.addEventListener('input', function() {
+      updateFloatingLabel(this);
+    });
+  }
+
+  if (stockInput) {
+    stockInput.addEventListener('input', function() {
+      updateFloatingLabel(this);
+    });
+  }
+
+  if (costoInput) {
+    costoInput.addEventListener('input', function() {
+      updateFloatingLabel(this);
+    });
+  }
+
+  if (precioInput) {
+    precioInput.addEventListener('input', function() {
+      updateFloatingLabel(this);
+    });
   }
 
   /* ===========================================================

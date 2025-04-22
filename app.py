@@ -854,10 +854,8 @@ def agregar_a_granel():
             costo_str = request.form.get("costo", "$0").strip()
             precio_str = request.form.get("precio_venta", "$0").strip()
             marca = request.form.get("marca", "").strip()
-            origen = request.form.get("origen", "").strip()
             
-            # Tipo y unidad de medida
-            tipo_medida = request.form.get("tipo_medida", "").strip()
+            # Obtener unidad de medida (ya no usamos tipo_medida ni origen directamente)
             unidad_medida = request.form.get("unidad_medida", "").strip()
             
             # Generar código de barras único para productos a granel
@@ -883,7 +881,7 @@ def agregar_a_granel():
             
             # Parse numéricos
             try:
-                stock_int = int(stock_str)
+                stock_int = float(stock_str)  # Cambiado a float para soportar decimales
             except:
                 stock_int = 0
             
@@ -947,8 +945,8 @@ def agregar_a_granel():
             
             # Usar la nueva función para truncar la URL para asegurar que quepa en la columna
             url_imagen_truncada = truncar_url(request.form.get("displayed_image_url", "").strip(), 95)
-                
-            # Crear el producto
+            
+            # Crear el producto - Solo usar campos que existen en el modelo
             nuevo = Producto(
                 nombre=nombre,
                 stock=stock_int,
@@ -966,10 +964,8 @@ def agregar_a_granel():
                 esta_a_la_venta=esta_a_la_venta_bool,
                 has_caducidad=has_caducidad,
                 metodo_caducidad=caducidad_lapso,
-                # Nuevos campos específicos para productos a granel
-                tipo_medida=tipo_medida,
-                unidad_medida=unidad_medida,
-                origen=origen
+                unidad=unidad_medida  # Usar unidad correctamente
+                # Ya no usamos "origen" que no existe en el modelo
             )
             
             # Guardar en la base de datos
@@ -1121,14 +1117,8 @@ def editar_producto(prod_id):
             producto.metodo_caducidad = caducidad_lapso
             
             # Actualizar campos específicos si existen
-            if request.form.get("tipo_medida"):
-                producto.tipo_medida = request.form.get("tipo_medida")
             if request.form.get("unidad_medida"):
-                producto.unidad_medida = request.form.get("unidad_medida")
-            if request.form.get("fabricacion"):
-                producto.fabricacion = request.form.get("fabricacion")
-            if request.form.get("origen"):
-                producto.origen = request.form.get("origen")
+                producto.unidad = request.form.get("unidad_medida")
             
             # Guardar en la base de datos
             db.session.commit()
