@@ -71,25 +71,23 @@
   <style>
     /* Estilos para la miniatura del producto */
     .product-thumb {
-      width: 60px;
-      height: 60px;
+      width: 90px;
+      height: 90px;
       object-fit: contain;
       border: 1px solid #dee2e6;
       border-radius: 4px;
+      margin-bottom: 0;
     }
     
-    /* Estilos para el chevron expandible */
-    .chevron {
-      cursor: pointer;
-      transition: transform 0.2s;
-      display: inline-block;
-      font-size: 16px;
-      width: 24px;
-      text-align: center;
+    /* Estilo para la información del producto */
+    .product-info {
+      line-height: 1.5;
+      text-align: left;
+      font-size: 0.9rem;
     }
     
-    .chevron.expanded {
-      transform: rotate(90deg);
+    .product-info div {
+      margin-bottom: 3px;
     }
     
     /* Estilos para tooltip de categoría */
@@ -178,33 +176,6 @@
       background-color: #f1f1f1;
     }
     
-    /* Estilos para pestañas en detalle expandido */
-    .nav-tabs .nav-link {
-      font-size: 0.85rem;
-      padding: 0.4rem 0.8rem;
-    }
-    
-    /* Estilos para tablas internas */
-    .inner-table {
-      font-size: 0.9rem;
-    }
-    
-    .inner-table th, .inner-table td {
-      padding: 0.4rem;
-    }
-    
-    /* Estilos para metadatos */
-    .metadata-item {
-      display: inline-block;
-      margin-right: 20px;
-      font-size: 0.9rem;
-    }
-    
-    .metadata-label {
-      font-weight: 500;
-      color: #6c757d;
-    }
-    
     /* Iconos para favorito y visibilidad */
     .icon-fav, .icon-vis {
       width: 24px;
@@ -212,15 +183,13 @@
       cursor: pointer;
     }
     
-    /* Separación entre nombre y marca */
-    .product-name {
-      font-weight: 500;
-      margin-bottom: 2px;
+    /* Filas zebra estrictas */
+    .row-white {
+      background-color: #ffffff !important;
     }
     
-    .product-brand {
-      font-size: 0.85rem;
-      color: #6c757d;
+    .row-gray {
+      background-color: #f8f9fa !important;
     }
     
     /* Separación entre columnas */
@@ -236,13 +205,23 @@
       border-right: none;
     }
     
-    /* Filas zebra estrictas - controladas con clases explícitas */
-    .row-white {
-      background-color: #ffffff !important;
+    /* Bordes completos para la tabla */
+    .table-column-separated {
+      border: 1px solid #dee2e6;
+      border-radius: 4px;
+      overflow: hidden;
     }
     
-    .row-gray {
-      background-color: #f8f9fa !important;
+    .table-column-separated thead th {
+      border-bottom: 2px solid #dee2e6;
+    }
+    
+    .table-column-separated tbody tr {
+      border-bottom: 1px solid #dee2e6;
+    }
+    
+    .table-column-separated tbody tr:last-child {
+      border-bottom: none;
     }
     
     /* Detalle siempre con fondo claro */
@@ -251,61 +230,52 @@
     }
   </style>
 
-  <!-- Tabla principal con filas expandibles -->
+  <!-- Tabla de productos -->
   <div class="table-responsive">
     <table class="table align-middle border-top table-column-separated" id="productsTable">
       <thead class="table-light">
         <tr>
-          <th style="width: 30px;" class="text-center"></th>
-          <th style="width: 60px;" class="text-center">FOTO</th>
-          <th style="width: 130px;" class="text-center">SKU</th>
-          <th class="text-center">NOMBRE</th>
-          <th class="text-center">MARCA</th>
-          <th style="width: 50px;" class="text-center">CAT</th>
+          <th style="width: 120px;" class="text-center">FOTO</th>
+          <th style="width: 280px;" class="text-center">DEL PRODUCTO</th>
+          <th style="width: 50px;" class="text-center">CATEGORÍA</th>
           <th style="width: 90px;" class="text-center">STOCK</th>
+          <th style="width: 100px;" class="text-center">CADUCIDAD</th>
           <th style="width: 90px;" class="text-center">PRECIO</th>
-          <th style="width: 40px;" class="text-center">MENÚ</th>
+          <th style="width: 90px;" class="text-center">COSTO</th>
           <th style="width: 30px;" class="text-center">FAV</th>
           <th style="width: 30px;" class="text-center">VIS</th>
+          <th style="width: 40px;" class="text-center">MENÚ</th>
         </tr>
       </thead>
       <tbody>
         {% for p in productos %}
-        <tr class="product-row {% if loop.index0 % 2 == 0 %}row-white{% else %}row-gray{% endif %}" data-id="{{ p.id }}">
-          <td class="text-center">
-            <span class="chevron" onclick="toggleDetail({{ p.id }})">&#9654;</span>
-          </td>
+        <tr class="{% if loop.index0 % 2 == 0 %}row-white{% else %}row-gray{% endif %}" data-id="{{ p.id }}">
+          <!-- Foto -->
           <td class="text-center">
             {% if p.foto %}
-            <img src="{{ url_for('static', filename='uploads/' ~ p.foto) }}" alt="Foto" 
-                 class="product-thumb">
+              <img src="{{ url_for('static', filename='uploads/' ~ p.foto) }}" alt="Foto" class="product-thumb">
             {% else %}
-            <div class="bg-light rounded product-thumb" style="display: inline-block;"></div>
+              <div class="bg-light rounded product-thumb" style="display: inline-block;"></div>
             {% endif %}
           </td>
-          <td class="text-center">
-            <span style="font-family: monospace; font-size: 0.9rem; font-weight: 500;">
-              {% if p.codigo_barras_externo %}
-                {{ p.codigo_barras_externo }}
-              {% else %}
-                SKU-{{ '%05d' % p.id }}
-              {% endif %}
-            </span>
-          </td>
-          <td class="text-center">
-            <div style="line-height: 1.2;" class="product-name">
-              {{ p.nombre }}
+          
+          <!-- Del Producto -->
+          <td style="text-align: left; padding-left: 15px;">
+            <div class="product-info">
+              <div><strong>Nombre:</strong> {{ p.nombre }}</div>
+              <div><strong>Marca:</strong> {{ p.marca|default('No definida') }}</div>
+              <div><strong>SKU:</strong> 
+                {% if p.codigo_barras_externo %}
+                  {{ p.codigo_barras_externo }}
+                {% else %}
+                  SKU-{{ '%05d' % p.id }}
+                {% endif %}
+              </div>
             </div>
           </td>
+          
+          <!-- Categoría -->
           <td class="text-center">
-            {% if p.marca %}
-              {{ p.marca }}
-            {% else %}
-              <span class="text-muted">No definida</span>
-            {% endif %}
-          </td>
-          <td class="text-center">
-            <!-- Categoría con círculo de color y tooltip -->
             {% set cat_color = p.categoria_color|default('#CCCCCC') %}
             {% if p.categoria == 'abarrotes secos' %}
               {% set cat_color = '#FFA500' %}
@@ -317,41 +287,17 @@
               {% set cat_color = '#1E90FF' %}
             {% elif p.categoria == 'bebidas alcohólicas' %}
               {% set cat_color = '#800080' %}
-            {% elif p.categoria == 'panadería y repostería' %}
-              {% set cat_color = '#D2B48C' %}
-            {% elif p.categoria == 'lácteos y huevos' %}
-              {% set cat_color = '#F5DEB3' %}
-            {% elif p.categoria == 'carnes frías y embutidos' %}
-              {% set cat_color = '#B22222' %}
-            {% elif p.categoria == 'congelados y refrigerados' %}
-              {% set cat_color = '#00CED1' %}
-            {% elif p.categoria == 'frutas y verduras frescas' %}
-              {% set cat_color = '#32CD32' %}
-            {% elif p.categoria == 'productos de limpieza y hogar' %}
-              {% set cat_color = '#87CEFA' %}
-            {% elif p.categoria == 'cuidado personal e higiene' %}
-              {% set cat_color = '#FFC0CB' %}
-            {% elif p.categoria == 'medicamentos de mostrador (otc)' %}
-              {% set cat_color = '#FF6347' %}
-            {% elif p.categoria == 'productos para bebés' %}
-              {% set cat_color = '#FFB6C1' %}
-            {% elif p.categoria == 'productos para mascotas' %}
-              {% set cat_color = '#8FBC8F' %}
-            {% elif p.categoria == 'artículos de papelería' %}
-              {% set cat_color = '#9370DB' %}
-            {% elif p.categoria == 'ferretería básica' %}
-              {% set cat_color = '#708090' %}
-            {% elif p.categoria == 'otros (miscelánea)' %}
-              {% set cat_color = '#A9A9A9' %}
             {% endif %}
 
             <div class="category-tooltip">
               <span class="d-inline-block rounded-circle" 
-                    style="width:14px; height:14px; background-color:{{ cat_color }}; border: 1px solid rgba(0,0,0,0.1);">
+                    style="width:12px; height:12px; background-color:{{ cat_color }}; border: 1px solid rgba(0,0,0,0.1);">
               </span>
               <span class="category-tooltip-text">{{ p.categoria|default('Sin categoría')|title }}</span>
             </div>
           </td>
+          
+          <!-- Stock -->
           <td class="text-center fw-medium">
             {% if p.stock < p.alerta_stock|default(5) and p.stock > 0 %}
               <span class="text-warning">{{ p.stock }} piezas</span>
@@ -361,7 +307,45 @@
               {{ p.stock }} piezas
             {% endif %}
           </td>
+          
+          <!-- Caducidad -->
+          <td class="text-center">
+            {% if p.has_caducidad %}
+              {{ p.metodo_caducidad|default('N/A') }}
+            {% else %}
+              <span class="text-muted">N/A</span>
+            {% endif %}
+          </td>
+          
+          <!-- Precio -->
           <td class="text-center fw-medium">$ {{ p.precio_venta|default(0)|round(2) }}</td>
+          
+          <!-- Costo -->
+          <td class="text-center fw-medium">$ {{ p.costo|default(0)|round(2) }}</td>
+          
+          <!-- Favorito -->
+          <td class="text-center">
+            <span class="fav-toggle" data-id="{{ p.id }}" data-status="{{ p.es_favorito|default(false) }}">
+              {% if p.es_favorito %}
+                <span class="heart-icon active" style="font-size: 20px; color: red; cursor: pointer;">&#9829;</span>
+              {% else %}
+                <span class="heart-icon" style="font-size: 20px; color: gray; cursor: pointer;">&#9825;</span>
+              {% endif %}
+            </span>
+          </td>
+          
+          <!-- Visibilidad -->
+          <td class="text-center">
+            <span class="vis-toggle" data-id="{{ p.id }}" data-status="{{ p.esta_a_la_venta|default(true) }}">
+              {% if p.esta_a_la_venta %}
+                <img src="{{ url_for('static', filename='img/1.png') }}" class="venta-icon" style="width:24px; cursor:pointer;">
+              {% else %}
+                <img src="{{ url_for('static', filename='img/2.png') }}" class="venta-icon" style="width:24px; cursor:pointer;">
+              {% endif %}
+            </span>
+          </td>
+          
+          <!-- Menú -->
           <td class="text-center">
             <div class="actions-menu">
               <span class="actions-dot" onclick="toggleActionsMenu(event, this)">⋯</span>
@@ -375,128 +359,6 @@
                 <a href="#" onclick="setLocation({{ p.id }})">Definir ubicación</a>
                 <a href="#" onclick="printLabels({{ p.id }})">Imprimir etiquetas</a>
                 <a href="#" onclick="confirmDelete({{ p.id }}, '{{ p.nombre }}')">Eliminar producto</a>
-              </div>
-            </div>
-          </td>
-          <td class="text-center">
-            <span class="fav-toggle" data-id="{{ p.id }}" data-status="{{ p.es_favorito|default(false) }}">
-              {% if p.es_favorito %}
-                <span class="heart-icon active" style="font-size: 20px; color: red; cursor: pointer;">&#9829;</span>
-              {% else %}
-                <span class="heart-icon" style="font-size: 20px; color: gray; cursor: pointer;">&#9825;</span>
-              {% endif %}
-            </span>
-          </td>
-          <td class="text-center">
-            <span class="vis-toggle" data-id="{{ p.id }}" data-status="{{ p.esta_a_la_venta|default(true) }}">
-              {% if p.esta_a_la_venta %}
-                <img src="{{ url_for('static', filename='img/1.png') }}" class="venta-icon" style="width:24px; cursor:pointer;">
-              {% else %}
-                <img src="{{ url_for('static', filename='img/2.png') }}" class="venta-icon" style="width:24px; cursor:pointer;">
-              {% endif %}
-            </span>
-          </td>
-        </tr>
-        <!-- Detalle expandible -->
-        <tr id="detail-row-{{ p.id }}" class="d-none detail-row">
-          <td colspan="11" class="p-0">
-            <div class="row-detail p-3">
-              <!-- Tabs de información adicional -->
-              <ul class="nav nav-tabs" id="detail-tabs-{{ p.id }}" role="tablist">
-                <li class="nav-item" role="presentation">
-                  <button class="nav-link active" id="lotes-tab-{{ p.id }}" data-bs-toggle="tab" data-bs-target="#lotes-content-{{ p.id }}" type="button" role="tab" aria-controls="lotes-content-{{ p.id }}" aria-selected="true">Lotes y Caducidad</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                  <button class="nav-link" id="historico-tab-{{ p.id }}" data-bs-toggle="tab" data-bs-target="#historico-content-{{ p.id }}" type="button" role="tab" aria-controls="historico-content-{{ p.id }}" aria-selected="false">Histórico de Costos</button>
-                </li>
-              </ul>
-              
-              <!-- Contenido de las tabs -->
-              <div class="tab-content mt-3" id="detail-content-{{ p.id }}">
-                <!-- Tab Lotes y Caducidad -->
-                <div class="tab-pane fade show active" id="lotes-content-{{ p.id }}" role="tabpanel" aria-labelledby="lotes-tab-{{ p.id }}">
-                  <div class="table-responsive">
-                    <table class="table table-sm inner-table">
-                      <thead>
-                        <tr>
-                          <th>Lote</th>
-                          <th>Caduca</th>
-                          <th>Stock</th>
-                          <th>Costo</th>
-                          <th>Entrada</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <!-- Ejemplo de lotes - En producción se debería generar dinámicamente -->
-                        <tr>
-                          <td>#1</td>
-                          <td>{% if p.has_caducidad %}15-Jun-25{% else %}N/A{% endif %}</td>
-                          <td>{{ (p.stock / 2)|round|int if p.stock > 1 else p.stock }} piezas</td>
-                          <td>$ {{ p.costo|default(0)|round(2) }}</td>
-                          <td>02-Mar-25</td>
-                        </tr>
-                        {% if p.stock > 1 %}
-                        <tr>
-                          <td>#2</td>
-                          <td>{% if p.has_caducidad %}30-Jul-25{% else %}N/A{% endif %}</td>
-                          <td>{{ (p.stock / 2)|round|int }} piezas</td>
-                          <td>$ {{ (p.costo * 1.05)|default(0)|round(2) }}</td>
-                          <td>28-Mar-25</td>
-                        </tr>
-                        {% endif %}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-                
-                <!-- Tab Histórico de Costos -->
-                <div class="tab-pane fade" id="historico-content-{{ p.id }}" role="tabpanel" aria-labelledby="historico-tab-{{ p.id }}">
-                  <div class="table-responsive">
-                    <table class="table table-sm inner-table">
-                      <thead>
-                        <tr>
-                          <th>Fecha</th>
-                          <th>Proveedor</th>
-                          <th>Costo</th>
-                          <th>Cantidad</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <!-- Ejemplo de histórico - En producción se debería generar dinámicamente -->
-                        <tr>
-                          <td>02-Mar-25</td>
-                          <td>{{ p.proveedor|default('No definido') }}</td>
-                          <td>$ {{ p.costo|default(0)|round(2) }}</td>
-                          <td>{{ (p.stock / 2)|round|int if p.stock > 1 else p.stock }} piezas</td>
-                        </tr>
-                        {% if p.stock > 1 %}
-                        <tr>
-                          <td>28-Mar-25</td>
-                          <td>{{ p.proveedor|default('No definido') }}</td>
-                          <td>$ {{ (p.costo * 1.05)|default(0)|round(2) }}</td>
-                          <td>{{ (p.stock / 2)|round|int }} piezas</td>
-                        </tr>
-                        {% endif %}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Metadatos rápidos -->
-              <div class="mt-3 pt-2 border-top">
-                <div class="metadata-item">
-                  <span class="metadata-label">Proveedor:</span> 
-                  <span>{{ p.proveedor|default('No definido') }}</span>
-                </div>
-                <div class="metadata-item">
-                  <span class="metadata-label">Ubicación:</span> 
-                  <span>{{ p.ubicacion|default('No definida') }}</span>
-                </div>
-                <div class="metadata-item">
-                  <span class="metadata-label">Unidad:</span> 
-                  <span>piezas</span>
-                </div>
               </div>
             </div>
           </td>
@@ -537,21 +399,13 @@
 {% block scripts %}
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    // Asegurarse de que Bootstrap Icons esté incluido
-    if (!document.querySelector('link[href*="bootstrap-icons"]')) {
-      const linkElement = document.createElement('link');
-      linkElement.rel = 'stylesheet';
-      linkElement.href = 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css';
-      document.head.appendChild(linkElement);
-    }
-    
     // Inicializar los tooltips de Bootstrap
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
       return new bootstrap.Tooltip(tooltipTriggerEl);
     });
     
-    // Aplicar rayado zebra explícitamente - esto es redundante pero asegura que se aplique
+    // Aplicar rayado zebra explícitamente
     const rows = document.querySelectorAll('.product-row');
     rows.forEach((row, index) => {
       if (index % 2 === 0) {
@@ -645,22 +499,6 @@
     // Modal de confirmación
     window.deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
   });
-  
-  // Función para expandir/colapsar el detalle de la fila
-  function toggleDetail(id) {
-    const detailRow = document.getElementById(`detail-row-${id}`);
-    const chevron = document.querySelector(`.product-row[data-id="${id}"] .chevron`);
-    
-    if (detailRow.classList.contains('d-none')) {
-      detailRow.classList.remove('d-none');
-      chevron.textContent = '▼';
-      chevron.classList.add('expanded');
-    } else {
-      detailRow.classList.add('d-none');
-      chevron.textContent = '▶';
-      chevron.classList.remove('expanded');
-    }
-  }
   
   // Función para mostrar/ocultar el menú de acciones
   function toggleActionsMenu(event, dot) {
