@@ -1,121 +1,260 @@
 {% extends 'dashboard_base.html' %}
 
-{% block title %}Inventario - Dashboard{% endblock %}
+{% block title %}Inventario - OptiMax Manage{% endblock %}
 
 {% block inventario_active %}active{% endblock %}
 
 {% block content %}
+<style>
+  /* Estilos adicionales para un diseño más profesional */
+  .inventory-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #333;
+    letter-spacing: -0.5px;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+  }
+  
+  .stats-card {
+    transition: all 0.2s ease;
+    border: none !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  
+  .stats-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  }
+  
+  .stats-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+  }
+  
+  .stats-number {
+    font-size: 1.65rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #333;
+    margin-bottom: 0.2rem;
+  }
+  
+  .stats-label {
+    font-size: 0.85rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+  }
+  
+  .tools-container {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  
+  .tool-card {
+    flex: 1 0 150px;
+    max-width: 200px;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    padding: 1.25rem 1rem;
+    transition: all 0.2s ease;
+    border: 1px solid rgba(229, 46, 46, 0.1);
+    text-align: center;
+    cursor: pointer;
+  }
+  
+  .tool-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(229, 46, 46, 0.15);
+    border-color: rgba(229, 46, 46, 0.3);
+  }
+  
+  .tool-icon {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(229, 46, 46, 0.1);
+    border-radius: 12px;
+    color: #e52e2e;
+  }
+  
+  .tool-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+  }
+  
+  .section-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+  }
+  
+  .section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0;
+  }
+</style>
+
+<!-- Título principales -->
+<h1 class="inventory-title">INVENTARIO</h1>
+
+<!-- DATOS GENERALES - Versión compacta y profesional -->
 <div class="row mb-4">
   <div class="col-12">
-    <h1 class="dashboard-title">Inventario</h1>
-    <p class="dashboard-subtitle">Gestiona tus productos y mantén un control eficiente de tu inventario</p>
+    <div class="dashboard-card mb-3">
+      <div class="section-header">
+        <h2 class="section-title">DATOS GENERALES:</h2>
+      </div>
+      
+      <div class="row">
+        <div class="col-md-3 col-sm-6 mb-3">
+          <div class="stats-card card h-100">
+            <div class="card-body d-flex align-items-center px-3 py-2">
+              <div class="stats-icon me-3 bg-primary bg-opacity-10">
+                <i class="fas fa-boxes-stacked text-primary"></i>
+              </div>
+              <div>
+                <div class="stats-number">{{ total_productos if total_productos is defined else '21' }}</div>
+                <div class="stats-label">total productos</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-md-3 col-sm-6 mb-3">
+          <div class="stats-card card h-100">
+            <div class="card-body d-flex align-items-center px-3 py-2">
+              <div class="stats-icon me-3 bg-success bg-opacity-10">
+                <i class="fas fa-warehouse text-success"></i>
+              </div>
+              <div>
+                <div class="stats-number">{{ productos|sum(attribute='stock') if productos else '108' }}</div>
+                <div class="stats-label">unidades en stock</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-md-3 col-sm-6 mb-3">
+          <div class="stats-card card h-100">
+            <div class="card-body d-flex align-items-center px-3 py-2">
+              <div class="stats-icon me-3 bg-warning bg-opacity-10">
+                <i class="fas fa-dollar-sign text-warning"></i>
+              </div>
+              <div>
+                <div class="stats-number">{{ '%0.2f'|format((productos|sum(attribute='precio_venta') * productos|sum(attribute='stock'))|float) if productos else '108' }}</div>
+                <div class="stats-label">valor del inventario</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-md-3 col-sm-6 mb-3">
+          <div class="stats-card card h-100">
+            <div class="card-body d-flex align-items-center px-3 py-2">
+              <div class="stats-icon me-3 bg-danger bg-opacity-10">
+                <i class="fas fa-exclamation-triangle text-danger"></i>
+              </div>
+              <div>
+                <div class="stats-number">{{ productos|selectattr('stock', 'le', 5)|list|length if productos else '2' }}</div>
+                <div class="stats-label">Productos por agotarse</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- Stats Cards -->
-<div class="row mb-4">
-  <div class="col-md-6 col-lg-3 mb-3">
-    <div class="stats-card stats-primary">
-      <div class="stats-icon">
-        <i class="fas fa-boxes-stacked"></i>
-      </div>
-      <div class="stats-info">
-        <h3>{{ total_productos if total_productos is defined else '0' }}</h3>
-        <p>Total Productos</p>
-      </div>
-    </div>
-  </div>
-  
-  <div class="col-md-6 col-lg-3 mb-3">
-    <div class="stats-card stats-success">
-      <div class="stats-icon">
-        <i class="fas fa-warehouse"></i>
-      </div>
-      <div class="stats-info">
-        <h3>{{ productos|sum(attribute='stock') if productos else '0' }}</h3>
-        <p>Unidades en Stock</p>
-      </div>
-    </div>
-  </div>
-  
-  <div class="col-md-6 col-lg-3 mb-3">
-    <div class="stats-card stats-warning">
-      <div class="stats-icon">
-        <i class="fas fa-dollar-sign"></i>
-      </div>
-      <div class="stats-info">
-        <h3>${{ '%0.2f'|format((productos|sum(attribute='precio_venta') * productos|sum(attribute='stock'))|float) if productos else '0.00' }}</h3>
-        <p>Valor del Inventario</p>
-      </div>
-    </div>
-  </div>
-  
-  <div class="col-md-6 col-lg-3 mb-3">
-    <div class="stats-card stats-danger">
-      <div class="stats-icon">
-        <i class="fas fa-exclamation-triangle"></i>
-      </div>
-      <div class="stats-info">
-        <h3>{{ productos|selectattr('stock', 'le', 5)|list|length if productos else '0' }}</h3>
-        <p>Productos por Agotarse</p>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Quick Actions -->
+<!-- HERRAMIENTAS - Diseño más profesional -->
 <div class="row mb-4">
   <div class="col-12">
     <div class="dashboard-card">
-      <div class="section-title">
-        <h2>Acciones Rápidas</h2>
+      <div class="section-header">
+        <h2 class="section-title">HERRAMIENTAS:</h2>
       </div>
-      <div class="row g-3">
-        <div class="col-md-6 col-lg-3">
-          <a href="{{ url_for('nuevo_producto') }}" class="btn btn-primary-custom w-100 d-flex align-items-center justify-content-center gap-2">
-            <i class="fas fa-plus"></i> Agregar Producto
-          </a>
+      
+      <div class="tools-container">
+        <div class="tool-card">
+          <div class="tool-icon">
+            <img src="{{ url_for('static', filename='img/3.png') }}" alt="Registrar producto" style="width: 28px; height: 28px;">
+          </div>
+          <p class="tool-label">Registrar producto</p>
         </div>
-        <div class="col-md-6 col-lg-3">
-          <a href="{{ url_for('ver_productos') }}" class="btn btn-outline-custom w-100 d-flex align-items-center justify-content-center gap-2">
-            <i class="fas fa-list"></i> Ver Todos
-          </a>
+        
+        <div class="tool-card">
+          <div class="tool-icon">
+            <i class="fas fa-plus-minus"></i>
+          </div>
+          <p class="tool-label">Añadir/restar existencias</p>
         </div>
-        <div class="col-md-6 col-lg-3">
-          <a href="{{ url_for('reabastecer_listado') }}" class="btn btn-outline-custom w-100 d-flex align-items-center justify-content-center gap-2">
-            <i class="fas fa-dolly"></i> Reabastecer
-          </a>
+        
+        <div class="tool-card">
+          <div class="tool-icon">
+            <i class="fas fa-dollar-sign"></i>
+          </div>
+          <p class="tool-label">Cambiar precios</p>
         </div>
-        <div class="col-md-6 col-lg-3">
-          <a href="{{ url_for('pendientes_aprobacion') }}" class="btn btn-outline-custom w-100 d-flex align-items-center justify-content-center gap-2">
-            <i class="fas fa-clipboard-check"></i> Pendientes
-          </a>
+        
+        <div class="tool-card">
+          <div class="tool-icon">
+            <i class="fas fa-percent"></i>
+          </div>
+          <p class="tool-label">Descuentos</p>
+        </div>
+        
+        <div class="tool-card">
+          <div class="tool-icon">
+            <i class="fas fa-map-marker-alt"></i>
+          </div>
+          <p class="tool-label">Ubicación de mis productos</p>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Recent Products -->
+<!-- VER Y GESTIONAR PRODUCTOS EXISTENTES -->
 <div class="row mb-4">
   <div class="col-12">
     <div class="dashboard-card">
-      <div class="section-title">
-        <h2>Productos Recientes</h2>
-        <a href="{{ url_for('ver_productos') }}">Ver todos <i class="fas fa-arrow-right"></i></a>
+      <div class="section-header">
+        <h2 class="section-title">VER Y GESTIONAR PRODUCTOS EXISTENTES:</h2>
       </div>
       
       {% if productos and productos|length > 0 %}
         <div class="table-responsive">
-          <table class="dashboard-table table">
-            <thead>
+          <table class="table table-hover align-middle">
+            <thead class="table-light">
               <tr>
                 <th style="width: 70px;"></th>
                 <th>Producto</th>
                 <th>Categoría</th>
                 <th>Stock</th>
                 <th>Precio</th>
-                <th>Acciones</th>
+                <th>Marca</th>
               </tr>
             </thead>
             <tbody>
@@ -124,9 +263,9 @@
                   <!-- Foto -->
                   <td>
                     {% if p.foto %}
-                      <img src="{{ url_for('static', filename='uploads/' ~ p.foto) }}" class="product-img" alt="{{ p.nombre }}">
+                      <img src="{{ url_for('static', filename='uploads/' ~ p.foto) }}" class="rounded" alt="{{ p.nombre }}" style="width: 50px; height: 50px; object-fit: cover; border: 1px solid #e9ecef;">
                     {% else %}
-                      <div class="product-img bg-light d-flex align-items-center justify-content-center">
+                      <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; border: 1px solid #e9ecef;">
                         <i class="fas fa-box text-secondary"></i>
                       </div>
                     {% endif %}
@@ -135,7 +274,7 @@
                   <!-- Información del producto -->
                   <td>
                     <div class="d-flex flex-column">
-                      <span class="fw-medium">{{ p.nombre }}</span>
+                      <span class="fw-medium text-dark">{{ p.nombre }}</span>
                       <small class="text-muted">
                         {% if p.codigo_barras_externo %}
                           {{ p.codigo_barras_externo }}
@@ -149,167 +288,136 @@
                   <!-- Categoría -->
                   <td>
                     {% set cat_color = p.categoria_color|default('#CCCCCC') %}
-                    <div class="category-badge">
-                      <span class="category-indicator" style="background-color: {{ cat_color }};"></span>
-                      {{ p.categoria|default('Sin categoría')|title }}
+                    <div class="d-inline-flex align-items-center px-2 py-1 rounded-pill" style="background-color: {{ cat_color }}20; border: 1px solid {{ cat_color }}50;">
+                      <span class="d-inline-block rounded-circle me-1" style="width: 8px; height: 8px; background-color: {{ cat_color }};"></span>
+                      <span style="font-size: 0.85rem; color: #333; font-weight: 500;">{{ p.categoria|default('Sin categoría')|title }}</span>
                     </div>
                   </td>
                   
                   <!-- Stock -->
                   <td>
                     {% if p.stock <= 0 %}
-                      <span class="badge-custom badge-out-of-stock">Agotado</span>
+                      <span class="px-2 py-1 rounded-pill bg-danger bg-opacity-10 text-danger" style="font-size: 0.85rem; font-weight: 500;">Agotado</span>
                     {% elif p.stock < 5 %}
-                      <span class="badge-custom badge-low-stock">Bajo: {{ p.stock }}</span>
+                      <span class="px-2 py-1 rounded-pill bg-warning bg-opacity-10 text-warning" style="font-size: 0.85rem; font-weight: 500;">{{ p.stock }} unidades</span>
                     {% else %}
-                      <span class="badge-custom badge-in-stock">{{ p.stock }} unidades</span>
+                      <span class="px-2 py-1 rounded-pill bg-success bg-opacity-10 text-success" style="font-size: 0.85rem; font-weight: 500;">{{ p.stock }} unidades</span>
                     {% endif %}
                   </td>
                   
                   <!-- Precio -->
                   <td>
-                    <span class="fw-medium">${{ p.precio_venta|round(2) }}</span>
+                    <span class="fw-semibold">${{ p.precio_venta|round(2) }}</span>
                   </td>
                   
-                  <!-- Acciones -->
+                  <!-- Marca -->
                   <td>
-                    <div class="dropdown">
-                      <button class="btn btn-sm btn-outline-custom dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Acciones
-                      </button>
-                      <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{{ url_for('editar_producto', prod_id=p.id) }}"><i class="fas fa-edit me-2"></i> Editar</a></li>
-                        <li><a class="dropdown-item" href="{{ url_for('reabastecer_producto', prod_id=p.id) }}"><i class="fas fa-plus me-2"></i> Reabastecer</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-danger" href="#" onclick="confirmDelete({{ p.id }}, '{{ p.nombre }}')"><i class="fas fa-trash-alt me-2"></i> Eliminar</a></li>
-                      </ul>
-                    </div>
+                    <span>{{ p.marca|default('—') }}</span>
                   </td>
                 </tr>
               {% endfor %}
             </tbody>
           </table>
         </div>
-        {% if productos|length > 2 %}
-          <div class="text-center mt-3">
-            <a href="{{ url_for('ver_productos') }}" class="btn btn-outline-custom">
-              Ver más productos <i class="fas fa-arrow-right ms-1"></i>
-            </a>
-          </div>
-        {% endif %}
+        <div class="d-flex justify-content-end mt-3">
+          <a href="{{ url_for('ver_productos') }}" class="btn btn-sm btn-outline-danger">
+            Ver completo <i class="fas fa-arrow-right ms-1"></i>
+          </a>
+        </div>
       {% else %}
-        <div class="alert alert-info mb-0">
-          <i class="fas fa-info-circle me-2"></i> No hay productos en tu inventario. 
-          <a href="{{ url_for('nuevo_producto') }}" class="alert-link">Agrega tu primer producto</a>.
+        <div class="alert alert-light border mb-0">
+          <div class="d-flex align-items-center">
+            <i class="fas fa-info-circle text-primary me-3 fa-lg"></i>
+            <div>
+              <p class="mb-0">No hay productos en tu inventario. <a href="{{ url_for('nuevo_producto') }}" class="fw-medium text-decoration-none">Agrega tu primer producto</a>.</p>
+            </div>
+          </div>
         </div>
       {% endif %}
     </div>
   </div>
 </div>
 
-<!-- Categorías y Estadísticas -->
+<!-- AVISOS -->
 <div class="row mb-4">
-  <div class="col-lg-6 mb-3 mb-lg-0">
-    <div class="dashboard-card h-100">
-      <div class="section-title">
-        <h2>Categorías</h2>
+  <div class="col-12">
+    <div class="dashboard-card">
+      <div class="section-header">
+        <h2 class="section-title">AVISOS</h2>
       </div>
-      {% if productos and productos|length > 0 %}
-        {% set categorias = {} %}
-        {% for p in productos %}
-          {% if p.categoria %}
-            {% if p.categoria in categorias %}
-              {% set _ = categorias.update({p.categoria: categorias[p.categoria] + 1}) %}
-            {% else %}
-              {% set _ = categorias.update({p.categoria: 1}) %}
-            {% endif %}
-          {% endif %}
-        {% endfor %}
-        
-        <div class="list-group">
-          {% for cat, count in categorias.items() %}
-            {% set cat_color = '#CCCCCC' %}
-            <!-- Buscar el color de categoría del primer producto que tenga esta categoría -->
-            {% for p in productos %}
-              {% if p.categoria == cat and p.categoria_color %}
-                {% set cat_color = p.categoria_color %}
-              {% endif %}
-            {% endfor %}
-            
-            <div class="list-group-item d-flex justify-content-between align-items-center">
-              <div class="d-flex align-items-center">
-                <span class="me-2 rounded-circle" style="width: 10px; height: 10px; background-color: {{ cat_color }};"></span>
-                {{ cat|title }}
-              </div>
-              <span class="badge bg-secondary rounded-pill">{{ count }}</span>
-            </div>
-          {% endfor %}
-        </div>
-      {% else %}
-        <div class="alert alert-info mb-0">
-          <i class="fas fa-info-circle me-2"></i> No hay categorías disponibles.
-        </div>
-      {% endif %}
-    </div>
-  </div>
-  
-  <div class="col-lg-6">
-    <div class="dashboard-card h-100">
-      <div class="section-title">
-        <h2>Productos por Agotarse</h2>
-      </div>
-      {% set low_stock = productos|selectattr('stock', 'le', 5)|selectattr('stock', 'gt', 0)|list if productos else [] %}
       
-      {% if low_stock|length > 0 %}
-        <div class="list-group">
-          {% for p in low_stock[:5] %}
-            <div class="list-group-item d-flex justify-content-between align-items-center">
-              <div class="d-flex align-items-center">
-                {% if p.foto %}
-                  <img src="{{ url_for('static', filename='uploads/' ~ p.foto) }}" class="me-2 rounded" style="width: 30px; height: 30px; object-fit: cover;" alt="{{ p.nombre }}">
-                {% else %}
-                  <div class="me-2 rounded bg-light d-flex align-items-center justify-content-center" style="width: 30px; height: 30px;">
-                    <i class="fas fa-box text-secondary small"></i>
-                  </div>
-                {% endif %}
-                <span>{{ p.nombre }}</span>
-              </div>
-              <span class="badge-custom badge-low-stock">{{ p.stock }} unidades</span>
+      <div class="row g-4">
+        <div class="col-md-6">
+          <div class="card h-100 border-0 shadow-sm">
+            <div class="card-header bg-white py-3">
+              <h5 class="m-0 d-flex align-items-center">
+                <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                Productos por agotarse
+              </h5>
             </div>
-          {% endfor %}
+            <div class="card-body p-0">
+              {% set low_stock = productos|selectattr('stock', 'le', 5)|selectattr('stock', 'gt', 0)|list if productos else [] %}
+              {% if low_stock|length > 0 %}
+                <div class="list-group list-group-flush">
+                  {% for p in low_stock[:5] %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center px-4">
+                      <span class="text-truncate">{{ p.nombre }}</span>
+                      <span class="badge rounded-pill bg-warning text-dark">{{ p.stock }}</span>
+                    </div>
+                  {% endfor %}
+                </div>
+              {% else %}
+                <div class="text-center py-4 text-muted">
+                  <i class="fas fa-check-circle fa-2x mb-2"></i>
+                  <p class="mb-0">No hay productos por agotarse</p>
+                </div>
+              {% endif %}
+            </div>
+          </div>
         </div>
         
-        {% if low_stock|length > 5 %}
-          <div class="text-center mt-3">
-            <a href="{{ url_for('ver_productos') }}?filtroAprobacion=todos" class="btn btn-sm btn-outline-custom">
-              Ver todos <i class="fas fa-arrow-right ms-1"></i>
-            </a>
+        <div class="col-md-6">
+          <div class="card h-100 border-0 shadow-sm">
+            <div class="card-header bg-white py-3">
+              <h5 class="m-0 d-flex align-items-center">
+                <i class="fas fa-bell text-info me-2"></i>
+                X cosa
+              </h5>
+            </div>
+            <div class="card-body p-0">
+              <div class="text-center py-4 text-muted">
+                <i class="fas fa-inbox fa-2x mb-2"></i>
+                <p class="mb-0">No hay notificaciones</p>
+              </div>
+            </div>
           </div>
-        {% endif %}
-      {% else %}
-        <div class="alert alert-success mb-0">
-          <i class="fas fa-check-circle me-2"></i> ¡Bien! No hay productos por agotarse.
         </div>
-      {% endif %}
+      </div>
     </div>
   </div>
 </div>
 
 <!-- Modal de confirmación para eliminar -->
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header border-0">
         <h5 class="modal-title">Confirmar eliminación</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body">
-        <p>¿Estás seguro de que deseas eliminar el producto "<span id="deleteProductName"></span>"?</p>
-        <p class="text-danger">Esta acción no se puede deshacer.</p>
+      <div class="modal-body py-4">
+        <div class="text-center mb-4">
+          <div class="d-inline-flex align-items-center justify-content-center bg-danger bg-opacity-10 text-danger rounded-circle mb-3" style="width: 60px; height: 60px;">
+            <i class="fas fa-exclamation-triangle fa-2x"></i>
+          </div>
+          <h4 class="mb-2">¿Eliminar este producto?</h4>
+          <p class="text-muted mb-0">¿Estás seguro de que deseas eliminar el producto "<span id="deleteProductName" class="fw-medium"></span>"?</p>
+          <p class="text-danger small mt-3 mb-0"><i class="fas fa-info-circle me-1"></i> Esta acción no se puede deshacer.</p>
+        </div>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <a href="#" id="confirmDelete" class="btn btn-danger">Eliminar</a>
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="btn btn-light fw-medium px-4" data-bs-dismiss="modal">Cancelar</button>
+        <a href="#" id="confirmDelete" class="btn btn-danger fw-medium px-4">Eliminar</a>
       </div>
     </div>
   </div>
@@ -333,6 +441,45 @@
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     tooltipTriggerList.map(function(tooltipTriggerEl) {
       return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    // Animación para tarjetas de estadísticas y herramientas
+    const statsCards = document.querySelectorAll('.stats-card');
+    statsCards.forEach((card, index) => {
+      setTimeout(() => {
+        card.style.opacity = '1';
+        card.style.transform = 'translateY(0)';
+      }, 100 * index);
+    });
+    
+    // Inicialización de herramientas con efecto hover
+    const toolCards = document.querySelectorAll('.tool-card');
+    toolCards.forEach(card => {
+      card.addEventListener('mouseenter', function() {
+        this.querySelector('.tool-icon').style.transform = 'scale(1.1)';
+      });
+      
+      card.addEventListener('mouseleave', function() {
+        this.querySelector('.tool-icon').style.transform = 'scale(1)';
+      });
+    });
+  });
+  
+  // Agregar interactividad a las herramientas
+  document.querySelectorAll('.tool-card').forEach((tool, index) => {
+    tool.addEventListener('click', function() {
+      // Acciones según el índice de la herramienta
+      const actions = [
+        () => window.location.href = "{{ url_for('nuevo_producto') }}",
+        () => window.location.href = "{{ url_for('reabastecer_listado') }}",
+        () => window.location.href = "#cambiar-precios",
+        () => window.location.href = "#descuentos",
+        () => window.location.href = "#ubicacion"
+      ];
+      
+      if (actions[index]) {
+        actions[index]();
+      }
     });
   });
 </script>
