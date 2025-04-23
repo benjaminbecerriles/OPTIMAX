@@ -4,389 +4,799 @@
 
 {% block content %}
 <style>
-  /* Estilos globales */
+  /* Variables globales */
   :root {
-    --primary-color: #e52e2e;
-    --primary-light: rgba(229, 46, 46, 0.1);
-    --primary-hover: #c51c1c;
-    --text-primary: #212121;
-    --text-secondary: #616161;
-    --text-tertiary: #757575;
-    --bg-light: #f5f7fa;
-    --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
-    --shadow-md: 0 4px 6px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.08);
-    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.025);
+    /* Colores principales */
+    --primary: #e52e2e;
+    --primary-dark: #c51818;
+    --primary-light: rgba(229, 46, 46, 0.08);
+    --primary-soft: rgba(229, 46, 46, 0.18);
+    --dark: #212529;
+    --gray-850: #2b3035;
+    --gray-800: #343a40;
+    --gray-700: #495057;
+    --gray-600: #6c757d;
+    --gray-500: #adb5bd;
+    --gray-400: #ced4da;
+    --gray-300: #dee2e6;
+    --gray-200: #e9ecef;
+    --gray-100: #f8f9fa;
+    --gray-50: #fafafa;
+    --white: #ffffff;
+    
+    /* Sombras */
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.03);
+    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0, 0, 0, 0.04);
+    --shadow-lg: 0 12px 24px -6px rgba(0, 0, 0, 0.04), 0 6px 12px -3px rgba(0, 0, 0, 0.02);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.04), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+    --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.04);
+    
+    /* Tipografía */
+    --font-heading: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-body: 'SF Pro Text', -apple-system, BlinkMacSystemFont, sans-serif;
+    
+    /* Transiciones */
+    --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Radios de bordes */
     --radius-sm: 4px;
     --radius-md: 8px;
     --radius-lg: 12px;
-    --spacing-xs: 4px;
-    --spacing-sm: 8px;
-    --spacing-md: 16px;
-    --spacing-lg: 24px;
-    --spacing-xl: 32px;
+    --radius-xl: 16px;
+    --radius-full: 9999px;
   }
 
-  .container-fluid {
-    width: 100%;
-    max-width: 1320px;
-    margin: 0 auto;
-    padding: 0 var(--spacing-lg);
+  /* Reset y estilos base */
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
   }
   
-  /* Sección principal */
-  .main-section {
-    padding: var(--spacing-xl) 0;
-    background-color: var(--bg-light);
-    min-height: calc(100vh - 120px);
+  body {
+    font-family: var(--font-body);
+    color: var(--gray-800);
+    background-color: var(--gray-100);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Cabecera */  
-  .header {
-    margin-bottom: var(--spacing-xl);
+  /* Contenedor principal */
+  .product-selection-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2.5rem;
+    background-color: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Encabezado */
+  .selection-header {
+    position: relative;
+    z-index: 2;
     text-align: center;
-  }
-  
-  .page-title {
-    font-size: 28px;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: var(--spacing-sm);
-    letter-spacing: -0.02em;
-  }
-  
-  .page-subtitle {
-    font-size: 16px;
-    color: var(--text-secondary);
-    max-width: 600px;
-    margin: 0 auto;
-    line-height: 1.5;
+    margin-bottom: 3.5rem;
   }
 
-  /* Contenedor de opciones */
-  .options-container {
+  .selection-header h1 {
+    font-family: var(--font-heading);
+    font-size: 2.25rem;
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+
+  .selection-header p {
+    font-size: 1.125rem;
+    color: var(--gray-600);
+    max-width: 700px;
+    margin: 0 auto;
+    line-height: 1.6;
+    font-weight: 400;
+  }
+
+  /* Grid de opciones */
+  .options-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: var(--spacing-xl);
-    margin-bottom: var(--spacing-xl);
+    gap: 2rem;
+    margin-bottom: 2.5rem;
+    position: relative;
+    z-index: 2;
   }
 
-  @media (max-width: 1024px) {
-    .options-container {
+  @media (max-width: 1100px) {
+    .options-grid {
       grid-template-columns: repeat(2, 1fr);
     }
   }
 
   @media (max-width: 768px) {
-    .options-container {
+    .options-grid {
       grid-template-columns: 1fr;
     }
   }
 
   /* Tarjeta de opción */
-  .option-card {
-    background-color: white;
+  .product-option {
+    position: relative;
+    background-color: var(--white);
     border-radius: var(--radius-lg);
     overflow: hidden;
-    box-shadow: var(--shadow-md);
-    transition: all 0.3s ease;
+    transition: var(--transition-normal);
     height: 100%;
     display: flex;
     flex-direction: column;
-  }
-  
-  .option-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-lg);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--gray-200);
   }
 
-  /* Imagen de la tarjeta */
-  .card-media {
+  .product-option:hover {
+    transform: translateY(-5px) scale(1.01);
+    box-shadow: var(--shadow-xl);
+    border-color: var(--gray-300);
+    z-index: 10;
+  }
+
+  /* Media container */
+  .option-media {
     position: relative;
     width: 100%;
-    height: 200px;
+    height: 240px;
     overflow: hidden;
   }
-  
-  .card-media video,
-  .card-media img {
+
+  .option-media video,
+  .option-media img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: var(--transition-slow);
+  }
+
+  .product-option:hover .option-media video,
+  .product-option:hover .option-media img {
+    transform: scale(1.05);
+  }
+
+  /* Overlay para el media */
+  .media-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(180deg, 
+      rgba(0,0,0,0) 0%, 
+      rgba(0,0,0,0.1) 70%, 
+      rgba(0,0,0,0.2) 100%);
+    pointer-events: none;
+  }
+
+  /* Badge del tipo de producto */
+  .option-badge {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    padding: 0.5rem 1rem;
+    background-color: rgba(255, 255, 255, 0.9);
+    color: var(--gray-700);
+    font-weight: 600;
+    font-size: 0.85rem;
+    border-radius: var(--radius-full);
+    box-shadow: var(--shadow-md);
+    z-index: 10;
+    transition: var(--transition-fast);
+    backdrop-filter: blur(4px);
+  }
+
+  .product-option:hover .option-badge {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  /* Botón de info */
+  .info-button {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-full);
+    background-color: rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    box-shadow: var(--shadow-md);
+    transition: var(--transition-fast);
+    border: none;
+    color: var(--gray-700);
+    font-weight: 600;
+    font-size: 0.85rem;
+    backdrop-filter: blur(4px);
+  }
+
+  .info-button:hover {
+    transform: scale(1.1);
+    background-color: var(--white);
+    box-shadow: var(--shadow-lg);
   }
 
   /* Contenido de la tarjeta */
-  .card-content {
-    padding: var(--spacing-lg);
+  .option-content {
+    padding: 1.75rem;
+    flex-grow: 1;
     display: flex;
     flex-direction: column;
-    flex-grow: 1;
+    position: relative;
   }
-  
-  .card-tag {
-    display: inline-block;
-    font-size: 12px;
+
+  .option-title {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
     font-weight: 600;
-    text-transform: uppercase;
-    color: var(--primary-color);
-    background-color: var(--primary-light);
-    padding: 4px 8px;
-    border-radius: 4px;
-    margin-bottom: var(--spacing-md);
-    letter-spacing: 0.5px;
-    align-self: flex-start;
-  }
-  
-  .card-title {
-    font-size: 20px;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: var(--spacing-sm);
+    color: var(--dark);
+    margin-bottom: 1rem;
     letter-spacing: -0.01em;
-  }
-  
-  .card-description {
-    color: var(--text-secondary);
-    font-size: 14px;
-    line-height: 1.5;
-    margin-bottom: var(--spacing-lg);
+    line-height: 1.3;
   }
 
-  /* Lista de características */
-  .feature-list {
-    margin-bottom: var(--spacing-lg);
-    flex-grow: 1;
-  }
-  
-  .feature-item {
-    display: flex;
-    align-items: flex-start;
-    margin-bottom: var(--spacing-md);
-  }
-  
-  .feature-icon {
-    flex-shrink: 0;
-    margin-right: var(--spacing-md);
-    width: 20px;
-    height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--primary-color);
-  }
-  
-  .feature-text {
-    font-size: 14px;
-    color: var(--text-tertiary);
-    line-height: 1.4;
+  .option-description {
+    font-size: 1rem;
+    color: var(--gray-700);
+    line-height: 1.6;
+    margin-bottom: 0;
   }
 
-  /* Pie de tarjeta */
-  .card-actions {
-    padding: var(--spacing-md) var(--spacing-lg);
-    border-top: 1px solid rgba(0,0,0,0.05);
-    display: flex;
-    justify-content: center;
+  /* Footer de la tarjeta */
+  .option-footer {
+    padding: 1.5rem;
+    border-top: 1px solid var(--gray-200);
+    margin-top: auto;
   }
-  
-  .btn-action {
-    display: inline-block;
-    background-color: var(--primary-color);
-    color: white;
-    font-size: 14px;
+
+  .btn-select {
+    width: 100%;
+    padding: 0.875rem 1.5rem;
+    background-color: var(--primary);
+    color: var(--white);
     font-weight: 600;
-    padding: 10px 24px;
-    border-radius: var(--radius-sm);
+    font-size: 1rem;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: var(--transition-fast);
     text-align: center;
     text-decoration: none;
-    transition: background-color 0.2s ease;
-    border: none;
-    cursor: pointer;
-    width: 100%;
+    display: inline-block;
+    letter-spacing: 0.01em;
   }
-  
-  .btn-action:hover {
-    background-color: var(--primary-hover);
-  }
-  
-  /* Navegación inferior */
-  .navigation {
-    display: flex;
-    justify-content: flex-start;
-    margin-top: var(--spacing-xl);
-  }
-  
-  .btn-back {
-    display: inline-flex;
-    align-items: center;
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--text-secondary);
-    text-decoration: none;
-    padding: 8px 16px;
-    border-radius: var(--radius-sm);
-    background-color: white;
-    box-shadow: var(--shadow-sm);
-    transition: all 0.2s ease;
-  }
-  
-  .btn-back:hover {
+
+  .btn-select:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-1px);
     box-shadow: var(--shadow-md);
-    color: var(--text-primary);
+  }
+
+  /* Botón cancelar */
+  .actions-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1.5rem;
+    position: relative;
+    z-index: 2;
+  }
+
+  .btn-cancel {
+    padding: 0.875rem 2.5rem;
+    background-color: var(--gray-200);
+    color: var(--gray-700);
+    font-weight: 600;
+    font-size: 1rem;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: var(--transition-fast);
+    text-decoration: none;
+    display: inline-block;
+    letter-spacing: 0.01em;
+  }
+
+  .btn-cancel:hover {
+    background-color: var(--gray-300);
+    color: var(--gray-800);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* Modal de información */
+  .info-modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(5px);
+  }
+
+  .modal-content {
+    position: relative;
+    background-color: var(--white);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    width: 100%;
+    max-width: 550px;
+    box-shadow: var(--shadow-xl);
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-full);
+    background-color: var(--gray-200);
+    border: none;
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition-fast);
+    color: var(--gray-700);
+  }
+
+  .modal-close:hover {
+    background-color: var(--gray-300);
+    color: var(--gray-800);
+  }
+
+  .modal-title {
+    font-family: var(--font-heading);
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: var(--dark);
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+    padding-right: 2rem;
+  }
+
+  .modal-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  @media (max-width: 576px) {
+    .modal-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .modal-feature-card {
+    background-color: var(--gray-100);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    transition: var(--transition-fast);
+    border: 1px solid var(--gray-200);
+  }
+
+  .modal-feature-card:hover {
+    background-color: var(--gray-50);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .modal-feature-title {
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+    color: var(--dark);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .modal-feature-icon {
+    width: 42px;
+    height: 42px;
+  }
+
+  .modal-feature-text {
+    font-size: 0.9rem;
+    color: var(--gray-700);
+    line-height: 1.5;
+  }
+
+  .modal-examples {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1.25rem;
+  }
+
+  .example-tag {
+    background-color: var(--white);
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--radius-full);
+    font-size: 0.85rem;
+    color: var(--gray-700);
+    border: 1px solid var(--gray-300);
+    transition: var(--transition-fast);
+  }
+
+  .example-tag:hover {
+    border-color: var(--primary);
+    background-color: var(--primary-light);
+    color: var(--primary-dark);
+    transform: translateY(-1px);
+  }
+
+  /* Animaciones */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .animated-fade {
+    animation: fadeIn 0.5s ease-out;
   }
   
-  .btn-back svg {
-    margin-right: var(--spacing-sm);
+  .scale-in {
+    animation: scaleIn 0.3s ease-out;
+  }
+  
+  @keyframes scaleIn {
+    from { transform: scale(0.98); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  /* Mejoras visuales adicionales */
+  .premium-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 56px;
+    height: 56px;
+    background-color: var(--primary);
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--white);
+    font-weight: 600;
+    font-size: 0.75rem;
+    box-shadow: var(--shadow-lg);
+    transform: rotate(15deg);
+    z-index: 5;
+  }
+
+  .highlight-accent {
+    color: var(--primary);
   }
 </style>
 
-<!-- Sección principal con fondo claro -->
-<section class="main-section">
-  <div class="container-fluid">
-    <!-- Cabecera -->
-    <header class="header">
-      <h1 class="page-title">¿Qué tipo de producto deseas agregar?</h1>
-      <p class="page-subtitle">Selecciona el método que mejor se adapte al producto que quieres registrar en tu inventario</p>
-    </header>
+<div class="product-selection-container animated-fade">
+  <!-- Encabezado de la sección -->
+  <div class="selection-header">
+    <h1>Selecciona un tipo de <span class="highlight-accent">producto</span></h1>
+    <p>Elige la opción que mejor se adapte a tus necesidades de inventario</p>
+  </div>
 
-    <!-- Contenedor de opciones -->
-    <div class="options-container">
-      <!-- Opción 1: Con código de barras -->
-      <div class="option-card">
-        <div class="card-media">
-          <video src="{{ url_for('static', filename='vid/producto.MOV') }}" autoplay loop muted playsinline></video>
-        </div>
-        <div class="card-content">
-          <span class="card-tag">Código de barras</span>
-          <h3 class="card-title">Productos empaquetados</h3>
-          <p class="card-description">Productos comerciales que ya incluyen un código de barras impreso en su empaque.</p>
-
-          <div class="feature-list">
-            <div class="feature-item">
-              <div class="feature-icon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M3 9L12 4.5L21 9L12 13.5L3 9Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                  <path d="M3 14L12 18.5L21 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                </svg>
-              </div>
-              <div class="feature-text">Escanea directamente el producto con la cámara o un lector físico</div>
-            </div>
-            <div class="feature-item">
-              <div class="feature-icon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                </svg>
-              </div>
-              <div class="feature-text">Búsqueda automática de información del producto</div>
-            </div>
-            <div class="feature-item">
-              <div class="feature-icon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M9 12L11 14L15 10M12 3L4 10V21H20V10L12 3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                </svg>
-              </div>
-              <div class="feature-text">Ideal para productos con empaque comercial estándar</div>
-            </div>
-          </div>
-        </div>
-        <div class="card-actions">
-          <a href="{{ url_for('agregar_producto') }}" class="btn-action">Seleccionar</a>
-        </div>
+  <!-- Grid de opciones -->
+  <div class="options-grid">
+    
+    <!-- Opción 1: Con código de barras -->
+    <div class="product-option">
+      <div class="option-media">
+        <video src="{{ url_for('static', filename='vid/producto.MOV') }}" autoplay loop muted playsinline></video>
+        <div class="media-overlay"></div>
       </div>
-
-      <!-- Opción 2: Sin código de barras -->
-      <div class="option-card">
-        <div class="card-media">
-          <video src="{{ url_for('static', filename='vid/croquetas.mp4') }}" autoplay loop muted playsinline></video>
-        </div>
-        <div class="card-content">
-          <span class="card-tag">Personalizado</span>
-          <h3 class="card-title">Productos sin código</h3>
-          <p class="card-description">Productos que no incluyen un código de barras o que son fabricados/empacados por ti.</p>
-
-          <div class="feature-list">
-            <div class="feature-item">
-              <div class="feature-icon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 9V12M12 12V15M12 12H15M12 12H9M3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                </svg>
-              </div>
-              <div class="feature-text">Se genera automáticamente un código único para tu producto</div>
-            </div>
-            <div class="feature-item">
-              <div class="feature-icon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M16 18L18 20L22 16M12 15H8C6.34315 15 5 16.3431 5 18V19M12 15C14.2091 15 16 13.2091 16 11C16 8.79086 14.2091 7 12 7M12 15V19M8 11C5.79086 11 4 9.20914 4 7C4 4.79086 5.79086 3 8 3C10.2091 3 12 4.79086 12 7C12 9.20914 10.2091 11 8 11Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                </svg>
-              </div>
-              <div class="feature-text">Puedes imprimir etiquetas personalizadas para tus productos</div>
-            </div>
-            <div class="feature-item">
-              <div class="feature-icon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M14 11C14 9.34315 12.6569 8 11 8C9.34315 8 8 9.34315 8 11M19 21V5C19 3.89543 18.1046 3 17 3H7C5.89543 3 5 3.89543 5 5V21L7.5 19L9.5 21L12 19L14.5 21L16.5 19L19 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                </svg>
-              </div>
-              <div class="feature-text">Ideal para productos artesanales, reempacados o locales</div>
-            </div>
-          </div>
-        </div>
-        <div class="card-actions">
-          <a href="{{ url_for('agregar_sin_codigo') }}" class="btn-action">Seleccionar</a>
-        </div>
+      <div class="option-badge">Código de barras</div>
+      <button class="info-button" onclick="openModal('modal-barcode')">i</button>
+      
+      <div class="option-content">
+        <h3 class="option-title">Con código de barras</h3>
+        <p class="option-description">Para artículos comerciales que ya incluyen un código de barras impreso.</p>
       </div>
-
-      <!-- Opción 3: A granel -->
-      <div class="option-card">
-        <div class="card-media">
-          <video src="{{ url_for('static', filename='vid/aguacates.mp4') }}" autoplay loop muted playsinline></video>
-        </div>
-        <div class="card-content">
-          <span class="card-tag">A granel</span>
-          <h3 class="card-title">Productos por peso/medida</h3>
-          <p class="card-description">Productos que se venden por kilos, litros u otras unidades de medida variables.</p>
-
-          <div class="feature-list">
-            <div class="feature-item">
-              <div class="feature-icon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M3 6L6 7M6 7L3 16L9 17.5L15 19L21 16L18 7M6 7L12 9M18 7L21 6M18 7L12 9M12 3V9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                </svg>
-              </div>
-              <div class="feature-text">Configura fácilmente unidades de peso, volumen o medida</div>
-            </div>
-            <div class="feature-item">
-              <div class="feature-icon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M9 5H7C5.89543 5 5 5.89543 5 7V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V7C19 5.89543 18.1046 5 17 5H15M9 5C9 6.10457 9.89543 7 11 7H13C14.1046 7 15 6.10457 15 5M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5M12 12H15M12 16H15M9 12H9.01M9 16H9.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                </svg>
-              </div>
-              <div class="feature-text">Control preciso de inventario por unidades de medida</div>
-            </div>
-            <div class="feature-item">
-              <div class="feature-icon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M8 7V3M16 7V3M7 11H17M5 21H19C20.1046 21 21 20.1046 21 19V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7V19C3 20.1046 3.89543 21 5 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                </svg>
-              </div>
-              <div class="feature-text">Perfecto para frutas, verduras, semillas, líquidos, etc.</div>
-            </div>
-          </div>
-        </div>
-        <div class="card-actions">
-          <a href="{{ url_for('agregar_a_granel') }}" class="btn-action">Seleccionar</a>
-        </div>
+      
+      <div class="option-footer">
+        <a href="{{ url_for('agregar_producto') }}" class="btn-select">Seleccionar</a>
       </div>
     </div>
-
-    <!-- Navegación -->
-    <div class="navigation">
-      <a href="{{ url_for('ver_productos') }}" class="btn-back">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-        </svg>
-        Volver al inventario
-      </a>
+    
+    <!-- Opción 2: Sin código de barras -->
+    <div class="product-option">
+      <div class="option-media">
+        <video src="{{ url_for('static', filename='vid/croquetas.mp4') }}" autoplay loop muted playsinline></video>
+        <div class="media-overlay"></div>
+      </div>
+      <div class="option-badge">Personalizado</div>
+      <button class="info-button" onclick="openModal('modal-custom')">i</button>
+      <div class="premium-badge">Pro</div>
+      
+      <div class="option-content">
+        <h3 class="option-title">Sin código de barras</h3>
+        <p class="option-description">Para artículos que no incluyen código de barras o son fabricados por ti.</p>
+      </div>
+      
+      <div class="option-footer">
+        <a href="{{ url_for('agregar_sin_codigo') }}" class="btn-select">Seleccionar</a>
+      </div>
+    </div>
+    
+    <!-- Opción 3: A granel -->
+    <div class="product-option">
+      <div class="option-media">
+        <video src="{{ url_for('static', filename='vid/aguacates.mp4') }}" autoplay loop muted playsinline></video>
+        <div class="media-overlay"></div>
+      </div>
+      <div class="option-badge">A granel</div>
+      <button class="info-button" onclick="openModal('modal-bulk')">i</button>
+      
+      <div class="option-content">
+        <h3 class="option-title">A granel</h3>
+        <p class="option-description">Para artículos que se venden por peso, volumen u otras medidas variables.</p>
+      </div>
+      
+      <div class="option-footer">
+        <a href="{{ url_for('agregar_a_granel') }}" class="btn-select">Seleccionar</a>
+      </div>
     </div>
   </div>
-</section>
+  
+  <!-- Botón cancelar -->
+  <div class="actions-container">
+    <a href="{{ url_for('ver_productos') }}" class="btn-cancel">Cancelar</a>
+  </div>
+</div>
+
+<!-- Modales de información -->
+<!-- Modal Código de Barras -->
+<div id="modal-barcode" class="info-modal">
+  <div class="modal-content scale-in">
+    <button class="modal-close" onclick="closeModal('modal-barcode')">&times;</button>
+    <h3 class="modal-title">Con código de barras</h3>
+    
+    <div class="modal-grid">
+      <div class="modal-feature-card">
+        <h4 class="modal-feature-title">
+          <img src="{{ url_for('static', filename='img/scaneando.png') }}" alt="Escaneo rápido" class="modal-feature-icon">
+          Escaneo rápido
+        </h4>
+        <p class="modal-feature-text">Usa la cámara o un lector físico para capturar el código al instante.</p>
+      </div>
+      
+      <div class="modal-feature-card">
+        <h4 class="modal-feature-title">
+          <img src="{{ url_for('static', filename='img/datos.png') }}" alt="Búsqueda inteligente" class="modal-feature-icon">
+          Búsqueda inteligente
+        </h4>
+        <p class="modal-feature-text">La IA completa automáticamente nombre, imagen y categoría del producto.</p>
+      </div>
+      
+      <div class="modal-feature-card">
+        <h4 class="modal-feature-title">
+          <img src="{{ url_for('static', filename='img/sku.png') }}" alt="Prevención de duplicados" class="modal-feature-icon">
+          Prevención de duplicados
+        </h4>
+        <p class="modal-feature-text">Detección automática para evitar duplicados en tu inventario.</p>
+      </div>
+      
+      <div class="modal-feature-card">
+        <h4 class="modal-feature-title">
+          <img src="{{ url_for('static', filename='img/preciso.png') }}" alt="Precisión garantizada" class="modal-feature-icon">
+          Precisión garantizada
+        </h4>
+        <p class="modal-feature-text">Elimina errores de entrada manual y asegura la trazabilidad del producto.</p>
+        
+        <div class="modal-examples">
+          <span class="example-tag">Bebidas</span>
+          <span class="example-tag">Envasados</span>
+          <span class="example-tag">Limpieza</span>
+          <span class="example-tag">Electrónicos</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Producto Sin Código -->
+<div id="modal-custom" class="info-modal">
+  <div class="modal-content scale-in">
+    <button class="modal-close" onclick="closeModal('modal-custom')">&times;</button>
+    <h3 class="modal-title">Sin código de barras</h3>
+    
+    <div class="modal-grid">
+      <div class="modal-feature-card">
+        <h4 class="modal-feature-title">
+          <img src="{{ url_for('static', filename='img/sku.png') }}" alt="Código único" class="modal-feature-icon">
+          Código único
+        </h4>
+        <p class="modal-feature-text">Generación automática de un código interno para trazabilidad perfecta.</p>
+      </div>
+      
+      <div class="modal-feature-card">
+        <h4 class="modal-feature-title">
+          <img src="{{ url_for('static', filename='img/adaptable.png') }}" alt="Personalización total" class="modal-feature-icon">
+          Personalización total
+        </h4>
+        <p class="modal-feature-text">Control completo sobre la información del producto a tu medida.</p>
+      </div>
+      
+      <div class="modal-feature-card">
+        <h4 class="modal-feature-title">
+          <img src="{{ url_for('static', filename='img/etiqueta.png') }}" alt="Etiquetado profesional" class="modal-feature-icon">
+          Etiquetado profesional
+        </h4>
+        <p class="modal-feature-text">Imprime etiquetas personalizadas para identificación y venta eficiente.</p>
+        
+        <div class="modal-examples">
+          <span class="example-tag">Artesanales</span>
+          <span class="example-tag">Reempacados</span>
+          <span class="example-tag">Marca propia</span>
+          <span class="example-tag">Importados</span>
+        </div>
+      </div>
+      
+      <div class="modal-feature-card">
+        <h4 class="modal-feature-title">
+          <img src="{{ url_for('static', filename='img/control.png') }}" alt="Gestión avanzada" class="modal-feature-icon">
+          Gestión avanzada
+        </h4>
+        <p class="modal-feature-text">Ideal para desarrollar catálogos propios o gestionar productos locales.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Producto a Granel -->
+<div id="modal-bulk" class="info-modal">
+  <div class="modal-content scale-in">
+    <button class="modal-close" onclick="closeModal('modal-bulk')">&times;</button>
+    <h3 class="modal-title">A granel</h3>
+    
+    <div class="modal-grid">
+      <div class="modal-feature-card">
+        <h4 class="modal-feature-title">
+          <img src="{{ url_for('static', filename='img/kg.png') }}" alt="Medidas flexibles" class="modal-feature-icon">
+          Medidas flexibles
+        </h4>
+        <p class="modal-feature-text">Define unidades específicas de peso, volumen o longitud según necesites.</p>
+      </div>
+      
+      <div class="modal-feature-card">
+        <h4 class="modal-feature-title">
+          <img src="{{ url_for('static', filename='img/datos.png') }}" alt="Precios por unidad" class="modal-feature-icon">
+          Precios por unidad
+        </h4>
+        <p class="modal-feature-text">Establece precios por kilo, litro o la unidad de medida que elijas.</p>
+      </div>
+      
+      <div class="modal-feature-card">
+        <h4 class="modal-feature-title">
+          <img src="{{ url_for('static', filename='img/control.png') }}" alt="Control de caducidad" class="modal-feature-icon">
+          Control de caducidad
+        </h4>
+        <p class="modal-feature-text">Gestión inteligente de fechas de vencimiento para minimizar pérdidas.</p>
+        
+        <div class="modal-examples">
+          <span class="example-tag">Frutas</span>
+          <span class="example-tag">Verduras</span>
+          <span class="example-tag">Semillas</span>
+          <span class="example-tag">Café</span>
+          <span class="example-tag">Especies</span>
+          <span class="example-tag">Quesos</span>
+        </div>
+      </div>
+      
+      <div class="modal-feature-card">
+        <h4 class="modal-feature-title">
+          <img src="{{ url_for('static', filename='img/adaptable.png') }}" alt="Integración avanzada" class="modal-feature-icon">
+          Integración avanzada
+        </h4>
+        <p class="modal-feature-text">Compatible con básculas y sistemas de medición para máxima precisión.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Gestión de modales
+  function openModal(modalId) {
+    document.getElementById(modalId).style.display = 'flex';
+    document.body.style.overflow = 'hidden'; // Prevenir scroll
+  }
+  
+  function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+    document.body.style.overflow = 'auto'; // Restaurar scroll
+  }
+  
+  // Inicialización al cargar la página
+  document.addEventListener('DOMContentLoaded', function() {
+    // Configuración para cerrar modales al hacer clic fuera del contenido
+    const modals = document.querySelectorAll('.info-modal');
+    modals.forEach(modal => {
+      modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+          modal.style.display = 'none';
+          document.body.style.overflow = 'auto';
+        }
+      });
+    });
+    
+    // Mejorar reproducción de videos
+    const videos = document.querySelectorAll('video');
+    videos.forEach(video => {
+      // Función para intentar reproducir con backoff exponencial
+      let attempts = 0;
+      const maxAttempts = 3;
+      const tryPlayVideo = () => {
+        video.play().catch(error => {
+          console.log(`Intento ${attempts+1} fallido:`, error);
+          if (attempts < maxAttempts) {
+            attempts++;
+            setTimeout(tryPlayVideo, 1000 * Math.pow(2, attempts));
+          } else {
+            // Fallback final: configurar poster estático
+            const videoSrc = video.getAttribute('src');
+            const posterSrc = videoSrc.replace(/\.(MOV|mp4)$/i, '.jpg');
+            video.setAttribute('poster', posterSrc);
+            console.log("Usando poster estático como fallback:", posterSrc);
+          }
+        });
+      };
+      
+      // Intentar reproducción inicial
+      tryPlayVideo();
+      
+      // Observer para reproducir/pausar cuando el video está en viewport
+      if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              tryPlayVideo();
+            } else {
+              video.pause();
+            }
+          });
+        }, { threshold: 0.5 });
+        
+        observer.observe(video);
+      }
+    });
+  });
+  
+  // Manejo de tecla Escape para cerrar modales
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      const openModals = document.querySelectorAll('.info-modal[style*="display: flex"]');
+      openModals.forEach(modal => {
+        modal.style.display = 'none';
+      });
+      document.body.style.overflow = 'auto';
+    }
+  });
+</script>
 {% endblock %}
