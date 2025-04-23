@@ -121,6 +121,11 @@
       z-index: 100;
     }
     
+    .header-left {
+      display: flex;
+      align-items: center;
+    }
+    
     .toggle-sidebar-btn {
       border: none;
       background: transparent;
@@ -482,6 +487,27 @@
       background-color: rgba(255, 255, 255, 0.5);
     }
     
+    /* Estilo para el título de la página */
+    .page-title-area {
+      display: flex;
+      align-items: center;
+    }
+    
+    .page-back-arrow {
+      color: var(--primary-color);
+      font-size: 1.5rem;
+      margin-right: 0.75rem;
+      text-decoration: none;
+    }
+    
+    .page-title {
+      font-size: 2rem;
+      font-weight: 700;
+      margin: 0;
+      color: #333;
+      text-transform: uppercase;
+    }
+    
     /* Responsive Media Queries */
     @media (max-width: 992px) {
       :root {
@@ -611,9 +637,15 @@
   <!-- Main Content -->
   <div class="main-content">
     <div class="content-header">
-      <button class="toggle-sidebar-btn" id="toggleSidebar">
-        <i class="fas fa-arrow-left"></i>
-      </button>
+      <div class="header-left">
+        <button class="toggle-sidebar-btn" id="toggleSidebar">
+          <i class="fas fa-arrow-left"></i>
+        </button>
+        
+        <!-- Aquí van los títulos de página específicos -->
+        {% block page_header %}{% endblock %}
+      </div>
+      
       <div class="header-right">
         <div class="notification-badge">
           <i class="fas fa-bell"></i>

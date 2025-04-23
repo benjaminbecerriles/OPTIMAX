@@ -75,12 +75,12 @@
     overflow: hidden;
   }
 
-  /* Encabezado */
+  /* Encabezado - MODIFICADO */
   .selection-header {
     position: relative;
     z-index: 2;
     text-align: center;
-    margin-bottom: 3.5rem;
+    margin-bottom: 1.5rem; /* Reducido para subir las cajas */
   }
 
   .selection-header h1 {
@@ -102,12 +102,17 @@
     font-weight: 400;
   }
 
-  /* Grid de opciones */
+  /* Resaltar "añadir" en rojo */
+  .highlight-add {
+    color: var(--primary);
+  }
+
+  /* Grid de opciones - SUBIDO LIGERAMENTE */
   .options-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 2rem;
-    margin-bottom: 2.5rem;
+    margin-bottom: 4.5rem; /* Aumentado para mantener distancia con el botón */
     position: relative;
     z-index: 2;
   }
@@ -290,13 +295,13 @@
     box-shadow: var(--shadow-md);
   }
 
-  /* Botón cancelar */
+  /* Botón cancelar - MANTENIDO EN LA MISMA POSICIÓN */
   .actions-container {
     display: flex;
     justify-content: flex-end;
-    margin-top: 1.5rem;
     position: relative;
     z-index: 2;
+    /* Sin cambios en margen para mantener posición */
   }
 
   .btn-cancel {
@@ -481,9 +486,9 @@
 </style>
 
 <div class="product-selection-container animated-fade">
-  <!-- Encabezado de la sección -->
+  <!-- Encabezado de la sección - Texto modificado -->
   <div class="selection-header">
-    <h1>Selecciona un tipo de <span class="highlight-accent">producto</span></h1>
+    <h1>¿Qué tipo de producto deseas <span class="highlight-add">añadir</span>?</h1>
     <p>Elige la opción que mejor se adapte a tus necesidades de inventario</p>
   </div>
 
@@ -549,9 +554,9 @@
     </div>
   </div>
   
-  <!-- Botón cancelar -->
+  <!-- Botón cancelar - Mantenido en la misma posición con URL actualizada -->
   <div class="actions-container text-end" style="margin-top:1.5rem; margin-bottom:0.5rem;">
-    <a href="{{ url_for('ver_productos') }}" class="btn-cancel">CANCELAR</a>
+    <a href="{{ url_for('dashboard_inventario') }}" class="btn-cancel">CANCELAR</a>
   </div>
 </div>
 
@@ -767,4 +772,3 @@
   });
 </script>
 {% endblock %}
-```
