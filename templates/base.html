@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <title>{% block title %}{% endblock %}</title>
 
+  <!-- Meta tags necesarios para comportamiento móvil correcto -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  
   <!-- Evitar caché -->
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
@@ -65,6 +68,68 @@
     .scan-active {
       animation: blink 1s infinite;
     }
+
+    /* Estilos para modal del scanner */
+    #modalEscaneoCamara {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.8);
+      z-index: 9999;
+      overflow: hidden;
+    }
+
+    #videoContainer {
+      position: relative;
+      margin: 20px auto;
+      width: 80%;
+      max-width: 600px;
+      background-color: #000;
+      overflow: hidden;
+    }
+
+    .scanner-target-box {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border: 2px dashed #00ff00;
+      width: 80%;
+      max-width: 300px;
+      height: 200px;
+      pointer-events: none;
+      z-index: 10000;
+    }
+
+    .scanner-close-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-size: 24px;
+      background-color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      z-index: 10001;
+    }
+
+    .scanner-title {
+      color: #fff;
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .scanner-instructions {
+      color: #fff;
+      text-align: center;
+      max-width: 600px;
+      margin: 10px auto;
+    }
   </style>
 </head>
 <body>
@@ -80,20 +145,151 @@
     {% block content %}{% endblock %}
   </div>
 
-  <!-- Bootstrap JS -->
-  <script
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
-  ></script>
-  <!-- Choices.js JS -->
-  <script
-    src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"
-  ></script>
-  <!-- QuaggaJS -->
-  <script src="{{ url_for('static', filename='js/quagga.min.js') }}"></script>
-  <!-- Script Quagga personalizado -->
-  <script src="{{ url_for('static', filename='js/mi_scanner_quagga.js') }}"></script>
-  <!-- Escáner físico -->
+  <!-- Modal para escáner de cámara (Quagga) -->
+  <div id="modalEscaneoCamara">
+    <button type="button" class="scanner-close-btn" onclick="cerrarModalEscaner()">X</button>
+    <h2 class="scanner-title">Escaneo con Cámara</h2>
+    <p class="scanner-instructions">
+      IMPORTANTE: Asegúrate de contar con buena iluminación y evita sombras.
+      Verifica que el código se lea correctamente,
+      ya que la cámara es menos precisa que un lector físico.
+    </p>
+    <div id="videoContainer"></div>
+    <div class="scanner-target-box"></div>
+  </div>
+
+  <!-- Scripts fundamentales primero -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
+  <!-- QuaggaJS cargado directamente desde CDN para asegurar la versión correcta -->
+  <script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
+  
+  <!-- Scripts personalizados después de los frameworks -->
   <script src="{{ url_for('static', filename='js/barcode-scanner.js') }}"></script>
+  
+  <!-- Implementación directa para QuaggaJS -->
+  <script>
+    // Función que inicia el modal y la captura de QuaggaJS
+    function iniciarEscaneoQuagga() {
+      if (typeof Quagga === 'undefined') {
+        console.error("ERROR: La librería Quagga no está disponible");
+        alert("Error: No se pudo cargar el escáner. Intente recargar la página.");
+        return;
+      }
+
+      // 1) Localiza el DIV del modal y lo muestra
+      const modal = document.getElementById("modalEscaneoCamara");
+      if (!modal) {
+        console.error("Error: No se encontró el elemento con id='modalEscaneoCamara'");
+        return;
+      }
+      modal.style.display = "block";
+
+      // 2) Localiza el contenedor donde Quagga inyecta el <video>
+      const videoContainer = document.getElementById("videoContainer");
+      if (!videoContainer) {
+        console.error("Error: No se encontró el elemento con id='videoContainer'");
+        return;
+      }
+      
+      // Limpiar el contenedor para evitar problemas con inicializaciones previas
+      videoContainer.innerHTML = '';
+
+      console.log("Iniciando configuración de Quagga...");
+
+      // 3) Inicializa Quagga con configuración mejorada
+      Quagga.init(
+        {
+          inputStream: {
+            name: "Live",
+            type: "LiveStream",
+            target: videoContainer,
+            constraints: {
+              width: {min: 640},
+              height: {min: 480},
+              facingMode: "environment", // cámara trasera en móviles
+              aspectRatio: {min: 1, max: 2}
+            }
+          },
+          locator: {
+            patchSize: "medium",
+            halfSample: true
+          },
+          numOfWorkers: 2,
+          frequency: 10,
+          decoder: {
+            readers: [
+              "code_128_reader",
+              "ean_reader",
+              "ean_8_reader",
+              "code_39_reader",
+              "upc_reader",
+              "upc_e_reader"
+            ]
+          }
+        },
+        function (err) {
+          if (err) {
+            console.error("Error al iniciar Quagga:", err);
+            videoContainer.innerHTML = `<div style="color: white; text-align: center; padding: 20px;">
+              <p>Error al acceder a la cámara: ${err.message || "Desconocido"}</p>
+              <p>Verifica que has dado permisos de cámara y refresca la página.</p>
+            </div>`;
+            return;
+          }
+          console.log("Quagga inicializado correctamente");
+          Quagga.start();
+        }
+      );
+
+      // 4) Callback cuando Quagga detecta un código de barras
+      Quagga.onDetected(function (result) {
+        if (!result || !result.codeResult) {
+          return;
+        }
+        const codigoDetectado = result.codeResult.code;
+        console.log("Código detectado:", codigoDetectado);
+
+        // Asigna el código detectado al campo "Ingresar Código de Barras"
+        const inputExterno = document.getElementById("codigo_barras_externo");
+        if (inputExterno) {
+          inputExterno.value = codigoDetectado;
+
+          // Aquí llamamos a la función onScannedBarcode si existe
+          if (typeof onScannedBarcode === "function") {
+            console.log("Llamando onScannedBarcode con:", codigoDetectado);
+            onScannedBarcode(codigoDetectado);
+          }
+        }
+
+        // Detén Quagga y cierra el modal
+        Quagga.stop();
+        cerrarModalEscaner();
+      });
+    }
+
+    // Función para cerrar el modal de escáner y detener Quagga manualmente
+    function cerrarModalEscaner() {
+      // Detener Quagga si sigue corriendo
+      if (window.Quagga) {
+        try {
+          Quagga.stop();
+        } catch (e) {
+          console.error("Error al detener Quagga:", e);
+        }
+      }
+
+      // Ocultar el modal
+      const modal = document.getElementById("modalEscaneoCamara");
+      if (modal) {
+        modal.style.display = "none";
+      }
+    }
+  </script>
+
+  <!-- Script original de mi_scanner_quagga.js como backup -->
+  <script src="{{ url_for('static', filename='js/mi_scanner_quagga.js') }}"></script>
 
   <script>
     // Recarga si se usa BFCache
