@@ -1,0 +1,274 @@
+{% extends 'dashboard_base.html' %}
+
+{% block title %}Dashboard - OptiMax{% endblock %}
+
+{% block home_active %}active{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+  <div class="col-12">
+    <h1 class="dashboard-title">Dashboard</h1>
+    <p class="dashboard-subtitle">Bienvenido al panel de control de OptiMax Manage</p>
+  </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row mb-4">
+  <div class="col-md-6 col-lg-3 mb-3">
+    <div class="stats-card stats-primary">
+      <div class="stats-icon">
+        <i class="fas fa-boxes-stacked"></i>
+      </div>
+      <div class="stats-info">
+        <h3>{{ total_productos if total_productos is defined else '0' }}</h3>
+        <p>Total Productos</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-6 col-lg-3 mb-3">
+    <div class="stats-card stats-success">
+      <div class="stats-icon">
+        <i class="fas fa-tag"></i>
+      </div>
+      <div class="stats-info">
+        <h3>0</h3>
+        <p>Ventas Hoy</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-6 col-lg-3 mb-3">
+    <div class="stats-card stats-warning">
+      <div class="stats-icon">
+        <i class="fas fa-truck"></i>
+      </div>
+      <div class="stats-info">
+        <h3>0</h3>
+        <p>Proveedores</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-6 col-lg-3 mb-3">
+    <div class="stats-card stats-danger">
+      <div class="stats-icon">
+        <i class="fas fa-exclamation-triangle"></i>
+      </div>
+      <div class="stats-info">
+        <h3>{{ productos|selectattr('stock', 'le', 5)|list|length if productos else '0' }}</h3>
+        <p>Productos por Agotarse</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Módulos Principales -->
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="dashboard-card">
+      <div class="section-title">
+        <h2>Módulos Principales</h2>
+      </div>
+      <div class="row g-3">
+        <div class="col-md-6 col-lg-4">
+          <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center">
+              <div class="rounded-circle bg-primary bg-opacity-10 p-3 d-inline-flex mb-3">
+                <i class="fas fa-boxes-stacked text-primary fa-2x"></i>
+              </div>
+              <h5 class="card-title">Inventario</h5>
+              <p class="card-text text-muted">Gestiona tus productos, stock y precios de manera eficiente.</p>
+              <a href="{{ url_for('dashboard_inventario') }}" class="btn btn-primary-custom mt-2">
+                Acceder <i class="fas fa-arrow-right ms-1"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-4">
+          <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center">
+              <div class="rounded-circle bg-success bg-opacity-10 p-3 d-inline-flex mb-3">
+                <i class="fas fa-chart-line text-success fa-2x"></i>
+              </div>
+              <h5 class="card-title">Competencia</h5>
+              <p class="card-text text-muted">Analiza precios y productos de la competencia.</p>
+              <a href="#" class="btn btn-outline-custom mt-2">
+                Acceder <i class="fas fa-arrow-right ms-1"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-4">
+          <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center">
+              <div class="rounded-circle bg-warning bg-opacity-10 p-3 d-inline-flex mb-3">
+                <i class="fas fa-truck text-warning fa-2x"></i>
+              </div>
+              <h5 class="card-title">Proveedores</h5>
+              <p class="card-text text-muted">Administra tus proveedores y órdenes de compra.</p>
+              <a href="#" class="btn btn-outline-custom mt-2">
+                Acceder <i class="fas fa-arrow-right ms-1"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-4">
+          <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center">
+              <div class="rounded-circle bg-info bg-opacity-10 p-3 d-inline-flex mb-3">
+                <i class="fas fa-money-bill-wave text-info fa-2x"></i>
+              </div>
+              <h5 class="card-title">Gestión Financiera</h5>
+              <p class="card-text text-muted">Controla ingresos, gastos y reportes financieros.</p>
+              <a href="#" class="btn btn-outline-custom mt-2">
+                Acceder <i class="fas fa-arrow-right ms-1"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-4">
+          <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center">
+              <div class="rounded-circle bg-danger bg-opacity-10 p-3 d-inline-flex mb-3">
+                <i class="fas fa-shield-alt text-danger fa-2x"></i>
+              </div>
+              <h5 class="card-title">Seguridad</h5>
+              <p class="card-text text-muted">Gestiona usuarios, permisos y configuraciones de seguridad.</p>
+              <a href="#" class="btn btn-outline-custom mt-2">
+                Acceder <i class="fas fa-arrow-right ms-1"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-4">
+          <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center">
+              <div class="rounded-circle bg-secondary bg-opacity-10 p-3 d-inline-flex mb-3">
+                <i class="fas fa-cash-register text-secondary fa-2x"></i>
+              </div>
+              <h5 class="card-title">Punto de Venta</h5>
+              <p class="card-text text-muted">Gestiona ventas, clientes y transacciones.</p>
+              <a href="#" class="btn btn-outline-custom mt-2">
+                Acceder <i class="fas fa-arrow-right ms-1"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Actividad Reciente -->
+<div class="row mb-4">
+  <div class="col-lg-7 mb-3 mb-lg-0">
+    <div class="dashboard-card h-100">
+      <div class="section-title">
+        <h2>Actividad Reciente</h2>
+      </div>
+      
+      <div class="list-group list-group-flush">
+        <div class="list-group-item px-0 d-flex align-items-center border-0 border-bottom py-3">
+          <div class="me-3 bg-primary bg-opacity-10 p-2 rounded-circle">
+            <i class="fas fa-plus text-primary"></i>
+          </div>
+          <div>
+            <h6 class="mb-0">Producto agregado</h6>
+            <p class="text-muted small mb-0">Se agregó un nuevo producto al inventario</p>
+          </div>
+          <small class="text-muted ms-auto">Hace 2 horas</small>
+        </div>
+        
+        <div class="list-group-item px-0 d-flex align-items-center border-0 border-bottom py-3">
+          <div class="me-3 bg-success bg-opacity-10 p-2 rounded-circle">
+            <i class="fas fa-edit text-success"></i>
+          </div>
+          <div>
+            <h6 class="mb-0">Producto actualizado</h6>
+            <p class="text-muted small mb-0">Se actualizó el stock del producto</p>
+          </div>
+          <small class="text-muted ms-auto">Hace 5 horas</small>
+        </div>
+        
+        <div class="list-group-item px-0 d-flex align-items-center border-0 border-bottom py-3">
+          <div class="me-3 bg-warning bg-opacity-10 p-2 rounded-circle">
+            <i class="fas fa-tag text-warning"></i>
+          </div>
+          <div>
+            <h6 class="mb-0">Precio actualizado</h6>
+            <p class="text-muted small mb-0">Se modificó el precio de un producto</p>
+          </div>
+          <small class="text-muted ms-auto">Hace 1 día</small>
+        </div>
+        
+        <div class="list-group-item px-0 d-flex align-items-center border-0 py-3">
+          <div class="me-3 bg-danger bg-opacity-10 p-2 rounded-circle">
+            <i class="fas fa-trash-alt text-danger"></i>
+          </div>
+          <div>
+            <h6 class="mb-0">Producto eliminado</h6>
+            <p class="text-muted small mb-0">Se eliminó un producto del inventario</p>
+          </div>
+          <small class="text-muted ms-auto">Hace 2 días</small>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-lg-5">
+    <div class="dashboard-card h-100">
+      <div class="section-title">
+        <h2>Accesos Rápidos</h2>
+      </div>
+      
+      <div class="list-group">
+        <a href="{{ url_for('nuevo_producto') }}" class="list-group-item list-group-item-action d-flex align-items-center">
+          <div class="me-3 bg-primary bg-opacity-10 p-2 rounded">
+            <i class="fas fa-plus text-primary"></i>
+          </div>
+          <div>
+            <h6 class="mb-0">Agregar Producto</h6>
+            <p class="text-muted small mb-0">Registra un nuevo producto en tu inventario</p>
+          </div>
+        </a>
+        
+        <a href="{{ url_for('reabastecer_listado') }}" class="list-group-item list-group-item-action d-flex align-items-center">
+          <div class="me-3 bg-success bg-opacity-10 p-2 rounded">
+            <i class="fas fa-dolly text-success"></i>
+          </div>
+          <div>
+            <h6 class="mb-0">Reabastecer Inventario</h6>
+            <p class="text-muted small mb-0">Actualiza el stock de tus productos</p>
+          </div>
+        </a>
+        
+        <a href="{{ url_for('pendientes_aprobacion') }}" class="list-group-item list-group-item-action d-flex align-items-center">
+          <div class="me-3 bg-warning bg-opacity-10 p-2 rounded">
+            <i class="fas fa-clipboard-check text-warning"></i>
+          </div>
+          <div>
+            <h6 class="mb-0">Pendientes de Aprobación</h6>
+            <p class="text-muted small mb-0">Revisa y aprueba productos pendientes</p>
+          </div>
+        </a>
+        
+        <a href="#" class="list-group-item list-group-item-action d-flex align-items-center">
+          <div class="me-3 bg-info bg-opacity-10 p-2 rounded">
+            <i class="fas fa-file-export text-info"></i>
+          </div>
+          <div>
+            <h6 class="mb-0">Exportar Inventario</h6>
+            <p class="text-muted small mb-0">Exporta tu inventario a Excel</p>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

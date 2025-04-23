@@ -346,6 +346,18 @@ def generar_codigo_a_granel():
     return prefix + codigo_aleatorio
 
 ##############################################
+# FUNCIÓN PARA GENERAR CÓDIGO ÚNICO PARA PRODUCTOS SIN CÓDIGO DE BARRAS
+##############################################
+def generar_codigo_unico():
+    """
+    Genera un código único para productos sin código de barras con formato INT-XXXXXXXX.
+    """
+    prefix = "INT-"
+    caracteres = string.ascii_uppercase + string.digits
+    codigo_aleatorio = ''.join(random.choice(caracteres) for _ in range(8))
+    return prefix + codigo_aleatorio
+
+##############################################
 # FLASK APP
 ##############################################
 app = Flask(__name__)
@@ -472,21 +484,68 @@ def login():
 
         session['logged_in'] = True
         session['user_id'] = emp.id
+        session['user_name'] = emp.nombre
 
         if emp.is_admin:
-            return f"Bienvenido Admin, {emp.nombre}!"
+            return redirect(url_for('admin_panel'))
 
         cod_asig = CodigoAsignado.query.filter_by(empresa_id=emp.id, esta_activo=True).first()
         if not cod_asig:
             return redirect(url_for('ingresar_codigo'))
 
-        return f"Bienvenido, {emp.nombre}!"
+        return redirect(url_for('dashboard_home'))
     return render_template('login.html')
 
 @app.route('/logout')
 def logout():
     session.clear()
     return redirect(url_for('index'))
+
+##############################
+# NUEVO DASHBOARD
+##############################
+@app.route('/dashboard')
+@login_requerido
+def dashboard_home():
+    """
+    Vista del dashboard principal
+    """
+    # Obtener información del usuario y datos para el dashboard
+    empresa_id = session['user_id']
+    empresa = Empresa.query.get(empresa_id)
+    
+    # Obtener lista de productos para estadísticas
+    productos = Producto.query.filter_by(empresa_id=empresa_id).all()
+    total_productos = len(productos)
+    
+    return render_template(
+        'dashboard_home.html',
+        productos=productos,
+        total_productos=total_productos
+    )
+
+@app.route('/dashboard/inventario')
+@login_requerido
+def dashboard_inventario():
+    """
+    Vista del dashboard de inventario
+    """
+    # Obtener información del usuario y datos para el dashboard
+    empresa_id = session['user_id']
+    
+    # Obtener lista de productos para mostrar
+    productos = Producto.query.filter_by(
+        empresa_id=empresa_id,
+        is_approved=True
+    ).order_by(Producto.id.desc()).all()
+    
+    total_productos = len(productos)
+    
+    return render_template(
+        'dashboard_inventario.html',
+        productos=productos,
+        total_productos=total_productos
+    )
 
 ##############################
 # ADMIN
@@ -754,7 +813,7 @@ def agregar_sin_codigo():
             codigo_barras_externo = request.form.get("codigo_barras_externo", "").strip()
             
             # Verificar que el código comience con "1901", si no, generar uno nuevo
-            if not codigo_barras_externo or not codigo_barras_externo.startswith("1901"):
+            if not codigo_barras_externo or not codigo_barras_externo.startswith("INT-"):
                 codigo_barras_externo = generar_codigo_unico()
                 
             print(f"DEBUG: Usando código de barras: {codigo_barras_externo}")

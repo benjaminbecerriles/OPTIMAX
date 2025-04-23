@@ -238,6 +238,7 @@
     display: flex;
     flex-direction: column;
     position: relative;
+    text-align: center; /* Centrado de texto añadido */
   }
 
   .option-title {
@@ -248,6 +249,7 @@
     margin-bottom: 1rem;
     letter-spacing: -0.01em;
     line-height: 1.3;
+    text-align: center; /* Centrado de texto añadido */
   }
 
   .option-description {
@@ -255,6 +257,7 @@
     color: var(--gray-700);
     line-height: 1.6;
     margin-bottom: 0;
+    text-align: center; /* Centrado de texto añadido */
   }
 
   /* Footer de la tarjeta */
@@ -472,25 +475,6 @@
   }
 
   /* Mejoras visuales adicionales */
-  .premium-badge {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    width: 56px;
-    height: 56px;
-    background-color: var(--primary);
-    border-radius: var(--radius-full);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--white);
-    font-weight: 600;
-    font-size: 0.75rem;
-    box-shadow: var(--shadow-lg);
-    transform: rotate(15deg);
-    z-index: 5;
-  }
-
   .highlight-accent {
     color: var(--primary);
   }
@@ -533,7 +517,7 @@
       </div>
       <div class="option-badge">Personalizado</div>
       <button class="info-button" onclick="openModal('modal-custom')">i</button>
-      <div class="premium-badge">Pro</div>
+      <!-- Eliminé el badge "Pro" -->
       
       <div class="option-content">
         <h3 class="option-title">Sin código de barras</h3>
@@ -566,8 +550,8 @@
   </div>
   
   <!-- Botón cancelar -->
-  <div class="actions-container">
-    <a href="{{ url_for('ver_productos') }}" class="btn-cancel">Cancelar</a>
+  <div class="actions-container text-end" style="margin-top:1.5rem; margin-bottom:0.5rem;">
+    <a href="{{ url_for('ver_productos') }}" class="btn-cancel">CANCELAR</a>
   </div>
 </div>
 
@@ -610,12 +594,7 @@
         </h4>
         <p class="modal-feature-text">Elimina errores de entrada manual y asegura la trazabilidad del producto.</p>
         
-        <div class="modal-examples">
-          <span class="example-tag">Bebidas</span>
-          <span class="example-tag">Envasados</span>
-          <span class="example-tag">Limpieza</span>
-          <span class="example-tag">Electrónicos</span>
-        </div>
+        <!-- Se eliminaron las etiquetas de ejemplo -->
       </div>
     </div>
   </div>
@@ -651,12 +630,7 @@
         </h4>
         <p class="modal-feature-text">Imprime etiquetas personalizadas para identificación y venta eficiente.</p>
         
-        <div class="modal-examples">
-          <span class="example-tag">Artesanales</span>
-          <span class="example-tag">Reempacados</span>
-          <span class="example-tag">Marca propia</span>
-          <span class="example-tag">Importados</span>
-        </div>
+        <!-- Se eliminaron las etiquetas de ejemplo -->
       </div>
       
       <div class="modal-feature-card">
@@ -700,14 +674,7 @@
         </h4>
         <p class="modal-feature-text">Gestión inteligente de fechas de vencimiento para minimizar pérdidas.</p>
         
-        <div class="modal-examples">
-          <span class="example-tag">Frutas</span>
-          <span class="example-tag">Verduras</span>
-          <span class="example-tag">Semillas</span>
-          <span class="example-tag">Café</span>
-          <span class="example-tag">Especies</span>
-          <span class="example-tag">Quesos</span>
-        </div>
+        <!-- Se eliminaron las etiquetas de ejemplo -->
       </div>
       
       <div class="modal-feature-card">
@@ -800,3 +767,4 @@
   });
 </script>
 {% endblock %}
+```

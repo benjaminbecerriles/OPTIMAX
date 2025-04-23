@@ -1,0 +1,339 @@
+{% extends 'dashboard_base.html' %}
+
+{% block title %}Inventario - Dashboard{% endblock %}
+
+{% block inventario_active %}active{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+  <div class="col-12">
+    <h1 class="dashboard-title">Inventario</h1>
+    <p class="dashboard-subtitle">Gestiona tus productos y mantén un control eficiente de tu inventario</p>
+  </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row mb-4">
+  <div class="col-md-6 col-lg-3 mb-3">
+    <div class="stats-card stats-primary">
+      <div class="stats-icon">
+        <i class="fas fa-boxes-stacked"></i>
+      </div>
+      <div class="stats-info">
+        <h3>{{ total_productos if total_productos is defined else '0' }}</h3>
+        <p>Total Productos</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-6 col-lg-3 mb-3">
+    <div class="stats-card stats-success">
+      <div class="stats-icon">
+        <i class="fas fa-warehouse"></i>
+      </div>
+      <div class="stats-info">
+        <h3>{{ productos|sum(attribute='stock') if productos else '0' }}</h3>
+        <p>Unidades en Stock</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-6 col-lg-3 mb-3">
+    <div class="stats-card stats-warning">
+      <div class="stats-icon">
+        <i class="fas fa-dollar-sign"></i>
+      </div>
+      <div class="stats-info">
+        <h3>${{ '%0.2f'|format((productos|sum(attribute='precio_venta') * productos|sum(attribute='stock'))|float) if productos else '0.00' }}</h3>
+        <p>Valor del Inventario</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-6 col-lg-3 mb-3">
+    <div class="stats-card stats-danger">
+      <div class="stats-icon">
+        <i class="fas fa-exclamation-triangle"></i>
+      </div>
+      <div class="stats-info">
+        <h3>{{ productos|selectattr('stock', 'le', 5)|list|length if productos else '0' }}</h3>
+        <p>Productos por Agotarse</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="dashboard-card">
+      <div class="section-title">
+        <h2>Acciones Rápidas</h2>
+      </div>
+      <div class="row g-3">
+        <div class="col-md-6 col-lg-3">
+          <a href="{{ url_for('nuevo_producto') }}" class="btn btn-primary-custom w-100 d-flex align-items-center justify-content-center gap-2">
+            <i class="fas fa-plus"></i> Agregar Producto
+          </a>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <a href="{{ url_for('ver_productos') }}" class="btn btn-outline-custom w-100 d-flex align-items-center justify-content-center gap-2">
+            <i class="fas fa-list"></i> Ver Todos
+          </a>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <a href="{{ url_for('reabastecer_listado') }}" class="btn btn-outline-custom w-100 d-flex align-items-center justify-content-center gap-2">
+            <i class="fas fa-dolly"></i> Reabastecer
+          </a>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <a href="{{ url_for('pendientes_aprobacion') }}" class="btn btn-outline-custom w-100 d-flex align-items-center justify-content-center gap-2">
+            <i class="fas fa-clipboard-check"></i> Pendientes
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Recent Products -->
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="dashboard-card">
+      <div class="section-title">
+        <h2>Productos Recientes</h2>
+        <a href="{{ url_for('ver_productos') }}">Ver todos <i class="fas fa-arrow-right"></i></a>
+      </div>
+      
+      {% if productos and productos|length > 0 %}
+        <div class="table-responsive">
+          <table class="dashboard-table table">
+            <thead>
+              <tr>
+                <th style="width: 70px;"></th>
+                <th>Producto</th>
+                <th>Categoría</th>
+                <th>Stock</th>
+                <th>Precio</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for p in productos[:2] %}
+                <tr>
+                  <!-- Foto -->
+                  <td>
+                    {% if p.foto %}
+                      <img src="{{ url_for('static', filename='uploads/' ~ p.foto) }}" class="product-img" alt="{{ p.nombre }}">
+                    {% else %}
+                      <div class="product-img bg-light d-flex align-items-center justify-content-center">
+                        <i class="fas fa-box text-secondary"></i>
+                      </div>
+                    {% endif %}
+                  </td>
+                  
+                  <!-- Información del producto -->
+                  <td>
+                    <div class="d-flex flex-column">
+                      <span class="fw-medium">{{ p.nombre }}</span>
+                      <small class="text-muted">
+                        {% if p.codigo_barras_externo %}
+                          {{ p.codigo_barras_externo }}
+                        {% else %}
+                          SKU-{{ '%05d' % p.id }}
+                        {% endif %}
+                      </small>
+                    </div>
+                  </td>
+                  
+                  <!-- Categoría -->
+                  <td>
+                    {% set cat_color = p.categoria_color|default('#CCCCCC') %}
+                    <div class="category-badge">
+                      <span class="category-indicator" style="background-color: {{ cat_color }};"></span>
+                      {{ p.categoria|default('Sin categoría')|title }}
+                    </div>
+                  </td>
+                  
+                  <!-- Stock -->
+                  <td>
+                    {% if p.stock <= 0 %}
+                      <span class="badge-custom badge-out-of-stock">Agotado</span>
+                    {% elif p.stock < 5 %}
+                      <span class="badge-custom badge-low-stock">Bajo: {{ p.stock }}</span>
+                    {% else %}
+                      <span class="badge-custom badge-in-stock">{{ p.stock }} unidades</span>
+                    {% endif %}
+                  </td>
+                  
+                  <!-- Precio -->
+                  <td>
+                    <span class="fw-medium">${{ p.precio_venta|round(2) }}</span>
+                  </td>
+                  
+                  <!-- Acciones -->
+                  <td>
+                    <div class="dropdown">
+                      <button class="btn btn-sm btn-outline-custom dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Acciones
+                      </button>
+                      <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{{ url_for('editar_producto', prod_id=p.id) }}"><i class="fas fa-edit me-2"></i> Editar</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('reabastecer_producto', prod_id=p.id) }}"><i class="fas fa-plus me-2"></i> Reabastecer</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="#" onclick="confirmDelete({{ p.id }}, '{{ p.nombre }}')"><i class="fas fa-trash-alt me-2"></i> Eliminar</a></li>
+                      </ul>
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% if productos|length > 2 %}
+          <div class="text-center mt-3">
+            <a href="{{ url_for('ver_productos') }}" class="btn btn-outline-custom">
+              Ver más productos <i class="fas fa-arrow-right ms-1"></i>
+            </a>
+          </div>
+        {% endif %}
+      {% else %}
+        <div class="alert alert-info mb-0">
+          <i class="fas fa-info-circle me-2"></i> No hay productos en tu inventario. 
+          <a href="{{ url_for('nuevo_producto') }}" class="alert-link">Agrega tu primer producto</a>.
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Categorías y Estadísticas -->
+<div class="row mb-4">
+  <div class="col-lg-6 mb-3 mb-lg-0">
+    <div class="dashboard-card h-100">
+      <div class="section-title">
+        <h2>Categorías</h2>
+      </div>
+      {% if productos and productos|length > 0 %}
+        {% set categorias = {} %}
+        {% for p in productos %}
+          {% if p.categoria %}
+            {% if p.categoria in categorias %}
+              {% set _ = categorias.update({p.categoria: categorias[p.categoria] + 1}) %}
+            {% else %}
+              {% set _ = categorias.update({p.categoria: 1}) %}
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+        
+        <div class="list-group">
+          {% for cat, count in categorias.items() %}
+            {% set cat_color = '#CCCCCC' %}
+            <!-- Buscar el color de categoría del primer producto que tenga esta categoría -->
+            {% for p in productos %}
+              {% if p.categoria == cat and p.categoria_color %}
+                {% set cat_color = p.categoria_color %}
+              {% endif %}
+            {% endfor %}
+            
+            <div class="list-group-item d-flex justify-content-between align-items-center">
+              <div class="d-flex align-items-center">
+                <span class="me-2 rounded-circle" style="width: 10px; height: 10px; background-color: {{ cat_color }};"></span>
+                {{ cat|title }}
+              </div>
+              <span class="badge bg-secondary rounded-pill">{{ count }}</span>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="alert alert-info mb-0">
+          <i class="fas fa-info-circle me-2"></i> No hay categorías disponibles.
+        </div>
+      {% endif %}
+    </div>
+  </div>
+  
+  <div class="col-lg-6">
+    <div class="dashboard-card h-100">
+      <div class="section-title">
+        <h2>Productos por Agotarse</h2>
+      </div>
+      {% set low_stock = productos|selectattr('stock', 'le', 5)|selectattr('stock', 'gt', 0)|list if productos else [] %}
+      
+      {% if low_stock|length > 0 %}
+        <div class="list-group">
+          {% for p in low_stock[:5] %}
+            <div class="list-group-item d-flex justify-content-between align-items-center">
+              <div class="d-flex align-items-center">
+                {% if p.foto %}
+                  <img src="{{ url_for('static', filename='uploads/' ~ p.foto) }}" class="me-2 rounded" style="width: 30px; height: 30px; object-fit: cover;" alt="{{ p.nombre }}">
+                {% else %}
+                  <div class="me-2 rounded bg-light d-flex align-items-center justify-content-center" style="width: 30px; height: 30px;">
+                    <i class="fas fa-box text-secondary small"></i>
+                  </div>
+                {% endif %}
+                <span>{{ p.nombre }}</span>
+              </div>
+              <span class="badge-custom badge-low-stock">{{ p.stock }} unidades</span>
+            </div>
+          {% endfor %}
+        </div>
+        
+        {% if low_stock|length > 5 %}
+          <div class="text-center mt-3">
+            <a href="{{ url_for('ver_productos') }}?filtroAprobacion=todos" class="btn btn-sm btn-outline-custom">
+              Ver todos <i class="fas fa-arrow-right ms-1"></i>
+            </a>
+          </div>
+        {% endif %}
+      {% else %}
+        <div class="alert alert-success mb-0">
+          <i class="fas fa-check-circle me-2"></i> ¡Bien! No hay productos por agotarse.
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Modal de confirmación para eliminar -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirmar eliminación</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>¿Estás seguro de que deseas eliminar el producto "<span id="deleteProductName"></span>"?</p>
+        <p class="text-danger">Esta acción no se puede deshacer.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <a href="#" id="confirmDelete" class="btn btn-danger">Eliminar</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Función para confirmar eliminación de producto
+  function confirmDelete(id, name) {
+    document.getElementById('deleteProductName').textContent = name;
+    document.getElementById('confirmDelete').href = "/eliminar-producto/" + id;
+    
+    // Mostrar el modal
+    const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    deleteModal.show();
+  }
+  
+  document.addEventListener('DOMContentLoaded', function() {
+    // Inicialización de elementos interactivos
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function(tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+  });
+</script>
+{% endblock %}
