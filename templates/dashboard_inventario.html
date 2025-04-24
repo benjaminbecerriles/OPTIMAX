@@ -1,3 +1,4 @@
+```html
 {% extends 'dashboard_base.html' %}
 
 {% block title %}Inventario - OptiMax Manage{% endblock %}
@@ -108,28 +109,13 @@
     font-weight: 500;
   }
   
-  /* Personalización por tipo - Ahora más sutil */
-  .stat-primary .stat-icon {
+  /* MODIFICACIÓN: Todos los iconos de stats ahora son azules */
+  .stat-icon {
     background-color: rgba(66, 133, 244, 0.15);
     color: #4285f4;
   }
   
-  .stat-success .stat-icon {
-    background-color: rgba(52, 168, 83, 0.15);
-    color: #34a853;
-  }
-  
-  .stat-warning .stat-icon {
-    background-color: rgba(251, 188, 5, 0.15);
-    color: #fbbc05;
-  }
-  
-  .stat-danger .stat-icon {
-    background-color: rgba(234, 67, 53, 0.15);
-    color: #ea4335;
-  }
-  
-  /* HERRAMIENTAS EN COLOR AZUL PROFUNDO - ELEGANTE NO SATURADO */
+  /* HERRAMIENTAS EN COLOR ROJO - MODIFICADO */
   .tools-container {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -138,34 +124,36 @@
   }
   
   .tool-item {
-    background-color: #2c3e50; /* Azul profundo elegante (Dark Slate Blue) */
+    position: relative;
+    background-color: #e52e2e; /* MODIFICADO: Ahora usa el color rojo del menú */
     border-radius: 0.75rem;
-    padding: 1.75rem 1.25rem;
-    box-shadow: 0 6px 16px rgba(44, 62, 80, 0.3);
-    transition: all 0.3s ease;
+    overflow: hidden;
+    transition: var(--transition-normal);
+    height: 100%;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    text-align: center;
-    text-decoration: none;
-    position: relative;
-    cursor: pointer;
+    box-shadow: 0 6px 16px rgba(229, 46, 46, 0.3);
     border: none;
     overflow: hidden;
+    text-decoration: none;
+    padding: 1.5rem 1rem; /* MODIFICADO: Padding ajustado */
   }
   
   .tool-item:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 20px rgba(44, 62, 80, 0.4);
-    background-color: #1a2533; /* Un tono más oscuro al pasar el cursor */
+    transform: translateY(-5px) scale(1.01);
+    box-shadow: 0 12px 20px rgba(229, 46, 46, 0.4);
+    border-color: var(--gray-300);
+    z-index: 10;
+    background-color: #c51818; /* MODIFICADO: Color rojo más oscuro al pasar el cursor */
   }
-  
+
+  /* MODIFICADO: Reorganización del layout para centrar títulos e iconos */
   .tool-icon {
     width: 60px;
     height: 60px;
     background-color: rgba(255, 255, 255, 0.2);
     border-radius: 16px;
-    margin-bottom: 1rem;
+    margin: 0 auto 1rem auto; /* MODIFICADO: centrado horizontal */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -182,15 +170,16 @@
   .tool-label {
     font-weight: 600;
     color: white;
-    font-size: 1.1rem;
-    margin-bottom: 0.25rem;
+    font-size: 1rem;
+    margin-bottom: 0; /* MODIFICADO: quitado margen inferior */
     transition: color 0.3s ease;
+    text-align: center; /* MODIFICADO: texto centrado */
+    margin-top: auto; /* MODIFICADO: empujar el título hacia abajo */
   }
   
+  /* MODIFICADO: Quitadas las descripciones */
   .tool-description {
-    font-size: 0.85rem;
-    color: rgba(255, 255, 255, 0.8);
-    margin: 0;
+    display: none;
   }
   
   /* Contenedores principales */
@@ -330,33 +319,42 @@
     box-shadow: 0 8px 24px rgba(0,0,0,0.08);
   }
   
+  /* MODIFICADO: Ahora sigue el mismo estilo que el título "HERRAMIENTAS" */
   .notice-header {
     background-color: white;
     padding: 1rem 1.25rem;
-    border-bottom: 1px solid var(--gray-200);
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    align-items: flex-start;
+    position: relative;
+    padding-bottom: 0.85rem;
+    border-bottom: 1px solid var(--gray-200);
   }
   
   .notice-title {
-    font-size: 1rem;
-    font-weight: 600;
+    font-size: 1.35rem !important;
+    font-weight: 800;
     margin: 0;
-    color: var(--gray-800);
+    color: #000000 !important;
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }
   
+  /* Línea roja para encabezados de notificaciones (igual que section-title) */
+  .notice-header::after {
+    content: '';
+    position: absolute;
+    left: 1.25rem;
+    bottom: -1px;
+    width: 80px;
+    height: 4px;
+    background-color: var(--primary);
+    border-radius: 2px;
+  }
+  
+  /* Quitamos el icono que ya no se necesita con el nuevo diseño */
   .notice-icon {
-    margin-right: 0.75rem;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background-color: var(--primary-light);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--primary);
+    display: none;
   }
   
   .notice-body {
@@ -427,13 +425,13 @@
 {% endblock %}
 
 {% block content %}
-<!-- Panel de estadísticas - MÁS DISCRETO -->
+<!-- Panel de estadísticas - TODOS AZULES AHORA -->
 <div class="dashboard-panel stats-panel">
   <h2 class="section-title">DATOS GENERALES</h2>
   
   <div class="stats-container">
     <!-- Total Productos -->
-    <div class="stat-card stat-primary">
+    <div class="stat-card">
       <div class="stat-icon">
         <i class="fas fa-boxes-stacked"></i>
       </div>
@@ -444,7 +442,7 @@
     </div>
     
     <!-- Unidades en Stock -->
-    <div class="stat-card stat-success">
+    <div class="stat-card">
       <div class="stat-icon">
         <i class="fas fa-warehouse"></i>
       </div>
@@ -455,7 +453,7 @@
     </div>
     
     <!-- Valor del Inventario -->
-    <div class="stat-card stat-warning">
+    <div class="stat-card">
       <div class="stat-icon">
         <i class="fas fa-dollar-sign"></i>
       </div>
@@ -466,7 +464,7 @@
     </div>
     
     <!-- Productos por Agotarse -->
-    <div class="stat-card stat-danger">
+    <div class="stat-card">
       <div class="stat-icon">
         <i class="fas fa-exclamation-triangle"></i>
       </div>
@@ -478,7 +476,7 @@
   </div>
 </div>
 
-<!-- Herramientas - AHORA MÁS PROMINENTES -->
+<!-- Herramientas - AHORA TODAS EN ROJO Y SIN DESCRIPCIONES -->
 <div class="dashboard-panel tools-panel">
   <!-- Usando span con estilo inline para forzar el color negro -->
   <h2 class="section-title" id="herramientas-titulo" style="color: #000000 !important;">HERRAMIENTAS</h2>
@@ -490,16 +488,14 @@
         <i class="fas fa-barcode"></i>
       </div>
       <h3 class="tool-label">Registrar producto</h3>
-      <p class="tool-description">Agrega nuevos artículos al inventario</p>
     </a>
     
-    <!-- Añadir/restar existencias -->
+    <!-- Modificado: Ajuste de stock (antes "Añadir/restar existencias") -->
     <a href="{{ url_for('reabastecer_listado') }}" class="tool-item">
       <div class="tool-icon">
         <i class="fas fa-plus-minus"></i>
       </div>
-      <h3 class="tool-label">Añadir/restar</h3>
-      <p class="tool-description">Ajusta niveles de existencias</p>
+      <h3 class="tool-label">Ajuste de stock</h3>
     </a>
     
     <!-- Cambiar precios -->
@@ -508,7 +504,6 @@
         <i class="fas fa-tag"></i>
       </div>
       <h3 class="tool-label">Cambiar precios</h3>
-      <p class="tool-description">Actualiza precios individuales o en lote</p>
     </div>
     
     <!-- Descuentos -->
@@ -517,7 +512,6 @@
         <i class="fas fa-percent"></i>
       </div>
       <h3 class="tool-label">Descuentos</h3>
-      <p class="tool-description">Configura ofertas y promociones</p>
     </div>
     
     <!-- Ubicación de mis productos -->
@@ -526,7 +520,6 @@
         <i class="fas fa-map-marker-alt"></i>
       </div>
       <h3 class="tool-label">Ubicación</h3>
-      <p class="tool-description">Organiza productos por ubicación</p>
     </div>
   </div>
 </div>
@@ -632,13 +625,9 @@
 <!-- Avisos y Alertas -->
 <div class="row g-4 mb-4">
   <div class="col-md-6">
-    <div class="notice-panel">
-      <div class="notice-header">
-        <div class="notice-icon">
-          <i class="fas fa-exclamation-triangle"></i>
-        </div>
-        <h3 class="notice-title">PRODUCTOS POR AGOTARSE</h3>
-      </div>
+    <div class="notice-panel dashboard-panel">
+      <!-- MODIFICADO: Ahora usa el mismo estilo que los títulos de sección -->
+      <h2 class="section-title">PRODUCTOS POR AGOTARSE</h2>
       
       <div class="notice-body">
         {% set low_stock = productos|selectattr('stock', 'le', 5)|selectattr('stock', 'gt', 0)|list if productos else [] %}
@@ -660,13 +649,9 @@
   </div>
   
   <div class="col-md-6">
-    <div class="notice-panel">
-      <div class="notice-header">
-        <div class="notice-icon">
-          <i class="fas fa-bell"></i>
-        </div>
-        <h3 class="notice-title">NOTIFICACIONES</h3>
-      </div>
+    <div class="notice-panel dashboard-panel">
+      <!-- MODIFICADO: Ahora usa el mismo estilo que los títulos de sección -->
+      <h2 class="section-title">NOTIFICACIONES</h2>
       
       <div class="notice-body">
         <div class="notice-empty">
@@ -703,3 +688,4 @@
   });
 </script>
 {% endblock %}
+```

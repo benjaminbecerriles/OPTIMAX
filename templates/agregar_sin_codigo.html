@@ -89,7 +89,7 @@
     display: block;
   }
 
-  /* Menú (3 puntitos) */
+  /* Menú (3 puntitos) - MODIFICADO: Igual al de agregar_producto.html */
   .no-image-icon {
     position: absolute;
     top: 5px;
@@ -493,10 +493,10 @@
             >
           </div>
 
-          <!-- Costo / Precio -->
+          <!-- Costo / Precio MODIFICADO PARA MOSTRAR "POR PZA" -->
           <div class="d-flex gap-3" style="align-items: center; margin-bottom: 0;">
             <div class="form-group" style="flex:1; margin-bottom: 0;">
-              <div class="floating-label" style="display: none;" id="costoFloatingLabel">Costo</div>
+              <div class="floating-label" style="display: none;" id="costoFloatingLabel">Costo por pza</div>
               <input
                 type="text"
                 step="0.01"
@@ -505,11 +505,11 @@
                 name="costo"
                 required
                 oninput="formatCostRealtime(this)"
-                placeholder="COSTO"
+                placeholder="COSTO POR PZA"
               >
             </div>
             <div class="form-group" style="flex:1; margin-bottom: 0;">
-              <div class="floating-label" style="display: none;" id="precio_ventaFloatingLabel">Precio de venta</div>
+              <div class="floating-label" style="display: none;" id="precio_ventaFloatingLabel">Precio de venta por pza</div>
               <input
                 type="text"
                 step="0.01"
@@ -518,7 +518,7 @@
                 name="precio_venta"
                 required
                 oninput="formatCostRealtime(this)"
-                placeholder="PRECIO DE VENTA"
+                placeholder="PRECIO DE VENTA POR PZA"
               >
             </div>
           </div>
@@ -761,6 +761,9 @@
         }
       });
     }
+    
+    // Configurar zona de soltar para arrastrar imágenes - NUEVO
+    setupDragAndDrop();
   });
 
   /* ===========================================================
@@ -944,6 +947,9 @@
         
         // Importante: vincular eventos al menú recién creado
         setTimeout(bindPhotoEvents, 0);
+        
+        // Reconfigurar zona de soltar para arrastrar imágenes
+        setupDragAndDrop();
       });
     }
   }
@@ -1123,6 +1129,7 @@
           `;
           showCenteredNotification("La imagen no pudo cargarse. Intenta de nuevo o carga una imagen manualmente.");
           setTimeout(bindPhotoEvents, 0);
+          setupDragAndDrop(); // Reconfigurar drag & drop
         };
         
         // Iniciar la carga de la imagen
@@ -1139,6 +1146,7 @@
         showCenteredNotification(data.message || "No se pudo obtener la imagen");
         // Dar tiempo para que el DOM se actualice antes de asignar eventos
         setTimeout(bindPhotoEvents, 0);
+        setupDragAndDrop(); // Reconfigurar drag & drop
       }
     })
     .catch(error => {
@@ -1158,6 +1166,7 @@
       showCenteredNotification("Ocurrió un error al buscar la imagen: " + error.message);
       // Dar tiempo para que el DOM se actualice antes de asignar eventos
       setTimeout(bindPhotoEvents, 0);
+      setupDragAndDrop(); // Reconfigurar drag & drop
     });
   }
 
@@ -1236,7 +1245,75 @@
   });
   
   /* ===========================================================
-   * 8) ENVÍO DEL FORMULARIO / VALIDACIÓN FINAL
+   * 8) NUEVA FUNCIONALIDAD: DRAG AND DROP DE IMÁGENES
+   * ===========================================================
+   */
+  function setupDragAndDrop() {
+    const fotoPlaceholder = document.getElementById("fotoPlaceholder");
+    const fotoInput = document.getElementById("fotoInput");
+    
+    if (!fotoPlaceholder || !fotoInput) return;
+    
+    // Prevenir comportamiento por defecto y activar el indicador visual
+    ['dragenter', 'dragover'].forEach(eventName => {
+      fotoPlaceholder.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Añadir indicador visual solo si no hay imagen
+        if (!fotoPlaceholder.classList.contains('has-image')) {
+          fotoPlaceholder.style.borderColor = '#e52e2e';
+          fotoPlaceholder.style.backgroundColor = 'rgba(229, 46, 46, 0.05)';
+        }
+      }, false);
+    });
+    
+    // Eliminar el indicador visual cuando se sale de la zona
+    ['dragleave', 'drop'].forEach(eventName => {
+      fotoPlaceholder.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        fotoPlaceholder.style.borderColor = '#ccc';
+        fotoPlaceholder.style.backgroundColor = '#fff';
+      }, false);
+    });
+    
+    // Procesar la imagen cuando se suelta
+    fotoPlaceholder.addEventListener('drop', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      // Si ya hay una imagen, no hacer nada
+      if (fotoPlaceholder.classList.contains('has-image')) return;
+      
+      // Obtener archivos dropados
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      
+      if (files.length) {
+        // Asignar al input de archivo para procesamiento uniforme
+        fotoInput.files = files;
+        
+        // Disparar el evento change manualmente
+        const changeEvent = new Event('change', { bubbles: true });
+        fotoInput.dispatchEvent(changeEvent);
+      }
+    }, false);
+    
+    // Permitir el drop en todo el documento
+    document.body.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    }, false);
+    
+    document.body.addEventListener('drop', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    }, false);
+  }
+  
+  /* ===========================================================
+   * 9) ENVÍO DEL FORMULARIO / VALIDACIÓN FINAL
    * ===========================================================
    */
   // Referencias a elementos de carga
