@@ -197,15 +197,15 @@
     position: relative;
   }
 
-  /* MODIFICADO: Estilo mejorado para el botón de columnas */
+  /* MODIFICADO: Estilo mejorado para el botón de columnas (ahora igual al de acciones) */
   .action-button.columns-button {
-    background-color: #f0f0f0;
-    border-color: #d0d0d0;
+    background-color: white; /* Igual que los demás botones */
+    border-color: var(--gray-300); /* Igual que los demás botones */
   }
   
   .action-button.columns-button:hover {
-    background-color: #e5e5e5;
-    border-color: #c0c0c0;
+    background-color: var(--gray-100);
+    border-color: var(--gray-400);
   }
   
   .columns-icon {
@@ -243,13 +243,16 @@
     background-color: #e0e0e0; /* Gris con tono frío, muy sutil */
     color: #333333; /* Texto negro oscuro */
     font-weight: 800; /* Texto en negritas más fuerte */
-    font-size: 0.9rem;
-    padding: 1.25rem 1rem;
+    font-size: 0.75rem; /* Reducido para acomodar dos líneas */
+    padding: 0.75rem 0.4rem; /* Reducido para encabezados más compactos */
     border-bottom: 2px solid var(--gray-300);
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    white-space: nowrap;
+    white-space: normal; /* Permitir saltos de línea */
     text-align: center;
+    line-height: 1.2; /* Ajustado para mejor legibilidad en dos líneas */
+    height: 60px; /* Altura fija para encabezados de dos líneas */
+    vertical-align: middle;
   }
   
   .products-table tbody td {
@@ -439,6 +442,26 @@
   
   .cost-value {
     color: var(--gray-700);
+  }
+
+  /* MODIFICADO: Estilo para caducidad sin fondo gris */
+  .expiry-value {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--gray-800);
+    text-align: center;
+  }
+  
+  .expiry-value.soon {
+    color: #e65100;
+  }
+  
+  .expiry-value.expired {
+    color: #c62828;
+  }
+  
+  .expiry-value.far {
+    color: #2e7d32;
   }
 
   /* MODIFICADO: Estilo para íconos de ojo (visibilidad) sin círculo */
@@ -785,6 +808,21 @@
     color: var(--gray-700);
   }
   
+  /* NUEVO: Estilos para opciones de selección de categoría con colores */
+  .category-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 3px 0;
+  }
+  
+  .category-color-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  
   /* Responsive adjustments */
   @media (max-width: 768px) {
     .product-img-container {
@@ -835,46 +873,48 @@
       </div>
     </div>
     
-    <!-- Filtro por categoría -->
+    <!-- Filtro por categoría MEJORADO con colores -->
     <div class="col-md-3">
       <select id="categoryFilter" class="form-select filter-select">
         <option value="">Todas las categorías</option>
-        <option value="abarrotes secos" data-color="#FFA500">Abarrotes secos</option>
-        <option value="enlatados y conservas" data-color="#DAA520">Enlatados y conservas</option>
-        <option value="botanas, dulces y snacks" data-color="#FF69B4">Botanas, dulces y snacks</option>
-        <option value="bebidas no alcohólicas" data-color="#1E90FF">Bebidas no alcohólicas</option>
-        <option value="bebidas alcohólicas" data-color="#800080">Bebidas alcohólicas</option>
-        <option value="panadería y repostería" data-color="#D2B48C">Panadería y repostería</option>
-        <option value="lácteos y huevos" data-color="#F5DEB3">Lácteos y huevos</option>
-        <option value="carnes frías y embutidos" data-color="#B22222">Carnes frías y embutidos</option>
-        <option value="congelados y refrigerados" data-color="#00CED1">Congelados y refrigerados</option>
-        <option value="frutas y verduras frescas" data-color="#32CD32">Frutas y verduras frescas</option>
-        <option value="productos de limpieza y hogar" data-color="#87CEFA">Productos de limpieza y hogar</option>
-        <option value="cuidado personal e higiene" data-color="#FFC0CB">Cuidado personal e higiene</option>
-        <option value="medicamentos de mostrador (otc)" data-color="#FF6347">Medicamentos de mostrador (OTC)</option>
-        <option value="productos para bebés" data-color="#FFB6C1">Productos para bebés</option>
-        <option value="productos para mascotas" data-color="#8FBC8F">Productos para mascotas</option>
-        <option value="artículos de papelería" data-color="#9370DB">Artículos de papelería</option>
-        <option value="ferretería básica" data-color="#708090">Ferretería básica</option>
-        <option value="artesanías y manualidades" data-color="#DDA0DD">Artesanías y manualidades</option>
-        <option value="productos a granel" data-color="#BDB76B">Productos a granel</option>
-        <option value="productos orgánicos" data-color="#6B8E23">Productos orgánicos</option>
-        <option value="productos gourmet" data-color="#CD853F">Productos gourmet</option>
-        <option value="suplementos alimenticios" data-color="#DA70D6">Suplementos alimenticios</option>
-        <option value="otros (miscelánea)" data-color="#A9A9A9">Otros (miscelánea)</option>
+        {% for cat_name, cat_color in [
+            ("abarrotes secos", "#FFA500"),
+            ("enlatados y conservas", "#DAA520"),
+            ("botanas, dulces y snacks", "#FF69B4"),
+            ("bebidas no alcohólicas", "#1E90FF"),
+            ("bebidas alcohólicas", "#800080"),
+            ("panadería y repostería", "#D2B48C"),
+            ("lácteos y huevos", "#F5DEB3"),
+            ("carnes frías y embutidos", "#B22222"),
+            ("congelados y refrigerados", "#00CED1"),
+            ("frutas y verduras frescas", "#32CD32"),
+            ("productos de limpieza y hogar", "#87CEFA"),
+            ("cuidado personal e higiene", "#FFC0CB"),
+            ("medicamentos de mostrador (otc)", "#FF6347"),
+            ("productos para bebés", "#FFB6C1"),
+            ("productos para mascotas", "#8FBC8F"),
+            ("artículos de papelería", "#9370DB"),
+            ("ferretería básica", "#708090"),
+            ("artesanías y manualidades", "#DDA0DD"),
+            ("productos a granel", "#BDB76B"),
+            ("productos orgánicos", "#6B8E23"),
+            ("productos gourmet", "#CD853F"),
+            ("suplementos alimenticios", "#DA70D6"),
+            ("otros (miscelánea)", "#A9A9A9")
+        ] %}
+          <option value="{{ cat_name }}" data-color="{{ cat_color }}" style="background-color: {{ cat_color }}10">
+            {{ cat_name|title }}
+          </option>
+        {% endfor %}
       </select>
     </div>
     
     <!-- Control de columnas MODIFICADO -->
     <div class="col-md-2">
       <div class="btn-columns">
-        <button class="action-button columns-button w-100" id="columnToggleBtn">
-          <div class="columns-icon">
-            <span class="column-line"></span>
-            <span class="column-line"></span>
-            <span class="column-line"></span>
-          </div>
-          Columnas <i class="fas fa-caret-down ml-1"></i>
+        <button class="action-button w-100" id="columnToggleBtn">
+          <i class="fas fa-columns"></i>
+          Columnas
         </button>
         <div class="dropdown-menu" id="columnDropdown" style="display: none;">
           <div class="px-3 py-2">
@@ -901,6 +941,10 @@
             <div class="form-check mb-2">
               <input class="form-check-input" type="checkbox" id="colCost" checked>
               <label class="form-check-label" for="colCost">Costo</label>
+            </div>
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="checkbox" id="colExpiry" checked>
+              <label class="form-check-label" for="colExpiry">Caducidad</label>
             </div>
             <div class="form-check mb-2">
               <input class="form-check-input" type="checkbox" id="colFav" checked>
@@ -952,18 +996,19 @@
         <tr>
           <th style="width: 110px;" class="column-image">FOTO</th>
           <th class="text-start column-product">PRODUCTO</th>
-          <th style="width: 130px;" class="column-category">CATEGORÍA</th>
-          <th style="width: 120px;" class="column-stock">STOCK</th>
-          <th style="width: 110px;" class="column-price">PRECIO</th>
-          <th style="width: 110px;" class="column-cost">COSTO</th>
-          <th style="width: 80px;" class="column-fav">FAV</th>
-          <th style="width: 80px;" class="column-vis">VISIBLE</th>
-          <th style="width: 80px;" class="column-actions">ACCIONES</th>
+          <th style="width: 80px;" class="column-category">CAT</th>
+          <th style="width: 120px;" class="column-stock">STOCK<br>UNIDADES</th>
+          <th style="width: 110px;" class="column-price">PRECIO<br>POR UNIDAD</th>
+          <th style="width: 110px;" class="column-cost">COSTO<br>POR UNIDAD</th>
+          <th style="width: 110px;" class="column-expiry">FECHA DE<br>CADUCIDAD</th>
+          <th style="width: 70px;" class="column-fav">FAV</th>
+          <th style="width: 70px;" class="column-vis">VISIBLE</th>
+          <th style="width: 70px;" class="column-actions">ACCIONES</th>
         </tr>
       </thead>
       <tbody>
         {% for p in productos %}
-        <tr data-id="{{ p.id }}" data-name="{{ p.nombre }}">
+        <tr data-id="{{ p.id }}" data-name="{{ p.nombre }}" data-category="{{ p.categoria|lower }}">
           <!-- Foto -->
           <td class="column-image">
             <div class="product-img-container">
@@ -1003,26 +1048,57 @@
           <!-- Categoría con burbuja de color y tooltip -->
           <td class="column-category">
             <div class="category-tooltip">
-              <span class="category-indicator" style="background-color: {{ p.categoria|category_color }};"></span>
+              {% set cat_color = p.categoria|category_color %}
+              <span class="category-indicator" style="background-color: {{ cat_color }};"></span>
               <span class="category-tooltip-text">{{ p.categoria|default('Sin categoría')|title }}</span>
             </div>
           </td>
           
-          <!-- MODIFICADO: Stock como texto simple -->
+          <!-- MODIFICADO: Stock con unidades personalizadas y manejo mejorado para valores None -->
           <td class="column-stock">
             <span class="stock-value {% if p.stock <= 0 %}zero{% elif p.stock < 5 %}low{% endif %}">
-              {{ p.stock }} unidades
+              {{ p.stock }} 
+              {% if p.unidad and p.unidad != 'NONE' %}
+                {{ p.unidad }}
+              {% else %}
+                {% if p.stock == 1 %}pieza{% else %}piezas{% endif %}
+              {% endif %}
             </span>
           </td>
           
-          <!-- Precio -->
+          <!-- Precio con formato mejorado: separadores de miles y sin decimales cuando son 0 -->
           <td class="column-price">
-            <span class="price-value">${{ p.precio_venta|round(2) }}</span>
+            <span class="price-value">$
+              {% if p.precio_venta == p.precio_venta|int %}
+                {{ '{:,}'.format(p.precio_venta|int) }}
+              {% elif ((p.precio_venta * 1000)|int % 10) == 0 %}
+                {{ '{:,.2f}'.format(p.precio_venta).rstrip('0').rstrip('.') }}
+              {% else %}
+                {{ '{:,.3f}'.format(p.precio_venta) }}
+              {% endif %}
+            </span>
           </td>
           
-          <!-- Costo -->
+          <!-- Costo con formato mejorado: separadores de miles y sin decimales cuando son 0 -->
           <td class="column-cost">
-            <span class="cost-value">${{ p.costo|round(2) }}</span>
+            <span class="cost-value">$
+              {% if p.costo == p.costo|int %}
+                {{ '{:,}'.format(p.costo|int) }}
+              {% elif ((p.costo * 1000)|int % 10) == 0 %}
+                {{ '{:,.2f}'.format(p.costo).rstrip('0').rstrip('.') }}
+              {% else %}
+                {{ '{:,.3f}'.format(p.costo) }}
+              {% endif %}
+            </span>
+          </td>
+          
+          <!-- MODIFICADO: Fecha de caducidad sin fondo y con N/A en lugar de "No definida" -->
+          <td class="column-expiry">
+            {% if p.has_caducidad and p.metodo_caducidad %}
+              <span class="expiry-value">{{ p.metodo_caducidad }}</span>
+            {% else %}
+              <span class="expiry-value">N/A</span>
+            {% endif %}
           </td>
           
           <!-- Favorito -->
@@ -1361,6 +1437,56 @@
       console.warn("Bootstrap tooltips no pudieron inicializarse:", e);
     }
     
+    // MEJORADO: Añadir colores a las opciones del selector de categorías
+    const categoryFilter = document.getElementById('categoryFilter');
+    if (categoryFilter) {
+      // Guardar las opciones originales
+      const options = Array.from(categoryFilter.options);
+      
+      // Vaciar el select
+      categoryFilter.innerHTML = '';
+      
+      // Agregar las opciones con color
+      options.forEach(option => {
+        const color = option.getAttribute('data-color');
+        
+        // Si es la opción de "Todas las categorías", no necesitamos color
+        if (!option.value) {
+          categoryFilter.appendChild(option);
+          return;
+        }
+        
+        // Crear elemento OPTION con color
+        const newOption = document.createElement('option');
+        newOption.value = option.value;
+        newOption.setAttribute('data-color', color);
+        
+        // Crear un contenedor para el color y el texto
+        const optionContent = document.createElement('span');
+        optionContent.className = 'category-option';
+        
+        // Crear el indicador de color
+        const colorDot = document.createElement('span');
+        colorDot.className = 'category-color-dot';
+        colorDot.style.backgroundColor = color;
+        
+        // Texto de la opción
+        const optionText = document.createTextNode(option.textContent);
+        
+        // Ensamblar (esto solo funciona en algunos navegadores)
+        optionContent.appendChild(colorDot);
+        optionContent.appendChild(optionText);
+        
+        // Como no podemos usar HTML en opciones, simulamos con estilos CSS
+        newOption.style.backgroundColor = color + '10'; // Color con 10% de opacidad
+        newOption.style.borderLeft = '12px solid ' + color;
+        newOption.style.paddingLeft = '8px';
+        newOption.textContent = option.textContent;
+        
+        categoryFilter.appendChild(newOption);
+      });
+    }
+    
     // Toggle menú de columnas
     const columnToggleBtn = document.getElementById('columnToggleBtn');
     const columnDropdown = document.getElementById('columnDropdown');
@@ -1432,31 +1558,20 @@
       });
     }
     
-    // Filtro por categoría
-    const categoryFilter = document.getElementById('categoryFilter');
+    // MEJORADO: Filtro por categoría
     if (categoryFilter) {
       categoryFilter.addEventListener('change', function() {
         const selectedCategory = this.value.toLowerCase();
         const tableRows = document.querySelectorAll('#productsTable tbody tr');
         
-        if (!selectedCategory) {
-          tableRows.forEach(row => {
-            row.style.display = '';
-          });
-          updateProductCounter();
-          return;
-        }
-        
         tableRows.forEach(row => {
-          const categoryTooltip = row.querySelector('.category-tooltip-text');
-          if (categoryTooltip) {
-            const category = categoryTooltip.innerText.toLowerCase();
-            
-            if (category.includes(selectedCategory)) {
-              row.style.display = '';
-            } else {
-              row.style.display = 'none';
-            }
+          // Usar el atributo data-category que añadimos a cada fila para una comparación exacta
+          const rowCategory = row.getAttribute('data-category') || '';
+          
+          if (!selectedCategory || rowCategory === selectedCategory) {
+            row.style.display = '';
+          } else {
+            row.style.display = 'none';
           }
         });
         
@@ -1483,7 +1598,7 @@
         window.deleteModal = new bootstrap.Modal(deleteModalEl);
       }
     } catch (e) {
-      console.warn("Bootstrap tooltips no pudieron inicializarse:", e);
+      console.warn("Bootstrap modal no pudo inicializarse:", e);
     }
   });
   
