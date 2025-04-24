@@ -5,6 +5,9 @@
 {% endblock %}
 
 {% block content %}
+<!-- Asegurémonos de que Font Awesome esté correctamente cargado -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
 <style>
   /* Variables y configuración general */
   :root {
@@ -219,12 +222,12 @@
     border-radius: 1px;
   }
 
-  /* Tabla de productos mejorada */
+  /* MODIFICADO: Tabla de productos con borde más grueso */
   .products-table-container {
     margin-top: 1.5rem;
     border-radius: var(--border-radius);
     overflow: hidden;
-    border: 1px solid var(--gray-300);
+    border: 3px solid var(--gray-300); /* Borde aumentado a 3px */
     box-shadow: var(--shadow-sm);
   }
   
@@ -235,11 +238,12 @@
     margin-bottom: 0;
   }
   
+  /* MODIFICADO: Encabezados con fondo gris suave y texto negro en negritas */
   .products-table thead th {
-    background-color: var(--gray-100);
-    color: var(--gray-800);
-    font-weight: 700;
-    font-size: 0.85rem;
+    background-color: #e0e0e0; /* Gris con tono frío, muy sutil */
+    color: #333333; /* Texto negro oscuro */
+    font-weight: 800; /* Texto en negritas más fuerte */
+    font-size: 0.9rem;
     padding: 1.25rem 1rem;
     border-bottom: 2px solid var(--gray-300);
     text-transform: uppercase;
@@ -259,13 +263,13 @@
     border-bottom: none;
   }
   
-  /* NUEVO: Efecto Zebra */
+  /* MODIFICADO: Efecto Zebra con color más oscuro */
   .products-table tbody tr:nth-child(odd) {
     background-color: white;
   }
   
   .products-table tbody tr:nth-child(even) {
-    background-color: #f9f9f9;
+    background-color: #f0f0f0; /* Gris más oscuro para el efecto zebra */
   }
   
   .products-table tbody tr:hover {
@@ -411,39 +415,19 @@
     opacity: 1;
   }
 
-  /* Stock badges */
-  .stock-badge {
-    padding: 0.5rem 0.75rem;
-    border-radius: 50rem;
-    font-size: 0.85rem;
+  /* MODIFICADO: Stock como texto simple */
+  .stock-value {
     font-weight: 700;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    line-height: 1;
-    box-shadow: var(--shadow-sm);
+    font-size: 1.1rem;
+    color: var(--gray-800);
   }
   
-  .badge-normal {
-    background-color: rgba(52, 168, 83, 0.15);
-    color: var(--green);
-    border: 1px solid rgba(52, 168, 83, 0.3);
+  .stock-value.zero {
+    color: #e53935; /* Rojo para stock en cero */
   }
   
-  .badge-warning {
-    background-color: rgba(251, 188, 5, 0.15);
-    color: #d1940a;
-    border: 1px solid rgba(251, 188, 5, 0.3);
-  }
-  
-  .badge-danger {
-    background-color: rgba(234, 67, 53, 0.15);
-    color: var(--red);
-    border: 1px solid rgba(234, 67, 53, 0.3);
-  }
-  
-  .stock-badge i {
-    font-size: 1rem;
+  .stock-value.low {
+    color: #ff9800; /* Naranja para stock bajo (opcional) */
   }
 
   /* Precio y costo */
@@ -457,10 +441,32 @@
     color: var(--gray-700);
   }
 
-  /* Iconos de favorito y visibilidad (MODIFICADO: ahora son clickeables) */
+  /* MODIFICADO: Estilo para íconos de ojo (visibilidad) sin círculo */
+  .eye-icon {
+    display: inline-block;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    font-size: 1.6rem;
+  }
+  
+  .eye-icon:hover {
+    transform: scale(1.15);
+  }
+  
+  /* Estilo para el ícono visible (ojo abierto) */
+  .eye-icon.visible {
+    color: #2196F3; /* Un azul más combinable */
+  }
+  
+  /* Estilo para el ícono invisible (ojo cerrado) */
+  .eye-icon.hidden {
+    color: #9E9E9E; /* Gris */
+  }
+
+  /* Iconos de favorito */
   .heart-icon {
     font-size: 24px;
-    cursor: pointer; /* Cambiado a pointer para que sea clickeable */
+    cursor: pointer;
     display: inline-block;
     transition: transform 0.2s ease, color 0.2s ease;
   }
@@ -475,18 +481,6 @@
   
   .heart-icon:not(.active) {
     color: gray;
-  }
-  
-  .vis-icon {
-    width: 24px;
-    height: auto;
-    cursor: pointer; /* Ahora clickeable */
-    display: inline-block;
-    transition: transform 0.2s ease;
-  }
-  
-  .vis-icon:hover {
-    transform: scale(1.1);
   }
 
   /* MODIFICADO: Nuevo menú de acciones centrado */
@@ -956,22 +950,22 @@
     <table class="products-table" id="productsTable">
       <thead>
         <tr>
-          <th style="width: 110px;">FOTO</th>
-          <th class="text-start">PRODUCTO</th>
-          <th style="width: 130px;">CATEGORÍA</th>
-          <th style="width: 120px;">STOCK</th>
-          <th style="width: 110px;">PRECIO</th>
-          <th style="width: 110px;">COSTO</th>
-          <th style="width: 80px;">FAV</th>
-          <th style="width: 80px;">VISIBLE</th>
-          <th style="width: 80px;">ACCIONES</th>
+          <th style="width: 110px;" class="column-image">FOTO</th>
+          <th class="text-start column-product">PRODUCTO</th>
+          <th style="width: 130px;" class="column-category">CATEGORÍA</th>
+          <th style="width: 120px;" class="column-stock">STOCK</th>
+          <th style="width: 110px;" class="column-price">PRECIO</th>
+          <th style="width: 110px;" class="column-cost">COSTO</th>
+          <th style="width: 80px;" class="column-fav">FAV</th>
+          <th style="width: 80px;" class="column-vis">VISIBLE</th>
+          <th style="width: 80px;" class="column-actions">ACCIONES</th>
         </tr>
       </thead>
       <tbody>
         {% for p in productos %}
         <tr data-id="{{ p.id }}" data-name="{{ p.nombre }}">
           <!-- Foto -->
-          <td>
+          <td class="column-image">
             <div class="product-img-container">
               {% if p.foto %}
                 <img src="{{ url_for('static', filename='uploads/' ~ p.foto) }}" alt="{{ p.nombre }}" class="product-img">
@@ -984,7 +978,7 @@
           </td>
           
           <!-- Información del producto -->
-          <td class="text-start">
+          <td class="text-start column-product">
             <div class="product-info">
               <div class="product-name">{{ p.nombre }}</div>
               <div class="product-meta">
@@ -1007,45 +1001,32 @@
           </td>
           
           <!-- Categoría con burbuja de color y tooltip -->
-          <td>
+          <td class="column-category">
             <div class="category-tooltip">
               <span class="category-indicator" style="background-color: {{ p.categoria|category_color }};"></span>
               <span class="category-tooltip-text">{{ p.categoria|default('Sin categoría')|title }}</span>
             </div>
           </td>
           
-          <!-- Stock con badge contextual -->
-          <td>
-            {% if p.stock <= 0 %}
-              <span class="stock-badge badge-danger">
-                <i class="fas fa-exclamation-circle"></i>
-                {{ p.stock }} unidades
-              </span>
-            {% elif p.stock < 5 %}
-              <span class="stock-badge badge-warning">
-                <i class="fas fa-exclamation-triangle"></i>
-                {{ p.stock }} unidades
-              </span>
-            {% else %}
-              <span class="stock-badge badge-normal">
-                <i class="fas fa-check-circle"></i>
-                {{ p.stock }} unidades
-              </span>
-            {% endif %}
+          <!-- MODIFICADO: Stock como texto simple -->
+          <td class="column-stock">
+            <span class="stock-value {% if p.stock <= 0 %}zero{% elif p.stock < 5 %}low{% endif %}">
+              {{ p.stock }} unidades
+            </span>
           </td>
           
           <!-- Precio -->
-          <td>
+          <td class="column-price">
             <span class="price-value">${{ p.precio_venta|round(2) }}</span>
           </td>
           
           <!-- Costo -->
-          <td>
+          <td class="column-cost">
             <span class="cost-value">${{ p.costo|round(2) }}</span>
           </td>
           
-          <!-- Favorito - MODIFICADO: Ahora es clickeable -->
-          <td>
+          <!-- Favorito -->
+          <td class="column-fav">
             <span class="heart-icon {% if p.es_favorito %}active{% endif %}" 
                  data-product-id="{{ p.id }}" 
                  data-is-favorite="{{ '1' if p.es_favorito else '0' }}"
@@ -1054,19 +1035,18 @@
             </span>
           </td>
           
-          <!-- Visibilidad - MODIFICADO: Ahora es clickeable -->
-          <td>
-            <img src="{{ url_for('static', filename='img/1.png' if p.esta_a_la_venta else '2.png') }}" 
-                 class="vis-icon" 
-                 alt="{{ 'Visible' if p.esta_a_la_venta else 'No visible' }}" 
+          <!-- MODIFICADO: Visibilidad usando iconos de ojo sin círculo -->
+          <td class="column-vis">
+            <span class="eye-icon {{ 'visible' if p.esta_a_la_venta else 'hidden' }}" 
                  data-product-id="{{ p.id }}" 
                  data-is-visible="{{ '1' if p.esta_a_la_venta else '0' }}"
-                 onclick="toggleVisibilidad(this)"
-                 style="width:24px;">
+                 onclick="toggleVisibilidad(this)">
+              <i class="fas {{ 'fa-eye' if p.esta_a_la_venta else 'fa-eye-slash' }}"></i>
+            </span>
           </td>
           
-          <!-- MODIFICADO: Nuevo botón para abrir el modal de acciones -->
-          <td>
+          <!-- Botón para abrir el modal de acciones -->
+          <td class="column-actions">
             <div class="actions-menu">
               <button type="button" class="actions-dot" onclick="openActionsModal({{ p.id }}, '{{ p.nombre }}')">&#8226;&#8226;&#8226;</button>
             </div>
@@ -1252,7 +1232,7 @@
     });
   }
   
-  // Función para cambiar estado de visibilidad
+  // MODIFICADO: Función para cambiar estado de visibilidad
   function toggleVisibilidad(element) {
     // Obtener ID del producto y estado actual
     const productId = element.getAttribute('data-product-id');
@@ -1260,12 +1240,16 @@
     const newState = isVisible ? '0' : '1';
     
     // Actualizar UI inmediatamente para feedback visual
+    const iconElement = element.querySelector('i');
+    
     if (newState === '1') {
-      element.src = "{{ url_for('static', filename='img/1.png') }}";
-      element.alt = "Visible";
+      element.classList.remove('hidden');
+      element.classList.add('visible');
+      iconElement.className = 'fas fa-eye';
     } else {
-      element.src = "{{ url_for('static', filename='img/2.png') }}";
-      element.alt = "No visible";
+      element.classList.remove('visible');
+      element.classList.add('hidden');
+      iconElement.className = 'fas fa-eye-slash';
     }
     
     // Hacer la petición AJAX
@@ -1294,11 +1278,13 @@
         element.setAttribute('data-is-visible', originalState);
         
         if (originalState === '1') {
-          element.src = "{{ url_for('static', filename='img/1.png') }}";
-          element.alt = "Visible";
+          element.classList.remove('hidden');
+          element.classList.add('visible');
+          iconElement.className = 'fas fa-eye';
         } else {
-          element.src = "{{ url_for('static', filename='img/2.png') }}";
-          element.alt = "No visible";
+          element.classList.remove('visible');
+          element.classList.add('hidden');
+          iconElement.className = 'fas fa-eye-slash';
         }
         
         showToast('Error', data.message || 'No se pudo actualizar', 'error');
@@ -1309,11 +1295,13 @@
       
       // Revertir cambios en UI en caso de error
       if (isVisible) {
-        element.src = "{{ url_for('static', filename='img/1.png') }}";
-        element.alt = "Visible";
+        element.classList.remove('hidden');
+        element.classList.add('visible');
+        iconElement.className = 'fas fa-eye';
       } else {
-        element.src = "{{ url_for('static', filename='img/2.png') }}";
-        element.alt = "No visible";
+        element.classList.remove('visible');
+        element.classList.add('hidden');
+        iconElement.className = 'fas fa-eye-slash';
       }
       element.setAttribute('data-is-visible', isVisible ? '1' : '0');
       
@@ -1406,6 +1394,20 @@
       }
     });
     
+    // NUEVO: Funcionalidad del selector de columnas
+    const columnCheckboxes = document.querySelectorAll('#columnDropdown input[type="checkbox"]');
+    columnCheckboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', function() {
+        const columnName = this.id.replace('col', '').toLowerCase();
+        const columnClass = `.column-${columnName.toLowerCase()}`;
+        const columnElements = document.querySelectorAll(columnClass);
+        
+        columnElements.forEach(el => {
+          el.style.display = this.checked ? '' : 'none';
+        });
+      });
+    });
+    
     // Búsqueda en tiempo real
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
@@ -1481,7 +1483,7 @@
         window.deleteModal = new bootstrap.Modal(deleteModalEl);
       }
     } catch (e) {
-      console.warn("Bootstrap modal no pudo inicializarse:", e);
+      console.warn("Bootstrap tooltips no pudieron inicializarse:", e);
     }
   });
   
