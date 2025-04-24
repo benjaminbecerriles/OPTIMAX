@@ -457,11 +457,16 @@
     color: var(--gray-700);
   }
 
-  /* Iconos de favorito y visibilidad (EXACTAMENTE COMO EN AGREGAR PRODUCTO) */
+  /* Iconos de favorito y visibilidad (MODIFICADO: ahora son clickeables) */
   .heart-icon {
     font-size: 24px;
-    cursor: default; /* Cambiado de pointer a default para que no parezca clickeable */
+    cursor: pointer; /* Cambiado a pointer para que sea clickeable */
     display: inline-block;
+    transition: transform 0.2s ease, color 0.2s ease;
+  }
+  
+  .heart-icon:hover {
+    transform: scale(1.1);
   }
   
   .heart-icon.active {
@@ -475,8 +480,13 @@
   .vis-icon {
     width: 24px;
     height: auto;
-    cursor: default; /* No clickeable */
+    cursor: pointer; /* Ahora clickeable */
     display: inline-block;
+    transition: transform 0.2s ease;
+  }
+  
+  .vis-icon:hover {
+    transform: scale(1.1);
   }
 
   /* MODIFICADO: Nuevo menú de acciones centrado */
@@ -707,6 +717,78 @@
     font-weight: 500;
     font-size: 0.95rem;
     cursor: pointer;
+  }
+  
+  /* NUEVO: Toast para notificaciones */
+  .toast-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+  }
+  
+  .toast {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    padding: 15px 20px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+    max-width: 350px;
+  }
+  
+  .toast-success {
+    border-left: 4px solid #34a853;
+  }
+  
+  .toast-error {
+    border-left: 4px solid #ea4335;
+  }
+  
+  .toast-info {
+    border-left: 4px solid #4285f4;
+  }
+  
+  .toast-warning {
+    border-left: 4px solid #fbbc05;
+  }
+  
+  .toast-icon {
+    font-size: 20px;
+  }
+  
+  .toast-success .toast-icon {
+    color: #34a853;
+  }
+  
+  .toast-error .toast-icon {
+    color: #ea4335;
+  }
+  
+  .toast-info .toast-icon {
+    color: #4285f4;
+  }
+  
+  .toast-warning .toast-icon {
+    color: #fbbc05;
+  }
+  
+  .toast-content {
+    flex-grow: 1;
+  }
+  
+  .toast-title {
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  
+  .toast-message {
+    font-size: 14px;
+    color: var(--gray-700);
   }
   
   /* Responsive adjustments */
@@ -962,22 +1044,25 @@
             <span class="cost-value">${{ p.costo|round(2) }}</span>
           </td>
           
-          <!-- Favorito - Solo muestra el estado, no es clickeable -->
+          <!-- Favorito - MODIFICADO: Ahora es clickeable -->
           <td>
-            {% if p.es_favorito %}
-              <span class="heart-icon active">&#9829;</span>
-            {% else %}
-              <span class="heart-icon">&#9825;</span>
-            {% endif %}
+            <span class="heart-icon {% if p.es_favorito %}active{% endif %}" 
+                 data-product-id="{{ p.id }}" 
+                 data-is-favorite="{{ '1' if p.es_favorito else '0' }}"
+                 onclick="toggleFavorito(this)">
+              {% if p.es_favorito %}&#9829;{% else %}&#9825;{% endif %}
+            </span>
           </td>
           
-          <!-- Visibilidad - Solo muestra el estado, no es clickeable -->
+          <!-- Visibilidad - MODIFICADO: Ahora es clickeable -->
           <td>
-            {% if p.esta_a_la_venta %}
-              <img src="{{ url_for('static', filename='img/1.png') }}" class="vis-icon" alt="Visible" style="width:24px;">
-            {% else %}
-              <img src="{{ url_for('static', filename='img/2.png') }}" class="vis-icon" alt="No visible" style="width:24px;">
-            {% endif %}
+            <img src="{{ url_for('static', filename='img/1.png' if p.esta_a_la_venta else '2.png') }}" 
+                 class="vis-icon" 
+                 alt="{{ 'Visible' if p.esta_a_la_venta else 'No visible' }}" 
+                 data-product-id="{{ p.id }}" 
+                 data-is-visible="{{ '1' if p.esta_a_la_venta else '0' }}"
+                 onclick="toggleVisibilidad(this)"
+                 style="width:24px;">
           </td>
           
           <!-- MODIFICADO: Nuevo botón para abrir el modal de acciones -->
@@ -1092,13 +1177,201 @@
   </div>
 </div>
 
+<!-- NUEVO: Contenedor para toasts de notificación -->
+<div class="toast-container" id="toastContainer">
+  <!-- Los toasts se generarán dinámicamente aquí -->
+</div>
+
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // Inicializar tooltips de Bootstrap
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-      return new bootstrap.Tooltip(tooltipTriggerEl);
+  // Función para cambiar estado de favorito
+  function toggleFavorito(element) {
+    // Obtener ID del producto y estado actual
+    const productId = element.getAttribute('data-product-id');
+    const isFavorite = element.getAttribute('data-is-favorite') === '1';
+    const newState = isFavorite ? '0' : '1';
+    
+    // Mostrar feedback visual inmediato
+    if (newState === '1') {
+      element.classList.add('active');
+      element.innerHTML = '&#9829;'; // Corazón lleno
+    } else {
+      element.classList.remove('active');
+      element.innerHTML = '&#9825;'; // Corazón vacío
+    }
+    
+    // Hacer la petición AJAX
+    fetch(`/api/toggle_favorite/${productId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ status: newState })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        // Actualizar atributo con el nuevo estado
+        element.setAttribute('data-is-favorite', newState);
+        
+        // Mostrar notificación
+        showToast(
+          newState === '1' ? 'Favorito añadido' : 'Favorito removido',
+          newState === '1' ? 'Producto marcado como favorito' : 'Producto desmarcado como favorito',
+          newState === '1' ? 'success' : 'info'
+        );
+      } else {
+        // Si hay error, revertir cambios en UI
+        const originalState = isFavorite ? '1' : '0';
+        element.setAttribute('data-is-favorite', originalState);
+        
+        if (originalState === '1') {
+          element.classList.add('active');
+          element.innerHTML = '&#9829;';
+        } else {
+          element.classList.remove('active');
+          element.innerHTML = '&#9825;';
+        }
+        
+        showToast('Error', data.message || 'No se pudo actualizar', 'error');
+      }
+    })
+    .catch(error => {
+      console.error('Error en petición:', error);
+      
+      // Revertir cambios en UI en caso de error
+      if (isFavorite) {
+        element.classList.add('active');
+        element.innerHTML = '&#9829;';
+      } else {
+        element.classList.remove('active');
+        element.innerHTML = '&#9825;';
+      }
+      element.setAttribute('data-is-favorite', isFavorite ? '1' : '0');
+      
+      showToast('Error de conexión', 'No se pudo contactar con el servidor', 'error');
     });
+  }
+  
+  // Función para cambiar estado de visibilidad
+  function toggleVisibilidad(element) {
+    // Obtener ID del producto y estado actual
+    const productId = element.getAttribute('data-product-id');
+    const isVisible = element.getAttribute('data-is-visible') === '1';
+    const newState = isVisible ? '0' : '1';
+    
+    // Actualizar UI inmediatamente para feedback visual
+    if (newState === '1') {
+      element.src = "{{ url_for('static', filename='img/1.png') }}";
+      element.alt = "Visible";
+    } else {
+      element.src = "{{ url_for('static', filename='img/2.png') }}";
+      element.alt = "No visible";
+    }
+    
+    // Hacer la petición AJAX
+    fetch(`/api/toggle_visibility/${productId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ status: newState })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        // Actualizar atributo con el nuevo estado
+        element.setAttribute('data-is-visible', newState);
+        
+        // Mostrar notificación
+        showToast(
+          newState === '1' ? 'Producto visible' : 'Producto invisible',
+          newState === '1' ? 'Ahora el producto es visible para venta' : 'El producto ya no es visible para venta',
+          newState === '1' ? 'success' : 'info'
+        );
+      } else {
+        // Si hay error, revertir cambios en UI
+        const originalState = isVisible ? '1' : '0';
+        element.setAttribute('data-is-visible', originalState);
+        
+        if (originalState === '1') {
+          element.src = "{{ url_for('static', filename='img/1.png') }}";
+          element.alt = "Visible";
+        } else {
+          element.src = "{{ url_for('static', filename='img/2.png') }}";
+          element.alt = "No visible";
+        }
+        
+        showToast('Error', data.message || 'No se pudo actualizar', 'error');
+      }
+    })
+    .catch(error => {
+      console.error('Error en petición:', error);
+      
+      // Revertir cambios en UI en caso de error
+      if (isVisible) {
+        element.src = "{{ url_for('static', filename='img/1.png') }}";
+        element.alt = "Visible";
+      } else {
+        element.src = "{{ url_for('static', filename='img/2.png') }}";
+        element.alt = "No visible";
+      }
+      element.setAttribute('data-is-visible', isVisible ? '1' : '0');
+      
+      showToast('Error de conexión', 'No se pudo contactar con el servidor', 'error');
+    });
+  }
+  
+  // Función para mostrar notificaciones
+  function showToast(title, message, type = 'info') {
+    // Crear elemento toast
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    
+    // Determinar ícono según el tipo
+    let icon;
+    switch (type) {
+      case 'success': icon = 'fa-check-circle'; break;
+      case 'error': icon = 'fa-exclamation-circle'; break;
+      case 'warning': icon = 'fa-exclamation-triangle'; break;
+      default: icon = 'fa-info-circle';
+    }
+    
+    // Contenido del toast
+    toast.innerHTML = `
+      <div class="toast-icon">
+        <i class="fas ${icon}"></i>
+      </div>
+      <div class="toast-content">
+        <div class="toast-title">${title}</div>
+        <div class="toast-message">${message}</div>
+      </div>
+    `;
+    
+    // Agregar al contenedor
+    const container = document.getElementById('toastContainer');
+    container.appendChild(toast);
+    
+    // Remover después de 3 segundos
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      setTimeout(() => {
+        if (container.contains(toast)) {
+          container.removeChild(toast);
+        }
+      }, 300);
+    }, 3000);
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar tooltips de Bootstrap si existen
+    try {
+      var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+      var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+      });
+    } catch (e) {
+      console.warn("Bootstrap tooltips no pudieron inicializarse:", e);
+    }
     
     // Toggle menú de columnas
     const columnToggleBtn = document.getElementById('columnToggleBtn');
@@ -1124,24 +1397,14 @@
     
     // Cerrar menús cuando se hace clic fuera
     document.addEventListener('click', function(e) {
-      if (columnDropdown && !columnToggleBtn.contains(e.target) && !columnDropdown.contains(e.target)) {
+      if (columnDropdown && columnToggleBtn && !columnToggleBtn.contains(e.target) && !columnDropdown.contains(e.target)) {
         columnDropdown.style.display = 'none';
       }
       
-      if (actionsDropdown && !bulkActionsBtn.contains(e.target) && !actionsDropdown.contains(e.target)) {
+      if (actionsDropdown && bulkActionsBtn && !bulkActionsBtn.contains(e.target) && !actionsDropdown.contains(e.target)) {
         actionsDropdown.style.display = 'none';
       }
     });
-    
-    // NUEVO: Cerrar modal de acciones si se hace clic fuera
-    const actionsModal = document.getElementById('actionsModal');
-    if (actionsModal) {
-      actionsModal.addEventListener('click', function(e) {
-        if (e.target === actionsModal) {
-          closeActionsModal();
-        }
-      });
-    }
     
     // Búsqueda en tiempo real
     const searchInput = document.getElementById('searchInput');
@@ -1151,9 +1414,9 @@
         const tableRows = document.querySelectorAll('#productsTable tbody tr');
         
         tableRows.forEach(row => {
-          const productName = row.querySelector('.product-name').innerText.toLowerCase();
-          const productSku = row.querySelector('.product-sku').innerText.toLowerCase();
-          const productBrand = row.querySelector('.product-brand').innerText.toLowerCase();
+          const productName = row.querySelector('.product-name')?.innerText.toLowerCase() || '';
+          const productSku = row.querySelector('.product-sku')?.innerText.toLowerCase() || '';
+          const productBrand = row.querySelector('.product-brand')?.innerText.toLowerCase() || '';
           
           if (productName.includes(searchTerm) || productSku.includes(searchTerm) || productBrand.includes(searchTerm)) {
             row.style.display = '';
@@ -1200,46 +1463,6 @@
       });
     }
     
-    // Mostrar/ocultar columnas
-    document.querySelectorAll('#columnDropdown input[type="checkbox"]').forEach(checkbox => {
-      checkbox.addEventListener('change', function() {
-        const colId = this.id;
-        const columnIndex = getColumnIndex(colId);
-        
-        if (columnIndex !== -1) {
-          const tableHeaders = document.querySelectorAll('#productsTable thead th');
-          const tableCells = document.querySelectorAll(`#productsTable tbody tr td:nth-child(${columnIndex + 1})`);
-          
-          if (this.checked) {
-            tableHeaders[columnIndex].style.display = '';
-            tableCells.forEach(cell => {
-              cell.style.display = '';
-            });
-          } else {
-            tableHeaders[columnIndex].style.display = 'none';
-            tableCells.forEach(cell => {
-              cell.style.display = 'none';
-            });
-          }
-        }
-      });
-    });
-    
-    function getColumnIndex(colId) {
-      const columnMap = {
-        'colImage': 0,
-        'colProduct': 1,
-        'colCategory': 2,
-        'colStock': 3,
-        'colPrice': 4,
-        'colCost': 5,
-        'colFav': 6,
-        'colVis': 7
-      };
-      
-      return columnMap[colId] !== undefined ? columnMap[colId] : -1;
-    }
-    
     // Actualizar contador de productos
     function updateProductCounter() {
       const visibleRows = document.querySelectorAll('#productsTable tbody tr:not([style*="display: none"])');
@@ -1251,255 +1474,80 @@
       }
     }
     
-    // Configurar eventos para los botones del modal de acciones
-    setupModalActions();
-    
-    // Inicializar modal de confirmación
-    window.deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    // Inicializar modal de confirmación si existe
+    try {
+      const deleteModalEl = document.getElementById('deleteModal');
+      if (deleteModalEl) {
+        window.deleteModal = new bootstrap.Modal(deleteModalEl);
+      }
+    } catch (e) {
+      console.warn("Bootstrap modal no pudo inicializarse:", e);
+    }
   });
   
-  // NUEVO: Funciones para el modal de acciones
-  let currentProductId = null;
-  
-  function openActionsModal(productId, productName) {
-    currentProductId = productId;
+  // Función para mostrar confirmación de eliminación
+  function confirmDelete(id, name) {
+    const deleteProductNameEl = document.getElementById('deleteProductName');
+    const confirmDeleteEl = document.getElementById('confirmDelete');
     
-    // Establecer el nombre del producto en el modal
-    const productNameInModal = document.getElementById('productNameInModal');
-    if (productNameInModal) {
-      productNameInModal.textContent = productName || `Producto #${productId}`;
+    if (deleteProductNameEl) {
+      deleteProductNameEl.textContent = name;
     }
     
-    // Configurar URLs y textos de las acciones
-    setupModalForProduct(productId);
+    if (confirmDeleteEl) {
+      confirmDeleteEl.href = `/eliminar-producto/${id}`;
+    }
     
-    // Mostrar el modal
-    const actionsModal = document.getElementById('actionsModal');
-    if (actionsModal) {
-      actionsModal.style.display = 'flex';
-      
-      // Añadir clase para animación
-      setTimeout(() => {
-        const modalContent = actionsModal.querySelector('.actions-modal-content');
-        if (modalContent) {
-          modalContent.style.transform = 'translateY(0)';
-          modalContent.style.opacity = '1';
-        }
-      }, 10);
+    try {
+      if (window.deleteModal) {
+        window.deleteModal.show();
+      }
+    } catch (e) {
+      // Fallback si el modal de Bootstrap falla
+      if (confirm(`¿Estás seguro de que deseas eliminar el producto "${name}"? Esta acción no se puede deshacer.`)) {
+        window.location.href = `/eliminar-producto/${id}`;
+      }
+    }
+  }
+  
+  // Funciones para el modal de acciones
+  function openActionsModal(productId, productName) {
+    const modal = document.getElementById('actionsModal');
+    const productNameEl = document.getElementById('productNameInModal');
+    const actionEdit = document.getElementById('actionEdit');
+    const actionDelete = document.getElementById('actionDelete');
+    const actionAddStock = document.getElementById('actionAddStock');
+    
+    if (productNameEl) {
+      productNameEl.textContent = productName;
+    }
+    
+    if (actionEdit) {
+      actionEdit.href = `/editar-producto/${productId}`;
+    }
+    
+    if (actionDelete) {
+      actionDelete.onclick = function(e) {
+        e.preventDefault();
+        closeActionsModal();
+        confirmDelete(productId, productName);
+      };
+    }
+    
+    if (actionAddStock) {
+      actionAddStock.href = `/reabastecer-producto/${productId}`;
+    }
+    
+    if (modal) {
+      modal.style.display = 'flex';
     }
   }
   
   function closeActionsModal() {
-    const actionsModal = document.getElementById('actionsModal');
-    if (actionsModal) {
-      actionsModal.style.display = 'none';
-    }
-    currentProductId = null;
-  }
-  
-  function setupModalForProduct(productId) {
-    // Obtener datos de visibilidad y favorito del producto
-    const productRow = document.querySelector(`#productsTable tbody tr[data-id="${productId}"]`);
-    let isVisible = true;
-    let isFavorite = false;
-    
-    if (productRow) {
-      // Determinar si el producto es visible
-      const visIcon = productRow.querySelector('.vis-icon');
-      if (visIcon) {
-        isVisible = visIcon.getAttribute('alt') === 'Visible';
-      }
-      
-      // Determinar si el producto es favorito
-      const heartIcon = productRow.querySelector('.heart-icon');
-      if (heartIcon) {
-        isFavorite = heartIcon.classList.contains('active');
-      }
-    }
-    
-    // Configurar textos según el estado
-    const visibilityText = document.getElementById('visibilityActionText');
-    if (visibilityText) {
-      visibilityText.textContent = isVisible ? 'Ocultar producto' : 'Mostrar producto';
-    }
-    
-    const favoriteText = document.getElementById('favoriteActionText');
-    if (favoriteText) {
-      favoriteText.textContent = isFavorite ? 'Quitar de favoritos' : 'Marcar como favorito';
-    }
-    
-    // Configurar URL de edición
-    const editLink = document.getElementById('actionEdit');
-    if (editLink) {
-      editLink.href = `/editar-producto/${productId}`;
+    const modal = document.getElementById('actionsModal');
+    if (modal) {
+      modal.style.display = 'none';
     }
   }
-  
-  function setupModalActions() {
-    // Añadir existencias
-    const addStockBtn = document.getElementById('actionAddStock');
-    if (addStockBtn) {
-      addStockBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        if (currentProductId) {
-          addStock(currentProductId);
-          closeActionsModal();
-        }
-      });
-    }
-    
-    // Cambiar precio
-    const changePriceBtn = document.getElementById('actionChangePrice');
-    if (changePriceBtn) {
-      changePriceBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        if (currentProductId) {
-          changePrice(currentProductId);
-          closeActionsModal();
-        }
-      });
-    }
-    
-    // Cambiar costo
-    const changeCostBtn = document.getElementById('actionChangeCost');
-    if (changeCostBtn) {
-      changeCostBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        if (currentProductId) {
-          changeCost(currentProductId);
-          closeActionsModal();
-        }
-      });
-    }
-    
-    // Cambiar visibilidad
-    const toggleVisibilityBtn = document.getElementById('actionToggleVisibility');
-    if (toggleVisibilityBtn) {
-      toggleVisibilityBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        if (currentProductId) {
-          toggleVisibility(currentProductId);
-          closeActionsModal();
-        }
-      });
-    }
-    
-    // Cambiar favorito
-    const toggleFavoriteBtn = document.getElementById('actionToggleFavorite');
-    if (toggleFavoriteBtn) {
-      toggleFavoriteBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        if (currentProductId) {
-          toggleFavorite(currentProductId);
-          closeActionsModal();
-        }
-      });
-    }
-    
-    // Definir ubicación
-    const setLocationBtn = document.getElementById('actionSetLocation');
-    if (setLocationBtn) {
-      setLocationBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        if (currentProductId) {
-          setLocation(currentProductId);
-          closeActionsModal();
-        }
-      });
-    }
-    
-    // Imprimir etiquetas
-    const printLabelsBtn = document.getElementById('actionPrintLabels');
-    if (printLabelsBtn) {
-      printLabelsBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        if (currentProductId) {
-          printLabels(currentProductId);
-          closeActionsModal();
-        }
-      });
-    }
-    
-    // Eliminar producto
-    const deleteBtn = document.getElementById('actionDelete');
-    if (deleteBtn) {
-      deleteBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        if (currentProductId) {
-          // Obtener el nombre del producto
-          const productRow = document.querySelector(`#productsTable tbody tr[data-id="${currentProductId}"]`);
-          let productName = `Producto #${currentProductId}`;
-          
-          if (productRow && productRow.dataset.name) {
-            productName = productRow.dataset.name;
-          }
-          
-          confirmDelete(currentProductId, productName);
-          closeActionsModal();
-        }
-      });
-    }
-  }
-  
-  // Función para mostrar confirmación de eliminación
-  function confirmDelete(id, name) {
-    document.getElementById('deleteProductName').textContent = name;
-    document.getElementById('confirmDelete').href = `/eliminar-producto/${id}`;
-    window.deleteModal.show();
-  }
-  
-  // Funciones para acciones del menú
-  function toggleFavorite(id) {
-    // Mostrar notificación simulando acción
-    alert("Marcando/desmarcando producto como favorito: " + id);
-  }
-  
-  function toggleVisibility(id) {
-    // Mostrar notificación simulando acción
-    alert("Cambiando visibilidad del producto: " + id);
-  }
-  
-  // Funciones pendientes (placeholders)
-  function addStock(id) {
-    alert("Función pendiente: Añadir existencias al producto " + id);
-  }
-  
-  function changePrice(id) {
-    alert("Función pendiente: Cambiar precio del producto " + id);
-  }
-  
-  function changeCost(id) {
-    alert("Función pendiente: Cambiar costo del producto " + id);
-  }
-  
-  function setLocation(id) {
-    alert("Función pendiente: Definir ubicación del producto " + id);
-  }
-  
-  function printLabels(id) {
-    alert("Función pendiente: Imprimir etiquetas para el producto " + id);
-  }
-  
-  // Para acciones masivas
-  document.addEventListener('DOMContentLoaded', function() {
-    const bulkActions = {
-      'bulkChangeCategory': 'Cambiar categoría masivamente',
-      'bulkUpdatePrices': 'Modificar precios masivamente', 
-      'bulkToggleVisibility': 'Cambiar visibilidad masivamente',
-      'bulkAddToFavorites': 'Marcar como favoritos masivamente',
-      'bulkPrintLabels': 'Imprimir etiquetas masivamente'
-    };
-    
-    Object.entries(bulkActions).forEach(([id, action]) => {
-      const element = document.getElementById(id);
-      if (element) {
-        element.addEventListener('click', function(e) {
-          e.preventDefault();
-          alert(`Función pendiente: ${action}`);
-          document.getElementById('actionsDropdown').style.display = 'none';
-        });
-      }
-    });
-  });
 </script>
 {% endblock %}

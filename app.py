@@ -664,6 +664,95 @@ def ver_productos():
         total_productos=total_productos
     )
 
+# NUEVO: Endpoint para cambiar el estado de favorito
+@app.route('/api/toggle_favorite/<int:product_id>', methods=['POST'])
+@login_requerido
+def toggle_favorite(product_id):
+    try:
+        # Obtener el producto y verificar que pertenezca a la empresa del usuario
+        producto = Producto.query.get_or_404(product_id)
+        
+        if producto.empresa_id != session.get('user_id'):
+            return jsonify({"success": False, "message": "No tienes permiso para modificar este producto"}), 403
+        
+        # Obtener el nuevo estado desde la solicitud JSON
+        data = request.get_json()
+        nuevo_estado = data.get('status') == '1'
+        
+        # Actualizar el estado
+        producto.es_favorito = nuevo_estado
+        db.session.commit()
+        
+        return jsonify({
+            "success": True, 
+            "message": "Estado de favorito actualizado correctamente", 
+            "estado": "1" if nuevo_estado else "0"
+        })
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"success": False, "message": f"Error al actualizar: {str(e)}"}), 500
+
+# NUEVO: Endpoint para cambiar el estado de visibilidad
+@app.route('/api/toggle_visibility/<int:product_id>', methods=['POST'])
+@login_requerido
+def toggle_visibility(product_id):
+    try:
+        # Obtener el producto y verificar que pertenezca a la empresa del usuario
+        producto = Producto.query.get_or_404(product_id)
+        
+        if producto.empresa_id != session.get('user_id'):
+            return jsonify({"success": False, "message": "No tienes permiso para modificar este producto"}), 403
+        
+        # Obtener el nuevo estado desde la solicitud JSON
+        data = request.get_json()
+        nuevo_estado = data.get('status') == '1'
+        
+        # Actualizar el estado
+        producto.esta_a_la_venta = nuevo_estado
+        db.session.commit()
+        
+        return jsonify({
+            "success": True, 
+            "message": "Visibilidad actualizada correctamente", 
+            "estado": "1" if nuevo_estado else "0"
+        })
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"success": False, "message": f"Error al actualizar: {str(e)}"}), 500
+
+# NUEVO: Endpoint para actualizar el precio
+@app.route('/api/update_price/<int:product_id>', methods=['POST'])
+@login_requerido
+def update_price(product_id):
+    try:
+        # Obtener el producto y verificar que pertenezca a la empresa del usuario
+        producto = Producto.query.get_or_404(product_id)
+        
+        if producto.empresa_id != session.get('user_id'):
+            return jsonify({"success": False, "message": "No tienes permiso para modificar este producto"}), 403
+        
+        # Obtener el nuevo precio desde la solicitud JSON
+        data = request.get_json()
+        try:
+            nuevo_precio = float(data.get('price', 0))
+            if nuevo_precio < 0:
+                return jsonify({"success": False, "message": "El precio no puede ser negativo"}), 400
+        except ValueError:
+            return jsonify({"success": False, "message": "El precio debe ser un número válido"}), 400
+        
+        # Actualizar el precio
+        producto.precio_venta = nuevo_precio
+        db.session.commit()
+        
+        return jsonify({
+            "success": True, 
+            "message": "Precio actualizado correctamente", 
+            "precio": nuevo_precio
+        })
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"success": False, "message": f"Error al actualizar: {str(e)}"}), 500
+
 @app.route('/agregar-producto', methods=['GET','POST'])
 @login_requerido
 def agregar_producto():
@@ -1423,6 +1512,8 @@ def api_autocomplete():
             "url_imagen": ref.url_imagen or "",
             "categoria": ref.categoria or ""
         })
+    
+    return jsonify({"results": results})
 
 ##############################
 # ENDPOINT: /api/buscar-imagen
@@ -1630,7 +1721,6 @@ def api_autocomplete_by_name():
             "url_imagen": ref.url_imagen or "",
             "categoria": ref.categoria or ""
         })
-    return jsonify({"results": results})
     return jsonify({"results": results})
 
 ##############################
