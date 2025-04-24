@@ -4,12 +4,6 @@
   Inventario de Productos
 {% endblock %}
 
-{% block summary %}
-<div class="text-muted small">
-  Mostrando {{ productos|length }} de {{ total_productos if total_productos is defined else 'XX' }} productos | Stock total: {{ productos|sum(attribute='stock') }} | Valor inventario: ${{ (productos|sum(attribute='precio_venta') * productos|sum(attribute='stock'))|round(2) }}
-</div>
-{% endblock %}
-
 {% block content %}
 <style>
   /* Variables y configuración general */
@@ -53,10 +47,10 @@
     border: 1px solid var(--gray-200);
   }
 
-  /* Título de sección */
+  /* Título de sección - MODIFICADO: TAMAÑO MÁS GRANDE */
   .section-title {
     color: #000000 !important;
-    font-size: 1.5rem !important;
+    font-size: 2rem !important; /* Aumentado de 1.5rem a 2rem */
     font-weight: 800;
     margin-bottom: 1.5rem;
     padding-bottom: 0.85rem;
@@ -75,6 +69,15 @@
     height: 4px;
     background-color: var(--primary);
     border-radius: 2px;
+  }
+
+  /* Información de productos mostrados - NUEVO */
+  .products-info {
+    margin-top: 0.75rem;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    color: var(--gray-600);
+    font-weight: 500;
   }
 
   /* Botón Excel verde */
@@ -191,6 +194,31 @@
     position: relative;
   }
 
+  /* MODIFICADO: Estilo mejorado para el botón de columnas */
+  .action-button.columns-button {
+    background-color: #f0f0f0;
+    border-color: #d0d0d0;
+  }
+  
+  .action-button.columns-button:hover {
+    background-color: #e5e5e5;
+    border-color: #c0c0c0;
+  }
+  
+  .columns-icon {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-right: 8px;
+  }
+  
+  .column-line {
+    width: 6px;
+    height: 2px;
+    background-color: var(--gray-700);
+    border-radius: 1px;
+  }
+
   /* Tabla de productos mejorada */
   .products-table-container {
     margin-top: 1.5rem;
@@ -229,6 +257,15 @@
   
   .products-table tbody tr:last-child td {
     border-bottom: none;
+  }
+  
+  /* NUEVO: Efecto Zebra */
+  .products-table tbody tr:nth-child(odd) {
+    background-color: white;
+  }
+  
+  .products-table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
   }
   
   .products-table tbody tr:hover {
@@ -442,7 +479,7 @@
     display: inline-block;
   }
 
-  /* Menú de acciones con puntos verticales */
+  /* MODIFICADO: Nuevo menú de acciones centrado */
   .actions-menu {
     position: relative;
     display: inline-block;
@@ -470,36 +507,117 @@
     transform: translateY(-2px);
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
   }
-  
-  /* Estilos para el menú desplegable de acciones */
-  .actions-dropdown {
+
+  /* NUEVO: Modal de acciones centrado */
+  .actions-modal {
     display: none;
-    position: absolute;
-    right: 0;
-    background-color: white;
-    border: 1px solid #dee2e6;
-    border-radius: 4px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
     z-index: 1000;
-    width: 200px;
-    text-align: left;
+    justify-content: center;
+    align-items: center;
   }
   
-  .actions-dropdown a {
-    display: block;
-    padding: 8px 12px;
+  .actions-modal-content {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+  }
+  
+  .actions-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--gray-200);
+  }
+  
+  .actions-modal-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin: 0;
+  }
+  
+  .actions-modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--gray-700);
+    cursor: pointer;
+    padding: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+  }
+  
+  .actions-modal-close:hover {
+    background-color: var(--gray-100);
+    color: var(--gray-900);
+  }
+  
+  .actions-modal-body {
+    padding: 1rem 1.5rem;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  
+  .action-item {
+    padding: 1rem;
+    border-radius: 6px;
+    background-color: var(--gray-100);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.2s;
     text-decoration: none;
-    color: #333;
-    font-size: 14px;
-    border-bottom: 1px solid #f5f5f5;
+    color: var(--gray-700);
+    border: 1px solid var(--gray-200);
   }
   
-  .actions-dropdown a:hover {
-    background-color: #f8f9fa;
+  .action-item:hover {
+    background-color: var(--primary-light);
+    color: var(--primary);
+    border-color: rgba(229, 46, 46, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
   }
   
-  .actions-dropdown a:last-child {
-    border-bottom: none;
+  .action-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+  
+  .action-text {
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+  
+  /* Responsive para el modal */
+  @media (max-width: 576px) {
+    .actions-modal-body {
+      grid-template-columns: 1fr;
+    }
   }
 
   /* Dropdown menus */
@@ -635,6 +753,10 @@
         <i class="fas fa-search"></i>
         <input type="text" id="searchInput" placeholder="Buscar por nombre, SKU o marca..." value="{{ termino_busqueda if termino_busqueda else '' }}" class="form-control">
       </div>
+      <!-- NUEVO: Contador de productos -->
+      <div class="products-info">
+        Mostrando {{ productos|length }} de {{ total_productos if total_productos is defined else 'XX' }} productos
+      </div>
     </div>
     
     <!-- Filtro por categoría -->
@@ -667,12 +789,16 @@
       </select>
     </div>
     
-    <!-- Control de columnas -->
+    <!-- Control de columnas MODIFICADO -->
     <div class="col-md-2">
       <div class="btn-columns">
-        <button class="action-button w-100" id="columnToggleBtn">
-          <i class="fas fa-columns"></i>
-          Columnas
+        <button class="action-button columns-button w-100" id="columnToggleBtn">
+          <div class="columns-icon">
+            <span class="column-line"></span>
+            <span class="column-line"></span>
+            <span class="column-line"></span>
+          </div>
+          Columnas <i class="fas fa-caret-down ml-1"></i>
         </button>
         <div class="dropdown-menu" id="columnDropdown" style="display: none;">
           <div class="px-3 py-2">
@@ -761,7 +887,7 @@
       </thead>
       <tbody>
         {% for p in productos %}
-        <tr data-id="{{ p.id }}">
+        <tr data-id="{{ p.id }}" data-name="{{ p.nombre }}">
           <!-- Foto -->
           <td>
             <div class="product-img-container">
@@ -800,63 +926,8 @@
           
           <!-- Categoría con burbuja de color y tooltip -->
           <td>
-            {% set cat_color = "#A9A9A9" %}  <!-- Valor predeterminado gris -->
-            
-            {% if p.categoria_color %}
-              {% set cat_color = p.categoria_color %}
-            {% else %}
-              <!-- Mapeo exacto según agregar_producto.html -->
-              {% if p.categoria == "abarrotes secos" %}
-                {% set cat_color = "#FFA500" %}
-              {% elif p.categoria == "enlatados y conservas" %}
-                {% set cat_color = "#DAA520" %}
-              {% elif p.categoria == "botanas, dulces y snacks" %}
-                {% set cat_color = "#FF69B4" %}
-              {% elif p.categoria == "bebidas no alcohólicas" %}
-                {% set cat_color = "#1E90FF" %}
-              {% elif p.categoria == "bebidas alcohólicas" %}
-                {% set cat_color = "#800080" %}
-              {% elif p.categoria == "panadería y repostería" %}
-                {% set cat_color = "#D2B48C" %}
-              {% elif p.categoria == "lácteos y huevos" %}
-                {% set cat_color = "#F5DEB3" %}
-              {% elif p.categoria == "carnes frías y embutidos" %}
-                {% set cat_color = "#B22222" %}
-              {% elif p.categoria == "congelados y refrigerados" %}
-                {% set cat_color = "#00CED1" %}
-              {% elif p.categoria == "frutas y verduras frescas" %}
-                {% set cat_color = "#32CD32" %}
-              {% elif p.categoria == "productos de limpieza y hogar" %}
-                {% set cat_color = "#87CEFA" %}
-              {% elif p.categoria == "cuidado personal e higiene" %}
-                {% set cat_color = "#FFC0CB" %}
-              {% elif p.categoria == "medicamentos de mostrador (otc)" %}
-                {% set cat_color = "#FF6347" %}
-              {% elif p.categoria == "productos para bebés" %}
-                {% set cat_color = "#FFB6C1" %}
-              {% elif p.categoria == "productos para mascotas" %}
-                {% set cat_color = "#8FBC8F" %}
-              {% elif p.categoria == "artículos de papelería" %}
-                {% set cat_color = "#9370DB" %}
-              {% elif p.categoria == "ferretería básica" %}
-                {% set cat_color = "#708090" %}
-              {% elif p.categoria == "artesanías y manualidades" %}
-                {% set cat_color = "#DDA0DD" %}
-              {% elif p.categoria == "productos a granel" %}
-                {% set cat_color = "#BDB76B" %}
-              {% elif p.categoria == "productos orgánicos" %}
-                {% set cat_color = "#6B8E23" %}
-              {% elif p.categoria == "productos gourmet" %}
-                {% set cat_color = "#CD853F" %}
-              {% elif p.categoria == "suplementos alimenticios" %}
-                {% set cat_color = "#DA70D6" %}
-              {% elif p.categoria == "otros (miscelánea)" %}
-                {% set cat_color = "#A9A9A9" %}
-              {% endif %}
-            {% endif %}
-            
             <div class="category-tooltip">
-              <span class="category-indicator" style="background-color: {{ cat_color }};"></span>
+              <span class="category-indicator" style="background-color: {{ p.categoria|category_color }};"></span>
               <span class="category-tooltip-text">{{ p.categoria|default('Sin categoría')|title }}</span>
             </div>
           </td>
@@ -909,21 +980,10 @@
             {% endif %}
           </td>
           
-          <!-- Menú de acciones - IMPLEMENTACIÓN COMO EN LA CAPTURA -->
+          <!-- MODIFICADO: Nuevo botón para abrir el modal de acciones -->
           <td>
             <div class="actions-menu">
-              <button type="button" class="actions-dot" onclick="toggleActionsMenu(event, this)">&#8226;&#8226;&#8226;</button>
-              <div class="actions-dropdown" id="actionMenu{{ p.id }}">
-                <a href="#" onclick="addStock({{ p.id }})">Añadir existencias</a>
-                <a href="#" onclick="changePrice({{ p.id }})">Cambiar precio</a>
-                <a href="#" onclick="changeCost({{ p.id }})">Cambiar costo</a>
-                <a href="{{ url_for('editar_producto', prod_id=p.id) }}">Editar producto</a>
-                <a href="#" onclick="toggleVisibility({{ p.id }})">{% if p.esta_a_la_venta %}Ocultar producto{% else %}Mostrar producto{% endif %}</a>
-                <a href="#" onclick="toggleFavorite({{ p.id }})">{% if p.es_favorito %}Quitar de favoritos{% else %}Marcar como favorito{% endif %}</a>
-                <a href="#" onclick="setLocation({{ p.id }})">Definir ubicación</a>
-                <a href="#" onclick="printLabels({{ p.id }})">Imprimir etiquetas</a>
-                <a href="#" onclick="confirmDelete({{ p.id }}, '{{ p.nombre }}')">Eliminar producto</a>
-              </div>
+              <button type="button" class="actions-dot" onclick="openActionsModal({{ p.id }}, '{{ p.nombre }}')">&#8226;&#8226;&#8226;</button>
             </div>
           </td>
         </tr>
@@ -944,6 +1004,72 @@
     </div>
   </div>
   {% endif %}
+</div>
+
+<!-- NUEVO: Modal de Acciones Centrado -->
+<div class="actions-modal" id="actionsModal">
+  <div class="actions-modal-content">
+    <div class="actions-modal-header">
+      <h3 class="actions-modal-title">Acciones para <span id="productNameInModal"></span></h3>
+      <button type="button" class="actions-modal-close" onclick="closeActionsModal()">&times;</button>
+    </div>
+    <div class="actions-modal-body">
+      <a href="#" class="action-item" id="actionAddStock">
+        <div class="action-icon">
+          <i class="fas fa-plus"></i>
+        </div>
+        <span class="action-text">Añadir existencias</span>
+      </a>
+      <a href="#" class="action-item" id="actionChangePrice">
+        <div class="action-icon">
+          <i class="fas fa-dollar-sign"></i>
+        </div>
+        <span class="action-text">Cambiar precio</span>
+      </a>
+      <a href="#" class="action-item" id="actionChangeCost">
+        <div class="action-icon">
+          <i class="fas fa-tag"></i>
+        </div>
+        <span class="action-text">Cambiar costo</span>
+      </a>
+      <a href="#" class="action-item" id="actionEdit">
+        <div class="action-icon">
+          <i class="fas fa-edit"></i>
+        </div>
+        <span class="action-text">Editar producto</span>
+      </a>
+      <a href="#" class="action-item" id="actionToggleVisibility">
+        <div class="action-icon">
+          <i class="fas fa-eye"></i>
+        </div>
+        <span class="action-text" id="visibilityActionText">Mostrar/Ocultar</span>
+      </a>
+      <a href="#" class="action-item" id="actionToggleFavorite">
+        <div class="action-icon">
+          <i class="fas fa-heart"></i>
+        </div>
+        <span class="action-text" id="favoriteActionText">Favorito</span>
+      </a>
+      <a href="#" class="action-item" id="actionSetLocation">
+        <div class="action-icon">
+          <i class="fas fa-map-marker-alt"></i>
+        </div>
+        <span class="action-text">Definir ubicación</span>
+      </a>
+      <a href="#" class="action-item" id="actionPrintLabels">
+        <div class="action-icon">
+          <i class="fas fa-print"></i>
+        </div>
+        <span class="action-text">Imprimir etiquetas</span>
+      </a>
+      <a href="#" class="action-item" id="actionDelete" style="grid-column: span 2; background-color: #ffebee; color: #e53935; border-color: #ffcdd2;">
+        <div class="action-icon" style="color: #e53935;">
+          <i class="fas fa-trash"></i>
+        </div>
+        <span class="action-text">Eliminar producto</span>
+      </a>
+    </div>
+  </div>
 </div>
 
 <!-- Modal de confirmación para eliminar -->
@@ -1005,14 +1131,17 @@
       if (actionsDropdown && !bulkActionsBtn.contains(e.target) && !actionsDropdown.contains(e.target)) {
         actionsDropdown.style.display = 'none';
       }
-      
-      // Cerrar todos los menús de acciones (puntos) al hacer clic en cualquier lugar
-      document.querySelectorAll('.actions-dropdown').forEach(function(menu) {
-        if (menu.style.display === 'block' && !e.target.closest('.actions-dot') && !e.target.closest('.actions-dropdown')) {
-          menu.style.display = 'none';
+    });
+    
+    // NUEVO: Cerrar modal de acciones si se hace clic fuera
+    const actionsModal = document.getElementById('actionsModal');
+    if (actionsModal) {
+      actionsModal.addEventListener('click', function(e) {
+        if (e.target === actionsModal) {
+          closeActionsModal();
         }
       });
-    });
+    }
     
     // Búsqueda en tiempo real
     const searchInput = document.getElementById('searchInput');
@@ -1032,6 +1161,9 @@
             row.style.display = 'none';
           }
         });
+        
+        // Actualizar contador de productos visibles
+        updateProductCounter();
       });
     }
     
@@ -1046,6 +1178,7 @@
           tableRows.forEach(row => {
             row.style.display = '';
           });
+          updateProductCounter();
           return;
         }
         
@@ -1061,6 +1194,9 @@
             }
           }
         });
+        
+        // Actualizar contador de productos visibles
+        updateProductCounter();
       });
     }
     
@@ -1104,33 +1240,215 @@
       return columnMap[colId] !== undefined ? columnMap[colId] : -1;
     }
     
+    // Actualizar contador de productos
+    function updateProductCounter() {
+      const visibleRows = document.querySelectorAll('#productsTable tbody tr:not([style*="display: none"])');
+      const totalProducts = {{ total_productos if total_productos is defined else 'document.querySelectorAll("#productsTable tbody tr").length' }};
+      const productsInfo = document.querySelector('.products-info');
+      
+      if (productsInfo) {
+        productsInfo.textContent = `Mostrando ${visibleRows.length} de ${totalProducts} productos`;
+      }
+    }
+    
+    // Configurar eventos para los botones del modal de acciones
+    setupModalActions();
+    
     // Inicializar modal de confirmación
     window.deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
   });
   
-  // Función para mostrar/ocultar el menú de acciones (tres puntos)
-  function toggleActionsMenu(event, dot) {
-    event.stopPropagation(); // Prevenir propagación
+  // NUEVO: Funciones para el modal de acciones
+  let currentProductId = null;
+  
+  function openActionsModal(productId, productName) {
+    currentProductId = productId;
     
-    const dropdown = dot.nextElementSibling;
-    const isVisible = dropdown.style.display === 'block';
+    // Establecer el nombre del producto en el modal
+    const productNameInModal = document.getElementById('productNameInModal');
+    if (productNameInModal) {
+      productNameInModal.textContent = productName || `Producto #${productId}`;
+    }
     
-    // Cerrar todos los menús abiertos primero
-    document.querySelectorAll('.actions-dropdown').forEach(menu => {
-      menu.style.display = 'none';
-    });
+    // Configurar URLs y textos de las acciones
+    setupModalForProduct(productId);
     
-    // Abrir/cerrar el menú actual
-    dropdown.style.display = isVisible ? 'none' : 'block';
+    // Mostrar el modal
+    const actionsModal = document.getElementById('actionsModal');
+    if (actionsModal) {
+      actionsModal.style.display = 'flex';
+      
+      // Añadir clase para animación
+      setTimeout(() => {
+        const modalContent = actionsModal.querySelector('.actions-modal-content');
+        if (modalContent) {
+          modalContent.style.transform = 'translateY(0)';
+          modalContent.style.opacity = '1';
+        }
+      }, 10);
+    }
   }
   
-  // Funciones para acciones del menú
+  function closeActionsModal() {
+    const actionsModal = document.getElementById('actionsModal');
+    if (actionsModal) {
+      actionsModal.style.display = 'none';
+    }
+    currentProductId = null;
+  }
+  
+  function setupModalForProduct(productId) {
+    // Obtener datos de visibilidad y favorito del producto
+    const productRow = document.querySelector(`#productsTable tbody tr[data-id="${productId}"]`);
+    let isVisible = true;
+    let isFavorite = false;
+    
+    if (productRow) {
+      // Determinar si el producto es visible
+      const visIcon = productRow.querySelector('.vis-icon');
+      if (visIcon) {
+        isVisible = visIcon.getAttribute('alt') === 'Visible';
+      }
+      
+      // Determinar si el producto es favorito
+      const heartIcon = productRow.querySelector('.heart-icon');
+      if (heartIcon) {
+        isFavorite = heartIcon.classList.contains('active');
+      }
+    }
+    
+    // Configurar textos según el estado
+    const visibilityText = document.getElementById('visibilityActionText');
+    if (visibilityText) {
+      visibilityText.textContent = isVisible ? 'Ocultar producto' : 'Mostrar producto';
+    }
+    
+    const favoriteText = document.getElementById('favoriteActionText');
+    if (favoriteText) {
+      favoriteText.textContent = isFavorite ? 'Quitar de favoritos' : 'Marcar como favorito';
+    }
+    
+    // Configurar URL de edición
+    const editLink = document.getElementById('actionEdit');
+    if (editLink) {
+      editLink.href = `/editar-producto/${productId}`;
+    }
+  }
+  
+  function setupModalActions() {
+    // Añadir existencias
+    const addStockBtn = document.getElementById('actionAddStock');
+    if (addStockBtn) {
+      addStockBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (currentProductId) {
+          addStock(currentProductId);
+          closeActionsModal();
+        }
+      });
+    }
+    
+    // Cambiar precio
+    const changePriceBtn = document.getElementById('actionChangePrice');
+    if (changePriceBtn) {
+      changePriceBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (currentProductId) {
+          changePrice(currentProductId);
+          closeActionsModal();
+        }
+      });
+    }
+    
+    // Cambiar costo
+    const changeCostBtn = document.getElementById('actionChangeCost');
+    if (changeCostBtn) {
+      changeCostBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (currentProductId) {
+          changeCost(currentProductId);
+          closeActionsModal();
+        }
+      });
+    }
+    
+    // Cambiar visibilidad
+    const toggleVisibilityBtn = document.getElementById('actionToggleVisibility');
+    if (toggleVisibilityBtn) {
+      toggleVisibilityBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (currentProductId) {
+          toggleVisibility(currentProductId);
+          closeActionsModal();
+        }
+      });
+    }
+    
+    // Cambiar favorito
+    const toggleFavoriteBtn = document.getElementById('actionToggleFavorite');
+    if (toggleFavoriteBtn) {
+      toggleFavoriteBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (currentProductId) {
+          toggleFavorite(currentProductId);
+          closeActionsModal();
+        }
+      });
+    }
+    
+    // Definir ubicación
+    const setLocationBtn = document.getElementById('actionSetLocation');
+    if (setLocationBtn) {
+      setLocationBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (currentProductId) {
+          setLocation(currentProductId);
+          closeActionsModal();
+        }
+      });
+    }
+    
+    // Imprimir etiquetas
+    const printLabelsBtn = document.getElementById('actionPrintLabels');
+    if (printLabelsBtn) {
+      printLabelsBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (currentProductId) {
+          printLabels(currentProductId);
+          closeActionsModal();
+        }
+      });
+    }
+    
+    // Eliminar producto
+    const deleteBtn = document.getElementById('actionDelete');
+    if (deleteBtn) {
+      deleteBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (currentProductId) {
+          // Obtener el nombre del producto
+          const productRow = document.querySelector(`#productsTable tbody tr[data-id="${currentProductId}"]`);
+          let productName = `Producto #${currentProductId}`;
+          
+          if (productRow && productRow.dataset.name) {
+            productName = productRow.dataset.name;
+          }
+          
+          confirmDelete(currentProductId, productName);
+          closeActionsModal();
+        }
+      });
+    }
+  }
+  
+  // Función para mostrar confirmación de eliminación
   function confirmDelete(id, name) {
     document.getElementById('deleteProductName').textContent = name;
     document.getElementById('confirmDelete').href = `/eliminar-producto/${id}`;
     window.deleteModal.show();
   }
   
+  // Funciones para acciones del menú
   function toggleFavorite(id) {
     // Mostrar notificación simulando acción
     alert("Marcando/desmarcando producto como favorito: " + id);

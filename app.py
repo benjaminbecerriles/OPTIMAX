@@ -32,6 +32,9 @@ from utils import (
     obtener_o_generar_color_categoria
 )
 
+# NUEVO: Importar las funciones del nuevo archivo category_colors.py
+from category_colors import get_category_color, normalize_category
+
 # Integración OPENAI (si la usas para otros fines)
 import openai
 openai.api_key = "sk-proj-KXZSGDJ6bGMjVUZXzGp1r3ZYfvUvpkVFbUVqPyWeJc1sxsEjeyodfaLEZOuq5Nc6RYV1f1JvyT3BlbkFJQo22FAJuvP6bF7Z4BQ3nsuEA"
@@ -375,6 +378,25 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 db.init_app(app)
 migrate = Migrate(app, db)
 
+# NUEVO: Filtro Jinja2 para obtener el color de categoría
+@app.template_filter('category_color')
+def category_color_filter(category):
+    return get_category_color(category)
+
+# MODIFICADO: Sobrescribir la función existente para usar la nueva lógica
+def obtener_o_generar_color_categoria(categoria):
+    """
+    Función sobrescrita que ahora utiliza get_category_color de category_colors.py
+    """
+    return get_category_color(categoria)
+
+# MODIFICADO: Actualizar la función normalizar_categoria para usar la nueva
+def normalizar_categoria(categoria):
+    """
+    Función sobrescrita que ahora utiliza normalize_category de category_colors.py
+    """
+    return normalize_category(categoria)
+
 # Inicialización antes de la primera solicitud
 # Inicialización en la creación de la aplicación
 with app.app_context():
@@ -674,7 +696,9 @@ def agregar_producto():
                 categoria = request.form.get('categoria_existente', '').strip()
             else:
                 categoria = request.form.get('categoria_nueva', '').strip()
-            categoria_normalizada = normalizar_categoria(categoria)
+            
+            # MODIFICADO: Usar la nueva función de normalización
+            categoria_normalizada = normalize_category(categoria)
             
             # Favorito y a la venta
             es_favorito_bool = (request.form.get("es_favorito", "0") == "1")
@@ -758,7 +782,8 @@ def agregar_producto():
                 costo=costo_val, 
                 precio_venta=precio_val,
                 categoria=categoria_normalizada,
-                categoria_color=obtener_o_generar_color_categoria(categoria_normalizada),
+                # MODIFICADO: Usar la nueva función de color de categoría
+                categoria_color=get_category_color(categoria_normalizada),
                 foto=foto_final,
                 url_imagen=url_imagen_truncada,  # Usando la URL truncada
                 is_approved=True,
@@ -826,7 +851,9 @@ def agregar_sin_codigo():
                 categoria = request.form.get('categoria_existente', '').strip()
             else:
                 categoria = request.form.get('categoria_nueva', '').strip()
-            categoria_normalizada = normalizar_categoria(categoria)
+                
+            # MODIFICADO: Usar la nueva función de normalización
+            categoria_normalizada = normalize_category(categoria)
             
             # Favorito y a la venta
             es_favorito_bool = (request.form.get("es_favorito", "0") == "1")
@@ -860,7 +887,8 @@ def agregar_sin_codigo():
                 costo=costo_val, 
                 precio_venta=precio_val,
                 categoria=categoria_normalizada,
-                categoria_color=obtener_o_generar_color_categoria(categoria_normalizada),
+                # MODIFICADO: Usar la nueva función de color de categoría
+                categoria_color=get_category_color(categoria_normalizada),
                 foto=foto_final,
                 url_imagen=url_imagen_truncada,
                 is_approved=True,
@@ -930,7 +958,9 @@ def agregar_a_granel():
                 categoria = request.form.get('categoria_existente', '').strip()
             else:
                 categoria = request.form.get('categoria_nueva', '').strip()
-            categoria_normalizada = normalizar_categoria(categoria)
+                
+            # MODIFICADO: Usar la nueva función de normalización
+            categoria_normalizada = normalize_category(categoria)
             
             # Favorito y a la venta
             es_favorito_bool = (request.form.get("es_favorito", "0") == "1")
@@ -1014,7 +1044,8 @@ def agregar_a_granel():
                 costo=costo_val, 
                 precio_venta=precio_val,
                 categoria=categoria_normalizada,
-                categoria_color=obtener_o_generar_color_categoria(categoria_normalizada),
+                # MODIFICADO: Usar la nueva función de color de categoría
+                categoria_color=get_category_color(categoria_normalizada),
                 foto=foto_final,
                 url_imagen=url_imagen_truncada,
                 is_approved=True,
@@ -1083,7 +1114,9 @@ def editar_producto(prod_id):
                 categoria = request.form.get('categoria_existente', '').strip()
             else:
                 categoria = request.form.get('categoria_nueva', '').strip()
-            categoria_normalizada = normalizar_categoria(categoria)
+                
+            # MODIFICADO: Usar la nueva función de normalización
+            categoria_normalizada = normalize_category(categoria)
             
             # Favorito y a la venta
             es_favorito_bool = (request.form.get("es_favorito", "0") == "1")
@@ -1162,7 +1195,8 @@ def editar_producto(prod_id):
             producto.costo = costo_val
             producto.precio_venta = precio_val
             producto.categoria = categoria_normalizada
-            producto.categoria_color = obtener_o_generar_color_categoria(categoria_normalizada)
+            # MODIFICADO: Usar la nueva función de color de categoría
+            producto.categoria_color = get_category_color(categoria_normalizada)
             
             # Actualizar foto solo si hay una nueva
             if nueva_foto:
@@ -1271,9 +1305,16 @@ def completar_datos(prod_id):
             # Categoría
             cat_option = request.form.get('categoria_option')
             if cat_option == 'existente':
-                producto.categoria = request.form.get('categoria_existente', '')
+                categoria = request.form.get('categoria_existente', '')
             else:
-                producto.categoria = request.form.get('categoria_nueva', '')
+                categoria = request.form.get('categoria_nueva', '')
+                
+            # MODIFICADO: Usar la nueva función para normalizar la categoría
+            categoria_normalizada = normalize_category(categoria)
+            producto.categoria = categoria_normalizada
+            
+            # MODIFICADO: Usar la nueva función para obtener el color de la categoría
+            producto.categoria_color = get_category_color(categoria_normalizada)
             
             # Aprobar el producto
             producto.is_approved = True
@@ -1382,38 +1423,6 @@ def api_autocomplete():
             "url_imagen": ref.url_imagen or "",
             "categoria": ref.categoria or ""
         })
-    return jsonify({"results": results})
-
-##############################
-# ENDPOINT /api/find-by-code
-##############################
-@app.route('/api/find_by_code', methods=['GET'])
-@login_requerido
-def api_find_by_code():
-    code = request.args.get("codigo", "").strip()
-    if not code:
-        return jsonify({"found": False})
-
-    # Optimizado: usar 'get' para búsqueda exacta por clave
-    ref = CatalogoGlobal.query.filter_by(codigo_barras=code).first()
-    
-    # Búsqueda parcial si no encontramos coincidencia exacta y el código es suficientemente largo
-    if not ref and len(code) > 7:
-        ref = CatalogoGlobal.query.filter(
-            CatalogoGlobal.codigo_barras.startswith(code[:7])
-        ).first()
-    
-    if not ref:
-        return jsonify({"found": False})
-
-    return jsonify({
-        "found": True,
-        "codigo_barras": ref.codigo_barras,
-        "nombre": ref.nombre,
-        "marca": ref.marca if ref.marca else "",
-        "url_imagen": ref.url_imagen or "",
-        "categoria": ref.categoria or ""
-    })
 
 ##############################
 # ENDPOINT: /api/buscar-imagen
@@ -1622,3 +1631,35 @@ def api_autocomplete_by_name():
             "categoria": ref.categoria or ""
         })
     return jsonify({"results": results})
+    return jsonify({"results": results})
+
+##############################
+# ENDPOINT /api/find-by-code
+##############################
+@app.route('/api/find_by_code', methods=['GET'])
+@login_requerido
+def api_find_by_code():
+    code = request.args.get("codigo", "").strip()
+    if not code:
+        return jsonify({"found": False})
+
+    # Optimizado: usar 'get' para búsqueda exacta por clave
+    ref = CatalogoGlobal.query.filter_by(codigo_barras=code).first()
+    
+    # Búsqueda parcial si no encontramos coincidencia exacta y el código es suficientemente largo
+    if not ref and len(code) > 7:
+        ref = CatalogoGlobal.query.filter(
+            CatalogoGlobal.codigo_barras.startswith(code[:7])
+        ).first()
+    
+    if not ref:
+        return jsonify({"found": False})
+
+    return jsonify({
+        "found": True,
+        "codigo_barras": ref.codigo_barras,
+        "nombre": ref.nombre,
+        "marca": ref.marca if ref.marca else "",
+        "url_imagen": ref.url_imagen or "",
+        "categoria": ref.categoria or ""
+    })
