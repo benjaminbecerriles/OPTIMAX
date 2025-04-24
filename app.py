@@ -350,10 +350,12 @@ def generar_codigo_a_granel():
 ##############################################
 def generar_codigo_unico():
     """
-    Genera un código único para productos sin código de barras con formato INT-XXXXXXXX.
+    Genera un código único para productos sin código de barras con formato 1901XXXXXXXX.
     """
-    prefix = "INT-"
-    caracteres = string.ascii_uppercase + string.digits
+    # MODIFICADO: Ahora genera códigos empezando con "1901" seguido de 8 dígitos en lugar de "INT-"
+    prefix = "1901"
+    # MODIFICADO: Ahora usa solo dígitos para los 8 caracteres siguientes
+    caracteres = string.digits
     codigo_aleatorio = ''.join(random.choice(caracteres) for _ in range(8))
     return prefix + codigo_aleatorio
 
@@ -812,8 +814,8 @@ def agregar_sin_codigo():
             # Obtener el código de barras externo del formulario
             codigo_barras_externo = request.form.get("codigo_barras_externo", "").strip()
             
-            # Verificar que el código comience con "1901", si no, generar uno nuevo
-            if not codigo_barras_externo or not codigo_barras_externo.startswith("INT-"):
+            # Verificar si el código está presente, si no, generar uno nuevo
+            if not codigo_barras_externo:
                 codigo_barras_externo = generar_codigo_unico()
                 
             print(f"DEBUG: Usando código de barras: {codigo_barras_externo}")
@@ -1383,44 +1385,6 @@ def api_autocomplete():
     return jsonify({"results": results})
 
 ##############################
-# ENDPOINT: /api/autocomplete_by_name
-##############################
-@app.route('/api/autocomplete_by_name', methods=['GET'])
-@login_requerido
-def api_autocomplete_by_name():
-    q = request.args.get('q', '').strip()
-    if not q:
-        return jsonify({"results": []})
-
-    # Consulta optimizada con límite y selección específica de campos
-    referencias = (
-        CatalogoGlobal.query
-        .with_entities(
-            CatalogoGlobal.id,
-            CatalogoGlobal.codigo_barras,
-            CatalogoGlobal.nombre,
-            CatalogoGlobal.marca,
-            CatalogoGlobal.url_imagen,
-            CatalogoGlobal.categoria
-        )
-        .filter(CatalogoGlobal.nombre.ilike(f"%{q}%"))
-        .limit(10)
-        .all()
-    )
-
-    results = []
-    for ref in referencias:
-        results.append({
-            "id": ref.id,
-            "codigo_barras": ref.codigo_barras,
-            "nombre": ref.nombre,
-            "marca": ref.marca if ref.marca else "",
-            "url_imagen": ref.url_imagen or "",
-            "categoria": ref.categoria or ""
-        })
-    return jsonify({"results": results})
-
-##############################
 # ENDPOINT /api/find-by-code
 ##############################
 @app.route('/api/find_by_code', methods=['GET'])
@@ -1620,3 +1584,41 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()
     app.run(debug=True)
+
+##############################
+# ENDPOINT: /api/autocomplete_by_name
+##############################
+@app.route('/api/autocomplete_by_name', methods=['GET'])
+@login_requerido
+def api_autocomplete_by_name():
+    q = request.args.get('q', '').strip()
+    if not q:
+        return jsonify({"results": []})
+
+    # Consulta optimizada con límite y selección específica de campos
+    referencias = (
+        CatalogoGlobal.query
+        .with_entities(
+            CatalogoGlobal.id,
+            CatalogoGlobal.codigo_barras,
+            CatalogoGlobal.nombre,
+            CatalogoGlobal.marca,
+            CatalogoGlobal.url_imagen,
+            CatalogoGlobal.categoria
+        )
+        .filter(CatalogoGlobal.nombre.ilike(f"%{q}%"))
+        .limit(10)
+        .all()
+    )
+
+    results = []
+    for ref in referencias:
+        results.append({
+            "id": ref.id,
+            "codigo_barras": ref.codigo_barras,
+            "nombre": ref.nombre,
+            "marca": ref.marca if ref.marca else "",
+            "url_imagen": ref.url_imagen or "",
+            "categoria": ref.categoria or ""
+        })
+    return jsonify({"results": results})
