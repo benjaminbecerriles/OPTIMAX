@@ -11,345 +11,909 @@
 {% endblock %}
 
 {% block content %}
-  <!-- Título y botones -->
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <div>
-      <h1 class="mb-0">Inventario</h1>
-      <p class="text-muted">Administra aquí tus productos de forma eficiente</p>
-    </div>
-    <div class="d-flex gap-2">
-      <a href="{{ url_for('nuevo_producto') }}" class="btn btn-primary">Agregar Nuevo</a>
-      <a href="{{ url_for('reabastecer_listado') }}" class="btn btn-secondary">Reabastecer</a>
-      <a href="{{ url_for('pendientes_aprobacion') }}" class="btn btn-warning">Pendientes</a>
-    </div>
-  </div>
+<style>
+  /* Variables y configuración general */
+  :root {
+    --primary: #e52e2e;
+    --primary-light: rgba(229, 46, 46, 0.1);
+    --primary-hover: #c51818;
+    --gray-100: #f8f9fa;
+    --gray-200: #e9ecef;
+    --gray-300: #dee2e6;
+    --gray-400: #ced4da;
+    --gray-500: #adb5bd;
+    --gray-600: #6c757d;
+    --gray-700: #495057;
+    --gray-800: #343a40;
+    --gray-900: #212529;
+    --blue: #4285f4;
+    --green: #34a853;
+    --yellow: #fbbc05;
+    --red: #ea4335;
+    --success: #00c851;
+    --info: #33b5e5;
+    --warning: #ffbb33;
+    --danger: #ff3547;
+    --excel-green: #217346;
+    --excel-green-hover: #1a5c38;
+    --border-radius: 8px;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+    --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+    --transition-normal: all 0.2s ease;
+  }
 
-  <!-- Barra de herramientas -->
-  <div class="row mb-3">
+  /* Contenedor principal */
+  .products-container {
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--gray-200);
+  }
+
+  /* Título de sección */
+  .section-title {
+    color: #000000 !important;
+    font-size: 1.5rem !important;
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.85rem;
+    position: relative;
+    border-bottom: 2px solid var(--gray-200);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .section-title::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    width: 80px;
+    height: 4px;
+    background-color: var(--primary);
+    border-radius: 2px;
+  }
+
+  /* Botón Excel verde */
+  .btn-excel {
+    background-color: var(--excel-green);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    transition: var(--transition-normal);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.95rem;
+  }
+  
+  .btn-excel:hover {
+    background-color: var(--excel-green-hover);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+  
+  .btn-excel i {
+    font-size: 1.2rem;
+  }
+
+  /* Controles de filtro y búsqueda */
+  .filter-controls {
+    margin-bottom: 1.5rem;
+  }
+  
+  .search-box {
+    position: relative;
+  }
+  
+  .search-box input {
+    padding: 0.75rem 1rem 0.75rem 3rem;
+    border-radius: var(--border-radius);
+    border: 2px solid var(--gray-300);
+    font-size: 1rem;
+    height: 50px;
+    width: 100%;
+    transition: var(--transition-normal);
+    font-weight: 500;
+  }
+  
+  .search-box input:focus {
+    box-shadow: 0 0 0 3px rgba(229, 46, 46, 0.15);
+    border-color: var(--primary);
+    outline: none;
+  }
+  
+  .search-box i {
+    position: absolute;
+    left: 1.25rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gray-600);
+    font-size: 1.1rem;
+  }
+  
+  .filter-select {
+    padding: 0.75rem 1rem;
+    border-radius: var(--border-radius);
+    border: 2px solid var(--gray-300);
+    font-size: 1rem;
+    height: 50px;
+    transition: var(--transition-normal);
+    font-weight: 500;
+    background-color: white;
+    cursor: pointer;
+  }
+  
+  .filter-select:focus {
+    box-shadow: 0 0 0 3px rgba(229, 46, 46, 0.15);
+    border-color: var(--primary);
+    outline: none;
+  }
+  
+  /* Botones de acción */
+  .action-button {
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    font-weight: 600;
+    height: 50px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    transition: var(--transition-normal);
+    border: 2px solid var(--gray-300);
+    background-color: white;
+    color: var(--gray-700);
+    padding: 0.75rem 1.25rem;
+    cursor: pointer;
+  }
+  
+  .action-button:hover {
+    background-color: var(--gray-100);
+    color: var(--gray-900);
+    box-shadow: var(--shadow-sm);
+    border-color: var(--gray-400);
+  }
+  
+  .action-button i {
+    font-size: 1.1rem;
+  }
+  
+  .btn-columns, .btn-actions {
+    position: relative;
+  }
+
+  /* Tabla de productos mejorada */
+  .products-table-container {
+    margin-top: 1.5rem;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    border: 1px solid var(--gray-300);
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .products-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-bottom: 0;
+  }
+  
+  .products-table thead th {
+    background-color: var(--gray-100);
+    color: var(--gray-800);
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 1.25rem 1rem;
+    border-bottom: 2px solid var(--gray-300);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    text-align: center;
+  }
+  
+  .products-table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--gray-200);
+    text-align: center;
+  }
+  
+  .products-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+  
+  .products-table tbody tr:hover {
+    background-color: rgba(229, 46, 46, 0.03);
+  }
+  
+  /* Estilos para celdas específicas */
+  .products-table th.text-start,
+  .products-table td.text-start {
+    text-align: left;
+  }
+  
+  .products-table th.text-center,
+  .products-table td.text-center {
+    text-align: center;
+  }
+
+  /* Columna con foto de producto */
+  .product-img-container {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto;
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--gray-200);
+  }
+  
+  .product-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background-color: white;
+    transition: transform 0.3s ease;
+  }
+  
+  .product-img-container:hover .product-img {
+    transform: scale(1.08);
+  }
+  
+  .no-image-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--gray-100);
+    color: var(--gray-500);
+    font-size: 1.5rem;
+  }
+
+  /* Información de producto */
+  .product-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: left;
+  }
+  
+  .product-name {
+    font-weight: 700;
+    color: var(--gray-900);
+    font-size: 1.1rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .product-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    font-size: 0.9rem;
+    color: var(--gray-600);
+  }
+  
+  .product-sku, .product-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .meta-label {
+    font-weight: 600;
+    color: var(--gray-700);
+    min-width: 50px;
+  }
+
+  /* Categoría con tooltip mejorado */
+  .category-tooltip {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+  }
+  
+  .category-indicator {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: inline-block;
+    border: 2px solid rgba(255, 255, 255, 0.7);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
+  }
+  
+  .category-tooltip:hover .category-indicator {
+    transform: scale(1.2);
+  }
+  
+  .category-tooltip-text {
+    visibility: hidden;
+    background-color: var(--gray-800);
+    color: white;
+    text-align: center;
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    position: absolute;
+    z-index: 100;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.3s, visibility 0.3s;
+    white-space: nowrap;
+    font-weight: 600;
+    font-size: 0.85rem;
+    box-shadow: var(--shadow-md);
+    min-width: 120px;
+  }
+  
+  .category-tooltip-text::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: var(--gray-800) transparent transparent transparent;
+  }
+  
+  .category-tooltip:hover .category-tooltip-text {
+    visibility: visible;
+    opacity: 1;
+  }
+
+  /* Stock badges */
+  .stock-badge {
+    padding: 0.5rem 0.75rem;
+    border-radius: 50rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    line-height: 1;
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .badge-normal {
+    background-color: rgba(52, 168, 83, 0.15);
+    color: var(--green);
+    border: 1px solid rgba(52, 168, 83, 0.3);
+  }
+  
+  .badge-warning {
+    background-color: rgba(251, 188, 5, 0.15);
+    color: #d1940a;
+    border: 1px solid rgba(251, 188, 5, 0.3);
+  }
+  
+  .badge-danger {
+    background-color: rgba(234, 67, 53, 0.15);
+    color: var(--red);
+    border: 1px solid rgba(234, 67, 53, 0.3);
+  }
+  
+  .stock-badge i {
+    font-size: 1rem;
+  }
+
+  /* Precio y costo */
+  .price-value, .cost-value {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--gray-800);
+  }
+  
+  .cost-value {
+    color: var(--gray-700);
+  }
+
+  /* Iconos de favorito y visibilidad (EXACTAMENTE COMO EN AGREGAR PRODUCTO) */
+  .heart-icon {
+    font-size: 24px;
+    cursor: default; /* Cambiado de pointer a default para que no parezca clickeable */
+    display: inline-block;
+  }
+  
+  .heart-icon.active {
+    color: red;
+  }
+  
+  .heart-icon:not(.active) {
+    color: gray;
+  }
+  
+  .vis-icon {
+    width: 24px;
+    height: auto;
+    cursor: default; /* No clickeable */
+    display: inline-block;
+  }
+
+  /* Menú de acciones con puntos verticales */
+  .actions-menu {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .actions-dot {
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    background-color: #e9ecef;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 18px;
+    transition: all 0.2s;
+    color: #333;
+    margin: 0 auto;
+    border: 1px solid #ddd;
+  }
+  
+  .actions-dot:hover {
+    background-color: #ddd;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+  
+  /* Estilos para el menú desplegable de acciones */
+  .actions-dropdown {
+    display: none;
+    position: absolute;
+    right: 0;
+    background-color: white;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    z-index: 1000;
+    width: 200px;
+    text-align: left;
+  }
+  
+  .actions-dropdown a {
+    display: block;
+    padding: 8px 12px;
+    text-decoration: none;
+    color: #333;
+    font-size: 14px;
+    border-bottom: 1px solid #f5f5f5;
+  }
+  
+  .actions-dropdown a:hover {
+    background-color: #f8f9fa;
+  }
+  
+  .actions-dropdown a:last-child {
+    border-bottom: none;
+  }
+
+  /* Dropdown menus */
+  .dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    min-width: 200px;
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--gray-200);
+    z-index: 1000;
+    padding: 0.75rem 0;
+    margin-top: 0.5rem;
+  }
+  
+  .dropdown-menu::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    right: 20px;
+    width: 16px;
+    height: 16px;
+    background-color: white;
+    transform: rotate(45deg);
+    border-top: 1px solid var(--gray-200);
+    border-left: 1px solid var(--gray-200);
+    z-index: -1;
+  }
+  
+  .dropdown-item {
+    padding: 0.75rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--gray-700);
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+    cursor: pointer;
+    font-size: 0.95rem;
+  }
+  
+  .dropdown-item:hover {
+    background-color: var(--gray-100);
+    color: var(--gray-900);
+  }
+  
+  .dropdown-item i {
+    font-size: 1rem;
+    color: var(--gray-600);
+  }
+  
+  .dropdown-item:hover i {
+    color: var(--primary);
+  }
+  
+  .dropdown-divider {
+    height: 1px;
+    margin: 0.5rem 0;
+    background-color: var(--gray-200);
+  }
+  
+  .form-check {
+    padding-left: 1.75rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .form-check-input {
+    margin-left: -1.75rem;
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 2px solid var(--gray-400);
+  }
+  
+  .form-check-input:checked {
+    background-color: var(--primary);
+    border-color: var(--primary);
+  }
+  
+  .form-check-input:focus {
+    box-shadow: 0 0 0 0.25rem rgba(229, 46, 46, 0.25);
+    border-color: var(--primary);
+  }
+  
+  .form-check-label {
+    font-weight: 500;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .product-img-container {
+      width: 80px;
+      height: 80px;
+    }
+    
+    .products-table thead th,
+    .products-table tbody td {
+      padding: 0.75rem 0.5rem;
+    }
+    
+    .product-name {
+      font-size: 0.95rem;
+    }
+    
+    .product-meta {
+      font-size: 0.8rem;
+    }
+    
+    .price-value, .cost-value {
+      font-size: 0.95rem;
+    }
+  }
+</style>
+
+<!-- Contenedor principal con título y botón de Excel -->
+<div class="products-container">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="section-title mb-0">VER Y GESTIONAR PRODUCTOS EXISTENTES</h2>
+    <button class="btn-excel">
+      <i class="fas fa-file-excel"></i>
+      EXPORTAR A EXCEL
+    </button>
+  </div>
+  
+  <!-- Controles de filtro, búsqueda y acciones -->
+  <div class="row filter-controls g-3">
+    <!-- Barra de búsqueda -->
     <div class="col-md-4">
-      <div class="input-group">
-        <span class="input-group-text"><i class="bi bi-search"></i></span>
-        <input type="text" id="searchInput" class="form-control" placeholder="Buscar por nombre, SKU o marca..." value="{{ termino_busqueda if termino_busqueda else '' }}">
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" id="searchInput" placeholder="Buscar por nombre, SKU o marca..." value="{{ termino_busqueda if termino_busqueda else '' }}" class="form-control">
       </div>
     </div>
+    
+    <!-- Filtro por categoría -->
     <div class="col-md-3">
-      <select id="filtroCategoria" class="form-select">
+      <select id="categoryFilter" class="form-select filter-select">
         <option value="">Todas las categorías</option>
-        <!-- Aquí irían las categorías dinámicas -->
+        <option value="abarrotes secos" data-color="#FFA500">Abarrotes secos</option>
+        <option value="enlatados y conservas" data-color="#DAA520">Enlatados y conservas</option>
+        <option value="botanas, dulces y snacks" data-color="#FF69B4">Botanas, dulces y snacks</option>
+        <option value="bebidas no alcohólicas" data-color="#1E90FF">Bebidas no alcohólicas</option>
+        <option value="bebidas alcohólicas" data-color="#800080">Bebidas alcohólicas</option>
+        <option value="panadería y repostería" data-color="#D2B48C">Panadería y repostería</option>
+        <option value="lácteos y huevos" data-color="#F5DEB3">Lácteos y huevos</option>
+        <option value="carnes frías y embutidos" data-color="#B22222">Carnes frías y embutidos</option>
+        <option value="congelados y refrigerados" data-color="#00CED1">Congelados y refrigerados</option>
+        <option value="frutas y verduras frescas" data-color="#32CD32">Frutas y verduras frescas</option>
+        <option value="productos de limpieza y hogar" data-color="#87CEFA">Productos de limpieza y hogar</option>
+        <option value="cuidado personal e higiene" data-color="#FFC0CB">Cuidado personal e higiene</option>
+        <option value="medicamentos de mostrador (otc)" data-color="#FF6347">Medicamentos de mostrador (OTC)</option>
+        <option value="productos para bebés" data-color="#FFB6C1">Productos para bebés</option>
+        <option value="productos para mascotas" data-color="#8FBC8F">Productos para mascotas</option>
+        <option value="artículos de papelería" data-color="#9370DB">Artículos de papelería</option>
+        <option value="ferretería básica" data-color="#708090">Ferretería básica</option>
+        <option value="artesanías y manualidades" data-color="#DDA0DD">Artesanías y manualidades</option>
+        <option value="productos a granel" data-color="#BDB76B">Productos a granel</option>
+        <option value="productos orgánicos" data-color="#6B8E23">Productos orgánicos</option>
+        <option value="productos gourmet" data-color="#CD853F">Productos gourmet</option>
+        <option value="suplementos alimenticios" data-color="#DA70D6">Suplementos alimenticios</option>
+        <option value="otros (miscelánea)" data-color="#A9A9A9">Otros (miscelánea)</option>
       </select>
     </div>
-    <div class="col-md-5 d-flex justify-content-end gap-2">
-      <div class="dropdown">
-        <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownColumnas" data-bs-toggle="dropdown" aria-expanded="false">
-          <i class="bi bi-columns"></i> Columnas
+    
+    <!-- Control de columnas -->
+    <div class="col-md-2">
+      <div class="btn-columns">
+        <button class="action-button w-100" id="columnToggleBtn">
+          <i class="fas fa-columns"></i>
+          Columnas
         </button>
-        <ul class="dropdown-menu" aria-labelledby="dropdownColumnas">
-          <li><a class="dropdown-item" href="#"><input type="checkbox" checked> SKU</a></li>
-          <li><a class="dropdown-item" href="#"><input type="checkbox" checked> Categoría</a></li>
-          <li><a class="dropdown-item" href="#"><input type="checkbox" checked> Stock</a></li>
-          <li><a class="dropdown-item" href="#"><input type="checkbox" checked> Precio</a></li>
-        </ul>
+        <div class="dropdown-menu" id="columnDropdown" style="display: none;">
+          <div class="px-3 py-2">
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="checkbox" id="colImage" checked>
+              <label class="form-check-label" for="colImage">Foto</label>
+            </div>
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="checkbox" id="colProduct" checked>
+              <label class="form-check-label" for="colProduct">Producto</label>
+            </div>
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="checkbox" id="colCategory" checked>
+              <label class="form-check-label" for="colCategory">Categoría</label>
+            </div>
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="checkbox" id="colStock" checked>
+              <label class="form-check-label" for="colStock">Stock</label>
+            </div>
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="checkbox" id="colPrice" checked>
+              <label class="form-check-label" for="colPrice">Precio</label>
+            </div>
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="checkbox" id="colCost" checked>
+              <label class="form-check-label" for="colCost">Costo</label>
+            </div>
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="checkbox" id="colFav" checked>
+              <label class="form-check-label" for="colFav">Favorito</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="colVis" checked>
+              <label class="form-check-label" for="colVis">Visibilidad</label>
+            </div>
+          </div>
+        </div>
       </div>
-      <button class="btn btn-outline-secondary">
-        <i class="bi bi-download"></i> Exportar Excel
-      </button>
-      <div class="dropdown">
-        <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownAcciones" data-bs-toggle="dropdown" aria-expanded="false">
-          <i class="bi bi-gear"></i> Acciones masivas
+    </div>
+    
+    <!-- Acciones masivas -->
+    <div class="col-md-3">
+      <div class="btn-actions">
+        <button class="action-button w-100" id="bulkActionsBtn">
+          <i class="fas fa-cogs"></i>
+          Acciones masivas
         </button>
-        <ul class="dropdown-menu" aria-labelledby="dropdownAcciones">
-          <li><a class="dropdown-item" href="#">Cambiar categoría</a></li>
-          <li><a class="dropdown-item" href="#">Modificar precios</a></li>
-          <li><a class="dropdown-item" href="#">Cambiar visibilidad</a></li>
-          <li><a class="dropdown-item" href="#">Marcar como favoritos</a></li>
-        </ul>
+        <div class="dropdown-menu" id="actionsDropdown" style="display: none;">
+          <a class="dropdown-item" href="#" id="bulkChangeCategory">
+            <i class="fas fa-tag"></i> Cambiar categoría
+          </a>
+          <a class="dropdown-item" href="#" id="bulkUpdatePrices">
+            <i class="fas fa-dollar-sign"></i> Modificar precios
+          </a>
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item" href="#" id="bulkToggleVisibility">
+            <i class="fas fa-eye"></i> Cambiar visibilidad
+          </a>
+          <a class="dropdown-item" href="#" id="bulkAddToFavorites">
+            <i class="fas fa-heart"></i> Marcar como favoritos
+          </a>
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item" href="#" id="bulkPrintLabels">
+            <i class="fas fa-print"></i> Imprimir etiquetas
+          </a>
+        </div>
       </div>
     </div>
   </div>
-
-  <!-- Estilos para la tabla y componentes -->
-  <style>
-    /* Estilos para la miniatura del producto */
-    .product-thumb {
-      width: 90px;
-      height: 90px;
-      object-fit: contain;
-      border: 1px solid #dee2e6;
-      border-radius: 4px;
-      margin-bottom: 0;
-    }
-    
-    /* Estilo para la información del producto */
-    .product-info {
-      line-height: 1.5;
-      text-align: left;
-      font-size: 0.9rem;
-    }
-    
-    .product-info div {
-      margin-bottom: 3px;
-    }
-    
-    /* Estilos para tooltip de categoría */
-    .category-tooltip {
-      position: relative;
-      display: inline-block;
-    }
-    
-    .category-tooltip .category-tooltip-text {
-      visibility: hidden;
-      background-color: #333;
-      color: #fff;
-      text-align: center;
-      border-radius: 6px;
-      padding: 5px 10px;
-      position: absolute;
-      z-index: 1;
-      bottom: 125%;
-      left: 50%;
-      transform: translateX(-50%);
-      opacity: 0;
-      transition: opacity 0.3s;
-      white-space: nowrap;
-      font-weight: 500;
-      font-size: 14px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-    }
-    
-    .category-tooltip .category-tooltip-text::after {
-      content: "";
-      position: absolute;
-      top: 100%;
-      left: 50%;
-      margin-left: -5px;
-      border-width: 5px;
-      border-style: solid;
-      border-color: #333 transparent transparent transparent;
-    }
-    
-    .category-tooltip:hover .category-tooltip-text {
-      visibility: visible;
-      opacity: 1;
-    }
-    
-    /* Estilos para expandir detalle */
-    .row-detail {
-      display: none;
-      background-color: #f8f9fa;
-      padding: 15px;
-      border-top: 1px solid #dee2e6;
-    }
-    
-    /* Menú de acciones */
-    .actions-menu {
-      position: relative;
-      display: inline-block;
-    }
-    
-    .actions-dot {
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 18px;
-    }
-    
-    .actions-dropdown {
-      display: none;
-      position: absolute;
-      right: 0;
-      background-color: white;
-      min-width: 180px;
-      border: 1px solid #dee2e6;
-      border-radius: 4px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-      z-index: 1;
-    }
-    
-    .actions-dropdown a {
-      color: black;
-      padding: 8px 12px;
-      text-decoration: none;
-      display: block;
-      font-size: 14px;
-    }
-    
-    .actions-dropdown a:hover {
-      background-color: #f1f1f1;
-    }
-    
-    /* Iconos para favorito y visibilidad */
-    .icon-fav, .icon-vis {
-      width: 24px;
-      height: 24px;
-      cursor: pointer;
-    }
-    
-    /* Filas zebra estrictas */
-    .row-white {
-      background-color: #ffffff !important;
-    }
-    
-    .row-gray {
-      background-color: #f8f9fa !important;
-    }
-    
-    /* Separación entre columnas */
-    .table-column-separated th,
-    .table-column-separated td {
-      border-right: 1px solid #dee2e6;
-      padding-left: 12px;
-      padding-right: 12px;
-    }
-    
-    .table-column-separated th:last-child,
-    .table-column-separated td:last-child {
-      border-right: none;
-    }
-    
-    /* Bordes completos para la tabla */
-    .table-column-separated {
-      border: 1px solid #dee2e6;
-      border-radius: 4px;
-      overflow: hidden;
-    }
-    
-    .table-column-separated thead th {
-      border-bottom: 2px solid #dee2e6;
-    }
-    
-    .table-column-separated tbody tr {
-      border-bottom: 1px solid #dee2e6;
-    }
-    
-    .table-column-separated tbody tr:last-child {
-      border-bottom: none;
-    }
-    
-    /* Detalle siempre con fondo claro */
-    .detail-row {
-      background-color: #f8f9fa !important;
-    }
-  </style>
-
+  
   <!-- Tabla de productos -->
-  <div class="table-responsive">
-    <table class="table align-middle border-top table-column-separated" id="productsTable">
-      <thead class="table-light">
+  <div class="products-table-container">
+    <table class="products-table" id="productsTable">
+      <thead>
         <tr>
-          <th style="width: 120px;" class="text-center">FOTO</th>
-          <th style="width: 280px;" class="text-center">DEL PRODUCTO</th>
-          <th style="width: 50px;" class="text-center">CATEGORÍA</th>
-          <th style="width: 90px;" class="text-center">STOCK</th>
-          <th style="width: 100px;" class="text-center">CADUCIDAD</th>
-          <th style="width: 90px;" class="text-center">PRECIO</th>
-          <th style="width: 90px;" class="text-center">COSTO</th>
-          <th style="width: 30px;" class="text-center">FAV</th>
-          <th style="width: 30px;" class="text-center">VIS</th>
-          <th style="width: 40px;" class="text-center">MENÚ</th>
+          <th style="width: 110px;">FOTO</th>
+          <th class="text-start">PRODUCTO</th>
+          <th style="width: 130px;">CATEGORÍA</th>
+          <th style="width: 120px;">STOCK</th>
+          <th style="width: 110px;">PRECIO</th>
+          <th style="width: 110px;">COSTO</th>
+          <th style="width: 80px;">FAV</th>
+          <th style="width: 80px;">VISIBLE</th>
+          <th style="width: 80px;">ACCIONES</th>
         </tr>
       </thead>
       <tbody>
         {% for p in productos %}
-        <tr class="{% if loop.index0 % 2 == 0 %}row-white{% else %}row-gray{% endif %}" data-id="{{ p.id }}">
+        <tr data-id="{{ p.id }}">
           <!-- Foto -->
-          <td class="text-center">
-            {% if p.foto %}
-              <img src="{{ url_for('static', filename='uploads/' ~ p.foto) }}" alt="Foto" class="product-thumb">
-            {% else %}
-              <div class="bg-light rounded product-thumb" style="display: inline-block;"></div>
-            {% endif %}
+          <td>
+            <div class="product-img-container">
+              {% if p.foto %}
+                <img src="{{ url_for('static', filename='uploads/' ~ p.foto) }}" alt="{{ p.nombre }}" class="product-img">
+              {% else %}
+                <div class="no-image-placeholder">
+                  <i class="fas fa-box"></i>
+                </div>
+              {% endif %}
+            </div>
           </td>
           
-          <!-- Del Producto -->
-          <td style="text-align: left; padding-left: 15px;">
+          <!-- Información del producto -->
+          <td class="text-start">
             <div class="product-info">
-              <div><strong>Nombre:</strong> {{ p.nombre }}</div>
-              <div><strong>Marca:</strong> {{ p.marca|default('No definida') }}</div>
-              <div><strong>SKU:</strong> 
-                {% if p.codigo_barras_externo %}
-                  {{ p.codigo_barras_externo }}
-                {% else %}
-                  SKU-{{ '%05d' % p.id }}
-                {% endif %}
+              <div class="product-name">{{ p.nombre }}</div>
+              <div class="product-meta">
+                <div class="product-sku">
+                  <span class="meta-label">SKU:</span>
+                  <span>
+                    {% if p.codigo_barras_externo %}
+                      {{ p.codigo_barras_externo }}
+                    {% else %}
+                      SKU-{{ '%05d' % p.id }}
+                    {% endif %}
+                  </span>
+                </div>
+                <div class="product-brand">
+                  <span class="meta-label">Marca:</span>
+                  <span>{{ p.marca|default('No definida') }}</span>
+                </div>
               </div>
             </div>
           </td>
           
-          <!-- Categoría -->
-          <td class="text-center">
-            {% set cat_color = p.categoria_color|default('#CCCCCC') %}
-            {% if p.categoria == 'abarrotes secos' %}
-              {% set cat_color = '#FFA500' %}
-            {% elif p.categoria == 'enlatados y conservas' %}
-              {% set cat_color = '#DAA520' %}
-            {% elif p.categoria == 'botanas, dulces y snacks' %}
-              {% set cat_color = '#FF69B4' %}
-            {% elif p.categoria == 'bebidas no alcohólicas' %}
-              {% set cat_color = '#1E90FF' %}
-            {% elif p.categoria == 'bebidas alcohólicas' %}
-              {% set cat_color = '#800080' %}
+          <!-- Categoría con burbuja de color y tooltip -->
+          <td>
+            {% set cat_color = "#A9A9A9" %}  <!-- Valor predeterminado gris -->
+            
+            {% if p.categoria_color %}
+              {% set cat_color = p.categoria_color %}
+            {% else %}
+              <!-- Mapeo exacto según agregar_producto.html -->
+              {% if p.categoria == "abarrotes secos" %}
+                {% set cat_color = "#FFA500" %}
+              {% elif p.categoria == "enlatados y conservas" %}
+                {% set cat_color = "#DAA520" %}
+              {% elif p.categoria == "botanas, dulces y snacks" %}
+                {% set cat_color = "#FF69B4" %}
+              {% elif p.categoria == "bebidas no alcohólicas" %}
+                {% set cat_color = "#1E90FF" %}
+              {% elif p.categoria == "bebidas alcohólicas" %}
+                {% set cat_color = "#800080" %}
+              {% elif p.categoria == "panadería y repostería" %}
+                {% set cat_color = "#D2B48C" %}
+              {% elif p.categoria == "lácteos y huevos" %}
+                {% set cat_color = "#F5DEB3" %}
+              {% elif p.categoria == "carnes frías y embutidos" %}
+                {% set cat_color = "#B22222" %}
+              {% elif p.categoria == "congelados y refrigerados" %}
+                {% set cat_color = "#00CED1" %}
+              {% elif p.categoria == "frutas y verduras frescas" %}
+                {% set cat_color = "#32CD32" %}
+              {% elif p.categoria == "productos de limpieza y hogar" %}
+                {% set cat_color = "#87CEFA" %}
+              {% elif p.categoria == "cuidado personal e higiene" %}
+                {% set cat_color = "#FFC0CB" %}
+              {% elif p.categoria == "medicamentos de mostrador (otc)" %}
+                {% set cat_color = "#FF6347" %}
+              {% elif p.categoria == "productos para bebés" %}
+                {% set cat_color = "#FFB6C1" %}
+              {% elif p.categoria == "productos para mascotas" %}
+                {% set cat_color = "#8FBC8F" %}
+              {% elif p.categoria == "artículos de papelería" %}
+                {% set cat_color = "#9370DB" %}
+              {% elif p.categoria == "ferretería básica" %}
+                {% set cat_color = "#708090" %}
+              {% elif p.categoria == "artesanías y manualidades" %}
+                {% set cat_color = "#DDA0DD" %}
+              {% elif p.categoria == "productos a granel" %}
+                {% set cat_color = "#BDB76B" %}
+              {% elif p.categoria == "productos orgánicos" %}
+                {% set cat_color = "#6B8E23" %}
+              {% elif p.categoria == "productos gourmet" %}
+                {% set cat_color = "#CD853F" %}
+              {% elif p.categoria == "suplementos alimenticios" %}
+                {% set cat_color = "#DA70D6" %}
+              {% elif p.categoria == "otros (miscelánea)" %}
+                {% set cat_color = "#A9A9A9" %}
+              {% endif %}
             {% endif %}
-
+            
             <div class="category-tooltip">
-              <span class="d-inline-block rounded-circle" 
-                    style="width:12px; height:12px; background-color:{{ cat_color }}; border: 1px solid rgba(0,0,0,0.1);">
-              </span>
+              <span class="category-indicator" style="background-color: {{ cat_color }};"></span>
               <span class="category-tooltip-text">{{ p.categoria|default('Sin categoría')|title }}</span>
             </div>
           </td>
           
-          <!-- Stock -->
-          <td class="text-center fw-medium">
-            {% if p.stock < p.alerta_stock|default(5) and p.stock > 0 %}
-              <span class="text-warning">{{ p.stock }} piezas</span>
-            {% elif p.stock <= 0 %}
-              <span class="text-danger">{{ p.stock }} piezas</span>
+          <!-- Stock con badge contextual -->
+          <td>
+            {% if p.stock <= 0 %}
+              <span class="stock-badge badge-danger">
+                <i class="fas fa-exclamation-circle"></i>
+                {{ p.stock }} unidades
+              </span>
+            {% elif p.stock < 5 %}
+              <span class="stock-badge badge-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                {{ p.stock }} unidades
+              </span>
             {% else %}
-              {{ p.stock }} piezas
-            {% endif %}
-          </td>
-          
-          <!-- Caducidad -->
-          <td class="text-center">
-            {% if p.has_caducidad %}
-              {{ p.metodo_caducidad|default('N/A') }}
-            {% else %}
-              <span class="text-muted">N/A</span>
+              <span class="stock-badge badge-normal">
+                <i class="fas fa-check-circle"></i>
+                {{ p.stock }} unidades
+              </span>
             {% endif %}
           </td>
           
           <!-- Precio -->
-          <td class="text-center fw-medium">$ {{ p.precio_venta|default(0)|round(2) }}</td>
+          <td>
+            <span class="price-value">${{ p.precio_venta|round(2) }}</span>
+          </td>
           
           <!-- Costo -->
-          <td class="text-center fw-medium">$ {{ p.costo|default(0)|round(2) }}</td>
-          
-          <!-- Favorito -->
-          <td class="text-center">
-            <span class="fav-toggle" data-id="{{ p.id }}" data-status="{{ p.es_favorito|default(false) }}">
-              {% if p.es_favorito %}
-                <span class="heart-icon active" style="font-size: 20px; color: red; cursor: pointer;">&#9829;</span>
-              {% else %}
-                <span class="heart-icon" style="font-size: 20px; color: gray; cursor: pointer;">&#9825;</span>
-              {% endif %}
-            </span>
+          <td>
+            <span class="cost-value">${{ p.costo|round(2) }}</span>
           </td>
           
-          <!-- Visibilidad -->
-          <td class="text-center">
-            <span class="vis-toggle" data-id="{{ p.id }}" data-status="{{ p.esta_a_la_venta|default(true) }}">
-              {% if p.esta_a_la_venta %}
-                <img src="{{ url_for('static', filename='img/1.png') }}" class="venta-icon" style="width:24px; cursor:pointer;">
-              {% else %}
-                <img src="{{ url_for('static', filename='img/2.png') }}" class="venta-icon" style="width:24px; cursor:pointer;">
-              {% endif %}
-            </span>
+          <!-- Favorito - Solo muestra el estado, no es clickeable -->
+          <td>
+            {% if p.es_favorito %}
+              <span class="heart-icon active">&#9829;</span>
+            {% else %}
+              <span class="heart-icon">&#9825;</span>
+            {% endif %}
           </td>
           
-          <!-- Menú -->
-          <td class="text-center">
+          <!-- Visibilidad - Solo muestra el estado, no es clickeable -->
+          <td>
+            {% if p.esta_a_la_venta %}
+              <img src="{{ url_for('static', filename='img/1.png') }}" class="vis-icon" alt="Visible" style="width:24px;">
+            {% else %}
+              <img src="{{ url_for('static', filename='img/2.png') }}" class="vis-icon" alt="No visible" style="width:24px;">
+            {% endif %}
+          </td>
+          
+          <!-- Menú de acciones - IMPLEMENTACIÓN COMO EN LA CAPTURA -->
+          <td>
             <div class="actions-menu">
-              <span class="actions-dot" onclick="toggleActionsMenu(event, this)">⋯</span>
-              <div class="actions-dropdown">
+              <button type="button" class="actions-dot" onclick="toggleActionsMenu(event, this)">&#8226;&#8226;&#8226;</button>
+              <div class="actions-dropdown" id="actionMenu{{ p.id }}">
                 <a href="#" onclick="addStock({{ p.id }})">Añadir existencias</a>
                 <a href="#" onclick="changePrice({{ p.id }})">Cambiar precio</a>
                 <a href="#" onclick="changeCost({{ p.id }})">Cambiar costo</a>
@@ -367,140 +931,184 @@
       </tbody>
     </table>
   </div>
-
+  
   <!-- Mensaje si no hay productos -->
   {% if productos|length == 0 %}
-  <div class="alert alert-info">
-    No hay productos que coincidan con los criterios seleccionados.
-  </div>
-  {% endif %}
-
-  <!-- Modal de confirmación para eliminar -->
-  <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Confirmar eliminación</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <p>¿Estás seguro de que deseas eliminar el producto "<span id="deleteProductName"></span>"?</p>
-          <p class="text-danger">Esta acción no se puede deshacer.</p>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <a href="#" id="confirmDelete" class="btn btn-danger">Eliminar</a>
-        </div>
+  <div class="alert alert-info mt-4">
+    <div class="d-flex align-items-center">
+      <i class="fas fa-info-circle me-3 fs-4"></i>
+      <div>
+        <p class="fw-medium mb-0">No hay productos que coincidan con los criterios seleccionados.</p>
+        <p class="mb-0 text-muted">Intenta cambiar los filtros o <a href="{{ url_for('nuevo_producto') }}" class="fw-medium">agrega un nuevo producto</a>.</p>
       </div>
     </div>
   </div>
-{% endblock %}
+  {% endif %}
+</div>
 
-{% block scripts %}
+<!-- Modal de confirmación para eliminar -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirmar eliminación</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>¿Estás seguro de que deseas eliminar el producto "<span id="deleteProductName"></span>"?</p>
+        <p class="text-danger">Esta acción no se puede deshacer.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <a href="#" id="confirmDelete" class="btn btn-danger">Eliminar</a>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    // Inicializar los tooltips de Bootstrap
+    // Inicializar tooltips de Bootstrap
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
       return new bootstrap.Tooltip(tooltipTriggerEl);
     });
     
-    // Aplicar rayado zebra explícitamente
-    const rows = document.querySelectorAll('.product-row');
-    rows.forEach((row, index) => {
-      if (index % 2 === 0) {
-        row.classList.add('row-white');
-        row.classList.remove('row-gray');
-      } else {
-        row.classList.add('row-gray');
-        row.classList.remove('row-white');
-      }
-    });
+    // Toggle menú de columnas
+    const columnToggleBtn = document.getElementById('columnToggleBtn');
+    const columnDropdown = document.getElementById('columnDropdown');
     
-    // Toggle para Favoritos
-    document.querySelectorAll('.fav-toggle').forEach(function(toggle) {
-      toggle.addEventListener('click', function() {
-        const id = this.getAttribute('data-id');
-        const heartIcon = this.querySelector('.heart-icon');
-        const currentStatus = heartIcon.classList.contains('active');
-        
-        // Toggle visual
-        if (currentStatus) {
-          heartIcon.classList.remove('active');
-          heartIcon.style.color = 'gray';
-          heartIcon.innerHTML = '&#9825;';
-        } else {
-          heartIcon.classList.add('active');
-          heartIcon.style.color = 'red';
-          heartIcon.innerHTML = '&#9829;';
-        }
-        
-        // AJAX para actualizar en la base de datos
-        fetch('/api/toggle-favorito/' + id, {
-          method: 'POST'
-        }).catch(error => {
-          console.error('Error:', error);
-          // Revertir cambio visual si hay error
-          if (currentStatus) {
-            heartIcon.classList.add('active');
-            heartIcon.style.color = 'red';
-            heartIcon.innerHTML = '&#9829;';
-          } else {
-            heartIcon.classList.remove('active');
-            heartIcon.style.color = 'gray';
-            heartIcon.innerHTML = '&#9825;';
-          }
-        });
+    if (columnToggleBtn && columnDropdown) {
+      columnToggleBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        columnDropdown.style.display = columnDropdown.style.display === 'block' ? 'none' : 'block';
       });
-    });
+    }
     
-    // Toggle para Visibilidad
-    document.querySelectorAll('.vis-toggle').forEach(function(toggle) {
-      toggle.addEventListener('click', function() {
-        const id = this.getAttribute('data-id');
-        const ventaIcon = this.querySelector('.venta-icon');
-        const currentStatus = this.getAttribute('data-status') === 'true';
-        
-        // Toggle visual
-        if (currentStatus) {
-          ventaIcon.src = "{{ url_for('static', filename='img/2.png') }}";
-          this.setAttribute('data-status', 'false');
-        } else {
-          ventaIcon.src = "{{ url_for('static', filename='img/1.png') }}";
-          this.setAttribute('data-status', 'true');
-        }
-        
-        // AJAX para actualizar en la base de datos
-        fetch('/api/toggle-visibilidad/' + id, {
-          method: 'POST'
-        }).catch(error => {
-          console.error('Error:', error);
-          // Revertir cambio visual si hay error
-          if (currentStatus) {
-            ventaIcon.src = "{{ url_for('static', filename='img/1.png') }}";
-            this.setAttribute('data-status', 'true');
-          } else {
-            ventaIcon.src = "{{ url_for('static', filename='img/2.png') }}";
-            this.setAttribute('data-status', 'false');
-          }
-        });
+    // Toggle menú de acciones masivas
+    const bulkActionsBtn = document.getElementById('bulkActionsBtn');
+    const actionsDropdown = document.getElementById('actionsDropdown');
+    
+    if (bulkActionsBtn && actionsDropdown) {
+      bulkActionsBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        actionsDropdown.style.display = actionsDropdown.style.display === 'block' ? 'none' : 'block';
       });
-    });
+    }
     
-    // Cerrar todos los menús al hacer clic en cualquier lugar
+    // Cerrar menús cuando se hace clic fuera
     document.addEventListener('click', function(e) {
-      if (!e.target.closest('.actions-dot') && !e.target.closest('.actions-dropdown')) {
-        document.querySelectorAll('.actions-dropdown').forEach(function(menu) {
-          menu.style.display = 'none';
-        });
+      if (columnDropdown && !columnToggleBtn.contains(e.target) && !columnDropdown.contains(e.target)) {
+        columnDropdown.style.display = 'none';
       }
+      
+      if (actionsDropdown && !bulkActionsBtn.contains(e.target) && !actionsDropdown.contains(e.target)) {
+        actionsDropdown.style.display = 'none';
+      }
+      
+      // Cerrar todos los menús de acciones (puntos) al hacer clic en cualquier lugar
+      document.querySelectorAll('.actions-dropdown').forEach(function(menu) {
+        if (menu.style.display === 'block' && !e.target.closest('.actions-dot') && !e.target.closest('.actions-dropdown')) {
+          menu.style.display = 'none';
+        }
+      });
     });
     
-    // Modal de confirmación
+    // Búsqueda en tiempo real
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+      searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase().trim();
+        const tableRows = document.querySelectorAll('#productsTable tbody tr');
+        
+        tableRows.forEach(row => {
+          const productName = row.querySelector('.product-name').innerText.toLowerCase();
+          const productSku = row.querySelector('.product-sku').innerText.toLowerCase();
+          const productBrand = row.querySelector('.product-brand').innerText.toLowerCase();
+          
+          if (productName.includes(searchTerm) || productSku.includes(searchTerm) || productBrand.includes(searchTerm)) {
+            row.style.display = '';
+          } else {
+            row.style.display = 'none';
+          }
+        });
+      });
+    }
+    
+    // Filtro por categoría
+    const categoryFilter = document.getElementById('categoryFilter');
+    if (categoryFilter) {
+      categoryFilter.addEventListener('change', function() {
+        const selectedCategory = this.value.toLowerCase();
+        const tableRows = document.querySelectorAll('#productsTable tbody tr');
+        
+        if (!selectedCategory) {
+          tableRows.forEach(row => {
+            row.style.display = '';
+          });
+          return;
+        }
+        
+        tableRows.forEach(row => {
+          const categoryTooltip = row.querySelector('.category-tooltip-text');
+          if (categoryTooltip) {
+            const category = categoryTooltip.innerText.toLowerCase();
+            
+            if (category.includes(selectedCategory)) {
+              row.style.display = '';
+            } else {
+              row.style.display = 'none';
+            }
+          }
+        });
+      });
+    }
+    
+    // Mostrar/ocultar columnas
+    document.querySelectorAll('#columnDropdown input[type="checkbox"]').forEach(checkbox => {
+      checkbox.addEventListener('change', function() {
+        const colId = this.id;
+        const columnIndex = getColumnIndex(colId);
+        
+        if (columnIndex !== -1) {
+          const tableHeaders = document.querySelectorAll('#productsTable thead th');
+          const tableCells = document.querySelectorAll(`#productsTable tbody tr td:nth-child(${columnIndex + 1})`);
+          
+          if (this.checked) {
+            tableHeaders[columnIndex].style.display = '';
+            tableCells.forEach(cell => {
+              cell.style.display = '';
+            });
+          } else {
+            tableHeaders[columnIndex].style.display = 'none';
+            tableCells.forEach(cell => {
+              cell.style.display = 'none';
+            });
+          }
+        }
+      });
+    });
+    
+    function getColumnIndex(colId) {
+      const columnMap = {
+        'colImage': 0,
+        'colProduct': 1,
+        'colCategory': 2,
+        'colStock': 3,
+        'colPrice': 4,
+        'colCost': 5,
+        'colFav': 6,
+        'colVis': 7
+      };
+      
+      return columnMap[colId] !== undefined ? columnMap[colId] : -1;
+    }
+    
+    // Inicializar modal de confirmación
     window.deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
   });
   
-  // Función para mostrar/ocultar el menú de acciones
+  // Función para mostrar/ocultar el menú de acciones (tres puntos)
   function toggleActionsMenu(event, dot) {
     event.stopPropagation(); // Prevenir propagación
     
@@ -519,21 +1127,21 @@
   // Funciones para acciones del menú
   function confirmDelete(id, name) {
     document.getElementById('deleteProductName').textContent = name;
-    document.getElementById('confirmDelete').href = "/eliminar-producto/" + id;
+    document.getElementById('confirmDelete').href = `/eliminar-producto/${id}`;
     window.deleteModal.show();
   }
   
   function toggleFavorite(id) {
-    const toggle = document.querySelector(`.fav-toggle[data-id="${id}"]`);
-    toggle.click();
+    // Mostrar notificación simulando acción
+    alert("Marcando/desmarcando producto como favorito: " + id);
   }
   
   function toggleVisibility(id) {
-    const toggle = document.querySelector(`.vis-toggle[data-id="${id}"]`);
-    toggle.click();
+    // Mostrar notificación simulando acción
+    alert("Cambiando visibilidad del producto: " + id);
   }
   
-  // Estas funciones necesitarán implementación adicional en producción
+  // Funciones pendientes (placeholders)
   function addStock(id) {
     alert("Función pendiente: Añadir existencias al producto " + id);
   }
@@ -553,5 +1161,27 @@
   function printLabels(id) {
     alert("Función pendiente: Imprimir etiquetas para el producto " + id);
   }
+  
+  // Para acciones masivas
+  document.addEventListener('DOMContentLoaded', function() {
+    const bulkActions = {
+      'bulkChangeCategory': 'Cambiar categoría masivamente',
+      'bulkUpdatePrices': 'Modificar precios masivamente', 
+      'bulkToggleVisibility': 'Cambiar visibilidad masivamente',
+      'bulkAddToFavorites': 'Marcar como favoritos masivamente',
+      'bulkPrintLabels': 'Imprimir etiquetas masivamente'
+    };
+    
+    Object.entries(bulkActions).forEach(([id, action]) => {
+      const element = document.getElementById(id);
+      if (element) {
+        element.addEventListener('click', function(e) {
+          e.preventDefault();
+          alert(`Función pendiente: ${action}`);
+          document.getElementById('actionsDropdown').style.display = 'none';
+        });
+      }
+    });
+  });
 </script>
 {% endblock %}
