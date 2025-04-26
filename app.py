@@ -49,7 +49,7 @@ import requests
 SERPAPI_API_KEY = "84d269bfa51876a1a092ace371d89f7dc2500d8c5a61b420c08d96e5351f5c79"
 
 from sqlalchemy import or_
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # =========================================
 # NUEVO: Conjunto de Categorías con Emojis
@@ -1385,6 +1385,59 @@ def eliminar_producto(prod_id):
     
     # Esta línea es crucial - asegura que siempre se devuelva una respuesta
     return redirect(url_for('ver_productos'))
+
+@app.route('/historial-movimientos')
+@login_requerido
+def historial_movimientos():
+    # Obtener parámetros de filtro
+    tipo = request.args.get('tipo', 'todos')
+    periodo = int(request.args.get('periodo', 30))
+    busqueda = request.args.get('q', '')
+    page = int(request.args.get('page', 1))
+    per_page = 30  # Movimientos por página
+    
+    # Calcular fecha límite según el período seleccionado
+    fecha_limite = datetime.now() - timedelta(days=periodo)
+    
+    # Consulta base
+    query = MovimientoInventario.query.join(Producto).filter(
+        MovimientoInventario.fecha_movimiento >= fecha_limite
+    )
+    
+    # Aplicar filtro de tipo
+    if tipo == 'entrada':
+        query = query.filter(MovimientoInventario.tipo_movimiento == 'ENTRADA')
+    elif tipo == 'salida':
+        query = query.filter(MovimientoInventario.tipo_movimiento == 'SALIDA')
+    
+    # Aplicar búsqueda
+    if busqueda:
+        query = query.filter(
+            or_(
+                Producto.nombre.ilike(f'%{busqueda}%'),
+                Producto.codigo_barras_externo.ilike(f'%{busqueda}%')
+            )
+        )
+    
+    # Ordenar por fecha descendente (más reciente primero)
+    query = query.order_by(MovimientoInventario.fecha_movimiento.desc())
+    
+    # Contar total de resultados
+    total_movimientos = query.count()
+    
+    # Aplicar paginación
+    movimientos = query.paginate(page=page, per_page=per_page, error_out=False)
+    
+    # Determinar si hay página siguiente
+    has_next = page * per_page < total_movimientos
+    
+    return render_template(
+        'historial_movimientos.html',
+        movimientos=movimientos.items,
+        current_page=page,
+        has_next=has_next,
+        total_movimientos=total_movimientos
+    )
 
 ##############################
 # ESCÁNER / CAPTURA RÁPIDA

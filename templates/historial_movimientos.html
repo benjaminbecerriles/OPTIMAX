@@ -1,0 +1,373 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  Historial de Movimientos
+{% endblock %}
+
+{% block content %}
+<style>
+  /* Estilos globales */
+  .historial-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 1rem;
+  }
+  
+  /* Encabezado de página */
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 1rem;
+  }
+  
+  .page-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 0;
+    color: #212529;
+  }
+  
+  /* Filtros y búsqueda */
+  .filters-container {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    background-color: #f8f9fa;
+    border-radius: 0.5rem;
+    padding: 1rem;
+  }
+  
+  .filter-item {
+    flex: 1;
+    min-width: 160px;
+  }
+  
+  .filter-item label {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #495057;
+  }
+  
+  .filter-item select, .filter-item input {
+    width: 100%;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    border: 1px solid #ced4da;
+    font-size: 0.875rem;
+  }
+  
+  /* Lista de movimientos */
+  .movimientos-list {
+    margin-top: 1.5rem;
+  }
+  
+  .movimiento-item {
+    display: flex;
+    padding: 1rem 0;
+    border-bottom: 1px solid #f0f0f0;
+    position: relative;
+    transition: background-color 0.2s;
+  }
+  
+  .movimiento-item:last-child {
+    border-bottom: none;
+  }
+  
+  .movimiento-item:hover {
+    background-color: #f8f9fa;
+  }
+  
+  .movimiento-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    flex-shrink: 0;
+  }
+  
+  .entrada-icon {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+  }
+  
+  .salida-icon {
+    background-color: #ffebee;
+    color: #c62828;
+  }
+  
+  .movimiento-details {
+    flex: 1;
+    min-width: 0; /* Evita que el texto rompa el flex */
+  }
+  
+  .movimiento-primary {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+  }
+  
+  .movimiento-nombre {
+    font-size: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 60%;
+    color: #212529;
+  }
+  
+  .movimiento-fecha {
+    font-size: 0.875rem;
+    color: #6c757d;
+    white-space: nowrap;
+  }
+  
+  .movimiento-secondary {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.875rem;
+  }
+  
+  .movimiento-info {
+    color: #6c757d;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 60%;
+  }
+  
+  .movimiento-cantidad {
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  
+  .cantidad-entrada {
+    color: #2e7d32;
+  }
+  
+  .cantidad-salida {
+    color: #c62828;
+  }
+  
+  /* Sin resultados */
+  .no-results {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+    background-color: #f8f9fa;
+    border-radius: 0.5rem;
+    color: #6c757d;
+    text-align: center;
+  }
+  
+  .no-results i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #adb5bd;
+  }
+  
+  /* Paginación */
+  .pagination-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+  }
+  
+  .pagination-info {
+    margin-top: 0.5rem;
+    text-align: center;
+    color: #6c757d;
+    font-size: 0.875rem;
+  }
+  
+  /* Estilos para dispositivos móviles */
+  @media (max-width: 768px) {
+    .filters-container {
+      flex-direction: column;
+    }
+    
+    .movimiento-primary, .movimiento-secondary {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .movimiento-nombre, .movimiento-info {
+      max-width: 100%;
+      margin-bottom: 0.25rem;
+    }
+    
+    .movimiento-fecha {
+      font-size: 0.75rem;
+    }
+  }
+</style>
+
+<div class="historial-container">
+  <!-- Encabezado con título y botón de volver -->
+  <div class="page-header">
+    <h1 class="page-title">Historial de Movimientos</h1>
+    <a href="{{ url_for('ajuste_stock') }}" class="btn-icon btn-outline">
+      <i class="fas fa-arrow-left"></i>
+      Volver
+    </a>
+  </div>
+  
+  <!-- Filtros -->
+  <div class="filters-container">
+    <div class="filter-item">
+      <label for="tipoFilter">Tipo</label>
+      <select id="tipoFilter" class="form-select">
+        <option value="todos">Todos los movimientos</option>
+        <option value="entrada">Solo entradas</option>
+        <option value="salida">Solo salidas</option>
+      </select>
+    </div>
+    
+    <div class="filter-item">
+      <label for="periodoFilter">Período</label>
+      <select id="periodoFilter" class="form-select">
+        <option value="30">Últimos 30 días</option>
+        <option value="7">Últimos 7 días</option>
+        <option value="90">Últimos 3 meses</option>
+        <option value="180">Últimos 6 meses</option>
+        <option value="365">Último año</option>
+      </select>
+    </div>
+    
+    <div class="filter-item">
+      <label for="productoFilter">Producto</label>
+      <input type="text" id="productoFilter" class="form-control" placeholder="Buscar por nombre o código">
+    </div>
+  </div>
+  
+  <!-- Lista de movimientos -->
+  <div class="movimientos-list">
+    {% if movimientos and movimientos|length > 0 %}
+      {% for movimiento in movimientos %}
+        <div class="movimiento-item">
+          <div class="movimiento-icon {% if movimiento.tipo_movimiento == 'ENTRADA' %}entrada-icon{% else %}salida-icon{% endif %}">
+            <i class="fas fa-{% if movimiento.tipo_movimiento == 'ENTRADA' %}plus{% else %}minus{% endif %}"></i>
+          </div>
+          <div class="movimiento-details">
+            <div class="movimiento-primary">
+              <div class="movimiento-nombre">{{ movimiento.producto.nombre }}</div>
+              <div class="movimiento-fecha">{{ movimiento.fecha_movimiento.strftime('%d/%m/%Y %H:%M') }}</div>
+            </div>
+            <div class="movimiento-secondary">
+              <div class="movimiento-info">
+                {{ movimiento.motivo|title }} | {{ movimiento.producto.codigo_barras_externo }}
+                {% if movimiento.numero_lote %} | Lote: {{ movimiento.numero_lote }}{% endif %}
+              </div>
+              <div class="movimiento-cantidad {% if movimiento.tipo_movimiento == 'ENTRADA' %}cantidad-entrada{% else %}cantidad-salida{% endif %}">
+                {% if movimiento.tipo_movimiento == 'ENTRADA' %}+{% else %}-{% endif %}{{ movimiento.cantidad }} 
+                {{ "unidad" if movimiento.cantidad == 1 else "unidades" }}
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="no-results">
+        <i class="fas fa-inbox"></i>
+        <h3>No hay movimientos registrados</h3>
+        <p>No se encontraron movimientos de inventario en el período seleccionado.</p>
+      </div>
+    {% endif %}
+  </div>
+  
+  <!-- Paginación simple -->
+  <div class="pagination-container">
+    <nav aria-label="Paginación del historial">
+      <ul class="pagination">
+        <li class="page-item {% if current_page == 1 %}disabled{% endif %}">
+          <a class="page-link" href="?page={{ current_page - 1 }}">Anterior</a>
+        </li>
+        <li class="page-item active">
+          <span class="page-link">{{ current_page }}</span>
+        </li>
+        <li class="page-item {% if not has_next %}disabled{% endif %}">
+          <a class="page-link" href="?page={{ current_page + 1 }}">Siguiente</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+  <div class="pagination-info">
+    Mostrando {{ movimientos|length }} de {{ total_movimientos }} movimientos
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Referencias a los filtros
+    const tipoFilter = document.getElementById('tipoFilter');
+    const periodoFilter = document.getElementById('periodoFilter');
+    const productoFilter = document.getElementById('productoFilter');
+    
+    // Función para aplicar filtros
+    function applyFilters() {
+      const tipo = tipoFilter.value;
+      const periodo = periodoFilter.value;
+      const producto = productoFilter.value.trim().toLowerCase();
+      
+      // Construir la URL con los parámetros de filtro
+      let url = window.location.pathname + '?';
+      
+      if (tipo !== 'todos') {
+        url += `tipo=${tipo}&`;
+      }
+      
+      if (periodo !== '30') {
+        url += `periodo=${periodo}&`;
+      }
+      
+      if (producto) {
+        url += `q=${encodeURIComponent(producto)}&`;
+      }
+      
+      // Eliminar el último '&' o '?' si existe
+      url = url.replace(/[&?]$/, '');
+      
+      // Redirigir a la URL con los filtros
+      window.location.href = url;
+    }
+    
+    // Eventos para los filtros
+    tipoFilter.addEventListener('change', applyFilters);
+    periodoFilter.addEventListener('change', applyFilters);
+    
+    // Debounce para el filtro de producto (esperar a que el usuario termine de escribir)
+    let debounceTimeout;
+    productoFilter.addEventListener('input', function() {
+      clearTimeout(debounceTimeout);
+      debounceTimeout = setTimeout(applyFilters, 500);
+    });
+    
+    // Establecer los valores de los filtros desde los parámetros de la URL
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    if (urlParams.has('tipo')) {
+      tipoFilter.value = urlParams.get('tipo');
+    }
+    
+    if (urlParams.has('periodo')) {
+      periodoFilter.value = urlParams.get('periodo');
+    }
+    
+    if (urlParams.has('q')) {
+      productoFilter.value = urlParams.get('q');
+    }
+  });
+</script>
+{% endblock %}
