@@ -145,18 +145,28 @@
   }
   
   .tool-item:hover::before {
-    border-color: var(--accent);
+    border-color: #1a237e; /* Cambiado a azul oscuro para combinar con los iconos */
   }
   
+  /* MODIFICADO: Icono más grande, centrado, fondo azul oscuro y color blanco */
   .tool-icon {
-    width: 48px; /* Icono más grande */
-    height: 48px; /* Icono más grande */
+    width: 60px; /* Aumentado de 48px a 60px */
+    height: 60px; /* Aumentado de 48px a 60px */
     margin-bottom: 18px;
-    color: var(--accent);
+    color: #ffffff; /* Cambiado a blanco */
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 24px; /* Tamaño del icono dentro del contenedor */
+    font-size: 32px; /* Aumentado de 24px a 32px */
+    border-radius: 50%; /* Añadido para hacer un círculo perfecto */
+    background-color: #1a237e; /* Azul oscuro que combina con el rojo */
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1); /* Sombra sutil para dar profundidad */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .tool-item:hover .tool-icon {
+    transform: scale(1.1);
+    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.15);
   }
   
   .tool-name {
@@ -172,6 +182,8 @@
     border-radius: 12px;
     overflow: hidden;
     margin-top: 24px;
+    border: 3px solid #dee2e6; /* Borde más grueso como en productos.html */
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1); /* Sombra sutil como en productos.html */
   }
   
   .products-table {
@@ -183,12 +195,15 @@
     text-align: left;
     padding: 16px 20px;
     font-size: 12px;
-    font-weight: 500;
+    font-weight: 800; /* Aumentado para coincidir con productos.html */
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: var(--text-secondary);
-    background-color: var(--light-background);
-    border-bottom: 1px solid var(--separator);
+    color: #333333; /* Cambiado a un gris oscuro casi negro como en productos.html */
+    background-color: #e0e0e0; /* Gris con tono frío como en productos.html */
+    border-bottom: 2px solid var(--gray-300);
+    text-align: center; /* Centrado como en productos.html */
+    line-height: 1.2; /* Para mejor legibilidad */
+    vertical-align: middle;
   }
   
   .products-table td {
@@ -264,8 +279,9 @@
     text-decoration: none;
     display: inline-flex;
     align-items: center;
-    margin-top: 24px;
     transition: color 0.2s ease;
+    line-height: 1; /* Ajustado para mejorar la alineación vertical */
+    padding: 5px 10px; /* Añadido padding para aumentar el área de clic */
   }
   
   .view-all:hover {
@@ -284,6 +300,11 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 24px;
+  }
+  
+  /* Alineación vertical mejorada para el título y el enlace Ver todos */
+  .section-header h2 {
+    margin: 0; /* Elimina el margen inferior del título para mejorar la alineación */
   }
   
   /* Estado vacío */
@@ -464,7 +485,7 @@
       <h2>Ver y gestionar productos</h2>
       <a href="{{ url_for('ver_productos') }}" class="view-all">
         Ver todos
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-left: 6px; width: 14px; height: 14px;">
           <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </a>

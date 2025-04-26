@@ -9,11 +9,26 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
 <style>
-  /* Variables y configuración general */
+  /* Sistema de Diseño Apple - Adaptado del dashboard_inventario.html */
   :root {
-    --primary: #e52e2e;
-    --primary-light: rgba(229, 46, 46, 0.1);
-    --primary-hover: #c51818;
+    --font-apple: -apple-system, BlinkMacSystemFont, 'SF Pro Text', Helvetica, Arial, sans-serif;
+    
+    /* Colores esenciales */
+    --text-color: #1d1d1f;
+    --text-secondary: #86868b;
+    --background: #ffffff;
+    --light-background: #f5f5f7;
+    --separator: rgba(0, 0, 0, 0.1);
+    --accent: #e52e2e;
+    --accent-hover: #c51818;
+    --accent-light: rgba(229, 46, 46, 0.1);
+    
+    /* Colores de estado */
+    --green: #2ecc71;
+    --orange: #f39c12;
+    --red: #e74c3c;
+    
+    /* Colores adicionales de productos.html */
     --gray-100: #f8f9fa;
     --gray-200: #e9ecef;
     --gray-300: #dee2e6;
@@ -24,63 +39,68 @@
     --gray-800: #343a40;
     --gray-900: #212529;
     --blue: #4285f4;
-    --green: #34a853;
-    --yellow: #fbbc05;
-    --red: #ea4335;
-    --success: #00c851;
-    --info: #33b5e5;
-    --warning: #ffbb33;
-    --danger: #ff3547;
     --excel-green: #217346;
     --excel-green-hover: #1a5c38;
-    --border-radius: 8px;
-    --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
-    --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
-    --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
-    --transition-normal: all 0.2s ease;
   }
 
-  /* Contenedor principal */
-  .products-container {
-    background-color: white;
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow-md);
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-    border: 1px solid var(--gray-200);
+  body {
+    font-family: var(--font-apple);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    line-height: 1.5;
+    color: var(--text-color);
+    background-color: var(--background);
   }
 
-  /* Título de sección - MODIFICADO: TAMAÑO MÁS GRANDE */
-  .section-title {
-    color: #000000 !important;
-    font-size: 2rem !important; /* Aumentado de 1.5rem a 2rem */
-    font-weight: 800;
-    margin-bottom: 1.5rem;
-    padding-bottom: 0.85rem;
-    position: relative;
-    border-bottom: 2px solid var(--gray-200);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+  /* Contenedor principal con estilo Apple */
+  .apple-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 36px 24px;
+  }
+
+  /* Tipografía */
+  h1 {
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+    color: var(--text-color);
   }
   
-  .section-title::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    bottom: -2px;
-    width: 80px;
-    height: 4px;
-    background-color: var(--primary);
-    border-radius: 2px;
+  .page-description {
+    font-size: 17px;
+    color: var(--text-secondary);
+    margin-bottom: 28px;
+    max-width: 600px;
   }
 
-  /* Información de productos mostrados - NUEVO */
-  .products-info {
-    margin-top: 0.75rem;
-    margin-bottom: 1rem;
-    font-size: 0.9rem;
-    color: var(--gray-600);
+  /* Título de sección */
+  .section-title {
+    font-size: 22px;
     font-weight: 500;
+    letter-spacing: -0.01em;
+    margin-bottom: 24px;
+    color: var(--text-color);
+  }
+
+  /* Título de sección con botón de acción */
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  
+  .section-header h2 {
+    margin: 0;
+  }
+
+  /* Información de productos mostrados */
+  .products-info {
+    font-size: 15px;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
   }
 
   /* Botón Excel verde */
@@ -88,32 +108,27 @@
     background-color: var(--excel-green);
     color: white;
     border: none;
-    padding: 0.75rem 1.5rem;
-    border-radius: var(--border-radius);
-    font-weight: 600;
-    transition: var(--transition-normal);
+    padding: 0.75rem 1.25rem;
+    border-radius: 980px; /* Más redondeado, estilo Apple */
+    font-weight: 500;
+    transition: all 0.2s ease;
     display: inline-flex;
     align-items: center;
     gap: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
     font-size: 0.95rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
   
   .btn-excel:hover {
     background-color: var(--excel-green-hover);
     color: white;
     transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-  }
-  
-  .btn-excel i {
-    font-size: 1.2rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
   }
 
   /* Controles de filtro y búsqueda */
   .filter-controls {
-    margin-bottom: 1.5rem;
+    margin-bottom: 24px;
   }
   
   .search-box {
@@ -122,19 +137,21 @@
   
   .search-box input {
     padding: 0.75rem 1rem 0.75rem 3rem;
-    border-radius: var(--border-radius);
-    border: 2px solid var(--gray-300);
+    border-radius: 8px;
+    border: 1px solid var(--gray-300);
     font-size: 1rem;
-    height: 50px;
+    height: 48px;
     width: 100%;
-    transition: var(--transition-normal);
-    font-weight: 500;
+    transition: all 0.2s ease;
+    font-weight: 400;
+    background-color: var(--light-background);
   }
   
   .search-box input:focus {
     box-shadow: 0 0 0 3px rgba(229, 46, 46, 0.15);
-    border-color: var(--primary);
+    border-color: var(--accent);
     outline: none;
+    background-color: white;
   }
   
   .search-box i {
@@ -148,111 +165,88 @@
   
   .filter-select {
     padding: 0.75rem 1rem;
-    border-radius: var(--border-radius);
-    border: 2px solid var(--gray-300);
+    border-radius: 8px;
+    border: 1px solid var(--gray-300);
     font-size: 1rem;
-    height: 50px;
-    transition: var(--transition-normal);
-    font-weight: 500;
-    background-color: white;
-    cursor: pointer;
+    height: 48px;
+    transition: all 0.2s ease;
+    font-weight: 400;
+    background-color: var(--light-background);
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236c757d' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 0.75rem;
+    padding-right: 2.5rem;
   }
   
   .filter-select:focus {
     box-shadow: 0 0 0 3px rgba(229, 46, 46, 0.15);
-    border-color: var(--primary);
+    border-color: var(--accent);
     outline: none;
+    background-color: white;
   }
-  
+
   /* Botones de acción */
   .action-button {
-    border-radius: var(--border-radius);
-    font-size: 1rem;
-    font-weight: 600;
-    height: 50px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    height: 48px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.75rem;
-    transition: var(--transition-normal);
-    border: 2px solid var(--gray-300);
-    background-color: white;
-    color: var(--gray-700);
+    transition: all 0.2s ease;
+    border: 1px solid var(--gray-300);
+    background-color: var(--light-background);
+    color: var(--text-color);
     padding: 0.75rem 1.25rem;
     cursor: pointer;
   }
   
   .action-button:hover {
-    background-color: var(--gray-100);
-    color: var(--gray-900);
-    box-shadow: var(--shadow-sm);
+    background-color: white;
+    color: var(--text-color);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     border-color: var(--gray-400);
+    transform: translateY(-2px);
   }
   
   .action-button i {
-    font-size: 1.1rem;
-  }
-  
-  .btn-columns, .btn-actions {
-    position: relative;
+    font-size: 1rem;
   }
 
-  /* MODIFICADO: Estilo mejorado para el botón de columnas (ahora igual al de acciones) */
-  .action-button.columns-button {
-    background-color: white; /* Igual que los demás botones */
-    border-color: var(--gray-300); /* Igual que los demás botones */
-  }
-  
-  .action-button.columns-button:hover {
-    background-color: var(--gray-100);
-    border-color: var(--gray-400);
-  }
-  
-  .columns-icon {
-    display: inline-flex;
-    flex-direction: column;
-    gap: 2px;
-    margin-right: 8px;
-  }
-  
-  .column-line {
-    width: 6px;
-    height: 2px;
-    background-color: var(--gray-700);
-    border-radius: 1px;
-  }
-
-  /* MODIFICADO: Tabla de productos con borde más grueso */
+  /* Tabla estilizada */
   .products-table-container {
     margin-top: 1.5rem;
-    border-radius: var(--border-radius);
+    border-radius: 12px;
     overflow: hidden;
-    border: 3px solid var(--gray-300); /* Borde aumentado a 3px */
-    box-shadow: var(--shadow-sm);
+    border: 3px solid var(--gray-300);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   }
   
   .products-table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
-    margin-bottom: 0;
   }
   
-  /* MODIFICADO: Encabezados con fondo gris suave y texto negro en negritas */
   .products-table thead th {
-    background-color: #e0e0e0; /* Gris con tono frío, muy sutil */
-    color: #333333; /* Texto negro oscuro */
-    font-weight: 800; /* Texto en negritas más fuerte */
-    font-size: 0.75rem; /* Reducido para acomodar dos líneas */
-    padding: 0.75rem 0.4rem; /* Reducido para encabezados más compactos */
-    border-bottom: 2px solid var(--gray-300);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    white-space: normal; /* Permitir saltos de línea */
     text-align: center;
-    line-height: 1.2; /* Ajustado para mejor legibilidad en dos líneas */
-    height: 60px; /* Altura fija para encabezados de dos líneas */
+    padding: 16px 8px;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #333333;
+    background-color: #e0e0e0;
+    border-bottom: 2px solid var(--gray-300);
+    line-height: 1.2;
     vertical-align: middle;
+    height: 60px;
   }
   
   .products-table tbody td {
@@ -266,47 +260,41 @@
     border-bottom: none;
   }
   
-  /* MODIFICADO: Efecto Zebra con color más oscuro */
   .products-table tbody tr:nth-child(odd) {
     background-color: white;
   }
   
   .products-table tbody tr:nth-child(even) {
-    background-color: #f0f0f0; /* Gris más oscuro para el efecto zebra */
+    background-color: #f0f0f0;
   }
   
   .products-table tbody tr:hover {
     background-color: rgba(229, 46, 46, 0.03);
   }
-  
+
   /* Estilos para celdas específicas */
   .products-table th.text-start,
   .products-table td.text-start {
     text-align: left;
   }
-  
-  .products-table th.text-center,
-  .products-table td.text-center {
-    text-align: center;
-  }
 
   /* Columna con foto de producto */
   .product-img-container {
-    width: 100px;
-    height: 100px;
+    width: 80px;
+    height: 80px;
     margin: 0 auto;
     position: relative;
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     border: 1px solid var(--gray-200);
+    background-color: white;
   }
   
   .product-img {
     width: 100%;
     height: 100%;
     object-fit: contain;
-    background-color: white;
     transition: transform 0.3s ease;
   }
   
@@ -320,8 +308,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: var(--gray-100);
-    color: var(--gray-500);
+    background-color: var(--light-background);
+    color: var(--text-secondary);
     font-size: 1.5rem;
   }
 
@@ -334,9 +322,9 @@
   }
   
   .product-name {
-    font-weight: 700;
-    color: var(--gray-900);
-    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-color);
+    font-size: 1rem;
     margin-bottom: 0.25rem;
   }
   
@@ -345,7 +333,7 @@
     flex-direction: column;
     gap: 0.35rem;
     font-size: 0.9rem;
-    color: var(--gray-600);
+    color: var(--text-secondary);
   }
   
   .product-sku, .product-brand {
@@ -355,12 +343,12 @@
   }
   
   .meta-label {
-    font-weight: 600;
-    color: var(--gray-700);
+    font-weight: 500;
+    color: var(--text-secondary);
     min-width: 50px;
   }
 
-  /* Categoría con tooltip mejorado */
+  /* Categoría con tooltip */
   .category-tooltip {
     position: relative;
     display: inline-block;
@@ -368,11 +356,10 @@
   }
   
   .category-indicator {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     border-radius: 50%;
     display: inline-block;
-    border: 2px solid rgba(255, 255, 255, 0.7);
     box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
     transition: transform 0.2s ease;
   }
@@ -386,7 +373,7 @@
     background-color: var(--gray-800);
     color: white;
     text-align: center;
-    border-radius: 6px;
+    border-radius: 8px;
     padding: 0.5rem 1rem;
     position: absolute;
     z-index: 100;
@@ -396,9 +383,9 @@
     opacity: 0;
     transition: opacity 0.3s, visibility 0.3s;
     white-space: nowrap;
-    font-weight: 600;
+    font-weight: 500;
     font-size: 0.85rem;
-    box-shadow: var(--shadow-md);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     min-width: 120px;
   }
   
@@ -418,72 +405,65 @@
     opacity: 1;
   }
 
-  /* MODIFICADO: Stock como texto simple */
+  /* Stock */
   .stock-value {
-    font-weight: 700;
-    font-size: 1.1rem;
-    color: var(--gray-800);
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--text-color);
   }
   
   .stock-value.zero {
-    color: #e53935; /* Rojo para stock en cero */
+    color: var(--red);
   }
   
   .stock-value.low {
-    color: #ff9800; /* Naranja para stock bajo (opcional) */
+    color: var(--orange);
   }
 
   /* Precio y costo */
   .price-value, .cost-value {
-    font-weight: 700;
-    font-size: 1.1rem;
-    color: var(--gray-800);
-  }
-  
-  .cost-value {
-    color: var(--gray-700);
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--text-color);
   }
 
-  /* MODIFICADO: Estilo para caducidad sin fondo gris */
+  /* Fecha de caducidad */
   .expiry-value {
-    font-weight: 600;
+    font-weight: 500;
     font-size: 0.95rem;
-    color: var(--gray-800);
-    text-align: center;
+    color: var(--text-color);
   }
   
   .expiry-value.soon {
-    color: #e65100;
+    color: var(--orange);
   }
   
   .expiry-value.expired {
-    color: #c62828;
+    color: var(--red);
   }
   
   .expiry-value.far {
-    color: #2e7d32;
+    color: var(--green);
   }
 
-  /* MODIFICADO: Estilo para íconos de ojo (visibilidad) sin círculo */
+  /* Iconos de visibilidad */
   .eye-icon {
     display: inline-block;
     cursor: pointer;
     transition: transform 0.2s ease;
-    font-size: 1.6rem;
+    font-size: 1.5rem;
   }
   
   .eye-icon:hover {
     transform: scale(1.15);
   }
   
-  /* Estilo para el ícono visible (ojo abierto) */
   .eye-icon.visible {
-    color: #2196F3; /* Un azul más combinable */
+    color: #2196F3;
   }
   
-  /* Estilo para el ícono invisible (ojo cerrado) */
   .eye-icon.hidden {
-    color: #9E9E9E; /* Gris */
+    color: #9E9E9E;
   }
 
   /* Iconos de favorito */
@@ -499,14 +479,14 @@
   }
   
   .heart-icon.active {
-    color: red;
+    color: var(--red);
   }
   
   .heart-icon:not(.active) {
-    color: gray;
+    color: var(--gray-500);
   }
 
-  /* MODIFICADO: Nuevo menú de acciones centrado */
+  /* Menú de acciones */
   .actions-menu {
     position: relative;
     display: inline-block;
@@ -514,28 +494,28 @@
   
   .actions-dot {
     cursor: pointer;
-    width: 40px;
-    height: 40px;
-    background-color: #e9ecef;
-    border-radius: 8px;
+    width: 36px;
+    height: 36px;
+    background-color: var(--light-background);
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: bold;
     font-size: 18px;
     transition: all 0.2s;
-    color: #333;
+    color: var(--text-color);
     margin: 0 auto;
-    border: 1px solid #ddd;
+    border: 1px solid var(--gray-300);
   }
   
   .actions-dot:hover {
-    background-color: #ddd;
+    background-color: white;
     transform: translateY(-2px);
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
   }
 
-  /* NUEVO: Modal de acciones centrado */
+  /* Modal de acciones */
   .actions-modal {
     display: none;
     position: fixed;
@@ -547,15 +527,16 @@
     z-index: 1000;
     justify-content: center;
     align-items: center;
+    backdrop-filter: blur(5px);
   }
   
   .actions-modal-content {
     background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
     width: 90%;
     max-width: 600px;
-    max-height: 80vh;
+    max-height: 85vh;
     overflow-y: auto;
     position: relative;
   }
@@ -564,14 +545,14 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem 1.5rem;
+    padding: 1.25rem 1.5rem;
     border-bottom: 1px solid var(--gray-200);
   }
   
   .actions-modal-title {
     font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--gray-900);
+    font-weight: 600;
+    color: var(--text-color);
     margin: 0;
   }
   
@@ -579,7 +560,7 @@
     background: none;
     border: none;
     font-size: 1.5rem;
-    color: var(--gray-700);
+    color: var(--text-secondary);
     cursor: pointer;
     padding: 0.25rem;
     display: flex;
@@ -592,12 +573,12 @@
   }
   
   .actions-modal-close:hover {
-    background-color: var(--gray-100);
-    color: var(--gray-900);
+    background-color: var(--light-background);
+    color: var(--text-color);
   }
   
   .actions-modal-body {
-    padding: 1rem 1.5rem;
+    padding: 1.5rem;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
@@ -605,23 +586,23 @@
   
   .action-item {
     padding: 1rem;
-    border-radius: 6px;
-    background-color: var(--gray-100);
+    border-radius: 10px;
+    background-color: var(--light-background);
     display: flex;
     align-items: center;
     gap: 1rem;
     transition: all 0.2s;
     text-decoration: none;
-    color: var(--gray-700);
-    border: 1px solid var(--gray-200);
+    color: var(--text-color);
+    border: 1px solid transparent;
   }
   
   .action-item:hover {
-    background-color: var(--primary-light);
-    color: var(--primary);
-    border-color: rgba(229, 46, 46, 0.2);
+    background-color: white;
+    color: var(--accent);
+    border-color: var(--accent-light);
     transform: translateY(-2px);
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   }
   
   .action-icon {
@@ -630,76 +611,138 @@
     justify-content: center;
     width: 40px;
     height: 40px;
-    border-radius: 8px;
+    border-radius: 10px;
     background-color: white;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    color: var(--accent);
   }
   
   .action-text {
-    font-weight: 600;
+    font-weight: 500;
     font-size: 0.95rem;
   }
-  
-  /* Responsive para el modal */
-  @media (max-width: 576px) {
-    .actions-modal-body {
-      grid-template-columns: 1fr;
-    }
-  }
 
-  /* Dropdown menus */
-  .dropdown-menu {
+  /* Dropdown menus - Corregido */
+  /* Dropdown menus - CORREGIDO con mejor posicionamiento */
+  #columnDropdown {
     position: absolute;
     top: 100%;
     right: 0;
-    min-width: 200px;
+    width: 250px;
     background-color: white;
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow-lg);
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
     border: 1px solid var(--gray-200);
     z-index: 1000;
-    padding: 0.75rem 0;
-    margin-top: 0.5rem;
+    padding: 10px;
+    display: none;
   }
   
-  .dropdown-menu::before {
-    content: '';
+  #columnDropdown.show {
+    display: block;
+  }
+  
+  /* Estilos específicos para el checkbox del menú de columnas */
+  #columnDropdown .form-check {
+    margin-bottom: 8px;
+    position: relative;
+    padding: 8px 8px 8px 35px;
+    border-radius: 6px;
+  }
+  
+  #columnDropdown .form-check:hover {
+    background-color: #f8f9fa;
+  }
+  
+  #columnDropdown .form-check-input {
     position: absolute;
-    top: -8px;
-    right: 20px;
-    width: 16px;
-    height: 16px;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  
+  #columnDropdown .form-check-label {
+    display: block;
+    cursor: pointer;
+  }
+  
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(5px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Dropdown para acciones masivas - mantener estilo general */
+  #actionsDropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 250px;
     background-color: white;
-    transform: rotate(45deg);
-    border-top: 1px solid var(--gray-200);
-    border-left: 1px solid var(--gray-200);
-    z-index: -1;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--gray-200);
+    z-index: 1000;
+    padding: 10px;
+    display: none;
+  }
+  
+  #actionsDropdown.show {
+    display: block;
+  }
+  
+  /* Mejorar tamaño y visibilidad del selector de categorías */
+  #categoryFilter {
+    font-size: 1rem;
+    height: 52px; /* Aumentar altura */
+    width: 100%; /* Asegurar que tome el ancho completo */
+    padding: 10px 35px 10px 15px; /* Aumentar padding interno */
+  }
+  
+  /* Estilos básicos para selectores */
+  .filter-select {
+    border-radius: 8px;
+    border: 1px solid var(--gray-300);
+    transition: all 0.2s ease;
+    font-weight: 400;
+    background-color: var(--light-background);
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236c757d' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 12px;
+    padding-right: 30px;
   }
   
   .dropdown-item {
-    padding: 0.75rem 1.25rem;
+    padding: 0.75rem 1rem;
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    color: var(--gray-700);
-    font-weight: 500;
+    color: var(--text-color);
+    font-weight: 400;
     transition: background-color 0.2s ease;
     cursor: pointer;
     font-size: 0.95rem;
+    border-radius: 8px;
+    margin-bottom: 2px;
   }
   
   .dropdown-item:hover {
-    background-color: var(--gray-100);
-    color: var(--gray-900);
+    background-color: var(--light-background);
+    color: var(--text-color);
   }
   
   .dropdown-item i {
     font-size: 1rem;
-    color: var(--gray-600);
-  }
-  
-  .dropdown-item:hover i {
-    color: var(--primary);
+    color: var(--accent);
   }
   
   .dropdown-divider {
@@ -709,34 +752,68 @@
   }
   
   .form-check {
-    padding-left: 1.75rem;
-    margin-bottom: 0.5rem;
+    padding: 0.5rem 1rem 0.5rem 2.5rem;
+    position: relative;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
+  }
+  
+  .form-check:hover {
+    background-color: var(--light-background);
   }
   
   .form-check-input {
-    margin-left: -1.75rem;
-    width: 1.25rem;
-    height: 1.25rem;
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
     border: 2px solid var(--gray-400);
+    border-radius: 4px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-color: white;
+    cursor: pointer;
+    vertical-align: middle;
+    transition: all 0.2s ease;
   }
   
   .form-check-input:checked {
-    background-color: var(--primary);
-    border-color: var(--primary);
+    background-color: var(--accent);
+    border-color: var(--accent);
+    position: relative;
+  }
+  
+  .form-check-input:checked::after {
+    content: '';
+    position: absolute;
+    display: block;
+    left: 5px;
+    top: 1px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
   }
   
   .form-check-input:focus {
-    box-shadow: 0 0 0 0.25rem rgba(229, 46, 46, 0.25);
-    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(229, 46, 46, 0.25);
+    border-color: var(--accent);
+    outline: none;
   }
   
   .form-check-label {
-    font-weight: 500;
+    font-weight: 400;
     font-size: 0.95rem;
     cursor: pointer;
+    user-select: none;
   }
-  
-  /* NUEVO: Toast para notificaciones */
+
+  /* Toast para notificaciones */
   .toast-container {
     position: fixed;
     bottom: 20px;
@@ -746,52 +823,62 @@
   
   .toast {
     background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    padding: 15px 20px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+    padding: 16px 20px;
     margin-bottom: 10px;
     display: flex;
-    align-items: center;
-    gap: 10px;
-    opacity: 1;
-    transition: opacity 0.3s ease;
+    align-items: flex-start;
+    gap: 12px;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: slideIn 0.3s forwards;
     max-width: 350px;
+    border-left: 4px solid transparent;
+  }
+  
+  @keyframes slideIn {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
   
   .toast-success {
-    border-left: 4px solid #34a853;
+    border-left-color: var(--green);
   }
   
   .toast-error {
-    border-left: 4px solid #ea4335;
+    border-left-color: var(--red);
   }
   
   .toast-info {
-    border-left: 4px solid #4285f4;
+    border-left-color: var(--blue);
   }
   
   .toast-warning {
-    border-left: 4px solid #fbbc05;
+    border-left-color: var(--orange);
   }
   
   .toast-icon {
     font-size: 20px;
+    flex-shrink: 0;
   }
   
   .toast-success .toast-icon {
-    color: #34a853;
+    color: var(--green);
   }
   
   .toast-error .toast-icon {
-    color: #ea4335;
+    color: var(--red);
   }
   
   .toast-info .toast-icon {
-    color: #4285f4;
+    color: var(--blue);
   }
   
   .toast-warning .toast-icon {
-    color: #fbbc05;
+    color: var(--orange);
   }
   
   .toast-content {
@@ -801,38 +888,68 @@
   .toast-title {
     font-weight: 600;
     margin-bottom: 4px;
+    color: var(--text-color);
   }
   
   .toast-message {
     font-size: 14px;
-    color: var(--gray-700);
+    color: var(--text-secondary);
+    line-height: 1.4;
+  }
+
+  /* Card de productos vacío */
+  .empty-state {
+    padding: 64px 0;
+    text-align: center;
+    background-color: var(--light-background);
+    border-radius: 12px;
   }
   
-  /* NUEVO: Estilos para opciones de selección de categoría con colores */
-  .category-option {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 3px 0;
+  .empty-icon {
+    font-size: 36px;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
   }
   
-  .category-color-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
+  .empty-message {
+    font-size: 17px;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+    max-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .empty-state .button-link {
     display: inline-block;
+    padding: 10px 20px;
+    font-size: 15px;
+    font-weight: 500;
+    text-align: center;
+    border-radius: 980px;
+    background-color: var(--accent);
+    color: white;
+    text-decoration: none;
+    margin-top: 16px;
+    transition: background-color 0.2s ease, transform 0.2s ease;
   }
   
+  .empty-state .button-link:hover {
+    background-color: var(--accent-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
   /* Responsive adjustments */
-  @media (max-width: 768px) {
+  @media (max-width: 991px) {
     .product-img-container {
-      width: 80px;
-      height: 80px;
+      width: 70px;
+      height: 70px;
     }
     
     .products-table thead th,
     .products-table tbody td {
-      padding: 0.75rem 0.5rem;
+      padding: 12px 8px;
     }
     
     .product-name {
@@ -840,26 +957,70 @@
     }
     
     .product-meta {
-      font-size: 0.8rem;
+      font-size: 0.85rem;
     }
     
-    .price-value, .cost-value {
+    .price-value, .cost-value, .stock-value {
       font-size: 0.95rem;
+    }
+    
+    .actions-modal-body {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  @media (max-width: 767px) {
+    .apple-container {
+      padding: 24px 16px;
+    }
+    
+    h1 {
+      font-size: 28px;
+    }
+    
+    .section-title {
+      font-size: 20px;
+    }
+    
+    .products-table thead th {
+      font-size: 10px;
+      padding: 10px 5px;
+    }
+    
+    .products-table tbody td {
+      padding: 8px 5px;
+    }
+    
+    .product-img-container {
+      width: 60px;
+      height: 60px;
+    }
+    
+    .btn-excel {
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
+    }
+    
+    .action-button {
+      font-size: 0.85rem;
+      padding: 0.5rem 1rem;
     }
   }
 </style>
 
-<!-- Contenedor principal con título y botón de Excel -->
-<div class="products-container">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="section-title mb-0">VER Y GESTIONAR PRODUCTOS EXISTENTES</h2>
+<div class="apple-container">
+  <h1>Ver y gestionar productos existentes</h1>
+  <p class="page-description">Revisa, modifica y controla tu inventario completo desde un solo lugar.</p>
+
+  <!-- Controles superiores: botón Excel -->
+  <div class="section-header" style="margin-bottom: 32px;">
+    <div></div> <!-- Elemento vacío para mantener el espacio y la alineación -->
     <button class="btn-excel">
       <i class="fas fa-file-excel"></i>
-      EXPORTAR A EXCEL
+      Exportar a Excel
     </button>
   </div>
   
-  <!-- Controles de filtro, búsqueda y acciones -->
   <div class="row filter-controls g-3">
     <!-- Barra de búsqueda -->
     <div class="col-md-4">
@@ -867,15 +1028,15 @@
         <i class="fas fa-search"></i>
         <input type="text" id="searchInput" placeholder="Buscar por nombre, SKU o marca..." value="{{ termino_busqueda if termino_busqueda else '' }}" class="form-control">
       </div>
-      <!-- NUEVO: Contador de productos -->
+      <!-- Contador de productos -->
       <div class="products-info">
         Mostrando {{ productos|length }} de {{ total_productos if total_productos is defined else 'XX' }} productos
       </div>
     </div>
     
-    <!-- Filtro por categoría MEJORADO con colores -->
-    <div class="col-md-3">
-      <select id="categoryFilter" class="form-select filter-select">
+    <!-- Filtro por categoría -->
+    <div class="col-md-2">
+      <select id="categoryFilter" class="filter-select w-100" style="font-size: 1rem; height: 52px; padding: 12px 30px 12px 15px;">
         <option value="">Todas las categorías</option>
         {% for cat_name, cat_color in [
             ("abarrotes secos", "#FFA500"),
@@ -902,51 +1063,54 @@
             ("suplementos alimenticios", "#DA70D6"),
             ("otros (miscelánea)", "#A9A9A9")
         ] %}
-          <option value="{{ cat_name }}" data-color="{{ cat_color }}" style="background-color: {{ cat_color }}10">
+          <option value="{{ cat_name }}" data-color="{{ cat_color }}">
             {{ cat_name|title }}
           </option>
         {% endfor %}
       </select>
     </div>
     
-    <!-- Control de columnas MODIFICADO -->
+    <!-- Espaciador -->
+    <div class="col-md-1"></div>
+    
+    <!-- Control de columnas -->
     <div class="col-md-2">
-      <div class="btn-columns">
+      <div class="btn-columns position-relative w-100">
         <button class="action-button w-100" id="columnToggleBtn">
           <i class="fas fa-columns"></i>
           Columnas
         </button>
-        <div class="dropdown-menu" id="columnDropdown" style="display: none;">
+        <div class="dropdown-menu" id="columnDropdown" style="position: absolute; top: 100%; right: 0; width: 250px; background: white; border: 1px solid #dee2e6; border-radius: 8px; box-shadow: 0 3px 10px rgba(0,0,0,0.1); padding: 10px; z-index: 1000; display: none;">
           <div class="px-3 py-2">
-            <div class="form-check mb-2">
+            <div class="form-check">
               <input class="form-check-input" type="checkbox" id="colImage" checked>
               <label class="form-check-label" for="colImage">Foto</label>
             </div>
-            <div class="form-check mb-2">
+            <div class="form-check">
               <input class="form-check-input" type="checkbox" id="colProduct" checked>
               <label class="form-check-label" for="colProduct">Producto</label>
             </div>
-            <div class="form-check mb-2">
+            <div class="form-check">
               <input class="form-check-input" type="checkbox" id="colCategory" checked>
               <label class="form-check-label" for="colCategory">Categoría</label>
             </div>
-            <div class="form-check mb-2">
+            <div class="form-check">
               <input class="form-check-input" type="checkbox" id="colStock" checked>
               <label class="form-check-label" for="colStock">Stock</label>
             </div>
-            <div class="form-check mb-2">
+            <div class="form-check">
               <input class="form-check-input" type="checkbox" id="colPrice" checked>
               <label class="form-check-label" for="colPrice">Precio</label>
             </div>
-            <div class="form-check mb-2">
+            <div class="form-check">
               <input class="form-check-input" type="checkbox" id="colCost" checked>
-              <label class="form-check-label" for="colCost">Costo</label>
+              <label class="form-check-label" for="colCost">Último Costo</label>
             </div>
-            <div class="form-check mb-2">
+            <div class="form-check">
               <input class="form-check-input" type="checkbox" id="colExpiry" checked>
               <label class="form-check-label" for="colExpiry">Caducidad</label>
             </div>
-            <div class="form-check mb-2">
+            <div class="form-check">
               <input class="form-check-input" type="checkbox" id="colFav" checked>
               <label class="form-check-label" for="colFav">Favorito</label>
             </div>
@@ -961,12 +1125,12 @@
     
     <!-- Acciones masivas -->
     <div class="col-md-3">
-      <div class="btn-actions">
+      <div class="btn-actions position-relative w-100">
         <button class="action-button w-100" id="bulkActionsBtn">
           <i class="fas fa-cogs"></i>
           Acciones masivas
         </button>
-        <div class="dropdown-menu" id="actionsDropdown" style="display: none;">
+        <div class="dropdown-menu" id="actionsDropdown" style="position: absolute; top: 100%; right: 0; width: 250px; background: white; border: 1px solid #dee2e6; border-radius: 8px; box-shadow: 0 3px 10px rgba(0,0,0,0.1); padding: 10px; z-index: 1000; display: none;">
           <a class="dropdown-item" href="#" id="bulkChangeCategory">
             <i class="fas fa-tag"></i> Cambiar categoría
           </a>
@@ -994,12 +1158,12 @@
     <table class="products-table" id="productsTable">
       <thead>
         <tr>
-          <th style="width: 110px;" class="column-image">FOTO</th>
+          <th style="width: 90px;" class="column-image">FOTO</th>
           <th class="text-start column-product">PRODUCTO</th>
           <th style="width: 80px;" class="column-category">CAT</th>
-          <th style="width: 120px;" class="column-stock">STOCK<br>UNIDADES</th>
+          <th style="width: 110px;" class="column-stock">STOCK<br>UNIDADES</th>
           <th style="width: 110px;" class="column-price">PRECIO<br>POR UNIDAD</th>
-          <th style="width: 110px;" class="column-cost">COSTO<br>POR UNIDAD</th>
+          <th style="width: 110px;" class="column-cost">ÚLTIMO COSTO<br>POR UNIDAD</th>
           <th style="width: 110px;" class="column-expiry">FECHA DE<br>CADUCIDAD</th>
           <th style="width: 70px;" class="column-fav">FAV</th>
           <th style="width: 70px;" class="column-vis">VISIBLE</th>
@@ -1054,7 +1218,7 @@
             </div>
           </td>
           
-          <!-- MODIFICADO: Stock con unidades personalizadas y manejo mejorado para valores None -->
+          <!-- Stock con unidades personalizadas -->
           <td class="column-stock">
             <span class="stock-value {% if p.stock <= 0 %}zero{% elif p.stock < 5 %}low{% endif %}">
               {{ p.stock }} 
@@ -1066,7 +1230,7 @@
             </span>
           </td>
           
-          <!-- Precio con formato mejorado: separadores de miles y sin decimales cuando son 0 -->
+          <!-- Precio con formato -->
           <td class="column-price">
             <span class="price-value">$
               {% if p.precio_venta == p.precio_venta|int %}
@@ -1079,7 +1243,7 @@
             </span>
           </td>
           
-          <!-- Costo con formato mejorado: separadores de miles y sin decimales cuando son 0 -->
+          <!-- Costo con formato -->
           <td class="column-cost">
             <span class="cost-value">$
               {% if p.costo == p.costo|int %}
@@ -1092,7 +1256,7 @@
             </span>
           </td>
           
-          <!-- MODIFICADO: Fecha de caducidad sin fondo y con N/A en lugar de "No definida" -->
+          <!-- Fecha de caducidad -->
           <td class="column-expiry">
             {% if p.has_caducidad and p.metodo_caducidad %}
               <span class="expiry-value">{{ p.metodo_caducidad }}</span>
@@ -1111,7 +1275,7 @@
             </span>
           </td>
           
-          <!-- MODIFICADO: Visibilidad usando iconos de ojo sin círculo -->
+          <!-- Visibilidad -->
           <td class="column-vis">
             <span class="eye-icon {{ 'visible' if p.esta_a_la_venta else 'hidden' }}" 
                  data-product-id="{{ p.id }}" 
@@ -1135,19 +1299,19 @@
   
   <!-- Mensaje si no hay productos -->
   {% if productos|length == 0 %}
-  <div class="alert alert-info mt-4">
-    <div class="d-flex align-items-center">
-      <i class="fas fa-info-circle me-3 fs-4"></i>
-      <div>
-        <p class="fw-medium mb-0">No hay productos que coincidan con los criterios seleccionados.</p>
-        <p class="mb-0 text-muted">Intenta cambiar los filtros o <a href="{{ url_for('nuevo_producto') }}" class="fw-medium">agrega un nuevo producto</a>.</p>
-      </div>
+  <div class="empty-state">
+    <div class="empty-icon">
+      <i class="fas fa-box-open"></i>
     </div>
+    <p class="empty-message">No hay productos que coincidan con los criterios seleccionados.</p>
+    <a href="{{ url_for('nuevo_producto') }}" class="button-link">
+      Agregar producto
+    </a>
   </div>
   {% endif %}
 </div>
 
-<!-- NUEVO: Modal de Acciones Centrado -->
+<!-- Modal de Acciones -->
 <div class="actions-modal" id="actionsModal">
   <div class="actions-modal-content">
     <div class="actions-modal-header">
@@ -1203,8 +1367,8 @@
         </div>
         <span class="action-text">Imprimir etiquetas</span>
       </a>
-      <a href="#" class="action-item" id="actionDelete" style="grid-column: span 2; background-color: #ffebee; color: #e53935; border-color: #ffcdd2;">
-        <div class="action-icon" style="color: #e53935;">
+      <a href="#" class="action-item" id="actionDelete" style="grid-column: span 2; background-color: rgba(231, 76, 60, 0.1); color: var(--red); border-color: rgba(231, 76, 60, 0.2);">
+        <div class="action-icon" style="color: var(--red);">
           <i class="fas fa-trash"></i>
         </div>
         <span class="action-text">Eliminar producto</span>
@@ -1233,10 +1397,8 @@
   </div>
 </div>
 
-<!-- NUEVO: Contenedor para toasts de notificación -->
-<div class="toast-container" id="toastContainer">
-  <!-- Los toasts se generarán dinámicamente aquí -->
-</div>
+<!-- Contenedor para toasts de notificación -->
+<div class="toast-container" id="toastContainer"></div>
 
 <script>
   // Función para cambiar estado de favorito
@@ -1308,7 +1470,7 @@
     });
   }
   
-  // MODIFICADO: Función para cambiar estado de visibilidad
+  // Función para cambiar estado de visibilidad
   function toggleVisibilidad(element) {
     // Obtener ID del producto y estado actual
     const productId = element.getAttribute('data-product-id');
@@ -1418,6 +1580,7 @@
     // Remover después de 3 segundos
     setTimeout(() => {
       toast.style.opacity = '0';
+      toast.style.transform = 'translateY(20px)';
       setTimeout(() => {
         if (container.contains(toast)) {
           container.removeChild(toast);
@@ -1426,75 +1589,28 @@
     }, 3000);
   }
 
+  // Funcionalidad específica para el menú de columnas
   document.addEventListener('DOMContentLoaded', function() {
-    // Inicializar tooltips de Bootstrap si existen
-    try {
-      var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-      var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-      });
-    } catch (e) {
-      console.warn("Bootstrap tooltips no pudieron inicializarse:", e);
-    }
-    
-    // MEJORADO: Añadir colores a las opciones del selector de categorías
-    const categoryFilter = document.getElementById('categoryFilter');
-    if (categoryFilter) {
-      // Guardar las opciones originales
-      const options = Array.from(categoryFilter.options);
-      
-      // Vaciar el select
-      categoryFilter.innerHTML = '';
-      
-      // Agregar las opciones con color
-      options.forEach(option => {
-        const color = option.getAttribute('data-color');
-        
-        // Si es la opción de "Todas las categorías", no necesitamos color
-        if (!option.value) {
-          categoryFilter.appendChild(option);
-          return;
-        }
-        
-        // Crear elemento OPTION con color
-        const newOption = document.createElement('option');
-        newOption.value = option.value;
-        newOption.setAttribute('data-color', color);
-        
-        // Crear un contenedor para el color y el texto
-        const optionContent = document.createElement('span');
-        optionContent.className = 'category-option';
-        
-        // Crear el indicador de color
-        const colorDot = document.createElement('span');
-        colorDot.className = 'category-color-dot';
-        colorDot.style.backgroundColor = color;
-        
-        // Texto de la opción
-        const optionText = document.createTextNode(option.textContent);
-        
-        // Ensamblar (esto solo funciona en algunos navegadores)
-        optionContent.appendChild(colorDot);
-        optionContent.appendChild(optionText);
-        
-        // Como no podemos usar HTML en opciones, simulamos con estilos CSS
-        newOption.style.backgroundColor = color + '10'; // Color con 10% de opacidad
-        newOption.style.borderLeft = '12px solid ' + color;
-        newOption.style.paddingLeft = '8px';
-        newOption.textContent = option.textContent;
-        
-        categoryFilter.appendChild(newOption);
-      });
-    }
-    
-    // Toggle menú de columnas
+    // Toggle menú de columnas - versión directa con estilo en línea
     const columnToggleBtn = document.getElementById('columnToggleBtn');
     const columnDropdown = document.getElementById('columnDropdown');
     
     if (columnToggleBtn && columnDropdown) {
       columnToggleBtn.addEventListener('click', function(e) {
+        e.preventDefault();
         e.stopPropagation();
-        columnDropdown.style.display = columnDropdown.style.display === 'block' ? 'none' : 'block';
+        // Cerrar el otro menú si está abierto
+        const actionsDropdown = document.getElementById('actionsDropdown');
+        if (actionsDropdown) {
+          actionsDropdown.style.display = 'none';
+        }
+        
+        // Mostrar u ocultar este menú
+        if (columnDropdown.style.display === 'block') {
+          columnDropdown.style.display = 'none';
+        } else {
+          columnDropdown.style.display = 'block';
+        }
       });
     }
     
@@ -1504,32 +1620,49 @@
     
     if (bulkActionsBtn && actionsDropdown) {
       bulkActionsBtn.addEventListener('click', function(e) {
+        e.preventDefault();
         e.stopPropagation();
-        actionsDropdown.style.display = actionsDropdown.style.display === 'block' ? 'none' : 'block';
+        // Cerrar el otro menú si está abierto
+        if (columnDropdown) {
+          columnDropdown.style.display = 'none';
+        }
+        
+        // Mostrar u ocultar este menú
+        if (actionsDropdown.style.display === 'block') {
+          actionsDropdown.style.display = 'none';
+        } else {
+          actionsDropdown.style.display = 'block';
+        }
       });
     }
     
     // Cerrar menús cuando se hace clic fuera
     document.addEventListener('click', function(e) {
+      // Cerrar menú de columnas
       if (columnDropdown && columnToggleBtn && !columnToggleBtn.contains(e.target) && !columnDropdown.contains(e.target)) {
         columnDropdown.style.display = 'none';
       }
       
+      // Cerrar menú de acciones
       if (actionsDropdown && bulkActionsBtn && !bulkActionsBtn.contains(e.target) && !actionsDropdown.contains(e.target)) {
         actionsDropdown.style.display = 'none';
       }
     });
     
-    // NUEVO: Funcionalidad del selector de columnas
+    // Funcionalidad del selector de columnas - versión directa
     const columnCheckboxes = document.querySelectorAll('#columnDropdown input[type="checkbox"]');
     columnCheckboxes.forEach(checkbox => {
       checkbox.addEventListener('change', function() {
         const columnName = this.id.replace('col', '').toLowerCase();
-        const columnClass = `.column-${columnName.toLowerCase()}`;
+        const columnClass = '.column-' + columnName;
         const columnElements = document.querySelectorAll(columnClass);
         
         columnElements.forEach(el => {
-          el.style.display = this.checked ? '' : 'none';
+          if (this.checked) {
+            el.style.display = '';
+          } else {
+            el.style.display = 'none';
+          }
         });
       });
     });
@@ -1558,14 +1691,14 @@
       });
     }
     
-    // MEJORADO: Filtro por categoría
+    // Filtro por categoría
+    const categoryFilter = document.getElementById('categoryFilter');
     if (categoryFilter) {
       categoryFilter.addEventListener('change', function() {
         const selectedCategory = this.value.toLowerCase();
         const tableRows = document.querySelectorAll('#productsTable tbody tr');
         
         tableRows.forEach(row => {
-          // Usar el atributo data-category que añadimos a cada fila para una comparación exacta
           const rowCategory = row.getAttribute('data-category') || '';
           
           if (!selectedCategory || rowCategory === selectedCategory) {
@@ -1600,9 +1733,33 @@
     } catch (e) {
       console.warn("Bootstrap modal no pudo inicializarse:", e);
     }
+    
+    // Añadir colores a las opciones del selector de categorías
+    const options = Array.from(categoryFilter.options);
+    categoryFilter.innerHTML = '';
+    
+    options.forEach(option => {
+      const color = option.getAttribute('data-color');
+      const newOption = document.createElement('option');
+      newOption.value = option.value;
+      newOption.setAttribute('data-color', color);
+      
+      if (!option.value) {
+        newOption.textContent = option.textContent;
+        categoryFilter.appendChild(newOption);
+        return;
+      }
+      
+      newOption.style.backgroundColor = color ? color + '10' : '';
+      newOption.style.borderLeft = color ? '8px solid ' + color : '';
+      newOption.style.paddingLeft = color ? '8px' : '';
+      newOption.textContent = option.textContent;
+      
+      categoryFilter.appendChild(newOption);
+    });
   });
   
-  // Función para mostrar confirmación de eliminación
+  // Función para confirmar eliminación
   function confirmDelete(id, name) {
     const deleteProductNameEl = document.getElementById('deleteProductName');
     const confirmDeleteEl = document.getElementById('confirmDelete');
@@ -1620,7 +1777,6 @@
         window.deleteModal.show();
       }
     } catch (e) {
-      // Fallback si el modal de Bootstrap falla
       if (confirm(`¿Estás seguro de que deseas eliminar el producto "${name}"? Esta acción no se puede deshacer.`)) {
         window.location.href = `/eliminar-producto/${id}`;
       }
@@ -1657,14 +1813,42 @@
     
     if (modal) {
       modal.style.display = 'flex';
+      
+      // Añadir animación de entrada
+      modal.querySelector('.actions-modal-content').classList.add('scale-in');
     }
   }
   
   function closeActionsModal() {
     const modal = document.getElementById('actionsModal');
     if (modal) {
-      modal.style.display = 'none';
+      // Añadir animación de salida
+      const content = modal.querySelector('.actions-modal-content');
+      content.style.opacity = '0';
+      content.style.transform = 'scale(0.95)';
+      
+      // Cerrar después de la animación
+      setTimeout(() => {
+        modal.style.display = 'none';
+        content.style.opacity = '';
+        content.style.transform = '';
+      }, 200);
     }
   }
+  
+  // Cerrar modal al hacer clic fuera
+  document.addEventListener('click', function(e) {
+    const modal = document.getElementById('actionsModal');
+    if (modal && e.target === modal) {
+      closeActionsModal();
+    }
+  });
+  
+  // Cerrar modal con tecla Escape
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      closeActionsModal();
+    }
+  });
 </script>
 {% endblock %}
