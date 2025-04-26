@@ -1,0 +1,760 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  Entrada de Mercancía - {{ producto.nombre }}
+{% endblock %}
+
+{% block content %}
+<style>
+  /* Estilos globales */
+  .container {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+  
+  /* Encabezado y navegación */
+  .breadcrumb {
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+  }
+  
+  .breadcrumb-item a {
+    color: #6c757d;
+    text-decoration: none;
+  }
+  
+  .breadcrumb-item a:hover {
+    color: #e52e2e;
+  }
+  
+  .breadcrumb-item.active {
+    color: #212529;
+    font-weight: 600;
+  }
+  
+  .page-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: #212529;
+    border-bottom: 2px solid #e52e2e;
+    padding-bottom: 0.75rem;
+    display: inline-block;
+  }
+  
+  /* Tarjeta de producto */
+  .product-card {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid #dee2e6;
+    background-color: white;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  }
+  
+  .product-img-container {
+    width: 120px;
+    height: 120px;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8f9fa;
+    flex-shrink: 0;
+  }
+  
+  .product-img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+  
+  .product-details {
+    flex: 1;
+  }
+  
+  .product-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #212529;
+  }
+  
+  .product-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .info-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .info-icon {
+    color: #6c757d;
+    width: 16px;
+    text-align: center;
+  }
+  
+  .info-label {
+    font-size: 0.875rem;
+    color: #6c757d;
+  }
+  
+  .info-value {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #212529;
+  }
+  
+  .badge-stock {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  
+  .badge-high {
+    background-color: #d4edda;
+    color: #155724;
+  }
+  
+  .badge-medium {
+    background-color: #fff3cd;
+    color: #856404;
+  }
+  
+  .badge-low {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
+  
+  /* Formulario de entrada */
+  .form-container {
+    background-color: white;
+    border-radius: 0.5rem;
+    border: 1px solid #dee2e6;
+    padding: 1.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    margin-bottom: 2rem;
+  }
+  
+  .form-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: #212529;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .form-title i {
+    color: #28a745;
+  }
+  
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+  
+  .form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #495057;
+  }
+  
+  .form-control {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 0.375rem;
+    border: 1px solid #ced4da;
+    font-size: 1rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  }
+  
+  .form-control:focus {
+    border-color: #e52e2e;
+    box-shadow: 0 0 0 0.25rem rgba(229, 46, 46, 0.25);
+  }
+  
+  .form-select {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 0.375rem;
+    border: 1px solid #ced4da;
+    font-size: 1rem;
+    background-color: white;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  }
+  
+  .form-select:focus {
+    border-color: #e52e2e;
+    box-shadow: 0 0 0 0.25rem rgba(229, 46, 46, 0.25);
+  }
+  
+  .form-text {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-top: 0.25rem;
+  }
+  
+  .form-check {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .form-check-input {
+    width: 1rem;
+    height: 1rem;
+  }
+  
+  .form-check-label {
+    font-size: 0.9rem;
+  }
+  
+  .input-group {
+    display: flex;
+    align-items: center;
+  }
+  
+  .input-group-text {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem 0 0 0.375rem;
+    background-color: #e9ecef;
+    font-size: 1rem;
+    border-right: none;
+  }
+  
+  .input-group .form-control {
+    border-radius: 0 0.375rem 0.375rem 0;
+  }
+  
+  .auto-generated {
+    background-color: #e9ecef;
+    cursor: not-allowed;
+  }
+  
+  /* Botones */
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+  
+  .btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.375rem;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.15s ease-in-out;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+  
+  .btn-primary {
+    background-color: #28a745;
+    color: white;
+    border: none;
+  }
+  
+  .btn-primary:hover {
+    background-color: #218838;
+  }
+  
+  .btn-secondary {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+  }
+  
+  .btn-secondary:hover {
+    background-color: #5a6268;
+  }
+  
+  .btn-outline {
+    background-color: white;
+    border: 1px solid #dee2e6;
+    color: #495057;
+  }
+  
+  .btn-outline:hover {
+    background-color: #f8f9fa;
+  }
+  
+  /* Historial */
+  .history-container {
+    margin-top: 2rem;
+  }
+  
+  .history-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #212529;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .history-title i {
+    color: #6c757d;
+  }
+  
+  .history-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .history-table th {
+    padding: 0.75rem 1rem;
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: #495057;
+  }
+  
+  .history-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #dee2e6;
+    font-size: 0.875rem;
+    color: #212529;
+  }
+  
+  .history-table tbody tr:hover {
+    background-color: #f8f9fa;
+  }
+  
+  .badge {
+    display: inline-block;
+    padding: 0.35rem 0.65rem;
+    font-size: 0.75em;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 0.375rem;
+  }
+  
+  .badge-entrada {
+    background-color: #d4edda;
+    color: #155724;
+  }
+  
+  .badge-salida {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
+  
+  /* Modo oscuro y responsive */
+  @media (prefers-color-scheme: dark) {
+    .product-card,
+    .form-container {
+      background-color: #343a40;
+      border-color: #495057;
+    }
+    
+    .product-title,
+    .form-title,
+    .history-title {
+      color: #f8f9fa;
+    }
+    
+    .info-value {
+      color: #e9ecef;
+    }
+    
+    .form-control,
+    .form-select {
+      background-color: #495057;
+      border-color: #6c757d;
+      color: #f8f9fa;
+    }
+    
+    .form-label {
+      color: #e9ecef;
+    }
+    
+    .form-text {
+      color: #adb5bd;
+    }
+    
+    .input-group-text,
+    .auto-generated {
+      background-color: #495057;
+      border-color: #6c757d;
+      color: #e9ecef;
+    }
+    
+    .btn-outline {
+      background-color: #343a40;
+      border-color: #495057;
+      color: #e9ecef;
+    }
+    
+    .btn-outline:hover {
+      background-color: #495057;
+    }
+    
+    .history-table th {
+      background-color: #343a40;
+      border-bottom-color: #495057;
+      color: #e9ecef;
+    }
+    
+    .history-table td {
+      border-bottom-color: #495057;
+      color: #e9ecef;
+    }
+    
+    .history-table tbody tr:hover {
+      background-color: #495057;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .product-card {
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .product-img-container {
+      width: 100%;
+      height: 180px;
+    }
+    
+    .product-info {
+      grid-template-columns: 1fr;
+    }
+    
+    .form-actions {
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    
+    .btn {
+      width: 100%;
+    }
+  }
+</style>
+
+<div class="container">
+  <!-- Migas de pan -->
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('dashboard_home') }}">Dashboard</a></li>
+      <li class="breadcrumb-item"><a href="{{ url_for('ajuste_stock') }}">Ajuste de Inventario</a></li>
+      <li class="breadcrumb-item active">Entrada - {{ producto.nombre }}</li>
+    </ol>
+  </nav>
+  
+  <h1 class="page-title">Entrada de Mercancía</h1>
+  
+  <!-- Información del producto -->
+  <div class="product-card">
+    <div class="product-img-container">
+      {% if producto.foto %}
+        <img src="{{ url_for('static', filename='uploads/' ~ producto.foto) }}" alt="{{ producto.nombre }}" class="product-img">
+      {% else %}
+        <img src="{{ url_for('static', filename='img/default_product.jpg') }}" alt="Imagen predeterminada" class="product-img">
+      {% endif %}
+    </div>
+    <div class="product-details">
+      <h2 class="product-title">{{ producto.nombre }}</h2>
+      <div class="product-info">
+        <div class="info-item">
+          <i class="fas fa-barcode info-icon"></i>
+          <span class="info-label">Código:</span>
+          <span class="info-value">{{ producto.codigo_barras_externo }}</span>
+        </div>
+        <div class="info-item">
+          <i class="fas fa-layer-group info-icon"></i>
+          <span class="info-label">Stock actual:</span>
+          <span class="info-value">
+            {% if producto.stock <= 0 %}
+              <span class="badge-stock badge-low">Sin stock</span>
+            {% elif producto.stock < 6 %}
+              <span class="badge-stock badge-low">{{ producto.stock }} unidades</span>
+            {% elif producto.stock < 21 %}
+              <span class="badge-stock badge-medium">{{ producto.stock }} unidades</span>
+            {% else %}
+              <span class="badge-stock badge-high">{{ producto.stock }} unidades</span>
+            {% endif %}
+          </span>
+        </div>
+        <div class="info-item">
+          <i class="fas fa-tag info-icon"></i>
+          <span class="info-label">Precio:</span>
+          <span class="info-value">${{ producto.precio_venta|round(2) }}</span>
+        </div>
+        <div class="info-item">
+          <i class="fas fa-dollar-sign info-icon"></i>
+          <span class="info-label">Costo actual:</span>
+          <span class="info-value">${{ producto.costo|round(2) }}</span>
+        </div>
+        <div class="info-item">
+          <i class="fas fa-cubes info-icon"></i>
+          <span class="info-label">Último lote:</span>
+          <span class="info-value">{{ ultimo_lote|default('Sin lotes registrados') }}</span>
+        </div>
+        <div class="info-item">
+          <i class="fas fa-calendar-alt info-icon"></i>
+          <span class="info-label">Fecha última entrada:</span>
+          <span class="info-value">{{ ultima_entrada|default('Sin entradas registradas') }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Formulario de entrada -->
+  <form method="POST" action="{{ url_for('ajuste_entrada', producto_id=producto.id) }}" enctype="multipart/form-data">
+    <div class="form-container">
+      <h3 class="form-title">
+        <i class="fas fa-plus-circle"></i>
+        Registrar Entrada de Mercancía
+      </h3>
+      
+      <div class="row">
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="cantidad" class="form-label">Cantidad a añadir *</label>
+            <input type="number" class="form-control" id="cantidad" name="cantidad" required min="1" value="1">
+            <div class="form-text">Número de unidades que se añadirán al inventario.</div>
+          </div>
+        </div>
+        
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="motivo" class="form-label">Motivo *</label>
+            <select class="form-select" id="motivo" name="motivo" required>
+              <option value="compra">Compra a proveedor</option>
+              <option value="devolucion">Devolución de cliente</option>
+              <option value="ajuste">Ajuste de inventario</option>
+              <option value="transferencia">Transferencia entre sucursales</option>
+              <option value="otro">Otro motivo</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      
+      <div class="row mt-3">
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="numero_lote" class="form-label">Número de lote</label>
+            <input type="text" class="form-control auto-generated" id="numero_lote" name="numero_lote" value="Lote #{{ proximo_lote }}" readonly>
+            <div class="form-text">Generado automáticamente para mantener trazabilidad.</div>
+          </div>
+        </div>
+        
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="costo_unitario" class="form-label">Costo unitario *</label>
+            <div class="input-group">
+              <span class="input-group-text">$</span>
+              <input type="number" class="form-control" id="costo_unitario" name="costo_unitario" step="0.01" min="0" required value="{{ producto.costo|round(2) }}">
+            </div>
+            <div class="form-text">Costo por unidad del producto.</div>
+          </div>
+          
+          <div class="form-check mt-2">
+            <input class="form-check-input" type="checkbox" id="actualizar_costo" name="actualizar_costo" checked>
+            <label class="form-check-label" for="actualizar_costo">
+              Actualizar costo principal del producto
+            </label>
+          </div>
+        </div>
+      </div>
+      
+      <div class="row mt-3">
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="fecha_caducidad" class="form-label">Fecha de caducidad</label>
+            <input type="date" class="form-control" id="fecha_caducidad" name="fecha_caducidad">
+            <div class="form-text">Opcional. Fecha de caducidad del lote.</div>
+          </div>
+        </div>
+        
+        <div class="col-md-6">
+          <div class="form-group">
+            <label for="comprobante" class="form-label">Comprobante</label>
+            <input type="file" class="form-control" id="comprobante" name="comprobante">
+            <div class="form-text">Opcional. Adjunte factura o comprobante de compra.</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-group mt-3">
+        <label for="notas" class="form-label">Notas adicionales</label>
+        <textarea class="form-control" id="notas" name="notas" rows="3"></textarea>
+        <div class="form-text">Información adicional sobre esta entrada.</div>
+      </div>
+      
+      <div class="form-actions">
+        <a href="{{ url_for('ajuste_stock') }}" class="btn btn-outline">
+          <i class="fas fa-times"></i>
+          Cancelar
+        </a>
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-check"></i>
+          Confirmar Entrada
+        </button>
+      </div>
+    </div>
+  </form>
+  
+  <!-- Historial de movimientos -->
+  <div class="history-container">
+    <h3 class="history-title">
+      <i class="fas fa-history"></i>
+      Últimos Movimientos
+    </h3>
+    
+    {% if historial and historial|length > 0 %}
+      <div class="table-responsive">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Tipo</th>
+              <th>Lote</th>
+              <th>Cantidad</th>
+              <th>Costo</th>
+              <th>Motivo</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for mov in historial %}
+              <tr>
+                <td>{{ mov.fecha_movimiento.strftime('%d/%m/%Y') }}</td>
+                <td>
+                  {% if mov.tipo_movimiento == 'ENTRADA' %}
+                    <span class="badge badge-entrada">Entrada</span>
+                  {% else %}
+                    <span class="badge badge-salida">Salida</span>
+                  {% endif %}
+                </td>
+                <td>{{ mov.numero_lote|default('-') }}</td>
+                <td>
+                  {% if mov.tipo_movimiento == 'ENTRADA' %}
+                    +{{ mov.cantidad }}
+                  {% else %}
+                    -{{ mov.cantidad }}
+                  {% endif %}
+                </td>
+                <td>
+                  {% if mov.tipo_movimiento == 'ENTRADA' %}
+                    ${{ mov.costo_unitario|round(2) }}
+                  {% else %}
+                    -
+                  {% endif %}
+                </td>
+                <td>{{ mov.motivo }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="alert alert-info">
+        No hay movimientos registrados para este producto.
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Formato de costo unitario
+    const costoUnitario = document.getElementById('costo_unitario');
+    costoUnitario.addEventListener('change', function() {
+      if (this.value < 0) {
+        this.value = 0;
+      }
+    });
+    
+    // Sugerir fecha de caducidad según el tipo de producto
+    const fechaCaducidad = document.getElementById('fecha_caducidad');
+    
+    {% if producto.has_caducidad %}
+      // Si el producto tiene configuración de caducidad, sugerir fecha basada en metodo_caducidad
+      let diasCaducidad = 0;
+      {% if producto.metodo_caducidad == '1 día' %}
+        diasCaducidad = 1;
+      {% elif producto.metodo_caducidad == '3 días' %}
+        diasCaducidad = 3;
+      {% elif producto.metodo_caducidad == '1 semana' %}
+        diasCaducidad = 7;
+      {% elif producto.metodo_caducidad == '2 semanas' %}
+        diasCaducidad = 14;
+      {% elif producto.metodo_caducidad == '1 mes' %}
+        diasCaducidad = 30;
+      {% elif producto.metodo_caducidad == '3 meses' %}
+        diasCaducidad = 90;
+      {% elif producto.metodo_caducidad == '6 meses' %}
+        diasCaducidad = 180;
+      {% elif producto.metodo_caducidad == '1 año' %}
+        diasCaducidad = 365;
+      {% elif producto.metodo_caducidad == '2 años' %}
+        diasCaducidad = 730;
+      {% elif producto.metodo_caducidad == 'más de 3 años' %}
+        diasCaducidad = 1095;
+      {% endif %}
+      
+      if (diasCaducidad > 0) {
+        const fechaSugerida = new Date();
+        fechaSugerida.setDate(fechaSugerida.getDate() + diasCaducidad);
+        
+        const yyyy = fechaSugerida.getFullYear();
+        const mm = String(fechaSugerida.getMonth() + 1).padStart(2, '0');
+        const dd = String(fechaSugerida.getDate()).padStart(2, '0');
+        
+        fechaCaducidad.value = `${yyyy}-${mm}-${dd}`;
+      }
+    {% endif %}
+    
+    // Validación del formulario
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(event) {
+      const cantidad = document.getElementById('cantidad');
+      const costoUnitario = document.getElementById('costo_unitario');
+      
+      if (cantidad.value <= 0) {
+        event.preventDefault();
+        alert('La cantidad debe ser mayor que cero.');
+        cantidad.focus();
+        return false;
+      }
+      
+      if (costoUnitario.value < 0) {
+        event.preventDefault();
+        alert('El costo unitario no puede ser negativo.');
+        costoUnitario.focus();
+        return false;
+      }
+      
+      return true;
+    });
+  });
+</script>
+{% endblock %}

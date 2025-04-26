@@ -20,6 +20,8 @@ from flask_migrate import Migrate
 from models import db
 # IMPORTAMOS TAMBIÉN CatalogoGlobal, sin tocar el resto
 from models.models import Empresa, CodigoDisponible, CodigoAsignado, Producto, CatalogoGlobal
+# Importamos los nuevos modelos de inventario
+from models.modelos_inventario import MovimientoInventario, LoteInventario, LoteMovimientoRelacion
 
 # (NUEVO) IMPORTA la función para leer Google Sheets
 from sheets import leer_hoja  # Asegúrate de tener 'sheets.py' con leer_hoja()
@@ -34,6 +36,9 @@ from utils import (
 
 # NUEVO: Importar las funciones del nuevo archivo category_colors.py
 from category_colors import get_category_color, normalize_category
+
+# Importamos el blueprint de ajuste_stock
+from ajuste_stock import init_app as init_ajuste_stock
 
 # Integración OPENAI (si la usas para otros fines)
 import openai
@@ -377,6 +382,9 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 db.init_app(app)
 migrate = Migrate(app, db)
+
+# Inicializar el módulo de ajuste de stock
+init_ajuste_stock(app)
 
 # NUEVO: Filtro Jinja2 para obtener el color de categoría
 @app.template_filter('category_color')
@@ -1342,15 +1350,38 @@ def editar_producto(prod_id):
 @app.route('/eliminar-producto/<int:prod_id>')
 @login_requerido
 def eliminar_producto(prod_id):
-    """Elimina un producto del inventario."""
+    """Elimina un producto del inventario y todos sus datos relacionados."""
     try:
+        # Verificar que el producto existe y pertenece a la empresa actual
         producto = Producto.query.get_or_404(prod_id)
+        
+        if producto.empresa_id != session.get('user_id'):
+            flash('No tienes permiso para eliminar este producto.', 'danger')
+            return redirect(url_for('ver_productos'))
+        
+        # 1. Eliminar las relaciones entre lotes y movimientos
+        LoteMovimientoRelacion.query.filter(
+            LoteMovimientoRelacion.lote_id.in_(
+                db.session.query(LoteInventario.id).filter_by(producto_id=prod_id)
+            )
+        ).delete(synchronize_session=False)
+        
+        # 2. Eliminar todos los movimientos de inventario del producto
+        MovimientoInventario.query.filter_by(producto_id=prod_id).delete()
+        
+        # 3. Eliminar todos los lotes de inventario del producto
+        LoteInventario.query.filter_by(producto_id=prod_id).delete()
+        
+        # 4. Finalmente, eliminar el producto
         db.session.delete(producto)
+        
+        # Confirmar todos los cambios
         db.session.commit()
-        flash('Producto eliminado correctamente', 'success')
+        flash('Producto y todos sus datos relacionados eliminados correctamente', 'success')
     except Exception as e:
         db.session.rollback()
         flash(f'Error al eliminar el producto: {str(e)}', 'danger')
+        print(f"ERROR al eliminar producto y datos relacionados: {str(e)}")
     
     # Esta línea es crucial - asegura que siempre se devuelva una respuesta
     return redirect(url_for('ver_productos'))

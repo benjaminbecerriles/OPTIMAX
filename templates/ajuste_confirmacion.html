@@ -1,0 +1,724 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  Confirmación de Ajuste - {{ producto.nombre }}
+{% endblock %}
+
+{% block content %}
+<style>
+  /* Estilos globales */
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  
+  /* Encabezado y navegación */
+  .breadcrumb {
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+  }
+  
+  .breadcrumb-item a {
+    color: #6c757d;
+    text-decoration: none;
+  }
+  
+  .breadcrumb-item a:hover {
+    color: #e52e2e;
+  }
+  
+  .breadcrumb-item.active {
+    color: #212529;
+    font-weight: 600;
+  }
+  
+  .page-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: #212529;
+    border-bottom: 2px solid #e52e2e;
+    padding-bottom: 0.75rem;
+    display: inline-block;
+  }
+  
+  /* Contenedor de confirmación */
+  .confirmation-container {
+    background-color: white;
+    border-radius: 0.5rem;
+    border: 1px solid #dee2e6;
+    overflow: hidden;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    margin-bottom: 2rem;
+  }
+  
+  .confirmation-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #dee2e6;
+    background-color: #f8f9fa;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .header-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+  }
+  
+  .header-icon.success {
+    background-color: #d4edda;
+    color: #28a745;
+  }
+  
+  .header-content {
+    flex: 1;
+  }
+  
+  .header-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+    color: #212529;
+  }
+  
+  .header-subtitle {
+    font-size: 0.9rem;
+    color: #6c757d;
+  }
+  
+  .confirmation-body {
+    padding: 1.5rem;
+  }
+  
+  /* Tarjeta de producto */
+  .product-card {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid #dee2e6;
+    background-color: white;
+  }
+  
+  .product-img-container {
+    width: 80px;
+    height: 80px;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8f9fa;
+    flex-shrink: 0;
+  }
+  
+  .product-img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+  
+  .product-details {
+    flex: 1;
+  }
+  
+  .product-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #212529;
+  }
+  
+  .product-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+  }
+  
+  .info-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+  }
+  
+  .info-icon {
+    color: #6c757d;
+    width: 16px;
+    text-align: center;
+  }
+  
+  /* Tabla de detalles */
+  .details-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.5rem;
+  }
+  
+  .details-table th {
+    padding: 0.75rem 1rem;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: #495057;
+  }
+  
+  .details-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #dee2e6;
+    font-size: 0.875rem;
+    color: #212529;
+  }
+  
+  .details-table tbody tr:hover {
+    background-color: #f8f9fa;
+  }
+  
+  .details-table .value-col {
+    font-weight: 600;
+  }
+  
+  /* Resumen */
+  .summary-container {
+    background-color: #f8f9fa;
+    border-radius: 0.5rem;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid #dee2e6;
+  }
+  
+  .summary-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #212529;
+  }
+  
+  .summary-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+  }
+  
+  .summary-label {
+    color: #6c757d;
+  }
+  
+  .summary-value {
+    font-weight: 600;
+    color: #212529;
+  }
+  
+  .summary-total {
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid #dee2e6;
+    font-weight: 700;
+    font-size: 1.1rem;
+  }
+  
+  /* Botones */
+  .actions-container {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+  
+  .btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.375rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease-in-out;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .btn-primary {
+    background-color: #e52e2e;
+    color: white;
+    border: none;
+  }
+  
+  .btn-primary:hover {
+    background-color: #c51818;
+  }
+  
+  .btn-outline {
+    background-color: white;
+    border: 1px solid #dee2e6;
+    color: #495057;
+  }
+  
+  .btn-outline:hover {
+    background-color: #f8f9fa;
+  }
+  
+  .btn-success {
+    background-color: #28a745;
+    color: white;
+    border: none;
+  }
+  
+  .btn-success:hover {
+    background-color: #218838;
+  }
+  
+  /* Alertas */
+  .alert {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid transparent;
+    border-radius: 0.375rem;
+  }
+  
+  .alert-info {
+    color: #0c5460;
+    background-color: #d1ecf1;
+    border-color: #bee5eb;
+  }
+  
+  .alert-success {
+    color: #155724;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+  }
+  
+  .alert-warning {
+    color: #856404;
+    background-color: #fff3cd;
+    border-color: #ffeeba;
+  }
+  
+  /* Estilo para impresión */
+  .print-header {
+    display: none;
+  }
+  
+  @media print {
+    .breadcrumb, .actions-container, nav, .btn {
+      display: none !important;
+    }
+    
+    .print-header {
+      display: block;
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    
+    .print-header img {
+      height: 60px;
+      margin-bottom: 0.5rem;
+    }
+    
+    .print-header h1 {
+      font-size: 1.25rem;
+      margin-bottom: 0.25rem;
+    }
+    
+    .print-header p {
+      font-size: 0.9rem;
+      color: #6c757d;
+    }
+    
+    .confirmation-container {
+      box-shadow: none;
+      border: none;
+    }
+  }
+  
+  /* Modo oscuro y responsive */
+  @media (prefers-color-scheme: dark) {
+    .confirmation-container,
+    .product-card,
+    .confirmation-body,
+    .btn-outline {
+      background-color: #343a40;
+      border-color: #495057;
+    }
+    
+    .confirmation-header {
+      background-color: #212529;
+      border-color: #495057;
+    }
+    
+    .product-title,
+    .header-title,
+    .summary-title,
+    .summary-value {
+      color: #f8f9fa;
+    }
+    
+    .product-img-container {
+      background-color: #212529;
+    }
+    
+    .header-subtitle,
+    .summary-label {
+      color: #adb5bd;
+    }
+    
+    .details-table th {
+      background-color: #212529;
+      border-color: #495057;
+      color: #e9ecef;
+    }
+    
+    .details-table td {
+      border-color: #495057;
+      color: #e9ecef;
+    }
+    
+    .details-table tbody tr:hover {
+      background-color: #495057;
+    }
+    
+    .summary-container {
+      background-color: #212529;
+      border-color: #495057;
+    }
+    
+    .summary-item {
+      border-color: #495057;
+    }
+    
+    .btn-outline {
+      color: #e9ecef;
+    }
+    
+    .btn-outline:hover {
+      background-color: #495057;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .product-card {
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .product-img-container {
+      width: 100%;
+      height: 160px;
+    }
+    
+    .details-table thead {
+      display: none;
+    }
+    
+    .details-table tbody {
+      display: block;
+    }
+    
+    .details-table tbody tr {
+      display: block;
+      margin-bottom: 0.75rem;
+      border: 1px solid #dee2e6;
+      border-radius: 0.25rem;
+    }
+    
+    .details-table tbody td {
+      display: block;
+      text-align: right;
+      padding: 0.5rem 0.75rem;
+      position: relative;
+      border-bottom: 1px solid #dee2e6;
+    }
+    
+    .details-table tbody td:last-child {
+      border-bottom: none;
+    }
+    
+    .details-table tbody td::before {
+      content: attr(data-label);
+      position: absolute;
+      left: 0.75rem;
+      font-weight: 600;
+      text-align: left;
+    }
+    
+    .actions-container {
+      flex-direction: column;
+    }
+    
+    .btn {
+      width: 100%;
+    }
+  }
+</style>
+
+<div class="container">
+  <!-- Encabezado para impresión -->
+  <div class="print-header">
+    <img src="{{ url_for('static', filename='img/optimaxlogo.png') }}" alt="OptiMax Logo">
+    <h1>Comprobante de Ajuste de Inventario</h1>
+    <p>Fecha: {{ movimiento.fecha_movimiento.strftime('%d/%m/%Y %H:%M') }}</p>
+  </div>
+  
+  <!-- Migas de pan (no se muestran en impresión) -->
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('dashboard_home') }}">Dashboard</a></li>
+      <li class="breadcrumb-item"><a href="{{ url_for('ajuste_stock') }}">Ajuste de Inventario</a></li>
+      <li class="breadcrumb-item active">Confirmación</li>
+    </ol>
+  </nav>
+  
+  <h1 class="page-title">Confirmación de Ajuste</h1>
+  
+  <!-- Contenedor principal -->
+  <div class="confirmation-container">
+    <!-- Encabezado de confirmación -->
+    <div class="confirmation-header">
+      <div class="header-icon success">
+        <i class="fas fa-check"></i>
+      </div>
+      <div class="header-content">
+        <h2 class="header-title">Operación completada con éxito</h2>
+        <p class="header-subtitle">
+          {% if movimiento.tipo_movimiento == 'ENTRADA' %}
+            Se ha registrado correctamente la entrada de mercancía.
+          {% else %}
+            Se ha registrado correctamente la salida de mercancía.
+          {% endif %}
+        </p>
+      </div>
+    </div>
+    
+    <!-- Cuerpo de confirmación -->
+    <div class="confirmation-body">
+      <!-- Información del producto -->
+      <div class="product-card">
+        <div class="product-img-container">
+          {% if producto.foto %}
+            <img src="{{ url_for('static', filename='uploads/' ~ producto.foto) }}" alt="{{ producto.nombre }}" class="product-img">
+          {% else %}
+            <img src="{{ url_for('static', filename='img/default_product.jpg') }}" alt="Imagen predeterminada" class="product-img">
+          {% endif %}
+        </div>
+        <div class="product-details">
+          <h3 class="product-title">{{ producto.nombre }}</h3>
+          <div class="product-info">
+            <div class="info-item">
+              <i class="fas fa-barcode info-icon"></i>
+              <span>{{ producto.codigo_barras_externo }}</span>
+            </div>
+            <div class="info-item">
+              <i class="fas fa-tag info-icon"></i>
+              <span>{{ producto.categoria|title }}</span>
+            </div>
+            <div class="info-item">
+              <i class="fas fa-layer-group info-icon"></i>
+              <span>Stock anterior: {{ stock_anterior }} unidades</span>
+            </div>
+            <div class="info-item">
+              <i class="fas fa-layer-group info-icon"></i>
+              <span>Stock actual: {{ producto.stock }} unidades</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Detalles del movimiento -->
+      <h4 class="summary-title">Detalle del Ajuste</h4>
+      <table class="details-table">
+        <tbody>
+          <tr>
+            <td>ID de Operación</td>
+            <td class="value-col">{{ movimiento.id }}</td>
+          </tr>
+          <tr>
+            <td>Fecha y Hora</td>
+            <td class="value-col">{{ movimiento.fecha_movimiento.strftime('%d/%m/%Y %H:%M') }}</td>
+          </tr>
+          <tr>
+            <td>Tipo de Movimiento</td>
+            <td class="value-col">
+              {% if movimiento.tipo_movimiento == 'ENTRADA' %}
+                <span style="color: #28a745;">Entrada de Mercancía</span>
+              {% else %}
+                <span style="color: #dc3545;">Salida de Mercancía</span>
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <td>Cantidad</td>
+            <td class="value-col">
+              {% if movimiento.tipo_movimiento == 'ENTRADA' %}
+                +{{ movimiento.cantidad }} unidades
+              {% else %}
+                -{{ movimiento.cantidad }} unidades
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <td>Motivo</td>
+            <td class="value-col">{{ movimiento.motivo }}</td>
+          </tr>
+          {% if movimiento.tipo_movimiento == 'ENTRADA' %}
+            <tr>
+              <td>Lote</td>
+              <td class="value-col">{{ movimiento.numero_lote }}</td>
+            </tr>
+            <tr>
+              <td>Costo Unitario</td>
+              <td class="value-col">${{ movimiento.costo_unitario|round(2) }}</td>
+            </tr>
+            {% if movimiento.fecha_caducidad %}
+              <tr>
+                <td>Fecha de Caducidad</td>
+                <td class="value-col">{{ movimiento.fecha_caducidad.strftime('%d/%m/%Y') }}</td>
+              </tr>
+            {% endif %}
+          {% else %}
+            <tr>
+              <td>Método de Descuento</td>
+              <td class="value-col">
+                {% if movimiento.metodo_descuento == 'fifo' %}
+                  FIFO (primero en caducar)
+                {% elif movimiento.metodo_descuento == 'lifo' %}
+                  LIFO (último en entrar)
+                {% else %}
+                  {{ movimiento.metodo_descuento|title }}
+                {% endif %}
+              </td>
+            </tr>
+            <tr>
+              <td>Impacto Financiero</td>
+              <td class="value-col">
+                {% if movimiento.impacto_financiero %}
+                  Registrado como pérdida
+                {% else %}
+                  Sin impacto financiero
+                {% endif %}
+              </td>
+            </tr>
+          {% endif %}
+          {% if movimiento.notas %}
+            <tr>
+              <td>Notas</td>
+              <td class="value-col">{{ movimiento.notas }}</td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+      
+      {% if lotes_afectados and lotes_afectados|length > 0 %}
+        <h4 class="summary-title">Lotes Afectados</h4>
+        <table class="details-table">
+          <thead>
+            <tr>
+              <th>Lote</th>
+              <th>Cantidad</th>
+              {% if movimiento.tipo_movimiento == 'ENTRADA' %}
+                <th>Costo</th>
+              {% endif %}
+              <th>Stock Actual</th>
+              {% if lotes_afectados[0].fecha_caducidad %}
+                <th>Caducidad</th>
+              {% endif %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for lote in lotes_afectados %}
+              <tr>
+                <td data-label="Lote">{{ lote.numero_lote }}</td>
+                <td data-label="Cantidad">
+                  {% if movimiento.tipo_movimiento == 'ENTRADA' %}
+                    +{{ lote.cantidad_afectada }}
+                  {% else %}
+                    -{{ lote.cantidad_afectada }}
+                  {% endif %}
+                </td>
+                {% if movimiento.tipo_movimiento == 'ENTRADA' %}
+                  <td data-label="Costo">${{ lote.costo_unitario|round(2) }}</td>
+                {% endif %}
+                <td data-label="Stock Actual">{{ lote.stock_actual }} unidades</td>
+                {% if lote.fecha_caducidad %}
+                  <td data-label="Caducidad">{{ lote.fecha_caducidad.strftime('%d/%m/%Y') }}</td>
+                {% endif %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% endif %}
+      
+      {% if movimiento.tipo_movimiento == 'ENTRADA' %}
+        <!-- Resumen financiero para entradas -->
+        <div class="summary-container">
+          <h4 class="summary-title">Resumen Financiero</h4>
+          <div class="summary-item">
+            <span class="summary-label">Cantidad</span>
+            <span class="summary-value">{{ movimiento.cantidad }} unidades</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Costo unitario</span>
+            <span class="summary-value">${{ movimiento.costo_unitario|round(2) }}</span>
+          </div>
+          {% if costo_total %}
+            <div class="summary-item summary-total">
+              <span class="summary-label">Costo total</span>
+              <span class="summary-value">${{ costo_total|round(2) }}</span>
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+      
+      <!-- Notas importantes -->
+      {% if movimiento.tipo_movimiento == 'ENTRADA' %}
+        <div class="alert alert-info">
+          <i class="fas fa-info-circle"></i>
+          Se ha actualizado correctamente el inventario. Los cambios se reflejarán en los informes de inventario y financieros.
+        </div>
+      {% else %}
+        {% if movimiento.impacto_financiero %}
+          <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle"></i>
+            Esta operación ha sido registrada como una pérdida y afectará los informes financieros.
+          </div>
+        {% else %}
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i>
+            Esta operación ha sido registrada sin impacto financiero. Solo afectará al inventario.
+          </div>
+        {% endif %}
+      {% endif %}
+      
+      <!-- Acciones -->
+      <div class="actions-container">
+        <button class="btn btn-outline" onclick="window.print()">
+          <i class="fas fa-print"></i>
+          Imprimir
+        </button>
+        <a href="{{ url_for('ajuste_stock') }}" class="btn btn-outline">
+          <i class="fas fa-arrow-left"></i>
+          Volver a Inventario
+        </a>
+        {% if movimiento.tipo_movimiento == 'ENTRADA' %}
+          <a href="{{ url_for('ajuste_entrada', producto_id=producto.id) }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i>
+            Nueva Entrada
+          </a>
+        {% else %}
+          <a href="{{ url_for('ajuste_salida', producto_id=producto.id) }}" class="btn btn-primary">
+            <i class="fas fa-minus"></i>
+            Nueva Salida
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
