@@ -1,4 +1,3 @@
-```html
 {% extends 'dashboard_base.html' %}
 
 {% block title %}Inventario - OptiMax Manage{% endblock %}
@@ -7,656 +6,579 @@
 
 {% block extra_css %}
 <style>
-  /* Tipografía y variables */
+  /* Sistema de Diseño Auténticamente Apple - Perfeccionado */
   :root {
-    --primary: #e52e2e;
-    --primary-light: rgba(229, 46, 46, 0.1);
-    --primary-hover: #c51818;
-    --gray-100: #f8f9fa;
-    --gray-200: #e9ecef;
-    --gray-300: #dee2e6;
-    --gray-600: #6c757d;
-    --gray-700: #495057;
-    --gray-800: #343a40;
-    --gray-900: #212529;
-    --blue: #4285f4;
-    --green: #34a853;
-    --yellow: #fbbc05;
-    --red: #ea4335;
-    --success: #00c851;
-    --info: #33b5e5;
-    --warning: #ffbb33;
-    --danger: #ff3547;
+    --font-apple: -apple-system, BlinkMacSystemFont, 'SF Pro Text', Helvetica, Arial, sans-serif;
+    
+    /* Colores esenciales */
+    --text-color: #1d1d1f;
+    --text-secondary: #86868b;
+    --background: #ffffff;
+    --light-background: #f5f5f7;
+    --separator: rgba(0, 0, 0, 0.1);
+    --accent: #e52e2e;
+    --accent-hover: #c51818;
+    --accent-light: rgba(229, 46, 46, 0.1);
+    
+    /* Colores de estado */
+    --green: #2ecc71;
+    --orange: #f39c12;
+    --red: #e74c3c;
   }
   
-  /* TÍTULOS DE SECCIÓN MEJORADOS - TODOS IGUALES */
-  .section-title {
-    color: #000000 !important;
-    font-size: 1.35rem !important;
-    font-weight: 800;
-    margin-bottom: 1.5rem;
-    padding-bottom: 0.85rem;
-    position: relative;
-    border-bottom: 1px solid var(--gray-200);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+  body {
+    font-family: var(--font-apple);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    line-height: 1.5;
+    color: var(--text-color);
+    background-color: var(--background);
   }
   
-  .section-title::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    bottom: -1px;
-    width: 80px;
-    height: 4px;
-    background-color: var(--primary);
-    border-radius: 2px;
+  /* Tipografía */
+  h1 {
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
   }
   
-  /* Panel de resumen estadístico - VERSIÓN MÁS DISCRETA */
-  .stats-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
+  h2 {
+    font-size: 22px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    margin-bottom: 24px;
+  }
+  
+  .page-description {
+    font-size: 17px;
+    color: var(--text-secondary);
+    margin-bottom: 48px;
+    max-width: 600px;
+  }
+  
+  /* Container para contenido */
+  .apple-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+  
+  /* Secciones con espaciado generoso */
+  .section {
+    margin-bottom: 80px;
+    width: 100%;
+  }
+  
+  /* Grid para tarjetas estadísticas */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 20px;
+    width: 100%;
   }
   
   .stat-card {
-    flex: 1;
-    min-width: 180px;
-    background-color: white;
-    border-radius: 0.5rem;
-    padding: 1rem;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
-    transition: transform 0.2s, box-shadow 0.2s;
-    position: relative;
-    display: flex;
-    align-items: center;
-    border: 1px solid var(--gray-200);
-  }
-  
-  .stat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-  }
-  
-  .stat-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 0.75rem;
-    font-size: 0.9rem;
-  }
-  
-  .stat-content {
-    flex: 1;
+    background-color: var(--light-background);
+    border-radius: 12px;
+    padding: 24px;
+    overflow: hidden;
   }
   
   .stat-number {
-    font-size: 1.4rem; /* Tamaño reducido */
-    font-weight: 600; /* Menos peso */
-    line-height: 1.2;
-    margin-bottom: 0.25rem;
-    color: var(--gray-800); /* Color más suave */
+    font-size: 36px; /* Ajustado para evitar desbordamiento */
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    color: var(--text-color);
+    margin-bottom: 4px;
+    line-height: 1.1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   
   .stat-label {
-    font-size: 0.75rem; /* Tamaño reducido */
-    color: var(--gray-600);
-    font-weight: 500;
+    font-size: 14px;
+    color: var(--text-secondary);
   }
   
-  /* MODIFICACIÓN: Todos los iconos de stats ahora son azules */
-  .stat-icon {
-    background-color: rgba(66, 133, 244, 0.15);
-    color: #4285f4;
-  }
-  
-  /* HERRAMIENTAS EN COLOR ROJO - MODIFICADO */
-  .tools-container {
+  /* Herramientas */
+  .tools-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 1rem;
-    margin-bottom: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 20px;
+    width: 100%;
   }
   
   .tool-item {
-    position: relative;
-    background-color: #e52e2e; /* MODIFICADO: Ahora usa el color rojo del menú */
-    border-radius: 0.75rem;
-    overflow: hidden;
-    transition: var(--transition-normal);
-    height: 100%;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 6px 16px rgba(229, 46, 46, 0.3);
-    border: none;
-    overflow: hidden;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--light-background);
+    border-radius: 12px;
+    padding: 24px;
     text-decoration: none;
-    padding: 1.5rem 1rem; /* MODIFICADO: Padding ajustado */
+    cursor: pointer;
+    text-align: center;
+    transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .tool-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 12px;
+    border: 2px solid transparent;
+    transition: border-color 0.3s ease;
+    pointer-events: none;
   }
   
   .tool-item:hover {
-    transform: translateY(-5px) scale(1.01);
-    box-shadow: 0 12px 20px rgba(229, 46, 46, 0.4);
-    border-color: var(--gray-300);
-    z-index: 10;
-    background-color: #c51818; /* MODIFICADO: Color rojo más oscuro al pasar el cursor */
+    background-color: #f0f0f2;
+    transform: translateY(-4px);
   }
-
-  /* MODIFICADO: Reorganización del layout para centrar títulos e iconos */
+  
+  .tool-item:hover::before {
+    border-color: var(--accent);
+  }
+  
   .tool-icon {
-    width: 60px;
-    height: 60px;
-    background-color: rgba(255, 255, 255, 0.2);
-    border-radius: 16px;
-    margin: 0 auto 1rem auto; /* MODIFICADO: centrado horizontal */
+    width: 48px; /* Icono más grande */
+    height: 48px; /* Icono más grande */
+    margin-bottom: 18px;
+    color: var(--accent);
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s ease;
-    color: white;
-    font-size: 1.4rem;
+    font-size: 24px; /* Tamaño del icono dentro del contenedor */
   }
   
-  .tool-item:hover .tool-icon {
-    transform: scale(1.1);
-    background-color: rgba(255, 255, 255, 0.3);
+  .tool-name {
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--text-color);
+    text-align: center;
   }
   
-  .tool-label {
-    font-weight: 600;
-    color: white;
-    font-size: 1rem;
-    margin-bottom: 0; /* MODIFICADO: quitado margen inferior */
-    transition: color 0.3s ease;
-    text-align: center; /* MODIFICADO: texto centrado */
-    margin-top: auto; /* MODIFICADO: empujar el título hacia abajo */
+  /* Tabla minimalista */
+  .products-table-container {
+    width: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-top: 24px;
   }
   
-  /* MODIFICADO: Quitadas las descripciones */
-  .tool-description {
-    display: none;
-  }
-  
-  /* Contenedores principales */
-  .dashboard-panel {
-    background-color: white;
-    border-radius: 0.75rem;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-    border: 1px solid var(--gray-200);
-    transition: box-shadow 0.3s ease;
-  }
-  
-  /* Haciendo panel de estadísticas más discreto */
-  .dashboard-panel.stats-panel {
-    box-shadow: 0 2px 6px rgba(0,0,0,0.03);
-    padding: 1.25rem;
-  }
-  
-  .dashboard-panel.stats-panel:hover {
-    box-shadow: 0 3px 8px rgba(0,0,0,0.05);
-  }
-  
-  /* Enfatizando panel de herramientas */
-  .dashboard-panel.tools-panel {
-    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
-    padding: 1.75rem;
-    border: 1px solid rgba(44, 62, 80, 0.1);
-  }
-  
-  .dashboard-panel.tools-panel:hover {
-    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-  }
-  
-  /* Título HERRAMIENTAS en negro - intentando múltiples enfoques */
-  #herramientas-titulo {
-    color: #000000 !important;
-    font-size: 1.35rem !important;
-  }
-  
-  /* Tabla de productos */
   .products-table {
     width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
+    border-collapse: collapse;
   }
   
-  .products-table thead th {
-    background-color: var(--gray-100);
-    color: var(--gray-700);
-    font-weight: 600;
-    font-size: 0.85rem;
-    padding: 0.85rem 1rem;
-    border-bottom: 1px solid var(--gray-200);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-  
-  .products-table tbody td {
-    padding: 1rem;
-    vertical-align: middle;
-    border-bottom: 1px solid var(--gray-200);
-  }
-  
-  .products-table tbody tr:last-child td {
-    border-bottom: none;
-  }
-  
-  .products-table tbody tr:hover {
-    background-color: var(--gray-100);
-  }
-  
-  /* Categoría tag */
-  .category-tag {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.35rem 0.75rem;
-    border-radius: 50rem;
-    font-size: 0.75rem;
+  .products-table th {
+    text-align: left;
+    padding: 16px 20px;
+    font-size: 12px;
     font-weight: 500;
-    letter-spacing: 0.2px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+    background-color: var(--light-background);
+    border-bottom: 1px solid var(--separator);
   }
   
-  /* Panel de título */
-  .page-title-area {
-    margin-bottom: 0.5rem;
+  .products-table td {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--separator);
+    font-size: 15px;
   }
   
-  .page-title {
-    font-size: 1.65rem;
-    font-weight: 700;
-    letter-spacing: -0.5px;
+  .product-cell {
+    display: flex;
+    align-items: center;
   }
   
-  /* Nuevo botón "Ver todos" */
-  .btn-view-all {
-    padding: 0.5rem 0;
-    color: #000000;
-    background-color: transparent;
-    border: none;
-    border-radius: 0;
-    font-weight: 700;
-    font-size: 0.95rem;
-    transition: all 0.2s;
+  .product-image {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    margin-right: 16px;
+    object-fit: cover;
+    background-color: var(--light-background);
+  }
+  
+  .product-info {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .product-name {
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+  
+  .product-sku {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+  
+  /* Badges */
+  .badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  
+  .badge-category {
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  
+  .badge-green {
+    background-color: rgba(46, 204, 113, 0.1);
+    color: var(--green);
+  }
+  
+  .badge-orange {
+    background-color: rgba(243, 156, 18, 0.1);
+    color: var(--orange);
+  }
+  
+  .badge-red {
+    background-color: rgba(231, 76, 60, 0.1);
+    color: var(--red);
+  }
+  
+  /* Ver todos link */
+  .view-all {
+    font-size: 16px;
+    color: var(--accent);
     text-decoration: none;
     display: inline-flex;
     align-items: center;
-    border-bottom: 2px solid #000000;
+    margin-top: 24px;
+    transition: color 0.2s ease;
   }
   
-  .btn-view-all:hover {
-    background-color: transparent;
-    color: var(--primary);
-    border-bottom-color: var(--primary);
+  .view-all:hover {
+    color: var(--accent-hover);
   }
   
-  .btn-view-all i {
-    margin-left: 0.4rem;
-    transition: transform 0.2s;
+  .view-all svg {
+    margin-left: 6px;
+    width: 14px;
+    height: 14px;
   }
   
-  .btn-view-all:hover i {
-    transform: translateX(3px);
-  }
-  
-  /* Mejoras para avisos */
-  .notice-panel {
-    height: 100%;
-    border-radius: 0.75rem;
-    overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    border: 1px solid var(--gray-200);
-    transition: box-shadow 0.2s;
-  }
-  
-  .notice-panel:hover {
-    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-  }
-  
-  /* MODIFICADO: Ahora sigue el mismo estilo que el título "HERRAMIENTAS" */
-  .notice-header {
-    background-color: white;
-    padding: 1rem 1.25rem;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    position: relative;
-    padding-bottom: 0.85rem;
-    border-bottom: 1px solid var(--gray-200);
-  }
-  
-  .notice-title {
-    font-size: 1.35rem !important;
-    font-weight: 800;
-    margin: 0;
-    color: #000000 !important;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-  
-  /* Línea roja para encabezados de notificaciones (igual que section-title) */
-  .notice-header::after {
-    content: '';
-    position: absolute;
-    left: 1.25rem;
-    bottom: -1px;
-    width: 80px;
-    height: 4px;
-    background-color: var(--primary);
-    border-radius: 2px;
-  }
-  
-  /* Quitamos el icono que ya no se necesita con el nuevo diseño */
-  .notice-icon {
-    display: none;
-  }
-  
-  .notice-body {
-    padding: 0;
-  }
-  
-  .notice-empty {
-    text-align: center;
-    padding: 2rem 1rem;
-    color: var(--gray-600);
-  }
-  
-  .notice-empty i {
-    font-size: 2rem;
-    color: var(--gray-400);
-    margin-bottom: 0.75rem;
-  }
-  
-  .notice-item {
+  /* Header de sección con botón */
+  .section-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.85rem 1.25rem;
-    border-bottom: 1px solid var(--gray-200);
-    transition: background-color 0.2s;
+    margin-bottom: 24px;
   }
   
-  .notice-item:last-child {
+  /* Estado vacío */
+  .empty-state {
+    padding: 64px 0;
+    text-align: center;
+    background-color: var(--light-background);
+    border-radius: 12px;
+  }
+  
+  .empty-icon {
+    font-size: 36px;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+  }
+  
+  .empty-message {
+    font-size: 17px;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+    max-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  /* Alertas */
+  .alerts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    width: 100%;
+  }
+  
+  .alert-box {
+    background-color: var(--light-background);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  
+  .alert-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--separator);
+  }
+  
+  .alert-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-color);
+    margin: 0;
+  }
+  
+  .alert-item {
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--separator);
+  }
+  
+  .alert-item:last-child {
     border-bottom: none;
   }
   
-  .notice-item:hover {
-    background-color: var(--gray-100);
+  .alert-content {
+    font-size: 15px;
   }
   
-  .notice-badge {
-    padding: 0.25rem 0.75rem;
-    border-radius: 50rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    background-color: var(--warning);
-    color: white;
-  }
-  
-  /* Botones de acción rápida */
-  .action-button {
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    font-size: 0.875rem;
+  .alert-value {
+    font-size: 14px;
     font-weight: 500;
-    transition: all 0.2s;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
+    color: var(--orange);
   }
   
-  .action-button i {
-    font-size: 0.95rem;
+  /* Enlaces */
+  .button-link {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 15px;
+    font-weight: 500;
+    text-align: center;
+    border-radius: 980px;
+    background-color: var(--accent);
+    color: white;
+    text-decoration: none;
+    margin-top: 16px;
+    transition: background-color 0.2s ease;
+  }
+  
+  .button-link:hover {
+    background-color: var(--accent-hover);
   }
 </style>
 {% endblock %}
 
 {% block page_header %}
-<div class="page-title-area">
-  <h1 class="page-title">INVENTARIO</h1>
-</div>
+<!-- Dejamos vacío para implementar nuestro propio header -->
 {% endblock %}
 
 {% block content %}
-<!-- Panel de estadísticas - TODOS AZULES AHORA -->
-<div class="dashboard-panel stats-panel">
-  <h2 class="section-title">DATOS GENERALES</h2>
-  
-  <div class="stats-container">
-    <!-- Total Productos -->
-    <div class="stat-card">
-      <div class="stat-icon">
-        <i class="fas fa-boxes-stacked"></i>
-      </div>
-      <div class="stat-content">
-        <div class="stat-number">{{ total_productos if total_productos is defined else '21' }}</div>
+<div class="apple-container">
+  <h1>Inventario</h1>
+  <p class="page-description">Gestiona tus productos, stock y precios de manera eficiente.</p>
+
+  <!-- Estadísticas -->
+  <div class="section">
+    <h2>Datos generales</h2>
+    
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-number">{{ total_productos if total_productos is defined else '13' }}</div>
         <div class="stat-label">Total productos</div>
       </div>
-    </div>
-    
-    <!-- Unidades en Stock -->
-    <div class="stat-card">
-      <div class="stat-icon">
-        <i class="fas fa-warehouse"></i>
-      </div>
-      <div class="stat-content">
-        <div class="stat-number">{{ productos|sum(attribute='stock') if productos else '242' }}</div>
+      
+      <div class="stat-card">
+        <div class="stat-number">{{ productos|sum(attribute='stock') if productos else '161' }}</div>
         <div class="stat-label">Unidades en stock</div>
       </div>
-    </div>
-    
-    <!-- Valor del Inventario -->
-    <div class="stat-card">
-      <div class="stat-icon">
-        <i class="fas fa-dollar-sign"></i>
-      </div>
-      <div class="stat-content">
-        <div class="stat-number">{{ '%0.2f'|format((productos|sum(attribute='precio_venta') * productos|sum(attribute='stock'))|float) if productos else '2980956.00' }}</div>
+      
+      <div class="stat-card">
+        {% set valor_total = (productos|sum(attribute='precio_venta') * productos|sum(attribute='stock'))|float if productos else 1965005.00 %}
+        {% set valor_redondeado = valor_total|round(0, 'floor')|int %}
+        <div class="stat-number">${{ '{:,}'.format(valor_redondeado) }}</div>
         <div class="stat-label">Valor del inventario</div>
       </div>
-    </div>
-    
-    <!-- Productos por Agotarse -->
-    <div class="stat-card">
-      <div class="stat-icon">
-        <i class="fas fa-exclamation-triangle"></i>
-      </div>
-      <div class="stat-content">
+      
+      <div class="stat-card">
         <div class="stat-number">{{ productos|selectattr('stock', 'le', 5)|list|length if productos else '1' }}</div>
         <div class="stat-label">Productos por agotarse</div>
       </div>
     </div>
   </div>
-</div>
 
-<!-- Herramientas - AHORA TODAS EN ROJO Y SIN DESCRIPCIONES -->
-<div class="dashboard-panel tools-panel">
-  <!-- Usando span con estilo inline para forzar el color negro -->
-  <h2 class="section-title" id="herramientas-titulo" style="color: #000000 !important;">HERRAMIENTAS</h2>
-  
-  <div class="tools-container">
-    <!-- Registrar producto -->
-    <a href="{{ url_for('nuevo_producto') }}" class="tool-item">
-      <div class="tool-icon">
-        <i class="fas fa-barcode"></i>
-      </div>
-      <h3 class="tool-label">Registrar producto</h3>
-    </a>
+  <!-- Herramientas -->
+  <div class="section">
+    <h2>Herramientas</h2>
     
-    <!-- Modificado: Ajuste de stock (antes "Añadir/restar existencias") -->
-    <a href="{{ url_for('ajuste_stock') }}" class="tool-item">
-      <div class="tool-icon">
-        <i class="fas fa-plus-minus"></i>
+    <div class="tools-grid">
+      <a href="{{ url_for('nuevo_producto') }}" class="tool-item">
+        <div class="tool-icon">
+          <i class="fas fa-barcode"></i>
+        </div>
+        <div class="tool-name">Registrar producto</div>
+      </a>
+      
+      <a href="{{ url_for('ajuste_stock') }}" class="tool-item">
+        <div class="tool-icon">
+          <i class="fas fa-plus-minus"></i>
+        </div>
+        <div class="tool-name">Ajuste de stock</div>
+      </a>
+      
+      <div class="tool-item" onclick="window.location.href='#cambiar-precios'">
+        <div class="tool-icon">
+          <i class="fas fa-tag"></i>
+        </div>
+        <div class="tool-name">Cambiar precios</div>
       </div>
-      <h3 class="tool-label">Ajuste de stock</h3>
-    </a>
-    
-    <!-- Cambiar precios -->
-    <div class="tool-item" onclick="window.location.href='#cambiar-precios'">
-      <div class="tool-icon">
-        <i class="fas fa-tag"></i>
+      
+      <div class="tool-item" onclick="window.location.href='#descuentos'">
+        <div class="tool-icon">
+          <i class="fas fa-percent"></i>
+        </div>
+        <div class="tool-name">Descuentos</div>
       </div>
-      <h3 class="tool-label">Cambiar precios</h3>
-    </div>
-    
-    <!-- Descuentos -->
-    <div class="tool-item" onclick="window.location.href='#descuentos'">
-      <div class="tool-icon">
-        <i class="fas fa-percent"></i>
+      
+      <div class="tool-item" onclick="window.location.href='#ubicacion'">
+        <div class="tool-icon">
+          <i class="fas fa-map-marker-alt"></i>
+        </div>
+        <div class="tool-name">Ubicación</div>
       </div>
-      <h3 class="tool-label">Descuentos</h3>
-    </div>
-    
-    <!-- Ubicación de mis productos -->
-    <div class="tool-item" onclick="window.location.href='#ubicacion'">
-      <div class="tool-icon">
-        <i class="fas fa-map-marker-alt"></i>
-      </div>
-      <h3 class="tool-label">Ubicación</h3>
     </div>
   </div>
-</div>
 
-<!-- Cambio de título y reposicionamiento del botón Ver todos -->
-<div class="dashboard-panel">
-  <h2 class="section-title mb-4">VER Y GESTIONAR PRODUCTOS EXISTENTES</h2>
-  
-  {% if productos and productos|length > 0 %}
-    <div class="table-responsive">
-      <table class="products-table">
-        <thead>
-          <tr>
-            <th style="width: 60px;"></th>
-            <th>Producto</th>
-            <th>Categoría</th>
-            <th>Stock</th>
-            <th>Precio</th>
-            <th>Marca</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for p in productos[:2] %}
-            <tr>
-              <!-- Foto -->
-              <td>
-                {% if p.foto %}
-                  <img src="{{ url_for('static', filename='uploads/' ~ p.foto) }}" class="rounded" alt="{{ p.nombre }}" style="width: 50px; height: 50px; object-fit: cover; border: 1px solid #e9ecef;">
-                {% else %}
-                  <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; border: 1px solid #e9ecef;">
-                    <i class="fas fa-box text-secondary"></i>
-                  </div>
-                {% endif %}
-              </td>
-              
-              <!-- Información del producto -->
-              <td>
-                <div class="d-flex flex-column">
-                  <span class="fw-medium text-dark">{{ p.nombre }}</span>
-                  <small class="text-muted">
-                    {% if p.codigo_barras_externo %}
-                      {{ p.codigo_barras_externo }}
-                    {% else %}
-                      SKU-{{ '%05d' % p.id }}
-                    {% endif %}
-                  </small>
-                </div>
-              </td>
-              
-              <!-- Categoría -->
-              <td>
-                {% set cat_color = p.categoria_color|default('#CCCCCC') %}
-                <div class="category-tag" style="background-color: {{ cat_color }}15; color: {{ cat_color }}; border: 1px solid {{ cat_color }}40;">
-                  <span class="d-inline-block rounded-circle me-1" style="width: 8px; height: 8px; background-color: {{ cat_color }};"></span>
-                  {{ p.categoria|default('Sin categoría')|title }}
-                </div>
-              </td>
-              
-              <!-- Stock -->
-              <td>
-                {% if p.stock <= 0 %}
-                  <span class="badge bg-danger bg-opacity-10 text-danger" style="font-size: 0.8rem; font-weight: 500; padding: 0.35rem 0.75rem;">{{ p.stock }} unidades</span>
-                {% elif p.stock < 5 %}
-                  <span class="badge bg-warning bg-opacity-10 text-warning" style="font-size: 0.8rem; font-weight: 500; padding: 0.35rem 0.75rem;">{{ p.stock }} unidades</span>
-                {% else %}
-                  <span class="badge bg-success bg-opacity-10 text-success" style="font-size: 0.8rem; font-weight: 500; padding: 0.35rem 0.75rem;">{{ p.stock }} unidades</span>
-                {% endif %}
-              </td>
-              
-              <!-- Precio -->
-              <td>
-                <span class="fw-semibold">${{ p.precio_venta|round(2) }}</span>
-              </td>
-              
-              <!-- Marca -->
-              <td>
-                <span>{{ p.marca|default('—') }}</span>
-              </td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    <div class="d-flex justify-content-end mt-3">
-      <a href="{{ url_for('ver_productos') }}" class="btn-view-all">
-        Ver todos <i class="fas fa-arrow-right"></i>
+  <!-- Productos -->
+  <div class="section">
+    <div class="section-header">
+      <h2>Ver y gestionar productos</h2>
+      <a href="{{ url_for('ver_productos') }}" class="view-all">
+        Ver todos
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
       </a>
     </div>
-  {% else %}
-    <div class="alert alert-light border-light">
-      <div class="d-flex align-items-center">
-        <div class="me-3 p-2 rounded-circle" style="background-color: #f8f9fa">
-          <i class="fas fa-info-circle text-primary"></i>
-        </div>
-        <div>
-          <p class="mb-0">No hay productos en tu inventario. <a href="{{ url_for('nuevo_producto') }}" class="fw-medium text-decoration-none">Agrega tu primer producto</a>.</p>
-        </div>
+    
+    {% if productos and productos|length > 0 %}
+      <div class="products-table-container">
+        <table class="products-table">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Categoría</th>
+              <th>Stock</th>
+              <th>Precio</th>
+              <th>Marca</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in productos[:2] %}
+              <tr>
+                <td>
+                  <div class="product-cell">
+                    {% if p.foto %}
+                      <img src="{{ url_for('static', filename='uploads/' ~ p.foto) }}" class="product-image" alt="{{ p.nombre }}">
+                    {% else %}
+                      <div class="product-image" style="display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-box" style="color: var(--text-secondary);"></i>
+                      </div>
+                    {% endif %}
+                    <div class="product-info">
+                      <div class="product-name">{{ p.nombre }}</div>
+                      <div class="product-sku">
+                        {% if p.codigo_barras_externo %}
+                          {{ p.codigo_barras_externo }}
+                        {% else %}
+                          SKU-{{ '%05d' % p.id }}
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                
+                <td>
+                  {% set cat_color = p.categoria_color|default('#6B7280') %}
+                  <span class="badge-category" style="background-color: {{ cat_color }}15; color: {{ cat_color }}; border: 1px solid {{ cat_color }}30;">{{ p.categoria|default('Sin categoría')|title }}</span>
+                </td>
+                
+                <td>
+                  {% if p.stock <= 0 %}
+                    <span class="badge badge-red">{{ p.stock }} unidades</span>
+                  {% elif p.stock < 5 %}
+                    <span class="badge badge-orange">{{ p.stock }} unidades</span>
+                  {% else %}
+                    <span class="badge badge-green">{{ p.stock }} unidades</span>
+                  {% endif %}
+                </td>
+                
+                <td>${{ '{:,.2f}'.format(p.precio_venta) }}</td>
+                
+                <td>{{ p.marca|default('—') }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
-    </div>
-  {% endif %}
-</div>
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-icon">
+          <i class="fas fa-box-open"></i>
+        </div>
+        <p class="empty-message">No hay productos en tu inventario</p>
+        <a href="{{ url_for('nuevo_producto') }}" class="button-link">
+          Agregar producto
+        </a>
+      </div>
+    {% endif %}
+  </div>
 
-<!-- Avisos y Alertas -->
-<div class="row g-4 mb-4">
-  <div class="col-md-6">
-    <div class="notice-panel dashboard-panel">
-      <!-- MODIFICADO: Ahora usa el mismo estilo que los títulos de sección -->
-      <h2 class="section-title">PRODUCTOS POR AGOTARSE</h2>
-      
-      <div class="notice-body">
+  <!-- Alertas -->
+  <div class="section">
+    <div class="alerts-grid">
+      <div class="alert-box">
+        <div class="alert-header">
+          <h3 class="alert-title">Productos por agotarse</h3>
+        </div>
+        
         {% set low_stock = productos|selectattr('stock', 'le', 5)|selectattr('stock', 'gt', 0)|list if productos else [] %}
         {% if low_stock|length > 0 %}
           {% for p in low_stock[:5] %}
-            <div class="notice-item">
-              <span class="text-truncate">{{ p.nombre }}</span>
-              <span class="notice-badge">{{ p.stock }}</span>
+            <div class="alert-item">
+              <div class="alert-content">{{ p.nombre }}</div>
+              <div class="alert-value">{{ p.stock }}</div>
             </div>
           {% endfor %}
         {% else %}
-          <div class="notice-empty">
-            <i class="fas fa-check-circle d-block"></i>
-            <p class="mb-0">No hay productos por agotarse</p>
+          <div class="empty-state" style="padding: 32px 0;">
+            <div class="empty-icon">
+              <i class="fas fa-check-circle"></i>
+            </div>
+            <p class="empty-message">No hay productos por agotarse</p>
           </div>
         {% endif %}
       </div>
-    </div>
-  </div>
-  
-  <div class="col-md-6">
-    <div class="notice-panel dashboard-panel">
-      <!-- MODIFICADO: Ahora usa el mismo estilo que los títulos de sección -->
-      <h2 class="section-title">NOTIFICACIONES</h2>
       
-      <div class="notice-body">
-        <div class="notice-empty">
-          <i class="fas fa-inbox d-block"></i>
-          <p class="mb-0">No hay notificaciones pendientes</p>
+      <div class="alert-box">
+        <div class="alert-header">
+          <h3 class="alert-title">Notificaciones</h3>
+        </div>
+        
+        <div class="empty-state" style="padding: 32px 0;">
+          <div class="empty-icon">
+            <i class="fas fa-bell"></i>
+          </div>
+          <p class="empty-message">No hay notificaciones</p>
         </div>
       </div>
     </div>
@@ -667,25 +589,25 @@
 {% block extra_js %}
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    // Animación para las herramientas (ahora con más énfasis)
+    // Las herramientas ya tienen animaciones de borde rojo en CSS con :hover::before
+    // Ajustes adicionales para mejorar la experiencia del usuario
     const toolItems = document.querySelectorAll('.tool-item');
-    toolItems.forEach((tool, index) => {
-      tool.style.opacity = '0';
-      tool.style.transform = 'translateY(15px)';
-      
-      setTimeout(() => {
-        tool.style.transition = 'all 0.5s ease';
-        tool.style.opacity = '1';
-        tool.style.transform = 'translateY(0)';
-      }, 100 * index);
-    });
     
-    // Forzar el color negro del título HERRAMIENTAS
-    const herramientasTitulo = document.getElementById('herramientas-titulo');
-    if (herramientasTitulo) {
-      herramientasTitulo.style.color = '#000000';
-    }
+    toolItems.forEach(tool => {
+      tool.addEventListener('mousedown', function() {
+        this.style.transform = 'scale(0.98)';
+      });
+      
+      tool.addEventListener('mouseup', function() {
+        this.style.transform = 'translateY(-4px)';
+      });
+      
+      tool.addEventListener('mouseleave', function() {
+        if (this.style.transform === 'scale(0.98)') {
+          this.style.transform = 'translateY(0)';
+        }
+      });
+    });
   });
 </script>
 {% endblock %}
-```
