@@ -342,6 +342,10 @@
     transition: all 0.15s;
   }
   
+  .expiry-option label:hover {
+    background-color: #f0f0f0;
+  }
+  
   .expiry-option input:checked + label {
     background-color: var(--color-primary);
     color: white;
@@ -531,8 +535,8 @@
         <div class="meta-item">
           <div class="meta-label">Última entrada</div>
           <div class="meta-value">
-            {% if ultima_entrada %}
-              {{ ultima_entrada.numero_lote }}
+            {% if ultimo_lote %}
+              {{ ultimo_lote }}
             {% else %}
               Sin lotes registrados
             {% endif %}

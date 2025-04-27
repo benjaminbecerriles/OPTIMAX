@@ -175,14 +175,32 @@ def ajuste_entrada(producto_id):
         is_approved=True
     ).first_or_404()
     
-    # Obtener información de lotes y último movimiento
-    proximo_lote = obtener_proximo_numero_lote(producto_id)
-    
-    # Primero buscar el lote de registro para este producto
+    # Buscar el lote de registro para este producto
     lote_registro = LoteInventario.query.filter_by(
         producto_id=producto_id,
         numero_lote="Lote de Registro"
     ).first()
+    
+    # Si no existe lote de registro, crearlo
+    if not lote_registro and producto.stock > 0:
+        # Crear lote de registro y movimiento inicial
+        try:
+            movimiento, lote = crear_lote_registro(
+                producto=producto,
+                cantidad=producto.stock,
+                costo=producto.costo,
+                fecha_caducidad=producto.fecha_caducidad if producto.has_caducidad else None,
+                usuario_id=empresa_id
+            )
+            db.session.commit()
+            lote_registro = lote
+            print(f"Lote de registro creado para producto {producto_id}")
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error al crear lote de registro: {str(e)}")
+    
+    # Obtener información de lotes y último movimiento
+    proximo_lote = obtener_proximo_numero_lote(producto_id)
     
     # Obtener el último lote (que podría ser el lote de registro si no hay otros)
     ultimo_lote = LoteInventario.query.filter_by(
@@ -194,19 +212,6 @@ def ajuste_entrada(producto_id):
         producto_id=producto_id,
         tipo_movimiento='ENTRADA'
     ).order_by(desc(MovimientoInventario.fecha_movimiento)).first()
-    
-    # Si no hay última entrada pero hay lote de registro, utilizamos la información del lote de registro
-    if not ultima_entrada and lote_registro:
-        # Buscar el movimiento asociado al lote de registro
-        entrada_registro = MovimientoInventario.query.filter_by(
-            producto_id=producto_id,
-            tipo_movimiento='ENTRADA',
-            numero_lote="Lote de Registro"
-        ).first()
-        
-        # Usar este como última entrada si existe
-        if entrada_registro:
-            ultima_entrada = entrada_registro
     
     # Historial de movimientos recientes
     historial = MovimientoInventario.query.filter_by(
@@ -371,6 +376,28 @@ def ajuste_salida(producto_id):
         empresa_id=empresa_id,
         is_approved=True
     ).first_or_404()
+    
+    # Verificar y crear lote de registro si no existe y hay stock
+    lote_registro = LoteInventario.query.filter_by(
+        producto_id=producto_id,
+        numero_lote="Lote de Registro"
+    ).first()
+    
+    if not lote_registro and producto.stock > 0:
+        # Crear lote de registro y movimiento inicial
+        try:
+            movimiento, lote = crear_lote_registro(
+                producto=producto,
+                cantidad=producto.stock,
+                costo=producto.costo,
+                fecha_caducidad=producto.fecha_caducidad if producto.has_caducidad else None,
+                usuario_id=empresa_id
+            )
+            db.session.commit()
+            print(f"Lote de registro creado para producto {producto_id}")
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error al crear lote de registro: {str(e)}")
     
     # Obtener lotes activos y último movimiento
     lotes_activos = obtener_lotes_activos(producto_id)

@@ -38,7 +38,7 @@ from utils import (
 from category_colors import get_category_color, normalize_category
 
 # Importamos el blueprint de ajuste_stock
-from ajuste_stock import init_app as init_ajuste_stock
+from ajuste_stock import init_app as init_ajuste_stock, crear_lote_registro
 
 # Integración OPENAI (si la usas para otros fines)
 import openai
@@ -896,6 +896,22 @@ def agregar_producto():
             # Guardar en la base de datos
             db.session.add(nuevo)
             db.session.commit()
+            
+            # NUEVO: Crear el lote de registro si hay stock inicial
+            if stock_int > 0:
+                try:
+                    movimiento, lote = crear_lote_registro(
+                        producto=nuevo,
+                        cantidad=stock_int,
+                        costo=costo_val,
+                        fecha_caducidad=None,
+                        usuario_id=session['user_id']
+                    )
+                    db.session.commit()
+                    print(f"Lote de registro creado para producto nuevo {nuevo.id}")
+                except Exception as e:
+                    db.session.rollback()
+                    print(f"Error al crear lote de registro: {str(e)}")
             flash('Producto guardado exitosamente', 'success')
             
         except Exception as e:
