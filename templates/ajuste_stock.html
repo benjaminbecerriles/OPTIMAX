@@ -1,48 +1,135 @@
 {% extends 'base.html' %}
 
 {% block title %}
-  Ajuste de Inventario
+  Ajuste de Stock
 {% endblock %}
 
 {% block content %}
 <style>
-  /* Estilos globales */
+  /* Sistema de Diseño Apple - Adaptado del dashboard_inventario.html */
+  :root {
+    --font-apple: -apple-system, BlinkMacSystemFont, 'SF Pro Text', Helvetica, Arial, sans-serif;
+    
+    /* Colores esenciales */
+    --text-color: #1d1d1f;
+    --text-secondary: #86868b;
+    --background: #ffffff;
+    --light-background: #f5f5f7;
+    --separator: rgba(0, 0, 0, 0.1);
+    --accent: #e52e2e;
+    --accent-hover: #c51818;
+    --accent-light: rgba(229, 46, 46, 0.1);
+    
+    /* Colores de estado */
+    --green: #2ecc71;
+    --orange: #f39c12;
+    --red: #e74c3c;
+    --blue: #1a237e;
+    --gray-500: #adb5bd;
+  }
+
+  body {
+    font-family: var(--font-apple);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    line-height: 1.5;
+    color: var(--text-color);
+    background-color: var(--background);
+  }
+
+  /* Contenedor principal con estilo Apple */
   .ajuste-stock-container {
     max-width: 1200px;
     margin: 0 auto;
+    padding: 36px 24px;
+  }
+
+  /* Tipografía */
+  h1 {
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+    color: var(--text-color);
   }
   
+  .page-description {
+    font-size: 17px;
+    color: var(--text-secondary);
+    margin-bottom: 28px;
+    max-width: 600px;
+  }
+
   /* Encabezado de página */
   .page-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 1.5rem;
-    border-bottom: 1px solid #e9ecef;
     padding-bottom: 1rem;
   }
   
   .page-title {
-    font-size: 1.8rem;
-    font-weight: 700;
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
     margin: 0;
-    color: #212529;
+    color: var(--text-color);
   }
   
   .header-actions {
     display: flex;
-    gap: 0.75rem;
+    gap: 1rem;
   }
   
-  /* Filtro y búsqueda */
+  /* Botones con estilo Apple */
+  .btn-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.25rem;
+    border-radius: 980px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+  }
+  
+  .btn-outline {
+    background-color: var(--light-background);
+    color: var(--text-color);
+    border: 1px solid var(--separator);
+  }
+  
+  .btn-outline:hover {
+    background-color: #e8e8e8;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .btn-primary {
+    background-color: var(--accent);
+    color: white;
+  }
+  
+  .btn-primary:hover {
+    background-color: var(--accent-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Filtros y búsqueda con estilo Apple */
   .filters-container {
     display: flex;
     flex-wrap: wrap;
     gap: 1rem;
     margin-bottom: 1.5rem;
-    padding: 1rem;
-    background-color: #f8f9fa;
-    border-radius: 0.5rem;
+    padding: 1.25rem;
+    background-color: var(--light-background);
+    border-radius: 12px;
   }
   
   .filter-item {
@@ -52,15 +139,35 @@
   
   .filter-item select {
     width: 100%;
-    padding: 0.5rem;
-    border-radius: 0.25rem;
-    border: 1px solid #ced4da;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    font-size: 0.95rem;
+    font-family: var(--font-apple);
+    background-color: white;
+    color: var(--text-color);
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236c757d' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 12px;
+    padding-right: 2.5rem;
+    transition: all 0.2s ease;
   }
   
+  .filter-item select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(229, 46, 46, 0.15);
+    outline: none;
+  }
+  
+  /* Busqueda con estilo Apple */
   .search-container {
     display: flex;
-    gap: 0.5rem;
-    margin-bottom: 0.75rem;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
     position: relative;
     align-items: center;
   }
@@ -72,11 +179,21 @@
   
   .search-input input {
     width: 100%;
-    padding: 0.75rem 1rem 0.75rem 2.5rem;
-    border-radius: 0.5rem;
-    border: 1px solid #ced4da;
+    padding: 0.75rem 1rem 0.75rem 3rem;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
     font-size: 1rem;
-    height: 42px;
+    font-family: var(--font-apple);
+    height: 48px;
+    background-color: var(--light-background);
+    transition: all 0.2s ease;
+  }
+  
+  .search-input input:focus {
+    background-color: white;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(229, 46, 46, 0.15);
+    outline: none;
   }
   
   .search-icon {
@@ -84,36 +201,38 @@
     left: 1rem;
     top: 50%;
     transform: translateY(-50%);
-    color: #6c757d;
+    color: var(--text-secondary);
+    font-size: 1rem;
   }
   
   .search-actions {
     display: flex;
     gap: 0.5rem;
-    height: 42px;
   }
   
   .icon-btn {
-    width: 42px;
-    height: 42px;
+    width: 48px;
+    height: 48px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #fff;
-    border: 1px solid #ced4da;
-    border-radius: 0.5rem;
+    background-color: var(--light-background);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
     padding: 0;
   }
   
   .icon-btn:hover {
-    background-color: #f8f9fa;
+    background-color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   }
   
   .icon-btn.scan-active {
-    background-color: #ffe9e9;
-    border-color: #e52e2e;
+    background-color: rgba(229, 46, 46, 0.1);
+    border-color: var(--accent);
     animation: blink 1s infinite;
   }
   
@@ -124,10 +243,42 @@
   }
   
   /* Contador de resultados */
-  .results-counter {
-    font-size: 0.9rem;
-    color: #6c757d;
+  .products-summary {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
     margin-bottom: 1.5rem;
+  }
+  
+  /* Estilos para el corazón exactamente como en productos.html */
+  .heart-icon {
+    font-size: 24px;
+    cursor: pointer;
+    display: inline-block;
+    transition: transform 0.2s ease, color 0.2s ease;
+  }
+  
+  .heart-icon:hover {
+    transform: scale(1.1);
+  }
+  
+  .heart-icon.active {
+    color: var(--red);
+  }
+  
+  .heart-icon:not(.active) {
+    color: var(--gray-500);
+  }
+  
+  /* Contenedor para el checkbox de favoritos */
+  .form-heart-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+  }
+  
+  .form-heart-check-input {
+    display: none;
   }
   
   /* Grid de productos */
@@ -139,17 +290,17 @@
   }
   
   .product-card {
-    border: 1px solid #dee2e6;
-    border-radius: 0.5rem;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
     overflow: hidden;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
     background-color: white;
     position: relative;
   }
   
   .product-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
   }
   
   .product-img-container {
@@ -158,7 +309,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #f8f9fa;
+    background-color: var(--light-background);
     position: relative;
   }
   
@@ -177,41 +328,36 @@
     position: absolute;
     top: 0.75rem;
     right: 0.75rem;
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.25rem;
+    padding: 0.4rem 0.75rem;
+    border-radius: 980px;
     font-size: 0.75rem;
-    font-weight: 600;
-    background-color: #f0f0f0;
-    color: #666666;
-    border: 1px solid #e0e0e0;
+    font-weight: 500;
+    background-color: white;
+    color: var(--text-color);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   }
   
   .product-body {
     padding: 1.25rem;
   }
   
-  /* Importantes estilos de alineación para el contenido de las tarjetas */
   .product-title {
     font-size: 1.1rem;
     font-weight: 600;
-    margin-bottom: 0.5rem;
-    color: #212529;
-    height: 2.6rem;
-    overflow: hidden;
+    margin-bottom: 0.75rem;
+    color: var(--text-color);
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
-    padding-left: 0;
-    margin-left: 0;
+    overflow: hidden;
+    height: 2.6rem;
   }
   
   .product-info {
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
+    gap: 0.5rem;
     margin-bottom: 1rem;
-    padding-left: 0;
-    margin-left: 0;
   }
   
   .product-info-item {
@@ -219,73 +365,72 @@
     align-items: center;
     gap: 0.5rem;
     font-size: 0.875rem;
-    color: #6c757d;
-    text-align: left;
-    padding-left: 0;
-    margin-left: 0;
+    color: var(--text-secondary);
   }
   
   .product-info-icon {
-    min-width: 16px;
     width: 16px;
     text-align: center;
-    flex-shrink: 0;
-    color: #6c757d;
+    color: var(--text-secondary);
   }
   
   .stock-badge {
-    display: inline-block;
-    font-size: 0.75rem;
+    display: inline;
+    font-size: 0.875rem;
     font-weight: 600;
-    color: #333333;
+    color: var(--text-color);
   }
   
   .product-footer {
     display: flex;
-    gap: 0.5rem;
-    margin-top: 1rem;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
   }
   
   .product-btn {
     flex: 1;
-    padding: 0.6rem 0.5rem;
+    padding: 0.75rem 0.5rem;
     text-align: center;
-    border-radius: 0.375rem;
-    font-weight: 600;
+    border-radius: 980px;
+    font-weight: 500;
     font-size: 0.875rem;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
     text-decoration: none;
-    border: none;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.4rem;
+    gap: 0.5rem;
+    border: none;
   }
   
   .btn-entrada {
-    background-color: #e8f5e9;
-    color: #2e7d32;
-    border: 1px solid #c8e6c9;
+    background-color: rgba(46, 204, 113, 0.2);
+    color: #1a7742; /* Más oscuro que var(--green) para mejor contraste */
+    border: 1px solid rgba(46, 204, 113, 0.3);
+    font-weight: 600;
   }
   
   .btn-entrada:hover {
-    background-color: #c8e6c9;
-    box-shadow: 0 2px 4px rgba(46, 125, 50, 0.1);
+    background-color: rgba(46, 204, 113, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(46, 204, 113, 0.25);
   }
   
   .btn-salida {
-    background-color: #ffebee;
-    color: #c62828;
-    border: 1px solid #ffcdd2;
+    background-color: rgba(231, 76, 60, 0.2);
+    color: #c0392b; /* Más oscuro que var(--red) para mejor contraste */
+    border: 1px solid rgba(231, 76, 60, 0.3);
+    font-weight: 600;
   }
   
   .btn-salida:hover {
-    background-color: #ffcdd2;
-    box-shadow: 0 2px 4px rgba(198, 40, 40, 0.1);
+    background-color: rgba(231, 76, 60, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(231, 76, 60, 0.25);
   }
   
-  /* Paginación */
+  /* Paginación con estilo Apple */
   .pagination-container {
     display: flex;
     justify-content: center;
@@ -297,143 +442,166 @@
     list-style: none;
     padding: 0;
     margin: 0;
+    gap: 0.5rem;
   }
   
   .page-item {
-    margin: 0 0.25rem;
+    margin: 0;
   }
   
   .page-link {
-    display: block;
-    padding: 0.5rem 0.75rem;
-    border-radius: 0.25rem;
-    border: 1px solid #dee2e6;
-    color: #e52e2e;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    border-radius: 980px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    color: var(--text-color);
     text-decoration: none;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
+    min-width: 40px;
+    height: 40px;
+    font-size: 0.95rem;
   }
   
   .page-link:hover {
-    background-color: #e9ecef;
+    background-color: var(--light-background);
+    transform: translateY(-2px);
   }
   
   .page-item.active .page-link {
-    background-color: #e52e2e;
+    background-color: var(--accent);
     color: white;
-    border-color: #e52e2e;
+    border-color: var(--accent);
   }
   
   .page-item.disabled .page-link {
-    color: #6c757d;
+    color: var(--text-secondary);
     pointer-events: none;
-    cursor: not-allowed;
+    opacity: 0.5;
   }
   
   .pagination-info {
     text-align: center;
-    color: #6c757d;
+    color: var(--text-secondary);
     font-size: 0.875rem;
-    margin-top: 0.5rem;
-  }
-  
-  /* Estilos para botones con íconos */
-  .btn-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 0.625rem 1.25rem;
-    border-radius: 0.375rem;
-    font-weight: 600;
-    transition: all 0.2s;
-    text-decoration: none;
-    cursor: pointer;
-  }
-  
-  .btn-icon i {
-    font-size: 1rem;
-  }
-  
-  .btn-primary {
-    background-color: #e52e2e;
-    color: white;
-    border: none;
-  }
-  
-  .btn-primary:hover {
-    background-color: #c51818;
-  }
-  
-  .btn-outline {
-    background-color: white;
-    border: 1px solid #dee2e6;
-    color: #495057;
-  }
-  
-  .btn-outline:hover {
-    background-color: #f8f9fa;
+    margin-top: 0.75rem;
   }
   
   /* No Results Message */
   #noResultsMessage {
     display: none;
     text-align: center;
-    padding: 2rem;
-    color: #6c757d;
-    background-color: #f8f9fa;
-    border-radius: 0.5rem;
+    padding: 3rem 2rem;
+    background-color: var(--light-background);
+    border-radius: 12px;
     margin-bottom: 2rem;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
   }
   
-  /* Mensaje de "Mostrando x de y productos" */
-  .products-summary {
-    font-size: 0.9rem;
-    color: #6c757d;
+  #noResultsMessage.visible {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  #noResultsMessage i {
+    font-size: 3rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+  }
+  
+  #noResultsMessage h4 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: var(--text-color);
+  }
+  
+  #noResultsMessage p {
+    font-size: 1rem;
+    color: var(--text-secondary);
     margin-bottom: 1.5rem;
   }
   
-  /* Modo noche y responsividad */
-  @media (prefers-color-scheme: dark) {
-    .product-card {
-      background-color: #343a40;
-      border-color: #495057;
-    }
-    
-    .product-img-container {
-      background-color: #212529;
-    }
-    
-    .product-title {
-      color: #f8f9fa;
-    }
-    
-    .filters-container {
-      background-color: #343a40;
-    }
-    
-    .btn-outline {
-      background-color: #343a40;
-      border-color: #495057;
-      color: #e9ecef;
-    }
-    
-    .btn-outline:hover {
-      background-color: #495057;
-    }
-    
-    .icon-btn {
-      background-color: #343a40;
-      border-color: #495057;
-    }
-    
-    .icon-btn:hover {
-      background-color: #495057;
+  #resetFilters {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    border-radius: 980px;
+    font-weight: 500;
+    background-color: white;
+    color: var(--text-color);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  #resetFilters:hover {
+    background-color: #f0f0f0;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Código adicional para manejo de escáner */
+  #quaggaScanner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 9999;
+    display: none;
+  }
+  
+  #quaggaScanner.active {
+    display: block;
+  }
+  
+  #scanner-container {
+    width: 100%;
+    max-width: 640px;
+    height: 480px;
+    margin: 50px auto;
+    position: relative;
+    border: 3px solid var(--accent);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  
+  #closeScanner {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: var(--text-color);
+    cursor: pointer;
+    z-index: 10000;
+    border: none;
+  }
+  
+  /* Responsive Media Queries */
+  @media (max-width: 992px) {
+    .products-grid {
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     }
   }
   
   @media (max-width: 768px) {
-    .products-grid {
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    .ajuste-stock-container {
+      padding: 24px 16px;
     }
     
     .page-header {
@@ -444,16 +612,27 @@
     
     .header-actions {
       width: 100%;
-      justify-content: space-between;
     }
     
     .filters-container {
       flex-direction: column;
-      gap: 0.75rem;
     }
     
-    .filter-item {
+    .product-card {
+      max-width: 100%;
+    }
+    
+    .product-img-container {
+      height: 160px;
+    }
+    
+    .search-container {
+      flex-direction: column;
+    }
+    
+    .search-actions {
       width: 100%;
+      justify-content: flex-end;
     }
   }
 </style>
@@ -461,13 +640,16 @@
 <div class="ajuste-stock-container">
   <!-- Encabezado con título y acciones -->
   <div class="page-header">
-    <h1 class="page-title">Ajuste de Inventario</h1>
+    <div>
+      <h1 class="page-title">Ajuste de Stock</h1>
+      <p class="page-description">Registra entradas y salidas de mercancía.</p>
+    </div>
     <div class="header-actions">
       <a href="{{ url_for('dashboard_inventario') }}" class="btn-icon btn-outline">
         <i class="fas fa-arrow-left"></i>
         Volver
       </a>
-      <a href="#" class="btn-icon btn-primary" id="btnHistorial">
+      <a href="{{ url_for('historial_movimientos') }}" class="btn-icon btn-primary" id="btnHistorial">
         <i class="fas fa-history"></i>
         Historial
       </a>
@@ -501,11 +683,10 @@
       </select>
     </div>
     <div class="filter-item" style="display: flex; justify-content: center; align-items: center;">
-      <div class="form-check">
-        <input class="form-check-input" type="checkbox" id="favoritosCheck">
-        <label class="form-check-label" for="favoritosCheck">
-          Solo favoritos
-        </label>
+      <div class="form-heart-container">
+        <input class="form-heart-check-input" type="checkbox" id="favoritosCheck">
+        <span class="heart-icon" id="heartIcon">&#9825;</span>
+        <label for="favoritosCheck" style="cursor: pointer; font-size: 0.95rem;">Solo favoritos</label>
       </div>
     </div>
   </div>
@@ -520,8 +701,8 @@
       <button class="icon-btn" id="scanButton" title="Escanear con pistola">
         <img src="{{ url_for('static', filename='img/3.png') }}" alt="Escanear con Lector" style="width: 24px; height: 24px;">
       </button>
-      <!-- Botón de escaneo con cámara -->
-      <button class="icon-btn" id="cameraButton" title="Escanear con cámara" onclick="iniciarEscaneoQuagga()">
+      <!-- Botón de escaneo con cámara - Especificamos directamente la función en el atributo onclick -->
+      <button class="icon-btn" id="cameraButton" title="Escanear con cámara">
         <img src="{{ url_for('static', filename='img/4.png') }}" alt="Escanear con Cámara" style="width: 24px; height: 24px;">
       </button>
     </div>
@@ -534,12 +715,12 @@
   
   <!-- Mensaje de sin resultados -->
   <div id="noResultsMessage">
-    <i class="fas fa-search mb-3" style="font-size: 2rem; color: #adb5bd;"></i>
+    <i class="fas fa-search mb-3"></i>
     <h4>No se encontraron productos</h4>
     <p>Intenta modificar los filtros o la búsqueda</p>
-    <button class="btn-icon btn-outline mt-3" id="resetFilters">
+    <button id="resetFilters">
       <i class="fas fa-sync-alt"></i>
-      Restablecer filtros
+      Restablecer
     </button>
   </div>
   
@@ -567,11 +748,13 @@
             <div class="product-info-item">
               <i class="fas fa-layer-group product-info-icon"></i>
               <span>
-                {% if producto.stock <= 0 %}
-                  <span class="stock-badge">Sin stock</span>
-                {% else %}
-                  <span class="stock-badge">{{ producto.stock }} unidades</span>
-                {% endif %}
+                <span class="stock-badge">
+                  {% if producto.stock <= 0 %}
+                    Sin stock
+                  {% else %}
+                    {{ producto.stock }} unidades
+                  {% endif %}
+                </span>
               </span>
             </div>
             <div class="product-info-item">
@@ -601,15 +784,25 @@
     </ul>
   </div>
   <div class="pagination-info" id="paginationInfo">
-    Mostrando 30 productos por página
+    Mostrando 10 productos por página
   </div>
 </div>
 
+<!-- Contenedor para escáner Quagga -->
+<div id="quaggaScanner">
+  <button id="closeScanner">&times;</button>
+  <div id="scanner-container"></div>
+</div>
+
+<!-- Scripts necesarios -->
 <script src="{{ url_for('static', filename='js/barcode-scanner.js') }}"></script>
+<!-- Incluir Quagga.js para el escáner de códigos de barras con cámara -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     // Variables globales
-    const PRODUCTS_PER_PAGE = 30;
+    const PRODUCTS_PER_PAGE = 10;
     const productCards = document.querySelectorAll('.product-card');
     const totalProducts = productCards.length;
     let currentPage = 1;
@@ -629,11 +822,12 @@
     const visibleCountSpan = document.getElementById('visibleCount');
     const totalCountSpan = document.getElementById('totalCount');
     const scanButton = document.getElementById('scanButton');
+    const cameraButton = document.getElementById('cameraButton');
     
     // Inicializar contador
     totalCountSpan.textContent = totalProducts;
     
-    // Inicializar el escáner de códigos de barras con las opciones correctas
+    // Inicializar el escáner de códigos de barras con pistola
     if (window.initBarcodeScanner) {
       window.initBarcodeScanner('#scanButton', '#searchInput', {
         threshold: 150,
@@ -651,6 +845,167 @@
         searchInput.dispatchEvent(inputEvent);
       }
     }, 100);  // revisar cada 100ms
+    
+    // Implementación de Quagga.js para el escáner de cámara
+    function iniciarEscaneoQuagga() {
+      const scanner = document.getElementById('quaggaScanner');
+      const closeButton = document.getElementById('closeScanner');
+      
+      // Mostrar el escáner
+      scanner.classList.add('active');
+      
+      // Configurar Quagga
+      Quagga.init({
+        inputStream: {
+          name: "Live",
+          type: "LiveStream",
+          target: document.getElementById('scanner-container'),
+          constraints: {
+            width: 640,
+            height: 480,
+            facingMode: "environment" // Usar cámara trasera si está disponible
+          }
+        },
+        locator: {
+          patchSize: "medium",
+          halfSample: true
+        },
+        numOfWorkers: navigator.hardwareConcurrency || 4,
+        decoder: {
+          readers: [
+            "code_128_reader",
+            "ean_reader",
+            "ean_8_reader",
+            "code_39_reader",
+            "code_39_vin_reader",
+            "codabar_reader",
+            "upc_reader",
+            "upc_e_reader",
+            "i2of5_reader"
+          ],
+          debug: {
+            showCanvas: true,
+            showPatches: true,
+            showFoundPatches: true,
+            showSkeleton: true,
+            showLabels: true,
+            showPatchLabels: true,
+            showRemainingPatchLabels: true
+          }
+        },
+        locate: true
+      }, function(err) {
+        if (err) {
+          console.error("Error al iniciar Quagga:", err);
+          alert("No se pudo acceder a la cámara. Verifique los permisos.");
+          scanner.classList.remove('active');
+          return;
+        }
+        
+        // Iniciar Quagga
+        Quagga.start();
+      });
+      
+      // Detectar código de barras
+      Quagga.onDetected(function(result) {
+        if (result && result.codeResult && result.codeResult.code) {
+          const code = result.codeResult.code;
+          console.log("Código detectado:", code);
+          
+          // Detener Quagga y cerrar el escáner
+          Quagga.stop();
+          scanner.classList.remove('active');
+          
+          // Asignar el código al campo de búsqueda y disparar búsqueda
+          if (searchInput) {
+            searchInput.value = code;
+            // Disparar evento de input para activar la búsqueda
+            const inputEvent = new Event('input', { bubbles: true });
+            searchInput.dispatchEvent(inputEvent);
+          }
+        }
+      });
+      
+      // Botón para cerrar el escáner manualmente
+      closeButton.addEventListener('click', function() {
+        Quagga.stop();
+        scanner.classList.remove('active');
+      });
+    }
+    
+    // Asignar el evento de clic al botón de cámara
+    if (cameraButton) {
+      cameraButton.addEventListener('click', function() {
+        iniciarEscaneoQuagga();
+      });
+    }
+    
+    // Al cargar la página, almacenar el orden original de los productos
+    const originalProductOrder = Array.from(document.querySelectorAll('.product-card'));
+    
+    // Función para aplicar el ordenamiento de manera consistente
+    function sortProducts() {
+      const orderValue = orderFilter.value;
+      const productsGridElement = document.querySelector('.products-grid');
+      
+      // Vaciar el contenedor primero
+      while (productsGridElement.firstChild) {
+        productsGridElement.removeChild(productsGridElement.firstChild);
+      }
+      
+      // Crear una copia de los productos filtrados para ordenar
+      let productsToSort = [...filteredProducts];
+      
+      // Ordenar según la opción seleccionada
+      if (orderValue === 'recientes') {
+        // Usar el orden original en que los productos venían del servidor
+        productsToSort.sort((a, b) => {
+          return originalProductOrder.indexOf(a) - originalProductOrder.indexOf(b);
+        });
+      } 
+      else if (orderValue === 'alfabetico') {
+        productsToSort.sort((a, b) => {
+          const titleA = a.querySelector('.product-title').textContent.toLowerCase();
+          const titleB = b.querySelector('.product-title').textContent.toLowerCase();
+          return titleA.localeCompare(titleB);
+        });
+      } 
+      else if (orderValue === 'stock-asc') {
+        productsToSort.sort((a, b) => {
+          const stockA = parseInt(a.getAttribute('data-stock') || '0');
+          const stockB = parseInt(b.getAttribute('data-stock') || '0');
+          return stockA - stockB;
+        });
+      } 
+      else if (orderValue === 'stock-desc') {
+        productsToSort.sort((a, b) => {
+          const stockA = parseInt(a.getAttribute('data-stock') || '0');
+          const stockB = parseInt(b.getAttribute('data-stock') || '0');
+          return stockB - stockA;
+        });
+      } 
+      else if (orderValue === 'precio-asc') {
+        productsToSort.sort((a, b) => {
+          const precioA = parseFloat(a.getAttribute('data-precio') || '0');
+          const precioB = parseFloat(b.getAttribute('data-precio') || '0');
+          return precioA - precioB;
+        });
+      } 
+      else if (orderValue === 'precio-desc') {
+        productsToSort.sort((a, b) => {
+          const precioA = parseFloat(a.getAttribute('data-precio') || '0');
+          const precioB = parseFloat(b.getAttribute('data-precio') || '0');
+          return precioB - precioA;
+        });
+      }
+      
+      // Reordenar físicamente en el DOM
+      productsToSort.forEach(card => {
+        productsGridElement.appendChild(card);
+      });
+      
+      return productsToSort;
+    }
     
     // Función principal para aplicar filtros y paginación
     function applyFiltersAndPagination() {
@@ -692,53 +1047,17 @@
         return matchesSearch && matchesCategoria && matchesStock && matchesFavoritos;
       });
       
-      // Aplicar ordenamiento
-      const orderValue = orderFilter.value;
-      
-      // Usar los elementos originales para ordenar correctamente
-      const productsGridElement = document.querySelector('.products-grid');
-      
-      filteredProducts.sort((a, b) => {
-        if (orderValue === 'alfabetico') {
-          const titleA = a.querySelector('.product-title').textContent.toLowerCase();
-          const titleB = b.querySelector('.product-title').textContent.toLowerCase();
-          return titleA.localeCompare(titleB);
-        } else if (orderValue === 'stock-asc') {
-          const stockA = parseInt(a.getAttribute('data-stock') || '0');
-          const stockB = parseInt(b.getAttribute('data-stock') || '0');
-          return stockA - stockB;
-        } else if (orderValue === 'stock-desc') {
-          const stockA = parseInt(a.getAttribute('data-stock') || '0');
-          const stockB = parseInt(b.getAttribute('data-stock') || '0');
-          return stockB - stockA;
-        } else if (orderValue === 'precio-asc') {
-          const precioA = parseFloat(a.getAttribute('data-precio') || '0');
-          const precioB = parseFloat(b.getAttribute('data-precio') || '0');
-          return precioA - precioB;
-        } else if (orderValue === 'precio-desc') {
-          const precioA = parseFloat(a.getAttribute('data-precio') || '0');
-          const precioB = parseFloat(b.getAttribute('data-precio') || '0');
-          return precioB - precioA;
-        }
-        // Por defecto, recientes (mantenemos el orden original)
-        return 0;
-      });
-      
-      // Para asegurarnos de que el ordenamiento se aplique visualmente, reorganizamos los elementos
-      if (orderValue !== 'recientes') {
-        filteredProducts.forEach(card => {
-          productsGridElement.appendChild(card);
-        });
-      }
+      // Ordenar productos utilizando la función dedicada
+      filteredProducts = sortProducts();
       
       // Actualizar contador de resultados
       visibleCountSpan.textContent = filteredProducts.length;
       
       // Mostrar mensaje de no resultados si es necesario
       if (filteredProducts.length === 0) {
-        noResultsMessage.style.display = 'block';
+        noResultsMessage.classList.add('visible');
       } else {
-        noResultsMessage.style.display = 'none';
+        noResultsMessage.classList.remove('visible');
       }
       
       // Actualizar paginación
@@ -823,7 +1142,9 @@
       if (totalPages <= 1) {
         paginationInfo.textContent = `Mostrando ${totalFilteredProducts} productos`;
       } else {
-        paginationInfo.textContent = `Mostrando ${PRODUCTS_PER_PAGE} productos por página`;
+        const productsOnThisPage = Math.min(PRODUCTS_PER_PAGE, 
+          (currentPage < totalPages) ? PRODUCTS_PER_PAGE : totalFilteredProducts - ((totalPages - 1) * PRODUCTS_PER_PAGE));
+        paginationInfo.textContent = `Mostrando ${productsOnThisPage} productos por página`;
       }
       
       // Ocultar paginación si no hay productos o solo hay una página
@@ -846,6 +1167,33 @@
       }
     }
     
+    // Actualizar el corazón cuando cambia el checkbox
+    const heartIcon = document.getElementById('heartIcon');
+    
+    favoritosCheck.addEventListener('change', function() {
+      currentPage = 1;
+      
+      // Actualizar el estilo del corazón
+      if (this.checked) {
+        heartIcon.innerHTML = '&#9829;'; // Corazón lleno
+        heartIcon.classList.add('active');
+      } else {
+        heartIcon.innerHTML = '&#9825;'; // Corazón vacío
+        heartIcon.classList.remove('active');
+      }
+      
+      applyFiltersAndPagination();
+    });
+    
+    // También permitir hacer clic en el corazón para activar/desactivar
+    heartIcon.addEventListener('click', function() {
+      favoritosCheck.checked = !favoritosCheck.checked;
+      
+      // Disparar el evento change para actualizar todo
+      const event = new Event('change');
+      favoritosCheck.dispatchEvent(event);
+    });
+    
     // Eventos de filtros
     searchInput.addEventListener('input', function() {
       currentPage = 1; // Resetear a la primera página
@@ -862,11 +1210,6 @@
       applyFiltersAndPagination();
     });
     
-    favoritosCheck.addEventListener('change', function() {
-      currentPage = 1;
-      applyFiltersAndPagination();
-    });
-    
     orderFilter.addEventListener('change', function() {
       currentPage = 1;
       applyFiltersAndPagination();
@@ -879,6 +1222,8 @@
       stockFilter.value = '';
       orderFilter.value = 'recientes';
       favoritosCheck.checked = false;
+      heartIcon.innerHTML = '&#9825;'; // Corazón vacío
+      heartIcon.classList.remove('active');
       currentPage = 1;
       applyFiltersAndPagination();
     });
