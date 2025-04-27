@@ -49,7 +49,7 @@ import requests
 SERPAPI_API_KEY = "84d269bfa51876a1a092ace371d89f7dc2500d8c5a61b420c08d96e5351f5c79"
 
 from sqlalchemy import or_
-from datetime import datetime, timedelta
+from datetime import datetime, date, timedelta
 
 # =========================================
 # NUEVO: Conjunto de Categorías con Emojis
@@ -664,6 +664,66 @@ def ver_productos():
     productos = query.all()
     total_productos = Producto.query.filter_by(empresa_id=empresa_id).count()
 
+    # Depuración - verificar que esta parte se ejecuta
+    print(f"Procesando {len(productos)} productos para calcular costos y caducidades")
+    
+    # Calcular costo promedio y días hasta caducidad para cada producto
+    for producto in productos:
+        # Agregar costo_promedio como atributo temporal
+        producto.costo_promedio = producto.costo  # Valor predeterminado
+        producto.proximo_lote_dias = None  # Valor predeterminado
+        
+        try:
+            # Buscar lotes activos con stock positivo
+            lotes_activos = LoteInventario.query.filter(
+                LoteInventario.producto_id == producto.id,
+                LoteInventario.esta_activo == True,
+                LoteInventario.stock > 0
+            ).all()
+            
+            print(f"Producto {producto.id}: {len(lotes_activos)} lotes activos")
+            
+            if lotes_activos:
+                # Cálculo del costo promedio ponderado por cantidad en stock
+                costo_total = 0
+                stock_total = 0
+                
+                for lote in lotes_activos:
+                    costo_total += lote.costo_unitario * lote.stock
+                    stock_total += lote.stock
+                
+                if stock_total > 0:
+                    producto.costo_promedio = costo_total / stock_total
+                    print(f"Costo promedio calculado: {producto.costo_promedio:.2f}")
+                
+                # Buscar el próximo lote a caducar (solo entre los que tienen fecha)
+                lotes_con_caducidad = []
+                for lote in lotes_activos:
+                    if lote.fecha_caducidad is not None:
+                        lotes_con_caducidad.append(lote)
+                
+                print(f"Producto {producto.id}: {len(lotes_con_caducidad)} lotes con fecha de caducidad")
+                
+                if lotes_con_caducidad:
+                    # Ordenar por fecha de caducidad (más cercana primero)
+                    lotes_con_caducidad.sort(key=lambda x: x.fecha_caducidad)
+                    proximo_lote = lotes_con_caducidad[0]
+                    
+                    # Calcular días hasta caducidad manualmente para depuración
+                    hoy = date.today()
+                    if proximo_lote.fecha_caducidad:
+                        if proximo_lote.fecha_caducidad < hoy:
+                            dias = -1  # Ya caducado
+                        else:
+                            dias = (proximo_lote.fecha_caducidad - hoy).days
+                        
+                        print(f"Lote {proximo_lote.id} caduca el {proximo_lote.fecha_caducidad}, faltan {dias} días")
+                        producto.proximo_lote_dias = dias
+        except Exception as e:
+            print(f"Error procesando producto {producto.id}: {str(e)}")
+            # No interrumpir el proceso por un error en un producto
+            continue
+
     return render_template(
         'productos.html',
         productos=productos,
@@ -699,6 +759,27 @@ def toggle_favorite(product_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({"success": False, "message": f"Error al actualizar: {str(e)}"}), 500
+
+@app.route('/api/toggle_cost_type', methods=['POST'])
+@login_requerido
+def toggle_cost_type():
+    try:
+        data = request.get_json()
+        cost_type = data.get('type', 'last')  # 'last' o 'average'
+        
+        # Guardar la preferencia en la sesión (opcional)
+        session['cost_display_type'] = cost_type
+        
+        return jsonify({
+            "success": True,
+            "message": f"Tipo de costo cambiado a: {cost_type}",
+            "type": cost_type
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": f"Error al cambiar tipo de costo: {str(e)}"
+        }), 500
 
 # NUEVO: Endpoint para cambiar el estado de visibilidad
 @app.route('/api/toggle_visibility/<int:product_id>', methods=['POST'])

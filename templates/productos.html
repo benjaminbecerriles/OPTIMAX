@@ -940,6 +940,94 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   }
 
+  /* NUEVO: Estilo para dropdown de costos */
+  .cost-type-dropdown {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .cost-toggle-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    margin-left: 5px;
+    color: var(--accent);
+    font-size: 12px;
+    transition: transform 0.2s ease;
+  }
+  
+  .cost-toggle-btn:hover {
+    transform: scale(1.2);
+  }
+  
+  .cost-type-menu {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    border: 1px solid var(--gray-200);
+    z-index: 1500;
+    padding: 8px 0;
+    min-width: 200px;
+    display: none;
+  }
+  
+  .cost-type-menu.show {
+    display: block !important;
+    animation: fadeInUp 0.2s forwards;
+  }
+  
+  .cost-type-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+  }
+  
+  .cost-type-item:hover {
+    background-color: var(--light-background);
+  }
+  
+  .cost-type-item.active {
+    background-color: var(--accent-light);
+    color: var(--accent);
+    font-weight: 500;
+  }
+  
+  .cost-type-item i {
+    margin-right: 8px;
+    font-size: 12px;
+    width: 14px;
+    text-align: center;
+  }
+  
+  /* Estilo para días hasta caducidad */
+  .expiry-days {
+    font-weight: 600;
+  }
+  
+  .expiry-days.expired {
+    color: var(--red);
+  }
+  
+  .expiry-days.soon {
+    color: var(--orange);
+  }
+  
+  .expiry-days.medium {
+    color: var(--blue);
+  }
+  
+  .expiry-days.far {
+    color: var(--green);
+  }
+
   /* Responsive adjustments */
   @media (max-width: 991px) {
     .product-img-container {
@@ -1163,8 +1251,23 @@
           <th style="width: 80px;" class="column-category">CAT</th>
           <th style="width: 110px;" class="column-stock">STOCK<br>UNIDADES</th>
           <th style="width: 110px;" class="column-price">PRECIO<br>POR UNIDAD</th>
-          <th style="width: 110px;" class="column-cost">ÚLTIMO COSTO<br>POR UNIDAD</th>
-          <th style="width: 110px;" class="column-expiry">FECHA DE<br>CADUCIDAD</th>
+          <!-- NUEVO: Cambiamos el encabezado de costo y añadimos botón de despliegue -->
+          <th style="width: 110px;" class="column-cost">
+            <div class="cost-type-dropdown">
+              <span id="costTypeTitle">ÚLTIMO COSTO REG.<br>POR UNIDAD</span>
+              <button type="button" class="cost-toggle-btn" id="costToggleBtn">▼</button>
+              <div class="cost-type-menu" id="costTypeMenu">
+                <div class="cost-type-item active" data-type="last">
+                  <i class="fas fa-check"></i> Último costo registrado
+                </div>
+                <div class="cost-type-item" data-type="average">
+                  <i class="fas fa-check" style="visibility: hidden;"></i> Costo promedio
+                </div>
+              </div>
+            </div>
+          </th>
+          <!-- NUEVO: Cambiamos el encabezado de caducidad -->
+          <th style="width: 110px;" class="column-expiry">PRÓXIMO LOTE<br>CADUCA EN</th>
           <th style="width: 70px;" class="column-fav">FAV</th>
           <th style="width: 70px;" class="column-vis">VISIBLE</th>
           <th style="width: 70px;" class="column-actions">ACCIONES</th>
@@ -1243,10 +1346,12 @@
             </span>
           </td>
           
-          <!-- Costo con formato -->
+          <!-- NUEVO: Costo con formato y data-attributes para alternar entre tipos -->
           <td class="column-cost">
-            <span class="cost-value">$
-              {% if p.costo == p.costo|int %}
+            <span class="cost-value" 
+                  data-last-cost="{{ p.costo }}" 
+                  data-avg-cost="{{ p.costo_promedio|default(p.costo) }}">
+              ${% if p.costo == p.costo|int %}
                 {{ '{:,}'.format(p.costo|int) }}
               {% elif ((p.costo * 1000)|int % 10) == 0 %}
                 {{ '{:,.2f}'.format(p.costo).rstrip('0').rstrip('.') }}
@@ -1256,10 +1361,20 @@
             </span>
           </td>
           
-          <!-- Fecha de caducidad -->
+          <!-- NUEVO: Próximo lote a caducar y días restantes -->
           <td class="column-expiry">
-            {% if p.has_caducidad and p.metodo_caducidad %}
-              <span class="expiry-value">{{ p.metodo_caducidad }}</span>
+            {% if p.proximo_lote_dias is defined and p.proximo_lote_dias is not none %}
+              {% if p.proximo_lote_dias < 0 %}
+                <span class="expiry-days expired">Caducado</span>
+              {% elif p.proximo_lote_dias == 0 %}
+                <span class="expiry-days expired">Hoy</span>
+              {% elif p.proximo_lote_dias <= 7 %}
+                <span class="expiry-days soon">{{ p.proximo_lote_dias }} día{{ 's' if p.proximo_lote_dias != 1 }}</span>
+              {% elif p.proximo_lote_dias <= 30 %}
+                <span class="expiry-days medium">{{ p.proximo_lote_dias }} días</span>
+              {% else %}
+                <span class="expiry-days far">{{ p.proximo_lote_dias }} días</span>
+              {% endif %}
             {% else %}
               <span class="expiry-value">N/A</span>
             {% endif %}
@@ -1457,6 +1572,105 @@
       console.error('Error en petición:', error);
       
       // Revertir cambios en UI en caso de error
+      if (isVisible) {
+        element.classList.remove('hidden');
+        element.classList.add('visible');
+        iconElement.className = 'fas fa-eye';
+      } else {
+        element.classList.remove('visible');
+        element.classList.add('hidden');
+        iconElement.className = 'fas fa-eye-slash';
+      }
+      element.setAttribute('data-is-visible', isVisible ? '1' : '0');
+      
+      showToast('Error de conexión', 'No se pudo contactar con el servidor', 'error');
+    });
+  }
+  
+  // Función para mostrar notificaciones
+  function showToast(title, message, type = 'info') {
+    // Crear elemento toast
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    
+    // Determinar ícono según el tipo
+    let icon;
+    switch (type) {
+      case 'success': icon = 'fa-check-circle'; break;
+      case 'error': icon = 'fa-exclamation-circle'; break;
+      case 'warning': icon = 'fa-exclamation-triangle'; break;
+      default: icon = 'fa-info-circle';
+    }
+    
+    // Contenido del toast
+    toast.innerHTML = `
+      <div class="toast-icon">
+        <i class="fas ${icon}"></i>
+      </div>
+      <div class="toast-content">
+        <div class="toast-title">${title}</div>
+        <div class="toast-message">${message}</div>
+      </div>
+    `;
+    
+    // Agregar al contenedor
+    const container = document.getElementById('toastContainer');
+    container.appendChild(toast);
+    
+    // Remover después de 3 segundos
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(20px)';
+      setTimeout(() => {
+        if (container.contains(toast)) {
+          container.removeChild(toast);
+        }
+      }, 300);
+    }, 3000);
+  }
+
+  // NUEVO: Función para alternar entre tipos de costo
+  function toggleCostType(type) {
+    console.log("Cambiando tipo de costo a:", type);
+    const costValues = document.querySelectorAll('.cost-value');
+    const costTitle = document.getElementById('costTypeTitle');
+    const costTypeItems = document.querySelectorAll('.cost-type-item');
+    
+    // Actualizar UI del menú
+    costTypeItems.forEach(item => {
+      const icon = item.querySelector('i');
+      if (item.getAttribute('data-type') === type) {
+        item.classList.add('active');
+        icon.style.visibility = 'visible';
+      } else {
+        item.classList.remove('active');
+        icon.style.visibility = 'hidden';
+      }
+    });
+    
+    // Actualizar título de la columna
+    if (type === 'last') {
+      costTitle.innerHTML = 'ÚLTIMO COSTO REG.<br>POR UNIDAD';
+    } else {
+      costTitle.innerHTML = 'COSTO PROMEDIO<br>POR UNIDAD';
+    }
+    
+    // Actualizar valores mostrados
+    costValues.forEach(value => {
+      const lastCost = parseFloat(value.getAttribute('data-last-cost'));
+      const avgCost = parseFloat(value.getAttribute('data-avg-cost'));
+      const showCost = type === 'last' ? lastCost : avgCost;
+      
+      // Formatear el valor según reglas existentes
+      let formattedCost;
+      if (showCost === Math.floor(showCost)) {
+        formattedCost = ' || 'No se pudo actualizar', 'error');
+      }
+    })
+    .catch(error => {
+      console.error('Error en petición:', error);
+      
+      // Revertir cambios en UI en caso de error
       if (isFavorite) {
         element.classList.add('active');
         element.innerHTML = '&#9829;';
@@ -1525,84 +1739,217 @@
           iconElement.className = 'fas fa-eye-slash';
         }
         
-        showToast('Error', data.message || 'No se pudo actualizar', 'error');
+        showToast('Error', data.message + showCost.toLocaleString('en-US', {maximumFractionDigits: 0});
+      } else if (Math.round(showCost * 1000) % 10 === 0) {
+        formattedCost = ' || 'No se pudo actualizar', 'error');
       }
     })
     .catch(error => {
       console.error('Error en petición:', error);
       
       // Revertir cambios en UI en caso de error
-      if (isVisible) {
-        element.classList.remove('hidden');
-        element.classList.add('visible');
-        iconElement.className = 'fas fa-eye';
+      if (isFavorite) {
+        element.classList.add('active');
+        element.innerHTML = '&#9829;';
       } else {
-        element.classList.remove('visible');
-        element.classList.add('hidden');
-        iconElement.className = 'fas fa-eye-slash';
+        element.classList.remove('active');
+        element.innerHTML = '&#9825;';
       }
-      element.setAttribute('data-is-visible', isVisible ? '1' : '0');
+      element.setAttribute('data-is-favorite', isFavorite ? '1' : '0');
       
       showToast('Error de conexión', 'No se pudo contactar con el servidor', 'error');
     });
   }
   
-  // Función para mostrar notificaciones
-  function showToast(title, message, type = 'info') {
-    // Crear elemento toast
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
+  // Función para cambiar estado de visibilidad
+  function toggleVisibilidad(element) {
+    // Obtener ID del producto y estado actual
+    const productId = element.getAttribute('data-product-id');
+    const isVisible = element.getAttribute('data-is-visible') === '1';
+    const newState = isVisible ? '0' : '1';
     
-    // Determinar ícono según el tipo
-    let icon;
-    switch (type) {
-      case 'success': icon = 'fa-check-circle'; break;
-      case 'error': icon = 'fa-exclamation-circle'; break;
-      case 'warning': icon = 'fa-exclamation-triangle'; break;
-      default: icon = 'fa-info-circle';
+    // Actualizar UI inmediatamente para feedback visual
+    const iconElement = element.querySelector('i');
+    
+    if (newState === '1') {
+      element.classList.remove('hidden');
+      element.classList.add('visible');
+      iconElement.className = 'fas fa-eye';
+    } else {
+      element.classList.remove('visible');
+      element.classList.add('hidden');
+      iconElement.className = 'fas fa-eye-slash';
     }
     
-    // Contenido del toast
-    toast.innerHTML = `
-      <div class="toast-icon">
-        <i class="fas ${icon}"></i>
-      </div>
-      <div class="toast-content">
-        <div class="toast-title">${title}</div>
-        <div class="toast-message">${message}</div>
-      </div>
-    `;
-    
-    // Agregar al contenedor
-    const container = document.getElementById('toastContainer');
-    container.appendChild(toast);
-    
-    // Remover después de 3 segundos
-    setTimeout(() => {
-      toast.style.opacity = '0';
-      toast.style.transform = 'translateY(20px)';
-      setTimeout(() => {
-        if (container.contains(toast)) {
-          container.removeChild(toast);
+    // Hacer la petición AJAX
+    fetch(`/api/toggle_visibility/${productId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ status: newState })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        // Actualizar atributo con el nuevo estado
+        element.setAttribute('data-is-visible', newState);
+        
+        // Mostrar notificación
+        showToast(
+          newState === '1' ? 'Producto visible' : 'Producto invisible',
+          newState === '1' ? 'Ahora el producto es visible para venta' : 'El producto ya no es visible para venta',
+          newState === '1' ? 'success' : 'info'
+        );
+      } else {
+        // Si hay error, revertir cambios en UI
+        const originalState = isVisible ? '1' : '0';
+        element.setAttribute('data-is-visible', originalState);
+        
+        if (originalState === '1') {
+          element.classList.remove('hidden');
+          element.classList.add('visible');
+          iconElement.className = 'fas fa-eye';
+        } else {
+          element.classList.remove('visible');
+          element.classList.add('hidden');
+          iconElement.className = 'fas fa-eye-slash';
         }
-      }, 300);
-    }, 3000);
+        
+        showToast('Error', data.message + showCost.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}).replace(/\.00$/, '');
+      } else {
+        formattedCost = ' || 'No se pudo actualizar', 'error');
+      }
+    })
+    .catch(error => {
+      console.error('Error en petición:', error);
+      
+      // Revertir cambios en UI en caso de error
+      if (isFavorite) {
+        element.classList.add('active');
+        element.innerHTML = '&#9829;';
+      } else {
+        element.classList.remove('active');
+        element.innerHTML = '&#9825;';
+      }
+      element.setAttribute('data-is-favorite', isFavorite ? '1' : '0');
+      
+      showToast('Error de conexión', 'No se pudo contactar con el servidor', 'error');
+    });
+  }
+  
+  // Función para cambiar estado de visibilidad
+  function toggleVisibilidad(element) {
+    // Obtener ID del producto y estado actual
+    const productId = element.getAttribute('data-product-id');
+    const isVisible = element.getAttribute('data-is-visible') === '1';
+    const newState = isVisible ? '0' : '1';
+    
+    // Actualizar UI inmediatamente para feedback visual
+    const iconElement = element.querySelector('i');
+    
+    if (newState === '1') {
+      element.classList.remove('hidden');
+      element.classList.add('visible');
+      iconElement.className = 'fas fa-eye';
+    } else {
+      element.classList.remove('visible');
+      element.classList.add('hidden');
+      iconElement.className = 'fas fa-eye-slash';
+    }
+    
+    // Hacer la petición AJAX
+    fetch(`/api/toggle_visibility/${productId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ status: newState })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        // Actualizar atributo con el nuevo estado
+        element.setAttribute('data-is-visible', newState);
+        
+        // Mostrar notificación
+        showToast(
+          newState === '1' ? 'Producto visible' : 'Producto invisible',
+          newState === '1' ? 'Ahora el producto es visible para venta' : 'El producto ya no es visible para venta',
+          newState === '1' ? 'success' : 'info'
+        );
+      } else {
+        // Si hay error, revertir cambios en UI
+        const originalState = isVisible ? '1' : '0';
+        element.setAttribute('data-is-visible', originalState);
+        
+        if (originalState === '1') {
+          element.classList.remove('hidden');
+          element.classList.add('visible');
+          iconElement.className = 'fas fa-eye';
+        } else {
+          element.classList.remove('visible');
+          element.classList.add('hidden');
+          iconElement.className = 'fas fa-eye-slash';
+        }
+        
+        showToast('Error', data.message + showCost.toLocaleString('en-US', {minimumFractionDigits: 3, maximumFractionDigits: 3});
+      }
+      
+      value.innerHTML = formattedCost;
+    });
+    
+    // Almacenar preferencia en sesión
+    localStorage.setItem('costDisplayType', type);
+    
+    // Notificar cambio
+    showToast(
+      'Tipo de costo actualizado',
+      type === 'last' ? 'Mostrando último costo registrado' : 'Mostrando costo promedio',
+      'info'
+    );
+    
+    // Opcional: enviar preferencia al servidor
+    fetch('/api/toggle_cost_type', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ type: type })
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log("Preferencia guardada en servidor:", data);
+    })
+    .catch(error => {
+      console.error("Error guardando preferencia:", error);
+      // Continuar aunque falle la petición al servidor
+    });
   }
 
   // Funcionalidad específica para el menú de columnas
   document.addEventListener('DOMContentLoaded', function() {
+    console.log("DOM cargado, inicializando funcionalidades...");
+    
     // Toggle menú de columnas - versión directa con estilo en línea
     const columnToggleBtn = document.getElementById('columnToggleBtn');
     const columnDropdown = document.getElementById('columnDropdown');
     
     if (columnToggleBtn && columnDropdown) {
       columnToggleBtn.addEventListener('click', function(e) {
+        console.log("Botón de columnas clickeado");
         e.preventDefault();
         e.stopPropagation();
         // Cerrar el otro menú si está abierto
         const actionsDropdown = document.getElementById('actionsDropdown');
         if (actionsDropdown) {
           actionsDropdown.style.display = 'none';
+        }
+        
+        // Cerrar menú de tipos de costo si está abierto
+        const costTypeMenu = document.getElementById('costTypeMenu');
+        if (costTypeMenu) {
+          costTypeMenu.classList.remove('show');
         }
         
         // Mostrar u ocultar este menú
@@ -1620,11 +1967,18 @@
     
     if (bulkActionsBtn && actionsDropdown) {
       bulkActionsBtn.addEventListener('click', function(e) {
+        console.log("Botón de acciones masivas clickeado");
         e.preventDefault();
         e.stopPropagation();
         // Cerrar el otro menú si está abierto
         if (columnDropdown) {
           columnDropdown.style.display = 'none';
+        }
+        
+        // Cerrar menú de tipos de costo si está abierto
+        const costTypeMenu = document.getElementById('costTypeMenu');
+        if (costTypeMenu) {
+          costTypeMenu.classList.remove('show');
         }
         
         // Mostrar u ocultar este menú
@@ -1634,6 +1988,51 @@
           actionsDropdown.style.display = 'block';
         }
       });
+    }
+    
+    // NUEVO: Toggle menú de tipos de costo
+    const costToggleBtn = document.getElementById('costToggleBtn');
+    const costTypeMenu = document.getElementById('costTypeMenu');
+    
+    console.log("Botón toggle costo:", costToggleBtn ? "encontrado" : "NO ENCONTRADO");
+    console.log("Menú de tipo de costo:", costTypeMenu ? "encontrado" : "NO ENCONTRADO");
+    
+    if (costToggleBtn && costTypeMenu) {
+      costToggleBtn.addEventListener('click', function(e) {
+        console.log("Botón de toggle de costo clickeado");
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Cerrar otros menús si están abiertos
+        if (columnDropdown) {
+          columnDropdown.style.display = 'none';
+        }
+        if (actionsDropdown) {
+          actionsDropdown.style.display = 'none';
+        }
+        
+        // Mostrar u ocultar menú de tipos de costo
+        costTypeMenu.classList.toggle('show');
+        console.log("Estado del menú de costo:", costTypeMenu.classList.contains('show') ? "VISIBLE" : "OCULTO");
+      });
+      
+      // Añadir eventos a opciones de tipo de costo
+      const costTypeItems = document.querySelectorAll('.cost-type-item');
+      costTypeItems.forEach(item => {
+        item.addEventListener('click', function() {
+          const type = this.getAttribute('data-type');
+          console.log("Item de costo clickeado:", type);
+          toggleCostType(type);
+          costTypeMenu.classList.remove('show');
+        });
+      });
+      
+      // Cargar preferencia guardada
+      const savedCostType = localStorage.getItem('costDisplayType');
+      if (savedCostType) {
+        console.log("Cargando preferencia guardada:", savedCostType);
+        toggleCostType(savedCostType);
+      }
     }
     
     // Cerrar menús cuando se hace clic fuera
@@ -1646,6 +2045,11 @@
       // Cerrar menú de acciones
       if (actionsDropdown && bulkActionsBtn && !bulkActionsBtn.contains(e.target) && !actionsDropdown.contains(e.target)) {
         actionsDropdown.style.display = 'none';
+      }
+      
+      // Cerrar menú de tipos de costo
+      if (costTypeMenu && costToggleBtn && !costToggleBtn.contains(e.target) && !costTypeMenu.contains(e.target)) {
+        costTypeMenu.classList.remove('show');
       }
     });
     
@@ -1815,7 +2219,8 @@
       modal.style.display = 'flex';
       
       // Añadir animación de entrada
-      modal.querySelector('.actions-modal-content').classList.add('scale-in');
+      modal.querySelector('.actions-modal-content').style.opacity = '1';
+      modal.querySelector('.actions-modal-content').style.transform = 'scale(1)';
     }
   }
   
@@ -1851,4 +2256,100 @@
     }
   });
 </script>
-{% endblock %}
+{% endblock %} || 'No se pudo actualizar', 'error');
+      }
+    })
+    .catch(error => {
+      console.error('Error en petición:', error);
+      
+      // Revertir cambios en UI en caso de error
+      if (isFavorite) {
+        element.classList.add('active');
+        element.innerHTML = '&#9829;';
+      } else {
+        element.classList.remove('active');
+        element.innerHTML = '&#9825;';
+      }
+      element.setAttribute('data-is-favorite', isFavorite ? '1' : '0');
+      
+      showToast('Error de conexión', 'No se pudo contactar con el servidor', 'error');
+    });
+  }
+  
+  // Función para cambiar estado de visibilidad
+  function toggleVisibilidad(element) {
+    // Obtener ID del producto y estado actual
+    const productId = element.getAttribute('data-product-id');
+    const isVisible = element.getAttribute('data-is-visible') === '1';
+    const newState = isVisible ? '0' : '1';
+    
+    // Actualizar UI inmediatamente para feedback visual
+    const iconElement = element.querySelector('i');
+    
+    if (newState === '1') {
+      element.classList.remove('hidden');
+      element.classList.add('visible');
+      iconElement.className = 'fas fa-eye';
+    } else {
+      element.classList.remove('visible');
+      element.classList.add('hidden');
+      iconElement.className = 'fas fa-eye-slash';
+    }
+    
+    // Hacer la petición AJAX
+    fetch(`/api/toggle_visibility/${productId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ status: newState })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        // Actualizar atributo con el nuevo estado
+        element.setAttribute('data-is-visible', newState);
+        
+        // Mostrar notificación
+        showToast(
+          newState === '1' ? 'Producto visible' : 'Producto invisible',
+          newState === '1' ? 'Ahora el producto es visible para venta' : 'El producto ya no es visible para venta',
+          newState === '1' ? 'success' : 'info'
+        );
+      } else {
+        // Si hay error, revertir cambios en UI
+        const originalState = isVisible ? '1' : '0';
+        element.setAttribute('data-is-visible', originalState);
+        
+        if (originalState === '1') {
+          element.classList.remove('hidden');
+          element.classList.add('visible');
+          iconElement.className = 'fas fa-eye';
+        } else {
+          element.classList.remove('visible');
+          element.classList.add('hidden');
+          iconElement.className = 'fas fa-eye-slash';
+        }
+        showToast('Error', data.message || 'No se pudo actualizar', 'error');
+      }
+    })
+    .catch(error => {
+      console.error('Error en petición:', error);
+      
+      // Revertir cambios en UI en caso de error
+      if (isVisible) {
+        element.classList.remove('hidden');
+        element.classList.add('visible');
+        iconElement.className = 'fas fa-eye';
+      } else {
+        element.classList.remove('visible');
+        element.classList.add('hidden');
+        iconElement.className = 'fas fa-eye-slash';
+      }
+      element.setAttribute('data-is-visible', isVisible ? '1' : '0');
+      
+      showToast('Error de conexión', 'No se pudo contactar con el servidor', 'error');
+    });
+  }
+  // Función para mostrar el modal de acciones      
+

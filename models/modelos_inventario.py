@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date, timedelta
 from models import db
 
 class MovimientoInventario(db.Model):
@@ -112,6 +112,25 @@ class LoteInventario(db.Model):
         if self.fecha_caducidad:
             return self.fecha_caducidad.strftime('%d/%m/%Y')
         return "No caduca"
+        
+    # NUEVO: Método para calcular días hasta caducidad
+    def dias_hasta_caducidad(self):
+        if not self.fecha_caducidad:
+            return None
+            
+        hoy = date.today()
+        if self.fecha_caducidad < hoy:
+            return -1  # Producto ya caducado
+            
+        delta = self.fecha_caducidad - hoy
+        return delta.days
+        
+    # NUEVO: Método para verificar si el lote está caducado
+    def esta_caducado(self):
+        if not self.fecha_caducidad:
+            return False
+            
+        return self.fecha_caducidad < date.today()
 
     # Método para formatear el costo unitario con formato de moneda
     def costo_formateado(self):
