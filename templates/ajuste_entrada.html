@@ -6,67 +6,86 @@
 
 {% block content %}
 <style>
-  /* Estilos globales */
-  .container {
-    max-width: 1000px;
+  /* Diseño elegante pero ultra-simple */
+  :root {
+    --font-system: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --color-text: #333333;
+    --color-text-light: #6c6c6c;
+    --color-background: #ffffff;
+    --color-border: #e0e0e0;
+    --color-primary: #e52e2e;
+    --color-primary-light: #fdf2f2;
+    --color-success: #34c759;
+    --color-warning: #ff9f0a;
+    --color-danger: #ff3b30;
+    --color-accent: #007aff;
+    --border-radius: 10px;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  body {
+    font-family: var(--font-system);
+    color: var(--color-text);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  .entry-container {
+    max-width: 960px;
     margin: 0 auto;
+    padding: 24px 16px;
   }
   
-  /* Encabezado y navegación */
-  .breadcrumb {
-    margin-bottom: 1.5rem;
-    font-size: 0.9rem;
-  }
-  
-  .breadcrumb-item a {
-    color: #6c757d;
+  /* Navegación simple */
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--color-text-light);
     text-decoration: none;
+    margin-bottom: 24px;
+    font-size: 14px;
   }
   
-  .breadcrumb-item a:hover {
-    color: #e52e2e;
+  .back-link:hover {
+    color: var(--color-primary);
   }
   
-  .breadcrumb-item.active {
-    color: #212529;
-    font-weight: 600;
-  }
-  
+  /* Encabezado */
   .page-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 1.5rem;
-    color: #212529;
-    border-bottom: 2px solid #e52e2e;
-    padding-bottom: 0.75rem;
-    display: inline-block;
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: 24px;
   }
   
   /* Tarjeta de producto */
   .product-card {
     display: flex;
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-    padding: 1.5rem;
-    border-radius: 0.5rem;
-    border: 1px solid #dee2e6;
-    background-color: white;
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    align-items: flex-start;
+    gap: 20px;
+    background-color: #f9f9f9;
+    border-radius: var(--border-radius);
+    padding: 16px;
+    margin-bottom: 24px;
   }
   
-  .product-img-container {
-    width: 120px;
-    height: 120px;
-    border-radius: 0.5rem;
+  .product-image {
+    width: 70px;
+    height: 70px;
+    border-radius: 6px;
     overflow: hidden;
+    background-color: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #f8f9fa;
+    border: 1px solid var(--color-border);
     flex-shrink: 0;
   }
   
-  .product-img {
+  .product-image img {
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
@@ -74,249 +93,321 @@
   
   .product-details {
     flex: 1;
+    min-width: 0;
   }
   
-  .product-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-    color: #212529;
+  .product-name {
+    font-size: 18px;
+    font-weight: 500;
+    margin: 0 0 8px 0;
   }
   
-  .product-info {
+  .product-meta {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 0.75rem;
-    margin-bottom: 0.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px 24px;
   }
   
-  .info-item {
+  .meta-item {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .meta-label {
+    font-size: 12px;
+    color: var(--color-text-light);
+    margin-bottom: 2px;
+  }
+  
+  .meta-value {
+    font-size: 14px;
+    font-weight: 500;
+  }
+  
+  .badge {
+    display: inline-block;
+    font-size: 12px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    line-height: 1.2;
+  }
+  
+  .badge-success {
+    background-color: rgba(52, 199, 89, 0.1);
+    color: var(--color-success);
+  }
+  
+  .badge-warning {
+    background-color: rgba(255, 159, 10, 0.1);
+    color: var(--color-warning);
+  }
+  
+  .badge-danger {
+    background-color: rgba(255, 59, 48, 0.1);
+    color: var(--color-danger);
+  }
+  
+  /* Formulario de entrada - Ultra simple */
+  .entry-form {
+    background-color: white;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  
+  .form-header {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-  }
-  
-  .info-icon {
-    color: #6c757d;
-    width: 16px;
-    text-align: center;
-  }
-  
-  .info-label {
-    font-size: 0.875rem;
-    color: #6c757d;
-  }
-  
-  .info-value {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: #212529;
-  }
-  
-  .badge-stock {
-    display: inline-block;
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.25rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-  }
-  
-  .badge-high {
-    background-color: #d4edda;
-    color: #155724;
-  }
-  
-  .badge-medium {
-    background-color: #fff3cd;
-    color: #856404;
-  }
-  
-  .badge-low {
-    background-color: #f8d7da;
-    color: #721c24;
-  }
-  
-  /* Formulario de entrada */
-  .form-container {
-    background-color: white;
-    border-radius: 0.5rem;
-    border: 1px solid #dee2e6;
-    padding: 1.5rem;
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-    margin-bottom: 2rem;
+    padding: 12px 16px;
+    background-color: var(--color-primary-light);
+    border-bottom: 1px solid var(--color-border);
   }
   
   .form-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-bottom: 1.5rem;
-    color: #212529;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--color-primary);
+    margin: 0;
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 8px;
   }
   
-  .form-title i {
-    color: #28a745;
+  .form-body {
+    padding: 16px;
+  }
+  
+  .form-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .form-col {
+    flex: 1;
+    min-width: 120px;
   }
   
   .form-group {
-    margin-bottom: 1.5rem;
+    margin-bottom: 16px;
   }
   
   .form-label {
     display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 600;
-    font-size: 0.9rem;
-    color: #495057;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text);
+    margin-bottom: 6px;
   }
   
   .form-control {
+    display: block;
     width: 100%;
-    padding: 0.75rem;
-    border-radius: 0.375rem;
-    border: 1px solid #ced4da;
-    font-size: 1rem;
+    padding: 10px 12px;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--color-text);
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
     transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
   }
   
   .form-control:focus {
-    border-color: #e52e2e;
-    box-shadow: 0 0 0 0.25rem rgba(229, 46, 46, 0.25);
-  }
-  
-  .form-select {
-    width: 100%;
-    padding: 0.75rem;
-    border-radius: 0.375rem;
-    border: 1px solid #ced4da;
-    font-size: 1rem;
-    background-color: white;
-    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-  }
-  
-  .form-select:focus {
-    border-color: #e52e2e;
-    box-shadow: 0 0 0 0.25rem rgba(229, 46, 46, 0.25);
-  }
-  
-  .form-text {
-    font-size: 0.875rem;
-    color: #6c757d;
-    margin-top: 0.25rem;
+    border-color: var(--color-accent);
+    outline: 0;
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
   }
   
   .form-check {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.5rem;
+    gap: 8px;
+    margin-bottom: 8px;
   }
   
   .form-check-input {
-    width: 1rem;
-    height: 1rem;
+    width: 16px;
+    height: 16px;
+    margin: 0;
   }
   
   .form-check-label {
-    font-size: 0.9rem;
+    font-size: 14px;
+  }
+  
+  .form-text {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--color-text-light);
+  }
+  
+  /* Dropdown para costo */
+  #costoContainer {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--color-border);
   }
   
   .input-group {
     display: flex;
-    align-items: center;
+    position: relative;
   }
   
   .input-group-text {
     display: flex;
     align-items: center;
-    padding: 0.75rem;
-    border: 1px solid #ced4da;
-    border-radius: 0.375rem 0 0 0.375rem;
-    background-color: #e9ecef;
-    font-size: 1rem;
-    border-right: none;
+    padding: 10px 12px;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--color-text);
+    text-align: center;
+    white-space: nowrap;
+    background-color: #f8f9fa;
+    border: 1px solid var(--color-border);
+    border-right: 0;
+    border-radius: 6px 0 0 6px;
   }
   
   .input-group .form-control {
-    border-radius: 0 0.375rem 0.375rem 0;
+    position: relative;
+    flex: 1 1 auto;
+    width: 1%;
+    min-width: 0;
+    border-radius: 0 6px 6px 0;
   }
   
-  .auto-generated {
-    background-color: #e9ecef;
-    cursor: not-allowed;
+  /* Accordion para secciones opcionales */
+  .accordion-item {
+    margin-bottom: 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  
+  .accordion-header {
+    cursor: pointer;
+    padding: 10px 12px;
+    background-color: #f8f9fa;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  
+  .accordion-header:hover {
+    background-color: #f0f0f0;
+  }
+  
+  .accordion-body {
+    padding: 12px;
+    display: none;
+    border-top: 1px solid var(--color-border);
+  }
+  
+  /* Selección de caducidad */
+  .expiry-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  
+  .expiry-option {
+    position: relative;
+  }
+  
+  .expiry-option input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+  
+  .expiry-option label {
+    display: inline-block;
+    padding: 6px 10px;
+    font-size: 13px;
+    background-color: #f8f9fa;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  
+  .expiry-option input:checked + label {
+    background-color: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
   }
   
   /* Botones */
   .form-actions {
     display: flex;
     justify-content: flex-end;
-    gap: 1rem;
-    margin-top: 2rem;
+    gap: 10px;
+    margin-top: 16px;
   }
   
   .btn {
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.375rem;
-    font-weight: 600;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.15s ease-in-out;
-    text-decoration: none;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
+    font-weight: 500;
+    text-align: center;
+    text-decoration: none;
+    vertical-align: middle;
+    cursor: pointer;
+    user-select: none;
+    padding: 8px 16px;
+    font-size: 14px;
+    border-radius: 6px;
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, 
+                border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
   }
   
   .btn-primary {
-    background-color: #28a745;
-    color: white;
-    border: none;
+    color: #fff;
+    background-color: var(--color-primary);
+    border: 1px solid var(--color-primary);
   }
   
   .btn-primary:hover {
-    background-color: #218838;
-  }
-  
-  .btn-secondary {
-    background-color: #6c757d;
-    color: white;
-    border: none;
-  }
-  
-  .btn-secondary:hover {
-    background-color: #5a6268;
+    background-color: #d12323;
   }
   
   .btn-outline {
-    background-color: white;
-    border: 1px solid #dee2e6;
-    color: #495057;
+    color: var(--color-text);
+    background-color: transparent;
+    border: 1px solid var(--color-border);
   }
   
   .btn-outline:hover {
     background-color: #f8f9fa;
   }
   
-  /* Historial */
-  .history-container {
-    margin-top: 2rem;
+  /* Tabla de historial */
+  .history-section {
+    margin-top: 32px;
   }
   
   .history-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-    color: #212529;
+    font-size: 18px;
+    font-weight: 500;
+    margin-bottom: 16px;
+    color: var(--color-text);
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-  }
-  
-  .history-title i {
-    color: #6c757d;
+    gap: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--color-border);
   }
   
   .history-table {
@@ -325,229 +416,153 @@
   }
   
   .history-table th {
-    padding: 0.75rem 1rem;
-    background-color: #f8f9fa;
-    border-bottom: 2px solid #dee2e6;
+    padding: 10px 12px;
     text-align: left;
-    font-weight: 600;
-    font-size: 0.875rem;
-    color: #495057;
+    font-weight: 500;
+    font-size: 13px;
+    color: var(--color-text-light);
+    border-bottom: 1px solid var(--color-border);
   }
   
   .history-table td {
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid #dee2e6;
-    font-size: 0.875rem;
-    color: #212529;
+    padding: 10px 12px;
+    font-size: 14px;
+    border-bottom: 1px solid var(--color-border);
   }
   
   .history-table tbody tr:hover {
-    background-color: #f8f9fa;
+    background-color: #f9f9f9;
   }
   
-  .badge {
-    display: inline-block;
-    padding: 0.35rem 0.65rem;
-    font-size: 0.75em;
-    font-weight: 700;
-    line-height: 1;
+  .history-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
     text-align: center;
-    white-space: nowrap;
-    vertical-align: baseline;
-    border-radius: 0.375rem;
+    background-color: #f9f9f9;
+    border-radius: 6px;
+    color: var(--color-text-light);
   }
   
-  .badge-entrada {
-    background-color: #d4edda;
-    color: #155724;
-  }
-  
-  .badge-salida {
-    background-color: #f8d7da;
-    color: #721c24;
-  }
-  
-  /* Modo oscuro y responsive */
-  @media (prefers-color-scheme: dark) {
-    .product-card,
-    .form-container {
-      background-color: #343a40;
-      border-color: #495057;
-    }
-    
-    .product-title,
-    .form-title,
-    .history-title {
-      color: #f8f9fa;
-    }
-    
-    .info-value {
-      color: #e9ecef;
-    }
-    
-    .form-control,
-    .form-select {
-      background-color: #495057;
-      border-color: #6c757d;
-      color: #f8f9fa;
-    }
-    
-    .form-label {
-      color: #e9ecef;
-    }
-    
-    .form-text {
-      color: #adb5bd;
-    }
-    
-    .input-group-text,
-    .auto-generated {
-      background-color: #495057;
-      border-color: #6c757d;
-      color: #e9ecef;
-    }
-    
-    .btn-outline {
-      background-color: #343a40;
-      border-color: #495057;
-      color: #e9ecef;
-    }
-    
-    .btn-outline:hover {
-      background-color: #495057;
-    }
-    
-    .history-table th {
-      background-color: #343a40;
-      border-bottom-color: #495057;
-      color: #e9ecef;
-    }
-    
-    .history-table td {
-      border-bottom-color: #495057;
-      color: #e9ecef;
-    }
-    
-    .history-table tbody tr:hover {
-      background-color: #495057;
-    }
-  }
-  
+  /* Responsive */
   @media (max-width: 768px) {
     .product-card {
       flex-direction: column;
-      gap: 1rem;
     }
     
-    .product-img-container {
-      width: 100%;
-      height: 180px;
+    .product-image {
+      margin: 0 auto 12px;
     }
     
-    .product-info {
-      grid-template-columns: 1fr;
-    }
-    
-    .form-actions {
+    .form-row {
       flex-direction: column;
-      gap: 0.75rem;
+      gap: 12px;
     }
     
-    .btn {
-      width: 100%;
+    .product-meta {
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
     }
   }
 </style>
 
-<div class="container">
-  <!-- Migas de pan -->
-  <nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a href="{{ url_for('dashboard_home') }}">Dashboard</a></li>
-      <li class="breadcrumb-item"><a href="{{ url_for('ajuste_stock') }}">Ajuste de Inventario</a></li>
-      <li class="breadcrumb-item active">Entrada - {{ producto.nombre }}</li>
-    </ol>
-  </nav>
+<div class="entry-container">
+  <!-- Link para volver -->
+  <a href="{{ url_for('ajuste_stock') }}" class="back-link">
+    <i class="fas fa-arrow-left"></i>
+    <span>Volver a inventario</span>
+  </a>
   
-  <h1 class="page-title">Entrada de Mercancía</h1>
+  <!-- Título de página -->
+  <h1 class="page-title">Entrada de mercancía</h1>
   
-  <!-- Información del producto -->
+  <!-- Tarjeta del producto -->
   <div class="product-card">
-    <div class="product-img-container">
+    <div class="product-image">
       {% if producto.foto %}
-        <img src="{{ url_for('static', filename='uploads/' ~ producto.foto) }}" alt="{{ producto.nombre }}" class="product-img">
+        <img src="{{ url_for('static', filename='uploads/' ~ producto.foto) }}" alt="{{ producto.nombre }}">
       {% else %}
-        <img src="{{ url_for('static', filename='img/default_product.jpg') }}" alt="Imagen predeterminada" class="product-img">
+        <img src="{{ url_for('static', filename='img/default_product.jpg') }}" alt="Imagen predeterminada">
       {% endif %}
     </div>
-    <div class="product-details">
-      <h2 class="product-title">{{ producto.nombre }}</h2>
-      <div class="product-info">
-        <div class="info-item">
-          <i class="fas fa-barcode info-icon"></i>
-          <span class="info-label">Código:</span>
-          <span class="info-value">{{ producto.codigo_barras_externo }}</span>
+          <div class="product-details">
+      <h2 class="product-name">{{ producto.nombre }}</h2>
+      <div class="product-meta">
+        <div class="meta-item">
+          <div class="meta-label">Código</div>
+          <div class="meta-value">{{ producto.codigo_barras_externo }}</div>
         </div>
-        <div class="info-item">
-          <i class="fas fa-layer-group info-icon"></i>
-          <span class="info-label">Stock actual:</span>
-          <span class="info-value">
+        
+        <div class="meta-item">
+          <div class="meta-label">Stock actual</div>
+          <div class="meta-value">
             {% if producto.stock <= 0 %}
-              <span class="badge-stock badge-low">Sin stock</span>
+              <span class="badge badge-danger">Sin stock</span>
             {% elif producto.stock < 6 %}
-              <span class="badge-stock badge-low">{{ producto.stock }} unidades</span>
-            {% elif producto.stock < 21 %}
-              <span class="badge-stock badge-medium">{{ producto.stock }} unidades</span>
+              <span class="badge badge-warning">{{ producto.stock }} unidades</span>
             {% else %}
-              <span class="badge-stock badge-high">{{ producto.stock }} unidades</span>
+              <span class="badge badge-success">{{ producto.stock }} unidades</span>
             {% endif %}
-          </span>
+          </div>
         </div>
-        <div class="info-item">
-          <i class="fas fa-tag info-icon"></i>
-          <span class="info-label">Precio:</span>
-          <span class="info-value">${{ producto.precio_venta|round(2) }}</span>
+        
+        <div class="meta-item">
+          <div class="meta-label">Precio</div>
+          <div class="meta-value">${{ producto.precio_venta|round(2) }}</div>
         </div>
-        <div class="info-item">
-          <i class="fas fa-dollar-sign info-icon"></i>
-          <span class="info-label">Costo actual:</span>
-          <span class="info-value">${{ producto.costo|round(2) }}</span>
+        
+        <div class="meta-item">
+          <div class="meta-label">Costo actual</div>
+          <div class="meta-value">${{ producto.costo|round(2) }}</div>
         </div>
-        <div class="info-item">
-          <i class="fas fa-cubes info-icon"></i>
-          <span class="info-label">Último lote:</span>
-          <span class="info-value">{{ ultimo_lote|default('Sin lotes registrados') }}</span>
+        
+        <div class="meta-item">
+          <div class="meta-label">Fecha de última entrada</div>
+          <div class="meta-value">
+            {% if ultima_entrada %}
+              {{ ultima_entrada.fecha_formateada() }}
+            {% else %}
+              Sin entradas previas
+            {% endif %}
+          </div>
         </div>
-        <div class="info-item">
-          <i class="fas fa-calendar-alt info-icon"></i>
-          <span class="info-label">Fecha última entrada:</span>
-          <span class="info-value">{{ ultima_entrada|default('Sin entradas registradas') }}</span>
+        
+        <div class="meta-item">
+          <div class="meta-label">Última entrada</div>
+          <div class="meta-value">
+            {% if ultima_entrada %}
+              {{ ultima_entrada.numero_lote }}
+            {% else %}
+              Sin lotes registrados
+            {% endif %}
+          </div>
         </div>
       </div>
     </div>
   </div>
   
-  <!-- Formulario de entrada -->
-  <form method="POST" action="{{ url_for('ajuste_entrada', producto_id=producto.id) }}" enctype="multipart/form-data">
-    <div class="form-container">
-      <h3 class="form-title">
-        <i class="fas fa-plus-circle"></i>
-        Registrar Entrada de Mercancía
-      </h3>
+  <!-- Formulario simplificado -->
+  <form method="POST" action="{{ url_for('ajuste_entrada', producto_id=producto.id) }}" enctype="multipart/form-data" id="entradaForm">
+    <div class="entry-form">
+      <div class="form-header">
+        <h3 class="form-title">
+          <i class="fas fa-plus-circle"></i>
+          Registrar entrada
+        </h3>
+      </div>
       
-      <div class="row">
-        <div class="col-md-6">
-          <div class="form-group">
-            <label for="cantidad" class="form-label">Cantidad a añadir *</label>
+      <div class="form-body">
+        <!-- Solo los campos imprescindibles visibles -->
+        <div class="form-row">
+          <div class="form-col">
+            <label for="cantidad" class="form-label">Cantidad a añadir*</label>
             <input type="number" class="form-control" id="cantidad" name="cantidad" required min="1" value="1">
-            <div class="form-text">Número de unidades que se añadirán al inventario.</div>
           </div>
-        </div>
-        
-        <div class="col-md-6">
-          <div class="form-group">
-            <label for="motivo" class="form-label">Motivo *</label>
-            <select class="form-select" id="motivo" name="motivo" required>
+          
+          <div class="form-col">
+            <label for="motivo" class="form-label">Motivo*</label>
+            <select class="form-control" id="motivo" name="motivo" required>
               <option value="compra">Compra a proveedor</option>
               <option value="devolucion">Devolución de cliente</option>
               <option value="ajuste">Ajuste de inventario</option>
@@ -556,78 +571,105 @@
             </select>
           </div>
         </div>
-      </div>
-      
-      <div class="row mt-3">
-        <div class="col-md-6">
-          <div class="form-group">
-            <label for="numero_lote" class="form-label">Número de lote</label>
-            <input type="text" class="form-control auto-generated" id="numero_lote" name="numero_lote" value="Lote #{{ proximo_lote }}" readonly>
-            <div class="form-text">Generado automáticamente para mantener trazabilidad.</div>
-          </div>
-        </div>
         
-        <div class="col-md-6">
-          <div class="form-group">
-            <label for="costo_unitario" class="form-label">Costo unitario *</label>
-            <div class="input-group">
-              <span class="input-group-text">$</span>
-              <input type="number" class="form-control" id="costo_unitario" name="costo_unitario" step="0.01" min="0" required value="{{ producto.costo|round(2) }}">
-            </div>
-            <div class="form-text">Costo por unidad del producto.</div>
-          </div>
-          
-          <div class="form-check mt-2">
-            <input class="form-check-input" type="checkbox" id="actualizar_costo" name="actualizar_costo" checked>
-            <label class="form-check-label" for="actualizar_costo">
-              Actualizar costo principal del producto
+        <!-- Opciones de costo -->
+        <div class="form-group">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="mantener_costo_anterior" name="mantener_costo_anterior" checked>
+            <label class="form-check-label" for="mantener_costo_anterior">
+              Mantener costo anterior ({% if ultima_entrada and ultima_entrada.costo_unitario %}${{ ultima_entrada.costo_unitario|round(2) }}{% else %}${{ producto.costo|round(2) }}{% endif %})
             </label>
           </div>
-        </div>
-      </div>
-      
-      <div class="row mt-3">
-        <div class="col-md-6">
-          <div class="form-group">
-            <label for="fecha_caducidad" class="form-label">Fecha de caducidad</label>
-            <input type="date" class="form-control" id="fecha_caducidad" name="fecha_caducidad">
-            <div class="form-text">Opcional. Fecha de caducidad del lote.</div>
+          
+          <div id="costoContainer" style="display:none;">
+            <div class="input-group">
+              <span class="input-group-text">$</span>
+              <input type="number" class="form-control" id="costo_unitario" name="costo_unitario" step="0.01" min="0" value="{{ producto.costo|round(2) }}">
+            </div>
+            <!-- El costo principal se actualizará automáticamente con el nuevo valor -->
+            <input type="hidden" id="actualizar_costo" name="actualizar_costo" value="on">
           </div>
         </div>
         
-        <div class="col-md-6">
-          <div class="form-group">
-            <label for="comprobante" class="form-label">Comprobante</label>
-            <input type="file" class="form-control" id="comprobante" name="comprobante">
-            <div class="form-text">Opcional. Adjunte factura o comprobante de compra.</div>
+        <!-- Secciones opcionales compactadas -->
+        <div class="accordion-item">
+          <div class="accordion-header" id="caducidadHeader">
+            <span><i class="fas fa-calendar-alt" style="margin-right:6px;"></i> Fecha de caducidad</span>
+            <i class="fas fa-chevron-down"></i>
+          </div>
+          <div class="accordion-body" id="caducidadBody">
+            <input type="hidden" id="toggle_caducidad_estado" name="toggle_caducidad_estado" value="DESACTIVADO">
+            
+            <div class="expiry-options">
+              <div class="expiry-option">
+                <input type="radio" name="caducidad_lapso" id="cad1sem" value="1 semana">
+                <label for="cad1sem">1 semana</label>
+              </div>
+              <div class="expiry-option">
+                <input type="radio" name="caducidad_lapso" id="cad2sem" value="2 semanas">
+                <label for="cad2sem">2 semanas</label>
+              </div>
+              <div class="expiry-option">
+                <input type="radio" name="caducidad_lapso" id="cad1mes" value="1 mes">
+                <label for="cad1mes">1 mes</label>
+              </div>
+              <div class="expiry-option">
+                <input type="radio" name="caducidad_lapso" id="cad3meses" value="3 meses">
+                <label for="cad3meses">3 meses</label>
+              </div>
+              <div class="expiry-option">
+                <input type="radio" name="caducidad_lapso" id="cad6meses" value="6 meses">
+                <label for="cad6meses">6 meses</label>
+              </div>
+              <div class="expiry-option">
+                <input type="radio" name="caducidad_lapso" id="cad1ano" value="1 año">
+                <label for="cad1ano">1 año</label>
+              </div>
+            </div>
+            
+            <div style="margin-top:8px;">
+              <label for="fecha_caducidad" class="form-label">O fecha específica:</label>
+              <input type="date" class="form-control" id="fecha_caducidad" name="fecha_caducidad">
+            </div>
           </div>
         </div>
-      </div>
-      
-      <div class="form-group mt-3">
-        <label for="notas" class="form-label">Notas adicionales</label>
-        <textarea class="form-control" id="notas" name="notas" rows="3"></textarea>
-        <div class="form-text">Información adicional sobre esta entrada.</div>
-      </div>
-      
-      <div class="form-actions">
-        <a href="{{ url_for('ajuste_stock') }}" class="btn btn-outline">
-          <i class="fas fa-times"></i>
-          Cancelar
-        </a>
-        <button type="submit" class="btn btn-primary">
-          <i class="fas fa-check"></i>
-          Confirmar Entrada
-        </button>
+        
+        <div class="accordion-item">
+          <div class="accordion-header" id="notasHeader">
+            <span><i class="fas fa-sticky-note" style="margin-right:6px;"></i> Notas adicionales</span>
+            <i class="fas fa-chevron-down"></i>
+          </div>
+          <div class="accordion-body" id="notasBody">
+            <input type="hidden" id="toggle_notas_estado" name="toggle_notas_estado" value="DESACTIVADO">
+            <textarea class="form-control" id="notas" name="notas" rows="2" placeholder="Información adicional..."></textarea>
+          </div>
+        </div>
+        
+        <div class="accordion-item">
+          <div class="accordion-header" id="comprobanteHeader">
+            <span><i class="fas fa-file-invoice" style="margin-right:6px;"></i> Adjuntar comprobante</span>
+            <i class="fas fa-chevron-down"></i>
+          </div>
+          <div class="accordion-body" id="comprobanteBody">
+            <input type="hidden" id="toggle_comprobante_estado" name="toggle_comprobante_estado" value="DESACTIVADO">
+            <input type="file" class="form-control" id="comprobante" name="comprobante">
+          </div>
+        </div>
+        
+        <!-- Botones de acción -->
+        <div class="form-actions">
+          <a href="{{ url_for('ajuste_stock') }}" class="btn btn-outline">Cancelar</a>
+          <button type="submit" class="btn btn-primary">Guardar entrada</button>
+        </div>
       </div>
     </div>
   </form>
   
   <!-- Historial de movimientos -->
-  <div class="history-container">
+  <div class="history-section">
     <h3 class="history-title">
       <i class="fas fa-history"></i>
-      Últimos Movimientos
+      Historial de movimientos
     </h3>
     
     {% if historial and historial|length > 0 %}
@@ -646,15 +688,15 @@
           <tbody>
             {% for mov in historial %}
               <tr>
-                <td>{{ mov.fecha_movimiento.strftime('%d/%m/%Y') }}</td>
+                <td>{{ mov.fecha_formateada() }}</td>
                 <td>
                   {% if mov.tipo_movimiento == 'ENTRADA' %}
-                    <span class="badge badge-entrada">Entrada</span>
+                    <span class="badge badge-success">Entrada</span>
                   {% else %}
-                    <span class="badge badge-salida">Salida</span>
+                    <span class="badge badge-danger">Salida</span>
                   {% endif %}
                 </td>
-                <td>{{ mov.numero_lote|default('-') }}</td>
+                <td>{{ mov.numero_lote }}</td>
                 <td>
                   {% if mov.tipo_movimiento == 'ENTRADA' %}
                     +{{ mov.cantidad }}
@@ -664,20 +706,21 @@
                 </td>
                 <td>
                   {% if mov.tipo_movimiento == 'ENTRADA' %}
-                    ${{ mov.costo_unitario|round(2) }}
+                    {{ mov.costo_formateado() }}
                   {% else %}
                     -
                   {% endif %}
                 </td>
-                <td>{{ mov.motivo }}</td>
+                <td>{{ mov.motivo|title }}</td>
               </tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
     {% else %}
-      <div class="alert alert-info">
-        No hay movimientos registrados para este producto.
+      <div class="history-empty">
+        <i class="fas fa-inbox" style="font-size:24px; margin-bottom:8px;"></i>
+        <p>No hay movimientos registrados para este producto.</p>
       </div>
     {% endif %}
   </div>
@@ -685,76 +728,82 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    // Formato de costo unitario
-    const costoUnitario = document.getElementById('costo_unitario');
-    costoUnitario.addEventListener('change', function() {
-      if (this.value < 0) {
-        this.value = 0;
-      }
-    });
+    // Toggle costo
+    const mantenerCostoCheck = document.getElementById('mantener_costo_anterior');
+    const costoContainer = document.getElementById('costoContainer');
     
-    // Sugerir fecha de caducidad según el tipo de producto
-    const fechaCaducidad = document.getElementById('fecha_caducidad');
+    if (mantenerCostoCheck && costoContainer) {
+      mantenerCostoCheck.addEventListener('change', function() {
+        costoContainer.style.display = this.checked ? 'none' : 'block';
+      });
+    }
     
-    {% if producto.has_caducidad %}
-      // Si el producto tiene configuración de caducidad, sugerir fecha basada en metodo_caducidad
-      let diasCaducidad = 0;
-      {% if producto.metodo_caducidad == '1 día' %}
-        diasCaducidad = 1;
-      {% elif producto.metodo_caducidad == '3 días' %}
-        diasCaducidad = 3;
-      {% elif producto.metodo_caducidad == '1 semana' %}
-        diasCaducidad = 7;
-      {% elif producto.metodo_caducidad == '2 semanas' %}
-        diasCaducidad = 14;
-      {% elif producto.metodo_caducidad == '1 mes' %}
-        diasCaducidad = 30;
-      {% elif producto.metodo_caducidad == '3 meses' %}
-        diasCaducidad = 90;
-      {% elif producto.metodo_caducidad == '6 meses' %}
-        diasCaducidad = 180;
-      {% elif producto.metodo_caducidad == '1 año' %}
-        diasCaducidad = 365;
-      {% elif producto.metodo_caducidad == '2 años' %}
-        diasCaducidad = 730;
-      {% elif producto.metodo_caducidad == 'más de 3 años' %}
-        diasCaducidad = 1095;
-      {% endif %}
+    // Acordeones para opciones adicionales
+    const accordionHeaders = document.querySelectorAll('.accordion-header');
+    
+    accordionHeaders.forEach(header => {
+      const targetId = header.id.replace('Header', 'Body');
+      const body = document.getElementById(targetId);
+      const stateInputId = targetId.replace('Body', '').toLowerCase().replace('caducidad', 'toggle_caducidad').replace('notas', 'toggle_notas').replace('comprobante', 'toggle_comprobante') + '_estado';
+      const stateInput = document.getElementById(stateInputId);
       
-      if (diasCaducidad > 0) {
-        const fechaSugerida = new Date();
-        fechaSugerida.setDate(fechaSugerida.getDate() + diasCaducidad);
+      header.addEventListener('click', function() {
+        // Toggle el cuerpo
+        const isVisible = body.style.display === 'block';
+        body.style.display = isVisible ? 'none' : 'block';
         
-        const yyyy = fechaSugerida.getFullYear();
-        const mm = String(fechaSugerida.getMonth() + 1).padStart(2, '0');
-        const dd = String(fechaSugerida.getDate()).padStart(2, '0');
+        // Cambiar el icono
+        const icon = this.querySelector('.fas.fa-chevron-down, .fas.fa-chevron-up');
+        if (icon) {
+          icon.classList.toggle('fa-chevron-down');
+          icon.classList.toggle('fa-chevron-up');
+        }
         
-        fechaCaducidad.value = `${yyyy}-${mm}-${dd}`;
-      }
-    {% endif %}
+        // Actualizar el estado
+        if (stateInput) {
+          stateInput.value = isVisible ? 'DESACTIVADO' : 'ACTIVADO';
+        }
+      });
+    });
     
     // Validación del formulario
-    const form = document.querySelector('form');
-    form.addEventListener('submit', function(event) {
-      const cantidad = document.getElementById('cantidad');
-      const costoUnitario = document.getElementById('costo_unitario');
-      
-      if (cantidad.value <= 0) {
-        event.preventDefault();
-        alert('La cantidad debe ser mayor que cero.');
-        cantidad.focus();
-        return false;
+    const form = document.getElementById('entradaForm');
+    
+    if (form) {
+      form.addEventListener('submit', function(event) {
+        const cantidad = document.getElementById('cantidad');
+        
+        if (parseInt(cantidad.value) <= 0) {
+          event.preventDefault();
+          alert('La cantidad debe ser mayor que cero.');
+          cantidad.focus();
+          return false;
+        }
+        
+        // Validar costo si no se mantiene el anterior
+        if (!mantenerCostoCheck.checked) {
+          const costoUnitario = document.getElementById('costo_unitario');
+          if (parseFloat(costoUnitario.value) < 0) {
+            event.preventDefault();
+            alert('El costo unitario no puede ser negativo.');
+            costoUnitario.focus();
+            return false;
+          }
+        }
+        
+        return true;
+      });
+    }
+    
+    // Preconfigurar el lapso de caducidad si el producto tiene uno configurado, pero sin abrir el acordeón
+    {% if producto.has_caducidad and producto.metodo_caducidad %}
+      // Seleccionar automáticamente el lapso configurado pero sin mostrar la sección
+      const lapsoConfigured = "{{ producto.metodo_caducidad }}";
+      const radioLapso = document.querySelector(`input[name="caducidad_lapso"][value="${lapsoConfigured}"]`);
+      if (radioLapso) {
+        radioLapso.checked = true;
       }
-      
-      if (costoUnitario.value < 0) {
-        event.preventDefault();
-        alert('El costo unitario no puede ser negativo.');
-        costoUnitario.focus();
-        return false;
-      }
-      
-      return true;
-    });
+    {% endif %}
   });
 </script>
 {% endblock %}

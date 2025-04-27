@@ -54,6 +54,18 @@ class MovimientoInventario(db.Model):
     def __repr__(self):
         return f"<MovimientoInventario {self.id}: {self.tipo_movimiento} de {self.cantidad} unidades>"
 
+    # Método para formatear la fecha en un formato legible
+    def fecha_formateada(self):
+        if self.fecha_movimiento:
+            return self.fecha_movimiento.strftime('%d/%m/%Y')
+        return "Sin fecha"
+
+    # Método para formatear el costo unitario con formato de moneda
+    def costo_formateado(self):
+        if self.costo_unitario:
+            return f"${self.costo_unitario:.2f}"
+        return "No aplica"
+
 
 class LoteInventario(db.Model):
     """
@@ -64,7 +76,7 @@ class LoteInventario(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     
-    # Número de lote (formato: "Lote #X")
+    # Número de lote (formato: "Lote #X" o "Lote de Registro" para el inicial)
     numero_lote = db.Column(db.String(50), nullable=False)
     
     # Costo unitario del lote
@@ -88,6 +100,26 @@ class LoteInventario(db.Model):
     
     def __repr__(self):
         return f"<LoteInventario {self.numero_lote}: {self.stock} unidades>"
+
+    # Método para formatear la fecha de entrada
+    def fecha_entrada_formateada(self):
+        if self.fecha_entrada:
+            return self.fecha_entrada.strftime('%d/%m/%Y')
+        return "Sin fecha"
+
+    # Método para formatear la fecha de caducidad
+    def fecha_caducidad_formateada(self):
+        if self.fecha_caducidad:
+            return self.fecha_caducidad.strftime('%d/%m/%Y')
+        return "No caduca"
+
+    # Método para formatear el costo unitario con formato de moneda
+    def costo_formateado(self):
+        return f"${self.costo_unitario:.2f}"
+
+    # Método para determinar si es el lote de registro
+    def es_lote_registro(self):
+        return self.numero_lote == "Lote de Registro"
 
 
 class LoteMovimientoRelacion(db.Model):

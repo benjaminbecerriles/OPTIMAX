@@ -29,9 +29,25 @@ def allowed_file(filename):
 
 # Funciones auxiliares para gestión de lotes
 def obtener_proximo_numero_lote(producto_id):
-    """Obtiene el siguiente número de lote para un producto."""
+    """
+    Obtiene el siguiente número de lote para un producto.
+    El primer lote siempre es 'Lote de Registro', los siguientes son 'Lote #X'
+    """
+    # Verificar si ya existe un lote de registro
+    lote_registro = LoteInventario.query.filter_by(
+        producto_id=producto_id,
+        numero_lote="Lote de Registro"
+    ).first()
+    
+    # Si no hay lote de registro, este debería ser el primero
+    if not lote_registro:
+        return "Lote de Registro"
+    
+    # Si ya existe lote de registro, buscar el último lote numerado
     ultimo_lote = LoteInventario.query.filter_by(
         producto_id=producto_id
+    ).filter(
+        LoteInventario.numero_lote != "Lote de Registro"
     ).order_by(desc(LoteInventario.numero_lote)).first()
     
     if ultimo_lote:
@@ -40,9 +56,10 @@ def obtener_proximo_numero_lote(producto_id):
             numero = int(ultimo_lote.numero_lote.split('#')[1])
             return f"Lote #{numero + 1}"
         except:
-            return "Lote #1"
+            return "Lote #2"  # Si hay error, empezar con Lote #2
     
-    return "Lote #1"
+    # Si solo existe lote de registro, el siguiente es Lote #2
+    return "Lote #2"
 
 def obtener_lotes_activos(producto_id):
     """Obtiene todos los lotes activos (con stock > 0) de un producto."""
@@ -160,14 +177,36 @@ def ajuste_entrada(producto_id):
     
     # Obtener información de lotes y último movimiento
     proximo_lote = obtener_proximo_numero_lote(producto_id)
+    
+    # Primero buscar el lote de registro para este producto
+    lote_registro = LoteInventario.query.filter_by(
+        producto_id=producto_id,
+        numero_lote="Lote de Registro"
+    ).first()
+    
+    # Obtener el último lote (que podría ser el lote de registro si no hay otros)
     ultimo_lote = LoteInventario.query.filter_by(
         producto_id=producto_id
     ).order_by(desc(LoteInventario.fecha_entrada)).first()
     
+    # Obtener la última entrada (incluido el lote de registro)
     ultima_entrada = MovimientoInventario.query.filter_by(
         producto_id=producto_id,
         tipo_movimiento='ENTRADA'
     ).order_by(desc(MovimientoInventario.fecha_movimiento)).first()
+    
+    # Si no hay última entrada pero hay lote de registro, utilizamos la información del lote de registro
+    if not ultima_entrada and lote_registro:
+        # Buscar el movimiento asociado al lote de registro
+        entrada_registro = MovimientoInventario.query.filter_by(
+            producto_id=producto_id,
+            tipo_movimiento='ENTRADA',
+            numero_lote="Lote de Registro"
+        ).first()
+        
+        # Usar este como última entrada si existe
+        if entrada_registro:
+            ultima_entrada = entrada_registro
     
     # Historial de movimientos recientes
     historial = MovimientoInventario.query.filter_by(
@@ -179,23 +218,69 @@ def ajuste_entrada(producto_id):
             # Obtener datos del formulario
             cantidad = int(request.form.get('cantidad', 1))
             motivo = request.form.get('motivo', 'compra')
-            costo_unitario = float(request.form.get('costo_unitario', producto.costo))
+            mantener_costo_anterior = request.form.get('mantener_costo_anterior') == 'on'
+            
+            # Determinar el costo unitario
+            if mantener_costo_anterior and ultima_entrada and ultima_entrada.costo_unitario:
+                costo_unitario = ultima_entrada.costo_unitario
+            else:
+                costo_unitario = float(request.form.get('costo_unitario', producto.costo))
+            
             actualizar_costo = request.form.get('actualizar_costo') == 'on'
             notas = request.form.get('notas', '')
             
-            # Procesar fecha de caducidad (opcional)
+            # Procesar fecha de caducidad
             fecha_caducidad = None
-            if request.form.get('fecha_caducidad'):
-                try:
-                    fecha_caducidad = datetime.strptime(
-                        request.form.get('fecha_caducidad'), '%Y-%m-%d'
-                    )
-                except:
-                    pass
+            caducidad_activada = request.form.get('toggle_caducidad_estado') == 'ACTIVADO'
             
-            # Guardar comprobante si existe
+            if caducidad_activada:
+                caducidad_lapso = request.form.get('caducidad_lapso')
+                if caducidad_lapso:
+                    fecha_actual = datetime.now()
+                    if caducidad_lapso == '1 día':
+                        fecha_caducidad = fecha_actual.replace(day=fecha_actual.day + 1)
+                    elif caducidad_lapso == '3 días':
+                        fecha_caducidad = fecha_actual.replace(day=fecha_actual.day + 3)
+                    elif caducidad_lapso == '1 semana':
+                        fecha_caducidad = fecha_actual.replace(day=fecha_actual.day + 7)
+                    elif caducidad_lapso == '2 semanas':
+                        fecha_caducidad = fecha_actual.replace(day=fecha_actual.day + 14)
+                    elif caducidad_lapso == '1 mes':
+                        nuevo_mes = fecha_actual.month + 1
+                        nuevo_ano = fecha_actual.year
+                        if nuevo_mes > 12:
+                            nuevo_mes = 1
+                            nuevo_ano += 1
+                        fecha_caducidad = fecha_actual.replace(year=nuevo_ano, month=nuevo_mes)
+                    elif caducidad_lapso == '3 meses':
+                        nuevo_mes = fecha_actual.month + 3
+                        nuevo_ano = fecha_actual.year
+                        if nuevo_mes > 12:
+                            nuevo_mes = nuevo_mes - 12
+                            nuevo_ano += 1
+                        fecha_caducidad = fecha_actual.replace(year=nuevo_ano, month=nuevo_mes)
+                    elif caducidad_lapso == '6 meses':
+                        nuevo_mes = fecha_actual.month + 6
+                        nuevo_ano = fecha_actual.year
+                        if nuevo_mes > 12:
+                            nuevo_mes = nuevo_mes - 12
+                            nuevo_ano += 1
+                        fecha_caducidad = fecha_actual.replace(year=nuevo_ano, month=nuevo_mes)
+                    elif caducidad_lapso == '1 año':
+                        fecha_caducidad = fecha_actual.replace(year=fecha_actual.year + 1)
+                    elif caducidad_lapso == '2 años':
+                        fecha_caducidad = fecha_actual.replace(year=fecha_actual.year + 2)
+                elif request.form.get('fecha_caducidad'):
+                    try:
+                        fecha_caducidad = datetime.strptime(
+                            request.form.get('fecha_caducidad'), '%Y-%m-%d'
+                        )
+                    except:
+                        pass
+            
+            # Guardar comprobante si existe y si está activado
             comprobante_filename = None
-            if 'comprobante' in request.files and request.files['comprobante'].filename:
+            if request.form.get('toggle_comprobante_estado') == 'ACTIVADO' and 'comprobante' in request.files and request.files['comprobante'].filename:
                 file = request.files['comprobante']
                 if allowed_file(file.filename):
                     filename = secure_filename(f"{uuid.uuid4().hex}_{file.filename}")
@@ -219,7 +304,7 @@ def ajuste_entrada(producto_id):
                 costo_unitario=costo_unitario,
                 numero_lote=proximo_lote,
                 fecha_caducidad=fecha_caducidad,
-                notas=notas,
+                notas=notas if request.form.get('toggle_notas_estado') == 'ACTIVADO' else None,
                 comprobante=comprobante_filename,
                 usuario_id=empresa_id
             )
@@ -266,7 +351,8 @@ def ajuste_entrada(producto_id):
         producto=producto,
         proximo_lote=proximo_lote,
         ultimo_lote=ultimo_lote.numero_lote if ultimo_lote else None,
-        ultima_entrada=ultima_entrada.fecha_movimiento.strftime('%d/%m/%Y') if ultima_entrada else None,
+        ultima_entrada=ultima_entrada,
+        costo_anterior=ultima_entrada.costo_unitario if ultima_entrada else producto.costo,
         historial=historial
     )
 
@@ -329,7 +415,7 @@ def ajuste_salida(producto_id):
                 fecha_movimiento=datetime.now(),
                 metodo_descuento=metodo_descuento,
                 impacto_financiero=impacto_financiero,
-                notas=notas,
+                notas=notas if request.form.get('toggle_notas_estado') == 'ACTIVADO' else None,
                 usuario_id=empresa_id
             )
             db.session.add(nuevo_movimiento)
@@ -454,6 +540,52 @@ def ajuste_confirmacion(movimiento_id):
         lotes_afectados=lotes_afectados,
         stock_anterior=stock_anterior
     )
+
+# Método para crear el lote inicial (Lote de Registro) al crear un producto
+def crear_lote_registro(producto, cantidad, costo, fecha_caducidad=None, usuario_id=None):
+    """
+    Crea el lote de registro inicial para un producto recién creado.
+    
+    Args:
+        producto: Instancia del producto
+        cantidad: Cantidad inicial
+        costo: Costo unitario
+        fecha_caducidad: Fecha de caducidad (opcional)
+        usuario_id: ID del usuario que realiza la acción
+    """
+    try:
+        # Crear movimiento de inventario para el registro inicial
+        movimiento = MovimientoInventario(
+            producto_id=producto.id,
+            tipo_movimiento='ENTRADA',
+            cantidad=cantidad,
+            motivo='Registro inicial',
+            fecha_movimiento=datetime.now(),
+            costo_unitario=costo,
+            numero_lote="Lote de Registro",
+            fecha_caducidad=fecha_caducidad,
+            usuario_id=usuario_id or producto.empresa_id
+        )
+        db.session.add(movimiento)
+        
+        # Crear lote inicial
+        lote = LoteInventario(
+            producto_id=producto.id,
+            numero_lote="Lote de Registro",
+            costo_unitario=costo,
+            stock=cantidad,
+            fecha_entrada=datetime.now(),
+            fecha_caducidad=fecha_caducidad,
+            esta_activo=True
+        )
+        db.session.add(lote)
+        
+        # Commit es responsabilidad del método que llama a esta función
+        
+        return movimiento, lote
+    except Exception as e:
+        db.session.rollback()
+        raise e
 
 def init_app(app):
     """Inicializa la aplicación con este blueprint."""
