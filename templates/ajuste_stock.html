@@ -60,11 +60,11 @@
     max-width: 600px;
   }
 
-  /* Encabezado de página */
+  /* Encabezado de página - MODIFICADO PARA ALINEACIÓN CORRECTA */
   .page-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start; /* Cambiado a flex-start para mejor control */
     margin-bottom: 1.5rem;
     padding-bottom: 1rem;
   }
@@ -80,9 +80,10 @@
   .header-actions {
     display: flex;
     gap: 1rem;
+    margin-top: 8px; /* Añadido para alinear con el título */
   }
   
-  /* Botones con estilo Apple */
+  /* Botones con estilo Apple - CENTRADO DE TEXTO MEJORADO */
   .btn-icon {
     display: flex;
     align-items: center;
@@ -96,6 +97,15 @@
     text-decoration: none;
     cursor: pointer;
     border: none;
+    text-align: center; /* Centrar texto dentro del botón */
+  }
+  
+  /* Fuerza centrado de texto en botones */
+  .btn-icon i, 
+  .btn-icon span {
+    display: inline-block;
+    vertical-align: middle;
+    line-height: 1;
   }
   
   .btn-outline {
@@ -163,7 +173,7 @@
     outline: none;
   }
   
-  /* Busqueda con estilo Apple */
+  /* Busqueda con estilo Apple - COMPLETAMENTE REVISADO PARA LA LUPA */
   .search-container {
     display: flex;
     gap: 0.75rem;
@@ -177,9 +187,23 @@
     position: relative;
   }
   
+  .search-input i.search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #86868b;
+    font-size: 1rem;
+    z-index: 5; /* Asegurar que esté por encima del input */
+    pointer-events: none; /* Evitar que interfiera con el input */
+  }
+  
   .search-input input {
     width: 100%;
-    padding: 0.75rem 1rem 0.75rem 3rem;
+    padding-left: 3rem !important; /* Importante para dejar espacio para la lupa */
+    padding-right: 1rem;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
     border-radius: 8px;
     border: 1px solid rgba(0, 0, 0, 0.1);
     font-size: 1rem;
@@ -187,6 +211,7 @@
     height: 48px;
     background-color: var(--light-background);
     transition: all 0.2s ease;
+    box-sizing: border-box;
   }
   
   .search-input input:focus {
@@ -194,15 +219,6 @@
     border-color: var(--accent);
     box-shadow: 0 0 0 3px rgba(229, 46, 46, 0.15);
     outline: none;
-  }
-  
-  .search-icon {
-    position: absolute;
-    left: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text-secondary);
-    font-size: 1rem;
   }
   
   .search-actions {
@@ -647,11 +663,11 @@
     <div class="header-actions">
       <a href="{{ url_for('dashboard_inventario') }}" class="btn-icon btn-outline">
         <i class="fas fa-arrow-left"></i>
-        Volver
+        <span>Volver</span>
       </a>
       <a href="{{ url_for('historial_movimientos') }}" class="btn-icon btn-primary" id="btnHistorial">
         <i class="fas fa-history"></i>
-        Historial
+        <span>Historial</span>
       </a>
     </div>
   </div>
@@ -693,6 +709,7 @@
   
   <div class="search-container">
     <div class="search-input">
+      <!-- Icono de lupa utilizando directamente Font Awesome -->
       <i class="fas fa-search search-icon"></i>
       <input type="text" id="searchInput" placeholder="Buscar por nombre, código o categoría...">
     </div>
