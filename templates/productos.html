@@ -1360,22 +1360,20 @@
             </span>
           </td>
           
-          <!-- NUEVO: Próximo lote a caducar y días restantes -->
+          <!-- DEBUG: Próximo lote a caducar y días restantes -->
           <td class="column-expiry">
-            {% if p.proximo_lote_dias is defined and p.proximo_lote_dias is not none %}
-              {% if p.proximo_lote_dias < 0 %}
-                <span class="expiry-days expired">Caducado</span>
-              {% elif p.proximo_lote_dias == 0 %}
-                <span class="expiry-days expired">Hoy</span>
-              {% elif p.proximo_lote_dias <= 7 %}
-                <span class="expiry-days soon">{{ p.proximo_lote_dias }} día{{ 's' if p.proximo_lote_dias != 1 }}</span>
-              {% elif p.proximo_lote_dias <= 30 %}
-                <span class="expiry-days medium">{{ p.proximo_lote_dias }} días</span>
-              {% else %}
-                <span class="expiry-days far">{{ p.proximo_lote_dias }} días</span>
-              {% endif %}
-            {% else %}
+            {% if p.proximo_lote_dias is none %}
               <span class="expiry-value">N/A</span>
+            {% elif p.proximo_lote_dias < 0 %}
+              <span class="expiry-days expired">Caducado ({{ p.proximo_lote_dias|abs }} días)</span>
+            {% elif p.proximo_lote_dias == 0 %}
+              <span class="expiry-days expired">Hoy</span>
+            {% elif p.proximo_lote_dias <= 7 %}
+              <span class="expiry-days soon">{{ p.proximo_lote_dias }} día{{ 's' if p.proximo_lote_dias != 1 }}</span>
+            {% elif p.proximo_lote_dias <= 30 %}
+              <span class="expiry-days medium">{{ p.proximo_lote_dias }} días</span>
+            {% else %}
+              <span class="expiry-days far">{{ p.proximo_lote_dias }} días</span>
             {% endif %}
           </td>
           

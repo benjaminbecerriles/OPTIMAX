@@ -1,6 +1,6 @@
 import os
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta, date
 from flask import (
     Blueprint, render_template, request, redirect, 
     url_for, flash, session, jsonify
@@ -159,6 +159,74 @@ def ajuste_stock():
         categorias=categorias_lista
     )
 
+@ajuste_stock_bp.route('/fix-existing-lots', methods=['GET'])
+def fix_existing_lots():
+    """Ruta temporal para arreglar lotes existentes sin fecha de caducidad."""
+    # Esta ruta solo debe ser accesible por un administrador
+    if not session.get('logged_in') or not session.get('user_id'):
+        return "Acceso denegado", 403
+    
+    try:
+        # Obtener todos los productos con has_caducidad=True y metodo_caducidad no nulo
+        productos = Producto.query.filter(
+            Producto.has_caducidad == True,
+            Producto.metodo_caducidad.isnot(None)
+        ).all()
+        
+        fixed_count = 0
+        for producto in productos:
+            # Obtener lotes activos sin fecha de caducidad
+            lotes = LoteInventario.query.filter(
+                LoteInventario.producto_id == producto.id,
+                LoteInventario.esta_activo == True,
+                LoteInventario.stock > 0,
+                LoteInventario.fecha_caducidad.is_(None)
+            ).all()
+            
+            if not lotes:
+                continue
+                
+            # Calcular fecha de caducidad basada en metodo_caducidad
+            caducidad_lapso = producto.metodo_caducidad
+            fecha_actual = datetime.now()
+            fecha_caducidad = None
+            
+            if caducidad_lapso == '1 día':
+                fecha_caducidad = fecha_actual + timedelta(days=1)
+            elif caducidad_lapso == '3 días':
+                fecha_caducidad = fecha_actual + timedelta(days=3)
+            elif caducidad_lapso == '1 semana':
+                fecha_caducidad = fecha_actual + timedelta(days=7)
+            elif caducidad_lapso == '2 semanas':
+                fecha_caducidad = fecha_actual + timedelta(days=14)
+            elif caducidad_lapso == '1 mes':
+                fecha_caducidad = fecha_actual + timedelta(days=30)
+            elif caducidad_lapso == '3 meses':
+                fecha_caducidad = fecha_actual + timedelta(days=90)
+            elif caducidad_lapso == '6 meses':
+                fecha_caducidad = fecha_actual + timedelta(days=180)
+            elif caducidad_lapso == '1 año':
+                fecha_caducidad = fecha_actual + timedelta(days=365)
+            elif caducidad_lapso == '2 años':
+                fecha_caducidad = fecha_actual + timedelta(days=730)
+            
+            # Convertir a date
+            if fecha_caducidad:
+                fecha_caducidad = fecha_caducidad.date()
+                
+                # Actualizar los lotes
+                for lote in lotes:
+                    lote.fecha_caducidad = fecha_caducidad
+                    fixed_count += 1
+                    
+        # Guardar cambios
+        db.session.commit()
+        return f"Se actualizaron {fixed_count} lotes con fechas de caducidad"
+        
+    except Exception as e:
+        db.session.rollback()
+        return f"Error: {str(e)}"
+
 @ajuste_stock_bp.route('/ajuste-entrada/<int:producto_id>', methods=['GET', 'POST'])
 def ajuste_entrada(producto_id):
     """Gestiona la entrada de mercancía de un producto."""
@@ -243,44 +311,35 @@ def ajuste_entrada(producto_id):
                 if caducidad_lapso:
                     fecha_actual = datetime.now()
                     if caducidad_lapso == '1 día':
-                        fecha_caducidad = fecha_actual.replace(day=fecha_actual.day + 1)
+                        fecha_caducidad = fecha_actual + timedelta(days=1)
                     elif caducidad_lapso == '3 días':
-                        fecha_caducidad = fecha_actual.replace(day=fecha_actual.day + 3)
+                        fecha_caducidad = fecha_actual + timedelta(days=3)
                     elif caducidad_lapso == '1 semana':
-                        fecha_caducidad = fecha_actual.replace(day=fecha_actual.day + 7)
+                        fecha_caducidad = fecha_actual + timedelta(days=7)
                     elif caducidad_lapso == '2 semanas':
-                        fecha_caducidad = fecha_actual.replace(day=fecha_actual.day + 14)
+                        fecha_caducidad = fecha_actual + timedelta(days=14)
                     elif caducidad_lapso == '1 mes':
-                        nuevo_mes = fecha_actual.month + 1
-                        nuevo_ano = fecha_actual.year
-                        if nuevo_mes > 12:
-                            nuevo_mes = 1
-                            nuevo_ano += 1
-                        fecha_caducidad = fecha_actual.replace(year=nuevo_ano, month=nuevo_mes)
+                        fecha_caducidad = fecha_actual + timedelta(days=30)
                     elif caducidad_lapso == '3 meses':
-                        nuevo_mes = fecha_actual.month + 3
-                        nuevo_ano = fecha_actual.year
-                        if nuevo_mes > 12:
-                            nuevo_mes = nuevo_mes - 12
-                            nuevo_ano += 1
-                        fecha_caducidad = fecha_actual.replace(year=nuevo_ano, month=nuevo_mes)
+                        fecha_caducidad = fecha_actual + timedelta(days=90)
                     elif caducidad_lapso == '6 meses':
-                        nuevo_mes = fecha_actual.month + 6
-                        nuevo_ano = fecha_actual.year
-                        if nuevo_mes > 12:
-                            nuevo_mes = nuevo_mes - 12
-                            nuevo_ano += 1
-                        fecha_caducidad = fecha_actual.replace(year=nuevo_ano, month=nuevo_mes)
+                        fecha_caducidad = fecha_actual + timedelta(days=180)
                     elif caducidad_lapso == '1 año':
-                        fecha_caducidad = fecha_actual.replace(year=fecha_actual.year + 1)
+                        fecha_caducidad = fecha_actual + timedelta(days=365)
                     elif caducidad_lapso == '2 años':
-                        fecha_caducidad = fecha_actual.replace(year=fecha_actual.year + 2)
+                        fecha_caducidad = fecha_actual + timedelta(days=730)
+                         
+                    # Extraer solo la fecha (sin hora) para evitar problemas de comparación
+                    fecha_caducidad = fecha_caducidad.date()
+                    print(f"DEBUG: Fecha de caducidad calculada: {fecha_caducidad} (tipo: {type(fecha_caducidad)})")
                 elif request.form.get('fecha_caducidad'):
                     try:
                         fecha_caducidad = datetime.strptime(
                             request.form.get('fecha_caducidad'), '%Y-%m-%d'
-                        )
-                    except:
+                        ).date() # Convertir a tipo date
+                        print(f"DEBUG: Fecha de caducidad manual: {fecha_caducidad}")
+                    except Exception as e:
+                        print(f"ERROR: No se pudo procesar la fecha manual: {e}")
                         pass
             
             # Guardar comprobante si existe y si está activado
@@ -581,6 +640,35 @@ def crear_lote_registro(producto, cantidad, costo, fecha_caducidad=None, usuario
         usuario_id: ID del usuario que realiza la acción
     """
     try:
+        # Procesar la fecha de caducidad si el producto tiene activada la opción
+        if producto.has_caducidad and producto.metodo_caducidad and not fecha_caducidad:
+            caducidad_lapso = producto.metodo_caducidad
+            fecha_actual = datetime.now()
+            
+            if caducidad_lapso == '1 día':
+                fecha_caducidad = fecha_actual + timedelta(days=1)
+            elif caducidad_lapso == '3 días':
+                fecha_caducidad = fecha_actual + timedelta(days=3)
+            elif caducidad_lapso == '1 semana':
+                fecha_caducidad = fecha_actual + timedelta(days=7)
+            elif caducidad_lapso == '2 semanas':
+                fecha_caducidad = fecha_actual + timedelta(days=14)
+            elif caducidad_lapso == '1 mes':
+                fecha_caducidad = fecha_actual + timedelta(days=30)
+            elif caducidad_lapso == '3 meses':
+                fecha_caducidad = fecha_actual + timedelta(days=90)
+            elif caducidad_lapso == '6 meses':
+                fecha_caducidad = fecha_actual + timedelta(days=180)
+            elif caducidad_lapso == '1 año':
+                fecha_caducidad = fecha_actual + timedelta(days=365)
+            elif caducidad_lapso == '2 años':
+                fecha_caducidad = fecha_actual + timedelta(days=730)
+            
+            # Extraer solo la fecha (sin hora)
+            if fecha_caducidad:
+                fecha_caducidad = fecha_caducidad.date()
+                print(f"DEBUG CREAR LOTE REGISTRO: Fecha caducidad calculada: {fecha_caducidad}")
+        
         # Crear movimiento de inventario para el registro inicial
         movimiento = MovimientoInventario(
             producto_id=producto.id,
@@ -607,11 +695,14 @@ def crear_lote_registro(producto, cantidad, costo, fecha_caducidad=None, usuario
         )
         db.session.add(lote)
         
+        print(f"LOTE REGISTRO CREADO: producto_id={producto.id}, fecha_caducidad={fecha_caducidad}")
+        
         # Commit es responsabilidad del método que llama a esta función
         
         return movimiento, lote
     except Exception as e:
         db.session.rollback()
+        print(f"ERROR al crear lote de registro: {str(e)}")
         raise e
 
 def init_app(app):

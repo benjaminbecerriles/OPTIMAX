@@ -49,7 +49,7 @@ import requests
 SERPAPI_API_KEY = "84d269bfa51876a1a092ace371d89f7dc2500d8c5a61b420c08d96e5351f5c79"
 
 from sqlalchemy import or_
-from datetime import datetime, timedelta
+from datetime import datetime, date, timedelta
 
 # =========================================
 # NUEVO: Conjunto de Categorías con Emojis
@@ -643,6 +643,69 @@ def ver_productos():
     filtro_aprobacion = request.args.get('filtroAprobacion', 'aprobados')
     termino_busqueda = request.args.get('q', '').strip()
 
+    # Actualizamos automáticamente los lotes sin fecha de caducidad
+    try:
+        # Obtener productos con caducidad activada
+        productos_caducidad = Producto.query.filter(
+            Producto.empresa_id == empresa_id,
+            Producto.has_caducidad == True,
+            Producto.metodo_caducidad.isnot(None)
+        ).all()
+        
+        fixed_count = 0
+        for producto in productos_caducidad:
+            # Obtener lotes activos sin fecha de caducidad
+            lotes = LoteInventario.query.filter(
+                LoteInventario.producto_id == producto.id,
+                LoteInventario.esta_activo == True,
+                LoteInventario.stock > 0,
+                LoteInventario.fecha_caducidad.is_(None)
+            ).all()
+            
+            if not lotes:
+                continue
+                
+            # Calcular fecha de caducidad basada en metodo_caducidad
+            caducidad_lapso = producto.metodo_caducidad
+            fecha_actual = datetime.now()
+            fecha_caducidad = None
+            
+            if caducidad_lapso == '1 día':
+                fecha_caducidad = fecha_actual + timedelta(days=1)
+            elif caducidad_lapso == '3 días':
+                fecha_caducidad = fecha_actual + timedelta(days=3)
+            elif caducidad_lapso == '1 semana':
+                fecha_caducidad = fecha_actual + timedelta(days=7)
+            elif caducidad_lapso == '2 semanas':
+                fecha_caducidad = fecha_actual + timedelta(days=14)
+            elif caducidad_lapso == '1 mes':
+                fecha_caducidad = fecha_actual + timedelta(days=30)
+            elif caducidad_lapso == '3 meses':
+                fecha_caducidad = fecha_actual + timedelta(days=90)
+            elif caducidad_lapso == '6 meses':
+                fecha_caducidad = fecha_actual + timedelta(days=180)
+            elif caducidad_lapso == '1 año':
+                fecha_caducidad = fecha_actual + timedelta(days=365)
+            elif caducidad_lapso == '2 años':
+                fecha_caducidad = fecha_actual + timedelta(days=730)
+            
+            # Convertir a date
+            if fecha_caducidad:
+                fecha_caducidad = fecha_caducidad.date()
+                
+                # Actualizar los lotes
+                for lote in lotes:
+                    lote.fecha_caducidad = fecha_caducidad
+                    fixed_count += 1
+                    
+        # Guardar cambios si se hicieron modificaciones
+        if fixed_count > 0:
+            db.session.commit()
+            print(f"Se actualizaron automáticamente {fixed_count} lotes con fechas de caducidad")
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error al actualizar fechas de caducidad: {str(e)}")
+
     query = Producto.query.filter_by(empresa_id=empresa_id)
     if filtro_aprobacion == 'aprobados':
         query = query.filter(Producto.is_approved == True)
@@ -678,6 +741,8 @@ def ver_productos():
                 LoteInventario.stock > 0
             ).all()
             
+            print(f"Producto {producto.id} ({producto.nombre}) - Lotes activos: {len(lotes_activos)}")
+            
             if lotes_activos:
                 # Cálculo del costo promedio ponderado por cantidad en stock
                 costo_total = 0
@@ -691,31 +756,103 @@ def ver_productos():
                     producto.costo_promedio = costo_total / stock_total
                 
                 # Buscar el próximo lote a caducar entre los que tienen fecha
-                lotes_con_caducidad = [lote for lote in lotes_activos if lote.fecha_caducidad is not None]
+                lotes_con_caducidad = []
+                for lote in lotes_activos:
+                    if lote.fecha_caducidad is not None:
+                        lotes_con_caducidad.append(lote)
+                        print(f"  Lote {lote.id}: fecha caducidad = {lote.fecha_caducidad}")
+                
+                print(f"  Lotes con caducidad: {len(lotes_con_caducidad)}")
                 
                 if lotes_con_caducidad:
                     # Ordenar por fecha de caducidad (más cercana primero)
                     lotes_con_caducidad.sort(key=lambda x: x.fecha_caducidad)
                     proximo_lote = lotes_con_caducidad[0]
                     
-                    # Utilizar el método dias_hasta_caducidad del modelo LoteInventario
-                    print(f"Producto {producto.id} ({producto.nombre}) - Fecha de caducidad: {proximo_lote.fecha_caducidad}")
-                    print(f"Fecha actual: {date.today()}")
-                    dias_calculados = proximo_lote.dias_hasta_caducidad()
-                    print(f"Días hasta caducidad calculados: {dias_calculados}")
+                    # Calcular días hasta caducidad directamente
+                    hoy = date.today()
+                    if proximo_lote.fecha_caducidad < hoy:
+                        dias_calculados = -1 * (hoy - proximo_lote.fecha_caducidad).days
+                    else:
+                        dias_calculados = (proximo_lote.fecha_caducidad - hoy).days
+                    
+                    print(f"  Próximo lote {proximo_lote.id} caduca el {proximo_lote.fecha_caducidad}")
+                    print(f"  Fecha actual: {hoy}")
+                    print(f"  Días hasta caducidad calculados: {dias_calculados}")
 
                     # Asignar el valor a la propiedad del producto
                     producto.proximo_lote_dias = dias_calculados
-                    print(f"Valor asignado a proximo_lote_dias: {producto.proximo_lote_dias}")
+                    print(f"  Valor asignado a proximo_lote_dias: {producto.proximo_lote_dias}")
+                else:
+                    print(f"  No hay lotes con fecha de caducidad")
+            else:
+                print(f"  No hay lotes activos con stock positivo")
 
         except Exception as e:
             print(f"Error procesando producto {producto.id}: {str(e)}")
+            import traceback
+            traceback.print_exc()  # Esto dará más información sobre la excepción
             # No interrumpir el proceso por un error en un producto
             continue
+    
+    # Verificación final
+    for producto in productos:
+        print(f"Producto {producto.id} final - proximo_lote_dias: {getattr(producto, 'proximo_lote_dias', 'NO DEFINIDO')}")
+
+    # Vamos a hacer un diagnóstico más profundo y forzar valores para probar
+    productos_dict = []
+    for p in productos:
+        # PASO 1: Verificar directamente en la base de datos
+        lotes_activos = LoteInventario.query.filter(
+            LoteInventario.producto_id == p.id,
+            LoteInventario.esta_activo == True,
+            LoteInventario.stock > 0
+        ).all()
+        
+        # PASO 2: Buscar cualquier lote con fecha de caducidad
+        proximo_lote = None
+        dias_calculados = None
+        
+        for lote in lotes_activos:
+            print(f"DEBUG LOTE: Producto {p.id}, Lote {lote.id}, Fecha caducidad: {lote.fecha_caducidad}")
+            if lote.fecha_caducidad is not None:
+                if proximo_lote is None or lote.fecha_caducidad < proximo_lote.fecha_caducidad:
+                    proximo_lote = lote
+        
+        # PASO 3: Calcular días si hay lote con fecha
+        if proximo_lote and proximo_lote.fecha_caducidad:
+            hoy = date.today()
+            if proximo_lote.fecha_caducidad < hoy:
+                dias_calculados = -1 * (hoy - proximo_lote.fecha_caducidad).days
+            else:
+                dias_calculados = (proximo_lote.fecha_caducidad - hoy).days
+            print(f"DEBUG FINAL: Producto {p.id} - Próximo lote caduca en {dias_calculados} días")
+        
+        # PASO 4: Crear diccionario con datos seguros
+        p_dict = {
+            'id': p.id,
+            'nombre': p.nombre,
+            'stock': p.stock,
+            'costo': p.costo,
+            'precio_venta': p.precio_venta,
+            'categoria': p.categoria,
+            'categoria_color': p.categoria_color,
+            'foto': p.foto,
+            'codigo_barras_externo': p.codigo_barras_externo,
+            'marca': p.marca,
+            'es_favorito': p.es_favorito,
+            'esta_a_la_venta': p.esta_a_la_venta,
+            'unidad': getattr(p, 'unidad', None),
+            'costo_promedio': getattr(p, 'costo_promedio', p.costo),
+            'proximo_lote_dias': dias_calculados  # Usar valor calculado directamente
+        }
+        
+        print(f"Diccionario final para producto {p.id}: proximo_lote_dias = {p_dict['proximo_lote_dias']}")
+        productos_dict.append(p_dict)
 
     return render_template(
         'productos.html',
-        productos=productos,
+        productos=productos_dict,
         filtro_aprobacion=filtro_aprobacion,
         termino_busqueda=termino_busqueda,
         total_productos=total_productos
@@ -966,6 +1103,71 @@ def agregar_producto():
             # Guardar en la base de datos
             db.session.add(nuevo)
             db.session.commit()
+            
+            # Si tiene caducidad y stock positivo, crear un lote inicial con fecha de caducidad
+            if nuevo.has_caducidad and nuevo.metodo_caducidad and nuevo.stock > 0:
+                try:
+                    # Determinar la fecha de caducidad según el método
+                    fecha_actual = datetime.now()
+                    fecha_caducidad = None
+
+                    if nuevo.metodo_caducidad == '1 día':
+                        fecha_caducidad = fecha_actual + timedelta(days=1)
+                    elif nuevo.metodo_caducidad == '3 días':
+                        fecha_caducidad = fecha_actual + timedelta(days=3)
+                    elif nuevo.metodo_caducidad == '1 semana':
+                        fecha_caducidad = fecha_actual + timedelta(days=7)
+                    elif nuevo.metodo_caducidad == '2 semanas':
+                        fecha_caducidad = fecha_actual + timedelta(days=14)
+                    elif nuevo.metodo_caducidad == '1 mes':
+                        fecha_caducidad = fecha_actual + timedelta(days=30)
+                    elif nuevo.metodo_caducidad == '3 meses':
+                        fecha_caducidad = fecha_actual + timedelta(days=90)
+                    elif nuevo.metodo_caducidad == '6 meses':
+                        fecha_caducidad = fecha_actual + timedelta(days=180)
+                    elif nuevo.metodo_caducidad == '1 año':
+                        fecha_caducidad = fecha_actual + timedelta(days=365)
+                    elif nuevo.metodo_caducidad == '2 años':
+                        fecha_caducidad = fecha_actual + timedelta(days=730)
+
+                    # Convertir a date
+                    if fecha_caducidad:
+                        fecha_caducidad = fecha_caducidad.date()
+                        
+                        # Crear el lote inicial
+                        nuevo_lote = LoteInventario(
+                            producto_id=nuevo.id,
+                            numero_lote="Lote de Registro",
+                            costo_unitario=nuevo.costo,
+                            stock=nuevo.stock,
+                            fecha_entrada=datetime.now(),
+                            fecha_caducidad=fecha_caducidad,
+                            esta_activo=True
+                        )
+                        
+                        # Crear un movimiento de entrada asociado
+                        movimiento_inicial = MovimientoInventario(
+                            producto_id=nuevo.id,
+                            tipo_movimiento='ENTRADA',
+                            cantidad=nuevo.stock,
+                            motivo='Registro inicial',
+                            fecha_movimiento=datetime.now(),
+                            costo_unitario=nuevo.costo,
+                            numero_lote="Lote de Registro",
+                            fecha_caducidad=fecha_caducidad,
+                            usuario_id=session['user_id']
+                        )
+
+                        db.session.add(nuevo_lote)
+                        db.session.add(movimiento_inicial)
+                        db.session.commit()
+
+                        print(f"Lote inicial creado para producto {nuevo.id} con fecha de caducidad {fecha_caducidad}")
+                except Exception as e:
+                        db.session.rollback()
+                        print(f"Error al crear lote inicial: {str(e)}")
+                        # No devolveremos el error al usuario, el producto ya se creó correctamente
+
             flash('Producto guardado exitosamente', 'success')
             
         except Exception as e:
