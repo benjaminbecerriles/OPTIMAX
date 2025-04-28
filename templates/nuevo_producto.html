@@ -199,11 +199,61 @@
     background-color: #2865d9;
   }
   
-  /* Botón de cancelar */
-  .actions-container {
+  /* MODIFICADO: Nuevo estilo para el encabezado con título y botón de volver */
+  .header-container {
     display: flex;
-    justify-content: flex-end;
-    margin-bottom: 48px;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  
+  /* MODIFICADO: Contenedor para los botones en el header */
+  .buttons-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+  
+  /* MODIFICADO: Nuevo botón volver (más grande y recorrido a la izquierda) */
+  .btn-back {
+    display: inline-block;
+    padding: 10px 30px;
+    font-size: 16px;
+    font-weight: 500;
+    background-color: var(--light-background);
+    color: var(--text-color);
+    border: 1px solid var(--separator);
+    border-radius: 50px; /* Forma ovalada */
+    text-decoration: none;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+  }
+  
+  .btn-back:hover {
+    background-color: #ebebeb;
+    border-color: var(--text-secondary);
+  }
+  
+  /* NUEVO: Botón para agregar masivamente */
+  .btn-mass-add {
+    display: inline-block;
+    padding: 10px 30px;
+    font-size: 16px;
+    font-weight: 500;
+    background-color: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 50px; /* Forma ovalada */
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+  }
+  
+  .btn-mass-add:hover {
+    background-color: var(--accent-hover);
+  }
+  
+  /* Botón de cancelar - Mantenido pero oculto */
+  .actions-container {
+    display: none; /* Ocultar el contenedor original */
   }
   
   .btn-cancel {
@@ -348,11 +398,32 @@
     .page-description {
       font-size: 16px;
     }
+    
+    /* Ajuste responsivo para el header */
+    .header-container {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    
+    .buttons-container {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
   }
 </style>
 
 <div class="apple-container animated-fade">
-  <h1>Agregar producto</h1>
+  <!-- MODIFICADO: Nuevo contenedor para el título y botones -->
+  <div class="header-container">
+    <h1>Registrar producto</h1>
+    <div class="buttons-container">
+      <a href="{{ url_for('dashboard_inventario') }}" class="btn-back">Volver</a>
+      <a href="#" class="btn-mass-add">O registrar masivamente</a>
+    </div>
+  </div>
+  
   <p class="page-description">Elige el tipo de producto que deseas añadir a tu inventario</p>
 
 <!-- Grid de opciones de producto -->
@@ -400,7 +471,7 @@
     </a>
   </div>
   
-  <!-- Botón cancelar -->
+  <!-- Botón cancelar original (ahora oculto) -->
   <div class="actions-container">
     <a href="{{ url_for('dashboard_inventario') }}" class="btn-cancel">Cancelar</a>
   </div>

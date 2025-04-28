@@ -9,8 +9,8 @@
   /* Diseño elegante pero ultra-simple */
   :root {
     --font-system: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    --color-text: #333333;
-    --color-text-light: #6c6c6c;
+    --color-text: #222222; /* Texto más oscuro para mejor legibilidad */
+    --color-text-light: #505050; /* Menos opaco para mejor legibilidad */
     --color-background: #ffffff;
     --color-border: #e0e0e0;
     --color-primary: #e52e2e;
@@ -282,6 +282,47 @@
     min-width: 0;
     border-radius: 0 6px 6px 0;
   }
+
+  /* Input con unidad */
+  .quantity-input-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .quantity-input-container .form-control {
+    padding-right: 65px; /* Espacio para la unidad */
+  }
+
+  .unit-indicator {
+    position: absolute;
+    right: 12px;
+    color: var(--color-text-light);
+    pointer-events: none;
+    font-size: 14px;
+  }
+  
+  /* Toggle para caducidad */
+  .toggle-button {
+    border: 1px solid var(--color-border);
+    border-radius: 20px;
+    background-color: #f2f2f2;
+    padding: 0.25rem 0.75rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.3s;
+    color: var(--color-text);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 100px;
+  }
+
+  .toggle-button.active {
+    background-color: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+  }
   
   /* Accordion para secciones opcionales */
   .accordion-item {
@@ -318,7 +359,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
-    margin-bottom: 12px;
+    margin-top: 12px;
   }
   
   .expiry-option {
@@ -424,7 +465,7 @@
     text-align: left;
     font-weight: 500;
     font-size: 13px;
-    color: var(--color-text-light);
+    color: var(--color-text);
     border-bottom: 1px solid var(--color-border);
   }
   
@@ -469,6 +510,18 @@
       grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
     }
   }
+
+  /* Caducidad toggle header */
+  .caducidad-toggle-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .caducidad-toggle-header .form-label {
+    margin-bottom: 0;
+  }
 </style>
 
 <div class="entry-container">
@@ -490,7 +543,7 @@
         <img src="{{ url_for('static', filename='img/default_product.jpg') }}" alt="Imagen predeterminada">
       {% endif %}
     </div>
-          <div class="product-details">
+    <div class="product-details">
       <h2 class="product-name">{{ producto.nombre }}</h2>
       <div class="product-meta">
         <div class="meta-item">
@@ -561,7 +614,23 @@
         <div class="form-row">
           <div class="form-col">
             <label for="cantidad" class="form-label">Cantidad a añadir*</label>
-            <input type="number" class="form-control" id="cantidad" name="cantidad" required min="1" value="1">
+            <div class="quantity-input-container">
+              <input type="number" 
+                     class="form-control" 
+                     id="cantidad" 
+                     name="cantidad" 
+                     required 
+                     min="{% if producto.unidad and producto.unidad not in ['pieza', 'piezas'] %}0.001{% else %}1{% endif %}" 
+                     value="1"
+                     step="{% if producto.unidad and producto.unidad not in ['pieza', 'piezas'] %}0.001{% else %}1{% endif %}">
+              <span class="unit-indicator" id="unidadIndicator">
+                {% if producto.unidad %}
+                  {% if producto.unidad == 'pieza' %}PIEZA{% else %}{{ producto.unidad|upper }}{% endif %}
+                {% else %}
+                  PIEZA
+                {% endif %}
+              </span>
+            </div>
           </div>
           
           <div class="form-col">
@@ -586,24 +655,32 @@
           </div>
           
           <div id="costoContainer" style="display:none;">
+            <label for="costo_unitario" class="form-label">Ingresar nuevo costo</label>
             <div class="input-group">
               <span class="input-group-text">$</span>
-              <input type="number" class="form-control" id="costo_unitario" name="costo_unitario" step="0.01" min="0" value="{{ producto.costo|round(2) }}">
+              <input type="number" 
+                     class="form-control" 
+                     id="costo_unitario" 
+                     name="costo_unitario" 
+                     step="0.01" 
+                     min="0" 
+                     value="{{ producto.costo|round(2) }}">
             </div>
             <!-- El costo principal se actualizará automáticamente con el nuevo valor -->
             <input type="hidden" id="actualizar_costo" name="actualizar_costo" value="on">
           </div>
         </div>
         
-        <!-- Secciones opcionales compactadas -->
-        <div class="accordion-item">
-          <div class="accordion-header" id="caducidadHeader">
-            <span><i class="fas fa-calendar-alt" style="margin-right:6px;"></i> Fecha de caducidad</span>
-            <i class="fas fa-chevron-down"></i>
+        <!-- Sección de caducidad con toggle -->
+        <div class="form-group">
+          <div class="caducidad-toggle-header">
+            <label class="form-label">Fecha de caducidad</label>
+            <button type="button" id="btnToggleCaducidad" class="toggle-button">DESACTIVADO</button>
           </div>
-          <div class="accordion-body" id="caducidadBody">
-            <input type="hidden" id="toggle_caducidad_estado" name="toggle_caducidad_estado" value="DESACTIVADO">
-            
+          
+          <input type="hidden" id="toggle_caducidad_estado" name="toggle_caducidad_estado" value="DESACTIVADO">
+          
+          <div id="caducidadOpcionesContainer" style="display:none;">
             <div class="expiry-options">
               <div class="expiry-option">
                 <input type="radio" name="caducidad_lapso" id="cad1sem" value="1 semana">
@@ -630,14 +707,10 @@
                 <label for="cad1ano">1 año</label>
               </div>
             </div>
-            
-            <div style="margin-top:8px;">
-              <label for="fecha_caducidad" class="form-label">O fecha específica:</label>
-              <input type="date" class="form-control" id="fecha_caducidad" name="fecha_caducidad">
-            </div>
           </div>
         </div>
         
+        <!-- Secciones opcionales compactadas -->
         <div class="accordion-item">
           <div class="accordion-header" id="notasHeader">
             <span><i class="fas fa-sticky-note" style="margin-right:6px;"></i> Notas adicionales</span>
@@ -732,6 +805,28 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
+    // Función para actualizar la unidad basada en la cantidad
+    function updateUnitText() {
+      const cantidad = document.getElementById('cantidad');
+      const unidadIndicator = document.getElementById('unidadIndicator');
+      
+      // Obtener la unidad del producto (o usar 'pieza'/'piezas' por defecto)
+      {% if producto.unidad %}
+        let unidad = '{{ producto.unidad }}';
+        
+        if (unidad === 'pieza') {
+          // Si es 'pieza', cambia a plural cuando es más de 1
+          unidadIndicator.textContent = parseFloat(cantidad.value) === 1 ? 'PIEZA' : 'PIEZAS';
+        } else {
+          // Mantener unidad existente (KG, L, etc.)
+          unidadIndicator.textContent = unidad.toUpperCase();
+        }
+      {% else %}
+        // Para productos sin unidad específica, usar pieza/piezas
+        unidadIndicator.textContent = parseFloat(cantidad.value) === 1 ? 'PIEZA' : 'PIEZAS';
+      {% endif %}
+    }
+    
     // Toggle costo
     const mantenerCostoCheck = document.getElementById('mantener_costo_anterior');
     const costoContainer = document.getElementById('costoContainer');
@@ -739,6 +834,31 @@
     if (mantenerCostoCheck && costoContainer) {
       mantenerCostoCheck.addEventListener('change', function() {
         costoContainer.style.display = this.checked ? 'none' : 'block';
+      });
+    }
+    
+    // Toggle caducidad
+    const btnToggleCaducidad = document.getElementById('btnToggleCaducidad');
+    const caducidadOpcionesContainer = document.getElementById('caducidadOpcionesContainer');
+    const toggleCaducidadEstado = document.getElementById('toggle_caducidad_estado');
+    
+    if (btnToggleCaducidad && caducidadOpcionesContainer && toggleCaducidadEstado) {
+      btnToggleCaducidad.addEventListener('click', function() {
+        const isActive = btnToggleCaducidad.textContent === 'ACTIVADO';
+        
+        if (isActive) {
+          // Cambiar a desactivado
+          btnToggleCaducidad.textContent = 'DESACTIVADO';
+          btnToggleCaducidad.classList.remove('active');
+          caducidadOpcionesContainer.style.display = 'none';
+          toggleCaducidadEstado.value = 'DESACTIVADO';
+        } else {
+          // Cambiar a activado
+          btnToggleCaducidad.textContent = 'ACTIVADO';
+          btnToggleCaducidad.classList.add('active');
+          caducidadOpcionesContainer.style.display = 'block';
+          toggleCaducidadEstado.value = 'ACTIVADO';
+        }
       });
     }
     
@@ -770,6 +890,25 @@
       });
     });
     
+    // Actualizar la unidad cuando cambia la cantidad
+    const cantidadInput = document.getElementById('cantidad');
+    if (cantidadInput) {
+      // Permitir explícitamente valores decimales para unidades no-piezas
+      {% if producto.unidad and producto.unidad not in ['pieza', 'piezas'] %}
+      // Asegurar que el navegador permite decimales
+      cantidadInput.step = '0.001';
+      cantidadInput.min = '0.001';
+      {% else %}
+      // Para piezas, forzar enteros
+      cantidadInput.step = '1';
+      cantidadInput.min = '1';
+      {% endif %}
+      
+      cantidadInput.addEventListener('input', updateUnitText);
+      // Inicializar al cargar
+      updateUnitText();
+    }
+    
     // Validación del formulario
     const form = document.getElementById('entradaForm');
     
@@ -777,12 +916,27 @@
       form.addEventListener('submit', function(event) {
         const cantidad = document.getElementById('cantidad');
         
-        if (parseInt(cantidad.value) <= 0) {
+        // Verificar si es un número válido y mayor que cero
+        const cantidadValor = parseFloat(cantidad.value);
+        if (isNaN(cantidadValor) || cantidadValor <= 0) {
           event.preventDefault();
           alert('La cantidad debe ser mayor que cero.');
           cantidad.focus();
           return false;
         }
+        
+        // Para productos con unidades como kg, l, etc., permitir decimales
+        {% if producto.unidad and producto.unidad not in ['pieza', 'piezas'] %}
+        // No hay validación adicional para decimales
+        {% else %}
+        // Para piezas, verificar que sea un número entero
+        if (Math.floor(cantidadValor) !== cantidadValor) {
+          event.preventDefault();
+          alert('La cantidad debe ser un número entero para este tipo de producto.');
+          cantidad.focus();
+          return false;
+        }
+        {% endif %}
         
         // Validar costo si no se mantiene el anterior
         if (!mantenerCostoCheck.checked) {
@@ -795,16 +949,29 @@
           }
         }
         
+        // Verificar que se seleccione un lapso de caducidad si está activado
+        if (toggleCaducidadEstado.value === 'ACTIVADO') {
+          const lapsoSeleccionado = document.querySelector('input[name="caducidad_lapso"]:checked');
+          if (!lapsoSeleccionado) {
+            event.preventDefault();
+            alert('Selecciona un lapso de caducidad.');
+            return false;
+          }
+        }
+        
         return true;
       });
     }
     
-    // Preconfigurar el lapso de caducidad si el producto tiene uno configurado, pero sin abrir el acordeón
+    // Preconfigurar el lapso de caducidad si el producto tiene uno configurado
     {% if producto.has_caducidad and producto.metodo_caducidad %}
-      // Seleccionar automáticamente el lapso configurado pero sin mostrar la sección
+      // Verificar si tiene configuración de caducidad
       const lapsoConfigured = "{{ producto.metodo_caducidad }}";
       const radioLapso = document.querySelector(`input[name="caducidad_lapso"][value="${lapsoConfigured}"]`);
+      
       if (radioLapso) {
+        // Activar toggle de caducidad y seleccionar el lapso
+        btnToggleCaducidad.click(); // Activará la caducidad
         radioLapso.checked = true;
       }
     {% endif %}

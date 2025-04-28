@@ -289,7 +289,7 @@ def ajuste_entrada(producto_id):
     if request.method == 'POST':
         try:
             # Obtener datos del formulario
-            cantidad = int(request.form.get('cantidad', 1))
+            cantidad = float(request.form.get('cantidad', 1))
             motivo = request.form.get('motivo', 'compra')
             mantener_costo_anterior = request.form.get('mantener_costo_anterior') == 'on'
             

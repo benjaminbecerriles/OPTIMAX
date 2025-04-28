@@ -521,11 +521,31 @@
             </div>
             <div class="info-item">
               <i class="fas fa-layer-group info-icon"></i>
-              <span>Stock anterior: {{ stock_anterior }} unidades</span>
+              <span>Stock anterior: 
+                {% if producto.unidad and producto.unidad not in ['pieza', 'piezas'] %}
+                  {{ "%.3f"|format(stock_anterior) }} {{ producto.unidad }}
+                {% else %}
+                  {% if stock_anterior == 1 %}
+                    {{ stock_anterior }} pieza
+                  {% else %}
+                    {{ stock_anterior }} piezas
+                  {% endif %}
+                {% endif %}
+              </span>
             </div>
             <div class="info-item">
               <i class="fas fa-layer-group info-icon"></i>
-              <span>Stock actual: {{ producto.stock }} unidades</span>
+              <span>Stock actual: 
+                {% if producto.unidad and producto.unidad not in ['pieza', 'piezas'] %}
+                  {{ "%.3f"|format(producto.stock) }} {{ producto.unidad }}
+                {% else %}
+                  {% if producto.stock == 1 %}
+                    {{ producto.stock }} pieza
+                  {% else %}
+                    {{ producto.stock }} piezas
+                  {% endif %}
+                {% endif %}
+              </span>
             </div>
           </div>
         </div>
@@ -557,9 +577,25 @@
             <td>Cantidad</td>
             <td class="value-col">
               {% if movimiento.tipo_movimiento == 'ENTRADA' %}
-                +{{ movimiento.cantidad }} unidades
+                {% if producto.unidad and producto.unidad not in ['pieza', 'piezas'] %}
+                  +{{ "%.3f"|format(movimiento.cantidad) }} {{ producto.unidad }}
+                {% else %}
+                  {% if movimiento.cantidad == 1 %}
+                    +{{ movimiento.cantidad }} pieza
+                  {% else %}
+                    +{{ movimiento.cantidad }} piezas
+                  {% endif %}
+                {% endif %}
               {% else %}
-                -{{ movimiento.cantidad }} unidades
+                {% if producto.unidad and producto.unidad not in ['pieza', 'piezas'] %}
+                  -{{ "%.3f"|format(movimiento.cantidad) }} {{ producto.unidad }}
+                {% else %}
+                  {% if movimiento.cantidad == 1 %}
+                    -{{ movimiento.cantidad }} pieza
+                  {% else %}
+                    -{{ movimiento.cantidad }} piezas
+                  {% endif %}
+                {% endif %}
               {% endif %}
             </td>
           </tr>
@@ -637,15 +673,41 @@
                 <td data-label="Lote">{{ lote.numero_lote }}</td>
                 <td data-label="Cantidad">
                   {% if movimiento.tipo_movimiento == 'ENTRADA' %}
-                    +{{ lote.cantidad_afectada }}
+                    {% if producto.unidad and producto.unidad not in ['pieza', 'piezas'] %}
+                      +{{ "%.3f"|format(movimiento.cantidad) }} {{ producto.unidad }}
+                    {% else %}
+                      {% if movimiento.cantidad == 1 %}
+                        +{{ movimiento.cantidad }} pieza
+                      {% else %}
+                        +{{ movimiento.cantidad }} piezas
+                      {% endif %}
+                    {% endif %}
                   {% else %}
-                    -{{ lote.cantidad_afectada }}
+                    {% if producto.unidad and producto.unidad not in ['pieza', 'piezas'] %}
+                      -{{ "%.3f"|format(movimiento.cantidad) }} {{ producto.unidad }}
+                    {% else %}
+                      {% if movimiento.cantidad == 1 %}
+                        -{{ movimiento.cantidad }} pieza
+                      {% else %}
+                        -{{ movimiento.cantidad }} piezas
+                      {% endif %}
+                    {% endif %}
                   {% endif %}
                 </td>
                 {% if movimiento.tipo_movimiento == 'ENTRADA' %}
                   <td data-label="Costo">${{ lote.costo_unitario|round(2) }}</td>
                 {% endif %}
-                <td data-label="Stock Actual">{{ lote.stock_actual }} unidades</td>
+                <td data-label="Stock Actual">
+                  {% if producto.unidad and producto.unidad not in ['pieza', 'piezas'] %}
+                    {{ "%.3f"|format(lote.stock) }} {{ producto.unidad }}
+                  {% else %}
+                    {% if lote.stock == 1 %}
+                      {{ lote.stock }} pieza
+                    {% else %}
+                      {{ lote.stock }} piezas
+                    {% endif %}
+                  {% endif %}
+                </td>
                 {% if lote.fecha_caducidad %}
                   <td data-label="Caducidad">{{ lote.fecha_caducidad.strftime('%d/%m/%Y') }}</td>
                 {% endif %}
@@ -661,7 +723,17 @@
           <h4 class="summary-title">Resumen Financiero</h4>
           <div class="summary-item">
             <span class="summary-label">Cantidad</span>
-            <span class="summary-value">{{ movimiento.cantidad }} unidades</span>
+            <span class="summary-value">
+              {% if producto.unidad and producto.unidad not in ['pieza', 'piezas'] %}
+                {{ "%.3f"|format(movimiento.cantidad) }} {{ producto.unidad }}
+              {% else %}
+                {% if movimiento.cantidad == 1 %}
+                  {{ movimiento.cantidad }} pieza
+                {% else %}
+                  {{ movimiento.cantidad }} piezas
+                {% endif %}
+              {% endif %}
+            </span>
           </div>
           <div class="summary-item">
             <span class="summary-label">Costo unitario</span>
