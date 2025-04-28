@@ -127,32 +127,53 @@
   
   .product-details {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+  
+  .product-name-row {
+    margin-bottom: 0.15rem;
   }
   
   .product-title {
     font-size: 1.1rem;
     font-weight: 600;
-    margin-bottom: 0.5rem;
+    margin: 0;
     color: #212529;
   }
   
-  .product-info {
+  .product-info-row {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem 1.5rem;
+    justify-content: flex-start;
+    margin-bottom: 0.15rem;
+    gap: 1rem;
   }
   
-  .info-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+  .product-info-cell {
     font-size: 0.875rem;
+    color: #495057;
+  }
+  
+  .product-info-cell:first-child {
+    min-width: 120px;
+    flex: 0 0 auto;
+  }
+  
+  .product-info-cell:last-child {
+    flex: 1;
   }
   
   .info-icon {
     color: #6c757d;
     width: 16px;
     text-align: center;
+  }
+  
+  /* Estilos para la palomita de éxito */
+  .success-checkmark {
+    color: #1e7e34;
+    font-size: 1.8rem;
   }
   
   /* Tabla de detalles */
@@ -414,6 +435,15 @@
       height: 160px;
     }
     
+    .product-info-row {
+      flex-direction: column;
+    }
+    
+    .product-info-cell {
+      text-align: left !important;
+      margin-bottom: 5px;
+    }
+    
     .details-table thead {
       display: none;
     }
@@ -471,7 +501,7 @@
   <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
       <li class="breadcrumb-item"><a href="{{ url_for('dashboard_home') }}">Dashboard</a></li>
-      <li class="breadcrumb-item"><a href="{{ url_for('ajuste_stock') }}">Ajuste de Inventario</a></li>
+      <li class="breadcrumb-item"><a href="{{ url_for('ajuste_stock') }}">Ajuste de Stock</a></li>
       <li class="breadcrumb-item active">Confirmación</li>
     </ol>
   </nav>
@@ -483,7 +513,7 @@
     <!-- Encabezado de confirmación -->
     <div class="confirmation-header">
       <div class="header-icon success">
-        <i class="fas fa-check"></i>
+        <i class="fas fa-check-circle success-checkmark"></i>
       </div>
       <div class="header-content">
         <h2 class="header-title">Operación completada con éxito</h2>
@@ -509,43 +539,42 @@
           {% endif %}
         </div>
         <div class="product-details">
-          <h3 class="product-title">{{ producto.nombre }}</h3>
-          <div class="product-info">
-            <div class="info-item">
-              <i class="fas fa-barcode info-icon"></i>
-              <span>{{ producto.codigo_barras_externo }}</span>
-            </div>
-            <div class="info-item">
-              <i class="fas fa-tag info-icon"></i>
-              <span>{{ producto.categoria|title }}</span>
-            </div>
-            <div class="info-item">
-              <i class="fas fa-layer-group info-icon"></i>
-              <span>Stock anterior: 
-                {% if producto.unidad and producto.unidad not in ['pieza', 'piezas'] %}
-                  {{ "%.3f"|format(stock_anterior) }} {{ producto.unidad }}
+          <!-- Primera fila: Solo el nombre del producto -->
+          <div class="product-name-row">
+            <h3 class="product-title">{{ producto.nombre }}</h3>
+          </div>
+          
+          <!-- Segunda fila: Código de barras y Stock anterior -->
+          <div class="product-info-row">
+            <div class="product-info-cell">{{ producto.codigo_barras_externo }}</div>
+            <div class="product-info-cell">
+              Stock anterior: 
+              {% if producto.unidad and producto.unidad not in ['pieza', 'piezas'] %}
+                {{ "%.3f"|format(stock_anterior) }} {{ producto.unidad }}
+              {% else %}
+                {% if stock_anterior == 1 %}
+                  {{ stock_anterior }} pieza
                 {% else %}
-                  {% if stock_anterior == 1 %}
-                    {{ stock_anterior }} pieza
-                  {% else %}
-                    {{ stock_anterior }} piezas
-                  {% endif %}
+                  {{ stock_anterior }} piezas
                 {% endif %}
-              </span>
+              {% endif %}
             </div>
-            <div class="info-item">
-              <i class="fas fa-layer-group info-icon"></i>
-              <span>Stock actual: 
-                {% if producto.unidad and producto.unidad not in ['pieza', 'piezas'] %}
-                  {{ "%.3f"|format(producto.stock) }} {{ producto.unidad }}
+          </div>
+          
+          <!-- Tercera fila: Categoría y Stock actual -->
+          <div class="product-info-row">
+            <div class="product-info-cell">{{ producto.categoria|title }}</div>
+            <div class="product-info-cell">
+              Stock actual: 
+              {% if producto.unidad and producto.unidad not in ['pieza', 'piezas'] %}
+                {{ "%.3f"|format(producto.stock) }} {{ producto.unidad }}
+              {% else %}
+                {% if producto.stock == 1 %}
+                  {{ producto.stock }} pieza
                 {% else %}
-                  {% if producto.stock == 1 %}
-                    {{ producto.stock }} pieza
-                  {% else %}
-                    {{ producto.stock }} piezas
-                  {% endif %}
+                  {{ producto.stock }} piezas
                 {% endif %}
-              </span>
+              {% endif %}
             </div>
           </div>
         </div>
@@ -651,72 +680,6 @@
         </tbody>
       </table>
       
-      {% if lotes_afectados and lotes_afectados|length > 0 %}
-        <h4 class="summary-title">Lotes Afectados</h4>
-        <table class="details-table">
-          <thead>
-            <tr>
-              <th>Lote</th>
-              <th>Cantidad</th>
-              {% if movimiento.tipo_movimiento == 'ENTRADA' %}
-                <th>Costo</th>
-              {% endif %}
-              <th>Stock Actual</th>
-              {% if lotes_afectados[0].fecha_caducidad %}
-                <th>Caducidad</th>
-              {% endif %}
-            </tr>
-          </thead>
-          <tbody>
-            {% for lote in lotes_afectados %}
-              <tr>
-                <td data-label="Lote">{{ lote.numero_lote }}</td>
-                <td data-label="Cantidad">
-                  {% if movimiento.tipo_movimiento == 'ENTRADA' %}
-                    {% if producto.unidad and producto.unidad not in ['pieza', 'piezas'] %}
-                      +{{ "%.3f"|format(movimiento.cantidad) }} {{ producto.unidad }}
-                    {% else %}
-                      {% if movimiento.cantidad == 1 %}
-                        +{{ movimiento.cantidad }} pieza
-                      {% else %}
-                        +{{ movimiento.cantidad }} piezas
-                      {% endif %}
-                    {% endif %}
-                  {% else %}
-                    {% if producto.unidad and producto.unidad not in ['pieza', 'piezas'] %}
-                      -{{ "%.3f"|format(movimiento.cantidad) }} {{ producto.unidad }}
-                    {% else %}
-                      {% if movimiento.cantidad == 1 %}
-                        -{{ movimiento.cantidad }} pieza
-                      {% else %}
-                        -{{ movimiento.cantidad }} piezas
-                      {% endif %}
-                    {% endif %}
-                  {% endif %}
-                </td>
-                {% if movimiento.tipo_movimiento == 'ENTRADA' %}
-                  <td data-label="Costo">${{ lote.costo_unitario|round(2) }}</td>
-                {% endif %}
-                <td data-label="Stock Actual">
-                  {% if producto.unidad and producto.unidad not in ['pieza', 'piezas'] %}
-                    {{ "%.3f"|format(lote.stock) }} {{ producto.unidad }}
-                  {% else %}
-                    {% if lote.stock == 1 %}
-                      {{ lote.stock }} pieza
-                    {% else %}
-                      {{ lote.stock }} piezas
-                    {% endif %}
-                  {% endif %}
-                </td>
-                {% if lote.fecha_caducidad %}
-                  <td data-label="Caducidad">{{ lote.fecha_caducidad.strftime('%d/%m/%Y') }}</td>
-                {% endif %}
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      {% endif %}
-      
       {% if movimiento.tipo_movimiento == 'ENTRADA' %}
         <!-- Resumen financiero para entradas -->
         <div class="summary-container">
@@ -776,17 +739,17 @@
         </button>
         <a href="{{ url_for('ajuste_stock') }}" class="btn btn-outline">
           <i class="fas fa-arrow-left"></i>
-          Volver a Inventario
+          Volver a Ajustar Stock
         </a>
         {% if movimiento.tipo_movimiento == 'ENTRADA' %}
-          <a href="{{ url_for('ajuste_entrada', producto_id=producto.id) }}" class="btn btn-primary">
-            <i class="fas fa-plus"></i>
-            Nueva Entrada
+          <a href="{{ url_for('dashboard_inventario') }}" class="btn btn-primary">
+            <i class="fas fa-check"></i>
+            Continuar
           </a>
         {% else %}
-          <a href="{{ url_for('ajuste_salida', producto_id=producto.id) }}" class="btn btn-primary">
-            <i class="fas fa-minus"></i>
-            Nueva Salida
+          <a href="{{ url_for('dashboard_inventario') }}" class="btn btn-primary">
+            <i class="fas fa-check"></i>
+            Continuar
           </a>
         {% endif %}
       </div>
