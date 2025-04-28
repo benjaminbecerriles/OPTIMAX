@@ -113,20 +113,33 @@ class LoteInventario(db.Model):
             return self.fecha_caducidad.strftime('%d/%m/%Y')
         return "No caduca"
         
-    # NUEVO: Método para calcular días hasta caducidad
+    # Método para calcular días hasta caducidad
     def dias_hasta_caducidad(self):
+        """
+        Calcula los días restantes hasta la caducidad del lote.
+        
+        Returns:
+            int: Número de días hasta la caducidad (negativo si ya caducó)
+            None: Si no tiene fecha de caducidad
+        """
         if not self.fecha_caducidad:
             return None
             
         hoy = date.today()
         if self.fecha_caducidad < hoy:
-            return -1  # Producto ya caducado
+            return -1 * (hoy - self.fecha_caducidad).days  # Retorna número negativo si ya caducó
             
         delta = self.fecha_caducidad - hoy
         return delta.days
         
-    # NUEVO: Método para verificar si el lote está caducado
+    # Método para verificar si el lote está caducado
     def esta_caducado(self):
+        """
+        Determina si el lote está caducado según su fecha de caducidad.
+        
+        Returns:
+            bool: True si está caducado, False si no lo está o no tiene fecha
+        """
         if not self.fecha_caducidad:
             return False
             
@@ -139,6 +152,27 @@ class LoteInventario(db.Model):
     # Método para determinar si es el lote de registro
     def es_lote_registro(self):
         return self.numero_lote == "Lote de Registro"
+        
+    # Método para obtener un estado de caducidad categorizado
+    def estado_caducidad(self):
+        """
+        Devuelve un estado de caducidad categorizado para usar en la interfaz.
+        
+        Returns:
+            str: 'caducado', 'pronto', 'medio', 'lejano' o 'nocaduca'
+        """
+        dias = self.dias_hasta_caducidad()
+        
+        if dias is None:
+            return 'nocaduca'
+        elif dias < 0:
+            return 'caducado'
+        elif dias <= 7:
+            return 'pronto'
+        elif dias <= 30:
+            return 'medio'
+        else:
+            return 'lejano'
 
 
 class LoteMovimientoRelacion(db.Model):

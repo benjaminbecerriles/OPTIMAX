@@ -622,7 +622,6 @@
     font-size: 0.95rem;
   }
 
-  /* Dropdown menus - Corregido */
   /* Dropdown menus - CORREGIDO con mejor posicionamiento */
   #columnDropdown {
     position: absolute;
@@ -1572,6 +1571,81 @@
       console.error('Error en petición:', error);
       
       // Revertir cambios en UI en caso de error
+      if (isFavorite) {
+        element.classList.add('active');
+        element.innerHTML = '&#9829;';
+      } else {
+        element.classList.remove('active');
+        element.innerHTML = '&#9825;';
+      }
+      element.setAttribute('data-is-favorite', isFavorite ? '1' : '0');
+      
+      showToast('Error de conexión', 'No se pudo contactar con el servidor', 'error');
+    });
+  }
+  
+  // Función para cambiar estado de visibilidad
+  function toggleVisibilidad(element) {
+    // Obtener ID del producto y estado actual
+    const productId = element.getAttribute('data-product-id');
+    const isVisible = element.getAttribute('data-is-visible') === '1';
+    const newState = isVisible ? '0' : '1';
+    
+    // Actualizar UI inmediatamente para feedback visual
+    const iconElement = element.querySelector('i');
+    
+    if (newState === '1') {
+      element.classList.remove('hidden');
+      element.classList.add('visible');
+      iconElement.className = 'fas fa-eye';
+    } else {
+      element.classList.remove('visible');
+      element.classList.add('hidden');
+      iconElement.className = 'fas fa-eye-slash';
+    }
+    
+    // Hacer la petición AJAX
+    fetch(`/api/toggle_visibility/${productId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ status: newState })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        // Actualizar atributo con el nuevo estado
+        element.setAttribute('data-is-visible', newState);
+        
+        // Mostrar notificación
+        showToast(
+          newState === '1' ? 'Producto visible' : 'Producto invisible',
+          newState === '1' ? 'Ahora el producto es visible para venta' : 'El producto ya no es visible para venta',
+          newState === '1' ? 'success' : 'info'
+        );
+      } else {
+        // Si hay error, revertir cambios en UI
+        const originalState = isVisible ? '1' : '0';
+        element.setAttribute('data-is-visible', originalState);
+        
+        if (originalState === '1') {
+          element.classList.remove('hidden');
+          element.classList.add('visible');
+          iconElement.className = 'fas fa-eye';
+        } else {
+          element.classList.remove('visible');
+          element.classList.add('hidden');
+          iconElement.className = 'fas fa-eye-slash';
+        }
+        
+        showToast('Error', data.message || 'No se pudo actualizar', 'error');
+      }
+    })
+    .catch(error => {
+      console.error('Error en petición:', error);
+      
+      // Revertir cambios en UI en caso de error
       if (isVisible) {
         element.classList.remove('hidden');
         element.classList.add('visible');
@@ -1586,7 +1660,7 @@
       showToast('Error de conexión', 'No se pudo contactar con el servidor', 'error');
     });
   }
-  
+
   // Función para mostrar notificaciones
   function showToast(title, message, type = 'info') {
     // Crear elemento toast
@@ -1664,236 +1738,11 @@
       // Formatear el valor según reglas existentes
       let formattedCost;
       if (showCost === Math.floor(showCost)) {
-        formattedCost = ' || 'No se pudo actualizar', 'error');
-      }
-    })
-    .catch(error => {
-      console.error('Error en petición:', error);
-      
-      // Revertir cambios en UI en caso de error
-      if (isFavorite) {
-        element.classList.add('active');
-        element.innerHTML = '&#9829;';
-      } else {
-        element.classList.remove('active');
-        element.innerHTML = '&#9825;';
-      }
-      element.setAttribute('data-is-favorite', isFavorite ? '1' : '0');
-      
-      showToast('Error de conexión', 'No se pudo contactar con el servidor', 'error');
-    });
-  }
-  
-  // Función para cambiar estado de visibilidad
-  function toggleVisibilidad(element) {
-    // Obtener ID del producto y estado actual
-    const productId = element.getAttribute('data-product-id');
-    const isVisible = element.getAttribute('data-is-visible') === '1';
-    const newState = isVisible ? '0' : '1';
-    
-    // Actualizar UI inmediatamente para feedback visual
-    const iconElement = element.querySelector('i');
-    
-    if (newState === '1') {
-      element.classList.remove('hidden');
-      element.classList.add('visible');
-      iconElement.className = 'fas fa-eye';
-    } else {
-      element.classList.remove('visible');
-      element.classList.add('hidden');
-      iconElement.className = 'fas fa-eye-slash';
-    }
-    
-    // Hacer la petición AJAX
-    fetch(`/api/toggle_visibility/${productId}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ status: newState })
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        // Actualizar atributo con el nuevo estado
-        element.setAttribute('data-is-visible', newState);
-        
-        // Mostrar notificación
-        showToast(
-          newState === '1' ? 'Producto visible' : 'Producto invisible',
-          newState === '1' ? 'Ahora el producto es visible para venta' : 'El producto ya no es visible para venta',
-          newState === '1' ? 'success' : 'info'
-        );
-      } else {
-        // Si hay error, revertir cambios en UI
-        const originalState = isVisible ? '1' : '0';
-        element.setAttribute('data-is-visible', originalState);
-        
-        if (originalState === '1') {
-          element.classList.remove('hidden');
-          element.classList.add('visible');
-          iconElement.className = 'fas fa-eye';
-        } else {
-          element.classList.remove('visible');
-          element.classList.add('hidden');
-          iconElement.className = 'fas fa-eye-slash';
-        }
-        
-        showToast('Error', data.message + showCost.toLocaleString('en-US', {maximumFractionDigits: 0});
+        formattedCost = '$' + showCost.toLocaleString('en-US', {maximumFractionDigits: 0});
       } else if (Math.round(showCost * 1000) % 10 === 0) {
-        formattedCost = ' || 'No se pudo actualizar', 'error');
-      }
-    })
-    .catch(error => {
-      console.error('Error en petición:', error);
-      
-      // Revertir cambios en UI en caso de error
-      if (isFavorite) {
-        element.classList.add('active');
-        element.innerHTML = '&#9829;';
+        formattedCost = '$' + showCost.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}).replace(/\.00$/, '');
       } else {
-        element.classList.remove('active');
-        element.innerHTML = '&#9825;';
-      }
-      element.setAttribute('data-is-favorite', isFavorite ? '1' : '0');
-      
-      showToast('Error de conexión', 'No se pudo contactar con el servidor', 'error');
-    });
-  }
-  
-  // Función para cambiar estado de visibilidad
-  function toggleVisibilidad(element) {
-    // Obtener ID del producto y estado actual
-    const productId = element.getAttribute('data-product-id');
-    const isVisible = element.getAttribute('data-is-visible') === '1';
-    const newState = isVisible ? '0' : '1';
-    
-    // Actualizar UI inmediatamente para feedback visual
-    const iconElement = element.querySelector('i');
-    
-    if (newState === '1') {
-      element.classList.remove('hidden');
-      element.classList.add('visible');
-      iconElement.className = 'fas fa-eye';
-    } else {
-      element.classList.remove('visible');
-      element.classList.add('hidden');
-      iconElement.className = 'fas fa-eye-slash';
-    }
-    
-    // Hacer la petición AJAX
-    fetch(`/api/toggle_visibility/${productId}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ status: newState })
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        // Actualizar atributo con el nuevo estado
-        element.setAttribute('data-is-visible', newState);
-        
-        // Mostrar notificación
-        showToast(
-          newState === '1' ? 'Producto visible' : 'Producto invisible',
-          newState === '1' ? 'Ahora el producto es visible para venta' : 'El producto ya no es visible para venta',
-          newState === '1' ? 'success' : 'info'
-        );
-      } else {
-        // Si hay error, revertir cambios en UI
-        const originalState = isVisible ? '1' : '0';
-        element.setAttribute('data-is-visible', originalState);
-        
-        if (originalState === '1') {
-          element.classList.remove('hidden');
-          element.classList.add('visible');
-          iconElement.className = 'fas fa-eye';
-        } else {
-          element.classList.remove('visible');
-          element.classList.add('hidden');
-          iconElement.className = 'fas fa-eye-slash';
-        }
-        
-        showToast('Error', data.message + showCost.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}).replace(/\.00$/, '');
-      } else {
-        formattedCost = ' || 'No se pudo actualizar', 'error');
-      }
-    })
-    .catch(error => {
-      console.error('Error en petición:', error);
-      
-      // Revertir cambios en UI en caso de error
-      if (isFavorite) {
-        element.classList.add('active');
-        element.innerHTML = '&#9829;';
-      } else {
-        element.classList.remove('active');
-        element.innerHTML = '&#9825;';
-      }
-      element.setAttribute('data-is-favorite', isFavorite ? '1' : '0');
-      
-      showToast('Error de conexión', 'No se pudo contactar con el servidor', 'error');
-    });
-  }
-  
-  // Función para cambiar estado de visibilidad
-  function toggleVisibilidad(element) {
-    // Obtener ID del producto y estado actual
-    const productId = element.getAttribute('data-product-id');
-    const isVisible = element.getAttribute('data-is-visible') === '1';
-    const newState = isVisible ? '0' : '1';
-    
-    // Actualizar UI inmediatamente para feedback visual
-    const iconElement = element.querySelector('i');
-    
-    if (newState === '1') {
-      element.classList.remove('hidden');
-      element.classList.add('visible');
-      iconElement.className = 'fas fa-eye';
-    } else {
-      element.classList.remove('visible');
-      element.classList.add('hidden');
-      iconElement.className = 'fas fa-eye-slash';
-    }
-    
-    // Hacer la petición AJAX
-    fetch(`/api/toggle_visibility/${productId}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ status: newState })
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        // Actualizar atributo con el nuevo estado
-        element.setAttribute('data-is-visible', newState);
-        
-        // Mostrar notificación
-        showToast(
-          newState === '1' ? 'Producto visible' : 'Producto invisible',
-          newState === '1' ? 'Ahora el producto es visible para venta' : 'El producto ya no es visible para venta',
-          newState === '1' ? 'success' : 'info'
-        );
-      } else {
-        // Si hay error, revertir cambios en UI
-        const originalState = isVisible ? '1' : '0';
-        element.setAttribute('data-is-visible', originalState);
-        
-        if (originalState === '1') {
-          element.classList.remove('hidden');
-          element.classList.add('visible');
-          iconElement.className = 'fas fa-eye';
-        } else {
-          element.classList.remove('visible');
-          element.classList.add('hidden');
-          iconElement.className = 'fas fa-eye-slash';
-        }
-        
-        showToast('Error', data.message + showCost.toLocaleString('en-US', {minimumFractionDigits: 3, maximumFractionDigits: 3});
+        formattedCost = '$' + showCost.toLocaleString('en-US', {minimumFractionDigits: 3, maximumFractionDigits: 3});
       }
       
       value.innerHTML = formattedCost;
@@ -2256,100 +2105,4 @@
     }
   });
 </script>
-{% endblock %} || 'No se pudo actualizar', 'error');
-      }
-    })
-    .catch(error => {
-      console.error('Error en petición:', error);
-      
-      // Revertir cambios en UI en caso de error
-      if (isFavorite) {
-        element.classList.add('active');
-        element.innerHTML = '&#9829;';
-      } else {
-        element.classList.remove('active');
-        element.innerHTML = '&#9825;';
-      }
-      element.setAttribute('data-is-favorite', isFavorite ? '1' : '0');
-      
-      showToast('Error de conexión', 'No se pudo contactar con el servidor', 'error');
-    });
-  }
-  
-  // Función para cambiar estado de visibilidad
-  function toggleVisibilidad(element) {
-    // Obtener ID del producto y estado actual
-    const productId = element.getAttribute('data-product-id');
-    const isVisible = element.getAttribute('data-is-visible') === '1';
-    const newState = isVisible ? '0' : '1';
-    
-    // Actualizar UI inmediatamente para feedback visual
-    const iconElement = element.querySelector('i');
-    
-    if (newState === '1') {
-      element.classList.remove('hidden');
-      element.classList.add('visible');
-      iconElement.className = 'fas fa-eye';
-    } else {
-      element.classList.remove('visible');
-      element.classList.add('hidden');
-      iconElement.className = 'fas fa-eye-slash';
-    }
-    
-    // Hacer la petición AJAX
-    fetch(`/api/toggle_visibility/${productId}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ status: newState })
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        // Actualizar atributo con el nuevo estado
-        element.setAttribute('data-is-visible', newState);
-        
-        // Mostrar notificación
-        showToast(
-          newState === '1' ? 'Producto visible' : 'Producto invisible',
-          newState === '1' ? 'Ahora el producto es visible para venta' : 'El producto ya no es visible para venta',
-          newState === '1' ? 'success' : 'info'
-        );
-      } else {
-        // Si hay error, revertir cambios en UI
-        const originalState = isVisible ? '1' : '0';
-        element.setAttribute('data-is-visible', originalState);
-        
-        if (originalState === '1') {
-          element.classList.remove('hidden');
-          element.classList.add('visible');
-          iconElement.className = 'fas fa-eye';
-        } else {
-          element.classList.remove('visible');
-          element.classList.add('hidden');
-          iconElement.className = 'fas fa-eye-slash';
-        }
-        showToast('Error', data.message || 'No se pudo actualizar', 'error');
-      }
-    })
-    .catch(error => {
-      console.error('Error en petición:', error);
-      
-      // Revertir cambios en UI en caso de error
-      if (isVisible) {
-        element.classList.remove('hidden');
-        element.classList.add('visible');
-        iconElement.className = 'fas fa-eye';
-      } else {
-        element.classList.remove('visible');
-        element.classList.add('hidden');
-        iconElement.className = 'fas fa-eye-slash';
-      }
-      element.setAttribute('data-is-visible', isVisible ? '1' : '0');
-      
-      showToast('Error de conexión', 'No se pudo contactar con el servidor', 'error');
-    });
-  }
-  // Función para mostrar el modal de acciones      
-
+{% endblock %}

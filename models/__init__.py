@@ -7,5 +7,7 @@ db = SQLAlchemy()
 
 print("=== LOADED NEW MODELS WITH USELIST=FALSE ===")
 
-# Luego importamos los modelos, que usarán 'db' desde aquí
-from .models import Empresa, CodigoDisponible, CodigoAsignado
+# No importes aquí, importa después de que la aplicación esté configurada
+def init_models():
+    from .models import Empresa, CodigoDisponible, CodigoAsignado
+    return Empresa, CodigoDisponible, CodigoAsignado
