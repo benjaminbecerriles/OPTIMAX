@@ -68,14 +68,14 @@ def obtener_lotes_activos(producto_id):
         esta_activo=True
     ).filter(LoteInventario.stock > 0).order_by(LoteInventario.fecha_entrada).all()
 
-def aplicar_salida_lotes(producto_id, cantidad, metodo='fifo'):
+def aplicar_salida_lotes(producto_id, cantidad, metodo='auto'):
     """
     Aplica una salida de stock a los lotes correspondientes.
     
     Args:
         producto_id: ID del producto
         cantidad: Cantidad a reducir
-        metodo: 'fifo' (primero en caducar) o 'lifo' (último en entrar)
+        metodo: 'auto' (selección inteligente), 'fifo' o 'lifo'
         
     Returns:
         lista de diccionarios con lotes afectados y cantidades
@@ -90,21 +90,40 @@ def aplicar_salida_lotes(producto_id, cantidad, metodo='fifo'):
         return []
     
     # Ordenar lotes según el método
-    if metodo == 'fifo':
-        # Primero los que caducan antes, luego por fecha de entrada
-        lotes.sort(key=lambda x: (
-            x.fecha_caducidad or datetime(9999, 12, 31),
-            x.fecha_entrada
-        ))
+    if metodo == 'auto':
+        # Método inteligente:
+        # 1. Primero ordenar por los que tienen fecha de caducidad (más cercana primero)
+        # 2. Luego ordenar por fecha de entrada (más antigua primero)
+        lotes_con_caducidad = [lote for lote in lotes if lote.fecha_caducidad is not None]
+        lotes_sin_caducidad = [lote for lote in lotes if lote.fecha_caducidad is None]
+        
+        # Ordenar lotes con caducidad por fecha de caducidad
+        lotes_con_caducidad.sort(key=lambda x: x.fecha_caducidad)
+        
+        # Ordenar lotes sin caducidad por fecha de entrada (FIFO)
+        lotes_sin_caducidad.sort(key=lambda x: x.fecha_entrada)
+        
+        # Combinar listas: primero los que caducan, luego el resto
+        lotes_ordenados = lotes_con_caducidad + lotes_sin_caducidad
+    elif metodo == 'fifo':
+        # FIFO: ordenar por fecha de entrada (más antigua primero)
+        lotes_ordenados = sorted(lotes, key=lambda x: x.fecha_entrada)
     elif metodo == 'lifo':
-        # Último en entrar primero
-        lotes.sort(key=lambda x: x.fecha_entrada, reverse=True)
+        # LIFO: ordenar por fecha de entrada (más reciente primero)
+        lotes_ordenados = sorted(lotes, key=lambda x: x.fecha_entrada, reverse=True)
+    else:
+        # Por defecto usar el método inteligente
+        lotes_con_caducidad = [lote for lote in lotes if lote.fecha_caducidad is not None]
+        lotes_sin_caducidad = [lote for lote in lotes if lote.fecha_caducidad is None]
+        lotes_con_caducidad.sort(key=lambda x: x.fecha_caducidad)
+        lotes_sin_caducidad.sort(key=lambda x: x.fecha_entrada)
+        lotes_ordenados = lotes_con_caducidad + lotes_sin_caducidad
     
     cantidad_restante = cantidad
     lotes_afectados = []
     
     # Aplicar la salida a los lotes
-    for lote in lotes:
+    for lote in lotes_ordenados:
         if cantidad_restante <= 0:
             break
         
@@ -480,7 +499,8 @@ def ajuste_salida(producto_id):
             # MODIFICADO: Cambiado de int a float
             cantidad = float(request.form.get('cantidad', 1))
             motivo = request.form.get('motivo', 'ajuste')
-            metodo_descuento = request.form.get('metodo_descuento', 'fifo')
+            # Usar método auto por defecto (ya no depende del formulario)
+            metodo_descuento = 'auto'
             impacto_financiero = request.form.get('impacto_financiero') == '1'
             notas = request.form.get('notas', '')
             
@@ -493,7 +513,7 @@ def ajuste_salida(producto_id):
                 flash(f'No hay suficiente stock disponible. Stock actual: {producto.stock}', 'danger')
                 return redirect(url_for('ajuste_salida', producto_id=producto_id))
             
-            # 1. Aplicar la salida a los lotes correspondientes
+            # 1. Aplicar la salida a los lotes correspondientes usando el método inteligente
             lotes_afectados = aplicar_salida_lotes(producto_id, cantidad, metodo_descuento)
             
             # 2. Crear el movimiento de inventario

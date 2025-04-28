@@ -7,66 +7,85 @@
 {% block content %}
 <style>
   /* Estilos globales */
-  .container {
-    max-width: 1000px;
+  :root {
+    --font-system: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --color-text: #222222; /* Texto más oscuro para mejor legibilidad */
+    --color-text-light: #505050; /* Menos opaco para mejor legibilidad */
+    --color-background: #ffffff;
+    --color-border: #e0e0e0;
+    --color-primary: #e52e2e;
+    --color-primary-light: #fdf2f2;
+    --color-success: #34c759;
+    --color-warning: #ff9f0a;
+    --color-danger: #ff3b30;
+    --color-accent: #007aff;
+    --border-radius: 10px;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  body {
+    font-family: var(--font-system);
+    color: var(--text-color);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  .entry-container {
+    max-width: 960px;
     margin: 0 auto;
+    padding: 24px 16px;
   }
   
-  /* Encabezado y navegación */
-  .breadcrumb {
-    margin-bottom: 1.5rem;
-    font-size: 0.9rem;
-  }
-  
-  .breadcrumb-item a {
-    color: #6c757d;
+  /* Navegación simple */
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--color-text-light);
     text-decoration: none;
+    margin-bottom: 24px;
+    font-size: 14px;
   }
   
-  .breadcrumb-item a:hover {
-    color: #e52e2e;
+  .back-link:hover {
+    color: var(--color-primary);
   }
   
-  .breadcrumb-item.active {
-    color: #212529;
-    font-weight: 600;
-  }
-  
+  /* Encabezado */
   .page-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 1.5rem;
-    color: #212529;
-    border-bottom: 2px solid #e52e2e;
-    padding-bottom: 0.75rem;
-    display: inline-block;
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: 24px;
   }
   
   /* Tarjeta de producto */
   .product-card {
     display: flex;
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-    padding: 1.5rem;
-    border-radius: 0.5rem;
-    border: 1px solid #dee2e6;
-    background-color: white;
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    align-items: flex-start;
+    gap: 20px;
+    background-color: #f9f9f9;
+    border-radius: var(--border-radius);
+    padding: 16px;
+    margin-bottom: 24px;
   }
   
-  .product-img-container {
-    width: 120px;
-    height: 120px;
-    border-radius: 0.5rem;
+  .product-image {
+    width: 70px;
+    height: 70px;
+    border-radius: 6px;
     overflow: hidden;
+    background-color: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #f8f9fa;
+    border: 1px solid var(--color-border);
     flex-shrink: 0;
   }
   
-  .product-img {
+  .product-image img {
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
@@ -74,322 +93,362 @@
   
   .product-details {
     flex: 1;
+    min-width: 0;
   }
   
-  .product-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-    color: #212529;
+  .product-name {
+    font-size: 18px;
+    font-weight: 500;
+    margin: 0 0 8px 0;
   }
   
-  .product-info {
+  .product-meta {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 0.75rem;
-    margin-bottom: 0.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px 24px;
   }
   
-  .info-item {
+  .meta-item {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .meta-label {
+    font-size: 12px;
+    color: var(--color-text-light);
+    margin-bottom: 2px;
+  }
+  
+  .meta-value {
+    font-size: 14px;
+    font-weight: 500;
+  }
+  
+  .badge {
+    display: inline-block;
+    font-size: 12px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    line-height: 1.2;
+  }
+  
+  .badge-success {
+    background-color: rgba(52, 199, 89, 0.1);
+    color: var(--color-success);
+  }
+  
+  .badge-warning {
+    background-color: rgba(255, 159, 10, 0.1);
+    color: var(--color-warning);
+  }
+  
+  .badge-danger {
+    background-color: rgba(255, 59, 48, 0.1);
+    color: var(--color-danger);
+  }
+  
+  /* Formulario de salida - Ultra simple */
+  .entry-form {
+    background-color: white;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  
+  .form-header {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-  }
-  
-  .info-icon {
-    color: #6c757d;
-    width: 16px;
-    text-align: center;
-  }
-  
-  .info-label {
-    font-size: 0.875rem;
-    color: #6c757d;
-  }
-  
-  .info-value {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: #212529;
-  }
-  
-  .badge-stock {
-    display: inline-block;
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.25rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-  }
-  
-  .badge-high {
-    background-color: #d4edda;
-    color: #155724;
-  }
-  
-  .badge-medium {
-    background-color: #fff3cd;
-    color: #856404;
-  }
-  
-  .badge-low {
-    background-color: #f8d7da;
-    color: #721c24;
-  }
-  
-  /* Formulario de salida */
-  .form-container {
-    background-color: white;
-    border-radius: 0.5rem;
-    border: 1px solid #dee2e6;
-    padding: 1.5rem;
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-    margin-bottom: 2rem;
+    padding: 12px 16px;
+    background-color: #ffebeb; /* Rojo claro para salida */
+    border-bottom: 1px solid var(--color-border);
   }
   
   .form-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-bottom: 1.5rem;
-    color: #212529;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--color-primary);
+    margin: 0;
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 8px;
   }
   
-  .form-title i {
-    color: #dc3545;
+  .form-body {
+    padding: 16px;
+  }
+  
+  .form-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .form-col {
+    flex: 1;
+    min-width: 120px;
   }
   
   .form-group {
-    margin-bottom: 1.5rem;
+    margin-bottom: 16px;
   }
   
   .form-label {
     display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 600;
-    font-size: 0.9rem;
-    color: #495057;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text);
+    margin-bottom: 6px;
   }
   
   .form-control {
+    display: block;
     width: 100%;
-    padding: 0.75rem;
-    border-radius: 0.375rem;
-    border: 1px solid #ced4da;
-    font-size: 1rem;
+    padding: 10px 12px;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--color-text);
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
     transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
   }
   
   .form-control:focus {
-    border-color: #e52e2e;
-    box-shadow: 0 0 0 0.25rem rgba(229, 46, 46, 0.25);
-  }
-  
-  .form-select {
-    width: 100%;
-    padding: 0.75rem;
-    border-radius: 0.375rem;
-    border: 1px solid #ced4da;
-    font-size: 1rem;
-    background-color: white;
-    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-  }
-  
-  .form-select:focus {
-    border-color: #e52e2e;
-    box-shadow: 0 0 0 0.25rem rgba(229, 46, 46, 0.25);
-  }
-  
-  .form-text {
-    font-size: 0.875rem;
-    color: #6c757d;
-    margin-top: 0.25rem;
+    border-color: var(--color-accent);
+    outline: 0;
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
   }
   
   .form-check {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.5rem;
+    gap: 8px;
+    margin-bottom: 8px;
   }
   
   .form-check-input {
-    width: 1rem;
-    height: 1rem;
+    width: 16px;
+    height: 16px;
+    margin: 0;
   }
   
   .form-check-label {
-    font-size: 0.9rem;
+    font-size: 14px;
   }
   
+  .form-text {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--color-text-light);
+  }
+  
+  /* Dropdown para motivo */
   .input-group {
     display: flex;
-    align-items: center;
+    position: relative;
   }
   
   .input-group-text {
     display: flex;
     align-items: center;
-    padding: 0.75rem;
-    border: 1px solid #ced4da;
-    border-radius: 0.375rem 0 0 0.375rem;
-    background-color: #e9ecef;
-    font-size: 1rem;
-    border-right: none;
+    padding: 10px 12px;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--color-text);
+    text-align: center;
+    white-space: nowrap;
+    background-color: #f8f9fa;
+    border: 1px solid var(--color-border);
+    border-right: 0;
+    border-radius: 6px 0 0 6px;
   }
   
   .input-group .form-control {
-    border-radius: 0 0.375rem 0.375rem 0;
+    position: relative;
+    flex: 1 1 auto;
+    width: 1%;
+    min-width: 0;
+    border-radius: 0 6px 6px 0;
   }
-  
-  /* Sección de lotes */
-  .lotes-section {
-    margin-top: 1.5rem;
-    margin-bottom: 1.5rem;
-    background-color: #f8f9fa;
-    border-radius: 0.5rem;
-    padding: 1.25rem;
-    border: 1px solid #dee2e6;
-  }
-  
-  .lotes-section-title {
-    font-size: 1rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-    color: #212529;
+
+  /* Input con unidad */
+  .quantity-input-container {
+    position: relative;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+  }
+
+  .quantity-input-container .form-control {
+    padding-right: 65px; /* Espacio para la unidad */
+  }
+
+  .unit-indicator {
+    position: absolute;
+    right: 12px;
+    color: var(--color-text-light);
+    pointer-events: none;
+    font-size: 14px;
   }
   
-  .lotes-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 0.75rem;
-  }
-  
-  .lotes-table th {
-    padding: 0.625rem;
-    background-color: #e9ecef;
-    border-bottom: 1px solid #dee2e6;
-    text-align: left;
-    font-weight: 600;
-    font-size: 0.75rem;
-    color: #495057;
-  }
-  
-  .lotes-table td {
-    padding: 0.625rem;
-    border-bottom: 1px solid #dee2e6;
-    font-size: 0.875rem;
-    color: #212529;
-  }
-  
-  .lotes-table tbody tr:hover {
-    background-color: #fff;
-  }
-  
-  /* Radio buttons personalizados */
-  .radio-group {
-    display: flex;
-    gap: 1rem;
-    margin-top: 0.5rem;
-  }
-  
-  .radio-btn {
-    background-color: white;
-    border: 1px solid #ced4da;
-    border-radius: 0.375rem;
-    padding: 0.75rem 1rem;
+  /* Toggle para impacto financiero */
+  .toggle-button {
+    border: 1px solid var(--color-border);
+    border-radius: 20px;
+    background-color: #f2f2f2;
+    padding: 0.25rem 0.75rem;
     cursor: pointer;
-    transition: all 0.15s;
-    flex: 1;
+    font-size: 0.9rem;
+    transition: background-color 0.3s;
+    color: var(--color-text);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 100px;
+  }
+
+  .toggle-button.active {
+    background-color: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
   }
   
-  .radio-btn:hover {
+  /* Radio buttons para impacto financiero */
+  .radio-option {
+    position: relative;
+    margin-bottom: 10px;
+    margin-right: 12px;
+    display: inline-flex;
+  }
+  
+  .radio-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  .radio-option label {
+    display: inline-block;
+    padding: 8px 16px;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    background-color: #f5f5f7;
+    color: var(--color-text);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .radio-option input[type="radio"]:checked + label {
+    background-color: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+  }
+  
+  .radio-option label:hover {
+    background-color: #ececec;
+  }
+  
+  .radio-option input[type="radio"]:checked + label:hover {
+    background-color: #d12323;
+  }
+  
+  /* Accordion para secciones opcionales */
+  .accordion-item {
+    margin-bottom: 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  
+  .accordion-header {
+    cursor: pointer;
+    padding: 10px 12px;
     background-color: #f8f9fa;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 14px;
+    font-weight: 500;
   }
   
-  .radio-btn.checked {
-    background-color: #e9ecef;
-    border-color: #adb5bd;
-    font-weight: 600;
+  .accordion-header:hover {
+    background-color: #f0f0f0;
   }
   
-  .radio-btn input[type="radio"] {
+  .accordion-body {
+    padding: 12px;
     display: none;
+    border-top: 1px solid var(--color-border);
   }
   
   /* Botones */
   .form-actions {
     display: flex;
     justify-content: flex-end;
-    gap: 1rem;
-    margin-top: 2rem;
+    gap: 10px;
+    margin-top: 16px;
   }
   
   .btn {
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.375rem;
-    font-weight: 600;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.15s ease-in-out;
-    text-decoration: none;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
+    font-weight: 500;
+    text-align: center;
+    text-decoration: none;
+    vertical-align: middle;
+    cursor: pointer;
+    user-select: none;
+    padding: 8px 16px;
+    font-size: 14px;
+    border-radius: 6px;
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, 
+                border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
   }
   
   .btn-primary {
-    background-color: #dc3545;
-    color: white;
-    border: none;
+    color: #fff;
+    background-color: var(--color-primary);
+    border: 1px solid var(--color-primary);
   }
   
   .btn-primary:hover {
-    background-color: #c82333;
-  }
-  
-  .btn-secondary {
-    background-color: #6c757d;
-    color: white;
-    border: none;
-  }
-  
-  .btn-secondary:hover {
-    background-color: #5a6268;
+    background-color: #d12323;
   }
   
   .btn-outline {
-    background-color: white;
-    border: 1px solid #dee2e6;
-    color: #495057;
+    color: var(--color-text);
+    background-color: transparent;
+    border: 1px solid var(--color-border);
   }
   
   .btn-outline:hover {
     background-color: #f8f9fa;
   }
   
-  /* Historial */
-  .history-container {
-    margin-top: 2rem;
+  /* Tabla de historial */
+  .history-section {
+    margin-top: 32px;
   }
   
   .history-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-    color: #212529;
+    font-size: 18px;
+    font-weight: 500;
+    margin-bottom: 16px;
+    color: var(--color-text);
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-  }
-  
-  .history-title i {
-    color: #6c757d;
+    gap: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--color-border);
   }
   
   .history-table {
@@ -398,255 +457,166 @@
   }
   
   .history-table th {
-    padding: 0.75rem 1rem;
-    background-color: #f8f9fa;
-    border-bottom: 2px solid #dee2e6;
+    padding: 10px 12px;
     text-align: left;
-    font-weight: 600;
-    font-size: 0.875rem;
-    color: #495057;
+    font-weight: 500;
+    font-size: 13px;
+    color: var(--color-text);
+    border-bottom: 1px solid var(--color-border);
   }
   
   .history-table td {
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid #dee2e6;
-    font-size: 0.875rem;
-    color: #212529;
+    padding: 10px 12px;
+    font-size: 14px;
+    border-bottom: 1px solid var(--color-border);
   }
   
   .history-table tbody tr:hover {
-    background-color: #f8f9fa;
+    background-color: #f9f9f9;
   }
   
-  .badge {
-    display: inline-block;
-    padding: 0.35rem 0.65rem;
-    font-size: 0.75em;
-    font-weight: 700;
-    line-height: 1;
+  .history-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
     text-align: center;
-    white-space: nowrap;
-    vertical-align: baseline;
-    border-radius: 0.375rem;
+    background-color: #f9f9f9;
+    border-radius: 6px;
+    color: var(--color-text-light);
   }
   
-  .badge-entrada {
-    background-color: #d4edda;
-    color: #155724;
-  }
-  
-  .badge-salida {
-    background-color: #f8d7da;
-    color: #721c24;
-  }
-  
-  /* Modo oscuro y responsive */
-  @media (prefers-color-scheme: dark) {
-    .product-card,
-    .form-container,
-    .lotes-section {
-      background-color: #343a40;
-      border-color: #495057;
-    }
-    
-    .product-title,
-    .form-title,
-    .history-title,
-    .lotes-section-title {
-      color: #f8f9fa;
-    }
-    
-    .info-value {
-      color: #e9ecef;
-    }
-    
-    .form-control,
-    .form-select,
-    .radio-btn {
-      background-color: #495057;
-      border-color: #6c757d;
-      color: #f8f9fa;
-    }
-    
-    .radio-btn.checked {
-      background-color: #212529;
-      border-color: #dee2e6;
-    }
-    
-    .lotes-table th {
-      background-color: #212529;
-      border-color: #495057;
-      color: #f8f9fa;
-    }
-    
-    .lotes-table td {
-      border-color: #495057;
-      color: #f8f9fa;
-    }
-    
-    .lotes-table tbody tr:hover {
-      background-color: #495057;
-    }
-    
-    .form-label {
-      color: #e9ecef;
-    }
-    
-    .form-text {
-      color: #adb5bd;
-    }
-    
-    .input-group-text {
-      background-color: #495057;
-      border-color: #6c757d;
-      color: #e9ecef;
-    }
-    
-    .btn-outline {
-      background-color: #343a40;
-      border-color: #495057;
-      color: #e9ecef;
-    }
-    
-    .btn-outline:hover {
-      background-color: #495057;
-    }
-    
-    .history-table th {
-      background-color: #343a40;
-      border-bottom-color: #495057;
-      color: #e9ecef;
-    }
-    
-    .history-table td {
-      border-bottom-color: #495057;
-      color: #e9ecef;
-    }
-    
-    .history-table tbody tr:hover {
-      background-color: #495057;
-    }
-  }
-  
+  /* Responsive */
   @media (max-width: 768px) {
     .product-card {
       flex-direction: column;
-      gap: 1rem;
     }
     
-    .product-img-container {
-      width: 100%;
-      height: 180px;
+    .product-image {
+      margin: 0 auto 12px;
     }
     
-    .product-info {
-      grid-template-columns: 1fr;
-    }
-    
-    .form-actions {
+    .form-row {
       flex-direction: column;
-      gap: 0.75rem;
+      gap: 12px;
     }
     
-    .btn {
-      width: 100%;
-    }
-    
-    .radio-group {
-      flex-direction: column;
+    .product-meta {
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
     }
   }
 </style>
 
-<div class="container">
-  <!-- Migas de pan -->
-  <nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a href="{{ url_for('dashboard_home') }}">Dashboard</a></li>
-      <li class="breadcrumb-item"><a href="{{ url_for('ajuste_stock') }}">Ajuste de Inventario</a></li>
-      <li class="breadcrumb-item active">Salida - {{ producto.nombre }}</li>
-    </ol>
-  </nav>
+<div class="entry-container">
+  <!-- Link para volver -->
+  <a href="{{ url_for('ajuste_stock') }}" class="back-link">
+    <i class="fas fa-arrow-left"></i>
+    <span>Volver a inventario</span>
+  </a>
   
-  <h1 class="page-title">Salida de Mercancía</h1>
+  <!-- Título de página -->
+  <h1 class="page-title">Salida de mercancía</h1>
   
-  <!-- Información del producto -->
+  <!-- Tarjeta del producto -->
   <div class="product-card">
-    <div class="product-img-container">
+    <div class="product-image">
       {% if producto.foto %}
-        <img src="{{ url_for('static', filename='uploads/' ~ producto.foto) }}" alt="{{ producto.nombre }}" class="product-img">
+        <img src="{{ url_for('static', filename='uploads/' ~ producto.foto) }}" alt="{{ producto.nombre }}">
       {% else %}
-        <img src="{{ url_for('static', filename='img/default_product.jpg') }}" alt="Imagen predeterminada" class="product-img">
+        <img src="{{ url_for('static', filename='img/default_product.jpg') }}" alt="Imagen predeterminada">
       {% endif %}
     </div>
     <div class="product-details">
-      <h2 class="product-title">{{ producto.nombre }}</h2>
-      <div class="product-info">
-        <div class="info-item">
-          <i class="fas fa-barcode info-icon"></i>
-          <span class="info-label">Código:</span>
-          <span class="info-value">{{ producto.codigo_barras_externo }}</span>
+      <h2 class="product-name">{{ producto.nombre }}</h2>
+      <div class="product-meta">
+        <div class="meta-item">
+          <div class="meta-label">Código</div>
+          <div class="meta-value">{{ producto.codigo_barras_externo }}</div>
         </div>
-        <div class="info-item">
-          <i class="fas fa-layer-group info-icon"></i>
-          <span class="info-label">Stock actual:</span>
-          <span class="info-value">
+        
+        <div class="meta-item">
+          <div class="meta-label">Stock actual</div>
+          <div class="meta-value">
             {% if producto.stock <= 0 %}
-              <span class="badge-stock badge-low">Sin stock</span>
+              <span class="badge badge-danger">Sin stock</span>
             {% elif producto.stock < 6 %}
-              <span class="badge-stock badge-low">{{ producto.stock }} unidades</span>
-            {% elif producto.stock < 21 %}
-              <span class="badge-stock badge-medium">{{ producto.stock }} unidades</span>
+              <span class="badge badge-warning">{{ producto.stock }} unidades</span>
             {% else %}
-              <span class="badge-stock badge-high">{{ producto.stock }} unidades</span>
+              <span class="badge badge-success">{{ producto.stock }} unidades</span>
             {% endif %}
-          </span>
+          </div>
         </div>
-        <div class="info-item">
-          <i class="fas fa-tag info-icon"></i>
-          <span class="info-label">Precio:</span>
-          <span class="info-value">${{ producto.precio_venta|round(2) }}</span>
+        
+        <div class="meta-item">
+          <div class="meta-label">Precio</div>
+          <div class="meta-value">${{ producto.precio_venta|round(2) }}</div>
         </div>
-        <div class="info-item">
-          <i class="fas fa-dollar-sign info-icon"></i>
-          <span class="info-label">Costo promedio:</span>
-          <span class="info-value">${{ producto.costo|round(2) }}</span>
+        
+        <div class="meta-item">
+          <div class="meta-label">Costo actual</div>
+          <div class="meta-value">${{ producto.costo|round(2) }}</div>
         </div>
-        <div class="info-item">
-          <i class="fas fa-cubes info-icon"></i>
-          <span class="info-label">Lotes activos:</span>
-          <span class="info-value">{{ lotes_activos|length|default('0') }}</span>
+        
+        <div class="meta-item">
+          <div class="meta-label">Fecha de última salida</div>
+          <div class="meta-value">
+            {% if ultima_salida %}
+              {{ ultima_salida }}
+            {% else %}
+              Sin salidas previas
+            {% endif %}
+          </div>
         </div>
-        <div class="info-item">
-          <i class="fas fa-calendar-alt info-icon"></i>
-          <span class="info-label">Última salida:</span>
-          <span class="info-value">{{ ultima_salida|default('Sin salidas registradas') }}</span>
+        
+        <div class="meta-item">
+          <div class="meta-label">Lotes activos</div>
+          <div class="meta-value">
+            {{ lotes_activos|length }} lote{{ 's' if lotes_activos|length != 1 }}
+          </div>
         </div>
       </div>
     </div>
   </div>
   
-  <!-- Formulario de salida -->
-  <form method="POST" action="{{ url_for('ajuste_salida', producto_id=producto.id) }}">
-    <div class="form-container">
-      <h3 class="form-title">
-        <i class="fas fa-minus-circle"></i>
-        Registrar Salida de Mercancía
-      </h3>
+  <!-- Formulario simplificado -->
+  <form method="POST" action="{{ url_for('ajuste_salida', producto_id=producto.id) }}" id="salidaForm">
+    <div class="entry-form">
+      <div class="form-header">
+        <h3 class="form-title">
+          <i class="fas fa-minus-circle"></i>
+          Registrar salida
+        </h3>
+      </div>
       
-      <div class="row">
-        <div class="col-md-6">
-          <div class="form-group">
-            <label for="cantidad" class="form-label">Cantidad a reducir *</label>
-            <input type="number" class="form-control" id="cantidad" name="cantidad" required min="1" max="{{ producto.stock }}" value="1">
-            <div class="form-text">Número de unidades que se retirarán del inventario.</div>
+      <div class="form-body">
+        <!-- Solo los campos imprescindibles visibles -->
+        <div class="form-row">
+          <div class="form-col">
+            <label for="cantidad" class="form-label">Cantidad a reducir*</label>
+            <div class="quantity-input-container">
+              <input type="text" 
+                     class="form-control" 
+                     id="cantidad" 
+                     name="cantidad" 
+                     required 
+                     value="1"
+                     inputmode="decimal"
+                     max="{{ producto.stock }}">
+              <span class="unit-indicator" id="unidadIndicator">
+                {% if producto.unidad %}
+                  {% if producto.unidad == 'pieza' %}PIEZA{% else %}{{ producto.unidad|upper }}{% endif %}
+                {% else %}
+                  PIEZA
+                {% endif %}
+              </span>
+            </div>
+            <small class="form-text">Cantidad que se descontará del inventario</small>
           </div>
-        </div>
-        
-        <div class="col-md-6">
-          <div class="form-group">
-            <label for="motivo" class="form-label">Motivo *</label>
-            <select class="form-select" id="motivo" name="motivo" required>
+          
+          <div class="form-col">
+            <label for="motivo" class="form-label">Motivo*</label>
+            <select class="form-control" id="motivo" name="motivo" required>
               <option value="merma">Merma por daño</option>
               <option value="caducidad">Caducidad</option>
               <option value="robo">Robo o pérdida</option>
@@ -656,117 +626,58 @@
               <option value="devolucion">Devolución a proveedor</option>
               <option value="otro">Otro motivo</option>
             </select>
-          </div>
-        </div>
-      </div>
-      
-      <div class="row mt-3">
-        <div class="col-md-6">
-          <div class="form-group">
-            <label for="metodo_descuento" class="form-label">Método de descuento *</label>
-            <div class="radio-group">
-              <label class="radio-btn checked" id="fifoLabel">
-                <input type="radio" name="metodo_descuento" id="fifo" value="fifo" checked>
-                FIFO (primero en caducar)
-              </label>
-              <label class="radio-btn" id="lifoLabel">
-                <input type="radio" name="metodo_descuento" id="lifo" value="lifo">
-                LIFO (último en entrar)
-              </label>
-            </div>
-            <div class="form-text">Define cómo se seleccionarán los lotes afectados.</div>
+            <small class="form-text">Razón por la que se descuenta stock</small>
           </div>
         </div>
         
-        <div class="col-md-6">
-          <div class="form-group">
-            <label class="form-label">Impacto financiero *</label>
-            <div class="radio-group">
-              <label class="radio-btn checked" id="impactoSiLabel">
-                <input type="radio" name="impacto_financiero" id="impactoSi" value="1" checked>
-                Registrar como pérdida
-              </label>
-              <label class="radio-btn" id="impactoNoLabel">
-                <input type="radio" name="impacto_financiero" id="impactoNo" value="0">
-                No afecta finanzas
-              </label>
+        <!-- Impacto financiero como radios con estilo moderno -->
+        <div class="form-group">
+          <label class="form-label">Impacto financiero*</label>
+          <div class="radio-container">
+            <div class="radio-option">
+              <input type="radio" id="impactoSi" name="impacto_financiero" value="1" checked>
+              <label for="impactoSi">Registrar como pérdida</label>
             </div>
-            <div class="form-text">Determina si este ajuste afecta los informes financieros.</div>
+            <div class="radio-option">
+              <input type="radio" id="impactoNo" name="impacto_financiero" value="0">
+              <label for="impactoNo">Sin impacto financiero</label>
+            </div>
+          </div>
+          <small class="form-text">Determina si este ajuste afecta los informes financieros</small>
+        </div>
+        
+        <!-- Se elimina la selección manual de método de descuento -->
+        <input type="hidden" name="metodo_descuento" value="auto">
+        
+        <!-- Notas adicionales como acordeón -->
+        <div class="accordion-item">
+          <div class="accordion-header" id="notasHeader">
+            <span><i class="fas fa-sticky-note" style="margin-right:6px;"></i> Notas adicionales</span>
+            <i class="fas fa-chevron-down"></i>
+          </div>
+          <div class="accordion-body" id="notasBody">
+            <input type="hidden" id="toggle_notas_estado" name="toggle_notas_estado" value="DESACTIVADO">
+            <textarea class="form-control" id="notas" name="notas" rows="2" placeholder="Información adicional..."></textarea>
           </div>
         </div>
-      </div>
-      
-      {% if lotes_activos and lotes_activos|length > 0 %}
-        <div class="lotes-section" id="lotesAffectedSection">
-          <div class="lotes-section-title">
-            <i class="fas fa-cubes"></i>
-            <span>Lotes afectados</span>
-            <div class="form-check" style="margin-left: auto; margin-bottom: 0;">
-              <input class="form-check-input" type="checkbox" id="mostrarLotes" checked>
-              <label class="form-check-label" for="mostrarLotes">
-                Mostrar detalle
-              </label>
-            </div>
-          </div>
-          
-          <div id="lotesTableContainer">
-            <div class="table-responsive">
-              <table class="lotes-table">
-                <thead>
-                  <tr>
-                    <th style="width: 10%;">Lote</th>
-                    <th style="width: 20%;">Entrada</th>
-                    <th style="width: 20%;">Caducidad</th>
-                    <th style="width: 15%;">Stock</th>
-                    <th style="width: 15%;">Costo</th>
-                    <th style="width: 20%;">Afectación</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for lote in lotes_activos %}
-                    <tr>
-                      <td>{{ lote.numero_lote }}</td>
-                      <td>{{ lote.fecha_entrada.strftime('%d/%m/%Y') }}</td>
-                      <td>{{ lote.fecha_caducidad.strftime('%d/%m/%Y') if lote.fecha_caducidad else 'N/A' }}</td>
-                      <td>{{ lote.stock }} unidades</td>
-                      <td>${{ lote.costo_unitario|round(2) }}</td>
-                      <td id="afectacion-{{ lote.id }}">
-                        <!-- Calculado por JavaScript -->
-                        -
-                      </td>
-                    </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            </div>
-          </div>
+        
+        <!-- Botones de acción -->
+        <div class="form-actions">
+          <a href="{{ url_for('ajuste_stock') }}" class="btn btn-outline">Cancelar</a>
+          <button type="submit" class="btn btn-primary" {% if producto.stock <= 0 %}disabled{% endif %}>
+            <i class="fas fa-check"></i>
+            Guardar salida
+          </button>
         </div>
-      {% endif %}
-      
-      <div class="form-group mt-3">
-        <label for="notas" class="form-label">Notas adicionales</label>
-        <textarea class="form-control" id="notas" name="notas" rows="2"></textarea>
-        <div class="form-text">Información adicional sobre esta salida.</div>
-      </div>
-      
-      <div class="form-actions">
-        <a href="{{ url_for('ajuste_stock') }}" class="btn btn-outline">
-          <i class="fas fa-times"></i>
-          Cancelar
-        </a>
-        <button type="submit" class="btn btn-primary" {% if producto.stock <= 0 %}disabled{% endif %}>
-          <i class="fas fa-check"></i>
-          Confirmar Salida
-        </button>
       </div>
     </div>
   </form>
   
   <!-- Historial de movimientos -->
-  <div class="history-container">
+  <div class="history-section">
     <h3 class="history-title">
       <i class="fas fa-history"></i>
-      Últimos Movimientos
+      Historial de movimientos
     </h3>
     
     {% if historial and historial|length > 0 %}
@@ -785,15 +696,15 @@
           <tbody>
             {% for mov in historial %}
               <tr>
-                <td>{{ mov.fecha_movimiento.strftime('%d/%m/%Y') }}</td>
+                <td>{{ mov.fecha_formateada() }}</td>
                 <td>
                   {% if mov.tipo_movimiento == 'ENTRADA' %}
-                    <span class="badge badge-entrada">Entrada</span>
+                    <span class="badge badge-success">Entrada</span>
                   {% else %}
-                    <span class="badge badge-salida">Salida</span>
+                    <span class="badge badge-danger">Salida</span>
                   {% endif %}
                 </td>
-                <td>{{ mov.numero_lote|default('-') }}</td>
+                <td>{{ mov.numero_lote }}</td>
                 <td>
                   {% if mov.tipo_movimiento == 'ENTRADA' %}
                     +{{ mov.cantidad }}
@@ -803,20 +714,21 @@
                 </td>
                 <td>
                   {% if mov.tipo_movimiento == 'ENTRADA' %}
-                    ${{ mov.costo_unitario|round(2) }}
+                    {{ mov.costo_formateado() }}
                   {% else %}
                     -
                   {% endif %}
                 </td>
-                <td>{{ mov.motivo }}</td>
+                <td>{{ mov.motivo|title }}</td>
               </tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
     {% else %}
-      <div class="alert alert-info">
-        No hay movimientos registrados para este producto.
+      <div class="history-empty">
+        <i class="fas fa-inbox" style="font-size:24px; margin-bottom:8px;"></i>
+        <p>No hay movimientos registrados para este producto.</p>
       </div>
     {% endif %}
   </div>
@@ -824,171 +736,205 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
+    // Obtener el campo de cantidad y su unidad
     const cantidadInput = document.getElementById('cantidad');
-    const fifoRadio = document.getElementById('fifo');
-    const lifoRadio = document.getElementById('lifo');
-    const fifoLabel = document.getElementById('fifoLabel');
-    const lifoLabel = document.getElementById('lifoLabel');
-    const impactoSiRadio = document.getElementById('impactoSi');
-    const impactoNoRadio = document.getElementById('impactoNo');
-    const impactoSiLabel = document.getElementById('impactoSiLabel');
-    const impactoNoLabel = document.getElementById('impactoNoLabel');
-    const mostrarLotesCheck = document.getElementById('mostrarLotes');
-    const lotesTableContainer = document.getElementById('lotesTableContainer');
+    const unidadIndicator = document.getElementById('unidadIndicator');
     
-    // Stock máximo para validación
-    const stockMax = {{ producto.stock }};
+    // Determinar si el producto usa unidades (no piezas)
+    const esUnidadDecimal = {% if producto.unidad and producto.unidad not in ['pieza', 'piezas'] %}true{% else %}false{% endif %};
     
-    // Cambiar estilos de los radio buttons personalizados
-    fifoRadio.addEventListener('change', function() {
-      if (this.checked) {
-        fifoLabel.classList.add('checked');
-        lifoLabel.classList.remove('checked');
-        actualizarAfectacionLotes('fifo');
-      }
-    });
-    
-    lifoRadio.addEventListener('change', function() {
-      if (this.checked) {
-        lifoLabel.classList.add('checked');
-        fifoLabel.classList.remove('checked');
-        actualizarAfectacionLotes('lifo');
-      }
-    });
-    
-    impactoSiRadio.addEventListener('change', function() {
-      if (this.checked) {
-        impactoSiLabel.classList.add('checked');
-        impactoNoLabel.classList.remove('checked');
-      }
-    });
-    
-    impactoNoRadio.addEventListener('change', function() {
-      if (this.checked) {
-        impactoNoLabel.classList.add('checked');
-        impactoSiLabel.classList.remove('checked');
-      }
-    });
-    
-    // Mostrar/ocultar tabla de lotes
-    if (mostrarLotesCheck) {
-      mostrarLotesCheck.addEventListener('change', function() {
-        if (lotesTableContainer) {
-          lotesTableContainer.style.display = this.checked ? 'block' : 'none';
-        }
-      });
-    }
-    
-    // Validación de cantidad
-    if (cantidadInput) {
-      cantidadInput.addEventListener('change', function() {
-        if (this.value <= 0) {
-          this.value = 1;
-        } else if (this.value > stockMax) {
-          this.value = stockMax;
-        }
+    // Función para actualizar la unidad basada en la cantidad
+    function updateUnitText() {
+      // Obtener la unidad del producto (o usar 'pieza'/'piezas' por defecto)
+      {% if producto.unidad %}
+        let unidad = '{{ producto.unidad }}';
         
-        actualizarAfectacionLotes(fifoRadio.checked ? 'fifo' : 'lifo');
-      });
-    }
-    
-    // Función para actualizar la afectación de lotes
-    function actualizarAfectacionLotes(metodo) {
-      {% if lotes_activos %}
-        const cantidad = parseInt(cantidadInput.value);
-        let cantidadRestante = cantidad;
-        
-        // Datos de lotes ordenados según el método
-        const lotes = [
-          {% for lote in lotes_activos %}
-            {
-              id: {{ lote.id }},
-              numero: "{{ lote.numero_lote }}",
-              stock: {{ lote.stock }},
-              fecha_entrada: new Date("{{ lote.fecha_entrada.isoformat() }}"),
-              {% if lote.fecha_caducidad %}
-                fecha_caducidad: new Date("{{ lote.fecha_caducidad.isoformat() }}"),
-              {% else %}
-                fecha_caducidad: null,
-              {% endif %}
-              costo: {{ lote.costo_unitario }}
-            },
-          {% endfor %}
-        ];
-        
-        // Ordenar lotes según el método
-        if (metodo === 'fifo') {
-          // FIFO: primero ordenar por fecha de caducidad (si existe), luego por fecha de entrada
-          lotes.sort((a, b) => {
-            if (a.fecha_caducidad && b.fecha_caducidad) {
-              return a.fecha_caducidad - b.fecha_caducidad;
-            } else if (a.fecha_caducidad) {
-              return -1; // a tiene caducidad, b no
-            } else if (b.fecha_caducidad) {
-              return 1; // b tiene caducidad, a no
-            }
-            return a.fecha_entrada - b.fecha_entrada;
-          });
+        if (unidad === 'pieza') {
+          // Si es 'pieza', cambia a plural cuando es más de 1
+          unidadIndicator.textContent = parseFloat(cantidadInput.value) === 1 ? 'PIEZA' : 'PIEZAS';
         } else {
-          // LIFO: último en entrar, primero en salir
-          lotes.sort((a, b) => b.fecha_entrada - a.fecha_entrada);
+          // Mantener unidad existente (KG, L, etc.)
+          unidadIndicator.textContent = unidad.toUpperCase();
         }
-        
-        // Reiniciar todas las afectaciones
-        lotes.forEach(lote => {
-          const element = document.getElementById(`afectacion-${lote.id}`);
-          if (element) {
-            element.textContent = '-';
-          }
-        });
-        
-        // Calcular y mostrar afectaciones
-        for (const lote of lotes) {
-          if (cantidadRestante <= 0) break;
-          
-          const afectacion = Math.min(lote.stock, cantidadRestante);
-          cantidadRestante -= afectacion;
-          
-          const element = document.getElementById(`afectacion-${lote.id}`);
-          if (element) {
-            element.textContent = `-${afectacion} unidades`;
-            element.style.color = '#dc3545';
-            element.style.fontWeight = '600';
-          }
-        }
+      {% else %}
+        // Para productos sin unidad específica, usar pieza/piezas
+        unidadIndicator.textContent = parseFloat(cantidadInput.value) === 1 ? 'PIEZA' : 'PIEZAS';
       {% endif %}
     }
     
-    // Inicializar afectación de lotes
-    actualizarAfectacionLotes('fifo');
+    // Validación del formato y limitación de decimales para el campo cantidad
+    if (cantidadInput) {
+      // Configurar manejo de entrada para el campo cantidad
+      cantidadInput.addEventListener('input', function(e) {
+        let valor = e.target.value;
+        
+        // Permitir campo vacío temporalmente para facilitar la edición
+        if (valor === '') {
+          return;
+        }
+        
+        if (esUnidadDecimal) {
+          // Para productos con unidades decimales (kg, l, etc.)
+          
+          // Patrón que permite números con hasta 3 decimales
+          // Acepta: "0", "1", "1.2", "1.23", "1.234", "10.234", etc.
+          const patronDecimal = /^(\d+)?(\.\d{0,3})?$/;
+          
+          if (!patronDecimal.test(valor)) {
+            // Si no cumple con el patrón, revertir al valor anterior
+            if (e.target.defaultValue) {
+              e.target.value = e.target.defaultValue;
+            } else {
+              e.target.value = '0';
+            }
+          } else {
+            // Actualizar el valor predeterminado para futuras validaciones
+            e.target.defaultValue = e.target.value;
+          }
+        } else {
+          // Para productos en piezas (solo enteros)
+          const patronEntero = /^[0-9]+$/;
+          if (!patronEntero.test(valor)) {
+            // Si no cumple con el patrón y no está vacío, revertir
+            if (e.target.defaultValue) {
+              e.target.value = e.target.defaultValue;
+            } else {
+              e.target.value = '1';
+            }
+          } else {
+            e.target.defaultValue = e.target.value;
+          }
+        }
+        
+        // Actualizar texto de unidad si hay un valor
+        if (e.target.value) {
+          updateUnitText();
+        }
+      });
+    }
+    
+    // Acordeones para opciones adicionales
+    const accordionHeaders = document.querySelectorAll('.accordion-header');
+    
+    accordionHeaders.forEach(header => {
+      const targetId = header.id.replace('Header', 'Body');
+      const body = document.getElementById(targetId);
+      const stateInputId = targetId.replace('Body', '').toLowerCase().replace('caducidad', 'toggle_caducidad').replace('notas', 'toggle_notas').replace('comprobante', 'toggle_comprobante') + '_estado';
+      const stateInput = document.getElementById(stateInputId);
+      
+      header.addEventListener('click', function() {
+        // Toggle el cuerpo
+        const isVisible = body.style.display === 'block';
+        body.style.display = isVisible ? 'none' : 'block';
+        
+        // Cambiar el icono
+        const icon = this.querySelector('.fas.fa-chevron-down, .fas.fa-chevron-up');
+        if (icon) {
+          icon.classList.toggle('fa-chevron-down');
+          icon.classList.toggle('fa-chevron-up');
+        }
+        
+        // Actualizar el estado
+        if (stateInput) {
+          stateInput.value = isVisible ? 'DESACTIVADO' : 'ACTIVADO';
+        }
+      });
+    });
+    
+    // Inicializar la visualización de unidad
+    updateUnitText();
     
     // Validación del formulario
-    const form = document.querySelector('form');
-    form.addEventListener('submit', function(event) {
-      const cantidad = parseInt(cantidadInput.value);
-      
-      if (cantidad <= 0) {
-        event.preventDefault();
-        alert('La cantidad debe ser mayor que cero.');
-        cantidadInput.focus();
-        return false;
-      }
-      
-      if (cantidad > stockMax) {
-        event.preventDefault();
-        alert(`La cantidad no puede ser mayor que el stock disponible (${stockMax}).`);
-        cantidadInput.focus();
-        return false;
-      }
-      
-      if (stockMax <= 0) {
-        event.preventDefault();
-        alert('No hay stock disponible para realizar una salida.');
-        return false;
-      }
-      
-      return true;
-    });
+    const form = document.getElementById('salidaForm');
+    
+    if (form) {
+      form.addEventListener('submit', function(event) {
+        let cantidadValor = cantidadInput.value.trim();
+        
+        // Verificar si es un número válido y mayor que cero
+        let numeroValido = parseFloat(cantidadValor);
+        
+        if (isNaN(numeroValido) || numeroValido <= 0) {
+          event.preventDefault();
+          alert('La cantidad debe ser mayor que cero.');
+          cantidadInput.focus();
+          return false;
+        }
+        
+        // Verificar que no exceda el stock disponible
+        const stockMaximo = {{ producto.stock }};
+        if (numeroValido > stockMaximo) {
+          event.preventDefault();
+          alert(`La cantidad no puede ser mayor que el stock disponible (${stockMaximo}).`);
+          cantidadInput.focus();
+          return false;
+        }
+        
+        // Validaciones especiales para unidades decimales
+        if (esUnidadDecimal) {
+          // Verificar formato decimal con punto obligatorio y un dígito antes
+          if (cantidadValor.includes('.') && cantidadValor.charAt(0) === '.') {
+            event.preventDefault();
+            
+            // Mensaje mejorado con estilo personalizado
+            const mensaje = document.createElement('div');
+            mensaje.style.position = 'fixed';
+            mensaje.style.top = '50%';
+            mensaje.style.left = '50%';
+            mensaje.style.transform = 'translate(-50%, -50%)';
+            mensaje.style.backgroundColor = '#ff3b30';
+            mensaje.style.color = 'white';
+            mensaje.style.padding = '20px';
+            mensaje.style.borderRadius = '8px';
+            mensaje.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
+            mensaje.style.zIndex = '9999';
+            mensaje.style.maxWidth = '90%';
+            mensaje.style.width = '350px';
+            mensaje.style.textAlign = 'center';
+            
+            mensaje.innerHTML = `
+              <div style="font-size: 24px; margin-bottom: 10px;"><i class="fas fa-exclamation-triangle"></i></div>
+              <div style="font-size: 16px; font-weight: bold; margin-bottom: 10px;">Formato incorrecto</div>
+              <div style="margin-bottom: 15px;">Debe incluir un dígito antes del punto decimal.</div>
+              <div style="font-size: 15px; padding: 5px; background: rgba(255,255,255,0.2); border-radius: 4px; margin-bottom: 15px;">
+                <span style="font-weight: bold;">Ejemplo:</span> 0.123 <span style="color: #90ee90;">✓</span>
+                &nbsp;&nbsp;&nbsp;
+                <span style="text-decoration: line-through;">.123</span> <span style="color: #ff9999;">✗</span>
+              </div>
+              <button id="cerrarAlerta" style="background: white; color: #ff3b30; border: none; padding: 8px 16px; border-radius: 4px; font-weight: bold; cursor: pointer;">Entendido</button>
+            `;
+            
+            document.body.appendChild(mensaje);
+            
+            // Botón para cerrar la alerta
+            document.getElementById('cerrarAlerta').addEventListener('click', function() {
+              document.body.removeChild(mensaje);
+              cantidadInput.focus();
+            });
+            
+            // Auto-cerrar después de 5 segundos
+            setTimeout(() => {
+              if (document.body.contains(mensaje)) {
+                document.body.removeChild(mensaje);
+              }
+            }, 5000);
+            
+            cantidadInput.focus();
+            return false;
+          }
+        } else {
+          // Para piezas, verificar que sea un número entero
+          if (Math.floor(numeroValido) !== numeroValido) {
+            event.preventDefault();
+            alert('La cantidad debe ser un número entero para este tipo de producto.');
+            cantidadInput.focus();
+            return false;
+          }
+        }
+        
+        return true;
+      });
+    }
   });
 </script>
 {% endblock %}
