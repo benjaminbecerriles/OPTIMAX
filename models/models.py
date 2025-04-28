@@ -52,7 +52,8 @@ class Producto(db.Model):
     # Campos básicos
     # AHORA: Se cambió de nullable=False a nullable=True
     nombre = db.Column(db.String(100), nullable=True)
-    stock = db.Column(db.Integer, default=0)
+    # MODIFICADO: Cambiado de Integer a Float para permitir cantidades decimales
+    stock = db.Column(db.Float, default=0.0)
     costo = db.Column(db.Float, default=0.0)
     precio_venta = db.Column(db.Float, default=0.0)
     categoria = db.Column(db.String(100), nullable=True)

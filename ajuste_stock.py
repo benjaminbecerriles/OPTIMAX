@@ -80,6 +80,9 @@ def aplicar_salida_lotes(producto_id, cantidad, metodo='fifo'):
     Returns:
         lista de diccionarios con lotes afectados y cantidades
     """
+    # Asegurar que cantidad sea un float
+    cantidad = float(cantidad)
+    
     lotes = obtener_lotes_activos(producto_id)
     
     # Si no hay lotes, no se puede aplicar la salida
@@ -474,7 +477,8 @@ def ajuste_salida(producto_id):
     if request.method == 'POST':
         try:
             # Obtener datos del formulario
-            cantidad = int(request.form.get('cantidad', 1))
+            # MODIFICADO: Cambiado de int a float
+            cantidad = float(request.form.get('cantidad', 1))
             motivo = request.form.get('motivo', 'ajuste')
             metodo_descuento = request.form.get('metodo_descuento', 'fifo')
             impacto_financiero = request.form.get('impacto_financiero') == '1'
