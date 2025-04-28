@@ -30,6 +30,31 @@
     color: #212529;
   }
   
+  /* Botón volver con estilo Apple */
+  .btn-volver {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.25rem;
+    border-radius: 980px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    background-color: #f5f5f7;
+    color: #1d1d1f;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  
+  .btn-volver:hover {
+    background-color: #e8e8e8;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
   /* Filtros y búsqueda */
   .filters-container {
     display: flex;
@@ -85,24 +110,24 @@
   }
   
   .movimiento-icon {
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    border-radius: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
     margin-right: 1rem;
     flex-shrink: 0;
+    overflow: hidden;
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   }
   
-  .entrada-icon {
-    background-color: #e8f5e9;
-    color: #2e7d32;
-  }
-  
-  .salida-icon {
-    background-color: #ffebee;
-    color: #c62828;
+  .movimiento-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
   }
   
   .movimiento-details {
@@ -178,11 +203,55 @@
     color: #adb5bd;
   }
   
-  /* Paginación */
+  /* Paginación mejorada */
   .pagination-container {
     display: flex;
     justify-content: center;
     margin-top: 2rem;
+  }
+  
+  .pagination {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    gap: 0.5rem;
+  }
+  
+  .page-item {
+    margin: 0;
+  }
+  
+  .page-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    border-radius: 980px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    color: #212529;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    min-width: 40px;
+    height: 40px;
+    font-size: 0.95rem;
+  }
+  
+  .page-link:hover {
+    background-color: #f5f5f7;
+    transform: translateY(-2px);
+  }
+  
+  .page-item.active .page-link {
+    background-color: #e52e2e;
+    color: white;
+    border-color: #e52e2e;
+  }
+  
+  .page-item.disabled .page-link {
+    color: #6c757d;
+    pointer-events: none;
+    opacity: 0.5;
   }
   
   .pagination-info {
@@ -190,6 +259,19 @@
     text-align: center;
     color: #6c757d;
     font-size: 0.875rem;
+  }
+  
+  /* Placeholder para imágenes */
+  .movimiento-icon .no-image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background-color: #f0f0f0;
+    color: #adb5bd;
+    font-size: 1.25rem;
+    border-radius: 0;
   }
   
   /* Estilos para dispositivos móviles */
@@ -218,9 +300,9 @@
   <!-- Encabezado con título y botón de volver -->
   <div class="page-header">
     <h1 class="page-title">Historial de Movimientos</h1>
-    <a href="{{ url_for('ajuste_stock') }}" class="btn-icon btn-outline">
+    <a href="{{ url_for('ajuste_stock') }}" class="btn-volver">
       <i class="fas fa-arrow-left"></i>
-      Volver
+      <span>Volver</span>
     </a>
   </div>
   
@@ -230,25 +312,25 @@
       <label for="tipoFilter">Tipo</label>
       <select id="tipoFilter" class="form-select">
         <option value="todos">Todos los movimientos</option>
-        <option value="entrada">Solo entradas</option>
-        <option value="salida">Solo salidas</option>
+        <option value="entrada" {% if request.args.get('tipo') == 'entrada' %}selected{% endif %}>Solo entradas</option>
+        <option value="salida" {% if request.args.get('tipo') == 'salida' %}selected{% endif %}>Solo salidas</option>
       </select>
     </div>
     
     <div class="filter-item">
       <label for="periodoFilter">Período</label>
       <select id="periodoFilter" class="form-select">
-        <option value="30">Últimos 30 días</option>
-        <option value="7">Últimos 7 días</option>
-        <option value="90">Últimos 3 meses</option>
-        <option value="180">Últimos 6 meses</option>
-        <option value="365">Último año</option>
+        <option value="30" {% if request.args.get('periodo') == '30' or not request.args.get('periodo') %}selected{% endif %}>Últimos 30 días</option>
+        <option value="7" {% if request.args.get('periodo') == '7' %}selected{% endif %}>Últimos 7 días</option>
+        <option value="90" {% if request.args.get('periodo') == '90' %}selected{% endif %}>Últimos 3 meses</option>
+        <option value="180" {% if request.args.get('periodo') == '180' %}selected{% endif %}>Últimos 6 meses</option>
+        <option value="365" {% if request.args.get('periodo') == '365' %}selected{% endif %}>Último año</option>
       </select>
     </div>
     
     <div class="filter-item">
       <label for="productoFilter">Producto</label>
-      <input type="text" id="productoFilter" class="form-control" placeholder="Buscar por nombre o código">
+      <input type="text" id="productoFilter" class="form-control" placeholder="Buscar por nombre o código" value="{{ request.args.get('q', '') }}">
     </div>
   </div>
   
@@ -257,8 +339,14 @@
     {% if movimientos and movimientos|length > 0 %}
       {% for movimiento in movimientos %}
         <div class="movimiento-item">
-          <div class="movimiento-icon {% if movimiento.tipo_movimiento == 'ENTRADA' %}entrada-icon{% else %}salida-icon{% endif %}">
-            <i class="fas fa-{% if movimiento.tipo_movimiento == 'ENTRADA' %}plus{% else %}minus{% endif %}"></i>
+          <div class="movimiento-icon">
+            {% if movimiento.producto.foto %}
+              <img src="{{ url_for('static', filename='uploads/' ~ movimiento.producto.foto) }}" alt="{{ movimiento.producto.nombre }}">
+            {% else %}
+              <div class="no-image">
+                <i class="fas fa-box"></i>
+              </div>
+            {% endif %}
           </div>
           <div class="movimiento-details">
             <div class="movimiento-primary">
@@ -287,25 +375,42 @@
     {% endif %}
   </div>
   
-  <!-- Paginación simple -->
-  <div class="pagination-container">
-    <nav aria-label="Paginación del historial">
-      <ul class="pagination">
-        <li class="page-item {% if current_page == 1 %}disabled{% endif %}">
-          <a class="page-link" href="?page={{ current_page - 1 }}">Anterior</a>
-        </li>
-        <li class="page-item active">
-          <span class="page-link">{{ current_page }}</span>
-        </li>
-        <li class="page-item {% if not has_next %}disabled{% endif %}">
-          <a class="page-link" href="?page={{ current_page + 1 }}">Siguiente</a>
-        </li>
-      </ul>
-    </nav>
-  </div>
-  <div class="pagination-info">
-    Mostrando {{ movimientos|length }} de {{ total_movimientos }} movimientos
-  </div>
+  <!-- Paginación adaptada para 30 elementos por página -->
+  {% if movimientos and movimientos|length > 0 %}
+    <div class="pagination-container">
+      <nav aria-label="Paginación del historial">
+        <ul class="pagination">
+          <!-- Botón Anterior -->
+          <li class="page-item {% if current_page == 1 %}disabled{% endif %}">
+            <a class="page-link" href="?page={{ current_page - 1 }}{% if request.args.get('tipo') %}&tipo={{ request.args.get('tipo') }}{% endif %}{% if request.args.get('periodo') %}&periodo={{ request.args.get('periodo') }}{% endif %}{% if request.args.get('q') %}&q={{ request.args.get('q') }}{% endif %}">Anterior</a>
+          </li>
+          
+          <!-- Números de página - Utilizando 30 por página en vez de 10 -->
+          {% set per_page = 30 %}
+          {% set total_pages = (total_movimientos + per_page - 1) // per_page %}
+          {% set start_page = [current_page - 2, 1]|max %}
+          {% set end_page = [start_page + 4, total_pages + 1]|min %}
+          {% if end_page - start_page < 5 and start_page > 1 %}
+            {% set start_page = [end_page - 4, 1]|max %}
+          {% endif %}
+          
+          {% for i in range(start_page, end_page) %}
+            <li class="page-item {% if i == current_page %}active{% endif %}">
+              <a class="page-link" href="?page={{ i }}{% if request.args.get('tipo') %}&tipo={{ request.args.get('tipo') }}{% endif %}{% if request.args.get('periodo') %}&periodo={{ request.args.get('periodo') }}{% endif %}{% if request.args.get('q') %}&q={{ request.args.get('q') }}{% endif %}">{{ i }}</a>
+            </li>
+          {% endfor %}
+          
+          <!-- Botón Siguiente -->
+          <li class="page-item {% if current_page >= total_pages %}disabled{% endif %}">
+            <a class="page-link" href="?page={{ current_page + 1 }}{% if request.args.get('tipo') %}&tipo={{ request.args.get('tipo') }}{% endif %}{% if request.args.get('periodo') %}&periodo={{ request.args.get('periodo') }}{% endif %}{% if request.args.get('q') %}&q={{ request.args.get('q') }}{% endif %}">Siguiente</a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+    <div class="pagination-info">
+      Mostrando {{ movimientos|length }} de {{ total_movimientos }} movimientos
+    </div>
+  {% endif %}
 </div>
 
 <script>
@@ -315,11 +420,18 @@
     const periodoFilter = document.getElementById('periodoFilter');
     const productoFilter = document.getElementById('productoFilter');
     
+    // Preservar los parámetros actuales de la URL
+    function getBaseUrl() {
+      const currentParams = new URLSearchParams(window.location.search);
+      currentParams.delete('page'); // Siempre volver a la primera página cuando se cambian los filtros
+      return window.location.pathname + '?' + currentParams.toString();
+    }
+    
     // Función para aplicar filtros
     function applyFilters() {
       const tipo = tipoFilter.value;
       const periodo = periodoFilter.value;
-      const producto = productoFilter.value.trim().toLowerCase();
+      const producto = productoFilter.value.trim();
       
       // Construir la URL con los parámetros de filtro
       let url = window.location.pathname + '?';
@@ -344,30 +456,51 @@
     }
     
     // Eventos para los filtros
-    tipoFilter.addEventListener('change', applyFilters);
-    periodoFilter.addEventListener('change', applyFilters);
+    if (tipoFilter) {
+      tipoFilter.addEventListener('change', applyFilters);
+    }
+    
+    if (periodoFilter) {
+      periodoFilter.addEventListener('change', applyFilters);
+    }
     
     // Debounce para el filtro de producto (esperar a que el usuario termine de escribir)
-    let debounceTimeout;
-    productoFilter.addEventListener('input', function() {
-      clearTimeout(debounceTimeout);
-      debounceTimeout = setTimeout(applyFilters, 500);
+    if (productoFilter) {
+      let debounceTimeout;
+      productoFilter.addEventListener('input', function() {
+        clearTimeout(debounceTimeout);
+        debounceTimeout = setTimeout(applyFilters, 500);
+      });
+      
+      // Manejar la tecla Enter en el campo de búsqueda
+      productoFilter.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          clearTimeout(debounceTimeout);
+          applyFilters();
+        }
+      });
+    }
+    
+    // Asegurarse de que los enlaces de paginación preserven los filtros actuales
+    document.querySelectorAll('.pagination .page-link').forEach(link => {
+      const url = new URL(link.href);
+      
+      // Añadir parámetros actuales
+      if (tipoFilter && tipoFilter.value !== 'todos') {
+        url.searchParams.set('tipo', tipoFilter.value);
+      }
+      
+      if (periodoFilter && periodoFilter.value !== '30') {
+        url.searchParams.set('periodo', periodoFilter.value);
+      }
+      
+      if (productoFilter && productoFilter.value.trim()) {
+        url.searchParams.set('q', productoFilter.value.trim());
+      }
+      
+      link.href = url.toString();
     });
-    
-    // Establecer los valores de los filtros desde los parámetros de la URL
-    const urlParams = new URLSearchParams(window.location.search);
-    
-    if (urlParams.has('tipo')) {
-      tipoFilter.value = urlParams.get('tipo');
-    }
-    
-    if (urlParams.has('periodo')) {
-      periodoFilter.value = urlParams.get('periodo');
-    }
-    
-    if (urlParams.has('q')) {
-      productoFilter.value = urlParams.get('q');
-    }
   });
 </script>
 {% endblock %}
