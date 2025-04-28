@@ -60,11 +60,11 @@
     max-width: 600px;
   }
 
-  /* Encabezado de página - MODIFICADO PARA ALINEACIÓN CORRECTA */
+  /* Encabezado de página - MODIFICADO PARA ALINEACIÓN PERFECTA */
   .page-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start; /* Cambiado a flex-start para mejor control */
+    align-items: flex-start; /* Cambiado a flex-start */
     margin-bottom: 1.5rem;
     padding-bottom: 1rem;
   }
@@ -74,16 +74,22 @@
     font-weight: 600;
     letter-spacing: -0.02em;
     margin: 0;
+    margin-bottom: 8px; /* Espacio para la descripción */
     color: var(--text-color);
+  }
+  
+  .header-title-container {
+    display: flex;
+    flex-direction: column;
   }
   
   .header-actions {
     display: flex;
     gap: 1rem;
-    margin-top: 8px; /* Añadido para alinear con el título */
+    padding-top: 8px; /* Ajuste para alinear con la primera línea del título */
   }
   
-  /* Botones con estilo Apple - CENTRADO DE TEXTO MEJORADO */
+  /* Botones con estilo Apple - MEJORADO PARA CENTRADO DE TEXTO */
   .btn-icon {
     display: flex;
     align-items: center;
@@ -103,7 +109,9 @@
   /* Fuerza centrado de texto en botones */
   .btn-icon i, 
   .btn-icon span {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     vertical-align: middle;
     line-height: 1;
   }
@@ -131,20 +139,21 @@
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   }
 
-  /* Filtros y búsqueda con estilo Apple */
+  /* Filtros y búsqueda con estilo Apple - MODIFICADO */
   .filters-container {
     display: flex;
     flex-wrap: wrap;
+    justify-content: space-between; /* Distribuir equitativamente */
     gap: 1rem;
     margin-bottom: 1.5rem;
-    padding: 1.25rem;
-    background-color: var(--light-background);
-    border-radius: 12px;
+    width: 100%; /* Asegurar ancho completo */
   }
   
   .filter-item {
     flex: 1;
     min-width: 180px;
+    display: flex;
+    align-items: center;
   }
   
   .filter-item select {
@@ -154,7 +163,7 @@
     border: 1px solid rgba(0, 0, 0, 0.1);
     font-size: 0.95rem;
     font-family: var(--font-apple);
-    background-color: white;
+    background-color: #f5f5f7;
     color: var(--text-color);
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -173,7 +182,7 @@
     outline: none;
   }
   
-  /* Busqueda con estilo Apple - COMPLETAMENTE REVISADO PARA LA LUPA */
+  /* Búsqueda con estilo Apple - CORREGIDO PARA QUE FUNCIONE COMO EN PRODUCTOS.HTML */
   .search-container {
     display: flex;
     gap: 0.75rem;
@@ -182,36 +191,32 @@
     align-items: center;
   }
   
-  .search-input {
+  .search-box {
     flex: 1;
     position: relative;
   }
   
-  .search-input i.search-icon {
+  .search-box i {
     position: absolute;
-    left: 1rem;
+    left: 1.25rem;
     top: 50%;
     transform: translateY(-50%);
-    color: #86868b;
-    font-size: 1rem;
-    z-index: 5; /* Asegurar que esté por encima del input */
-    pointer-events: none; /* Evitar que interfiera con el input */
+    color: var(--gray-600);
+    font-size: 1.1rem;
+    z-index: 5;
+    pointer-events: none;
   }
   
-  .search-input input {
+  .search-box input {
     width: 100%;
-    padding-left: 3rem !important; /* Importante para dejar espacio para la lupa */
-    padding-right: 1rem;
-    padding-top: 0.75rem;
-    padding-bottom: 0.75rem;
+    padding: 0.75rem 1rem 0.75rem 3rem;
     border-radius: 8px;
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--gray-300);
     font-size: 1rem;
-    font-family: var(--font-apple);
     height: 48px;
-    background-color: var(--light-background);
     transition: all 0.2s ease;
-    box-sizing: border-box;
+    font-weight: 400;
+    background-color: var(--light-background);
   }
   
   .search-input input:focus {
@@ -289,8 +294,11 @@
   .form-heart-container {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 0.5rem;
     cursor: pointer;
+    height: 100%;
+    padding: 0.75rem 0;
   }
   
   .form-heart-check-input {
@@ -656,7 +664,7 @@
 <div class="ajuste-stock-container">
   <!-- Encabezado con título y acciones -->
   <div class="page-header">
-    <div>
+    <div class="header-title-container">
       <h1 class="page-title">Ajuste de Stock</h1>
       <p class="page-description">Registra entradas y salidas de mercancía.</p>
     </div>
@@ -672,7 +680,7 @@
     </div>
   </div>
   
-  <!-- Filtros y búsqueda -->
+  <!-- Filtros y búsqueda - MODIFICADO PARA ELIMINAR FONDO GRIS -->
   <div class="filters-container">
     <div class="filter-item">
       <select class="form-select" id="categoriaFilter">
@@ -698,7 +706,7 @@
         <option value="stock-desc">Stock (mayor a menor)</option>
       </select>
     </div>
-    <div class="filter-item" style="display: flex; justify-content: center; align-items: center;">
+    <div class="filter-item">
       <div class="form-heart-container">
         <input class="form-heart-check-input" type="checkbox" id="favoritosCheck">
         <span class="heart-icon" id="heartIcon">&#9825;</span>
@@ -708,9 +716,9 @@
   </div>
   
   <div class="search-container">
-    <div class="search-input">
-      <!-- Icono de lupa utilizando directamente Font Awesome -->
-      <i class="fas fa-search search-icon"></i>
+    <div class="search-box">
+      <!-- Ícono de lupa con Font Awesome -->
+      <i class="fas fa-search"></i>
       <input type="text" id="searchInput" placeholder="Buscar por nombre, código o categoría...">
     </div>
     <div class="search-actions">
