@@ -725,6 +725,8 @@ def ver_productos():
                 fecha_caducidad = fecha_actual + timedelta(days=365)
             elif caducidad_lapso == '2 años':
                 fecha_caducidad = fecha_actual + timedelta(days=730)
+            elif nuevo.metodo_caducidad == '3 años':
+                fecha_caducidad = fecha_actual + timedelta(days=1460)  # 4 años (considerados como +3 años)
             
             # Convertir a date
             if fecha_caducidad:
@@ -1166,6 +1168,8 @@ def agregar_producto():
                         fecha_caducidad = fecha_actual + timedelta(days=365)
                     elif nuevo.metodo_caducidad == '2 años':
                         fecha_caducidad = fecha_actual + timedelta(days=730)
+                    elif nuevo.metodo_caducidad == '3 años' or nuevo.metodo_caducidad == 'más de 3 años':
+                        fecha_caducidad = fecha_actual + timedelta(days=1460)  # 4 años (considerados como +3 años)
 
                     # Convertir a date
                     if fecha_caducidad:
@@ -1312,6 +1316,73 @@ def agregar_sin_codigo():
             # Guardar en la base de datos
             db.session.add(nuevo)
             db.session.commit()
+            
+            # Si tiene caducidad y stock positivo, crear un lote inicial con fecha de caducidad
+            if nuevo.has_caducidad and nuevo.metodo_caducidad and nuevo.stock > 0:
+                try:
+                    # Determinar la fecha de caducidad según el método
+                    fecha_actual = datetime.now()
+                    fecha_caducidad = None
+
+                    if nuevo.metodo_caducidad == '1 día':
+                        fecha_caducidad = fecha_actual + timedelta(days=1)
+                    elif nuevo.metodo_caducidad == '3 días':
+                        fecha_caducidad = fecha_actual + timedelta(days=3)
+                    elif nuevo.metodo_caducidad == '1 semana':
+                        fecha_caducidad = fecha_actual + timedelta(days=7)
+                    elif nuevo.metodo_caducidad == '2 semanas':
+                        fecha_caducidad = fecha_actual + timedelta(days=14)
+                    elif nuevo.metodo_caducidad == '1 mes':
+                        fecha_caducidad = fecha_actual + timedelta(days=30)
+                    elif nuevo.metodo_caducidad == '3 meses':
+                        fecha_caducidad = fecha_actual + timedelta(days=90)
+                    elif nuevo.metodo_caducidad == '6 meses':
+                        fecha_caducidad = fecha_actual + timedelta(days=180)
+                    elif nuevo.metodo_caducidad == '1 año':
+                        fecha_caducidad = fecha_actual + timedelta(days=365)
+                    elif nuevo.metodo_caducidad == '2 años':
+                        fecha_caducidad = fecha_actual + timedelta(days=730)
+                    elif nuevo.metodo_caducidad == '3 años' or nuevo.metodo_caducidad == 'más de 3 años':
+                        fecha_caducidad = fecha_actual + timedelta(days=1460)  # 4 años (considerados como +3 años)
+
+                    # Convertir a date
+                    if fecha_caducidad:
+                        fecha_caducidad = fecha_caducidad.date()
+                        
+                        # Crear el lote inicial
+                        nuevo_lote = LoteInventario(
+                            producto_id=nuevo.id,
+                            numero_lote="Lote de Registro",
+                            costo_unitario=nuevo.costo,
+                            stock=nuevo.stock,
+                            fecha_entrada=datetime.now(),
+                            fecha_caducidad=fecha_caducidad,
+                            esta_activo=True
+                        )
+                        
+                        # Crear un movimiento de entrada asociado
+                        movimiento_inicial = MovimientoInventario(
+                            producto_id=nuevo.id,
+                            tipo_movimiento='ENTRADA',
+                            cantidad=nuevo.stock,
+                            motivo='Registro inicial',
+                            fecha_movimiento=datetime.now(),
+                            costo_unitario=nuevo.costo,
+                            numero_lote="Lote de Registro",
+                            fecha_caducidad=fecha_caducidad,
+                            usuario_id=session['user_id']
+                        )
+
+                        db.session.add(nuevo_lote)
+                        db.session.add(movimiento_inicial)
+                        db.session.commit()
+
+                        print(f"Lote inicial creado para producto {nuevo.id} con fecha de caducidad {fecha_caducidad}")
+                except Exception as e:
+                        db.session.rollback()
+                        print(f"Error al crear lote inicial: {str(e)}")
+                        # No devolveremos el error al usuario, el producto ya se creó correctamente
+                        
             flash('Producto sin código de barras guardado exitosamente', 'success')
             
         except Exception as e:
@@ -1469,6 +1540,73 @@ def agregar_a_granel():
             # Guardar en la base de datos
             db.session.add(nuevo)
             db.session.commit()
+            
+            # Si tiene caducidad y stock positivo, crear un lote inicial con fecha de caducidad
+            if nuevo.has_caducidad and nuevo.metodo_caducidad and nuevo.stock > 0:
+                try:
+                    # Determinar la fecha de caducidad según el método
+                    fecha_actual = datetime.now()
+                    fecha_caducidad = None
+
+                    if nuevo.metodo_caducidad == '1 día':
+                        fecha_caducidad = fecha_actual + timedelta(days=1)
+                    elif nuevo.metodo_caducidad == '3 días':
+                        fecha_caducidad = fecha_actual + timedelta(days=3)
+                    elif nuevo.metodo_caducidad == '1 semana':
+                        fecha_caducidad = fecha_actual + timedelta(days=7)
+                    elif nuevo.metodo_caducidad == '2 semanas':
+                        fecha_caducidad = fecha_actual + timedelta(days=14)
+                    elif nuevo.metodo_caducidad == '1 mes':
+                        fecha_caducidad = fecha_actual + timedelta(days=30)
+                    elif nuevo.metodo_caducidad == '3 meses':
+                        fecha_caducidad = fecha_actual + timedelta(days=90)
+                    elif nuevo.metodo_caducidad == '6 meses':
+                        fecha_caducidad = fecha_actual + timedelta(days=180)
+                    elif nuevo.metodo_caducidad == '1 año':
+                        fecha_caducidad = fecha_actual + timedelta(days=365)
+                    elif nuevo.metodo_caducidad == '2 años':
+                        fecha_caducidad = fecha_actual + timedelta(days=730)
+                    elif nuevo.metodo_caducidad == '3 años' or nuevo.metodo_caducidad == 'más de 3 años':
+                        fecha_caducidad = fecha_actual + timedelta(days=1460)  # 4 años (considerados como +3 años)
+
+                    # Convertir a date
+                    if fecha_caducidad:
+                        fecha_caducidad = fecha_caducidad.date()
+                        
+                        # Crear el lote inicial
+                        nuevo_lote = LoteInventario(
+                            producto_id=nuevo.id,
+                            numero_lote="Lote de Registro",
+                            costo_unitario=nuevo.costo,
+                            stock=nuevo.stock,
+                            fecha_entrada=datetime.now(),
+                            fecha_caducidad=fecha_caducidad,
+                            esta_activo=True
+                        )
+                        
+                        # Crear un movimiento de entrada asociado
+                        movimiento_inicial = MovimientoInventario(
+                            producto_id=nuevo.id,
+                            tipo_movimiento='ENTRADA',
+                            cantidad=nuevo.stock,
+                            motivo='Registro inicial',
+                            fecha_movimiento=datetime.now(),
+                            costo_unitario=nuevo.costo,
+                            numero_lote="Lote de Registro",
+                            fecha_caducidad=fecha_caducidad,
+                            usuario_id=session['user_id']
+                        )
+
+                        db.session.add(nuevo_lote)
+                        db.session.add(movimiento_inicial)
+                        db.session.commit()
+
+                        print(f"Lote inicial creado para producto {nuevo.id} con fecha de caducidad {fecha_caducidad}")
+                except Exception as e:
+                        db.session.rollback()
+                        print(f"Error al crear lote inicial: {str(e)}")
+                        # No devolveremos el error al usuario, el producto ya se creó correctamente
+                        
             flash('Producto a granel guardado exitosamente', 'success')
             
         except Exception as e:
@@ -1493,7 +1631,7 @@ def agregar_a_granel():
             for c in categorias_db
         ]
         return render_template('agregar_a_granel.html', categories=categories_list)
-
+        
 @app.route('/editar-producto/<int:prod_id>', methods=['GET','POST'])
 @login_requerido
 def editar_producto(prod_id):

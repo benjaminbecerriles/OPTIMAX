@@ -231,6 +231,8 @@ def fix_existing_lots():
                 fecha_caducidad = fecha_actual + timedelta(days=365)
             elif caducidad_lapso == '2 años':
                 fecha_caducidad = fecha_actual + timedelta(days=730)
+            elif caducidad_lapso == '3 años':
+                fecha_caducidad = fecha_actual + timedelta(days=1460)  # 4 años (considerados como +3 años)
             
             # Convertir a date
             if fecha_caducidad:
@@ -350,6 +352,8 @@ def ajuste_entrada(producto_id):
                         fecha_caducidad = fecha_actual + timedelta(days=365)
                     elif caducidad_lapso == '2 años':
                         fecha_caducidad = fecha_actual + timedelta(days=730)
+                    elif caducidad_lapso == '3 años':
+                        fecha_caducidad = fecha_actual + timedelta(days=1460)  # 4 años (considerados como +3 años)
                          
                     # Extraer solo la fecha (sin hora) para evitar problemas de comparación
                     fecha_caducidad = fecha_caducidad.date()
@@ -687,6 +691,8 @@ def crear_lote_registro(producto, cantidad, costo, fecha_caducidad=None, usuario
                 fecha_caducidad = fecha_actual + timedelta(days=365)
             elif caducidad_lapso == '2 años':
                 fecha_caducidad = fecha_actual + timedelta(days=730)
+            elif caducidad_lapso == '3 años':
+                fecha_caducidad = fecha_actual + timedelta(days=1460)  # 4 años (considerados como +3 años)
             
             # Extraer solo la fecha (sin hora)
             if fecha_caducidad:
