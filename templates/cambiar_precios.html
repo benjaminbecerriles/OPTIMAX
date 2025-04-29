@@ -1,0 +1,1010 @@
+{% extends 'base.html' %}
+
+{% block title %}Cambiar Precios - OptiMax Manage{% endblock %}
+
+{% block content %}
+<style>
+  /* Sistema de Diseño Apple - Consistente con dashboard_inventario.html */
+  :root {
+    --font-apple: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', Helvetica, Arial, sans-serif;
+    
+    /* Colores esenciales - TEXTO OSCURECIDO */
+    --text-color: #1d1d1f;
+    --text-secondary: #515154; /* Oscurecido de #86868b a #515154 */
+    --background: #ffffff;
+    --light-background: #f5f5f7;
+    --separator: rgba(0, 0, 0, 0.1);
+    --accent: #e52e2e;
+    --accent-hover: #c51818;
+    --accent-light: rgba(229, 46, 46, 0.1);
+    
+    /* Colores de estado */
+    --green: #2ecc71;
+    --orange: #f39c12;
+    --red: #e74c3c;
+  }
+  
+  body {
+    font-family: var(--font-apple);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    color: var(--text-color);
+    background-color: var(--background);
+  }
+  
+  /* Contenedor principal */
+  .apple-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 36px 24px;
+  }
+  
+  /* Tipografía */
+  h1 {
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+    color: var(--text-color);
+  }
+  
+  .page-description {
+    font-size: 17px;
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+    max-width: 600px;
+  }
+  
+  /* Barra de búsqueda - MEJORADA */
+  .search-container {
+    position: relative;
+    margin-bottom: 30px;
+    border-radius: 12px;
+    background-color: var(--light-background);
+    padding: 16px 20px; /* Reducido de 24px a 16px/20px */
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  
+  .search-input-group {
+    display: flex;
+    align-items: center;
+    background-color: white;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--separator);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .search-input-group:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-light);
+  }
+  
+  .search-input {
+    flex-grow: 1;
+    padding: 14px 16px;
+    font-family: var(--font-apple);
+    font-size: 16px;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--text-color); /* Texto más oscuro */
+  }
+  
+  .search-input::placeholder {
+    color: #707074; /* Placeholder oscurecido */
+    font-weight: 400;
+  }
+  
+  .search-icon-group {
+    display: flex;
+    align-items: center;
+    padding-right: 16px;
+    gap: 12px;
+  }
+  
+  .search-icon {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
+  
+  .search-icon:hover {
+    transform: scale(1.1);
+  }
+  
+  /* Categorías */
+  .category-section {
+    margin-bottom: 30px; /* Reducido de 36px a 30px */
+  }
+  
+  .category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px; /* Reducido de 16px a 14px */
+  }
+  
+  .category-title {
+    font-size: 20px; /* Reducido de 22px a 20px */
+    font-weight: 600; /* Aumentado de 500 a 600 */
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--text-color);
+  }
+  
+  .category-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px; /* Reducido de 28px a 24px */
+    height: 24px; /* Reducido de 28px a 24px */
+    border-radius: 50%;
+    background-color: #eeeeee; /* Cambiado de var(--light-background) a #eeeeee */
+    color: #505050; /* Color más oscuro */
+    font-size: 13px; /* Reducido de 14px a 13px */
+    font-weight: 600; /* Aumentado de 500 a 600 */
+  }
+  
+  .category-color-dot {
+    width: 12px; /* Reducido de 14px a 12px */
+    height: 12px; /* Reducido de 14px a 12px */
+    border-radius: 50%;
+  }
+  
+  /* Slider de productos - REDISEÑO COMPLETO con ALTURA FIJA */
+  .product-slider-container {
+    position: relative;
+    padding: 0 30px; /* Reducido de 40px a 30px */
+  }
+  
+  .product-slider {
+    display: flex;
+    gap: 14px; /* Reducido de 16px a 14px */
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+    padding: 4px 0 12px 0; /* Reducido */
+    margin-bottom: 4px; /* Reducido de 8px a 4px */
+  }
+  
+  .product-card {
+    flex: 0 0 180px; /* Reducido de 200px a 180px */
+    height: 310px; /* ALTURA FIJA para todas las tarjetas */
+    border-radius: 10px; /* Reducido de 12px a 10px */
+    overflow: hidden;
+    background-color: white;
+    border: 1px solid #e0e0e0; /* Cambiado de var(--separator) a un color más visible */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05); /* Sombra muy sutil añadida */
+    display: flex;
+    flex-direction: column; /* Para control del diseño interno */
+  }
+  
+  .product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.08); /* Sombra menos intensa */
+  }
+  
+  .product-image-container {
+    height: 120px; /* Reducido de 150px a 120px */
+    min-height: 120px; /* Asegurar altura mínima */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    background-color: #f8f8f8; /* Un poco más claro que var(--light-background) */
+  }
+  
+  .product-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  
+  .product-details {
+    padding: 12px; /* Reducido de 16px a 12px */
+    flex-grow: 1; /* Toma el espacio restante */
+    display: flex;
+    flex-direction: column; /* Organiza el contenido verticalmente */
+  }
+  
+  /* NUEVO: Diseño mejorado para nombre y marca */
+  .product-info-container {
+    display: flex;
+    flex-direction: column;
+    height: 60px; /* Altura fija para nombre+marca */
+    margin-bottom: 6px;
+    overflow: hidden;
+    position: relative; /* Para posicionamiento absoluto de la marca */
+  }
+  
+  .product-name {
+    font-size: 14px;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* Limitar a 2 líneas siempre */
+    -webkit-box-orient: vertical;
+    line-height: 1.35; /* Ajustado para optimizar espacio */
+    color: var(--text-color);
+    height: 38px; /* Altura fija para 2 líneas */
+    margin-bottom: 0; /* Sin margen inferior */
+  }
+  
+  .product-brand {
+    font-size: 12px;
+    color: #606060; /* Color más oscuro que var(--text-secondary) */
+    position: absolute; /* Posicionamiento absoluto para ubicación fija */
+    bottom: 0; /* Siempre en la parte inferior */
+    left: 0; /* Alineado a la izquierda */
+    right: 0; /* Extender a todo el ancho */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2; /* Ajuste de línea para marca */
+  }
+  
+  /* Contenedor de precio con altura fija */
+  .product-price-container {
+    height: 24px; /* Altura fija para precio */
+    margin-top: auto; /* Empuja hacia abajo, después del espacio flexible */
+    margin-bottom: 8px; /* Espacio antes del input */
+  }
+  
+  .current-price {
+    font-size: 17px; /* Reducido de 18px a 17px */
+    font-weight: 600;
+    color: var(--accent);
+  }
+  
+  /* Contenedor de input con altura fija */
+  .price-input-container {
+    height: 70px; /* Altura fija para input+botón */
+  }
+  
+  .price-input-group {
+    display: flex;
+    align-items: center;
+    height: 36px; /* Altura fija para el input */
+    border: 1px solid #d1d1d6; /* Color más visible que var(--separator) */
+    border-radius: 6px;
+    overflow: hidden;
+    background-color: white;
+    transition: border-color 0.2s ease;
+    margin-bottom: 8px; /* Espacio consistente antes del botón */
+  }
+  
+  .price-input-group:focus-within {
+    border-color: var(--accent);
+  }
+  
+  .currency-symbol {
+    padding: 0 8px;
+    font-weight: 500;
+    color: #505050; /* Texto oscurecido */
+  }
+  
+  .price-input {
+    flex-grow: 1;
+    height: 100%;
+    padding: 0;
+    border: none;
+    outline: none;
+    font-size: 14px;
+    width: 100%;
+    text-align: left;
+    color: var(--text-color); /* Texto más oscuro */
+  }
+  
+  .save-price-btn {
+    width: 100%;
+    height: 36px; /* Altura fija para el botón */
+    background-color: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px; /* Reducido de 14px a 13px */
+    font-weight: 600; /* Aumentado de 500 a 600 */
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .save-price-btn:hover {
+    background-color: var(--accent-hover);
+  }
+  
+  /* Botones de navegación del slider - MEJORADOS */
+  .slider-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 30px; /* Reducido de 36px a 30px */
+    height: 30px; /* Reducido de 36px a 30px */
+    border-radius: 50%;
+    background-color: white;
+    border: 1px solid #d1d1d6; /* Color más visible que var(--separator) */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    z-index: 10;
+    transition: background-color 0.2s ease;
+  }
+  
+  .slider-arrow:hover {
+    background-color: #f0f0f2; /* Un poco más oscuro que var(--light-background) */
+  }
+  
+  .slider-arrow-left {
+    left: 0;
+  }
+  
+  .slider-arrow-right {
+    right: 0;
+  }
+  
+  .slider-arrow svg {
+    width: 16px; /* Reducido de 20px a 16px */
+    height: 16px; /* Reducido de 20px a 16px */
+    fill: none;
+    stroke: var(--text-color);
+    stroke-width: 2;
+  }
+  
+  /* Estado vacío */
+  .empty-state {
+    padding: 50px 0; /* Reducido de 64px a 50px */
+    text-align: center;
+    background-color: var(--light-background);
+    border-radius: 12px;
+    margin-bottom: 36px;
+  }
+  
+  .empty-icon {
+    font-size: 32px; /* Reducido de 36px a 32px */
+    color: var(--text-secondary);
+    margin-bottom: 14px; /* Reducido de 16px a 14px */
+  }
+  
+  .empty-message {
+    font-size: 16px; /* Reducido de 17px a 16px */
+    color: var(--text-secondary);
+    margin-bottom: 14px; /* Reducido de 16px a 14px */
+    max-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  /* Toast notificaciones - MEJORADAS */
+  .toast-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+  }
+  
+  .toast {
+    background-color: #333;
+    color: white;
+    padding: 14px 20px; /* Reducido de 16px 24px a 14px 20px */
+    border-radius: 8px;
+    margin-top: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Reducido de 12px a 10px */
+    animation: slideIn 0.3s ease, fadeOut 0.5s ease 2.5s forwards;
+    max-width: 350px; /* Reducido de 400px a 350px */
+    font-weight: 500;
+  }
+  
+  .toast.success {
+    background-color: var(--green);
+  }
+  
+  .toast.error {
+    background-color: var(--red);
+  }
+  
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes fadeOut {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+  }
+  
+  /* Modal de scanner */
+  #modalEscaneoCamara {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.85);
+    z-index: 100;
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .product-slider {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scroll-snap-type: x mandatory;
+      padding-bottom: 16px; /* Reducido de 24px a 16px */
+    }
+    
+    .product-card {
+      flex: 0 0 70%; /* Reducido de 80% a 70% */
+      scroll-snap-align: start;
+    }
+    
+    .product-slider-container {
+      padding: 0;
+    }
+    
+    .slider-arrow {
+      display: none;
+    }
+    
+    h1 {
+      font-size: 26px; /* Reducido de 28px a 26px */
+    }
+    
+    .page-description {
+      font-size: 15px; /* Reducido de 16px a 15px */
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .product-card {
+      flex: 0 0 85%; /* Reducido de 90% a 85% */
+    }
+  }
+  
+  /* Animaciones */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  .animated-fade {
+    animation: fadeIn 0.3s ease-out;
+  }
+  
+  .no-scroll {
+    overflow: hidden;
+  }
+</style>
+
+<div class="apple-container animated-fade">
+  <h1>Cambiar precios</h1>
+  <p class="page-description">Actualiza los precios de tus productos de forma rápida y sencilla. Explora por categorías o busca un producto específico.</p>
+  
+  <!-- Barra de búsqueda -->
+  <div class="search-container">
+    <div class="search-input-group">
+      <input type="text" id="searchInput" class="search-input" placeholder="Buscar por nombre, marca o código de barras..." autocomplete="off">
+      <div class="search-icon-group">
+        <!-- Icono Lector Físico -->
+        <img src="{{ url_for('static', filename='img/3.png') }}" alt="Escanear con Lector" class="search-icon" id="scanIcon">
+        <!-- Icono Cámara QuaggaJS -->
+        <img src="{{ url_for('static', filename='img/4.png') }}" alt="Escanear con Cámara" class="search-icon" id="cameraIcon" onclick="iniciarEscaneoQuagga()">
+      </div>
+    </div>
+  </div>
+  
+  <!-- Contenedor para categorías y productos -->
+  <div id="categoriesContainer">
+    {% if categorias and categorias|length > 0 %}
+      {# Ordenar categorías por cantidad de productos (mayor a menor) #}
+      {% set categorias_ordenadas = [] %}
+      {% for categoria in categorias %}
+        {% set productos_categoria = productos|selectattr('categoria', 'equalto', categoria.nombre)|list %}
+        {% if productos_categoria|length > 0 %}
+          {% set _ = categorias_ordenadas.append({'nombre': categoria.nombre, 'color': categoria.color, 'count': productos_categoria|length}) %}
+        {% endif %}
+      {% endfor %}
+      {% set categorias_ordenadas = categorias_ordenadas|sort(attribute='count', reverse=true) %}
+      
+      {% for categoria in categorias_ordenadas %}
+        {% set productos_categoria = productos|selectattr('categoria', 'equalto', categoria.nombre)|list %}
+        <div class="category-section" data-category="{{ categoria.nombre|lower }}">
+          <div class="category-header">
+            <h2 class="category-title">
+              <span class="category-color-dot" style="background-color: {{ categoria.color }}"></span>
+              {{ categoria.nombre|title }}
+              <span class="category-badge">{{ categoria.count }}</span>
+            </h2>
+          </div>
+          
+          <div class="product-slider-container">
+            <div class="slider-arrow slider-arrow-left" onclick="scrollSlider('{{ categoria.nombre|lower }}', 'left')">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            
+            <div class="product-slider" id="slider-{{ categoria.nombre|lower }}">
+              {% for producto in productos_categoria %}
+                <div class="product-card" data-product-id="{{ producto.id }}" data-product-name="{{ producto.nombre|lower }}" data-product-barcode="{{ producto.codigo_barras_externo|lower if producto.codigo_barras_externo else '' }}">
+                  <div class="product-image-container">
+                    {% if producto.foto %}
+                      <img src="{{ url_for('static', filename='uploads/' ~ producto.foto) }}" class="product-image" alt="{{ producto.nombre }}">
+                    {% else %}
+                      <div class="product-image" style="display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-box" style="color: var(--text-secondary);"></i>
+                      </div>
+                    {% endif %}
+                  </div>
+                  <div class="product-details">
+                    <div class="product-info-container">
+                      <div class="product-name">{{ producto.nombre }}</div>
+                      {% if producto.marca %}
+                        <div class="product-brand">{{ producto.marca }}</div>
+                      {% else %}
+                        <div class="product-brand" style="opacity: 0;">-</div>
+                      {% endif %}
+                    </div>
+                    <div class="product-price-container">
+                      <div class="current-price">${{ '{:.2f}'.format(producto.precio_venta) }}</div>
+                    </div>
+                    <div class="price-input-container">
+                      <div class="price-input-group">
+                        <span class="currency-symbol">$</span>
+                        <input type="text" class="price-input" value="{{ '{:.2f}'.format(producto.precio_venta) }}" 
+                              data-original-price="{{ producto.precio_venta }}"
+                              oninput="formatPriceInput(this)">
+                      </div>
+                      <button class="save-price-btn" onclick="updatePrice({{ producto.id }}, this)">Guardar</button>
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+            
+            <div class="slider-arrow slider-arrow-right" onclick="scrollSlider('{{ categoria.nombre|lower }}', 'right')">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <!-- Estado vacío -->
+      <div class="empty-state">
+        <div class="empty-icon">
+          <i class="fas fa-tag"></i>
+        </div>
+        <p class="empty-message">No hay productos en tu inventario</p>
+        <a href="{{ url_for('nuevo_producto') }}" class="button-link" style="display: inline-block; padding: 10px 20px; background-color: var(--accent); color: white; text-decoration: none; border-radius: 6px; margin-top: 16px;">
+          Agregar producto
+        </a>
+      </div>
+    {% endif %}
+  </div>
+  
+  <!-- Contenedor de notificaciones toast -->
+  <div class="toast-container" id="toastContainer"></div>
+</div>
+
+<script>
+  // ----------------------------------------------------
+  // Funciones para el slider de productos
+  // ----------------------------------------------------
+  function scrollSlider(categoryId, direction) {
+    const slider = document.getElementById(`slider-${categoryId}`);
+    if (!slider) return;
+    
+    const cardWidth = slider.querySelector('.product-card').offsetWidth + 14; // 14px es el gap
+    const scrollAmount = cardWidth * 3; // Scroll de 3 productos a la vez
+    
+    if (direction === 'left') {
+      slider.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+    } else {
+      slider.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  }
+  
+  // ----------------------------------------------------
+  // Formateo de entrada de precios
+  // ----------------------------------------------------
+  function formatPriceInput(input) {
+    // Eliminar caracteres no numéricos excepto el punto decimal
+    let value = input.value.replace(/[^\d.]/g, '');
+    
+    // Asegurar que solo haya un punto decimal
+    const parts = value.split('.');
+    if (parts.length > 2) {
+      value = parts[0] + '.' + parts.slice(1).join('');
+    }
+    
+    // Limitar a dos decimales
+    if (parts.length > 1) {
+      value = parts[0] + '.' + parts[1].slice(0, 2);
+    }
+    
+    // Actualizar el valor del input
+    input.value = value;
+  }
+  
+  // ----------------------------------------------------
+  // Actualizar precio con AJAX
+  // ----------------------------------------------------
+  function updatePrice(productId, button) {
+    const card = button.closest('.product-card');
+    const inputContainer = button.closest('.price-input-container');
+    const input = inputContainer.querySelector('.price-input');
+    const currentPriceElement = card.querySelector('.current-price');
+    
+    // Validar que el precio sea mayor que cero
+    const newPrice = parseFloat(input.value);
+    if (isNaN(newPrice) || newPrice <= 0) {
+      showToast('El precio debe ser mayor que cero', 'error');
+      return;
+    }
+    
+    // Desactivar botón durante la actualización
+    button.disabled = true;
+    button.textContent = 'Guardando...';
+    
+    // Enviar actualización al servidor
+    fetch(`/api/update_price/${productId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ price: newPrice })
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Error al actualizar el precio');
+      }
+      return response.json();
+    })
+    .then(data => {
+      if (data.success) {
+        // Actualizar la interfaz
+        currentPriceElement.textContent = `$${parseFloat(newPrice).toFixed(2)}`;
+        input.dataset.originalPrice = newPrice;
+        
+        // Mostrar notificación de éxito
+        showToast('Precio actualizado correctamente', 'success');
+        
+        // Efecto visual de éxito
+        card.style.transition = 'transform 0.3s ease, box-shadow 0.3s ease';
+        card.style.boxShadow = '0 0 0 3px rgba(46, 204, 113, 0.3)';
+        setTimeout(() => {
+          card.style.boxShadow = '';
+        }, 1500);
+      } else {
+        throw new Error(data.message || 'Error al actualizar el precio');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      showToast(error.message, 'error');
+    })
+    .finally(() => {
+      // Restaurar botón
+      button.disabled = false;
+      button.textContent = 'Guardar';
+    });
+  }
+  
+  // ----------------------------------------------------
+  // Sistema de notificaciones toast
+  // ----------------------------------------------------
+  function showToast(message, type = 'success') {
+    const toastContainer = document.getElementById('toastContainer');
+    
+    // Crear elemento toast
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+    
+    // Agregar al contenedor
+    toastContainer.appendChild(toast);
+    
+    // Remover después de la animación
+    setTimeout(() => {
+      toast.remove();
+    }, 3000);
+  }
+  
+  // ----------------------------------------------------
+  // SOLUCIÓN RADICAL PARA EL ESCÁNER - REDISEÑADA POR COMPLETO
+  // ----------------------------------------------------
+  document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const categorySections = document.querySelectorAll('.category-section');
+    
+    // ==========================================
+    // FUNCIÓN DE BÚSQUEDA PRINCIPAL - SIMPLIFICADA
+    // ==========================================
+    function performSearch(searchTermParam) {
+      // Permitir proporcionar el término de búsqueda como parámetro o usar el valor del input
+      const searchTerm = (searchTermParam !== undefined) 
+        ? searchTermParam.toString().toLowerCase().trim() 
+        : searchInput.value.toLowerCase().trim();
+      
+      console.log(">> EJECUTANDO BÚSQUEDA:", searchTerm);
+      
+      let resultsCount = 0;
+      
+      // Si no hay término de búsqueda, mostrar todo
+      if (!searchTerm) {
+        categorySections.forEach(section => {
+          section.style.display = 'block';
+          const products = section.querySelectorAll('.product-card');
+          products.forEach(product => {
+            product.style.display = 'block';
+          });
+        });
+        
+        const emptySearch = document.getElementById('emptySearchResults');
+        if (emptySearch) {
+          emptySearch.style.display = 'none';
+        }
+        return;
+      }
+      
+      // Filtrar productos por búsqueda
+      categorySections.forEach(section => {
+        const products = section.querySelectorAll('.product-card');
+        let hasVisibleProducts = false;
+        
+        products.forEach(product => {
+          const productName = product.dataset.productName || '';
+          const productBarcode = product.dataset.productBarcode || '';
+          const productBrand = product.querySelector('.product-brand')?.textContent?.toLowerCase() || '';
+          
+          // Coincidencia exacta para códigos de barras
+          const exactBarcodeMatch = productBarcode === searchTerm;
+          
+          // Coincidencia parcial para nombre y marca
+          const partialNameMatch = productName.includes(searchTerm);
+          const partialBrandMatch = productBrand.includes(searchTerm);
+          
+          // Dar prioridad a coincidencia exacta de código de barras
+          const matches = exactBarcodeMatch || partialNameMatch || partialBrandMatch;
+          
+          product.style.display = matches ? 'block' : 'none';
+          
+          if (matches) {
+            hasVisibleProducts = true;
+            resultsCount++;
+            
+            if (exactBarcodeMatch) {
+              // Resaltar el producto con código de barras exacto
+              product.style.order = "-1"; // Mover al principio
+              product.style.boxShadow = "0 0 0 2px #e52e2e";
+              setTimeout(() => {
+                product.style.boxShadow = "";
+              }, 3000);
+            }
+          }
+        });
+        
+        section.style.display = hasVisibleProducts ? 'block' : 'none';
+      });
+      
+      // Mensaje sin resultados
+      showEmptyOrResults(resultsCount, searchTerm);
+      
+      console.log(`>> BÚSQUEDA COMPLETADA: ${resultsCount} productos encontrados`);
+      return resultsCount;
+    }
+    
+    // Función auxiliar para mensaje vacío
+    function showEmptyOrResults(count, term) {
+      let emptySearch = document.getElementById('emptySearchResults');
+      
+      if (count === 0) {
+        if (!emptySearch) {
+          emptySearch = document.createElement('div');
+          emptySearch.id = 'emptySearchResults';
+          emptySearch.className = 'empty-state';
+          emptySearch.innerHTML = `
+            <div class="empty-icon">
+              <i class="fas fa-search"></i>
+            </div>
+            <p class="empty-message">No se encontraron productos que coincidan con "<strong>${term}</strong>"</p>
+          `;
+          
+          const categoriesContainer = document.getElementById('categoriesContainer');
+          categoriesContainer.prepend(emptySearch);
+        } else {
+          const message = emptySearch.querySelector('.empty-message');
+          message.innerHTML = `No se encontraron productos que coincidan con "<strong>${term}</strong>"`;
+          emptySearch.style.display = 'block';
+        }
+      } else if (emptySearch) {
+        emptySearch.style.display = 'none';
+      }
+    }
+    
+    // ==========================================
+    // FUNCIONES DE ESCANEO - COMPLETAMENTE NUEVAS
+    // ==========================================
+    
+    // HANDLER PRINCIPAL UNIFICADO PARA ESCÁNER
+    window.handleScannedCode = function(code) {
+      // Alertar del código escaneado
+      console.log("🔍 CÓDIGO ESCANEADO:", code);
+      
+      // Actualizar directamente el input
+      if (searchInput) {
+        searchInput.value = code;
+      }
+      
+      // Ejecutar búsqueda inmediatamente
+      const found = performSearch(code);
+      
+      // Notificar el resultado
+      if (found > 0) {
+        showToast(`Encontrado ${found} producto(s) para: ${code}`, 'success');
+      } else {
+        showToast(`No se encontró ningún producto para el código: ${code}`, 'error');
+      }
+      
+      // Log para fines de diagnóstico
+      console.log("🔍 Búsqueda completada para el código:", code);
+      return found;
+    };
+    
+    // Reemplazar COMPLETAMENTE las funciones de escaneo existentes
+    window.onScannedBarcode = function(code) {
+      return window.handleScannedCode(code);
+    };
+    
+    // Registro para eventos de input
+    if (searchInput) {
+      searchInput.addEventListener('input', function() {
+        performSearch();
+      });
+      
+      searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          performSearch();
+        }
+      });
+    }
+    
+    // PARCHE INVASIVO PARA BARCODE SCANNER
+    try {
+      // No sobrescribir el initBarcodeScanner original si existe
+      const originalInitBarcodeScanner = window.initBarcodeScanner;
+      
+      if (typeof originalInitBarcodeScanner === 'function') {
+        // Creamos una versión envolvente que aplica nuestro handler
+        window.initBarcodeScanner = function(scanIconSelector, inputSelector, options) {
+          console.log("⚙️ Inicializando escáner mejorado");
+          
+          // Llamar a la implementación original
+          originalInitBarcodeScanner(scanIconSelector, inputSelector, options);
+          
+          // IMPORTANTE: Agregar un listener directo al input
+          const inputElement = document.querySelector(inputSelector);
+          if (inputElement) {
+            // Monitorear cambios en el valor directamente
+            let lastValue = inputElement.value;
+            
+            // Usar MutationObserver para detectar cambios directos en el DOM
+            const inputObserver = new MutationObserver(function(mutations) {
+              mutations.forEach(function(mutation) {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'value') {
+                  const newValue = inputElement.value;
+                  if (newValue !== lastValue) {
+                    console.log("⚠️ Input value changed:", newValue);
+                    lastValue = newValue;
+                    // Ejecutar búsqueda con el nuevo valor
+                    performSearch(newValue);
+                  }
+                }
+              });
+            });
+            
+            inputObserver.observe(inputElement, { attributes: true });
+            
+            // También usar setInterval como última línea de defensa
+            setInterval(function() {
+              const currentValue = inputElement.value;
+              if (currentValue !== lastValue && currentValue.trim() !== '') {
+                console.log("⚠️ Cambio detectado en intervalo:", currentValue);
+                lastValue = currentValue;
+                // Ejecutar búsqueda con el nuevo valor
+                performSearch(currentValue);
+              }
+            }, 300);
+          }
+        };
+      }
+    } catch (e) {
+      console.error("Error al parchear initBarcodeScanner:", e);
+    }
+    
+    // PARCHE PARA QUAGGA.JS
+    try {
+      // Reemplazar completamente iniciarEscaneoQuagga si existe
+      const originalIniciarEscaneoQuagga = window.iniciarEscaneoQuagga;
+      
+      if (typeof originalIniciarEscaneoQuagga === 'function') {
+        window.iniciarEscaneoQuagga = function() {
+          console.log("⚙️ Iniciando Quagga mejorado");
+          
+          // Llamar a la implementación original
+          originalIniciarEscaneoQuagga();
+          
+          // Parchear Quagga.onDetected después de un breve retraso
+          setTimeout(function() {
+            if (window.Quagga) {
+              console.log("⚙️ Quagga detectado, aplicando parche");
+              
+              // Guardar la implementación original
+              const originalOnDetected = window.Quagga.onDetected;
+              
+              // Reemplazar con nuestra versión
+              window.Quagga.onDetected = function(result) {
+                // Primero llamar a la implementación original
+                if (typeof originalOnDetected === 'function') {
+                  originalOnDetected(result);
+                }
+                
+                // Luego manejar el código con nuestra función unificada
+                if (result && result.codeResult && result.codeResult.code) {
+                  console.log("📷 Quagga detectó:", result.codeResult.code);
+                  window.handleScannedCode(result.codeResult.code);
+                }
+              };
+            }
+          }, 500);
+        };
+      }
+    } catch (e) {
+      console.error("Error al parchear iniciarEscaneoQuagga:", e);
+    }
+    
+    // Inicializar manualmente el escáner físico si existe
+    if (typeof window.initBarcodeScanner === 'function' && document.getElementById('scanIcon')) {
+      window.initBarcodeScanner('#scanIcon', '#searchInput');
+      console.log("⚙️ Escáner físico inicializado manualmente");
+    }
+    
+    // TRUCO ADICIONAL: monitor para cambios en searchInput desde cualquier fuente
+    if (searchInput) {
+      let lastKnownValue = searchInput.value;
+      
+      // Verificar cada 100ms si hay cambios en el valor
+      setInterval(function() {
+        const currentValue = searchInput.value;
+        if (currentValue !== lastKnownValue && currentValue.trim() !== '') {
+          console.log("⚠️ Se detectó cambio en searchInput:", currentValue);
+          lastKnownValue = currentValue;
+          performSearch(currentValue);
+        }
+      }, 100);
+    }
+  });
+</script>
+{% endblock %}

@@ -579,6 +579,43 @@ def dashboard_inventario():
         total_productos=total_productos
     )
 
+@app.route('/cambiar-precios')
+@login_requerido
+def cambiar_precios():
+    """
+    Vista para cambiar precios de productos organizados por categorías.
+    Permite búsqueda y modificación rápida de precios.
+    """
+    # Obtener información del usuario y datos para el dashboard
+    empresa_id = session['user_id']
+    
+    # Obtener lista de productos aprobados
+    productos = Producto.query.filter_by(
+        empresa_id=empresa_id,
+        is_approved=True
+    ).order_by(Producto.categoria).all()
+    
+    # Obtener categorías únicas y sus colores
+    categorias = []
+    categorias_set = set()
+    
+    for producto in productos:
+        if producto.categoria and producto.categoria not in categorias_set:
+            categorias_set.add(producto.categoria)
+            categorias.append({
+                'nombre': producto.categoria,
+                'color': producto.categoria_color or '#6B7280' # Color por defecto si no tiene
+            })
+    
+    # Ordenar categorías alfabéticamente
+    categorias.sort(key=lambda x: x['nombre'])
+    
+    return render_template(
+        'cambiar_precios.html',
+        productos=productos,
+        categorias=categorias
+    )
+
 ##############################
 # ADMIN
 ##############################

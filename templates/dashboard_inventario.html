@@ -10,20 +10,21 @@
   :root {
     --font-apple: -apple-system, BlinkMacSystemFont, 'SF Pro Text', Helvetica, Arial, sans-serif;
     
-    /* Colores esenciales */
-    --text-color: #1d1d1f;
-    --text-secondary: #86868b;
+    /* Colores esenciales - MODIFICADOS para más contraste */
+    --text-color: #000000; /* Negro puro para texto principal */
+    --text-secondary: #333333; /* Gris muy oscuro para texto secundario */
+    --text-tertiary: #555555; /* Gris medio para texto terciario */
     --background: #ffffff;
     --light-background: #f5f5f7;
-    --separator: rgba(0, 0, 0, 0.1);
+    --separator: rgba(0, 0, 0, 0.2); /* Separador más visible */
     --accent: #e52e2e;
     --accent-hover: #c51818;
     --accent-light: rgba(229, 46, 46, 0.1);
     
     /* Colores de estado */
-    --green: #2ecc71;
-    --orange: #f39c12;
-    --red: #e74c3c;
+    --green: #1a9951; /* Verde más oscuro */
+    --orange: #d17d08; /* Naranja más oscuro */
+    --red: #c0392b; /* Rojo más oscuro */
   }
   
   body {
@@ -41,13 +42,15 @@
     font-weight: 600;
     letter-spacing: -0.02em;
     margin-bottom: 8px;
+    color: #000000; /* Negro puro */
   }
   
   h2 {
     font-size: 22px;
-    font-weight: 500;
+    font-weight: 600; /* Más bold */
     letter-spacing: -0.01em;
     margin-bottom: 24px;
+    color: #000000; /* Negro puro */
   }
   
   .page-description {
@@ -55,6 +58,7 @@
     color: var(--text-secondary);
     margin-bottom: 48px;
     max-width: 600px;
+    font-weight: 500; /* Más peso para mejor legibilidad */
   }
   
   /* Container para contenido */
@@ -83,14 +87,15 @@
     border-radius: 12px;
     padding: 24px;
     overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.08); /* Borde sutil para mejor definición */
   }
   
   .stat-number {
-    font-size: 36px; /* Ajustado para evitar desbordamiento */
-    font-weight: 600;
+    font-size: 36px;
+    font-weight: 700; /* Extra bold */
     letter-spacing: -0.03em;
-    color: var(--text-color);
-    margin-bottom: 4px;
+    color: #000000; /* Negro puro */
+    margin-bottom: 8px; /* Aumentado */
     line-height: 1.1;
     white-space: nowrap;
     overflow: hidden;
@@ -98,8 +103,9 @@
   }
   
   .stat-label {
-    font-size: 14px;
+    font-size: 15px; /* Ligeramente más grande */
     color: var(--text-secondary);
+    font-weight: 500; /* Más peso */
   }
   
   /* Herramientas */
@@ -124,6 +130,7 @@
     transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
     position: relative;
     overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.08); /* Borde sutil para mejor definición */
   }
   
   .tool-item::before {
@@ -145,153 +152,192 @@
   }
   
   .tool-item:hover::before {
-    border-color: #1a237e; /* Cambiado a azul oscuro para combinar con los iconos */
+    border-color: #1a237e;
   }
   
-  /* MODIFICADO: Icono más grande, centrado, fondo azul oscuro y color blanco */
   .tool-icon {
-    width: 60px; /* Aumentado de 48px a 60px */
-    height: 60px; /* Aumentado de 48px a 60px */
+    width: 60px;
+    height: 60px;
     margin-bottom: 18px;
-    color: #ffffff; /* Cambiado a blanco */
+    color: #ffffff;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 32px; /* Aumentado de 24px a 32px */
-    border-radius: 50%; /* Añadido para hacer un círculo perfecto */
-    background-color: #1a237e; /* Azul oscuro que combina con el rojo */
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1); /* Sombra sutil para dar profundidad */
+    font-size: 32px;
+    border-radius: 50%;
+    background-color: #1a237e;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15); /* Sombra más visible */
     transition: transform 0.3s ease, box-shadow 0.3s ease;
   }
   
   .tool-item:hover .tool-icon {
     transform: scale(1.1);
-    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Sombra más visible */
   }
   
   .tool-name {
     font-size: 16px;
-    font-weight: 400;
-    color: var(--text-color);
+    font-weight: 600; /* Más peso para mejor legibilidad */
+    color: #000000; /* Negro puro */
     text-align: center;
   }
   
-  /* Tabla minimalista */
+  /* Tabla minimalista - Texto oscurecido */
   .products-table-container {
     width: 100%;
     border-radius: 12px;
     overflow: hidden;
     margin-top: 24px;
-    border: 3px solid #dee2e6; /* Borde más grueso como en productos.html */
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1); /* Sombra sutil como en productos.html */
+    border: 3px solid #dee2e6;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15); /* Sombra más pronunciada */
   }
   
   .products-table {
     width: 100%;
     border-collapse: collapse;
+    table-layout: fixed;
   }
   
   .products-table th {
-    text-align: left;
-    padding: 16px 20px;
-    font-size: 12px;
-    font-weight: 800; /* Aumentado para coincidir con productos.html */
+    text-align: center;
+    padding: 16px 5px;
+    font-size: 13px; /* Ligeramente más grande */
+    font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #333333; /* Cambiado a un gris oscuro casi negro como en productos.html */
-    background-color: #e0e0e0; /* Gris con tono frío como en productos.html */
-    border-bottom: 2px solid var(--gray-300);
-    text-align: center; /* Centrado como en productos.html */
-    line-height: 1.2; /* Para mejor legibilidad */
+    color: #000000; /* Negro puro */
+    background-color: #e0e0e0;
+    border-bottom: 2px solid #aaaaaa; /* Borde más oscuro */
+    line-height: 1.2;
     vertical-align: middle;
   }
   
+  .products-table th:first-child {
+    width: 35%;
+  }
+  
+  .products-table th:nth-child(2) {
+    width: 20%;
+  }
+  
+  .products-table th:nth-child(3), 
+  .products-table th:nth-child(4), 
+  .products-table th:nth-child(5) {
+    width: 15%;
+  }
+  
   .products-table td {
-    padding: 16px 20px;
+    padding: 16px 5px;
     border-bottom: 1px solid var(--separator);
     font-size: 15px;
+    text-align: center;
+    vertical-align: middle;
+    color: #000000; /* Texto negro en todas las celdas */
+    font-weight: 500; /* Más peso para mejor legibilidad */
   }
   
   .product-cell {
     display: flex;
     align-items: center;
+    justify-content: flex-start;
+    padding-left: 10px;
   }
   
   .product-image {
     width: 40px;
     height: 40px;
+    min-width: 40px;
     border-radius: 8px;
-    margin-right: 16px;
+    margin-right: 12px;
     object-fit: cover;
     background-color: var(--light-background);
+    border: 1px solid rgba(0,0,0,0.1); /* Borde para mejor definición */
   }
   
   .product-info {
     display: flex;
     flex-direction: column;
+    text-align: left;
+    max-width: calc(100% - 52px);
   }
   
   .product-name {
-    font-weight: 500;
+    font-weight: 600; /* Más peso */
     margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #000000; /* Negro puro */
   }
   
   .product-sku {
     font-size: 12px;
-    color: var(--text-secondary);
+    color: var(--text-secondary); /* Más oscuro */
+    font-weight: 500; /* Más peso */
   }
   
-  /* Badges */
+  /* Badges con mejor contraste */
   .badge {
     display: inline-block;
     padding: 4px 8px;
     border-radius: 4px;
     font-size: 12px;
-    font-weight: 500;
+    font-weight: 600; /* Más peso */
   }
   
   .badge-category {
     padding: 4px 10px;
     border-radius: 4px;
     font-size: 12px;
-    font-weight: 500;
+    font-weight: 600; /* Más peso */
+    display: inline-block;
+    text-align: center;
   }
   
   .badge-green {
-    background-color: rgba(46, 204, 113, 0.1);
+    background-color: rgba(46, 204, 113, 0.2); /* Más oscuro */
     color: var(--green);
+    border: 1px solid rgba(46, 204, 113, 0.3);
   }
   
   .badge-orange {
-    background-color: rgba(243, 156, 18, 0.1);
+    background-color: rgba(243, 156, 18, 0.2); /* Más oscuro */
     color: var(--orange);
+    border: 1px solid rgba(243, 156, 18, 0.3);
   }
   
   .badge-red {
-    background-color: rgba(231, 76, 60, 0.1);
+    background-color: rgba(231, 76, 60, 0.2); /* Más oscuro */
     color: var(--red);
+    border: 1px solid rgba(231, 76, 60, 0.3);
   }
   
-  /* Ver todos link */
+  /* Ver todos link - Botón ovalado rojo con mejor contraste */
   .view-all {
-    font-size: 16px;
-    color: var(--accent);
+    font-size: 14px;
+    color: white;
+    background-color: var(--accent);
     text-decoration: none;
     display: inline-flex;
     align-items: center;
-    transition: color 0.2s ease;
-    line-height: 1; /* Ajustado para mejorar la alineación vertical */
-    padding: 5px 10px; /* Añadido padding para aumentar el área de clic */
+    justify-content: center;
+    border-radius: 50px;
+    padding: 8px 18px;
+    transition: background-color 0.2s ease;
+    font-weight: 600; /* Más peso */
+    box-shadow: 0 2px 4px rgba(229, 46, 46, 0.3); /* Sombra roja */
   }
   
   .view-all:hover {
-    color: var(--accent-hover);
+    background-color: var(--accent-hover);
+    color: white;
   }
   
   .view-all svg {
     margin-left: 6px;
     width: 14px;
     height: 14px;
+    stroke: white;
   }
   
   /* Header de sección con botón */
@@ -302,9 +348,10 @@
     margin-bottom: 24px;
   }
   
-  /* Alineación vertical mejorada para el título y el enlace Ver todos */
   .section-header h2 {
-    margin: 0; /* Elimina el margen inferior del título para mejorar la alineación */
+    margin: 0;
+    font-weight: 600;
+    color: #000000; /* Negro puro */
   }
   
   /* Estado vacío */
@@ -313,6 +360,7 @@
     text-align: center;
     background-color: var(--light-background);
     border-radius: 12px;
+    border: 1px solid rgba(0,0,0,0.08); /* Borde sutil */
   }
   
   .empty-icon {
@@ -328,9 +376,10 @@
     max-width: 300px;
     margin-left: auto;
     margin-right: auto;
+    font-weight: 500; /* Más peso */
   }
   
-  /* Alertas */
+  /* Alertas con mayor contraste */
   .alerts-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -342,17 +391,20 @@
     background-color: var(--light-background);
     border-radius: 12px;
     overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.08); /* Borde sutil */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05); /* Sombra sutil */
   }
   
   .alert-header {
     padding: 16px 20px;
     border-bottom: 1px solid var(--separator);
+    background-color: #f0f0f2; /* Fondo ligeramente más oscuro */
   }
   
   .alert-title {
     font-size: 16px;
-    font-weight: 500;
-    color: var(--text-color);
+    font-weight: 600; /* Más peso */
+    color: #000000; /* Negro puro */
     margin: 0;
   }
   
@@ -370,11 +422,13 @@
   
   .alert-content {
     font-size: 15px;
+    color: #000000; /* Negro puro */
+    font-weight: 500; /* Más peso */
   }
   
   .alert-value {
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 600; /* Más peso */
     color: var(--orange);
   }
   
@@ -383,7 +437,7 @@
     display: inline-block;
     padding: 10px 20px;
     font-size: 15px;
-    font-weight: 500;
+    font-weight: 600; /* Más peso */
     text-align: center;
     border-radius: 980px;
     background-color: var(--accent);
@@ -391,6 +445,7 @@
     text-decoration: none;
     margin-top: 16px;
     transition: background-color 0.2s ease;
+    box-shadow: 0 2px 4px rgba(229, 46, 46, 0.3); /* Sombra roja */
   }
   
   .button-link:hover {
@@ -456,12 +511,12 @@
         <div class="tool-name">Ajuste de stock</div>
       </a>
       
-      <div class="tool-item" onclick="window.location.href='#cambiar-precios'">
+      <a href="{{ url_for('cambiar_precios') }}" class="tool-item">
         <div class="tool-icon">
           <i class="fas fa-tag"></i>
         </div>
         <div class="tool-name">Cambiar precios</div>
-      </div>
+      </a>
       
       <div class="tool-item" onclick="window.location.href='#descuentos'">
         <div class="tool-icon">
@@ -512,7 +567,7 @@
                       <img src="{{ url_for('static', filename='uploads/' ~ p.foto) }}" class="product-image" alt="{{ p.nombre }}">
                     {% else %}
                       <div class="product-image" style="display: flex; align-items: center; justify-content: center;">
-                        <i class="fas fa-box" style="color: var(--text-secondary);"></i>
+                        <i class="fas fa-box" style="color: #333333;"></i>
                       </div>
                     {% endif %}
                     <div class="product-info">
@@ -529,7 +584,7 @@
                 </td>
                 
                 <td>
-                  {% set cat_color = p.categoria_color|default('#6B7280') %}
+                  {% set cat_color = p.categoria_color|default('#333333') %}
                   <span class="badge-category" style="background-color: {{ cat_color }}15; color: {{ cat_color }}; border: 1px solid {{ cat_color }}30;">{{ p.categoria|default('Sin categoría')|title }}</span>
                 </td>
                 
@@ -583,7 +638,7 @@
         {% else %}
           <div class="empty-state" style="padding: 32px 0;">
             <div class="empty-icon">
-              <i class="fas fa-check-circle"></i>
+              <i class="fas fa-check-circle" style="color: #333333;"></i>
             </div>
             <p class="empty-message">No hay productos por agotarse</p>
           </div>
@@ -597,7 +652,7 @@
         
         <div class="empty-state" style="padding: 32px 0;">
           <div class="empty-icon">
-            <i class="fas fa-bell"></i>
+            <i class="fas fa-bell" style="color: #333333;"></i>
           </div>
           <p class="empty-message">No hay notificaciones</p>
         </div>
