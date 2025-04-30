@@ -1,3 +1,4 @@
+```html
 {% extends 'base.html' %}
 
 {% block title %}
@@ -63,7 +64,33 @@
     font-weight: 600;
     position: relative;
     background-color: #fff;
+    transition: all 0.3s ease;
   }
+  
+  /* Estilos para drag & drop */
+  .foto-placeholder.dragover {
+    background-color: #f1f8ff;
+    border-color: #3498db;
+    border-style: solid;
+  }
+  
+  .drop-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.2rem;
+    color: #3498db;
+    font-weight: bold;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .foto-placeholder.dragover .drop-message {
+    opacity: 1;
+  }
+  
   .foto-placeholder img {
     max-width: 100%;
     max-height: 100%;
@@ -97,7 +124,7 @@
     width: 30px;
     height: 30px;
     border-radius: 50%;
-    background-color: #ccc;
+    background-color: #777; /* Color gris más intenso */
     color: #fff;
     border: none;
     font-size: 18px;
@@ -105,6 +132,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2); /* Añadido sombra para más visibilidad */
   }
 
   .foto-dropdown {
@@ -116,6 +144,7 @@
     border-radius: 4px;
     z-index: 100;
     display: none;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.15); /* Sombra más pronunciada */
   }
   .foto-dropdown .dropdown-item {
     display: block;
@@ -226,12 +255,25 @@
   .heart-icon.active {
     color: red;
   }
-  .venta-icon {
-    width: 24px;
-    height: auto;
+  
+  /* Estilos para el ojo de visibilidad */
+  .eye-icon {
+    display: inline-block;
     cursor: pointer;
-    transition: opacity 0.3s;
-    object-fit: contain;
+    transition: transform 0.2s ease;
+    font-size: 1.5rem;
+  }
+  
+  .eye-icon:hover {
+    transform: scale(1.15);
+  }
+  
+  .eye-icon.visible {
+    color: #2196F3;
+  }
+  
+  .eye-icon.hidden {
+    color: #9E9E9E;
   }
 
   /* Toggle y Caducidad */
@@ -490,15 +532,39 @@
   .precio-field {
     min-width: 200px; /* Reducir ligeramente para evitar desbordamiento */
   }
+  
+  /* Estilo para campos inválidos/requeridos */
+  .form-control.is-invalid {
+    border-color: #dc3545;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(.375em + .1875rem) center;
+    background-size: calc(.75em + .375rem) calc(.75em + .375rem);
+  }
+  
+  .invalid-feedback {
+    display: none;
+    width: 100%;
+    margin-top: .25rem;
+    font-size: 80%;
+    color: #dc3545;
+  }
+  
+  .form-control.is-invalid ~ .invalid-feedback {
+    display: block;
+  }
 </style>
 
 <div class="card-form">
-  <form method="POST" action="" enctype="multipart/form-data" id="productForm">
+  <form method="POST" action="" enctype="multipart/form-data" id="productForm" novalidate>
     <div class="row-form">
       <!-- Col Izquierda: Foto + Checks -->
       <div class="col-left">
         <div class="foto-container">
           <div class="foto-placeholder" id="fotoPlaceholder">
+            <!-- Mensaje de arrastrar y soltar -->
+            <div class="drop-message">Suelta tu imagen aquí</div>
+            
             <button type="button" class="no-image-icon" id="btnCargarFoto">&#8942;</button>
             <div class="foto-dropdown" id="fotoDropdown" style="display:none;">
               <button type="button" class="dropdown-item btn btn-secondary" id="dropdownCargarFoto">Cargar imagen</button>
@@ -523,7 +589,9 @@
           </div>
 
           <div id="ventaContainer" style="display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem;">
-            <img id="ventaIcon" src="{{ url_for('static', filename='img/1.png') }}" class="venta-icon">
+            <span id="ventaIcon" class="eye-icon hidden">
+              <i class="fas fa-eye-slash"></i>
+            </span>
             <span>Producto a la Venta</span>
             <input type="hidden" name="esta_a_la_venta" id="esta_a_la_venta" value="1">
           </div>
@@ -565,6 +633,9 @@
               required
               autocomplete="off"
             >
+            <div class="invalid-feedback">
+              Por favor, ingresa el nombre del producto.
+            </div>
             <!-- Contenedor de autocomplete -->
             <div id="autocomplete-results"></div>
           </div>
@@ -594,6 +665,9 @@
               <p class="sell-option-text">Por MEDIDA</p>
             </div>
           </div>
+          <div class="invalid-feedback" id="tipoMedidaFeedback" style="display: none;">
+            Por favor, selecciona cómo se vende el producto.
+          </div>
         </div>
 
         <!-- PASO 3: MEDIDAS Y PRECIOS -->
@@ -603,7 +677,7 @@
           <!-- Unidad de medida con label normal (no flotante) -->
           <div class="mb-3">
             <label for="unidadMedidaSelect" class="form-label mb-2">Unidad de medida</label>
-            <select class="form-select" id="unidadMedidaSelect" name="unidad_medida">
+            <select class="form-select" id="unidadMedidaSelect" name="unidad_medida" required>
               <option value="" disabled selected>Selecciona una unidad</option>
               <!-- Opciones para PESO -->
               <option value="KG" data-type="peso" data-singular="Kilogramo" data-plural="Kilogramos">Kilogramos</option>
@@ -623,6 +697,9 @@
               <option value="CM" data-type="volumen" data-singular="Centímetro" data-plural="Centímetros">Centímetros</option>
               <option value="M2" data-type="volumen" data-singular="Metro cuadrado" data-plural="Metros cuadrados">Metros cuadrados</option>
             </select>
+            <div class="invalid-feedback">
+              Por favor, selecciona una unidad de medida.
+            </div>
           </div>
           
           <!-- Stock con ETIQUETA FLOTANTE -->
@@ -638,6 +715,9 @@
               placeholder="INGRESA EL STOCK INICIAL"
               required
             >
+            <div class="invalid-feedback">
+              Por favor, ingresa el stock inicial del producto.
+            </div>
           </div>
           
           <div style="display: flex; gap: 5px;"> <!-- Reducir el gap entre campos -->
@@ -650,9 +730,12 @@
                 id="costo"
                 name="costo"
                 required
-                oninput="formatCostRealtime(this)"
+                oninput="formatCostRealtime(this, 2)"
                 placeholder="COSTO POR"
               >
+              <div class="invalid-feedback">
+                Por favor, ingresa el costo por unidad.
+              </div>
             </div>
             
             <!-- Precio de venta con ETIQUETA FLOTANTE -->
@@ -664,9 +747,12 @@
                 id="precio_venta"
                 name="precio_venta"
                 required
-                oninput="formatCostRealtime(this)"
+                oninput="formatCostRealtime(this, 2)"
                 placeholder="PRECIO POR"
               >
+              <div class="invalid-feedback">
+                Por favor, ingresa el precio de venta por unidad.
+              </div>
             </div>
           </div>
         </div>
@@ -677,7 +763,7 @@
           
           <div class="mb-3">
             <label for="categoria_existente" class="form-label mb-2">Categoría</label>
-            <select class="form-select" name="categoria_existente" id="categoria_existente">
+            <select class="form-select" name="categoria_existente" id="categoria_existente" required>
               <option value="" disabled selected hidden>-SELECCIONA UNA CATEGORÍA-</option>
               <option value="abarrotes secos" data-custom-properties='{"color": "#FFA500"}'>Abarrotes secos</option>
               <option value="enlatados y conservas" data-custom-properties='{"color": "#DAA520"}'>Enlatados y conservas</option>
@@ -701,6 +787,9 @@
               <option value="productos gourmet" data-custom-properties='{"color": "#800080"}'>Productos gourmet</option>
               <option value="otros (miscelánea)" data-custom-properties='{"color": "#A9A9A9"}'>Otros (miscelánea)</option>
             </select>
+            <div class="invalid-feedback">
+              Por favor, selecciona una categoría para el producto.
+            </div>
           </div>
 
           <!-- Toggle "¿TIENE FECHA DE CADUCIDAD?" -->
@@ -756,6 +845,9 @@
                   <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad3anos" value="más de 3 años">
                   <label class="form-check-label" for="cad3anos">+3 AÑOS</label>
                 </div>
+              </div>
+              <div class="invalid-feedback" id="caducidadFeedback" style="display: none;">
+                Por favor, selecciona un lapso de caducidad.
               </div>
             </div>
           </div>
@@ -835,36 +927,103 @@
     }, duration);
   }
 
-  /* ===========================================================
-   * 3) Formatear Costo en tiempo real
+/* ===========================================================
+   * 3) Formatear Costo en tiempo real (CORREGIDO PARA PERMITIR 2 DECIMALES)
    * ===========================================================
    */
-  const numericRegex = /[^\d.]/g;
-  const moneyPattern = /^(\d*)(\.?)(\d{0,3})/;
-  
-  function formatCostRealtime(input) {
+   function formatCostRealtime(input, maxDecimals = 2) {
+    // Obtener posición del cursor antes de la modificación
+    const cursorPos = input.selectionStart;
+    
+    // Obtener el valor actual sin el símbolo $
     let value = input.value;
     if (value.startsWith("$")) {
       value = value.substring(1);
     }
-    value = value.replace(/,/g, "").replace(numericRegex, "");
     
-    const match = value.match(moneyPattern);
-    if (match) {
-      let intPart = match[1];
-      let dot = match[2];
-      let decPart = match[3];
-      let formattedInt = intPart ? Number(intPart).toLocaleString("en-US") : "";
-      let result = formattedInt;
-      if (dot) {
-        result += ".";
+    // Eliminar todas las comas existentes
+    value = value.replace(/,/g, "");
+    
+    // Verificar que solo haya un punto decimal
+    const pointCount = (value.match(/\./g) || []).length;
+    if (pointCount > 1) {
+      // Si hay más de un punto, mantener solo el primero
+      const firstPointIndex = value.indexOf('.');
+      value = value.substring(0, firstPointIndex + 1) + 
+              value.substring(firstPointIndex + 1).replace(/\./g, '');
+    }
+    
+    // Permitir solo dígitos y un punto decimal
+    value = value.replace(/[^\d.]/g, "");
+    
+    // Limitar los decimales al máximo especificado
+    if (value.includes('.')) {
+      const parts = value.split('.');
+      if (parts[1] && parts[1].length > maxDecimals) {
+        parts[1] = parts[1].substring(0, maxDecimals);
+        value = parts.join('.');
       }
-      result += decPart;
-      if (result !== "") {
-        result = "$" + result;
+    }
+    
+    // Aplicar formato con comas para miles
+    let formattedValue = "";
+    if (value) {
+      // Separar parte entera y decimal
+      const parts = value.split('.');
+      
+      // Formatear parte entera con comas
+      if (parts[0]) {
+        formattedValue = parseInt(parts[0]).toLocaleString('en-US');
+        // Si la parte entera es 0 o está vacía, mantener el 0
+        if (formattedValue === '0' || !parts[0]) {
+          formattedValue = '0';
+        }
+      } else {
+        formattedValue = "0";
       }
-      input.value = result;
-      input.setSelectionRange(input.value.length, input.value.length);
+      
+      // Agregar parte decimal si existe
+      if (parts.length > 1) {
+        formattedValue += '.' + parts[1];
+      }
+      
+      // Agregar el símbolo $ al principio
+      formattedValue = '$' + formattedValue;
+    } else {
+      formattedValue = "";
+    }
+    
+    // Aplicar el valor formateado
+    input.value = formattedValue;
+    
+    // Ajustar la posición del cursor para una mejor experiencia de usuario
+    // Si hay un símbolo $, ajustar la posición
+    let adjustedCursorPos = cursorPos;
+    
+    // Si se agregó un "$" al principio y antes no estaba, incrementar cursor
+    if (formattedValue.startsWith('$') && !value.startsWith('$')) {
+      adjustedCursorPos += 1;
+    }
+    
+    // Ajustar por comas añadidas antes de la posición del cursor
+    const valueBeforeCursor = value.substring(0, cursorPos);
+    const formattedBeforeCursor = formattedValue.substring(0, adjustedCursorPos);
+    
+    const commasBeforeInOriginal = (valueBeforeCursor.match(/,/g) || []).length;
+    const commasBeforeInFormatted = (formattedBeforeCursor.match(/,/g) || []).length;
+    
+    adjustedCursorPos += (commasBeforeInFormatted - commasBeforeInOriginal);
+    
+    // Si la longitud del valor cambió drásticamente, poner el cursor al final
+    if (Math.abs(value.length - formattedValue.length) > 3) {
+      adjustedCursorPos = formattedValue.length;
+    }
+    
+    // Aplicar la posición del cursor, con seguridad
+    if (adjustedCursorPos >= 0 && adjustedCursorPos <= formattedValue.length) {
+      setTimeout(() => {
+        input.setSelectionRange(adjustedCursorPos, adjustedCursorPos);
+      }, 0);
     }
   }
 
@@ -882,6 +1041,7 @@
         
         // Recrear menú con estructura correcta
         fotoPlaceholder.innerHTML = `
+          <div class="drop-message">Suelta tu imagen aquí</div>
           <button type="button" class="no-image-icon" id="btnCargarFoto">&#8942;</button>
           <div class="foto-dropdown" id="fotoDropdown" style="display:none;">
             <button type="button" class="dropdown-item btn btn-secondary" id="dropdownCargarFoto">Cargar imagen</button>
@@ -955,6 +1115,9 @@
         fotoDropdown.style.display = "none";
       }
     });
+    
+    // Configurar eventos para Drag & Drop
+    setupDragAndDrop(fotoPlaceholder);
 
     // Observador para detectar cambios en el DOM y volver a vincular si es necesario
     const observer = new MutationObserver(function(mutations) {
@@ -971,6 +1134,107 @@
 
     // Configurar el observador para observar cambios en los hijos
     observer.observe(fotoPlaceholder, { childList: true, subtree: true });
+  }
+  
+  /* ===========================================================
+   * 4.1) DRAG & DROP
+   * ===========================================================
+   */
+  function setupDragAndDrop(dropZone) {
+    if (!dropZone) return;
+    
+    // Prevenir comportamiento predeterminado para estos eventos
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      dropZone.addEventListener(eventName, preventDefaults, false);
+      document.body.addEventListener(eventName, preventDefaults, false);
+    });
+    
+    // Destacar la zona al arrastrar sobre ella
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropZone.addEventListener(eventName, highlight, false);
+    });
+    
+    // Quitar el destacado al salir o al soltar
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropZone.addEventListener(eventName, unhighlight, false);
+    });
+    
+    // Manejar el evento de soltar
+    dropZone.addEventListener('drop', handleDrop, false);
+    
+    function preventDefaults(e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    function highlight() {
+      dropZone.classList.add('dragover');
+    }
+    
+    function unhighlight() {
+      dropZone.classList.remove('dragover');
+    }
+    
+    function handleDrop(e) {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      
+      if (files && files.length) {
+        const file = files[0];
+        
+        // Verificar que sea una imagen
+        if (!file.type.match('image.*')) {
+          showCenteredNotification("El archivo debe ser una imagen (jpg, png, etc.)");
+          return;
+        }
+        
+        // Verificar tamaño (5MB max)
+        if (file.size > 5 * 1024 * 1024) {
+          showCenteredNotification("La imagen es demasiado grande (máximo 5MB)");
+          return;
+        }
+        
+        // Mostrar progreso para archivos grandes
+        const imageProgressContainer = document.querySelector(".image-upload-progress");
+        const imageProgressBar = document.getElementById("imageProgressBar");
+        
+        if (file.size > 1 * 1024 * 1024) { // 1MB
+          imageProgressContainer.style.display = "block";
+          
+          // Simulación de progreso
+          let progress = 0;
+          const interval = setInterval(() => {
+            progress += 5;
+            if (progress > 100) {
+              clearInterval(interval);
+              imageProgressContainer.style.display = "none";
+            } else {
+              imageProgressBar.style.width = `${progress}%`;
+            }
+          }, 50);
+        }
+        
+        // Crear blob URL para vista previa
+        const objectURL = URL.createObjectURL(file);
+        
+        // Actualizar vista previa
+        dropZone.innerHTML = `
+          <img src="${objectURL}" alt="Imagen subida">
+          <button type="button" class="remove-image" id="removeImageBtn">&times;</button>
+        `;
+        dropZone.classList.add("has-image");
+        
+        // Asignar el archivo al input file oculto
+        const fileList = new DataTransfer();
+        fileList.items.add(file);
+        document.getElementById("fotoInput").files = fileList.files;
+        
+        // NO guardar objectURL como displayed_image_url para archivos locales
+        document.getElementById("displayed_image_url").value = "";
+        
+        attachRemoveImageListener();
+      }
+    }
   }
   
   function generatePhotoWithIA() {
@@ -1065,6 +1329,7 @@
         testImg.onerror = function() {
           console.error("No se pudo cargar la imagen:", data.image_url);
           fotoPlaceholder.innerHTML = `
+            <div class="drop-message">Suelta tu imagen aquí</div>
             <button type="button" class="no-image-icon" id="btnCargarFoto">&#8942;</button>
             <div class="foto-dropdown" id="fotoDropdown" style="display:none;">
               <button type="button" class="dropdown-item btn btn-secondary" id="dropdownCargarFoto">Cargar imagen</button>
@@ -1080,6 +1345,7 @@
       } else {
         // Reconstruir menú con estructura correcta en caso de error
         fotoPlaceholder.innerHTML = `
+          <div class="drop-message">Suelta tu imagen aquí</div>
           <button type="button" class="no-image-icon" id="btnCargarFoto">&#8942;</button>
           <div class="foto-dropdown" id="fotoDropdown" style="display:none;">
             <button type="button" class="dropdown-item btn btn-secondary" id="dropdownCargarFoto">Cargar imagen</button>
@@ -1098,6 +1364,7 @@
       console.error("Error al buscar la imagen:", error);
       // Reconstruir menú con estructura correcta en caso de error
       fotoPlaceholder.innerHTML = `
+        <div class="drop-message">Suelta tu imagen aquí</div>
         <button type="button" class="no-image-icon" id="btnCargarFoto">&#8942;</button>
         <div class="foto-dropdown" id="fotoDropdown" style="display:none;">
           <button type="button" class="dropdown-item btn btn-secondary" id="dropdownCargarFoto">Cargar imagen</button>
@@ -1230,6 +1497,9 @@
       
       // Manejar las etiquetas flotantes
       updateFloatingLabel(this);
+      
+      // Quitar clase de error si hay contenido
+      this.classList.remove('is-invalid');
     });
     
     // Usar delegación de eventos para mejorar rendimiento
@@ -1324,10 +1594,14 @@
     ventaContainer.addEventListener("click", () => {
       if (estaAVentaInput.value === "1") {
         estaAVentaInput.value = "0";
-        ventaIcon.src = "{{ url_for('static', filename='img/2.png') }}";
+        ventaIcon.classList.remove("visible");
+        ventaIcon.classList.add("hidden");
+        ventaIcon.innerHTML = '<i class="fas fa-eye-slash"></i>';
       } else {
         estaAVentaInput.value = "1";
-        ventaIcon.src = "{{ url_for('static', filename='img/1.png') }}";
+        ventaIcon.classList.remove("hidden");
+        ventaIcon.classList.add("visible");
+        ventaIcon.innerHTML = '<i class="fas fa-eye"></i>';
       }
     });
   }
@@ -1363,6 +1637,10 @@
         document.querySelectorAll(".caducidad-options .form-check").forEach(el => el.classList.remove("selected"));
         if (radio.checked) {
           fc.classList.add("selected");
+        }
+        // Quitar mensaje de error si hay selección
+        if (document.getElementById("caducidadFeedback")) {
+          document.getElementById("caducidadFeedback").style.display = "none";
         }
       });
     }
@@ -1425,6 +1703,9 @@
     
     // Actualizar placeholders y etiquetas flotantes
     actualizarPlaceholders();
+    
+    // Quitar mensaje de error al seleccionar una unidad
+    unidadMedidaSelect.classList.remove('is-invalid');
   }
 
   // Función para actualizar placeholders según la unidad seleccionada
@@ -1526,6 +1807,11 @@
         tipoMedidaInput.value = value;
       }
       
+      // Quitar mensaje de error de tipo de medida
+      if (document.getElementById('tipoMedidaFeedback')) {
+        document.getElementById('tipoMedidaFeedback').style.display = 'none';
+      }
+      
       // Filtrar y actualizar dropdown de unidades según el tipo seleccionado
       filtrarOpcionesUnidad(value);
     });
@@ -1533,7 +1819,11 @@
 
   // Evento para cuando cambia la unidad de medida
   if (unidadMedidaSelect) {
-    unidadMedidaSelect.addEventListener('change', actualizarPlaceholders);
+    unidadMedidaSelect.addEventListener('change', function() {
+      actualizarPlaceholders();
+      // Quitar clase de error cuando hay selección
+      this.classList.remove('is-invalid');
+    });
   }
 
   // Eventos para actualizar las etiquetas flotantes cuando cambia el contenido de los campos
@@ -1546,18 +1836,24 @@
   if (stockInput) {
     stockInput.addEventListener('input', function() {
       updateFloatingLabel(this);
+      // Quitar clase de error cuando hay contenido
+      this.classList.remove('is-invalid');
     });
   }
 
   if (costoInput) {
     costoInput.addEventListener('input', function() {
       updateFloatingLabel(this);
+      // Quitar clase de error cuando hay contenido
+      this.classList.remove('is-invalid');
     });
   }
 
   if (precioInput) {
     precioInput.addEventListener('input', function() {
       updateFloatingLabel(this);
+      // Quitar clase de error cuando hay contenido
+      this.classList.remove('is-invalid');
     });
   }
 
@@ -1631,6 +1927,19 @@
         };
       }
     });
+    
+    // Añadir validación al cambiar la selección
+    if (categoryChoices) {
+      categoryChoices.passedElement.element.addEventListener('change', function(event) {
+        const choicesContainer = document.querySelector('.choices');
+        if (this.value) {
+          choicesContainer.classList.remove('is-invalid');
+          if (this.nextElementSibling && this.nextElementSibling.classList.contains('invalid-feedback')) {
+            this.nextElementSibling.style.display = 'none';
+          }
+        }
+      });
+    }
   }
 
   /* ===========================================================
@@ -1687,7 +1996,7 @@
   }
 
   /* ===========================================================
-   * 11) VALIDACIÓN Y ENVÍO DE FORMULARIO 
+   * 11) VALIDACIÓN Y ENVÍO DE FORMULARIO - MEJORADO
    * ===========================================================
    */
   // Referencias a elementos de carga
@@ -1695,51 +2004,132 @@
   const productForm = document.getElementById("productForm");
   const submitBtn = document.getElementById("submitBtn");
   
+  // Nueva función para validar todos los campos
+  function validateForm() {
+    let isValid = true;
+    let firstInvalidElement = null;
+    
+    // Validar nombre del producto
+    const nombre = document.getElementById("nombre");
+    if (!nombre.value.trim()) {
+      nombre.classList.add('is-invalid');
+      isValid = false;
+      firstInvalidElement = nombre;
+    } else {
+      nombre.classList.remove('is-invalid');
+    }
+    
+    // Validar tipo de medida
+    const tipoMedida = document.getElementById("tipo_medida").value;
+    if (!tipoMedida) {
+      document.getElementById("tipoMedidaFeedback").style.display = 'block';
+      isValid = false;
+      if (!firstInvalidElement) {
+        firstInvalidElement = document.querySelector('.sell-options');
+      }
+    } else {
+      document.getElementById("tipoMedidaFeedback").style.display = 'none';
+    }
+    
+    // Validar unidad de medida
+    const unidadMedida = document.getElementById("unidadMedidaSelect");
+    if (!unidadMedida.value) {
+      unidadMedida.classList.add('is-invalid');
+      isValid = false;
+      if (!firstInvalidElement) {
+        firstInvalidElement = unidadMedida;
+      }
+    } else {
+      unidadMedida.classList.remove('is-invalid');
+    }
+    
+    // Validar stock
+    const stock = document.getElementById("stock");
+    if (!stock.value || isNaN(parseFloat(stock.value))) {
+      stock.classList.add('is-invalid');
+      isValid = false;
+      if (!firstInvalidElement) {
+        firstInvalidElement = stock;
+      }
+    } else {
+      stock.classList.remove('is-invalid');
+    }
+    
+    // Validar costo
+    const costo = document.getElementById("costo");
+    if (!costo.value || costo.value === "$") {
+      costo.classList.add('is-invalid');
+      isValid = false;
+      if (!firstInvalidElement) {
+        firstInvalidElement = costo;
+      }
+    } else {
+      costo.classList.remove('is-invalid');
+    }
+    
+    // Validar precio de venta
+    const precioVenta = document.getElementById("precio_venta");
+    if (!precioVenta.value || precioVenta.value === "$") {
+      precioVenta.classList.add('is-invalid');
+      isValid = false;
+      if (!firstInvalidElement) {
+        firstInvalidElement = precioVenta;
+      }
+    } else {
+      precioVenta.classList.remove('is-invalid');
+    }
+    
+    // Validar categoría
+    const categoriaSelect = document.getElementById("categoria_existente");
+    if (!categoriaSelect.value) {
+      const choicesContainer = document.querySelector('.choices');
+      if (choicesContainer) {
+        choicesContainer.classList.add('is-invalid');
+      }
+      isValid = false;
+      if (!firstInvalidElement) {
+        firstInvalidElement = categoriaSelect;
+      }
+    } else {
+      const choicesContainer = document.querySelector('.choices');
+      if (choicesContainer) {
+        choicesContainer.classList.remove('is-invalid');
+      }
+    }
+    
+    // Validar caducidad si está activada
+    if (document.getElementById("toggle_caducidad_estado").value === "ACTIVADO") {
+      const radioSelectedCaducidad = document.querySelector('input[name="caducidad_lapso"]:checked');
+      if (!radioSelectedCaducidad) {
+        document.getElementById("caducidadFeedback").style.display = 'block';
+        isValid = false;
+        if (!firstInvalidElement) {
+          firstInvalidElement = document.querySelector('.caducidad-options');
+        }
+      } else {
+        document.getElementById("caducidadFeedback").style.display = 'none';
+      }
+    }
+    
+    // Hacer scroll al primer elemento inválido
+    if (firstInvalidElement) {
+      firstInvalidElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      if (firstInvalidElement.focus) {
+        setTimeout(() => firstInvalidElement.focus(), 500);
+      }
+    }
+    
+    return isValid;
+  }
+  
   // Manejar el envío del formulario
   if (productForm) {
     productForm.addEventListener("submit", function(e) {
       e.preventDefault();
       
-      // Paso 1: Validar nombre del producto
-      const nombre = document.getElementById("nombre").value.trim();
-      if (!nombre) {
-        showCenteredNotification("Debes ingresar el nombre del producto");
-        return;
-      }
-      
-      // Paso 2: Validar tipo de venta
-      const tipoMedida = document.getElementById("tipo_medida").value;
-      if (!tipoMedida) {
-        showCenteredNotification("Debes seleccionar cómo se vende el producto (Unidad, Peso o Medida)");
-        return;
-      }
-      
-      // Paso 3: Validar unidad de medida
-      const unidadMedida = document.getElementById("unidadMedidaSelect").value;
-      if (!unidadMedida) {
-        showCenteredNotification("Debes seleccionar una unidad de medida específica");
-        return;
-      }
-      
-      // Validar que se haya ingresado un stock
-      const stock = document.getElementById("stock").value;
-      if (!stock) {
-        showCenteredNotification("Debes ingresar el stock inicial");
-        return;
-      }
-      
-      // Validar que se hayan ingresado costo y precio de venta
-      const costo = document.getElementById("costo").value;
-      const precioVenta = document.getElementById("precio_venta").value;
-      if (!costo || !precioVenta) {
-        showCenteredNotification("Debes ingresar tanto el costo como el precio de venta");
-        return;
-      }
-      
-      // Validar categoría
-      const categoria = document.getElementById("categoria_existente").value;
-      if (!categoria) {
-        showCenteredNotification("Por favor, selecciona una categoría para tu producto");
+      // Validar todos los campos
+      if (!validateForm()) {
+        showCenteredNotification("Por favor, completa todos los campos obligatorios");
         return;
       }
       
@@ -1764,6 +2154,16 @@
     
     // Inicializar eventos del menú de fotos
     bindPhotoEvents();
+    
+    // Inicializar iconos de visibilidad
+    const ventaIcon = document.getElementById("ventaIcon");
+    const estaAVentaInput = document.getElementById("esta_a_la_venta");
+    
+    if (ventaIcon && estaAVentaInput && estaAVentaInput.value === "1") {
+      ventaIcon.classList.remove("hidden");
+      ventaIcon.classList.add("visible");
+      ventaIcon.innerHTML = '<i class="fas fa-eye"></i>';
+    }
     
     // Seleccionar la opción "Por PESO" por defecto al cargar
     const defaultOption = document.getElementById('sellByWeight');
