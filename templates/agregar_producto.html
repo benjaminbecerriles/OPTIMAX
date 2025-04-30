@@ -63,33 +63,7 @@
     font-weight: 600;
     position: relative;
     background-color: #fff;
-    transition: all 0.3s ease;
   }
-  
-  /* Nuevos estilos para drag & drop */
-  .foto-placeholder.dragover {
-    background-color: #f1f8ff;
-    border-color: #3498db;
-    border-style: solid;
-  }
-  
-  .drop-message {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 1.2rem;
-    color: #3498db;
-    font-weight: bold;
-    text-align: center;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-  
-  .foto-placeholder.dragover .drop-message {
-    opacity: 1;
-  }
-  
   .foto-placeholder img {
     max-width: 100%;
     max-height: 100%;
@@ -115,7 +89,7 @@
     display: block;
   }
 
-  /* Menú (3 puntitos) - MODIFICACIÓN: color más intenso */
+  /* Menú (3 puntitos) */
   .no-image-icon {
     position: absolute;
     top: 5px;
@@ -123,7 +97,7 @@
     width: 30px;
     height: 30px;
     border-radius: 50%;
-    background-color: #777; /* Color gris más intenso */
+    background-color: #ccc;
     color: #fff;
     border: none;
     font-size: 18px;
@@ -131,7 +105,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2); /* Añadido sombra para más visibilidad */
   }
 
   .foto-dropdown {
@@ -143,7 +116,6 @@
     border-radius: 4px;
     z-index: 100;
     display: none;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.15); /* Sombra más pronunciada */
   }
   .foto-dropdown .dropdown-item {
     display: block;
@@ -588,9 +560,6 @@
       <div class="col-left">
         <div class="foto-container">
           <div class="foto-placeholder" id="fotoPlaceholder">
-            <!-- Mensaje de arrastrar y soltar -->
-            <div class="drop-message">Suelta tu imagen aquí</div>
-            
             <button type="button" class="no-image-icon" id="btnCargarFoto">&#8942;</button>
             <div class="foto-dropdown" id="fotoDropdown" style="display:none;">
               <button type="button" class="dropdown-item btn btn-secondary" id="dropdownCargarFoto">Cargar imagen</button>
@@ -727,10 +696,10 @@
             >
           </div>
 
-          <!-- Costo / Precio - MODIFICACIÓN: Placeholders actualizados -->
+          <!-- Costo / Precio -->
           <div class="d-flex gap-3" style="align-items: center; margin-bottom: 0;">
             <div class="form-group" style="flex:1; margin-bottom: 0;">
-              <div class="floating-label" style="display: none;" id="costoFloatingLabel">Costo por pza</div>
+              <div class="floating-label" style="display: none;" id="costoFloatingLabel">Costo</div>
               <input
                 type="text"
                 step="0.01"
@@ -739,11 +708,11 @@
                 name="costo"
                 required
                 oninput="formatCostRealtime(this)"
-                placeholder="COSTO POR PZA"
+                placeholder="COSTO"
               >
             </div>
             <div class="form-group" style="flex:1; margin-bottom: 0;">
-              <div class="floating-label" style="display: none;" id="precio_ventaFloatingLabel">Precio de venta por pza</div>
+              <div class="floating-label" style="display: none;" id="precio_ventaFloatingLabel">Precio de venta</div>
               <input
                 type="text"
                 step="0.01"
@@ -752,7 +721,7 @@
                 name="precio_venta"
                 required
                 oninput="formatCostRealtime(this)"
-                placeholder="PRECIO DE VENTA POR PZA"
+                placeholder="PRECIO DE VENTA"
               >
             </div>
           </div>
@@ -1069,7 +1038,6 @@
         
         // Recrear menú con estructura correcta
         fotoPlaceholder.innerHTML = `
-          <div class="drop-message">Suelta tu imagen aquí</div>
           <button type="button" class="no-image-icon" id="btnCargarFoto">&#8942;</button>
           <div class="foto-dropdown" id="fotoDropdown" style="display:none;">
             <button type="button" class="dropdown-item btn btn-secondary" id="dropdownCargarFoto">Cargar imagen</button>
@@ -1160,110 +1128,6 @@
 
     // Configurar el observador para observar cambios en los hijos
     observer.observe(fotoPlaceholder, { childList: true, subtree: true });
-    
-    // NUEVO: Añadir eventos para Drag & Drop
-    setupDragAndDrop(fotoPlaceholder);
-  }
-  
-  /* ===========================================================
-   * 5.1) NUEVO: Configuración Drag & Drop
-   * ===========================================================
-   */
-  function setupDragAndDrop(dropZone) {
-    if (!dropZone) return;
-    
-    // Prevenir comportamiento predeterminado para estos eventos
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-      dropZone.addEventListener(eventName, preventDefaults, false);
-      document.body.addEventListener(eventName, preventDefaults, false);
-    });
-    
-    // Destacar la zona al arrastrar sobre ella
-    ['dragenter', 'dragover'].forEach(eventName => {
-      dropZone.addEventListener(eventName, highlight, false);
-    });
-    
-    // Quitar el destacado al salir o al soltar
-    ['dragleave', 'drop'].forEach(eventName => {
-      dropZone.addEventListener(eventName, unhighlight, false);
-    });
-    
-    // Manejar el evento de soltar
-    dropZone.addEventListener('drop', handleDrop, false);
-    
-    function preventDefaults(e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-    
-    function highlight() {
-      dropZone.classList.add('dragover');
-    }
-    
-    function unhighlight() {
-      dropZone.classList.remove('dragover');
-    }
-    
-    function handleDrop(e) {
-      const dt = e.dataTransfer;
-      const files = dt.files;
-      
-      if (files && files.length) {
-        const file = files[0];
-        
-        // Verificar que sea una imagen
-        if (!file.type.match('image.*')) {
-          showCenteredNotification("El archivo debe ser una imagen (jpg, png, etc.)");
-          return;
-        }
-        
-        // Verificar tamaño (5MB max)
-        if (file.size > 5 * 1024 * 1024) {
-          showCenteredNotification("La imagen es demasiado grande (máximo 5MB)");
-          return;
-        }
-        
-        // Mostrar progreso para archivos grandes
-        const imageProgressContainer = document.querySelector(".image-upload-progress");
-        const imageProgressBar = document.getElementById("imageProgressBar");
-        
-        if (file.size > 1 * 1024 * 1024) { // 1MB
-          imageProgressContainer.style.display = "block";
-          
-          // Simulación de progreso
-          let progress = 0;
-          const interval = setInterval(() => {
-            progress += 5;
-            if (progress > 100) {
-              clearInterval(interval);
-              imageProgressContainer.style.display = "none";
-            } else {
-              imageProgressBar.style.width = `${progress}%`;
-            }
-          }, 50);
-        }
-        
-        // Crear blob URL para vista previa
-        const objectURL = URL.createObjectURL(file);
-        
-        // Actualizar vista previa
-        dropZone.innerHTML = `
-          <img src="${objectURL}" alt="Imagen subida">
-          <button type="button" class="remove-image" id="removeImageBtn">&times;</button>
-        `;
-        dropZone.classList.add("has-image");
-        
-        // Asignar el archivo al input file oculto
-        const fileList = new DataTransfer();
-        fileList.items.add(file);
-        document.getElementById("fotoInput").files = fileList.files;
-        
-        // NO guardar objectURL como displayed_image_url para archivos locales
-        document.getElementById("displayed_image_url").value = "";
-        
-        attachRemoveImageListener();
-      }
-    }
   }
   
   function generatePhotoWithIA() {
@@ -1360,7 +1224,6 @@
         testImg.onerror = function() {
           console.error("No se pudo cargar la imagen:", data.image_url);
           fotoPlaceholder.innerHTML = `
-            <div class="drop-message">Suelta tu imagen aquí</div>
             <button type="button" class="no-image-icon" id="btnCargarFoto">&#8942;</button>
             <div class="foto-dropdown" id="fotoDropdown" style="display:none;">
               <button type="button" class="dropdown-item btn btn-secondary" id="dropdownCargarFoto">Cargar imagen</button>
@@ -1376,7 +1239,6 @@
       } else {
         // Reconstruir menú con estructura correcta en caso de error
         fotoPlaceholder.innerHTML = `
-          <div class="drop-message">Suelta tu imagen aquí</div>
           <button type="button" class="no-image-icon" id="btnCargarFoto">&#8942;</button>
           <div class="foto-dropdown" id="fotoDropdown" style="display:none;">
             <button type="button" class="dropdown-item btn btn-secondary" id="dropdownCargarFoto">Cargar imagen</button>
@@ -1396,7 +1258,6 @@
       console.error("Error al buscar la imagen:", error);
       // Reconstruir menú con estructura correcta en caso de error
       fotoPlaceholder.innerHTML = `
-        <div class="drop-message">Suelta tu imagen aquí</div>
         <button type="button" class="no-image-icon" id="btnCargarFoto">&#8942;</button>
         <div class="foto-dropdown" id="fotoDropdown" style="display:none;">
           <button type="button" class="dropdown-item btn btn-secondary" id="dropdownCargarFoto">Cargar imagen</button>

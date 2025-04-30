@@ -181,12 +181,21 @@
   .heart-icon.active {
     color: red;
   }
-  .venta-icon {
-    width: 24px;
-    height: auto;
+  
+  /* NUEVO - Reemplazando los estilos del ícono de visibilidad */
+  .eye-icon {
+    display: inline-block;
     cursor: pointer;
-    transition: opacity 0.3s;
-    object-fit: contain;
+    transition: transform 0.2s ease;
+    font-size: 1.5rem;
+  }
+  
+  .eye-icon.visible {
+    color: #2196F3;
+  }
+  
+  .eye-icon.hidden {
+    color: #9E9E9E;
   }
 
   /* Toggle y Caducidad */
@@ -372,10 +381,30 @@
     color: #888;
     font-size: 0.8rem;
   }
+  
+  /* Estilo para campos obligatorios */
+  .required::after {
+    content: ' *';
+    color: #e52e2e;
+    font-weight: bold;
+  }
+  
+  /* Estilo para validación de errores */
+  .is-invalid {
+    border-color: #e52e2e !important;
+    background-color: #fff8f8 !important;
+  }
+  
+  .invalid-feedback {
+    display: none;
+    color: #e52e2e;
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+  }
 </style>
 
 <div class="card-form">
-  <form method="POST" action="" enctype="multipart/form-data" id="productForm">
+  <form method="POST" action="" enctype="multipart/form-data" id="productForm" novalidate>
     <div class="row-form">
       <!-- Col Izquierda: Foto + Checks -->
       <div class="col-left">
@@ -404,8 +433,11 @@
             <input type="hidden" name="es_favorito" id="es_favorito" value="0">
           </div>
 
+          <!-- MODIFICADO: Cambiado para usar ícono de ojo similar a productos.html -->
           <div id="ventaContainer" style="display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem;">
-            <img id="ventaIcon" src="{{ url_for('static', filename='img/1.png') }}" class="venta-icon">
+            <span id="ventaIcon" class="eye-icon visible">
+              <i class="fas fa-eye"></i>
+            </span>
             <span>Producto a la Venta</span>
             <input type="hidden" name="esta_a_la_venta" id="esta_a_la_venta" value="1">
           </div>
@@ -450,17 +482,18 @@
           <!-- IMPORTANTE: Para saber si caducidad está activado o no -->
           <input type="hidden" name="toggle_caducidad_estado" id="toggle_caducidad_estado" value="DESACTIVADO">
 
-          <!-- Nombre -->
+          <!-- Nombre - MODIFICADO: Añadido required y clase required -->
           <div class="form-group">
-            <div class="floating-label" style="display: none;" id="nombreFloatingLabel">Nombre del producto</div>
+            <div class="floating-label required" style="display: none;" id="nombreFloatingLabel">Nombre del producto</div>
             <input 
               type="text"
               class="form-control"
               id="nombre"
               name="nombre"
-              placeholder="NOMBRE DEL PRODUCTO"
+              placeholder="NOMBRE DEL PRODUCTO *"
               required
             >
+            <div class="invalid-feedback">El nombre del producto es obligatorio</div>
           </div>
 
           <!-- Marca -->
@@ -480,23 +513,25 @@
         <div class="step-container">
           <div class="step-number">3</div>
 
-          <!-- Stock Inicial -->
+          <!-- Stock Inicial - MODIFICADO: Añadido required y clase required -->
           <div class="form-group">
-            <div class="floating-label" style="display: none;" id="stockFloatingLabel">Stock inicial</div>
+            <div class="floating-label required" style="display: none;" id="stockFloatingLabel">Stock inicial</div>
             <input 
               type="number"
               class="form-control"
               id="stock"
               name="stock"
               min="0"
-              placeholder="STOCK INICIAL"
+              placeholder="STOCK INICIAL *"
+              required
             >
+            <div class="invalid-feedback">El stock inicial es obligatorio</div>
           </div>
 
-          <!-- Costo / Precio -->
+          <!-- Costo / Precio - MODIFICADO: Añadido required y clase required -->
           <div class="d-flex gap-3" style="align-items: center; margin-bottom: 0;">
             <div class="form-group" style="flex:1; margin-bottom: 0;">
-              <div class="floating-label" style="display: none;" id="costoFloatingLabel">Costo</div>
+              <div class="floating-label required" style="display: none;" id="costoFloatingLabel">Costo</div>
               <input
                 type="text"
                 step="0.01"
@@ -505,11 +540,12 @@
                 name="costo"
                 required
                 oninput="formatCostRealtime(this)"
-                placeholder="COSTO"
+                placeholder="COSTO *"
               >
+              <div class="invalid-feedback">El costo es obligatorio</div>
             </div>
             <div class="form-group" style="flex:1; margin-bottom: 0;">
-              <div class="floating-label" style="display: none;" id="precio_ventaFloatingLabel">Precio de venta</div>
+              <div class="floating-label required" style="display: none;" id="precio_ventaFloatingLabel">Precio de venta</div>
               <input
                 type="text"
                 step="0.01"
@@ -518,8 +554,9 @@
                 name="precio_venta"
                 required
                 oninput="formatCostRealtime(this)"
-                placeholder="PRECIO DE VENTA"
+                placeholder="PRECIO DE VENTA *"
               >
+              <div class="invalid-feedback">El precio de venta es obligatorio</div>
             </div>
           </div>
         </div>
@@ -528,10 +565,10 @@
         <div class="step-container">
           <div class="step-number">4</div>
 
-          <!-- Categoría (Choices.js) -->
+          <!-- Categoría (Choices.js) - MODIFICADO: Añadido required -->
           <div class="form-group">
-            <select class="form-select" name="categoria_existente" id="categoria_existente">
-              <option value="" disabled selected hidden>-SELECCIONA UNA CATEGORÍA-</option>
+            <select class="form-select required" name="categoria_existente" id="categoria_existente" required>
+              <option value="" disabled selected hidden>-SELECCIONA UNA CATEGORÍA *-</option>
               <option value="abarrotes secos" data-custom-properties='{"color": "#FFA500"}'>Abarrotes secos</option>
               <option value="enlatados y conservas" data-custom-properties='{"color": "#DAA520"}'>Enlatados y conservas</option>
               <option value="botanas, dulces y snacks" data-custom-properties='{"color": "#FF69B4"}'>Botanas, dulces y snacks</option>
@@ -551,6 +588,7 @@
               <option value="ferretería básica" data-custom-properties='{"color": "#708090"}'>Ferretería básica</option>
               <option value="otros (miscelánea)" data-custom-properties='{"color": "#A9A9A9"}'>Otros (miscelánea)</option>
             </select>
+            <div class="invalid-feedback">Debes seleccionar una categoría</div>
           </div>
 
           <!-- Toggle "¿TIENE FECHA DE CADUCIDAD?" -->
@@ -710,7 +748,7 @@
                     data-item data-id="${data.id}" data-value="${data.value}"
                     ${data.active ? 'aria-selected="true"' : ''}
                     ${data.disabled ? 'aria-disabled="true"' : ''}>
-                    -SELECCIONA UNA CATEGORÍA-
+                    -SELECCIONA UNA CATEGORÍA *-
                   </div>
                 `);
               }
@@ -738,7 +776,7 @@
                     style="display:none;"
                     ${data.disabled ? 'data-choice-disabled aria-disabled="true"' : 'data-choice-selectable'}
                     data-id="${data.id}" data-value="${data.value}">
-                    -SELECCIONA UNA CATEGORÍA-
+                    -SELECCIONA UNA CATEGORÍA *-
                   </div>
                 `);
               }
@@ -797,20 +835,46 @@
    * ===========================================================
    */
   function validateForm(e) {
+    e.preventDefault(); // Detener envío para validación
+    
     // Asegurarse de que el código de barras esté presente
     const barcode = validateBarcodeInput();
     
     if (!barcode || !barcode.startsWith("1901")) {
-      e.preventDefault(); // Detener el envío
       showCenteredNotification("Error: No se pudo generar un código de barras válido");
       return false;
     }
     
-    // Verificar que el nombre no esté vacío
-    const nombreInput = document.getElementById("nombre");
-    if (!nombreInput || !nombreInput.value || nombreInput.value.trim() === "") {
-      e.preventDefault();
-      showCenteredNotification("Error: El nombre del producto es obligatorio");
+    // Validar campos obligatorios
+    let isValid = true;
+    const requiredFields = [
+      { id: "nombre", message: "El nombre del producto es obligatorio" },
+      { id: "stock", message: "El stock inicial es obligatorio" },
+      { id: "costo", message: "El costo es obligatorio" },
+      { id: "precio_venta", message: "El precio de venta es obligatorio" },
+      { id: "categoria_existente", message: "Debes seleccionar una categoría" }
+    ];
+    
+    requiredFields.forEach(field => {
+      const element = document.getElementById(field.id);
+      const feedbackElement = element.nextElementSibling;
+      
+      if (!element.value) {
+        element.classList.add("is-invalid");
+        if (feedbackElement && feedbackElement.classList.contains("invalid-feedback")) {
+          feedbackElement.style.display = "block";
+        }
+        isValid = false;
+      } else {
+        element.classList.remove("is-invalid");
+        if (feedbackElement && feedbackElement.classList.contains("invalid-feedback")) {
+          feedbackElement.style.display = "none";
+        }
+      }
+    });
+    
+    if (!isValid) {
+      showCenteredNotification("Por favor, completa todos los campos obligatorios");
       return false;
     }
     
@@ -820,6 +884,8 @@
       loadingOverlay.style.display = "flex";
     }
     
+    // Enviar el formulario
+    document.getElementById("productForm").submit();
     return true;
   }
 
@@ -864,12 +930,12 @@
   }
 
   /* ===========================================================
-   * 3) Formatear Costo en tiempo real (optimizado)
+   * 3) Formatear Costo en tiempo real (MODIFICADO para limitar a 2 decimales)
    * ===========================================================
    */
   // Cache expresiones regulares
   const numericRegex = /[^\d.]/g;
-  const moneyPattern = /^(\d*)(\.?)(\d{0,3})/;
+  const moneyPattern = /^(\d*)(\.?)(\d{0,2})/;  // MODIFICADO: Ahora solo acepta 2 decimales
   
   function formatCostRealtime(input) {
     let value = input.value;
@@ -910,7 +976,7 @@
     if (!floatingLabel) return;
     
     if (input.value.trim() !== "") {
-      floatingLabel.textContent = input.placeholder;
+      floatingLabel.textContent = input.placeholder.replace(" *", "");
       floatingLabel.style.display = "block";
     } else {
       floatingLabel.style.display = "none";
@@ -1183,6 +1249,7 @@
     });
   }
 
+  // MODIFICADO: Cambiado para usar ícono de ojo como en productos.html
   const ventaContainer = document.getElementById("ventaContainer");
   const ventaIcon = document.getElementById("ventaIcon");
   const estaAVentaInput = document.getElementById("esta_a_la_venta");
@@ -1191,10 +1258,14 @@
     ventaContainer.addEventListener("click", () => {
       if (estaAVentaInput.value === "1") {
         estaAVentaInput.value = "0";
-        ventaIcon.src = "{{ url_for('static', filename='img/2.png') }}";
+        ventaIcon.classList.remove("visible");
+        ventaIcon.classList.add("hidden");
+        ventaIcon.innerHTML = '<i class="fas fa-eye-slash"></i>';
       } else {
         estaAVentaInput.value = "1";
-        ventaIcon.src = "{{ url_for('static', filename='img/1.png') }}";
+        ventaIcon.classList.remove("hidden");
+        ventaIcon.classList.add("visible");
+        ventaIcon.innerHTML = '<i class="fas fa-eye"></i>';
       }
     });
   }

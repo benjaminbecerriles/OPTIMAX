@@ -1,417 +1,337 @@
-// Service worker para cachear recursos y mejorar rendimiento
-const CACHE_NAME = 'optimax-product-cache-v2';
-const API_CACHE_NAME = 'optimax-api-cache-v2';
+// -------------------------------------------------
+// SOLUCIÓN MEJORADA PARA EL CUADRO "¿ESTE ES TU PRODUCTO?"
+// -------------------------------------------------
 
-// Lista de recursos a cachear durante la instalación
-const urlsToCache = [
-  '/static/js/barcode-scanner.js',
-  '/static/js/mi_scanner_quagga.js',
-  '/static/js/quagga.min.js',
-  '/static/img/1.png',
-  '/static/img/2.png',
-  '/static/img/3.png',
-  '/static/img/4.png',
-  '/static/img/optimaxlogo.png',
-  '/static/img/default_product.jpg',
-  '/static/img/default_snack.jpg',
-  '/static/img/default_drink.jpg',
-  '/static/img/default_fruit.jpg',
-  '/static/css/choices.min.css',
-  '/static/js/choices.min.js'
-];
+// Variable global para controlar el temporizador del cuadro rosa
+let scanFoundTimeout = null;
+let closeListenerActive = false;
+let blockScanFoundHiding = false; // Previene el cierre accidental
 
-// Lista de patrones de API para cachear agresivamente
-const API_CACHE_PATTERNS = [
-  '/api/autocomplete',
-  '/api/find_by_code'
-];
-
-// Tiempo de caché para APIs (5 minutos)
-const API_CACHE_DURATION = 5 * 60 * 1000;
-
-// Instalar service worker y cachear recursos iniciales
-self.addEventListener('install', event => {
-  console.log('[Service Worker] Instalando');
+// 1. FUNCIÓN PRINCIPAL PARA MANEJAR CÓDIGO ESCANEADO
+function onScannedBarcode(code) {
+  console.log("onScannedBarcode llamado con:", code);
   
-  // Esperar hasta que se completen todas las promesas
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('[Service Worker] Cache abierto');
-        // Añadir todos los URLs a la caché
-        return cache.addAll(urlsToCache)
-          .then(() => {
-            console.log('[Service Worker] Recursos pre-cacheados');
-          })
-          .catch(error => {
-            console.error('[Service Worker] Error en pre-cache:', error);
-          });
-      })
-  );
+  // Limpiar cualquier temporizador previo
+  if (scanFoundTimeout) {
+    clearTimeout(scanFoundTimeout);
+    scanFoundTimeout = null;
+  }
   
-  // Activar inmediatamente sin esperar a que otras pestañas cierren
-  self.skipWaiting();
-});
-
-// Cuando el service worker se activa (después de instalarse)
-self.addEventListener('activate', event => {
-  console.log('[Service Worker] Activando');
+  // Activar bloqueo para prevenir cierre accidental
+  blockScanFoundHiding = true;
+  setTimeout(() => { blockScanFoundHiding = false; }, 1000);
   
-  // Limpiar cachés antiguos
-  event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME && cacheName !== API_CACHE_NAME) {
-            console.log('[Service Worker] Eliminando caché antigua:', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
-  );
+  // Obtener referencias a elementos del DOM
+  const scanFoundContainer = document.getElementById("scanFoundContainer");
+  const scanFoundRow = document.getElementById("scanFoundRow");
   
-  // Controlar todas las páginas inmediatamente
-  return self.clients.claim();
-});
-
-// Verificar si una URL corresponde a una API que queremos cachear agresivamente
-function isApiCacheable(url) {
-  const urlObj = new URL(url);
-  return API_CACHE_PATTERNS.some(pattern => urlObj.pathname.includes(pattern));
-}
-
-// Optimizado: Buscar en caché con prioridad para APIs
-async function findInCache(request) {
-  // Verificar si es una API cacheable
-  if (isApiCacheable(request.url)) {
-    try {
-      const apiCache = await caches.open(API_CACHE_NAME);
-      const cachedResponse = await apiCache.match(request);
-      
-      if (cachedResponse) {
-        // Verificar tiempo de caché
-        const cachedTime = cachedResponse.headers.get('sw-cache-time');
-        if (cachedTime && Date.now() - parseInt(cachedTime) < API_CACHE_DURATION) {
-          console.log('[Service Worker] Sirviendo API desde caché:', request.url);
-          return cachedResponse;
-        }
+  if (!scanFoundContainer || !scanFoundRow) {
+    console.error("Elementos del cuadro rosa no encontrados");
+    return;
+  }
+  
+  // Verificar si el código ya existe en nuestro inventario
+  verificarCodigoBarras(code).then(exists => {
+    if (exists) {
+      // Si ya existe, mostrar mensaje de advertencia
+      if (typeof showBarcodeWarningModal === 'function') {
+        showBarcodeWarningModal(code);
+      } else {
+        console.warn("Función showBarcodeWarningModal no encontrada");
       }
-    } catch (error) {
-      console.error('[Service Worker] Error al buscar en caché API:', error);
+      if (typeof codigoBarrasValido !== 'undefined') {
+        codigoBarrasValido = false;
+      }
+      return;
     }
-  }
-  
-  // Buscar en cache principal
-  try {
-    const cache = await caches.open(CACHE_NAME);
-    const cachedResponse = await cache.match(request);
-    if (cachedResponse) {
-      return cachedResponse;
-    }
-  } catch (error) {
-    console.error('[Service Worker] Error al buscar en caché principal:', error);
-  }
-  
-  return null;
-}
-
-// Estrategia de cacheo optimizada para APIs
-self.addEventListener('fetch', event => {
-  // Ignorar peticiones POST o que no sean HTTP/HTTPS
-  if (event.request.method !== 'GET' || 
-      !event.request.url.startsWith('http')) {
-    return;
-  }
-  
-  const url = new URL(event.request.url);
-  
-  // Estrategia especial para APIs de autocompletado - Cache primero, luego red
-  if (isApiCacheable(event.request.url)) {
-    event.respondWith(
-      findInCache(event.request)
-        .then(cachedResponse => {
-          if (cachedResponse) {
-            // Actualizar en segundo plano si es API
-            fetch(event.request)
-              .then(networkResponse => {
-                if (networkResponse.ok) {
-                  const clonedResponse = networkResponse.clone();
-                  // Agregar tiempo de caché a los headers
-                  const headers = new Headers(clonedResponse.headers);
-                  headers.append('sw-cache-time', Date.now().toString());
-                  
-                  // Crear una nueva respuesta con los headers modificados
-                  return clonedResponse.blob().then(blob => {
-                    const newResponse = new Response(blob, {
-                      status: clonedResponse.status,
-                      statusText: clonedResponse.statusText,
-                      headers: headers
-                    });
-                    
-                    // Guardar en caché de API
-                    caches.open(API_CACHE_NAME).then(cache => {
-                      cache.put(event.request, newResponse);
-                    });
-                  });
-                }
-              })
-              .catch(error => {
-                console.error('[Service Worker] Error al actualizar caché API:', error);
-              });
-              
-            return cachedResponse;
-          }
-          
-          // Si no está en caché, intentar red
-          return fetch(event.request)
-            .then(networkResponse => {
-              if (!networkResponse || !networkResponse.ok) {
-                throw new Error('Network error');
-              }
-              
-              const clonedResponse = networkResponse.clone();
-              
-              // Agregar tiempo de caché a los headers
-              const headers = new Headers(clonedResponse.headers);
-              headers.append('sw-cache-time', Date.now().toString());
-              
-              // Crear una nueva respuesta con los headers modificados
-              return clonedResponse.blob().then(blob => {
-                const newResponse = new Response(blob, {
-                  status: clonedResponse.status,
-                  statusText: clonedResponse.statusText,
-                  headers: headers
-                });
-                
-                // Guardar en caché de API
-                caches.open(API_CACHE_NAME).then(cache => {
-                  cache.put(event.request, newResponse);
-                });
-                
-                return networkResponse;
-              });
-            })
-            .catch(error => {
-              console.error('[Service Worker] Error con la red para API:', error);
-              return new Response(JSON.stringify({
-                results: [],
-                error: 'Error de conexión'
-              }), {
-                headers: {'Content-Type': 'application/json'}
-              });
-            });
-        })
-    );
-    return;
-  }
-  
-  // Para otros recursos: Estrategia de Red con fallback a Cache
-  event.respondWith(
-    fetch(event.request)
-      .then(response => {
-        // Solo cachear respuestas válidas (status 200 OK)
-        if (!response || response.status !== 200) {
-          return response;
+    
+    // Hacer la petición API directamente sin mostrar carga
+    fetch(`/api/find_by_code?codigo=${encodeURIComponent(code)}&t=${Date.now()}`)
+      .then(res => res.json())
+      .then(data => {
+        if (!data.found) {
+          console.log("Código no encontrado en la API");
+          // Mostrar mensaje de no encontrado
+          scanFoundContainer.style.display = "block";
+          scanFoundRow.innerHTML = `
+            <div class="scanFoundInner">
+              <div class="scanFoundText">
+                <div class="scanFoundTitle">NO SE ENCONTRÓ INFORMACIÓN</div>
+                <div class="scanFoundName">Código: ${code}</div>
+                <div class="scanFoundCode">Continúa llenando el formulario manualmente</div>
+              </div>
+            </div>
+          `;
+          scanFoundContainer.classList.add("animate-pulse");
+          setupScanFoundTimeout(15000);
+          return;
         }
-
-        // Clonar la respuesta para poder guardarla en cache
-        // mientras retornamos la original
-        const responseToCache = response.clone();
         
-        // Guardar en cache para uso futuro
-        caches.open(CACHE_NAME)
-          .then(cache => {
-            // Solo cachear recursos locales o CDNs específicos
-            if (event.request.url.includes('/static/') || 
-                event.request.url.includes('cdn.jsdelivr.net')) {
-              cache.put(event.request, responseToCache);
-              console.log('[Service Worker] Recurso cacheado:', event.request.url);
-            }
-          })
-          .catch(error => {
-            console.error('[Service Worker] Error al cachear:', error);
-          });
-
-        return response;
+        console.log("Datos encontrados:", data);
+        // Mostrar la información encontrada inmediatamente
+        showScanFound(data);
+        
+        // Configurar temporizador para mantener visible
+        setupScanFoundTimeout(15000);
       })
-      .catch(error => {
-        // Si la red falla, intentar servir desde cache
-        console.log('[Service Worker] Fallback a cache para:', event.request.url);
-        return findInCache(event.request)
-          .then(cachedResponse => {
-            // Retornar el recurso cacheado o undefined si no existe
-            if (cachedResponse) {
-              console.log('[Service Worker] Sirviendo desde cache:', event.request.url);
-              return cachedResponse;
-            }
-            
-            // Si no hay cache, mostrar error genérico para imágenes
-            if (event.request.url.match(/\.(jpg|jpeg|png|gif|webp)$/)) {
-              return caches.match('/static/img/default_product.jpg');
-            }
-            
-            console.log('[Service Worker] No hay respuesta en cache para:', event.request.url);
-            return new Response('Recurso no disponible sin conexión', {
-              status: 503,
-              statusText: 'Service Unavailable',
-              headers: new Headers({
-                'Content-Type': 'text/plain'
-              })
-            });
-          });
-      })
-  );
-});
-
-// Optimización para API Autocomplete: Precarga basada en patrones comunes
-const commonPrefixes = ['7', '75', '750', '8', '80', '9', '90'];
-
-// Precarga de patrones comunes para autocompletado cuando el navegador está inactivo
-self.addEventListener('idle', event => {
-  // Solo si hay conectividad
-  if (navigator.onLine) {
-    // Precargar búsquedas comunes
-    Promise.all(
-      commonPrefixes.map(prefix => 
-        fetch(`/api/autocomplete?q=${prefix}&t=${Date.now()}`)
-          .then(response => {
-            if (response.ok) {
-              const clonedResponse = response.clone();
-              
-              // Guardar en caché con tiempo de expiración
-              const headers = new Headers(clonedResponse.headers);
-              headers.append('sw-cache-time', Date.now().toString());
-              
-              return clonedResponse.blob().then(blob => {
-                const newResponse = new Response(blob, {
-                  status: clonedResponse.status,
-                  statusText: clonedResponse.statusText,
-                  headers: headers
-                });
-                
-                return caches.open(API_CACHE_NAME).then(cache => {
-                  return cache.put(`/api/autocomplete?q=${prefix}`, newResponse);
-                });
-              });
-            }
-          })
-          .catch(error => {
-            console.log(`[Service Worker] Error precargando ${prefix}:`, error);
-          })
-      )
-    ).then(() => {
-      console.log('[Service Worker] Precarga de prefijos comunes completada');
-    });
+      .catch(err => {
+        console.error("Error en find-by-code:", err);
+        hideScanFoundContainer();
+      });
+  });
+  
+  // Configurar un solo event listener para documentos si no existe
+  if (!closeListenerActive) {
+    setupCloseListener();
   }
-});
+}
 
-// Caché de respuestas de API (implementación mejorada)
-const apiMemoryCache = new Map();
-
-// Mensaje desde la página principal
-self.addEventListener('message', event => {
-  // Permitir a la página principal cachear respuestas de API
-  if (event.data && event.data.type === 'CACHE_API_RESPONSE') {
-    const { endpoint, data, expiry } = event.data;
-    if (endpoint && data) {
-      const expiryTime = expiry || Date.now() + (60 * 60 * 1000); // 1 hora por defecto
-      
-      // Guardar en memoria
-      apiMemoryCache.set(endpoint, {
-        data,
-        expiry: expiryTime
-      });
-      
-      // Guardar en cache storage
-      const response = new Response(JSON.stringify(data), {
-        headers: {
-          'Content-Type': 'application/json',
-          'sw-cache-time': Date.now().toString()
+// 2. FUNCIÓN PARA MOSTRAR LA INFORMACIÓN ENCONTRADA
+function showScanFound(info) {
+  const scanFoundContainer = document.getElementById("scanFoundContainer");
+  const scanFoundRow = document.getElementById("scanFoundRow");
+  const btnScanYes = document.getElementById("btnScanYes");
+  const btnScanNo = document.getElementById("btnScanNo");
+  
+  if (!scanFoundContainer || !scanFoundRow) return;
+  
+  scanFoundContainer.classList.remove("animate-pulse");
+  scanFoundRow.innerHTML = `
+    <div class="scanFoundInner">
+      <div class="scanFoundImageBox">
+        <img src="${info.url_imagen || ''}" alt="Producto Escaneado"
+             onerror="this.src='${window.location.origin}/static/img/default_product.jpg';" />
+      </div>
+      <div class="scanFoundText">
+        <div class="scanFoundTitle">¿ESTE ES TU PRODUCTO?</div>
+        <div class="scanFoundName">${info.nombre || 'Producto sin nombre'}</div>
+        <div class="scanFoundCode">Código: ${info.codigo_barras || ''}</div>
+      </div>
+    </div>
+  `;
+  
+  scanFoundContainer.style.display = "block";
+  
+  // Limpiar listeners anteriores para evitar duplicaciones
+  const newBtnYes = btnScanYes.cloneNode(true);
+  btnScanYes.parentNode.replaceChild(newBtnYes, btnScanYes);
+  
+  const newBtnNo = btnScanNo.cloneNode(true);
+  btnScanNo.parentNode.replaceChild(newBtnNo, btnScanNo);
+  
+  // Guardar atributos para usarlos después
+  newBtnYes.setAttribute("data-nombre", info.nombre || '');
+  newBtnYes.setAttribute("data-marca", info.marca || '');
+  newBtnYes.setAttribute("data-imagen", info.url_imagen || '');
+  newBtnYes.setAttribute("data-categoria", info.categoria || '');
+  
+  // Configurar nuevos event listeners
+  newBtnYes.addEventListener("click", function() {
+    // Usar atributos guardados
+    const nombre = this.getAttribute("data-nombre");
+    const marca = this.getAttribute("data-marca");
+    const imagenURL = this.getAttribute("data-imagen");
+    const cat = this.getAttribute("data-categoria");
+    
+    // Actualizar campos del formulario
+    const nombreInput = document.getElementById("nombre");
+    const marcaInput = document.getElementById("marca");
+    
+    if (nombreInput) {
+      nombreInput.value = nombre;
+      if (typeof updateFloatingLabel === 'function') {
+        updateFloatingLabel(nombreInput);
+      }
+    }
+    
+    if (marcaInput) {
+      marcaInput.value = marca;
+      if (typeof updateFloatingLabel === 'function') {
+        updateFloatingLabel(marcaInput);
+      }
+    }
+    
+    // Actualizar imagen
+    if (imagenURL) {
+      const fotoPlaceholder = document.getElementById("fotoPlaceholder");
+      if (fotoPlaceholder) {
+        fotoPlaceholder.innerHTML = `
+          <img src="${imagenURL}" alt="Imagen del Producto">
+          <button type="button" class="remove-image" id="removeImageBtn">&times;</button>
+        `;
+        fotoPlaceholder.classList.add("has-image");
+        
+        // Actualizar campos ocultos
+        const iaFotoFilename = document.getElementById("ia_foto_filename");
+        if (iaFotoFilename) {
+          iaFotoFilename.value = imagenURL.split("/").pop();
         }
-      });
-      
-      caches.open(API_CACHE_NAME)
-        .then(cache => cache.put(endpoint, response))
-        .catch(error => console.error('[Service Worker] Error guardando en caché:', error));
-      
-      console.log('[Service Worker] Respuesta API cacheada:', endpoint);
+        
+        const displayedImageUrl = document.getElementById("displayed_image_url");
+        if (displayedImageUrl) {
+          displayedImageUrl.value = imagenURL;
+        }
+        
+        // Reconectar listener para eliminar imagen
+        setTimeout(function() {
+          if (typeof attachRemoveImageListener === 'function') {
+            attachRemoveImageListener();
+          }
+          if (typeof bindPhotoEvents === 'function') {
+            bindPhotoEvents();
+          }
+        }, 100);
+      }
+    }
+    
+    // Actualizar categoría
+    if (cat) {
+      try {
+        const removeAccents = function(str) {
+          return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        };
+        
+        const catDB = removeAccents(cat.toLowerCase().trim());
+        const catSelect = document.getElementById("categoria_existente");
+        
+        if (catSelect && window.categoryChoices) {
+          for (let i = 0; i < catSelect.options.length; i++) {
+            const rawOption = catSelect.options[i].value;
+            const catOption = removeAccents(rawOption.toLowerCase().trim());
+            
+            if (catOption === catDB) {
+              window.categoryChoices.setChoiceByValue(rawOption);
+              break;
+            }
+          }
+        }
+      } catch (e) {
+        console.warn("Error al actualizar categoría:", e);
+      }
+    }
+    
+    // Ocultar cuadro rosa
+    hideScanFoundContainer();
+  });
+  
+  newBtnNo.addEventListener("click", hideScanFoundContainer);
+}
+
+// 3. FUNCIÓN PARA OCULTAR EL CUADRO ROSA
+function hideScanFoundContainer() {
+  // Si está bloqueado, no ocultar
+  if (blockScanFoundHiding) return;
+  
+  // Limpiar cualquier temporizador existente
+  if (scanFoundTimeout) {
+    clearTimeout(scanFoundTimeout);
+    scanFoundTimeout = null;
+  }
+  
+  const scanFoundContainer = document.getElementById("scanFoundContainer");
+  const scanFoundRow = document.getElementById("scanFoundRow");
+  
+  if (scanFoundContainer) {
+    scanFoundContainer.style.display = "none";
+    scanFoundContainer.classList.remove("animate-pulse");
+    
+    if (scanFoundRow) {
+      scanFoundRow.innerHTML = "";
     }
   }
-  
-  // Limpiar cache cuando se solicita
-  if (event.data && event.data.type === 'CLEAR_CACHE') {
-    // Limpiar caché en memoria
-    apiMemoryCache.clear();
-    
-    // Limpiar caché de almacenamiento
-    Promise.all([
-      caches.delete(CACHE_NAME),
-      caches.delete(API_CACHE_NAME)
-    ])
-      .then(() => {
-        console.log('[Service Worker] Cache borrado exitosamente');
-        // Notificar a la página que el cache fue borrado
-        if (event.source) {
-          event.source.postMessage({
-            type: 'CACHE_CLEARED',
-            success: true
-          });
-        }
-      })
-      .catch(error => {
-        console.error('[Service Worker] Error al borrar cache:', error);
-        if (event.source) {
-          event.source.postMessage({
-            type: 'CACHE_CLEARED',
-            success: false,
-            error: error.message
-          });
-        }
-      });
+}
+
+// 4. CONFIGURAR TEMPORIZADOR PARA MANTENER EL CUADRO VISIBLE
+function setupScanFoundTimeout(duration) {
+  // Limpiar temporizador anterior si existe
+  if (scanFoundTimeout) {
+    clearTimeout(scanFoundTimeout);
   }
   
-  // Prefetch de recursos - optimización para autocompletado
-  if (event.data && event.data.type === 'PREFETCH_AUTOCOMPLETE') {
-    const prefixes = event.data.prefixes || commonPrefixes;
+  // Establecer nuevo temporizador
+  scanFoundTimeout = setTimeout(() => {
+    hideScanFoundContainer();
+  }, duration);
+  
+  console.log(`Temporizador configurado para ${duration/1000} segundos`);
+}
+
+// 5. CONFIGURAR LISTENER PARA CERRAR CUADRO AL HACER CLIC FUERA
+function setupCloseListener() {
+  // Marcar como activo
+  closeListenerActive = true;
+  
+  document.addEventListener("click", function(e) {
+    // No cerrar si el clic fue en el cuadro o sus elementos
+    if (e.target.closest("#scanFoundContainer") || 
+        e.target.closest("#scanFoundRow") || 
+        e.target.closest("#codigo_barras_externo") || 
+        e.target.closest("#scanIcon") || 
+        e.target.closest("#cameraIcon") || 
+        blockScanFoundHiding) {
+      return;
+    }
     
-    // Hacer prefetch en segundo plano
-    Promise.all(
-      prefixes.map(prefix => 
-        fetch(`/api/autocomplete?q=${prefix}&t=${Date.now()}`)
-          .then(response => {
-            if (response.ok) {
-              const clonedResponse = response.clone();
-              
-              // Guardar en caché con tiempo de expiración
-              const headers = new Headers(clonedResponse.headers);
-              headers.append('sw-cache-time', Date.now().toString());
-              
-              return clonedResponse.blob().then(blob => {
-                const newResponse = new Response(blob, {
-                  status: clonedResponse.status,
-                  statusText: clonedResponse.statusText,
-                  headers: headers
-                });
-                
-                return caches.open(API_CACHE_NAME).then(cache => {
-                  return cache.put(`/api/autocomplete?q=${prefix}`, newResponse);
-                });
-              });
-            }
-          })
-          .catch(error => {
-            console.log(`[Service Worker] Error prefetch ${prefix}:`, error);
-          })
-      )
-    ).then(() => {
-      console.log('[Service Worker] Prefetch solicitado completado');
-      if (event.source) {
-        event.source.postMessage({
-          type: 'PREFETCH_COMPLETED',
-          success: true
-        });
+    // Ocultar el cuadro rosa
+    hideScanFoundContainer();
+  });
+}
+
+// 6. AÑADIR ESTILOS CSS PARA LA ANIMACIÓN DE PULSO
+document.addEventListener("DOMContentLoaded", function() {
+  // Añadir estilos si no existen
+  if (!document.getElementById("scannerPulseStyles")) {
+    const styleEl = document.createElement("style");
+    styleEl.id = "scannerPulseStyles";
+    styleEl.textContent = `
+      @keyframes scan-pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.85; }
+        100% { opacity: 1; }
+      }
+      
+      .animate-pulse {
+        animation: scan-pulse 1.5s ease-in-out infinite;
+        box-shadow: 0 0 15px rgba(212, 138, 212, 0.7);
+      }
+    `;
+    document.head.appendChild(styleEl);
+  }
+  
+  // Configurar un observador para verificar si hay cambios en #scanFoundContainer
+  const observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+      if (mutation.attributeName === 'style' && 
+          mutation.target.id === 'scanFoundContainer' &&
+          mutation.target.style.display === 'block') {
+        console.log("scanFoundContainer ahora visible!");
       }
     });
+  });
+  
+  // Empezar a observar el contenedor de escaneo
+  const scanFoundContainer = document.getElementById("scanFoundContainer");
+  if (scanFoundContainer) {
+    observer.observe(scanFoundContainer, { attributes: true });
   }
 });
+
+// 7. VERIFICAR CÓDIGO DE BARRAS (Si no existe la función)
+if (typeof verificarCodigoBarras !== 'function') {
+  function verificarCodigoBarras(codigo) {
+    if (!codigo || codigo.trim() === "") {
+      return Promise.resolve(false); // No hay código que verificar
+    }
+    
+    return fetch(`/api/check_barcode_exists?codigo=${encodeURIComponent(codigo)}&t=${Date.now()}`)
+      .then(response => response.json())
+      .then(data => data.exists)
+      .catch(error => {
+        console.error("Error verificando código de barras:", error);
+        return false; // En caso de error, asumimos que no existe
+      });
+  }
+}
+
+// Asegurar que la función onScannedBarcode esté disponible globalmente
+window.onScannedBarcode = onScannedBarcode;

@@ -508,7 +508,7 @@
         <!-- Icono Lector Físico -->
         <img src="{{ url_for('static', filename='img/3.png') }}" alt="Escanear con Lector" class="search-icon" id="scanIcon">
         <!-- Icono Cámara QuaggaJS -->
-        <img src="{{ url_for('static', filename='img/4.png') }}" alt="Escanear con Cámara" class="search-icon" id="cameraIcon">
+        <img src="{{ url_for('static', filename='img/4.png') }}" alt="Escanear con Cámara" class="search-icon" id="cameraIcon" onclick="iniciarEscaneoQuagga()">
       </div>
     </div>
   </div>
@@ -610,51 +610,6 @@
 
 <script>
   // ----------------------------------------------------
-  // FUNCIÓN PARA FORMATEAR PRECIOS CON COMAS DE MILES - SIMPLIFICADA
-  // ----------------------------------------------------
-  function formatPrice(price) {
-    // Convertir a número si es string
-    if (typeof price === 'string') {
-      price = price.replace(/,/g, '');
-      price = parseFloat(price);
-    }
-    
-    // Si no es un número válido, retornar un valor por defecto
-    if (isNaN(price)) {
-      return '0.00';
-    }
-    
-    // Formatear con comas y siempre 2 decimales
-    return price.toLocaleString('es-MX', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
-  }
-  
-  // Formatear todos los precios actuales al cargar la página
-  document.addEventListener('DOMContentLoaded', function() {
-    // Formatear todos los precios actuales
-    document.querySelectorAll('.current-price').forEach(function(element) {
-      // Obtener el precio actual (eliminando el "$" del inicio)
-      const priceText = element.textContent.replace('$', '').trim();
-      const price = parseFloat(priceText);
-      
-      if (!isNaN(price)) {
-        // Formatear y mostrar con el símbolo "$"
-        element.textContent = '$' + formatPrice(price);
-      }
-    });
-    
-    // Formatear todos los inputs de precios
-    document.querySelectorAll('.price-input').forEach(function(input) {
-      const price = parseFloat(input.value);
-      if (!isNaN(price)) {
-        input.value = formatPrice(price);
-      }
-    });
-  });
-  
-  // ----------------------------------------------------
   // Funciones para el slider de productos
   // ----------------------------------------------------
   function scrollSlider(categoryId, direction) {
@@ -672,71 +627,25 @@
   }
   
   // ----------------------------------------------------
-  // Formateo de entrada de precios SIMPLIFICADO
+  // Formateo de entrada de precios
   // ----------------------------------------------------
   function formatPriceInput(input) {
-    // 1. Detectar y manejar si está completamente vacío
-    if (input.value === '') {
-      return; // Permitir que esté vacío
+    // Eliminar caracteres no numéricos excepto el punto decimal
+    let value = input.value.replace(/[^\d.]/g, '');
+    
+    // Asegurar que solo haya un punto decimal
+    const parts = value.split('.');
+    if (parts.length > 2) {
+      value = parts[0] + '.' + parts.slice(1).join('');
     }
     
-    // 2. Eliminar cualquier caracter que no sea número, punto o coma
-    const cleanedValue = input.value.replace(/[^\d.,]/g, '');
-    
-    // 3. Si después de limpiar está vacío, dejar el campo vacío
-    if (cleanedValue === '') {
-      input.value = '';
-      return;
+    // Limitar a dos decimales
+    if (parts.length > 1) {
+      value = parts[0] + '.' + parts[1].slice(0, 2);
     }
     
-    // 4. Eliminar todas las comas para trabajar solo con el valor numérico
-    const rawValue = cleanedValue.replace(/,/g, '');
-    
-    // 5. Manejar puntos decimales (asegurar solo uno)
-    const parts = rawValue.split('.');
-    let formattedValue;
-    
-    if (parts.length === 1) {
-      // Sin punto decimal - formatear toda la parte entera
-      const wholeNumber = parseInt(parts[0]);
-      if (!isNaN(wholeNumber)) {
-        formattedValue = wholeNumber.toLocaleString('es-MX');
-      } else {
-        input.value = '';
-        return;
-      }
-    } else {
-      // Con punto decimal
-      const wholeNumber = parseInt(parts[0]);
-      let decimal = parts.slice(1).join(''); // Por si hay múltiples puntos
-      
-      // Limitar decimales a 2
-      decimal = decimal.substr(0, 2);
-      
-      if (!isNaN(wholeNumber)) {
-        // Formatear con comas la parte entera
-        formattedValue = wholeNumber.toLocaleString('es-MX');
-        
-        // Añadir los decimales si existen
-        if (decimal) {
-          formattedValue += '.' + decimal;
-        } else if (input.value.endsWith('.')) {
-          // Si termina con punto, mantenerlo
-          formattedValue += '.';
-        }
-      } else {
-        // Si la parte entera no es un número, manejar solo decimales
-        formattedValue = '0';
-        if (decimal) {
-          formattedValue += '.' + decimal;
-        } else if (input.value.endsWith('.')) {
-          formattedValue += '.';
-        }
-      }
-    }
-    
-    // 6. Actualizar el valor con el formato correcto
-    input.value = formattedValue;
+    // Actualizar el valor del input
+    input.value = value;
   }
   
   // ----------------------------------------------------
@@ -748,13 +657,8 @@
     const input = inputContainer.querySelector('.price-input');
     const currentPriceElement = card.querySelector('.current-price');
     
-    // Obtener el valor sin comas para procesarlo
-    const rawValue = input.value.replace(/,/g, '');
-    
-    // Convertir a número
-    const newPrice = parseFloat(rawValue);
-    
     // Validar que el precio sea mayor que cero
+    const newPrice = parseFloat(input.value);
     if (isNaN(newPrice) || newPrice <= 0) {
       showToast('El precio debe ser mayor que cero', 'error');
       return;
@@ -780,12 +684,8 @@
     })
     .then(data => {
       if (data.success) {
-        // Actualizar la interfaz con el precio formateado con comas
-        const formattedPrice = newPrice.toLocaleString('es-MX', {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2
-        });
-        currentPriceElement.textContent = `$${formattedPrice}`;
+        // Actualizar la interfaz
+        currentPriceElement.textContent = `$${parseFloat(newPrice).toFixed(2)}`;
         input.dataset.originalPrice = newPrice;
         
         // Mostrar notificación de éxito
@@ -833,7 +733,7 @@
   }
   
   // ----------------------------------------------------
-  // FUNCIONES DE BÚSQUEDA Y MANEJO DE CÓDIGOS ESCANEADOS
+  // SOLUCIÓN RADICAL PARA EL ESCÁNER - REDISEÑADA POR COMPLETO
   // ----------------------------------------------------
   document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('searchInput');
@@ -842,7 +742,7 @@
     // ==========================================
     // FUNCIÓN DE BÚSQUEDA PRINCIPAL - SIMPLIFICADA
     // ==========================================
-    window.performSearch = function performSearch(searchTermParam) {
+    function performSearch(searchTermParam) {
       // Permitir proporcionar el término de búsqueda como parámetro o usar el valor del input
       const searchTerm = (searchTermParam !== undefined) 
         ? searchTermParam.toString().toLowerCase().trim() 
@@ -914,7 +814,7 @@
       
       console.log(`>> BÚSQUEDA COMPLETADA: ${resultsCount} productos encontrados`);
       return resultsCount;
-    };
+    }
     
     // Función auxiliar para mensaje vacío
     function showEmptyOrResults(count, term) {
@@ -945,8 +845,10 @@
     }
     
     // ==========================================
-    // HANDLER PRINCIPAL UNIFICADO PARA ESCÁNER
+    // FUNCIONES DE ESCANEO - COMPLETAMENTE NUEVAS
     // ==========================================
+    
+    // HANDLER PRINCIPAL UNIFICADO PARA ESCÁNER
     window.handleScannedCode = function(code) {
       // Alertar del código escaneado
       console.log("🔍 CÓDIGO ESCANEADO:", code);
@@ -954,13 +856,10 @@
       // Actualizar directamente el input
       if (searchInput) {
         searchInput.value = code;
-        
-        // Disparar eventos para que otros controladores lo detecten
-        searchInput.dispatchEvent(new Event('input', { bubbles: true }));
       }
       
       // Ejecutar búsqueda inmediatamente
-      const found = window.performSearch(code);
+      const found = performSearch(code);
       
       // Notificar el resultado
       if (found > 0) {
@@ -974,7 +873,7 @@
       return found;
     };
     
-    // Establecer función para lector físico
+    // Reemplazar COMPLETAMENTE las funciones de escaneo existentes
     window.onScannedBarcode = function(code) {
       return window.handleScannedCode(code);
     };
@@ -982,20 +881,114 @@
     // Registro para eventos de input
     if (searchInput) {
       searchInput.addEventListener('input', function() {
-        window.performSearch();
+        performSearch();
       });
       
       searchInput.addEventListener('keydown', function(e) {
         if (e.key === 'Enter') {
-          window.performSearch();
+          performSearch();
         }
       });
     }
     
-    // Inicializar escáner físico si existe la función
+    // PARCHE INVASIVO PARA BARCODE SCANNER
+    try {
+      // No sobrescribir el initBarcodeScanner original si existe
+      const originalInitBarcodeScanner = window.initBarcodeScanner;
+      
+      if (typeof originalInitBarcodeScanner === 'function') {
+        // Creamos una versión envolvente que aplica nuestro handler
+        window.initBarcodeScanner = function(scanIconSelector, inputSelector, options) {
+          console.log("⚙️ Inicializando escáner mejorado");
+          
+          // Llamar a la implementación original
+          originalInitBarcodeScanner(scanIconSelector, inputSelector, options);
+          
+          // IMPORTANTE: Agregar un listener directo al input
+          const inputElement = document.querySelector(inputSelector);
+          if (inputElement) {
+            // Monitorear cambios en el valor directamente
+            let lastValue = inputElement.value;
+            
+            // Usar MutationObserver para detectar cambios directos en el DOM
+            const inputObserver = new MutationObserver(function(mutations) {
+              mutations.forEach(function(mutation) {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'value') {
+                  const newValue = inputElement.value;
+                  if (newValue !== lastValue) {
+                    console.log("⚠️ Input value changed:", newValue);
+                    lastValue = newValue;
+                    // Ejecutar búsqueda con el nuevo valor
+                    performSearch(newValue);
+                  }
+                }
+              });
+            });
+            
+            inputObserver.observe(inputElement, { attributes: true });
+            
+            // También usar setInterval como última línea de defensa
+            setInterval(function() {
+              const currentValue = inputElement.value;
+              if (currentValue !== lastValue && currentValue.trim() !== '') {
+                console.log("⚠️ Cambio detectado en intervalo:", currentValue);
+                lastValue = currentValue;
+                // Ejecutar búsqueda con el nuevo valor
+                performSearch(currentValue);
+              }
+            }, 300);
+          }
+        };
+      }
+    } catch (e) {
+      console.error("Error al parchear initBarcodeScanner:", e);
+    }
+    
+    // PARCHE PARA QUAGGA.JS
+    try {
+      // Reemplazar completamente iniciarEscaneoQuagga si existe
+      const originalIniciarEscaneoQuagga = window.iniciarEscaneoQuagga;
+      
+      if (typeof originalIniciarEscaneoQuagga === 'function') {
+        window.iniciarEscaneoQuagga = function() {
+          console.log("⚙️ Iniciando Quagga mejorado");
+          
+          // Llamar a la implementación original
+          originalIniciarEscaneoQuagga();
+          
+          // Parchear Quagga.onDetected después de un breve retraso
+          setTimeout(function() {
+            if (window.Quagga) {
+              console.log("⚙️ Quagga detectado, aplicando parche");
+              
+              // Guardar la implementación original
+              const originalOnDetected = window.Quagga.onDetected;
+              
+              // Reemplazar con nuestra versión
+              window.Quagga.onDetected = function(result) {
+                // Primero llamar a la implementación original
+                if (typeof originalOnDetected === 'function') {
+                  originalOnDetected(result);
+                }
+                
+                // Luego manejar el código con nuestra función unificada
+                if (result && result.codeResult && result.codeResult.code) {
+                  console.log("📷 Quagga detectó:", result.codeResult.code);
+                  window.handleScannedCode(result.codeResult.code);
+                }
+              };
+            }
+          }, 500);
+        };
+      }
+    } catch (e) {
+      console.error("Error al parchear iniciarEscaneoQuagga:", e);
+    }
+    
+    // Inicializar manualmente el escáner físico si existe
     if (typeof window.initBarcodeScanner === 'function' && document.getElementById('scanIcon')) {
       window.initBarcodeScanner('#scanIcon', '#searchInput');
-      console.log("⚙️ Escáner físico inicializado");
+      console.log("⚙️ Escáner físico inicializado manualmente");
     }
     
     // TRUCO ADICIONAL: monitor para cambios en searchInput desde cualquier fuente
@@ -1008,225 +1001,10 @@
         if (currentValue !== lastKnownValue && currentValue.trim() !== '') {
           console.log("⚠️ Se detectó cambio en searchInput:", currentValue);
           lastKnownValue = currentValue;
-          window.performSearch(currentValue);
+          performSearch(currentValue);
         }
       }, 100);
     }
-  });
-</script>
-
-<!-- SOLUCIÓN PARA EL ESCÁNER DE CÁMARA EN CAMBIAR-PRECIOS -->
-<script>
-  document.addEventListener("DOMContentLoaded", function() {
-    // 1. Aseguramos que Quagga esté disponible
-    if (typeof Quagga === "undefined") {
-      console.error("Error: Quagga no está disponible. Verifica la carga de la biblioteca.");
-      return;
-    }
-    
-    console.log("✓ Inyectando funcionalidad de escáner QuaggaJS para cambiar-precios");
-    
-    // 2. Configurar el botón de cámara
-    const cameraBtn = document.getElementById("cameraIcon");
-    if (cameraBtn) {
-      // Asignar nuestro handler
-      cameraBtn.onclick = function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        iniciarEscaneoQuaggaCambiarPrecios();
-        return false;
-      };
-      console.log("✓ Botón de cámara configurado correctamente");
-    } else {
-      console.error("⚠️ No se encontró el botón de cámara (#cameraIcon)");
-    }
-
-    // NUEVA IMPLEMENTACIÓN INDEPENDIENTE DEL ESCÁNER QUAGGA
-    window.iniciarEscaneoQuaggaCambiarPrecios = function() {
-      console.log("▶️ Iniciando el escáner de códigos de barras personalizado para cambiar-precios");
-      
-      // Verificar si el modal existe, si no, crearlo
-      let modalEscaneo = document.getElementById("modalEscaneoCambioPrecio");
-      if (!modalEscaneo) {
-        modalEscaneo = document.createElement("div");
-        modalEscaneo.id = "modalEscaneoCambioPrecio";
-        modalEscaneo.style.display = "none";
-        modalEscaneo.style.position = "fixed";
-        modalEscaneo.style.top = "0";
-        modalEscaneo.style.left = "0";
-        modalEscaneo.style.width = "100%";
-        modalEscaneo.style.height = "100%";
-        modalEscaneo.style.backgroundColor = "rgba(0,0,0,0.9)";
-        modalEscaneo.style.zIndex = "9999";
-        
-        // Crear contenido del modal
-        modalEscaneo.innerHTML = `
-          <div style="position:relative; width:100%; height:100%;">
-            <button style="position:absolute; top:20px; right:20px; background-color:#e52e2e; color:white; border:none; border-radius:50%; width:40px; height:40px; font-size:20px; cursor:pointer; z-index:10000" onclick="cerrarEscanerCambioPrecio()">×</button>
-            <h2 style="color:white; text-align:center; margin-top:20px">Escanear código de barras</h2>
-            <div id="videoContainerCambioPrecio" style="width:90%; max-width:640px; margin:0 auto; background:#000;"></div>
-          </div>
-        `;
-        
-        document.body.appendChild(modalEscaneo);
-      }
-      
-      // Mostrar el modal
-      modalEscaneo.style.display = "block";
-      
-      // Obtener el contenedor de video
-      const videoContainer = document.getElementById("videoContainerCambioPrecio");
-      if (!videoContainer) {
-        console.error("Error: No se encuentra el contenedor de video");
-        return;
-      }
-      
-      // Limpiar el contenedor
-      videoContainer.innerHTML = "";
-      
-      // Inicializar Quagga
-      Quagga.init({
-        inputStream: {
-          name: "Live",
-          type: "LiveStream",
-          target: videoContainer,
-          constraints: {
-            width: { min: 640 },
-            height: { min: 480 },
-            facingMode: "environment",
-            aspectRatio: { min: 1, max: 2 }
-          }
-        },
-        locator: {
-          patchSize: "medium",
-          halfSample: true
-        },
-        numOfWorkers: 2,
-        decoder: {
-          readers: [
-            "code_128_reader",
-            "ean_reader",
-            "ean_8_reader",
-            "code_39_reader",
-            "upc_reader",
-            "upc_e_reader"
-          ]
-        }
-      }, function(err) {
-        if (err) {
-          console.error("Error inicializando Quagga:", err);
-          videoContainer.innerHTML = `
-            <div style="color:white; padding:20px; text-align:center">
-              <p>Error accediendo a la cámara: ${err.message || "desconocido"}</p>
-              <p>Por favor, verifica los permisos de cámara y recarga la página.</p>
-            </div>
-          `;
-          return;
-        }
-        
-        console.log("✓ Quagga iniciado correctamente");
-        
-        // MÉTODO AVANZADO: Desconectar todos los handlers anteriores e instalar el nuestro personalizado
-        try {
-          // Solución radical: reemplazar completamente el método onDetected
-          const originalOnDetected = Quagga.onDetected;
-          Quagga.onDetected = function(callback) {
-            // Guardar el callback
-            window._currentQuaggaCallback = callback;
-            // Llamar a la implementación original
-            return originalOnDetected.call(Quagga, callback);
-          };
-          
-          Quagga.offDetected = function() {
-            window._currentQuaggaCallback = null;
-            // Simular desactivación del detector
-            return Quagga;
-          };
-        } catch (e) {
-          console.error("Error al sobreescribir Quagga.onDetected:", e);
-        }
-        
-        // Nuestro handler personalizado para esta página específica
-        Quagga.onDetected(function(result) {
-          if (!result || !result.codeResult) return;
-          
-          const codigo = result.codeResult.code;
-          console.log("🔍 CÓDIGO DETECTADO en cambiar-precios:", codigo);
-          
-          // Detener Quagga y cerrar el modal
-          Quagga.stop();
-          modalEscaneo.style.display = "none";
-          
-          // IMPORTANTE: Obtener el campo de búsqueda
-          const searchInput = document.getElementById("searchInput");
-          if (searchInput) {
-            // Establecer el valor y forzar el evento input
-            searchInput.value = codigo;
-            
-            // Disparar eventos para activar la búsqueda - REDUNDANCIA MÁXIMA
-            // 1. Evento input nativo
-            const inputEvent = new Event('input', { bubbles: true });
-            searchInput.dispatchEvent(inputEvent);
-            
-            // 2. Evento change
-            const changeEvent = new Event('change', { bubbles: true });
-            searchInput.dispatchEvent(changeEvent);
-            
-            // 3. Evento keydown con Enter para simular presionar Enter
-            const enterEvent = new KeyboardEvent('keydown', {
-              key: 'Enter',
-              code: 'Enter',
-              keyCode: 13,
-              which: 13,
-              bubbles: true
-            });
-            searchInput.dispatchEvent(enterEvent);
-            
-            // 4. Llamada directa a la función de búsqueda global
-            if (typeof window.performSearch === 'function') {
-              window.performSearch(codigo);
-            }
-            
-            // 5. Llamada al handler globalizado para escaner
-            if (typeof window.handleScannedCode === 'function') {
-              window.handleScannedCode(codigo);
-            }
-            
-            // 6. Llamada al handler del lector físico para compatibilidad
-            if (typeof window.onScannedBarcode === 'function') {
-              window.onScannedBarcode(codigo);
-            }
-          } else {
-            console.error("Error: No se encontró el campo de búsqueda #searchInput");
-          }
-        });
-        
-        // Iniciar Quagga
-        Quagga.start();
-      });
-    };
-
-    // Función para cerrar el escáner
-    window.cerrarEscanerCambioPrecio = function() {
-      console.log("⏹️ Cerrando escáner");
-      
-      // Detener Quagga
-      if (window.Quagga) {
-        try {
-          Quagga.stop();
-        } catch (e) {
-          console.error("Error al detener Quagga:", e);
-        }
-      }
-      
-      // Ocultar modal
-      const modal = document.getElementById("modalEscaneoCambioPrecio");
-      if (modal) {
-        modal.style.display = "none";
-      }
-    };
-    
-    console.log("🎉 Configuración de escáner para cambiar-precios completada");
   });
 </script>
 {% endblock %}
