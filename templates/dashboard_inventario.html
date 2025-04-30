@@ -55,10 +55,10 @@
   
   .page-description {
     font-size: 17px;
-    color: var(--text-secondary);
+    color: #86868b; /* MODIFICADO: Ahora utiliza el mismo gris claro */
     margin-bottom: 48px;
     max-width: 600px;
-    font-weight: 500; /* Más peso para mejor legibilidad */
+    font-weight: 400; /* MODIFICADO: Mismo peso que en ajuste_stock */
   }
   
   /* Container para contenido */
@@ -451,6 +451,14 @@
   .button-link:hover {
     background-color: var(--accent-hover);
   }
+
+  /* Ver todos abajo de la tabla con alineación derecha */
+  .view-all-container {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    margin-top: 15px;
+  }
 </style>
 {% endblock %}
 
@@ -538,12 +546,7 @@
   <div class="section">
     <div class="section-header">
       <h2>Ver y gestionar productos</h2>
-      <a href="{{ url_for('ver_productos') }}" class="view-all">
-        Ver todos
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-left: 6px; width: 14px; height: 14px;">
-          <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </a>
+      <!-- El botón "Ver todos" se ha movido abajo de la tabla -->
     </div>
     
     {% if productos and productos|length > 0 %}
@@ -605,6 +608,15 @@
             {% endfor %}
           </tbody>
         </table>
+      </div>
+      <!-- Botón "Ver todos" ahora está abajo de la tabla -->
+      <div class="view-all-container">
+        <a href="{{ url_for('ver_productos') }}" class="view-all">
+          Ver todos
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-left: 6px; width: 14px; height: 14px;">
+            <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
       </div>
     {% else %}
       <div class="empty-state">

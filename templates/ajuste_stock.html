@@ -12,7 +12,7 @@
     
     /* Colores esenciales */
     --text-color: #1d1d1f;
-    --text-secondary: #86868b;
+    --text-secondary: #555555; /* Cambiado a color más oscuro para mejor legibilidad */
     --background: #ffffff;
     --light-background: #f5f5f7;
     --separator: rgba(0, 0, 0, 0.1);
@@ -25,7 +25,7 @@
     --orange: #f39c12;
     --red: #e74c3c;
     --blue: #1a237e;
-    --gray-500: #adb5bd;
+    --gray-500: #777777; /* Cambiado a color más oscuro para mejor legibilidad */
   }
 
   body {
@@ -55,9 +55,10 @@
   
   .page-description {
     font-size: 17px;
-    color: var(--text-secondary);
+    color: #86868b; /* Más claro para la descripción de la página */
     margin-bottom: 28px;
     max-width: 600px;
+    font-weight: 400; /* Algo más ligero */
   }
 
   /* Encabezado de página - MODIFICADO PARA ALINEACIÓN PERFECTA */
@@ -268,6 +269,7 @@
     font-size: 0.95rem;
     color: var(--text-secondary);
     margin-bottom: 1.5rem;
+    font-weight: 500; /* Añadido para mejor legibilidad */
   }
   
   /* Estilos para el corazón exactamente como en productos.html */
@@ -390,6 +392,7 @@
     gap: 0.5rem;
     font-size: 0.875rem;
     color: var(--text-secondary);
+    font-weight: 500; /* Añadido para mejor legibilidad */
   }
   
   .product-info-icon {
@@ -510,6 +513,7 @@
     color: var(--text-secondary);
     font-size: 0.875rem;
     margin-top: 0.75rem;
+    font-weight: 500; /* Añadido para mejor legibilidad */
   }
   
   /* No Results Message */
@@ -548,21 +552,21 @@
     font-size: 1rem;
     color: var(--text-secondary);
     margin-bottom: 1.5rem;
+    font-weight: 500; /* Añadido para mejor legibilidad */
   }
   
   #resetFilters {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.25rem;
+    display: inline-block;
+    padding: 0.5rem 0.9rem;
     border-radius: 980px;
     font-weight: 500;
+    font-size: 0.85rem;
     background-color: white;
     color: var(--text-color);
     border: 1px solid rgba(0, 0, 0, 0.1);
     cursor: pointer;
     transition: all 0.2s ease;
+    text-align: center;
   }
   
   #resetFilters:hover {
@@ -669,6 +673,7 @@
       <p class="page-description">Registra entradas y salidas de mercancía.</p>
     </div>
     <div class="header-actions">
+      <!-- Volver a añadir el icono de flecha -->
       <a href="{{ url_for('dashboard_inventario') }}" class="btn-icon btn-outline">
         <i class="fas fa-arrow-left"></i>
         <span>Volver</span>
@@ -710,7 +715,7 @@
       <div class="form-heart-container">
         <input class="form-heart-check-input" type="checkbox" id="favoritosCheck">
         <span class="heart-icon" id="heartIcon">&#9825;</span>
-        <label for="favoritosCheck" style="cursor: pointer; font-size: 0.95rem;">Solo favoritos</label>
+        <label for="favoritosCheck" style="cursor: pointer; font-size: 0.95rem; font-weight: 500;">Solo favoritos</label>
       </div>
     </div>
   </div>
@@ -744,7 +749,6 @@
     <h4>No se encontraron productos</h4>
     <p>Intenta modificar los filtros o la búsqueda</p>
     <button id="resetFilters">
-      <i class="fas fa-sync-alt"></i>
       Restablecer
     </button>
   </div>
@@ -767,12 +771,12 @@
           <h3 class="product-title">{{ producto.nombre }}</h3>
           <div class="product-info">
             <div class="product-info-item">
-              <i class="fas fa-barcode product-info-icon"></i>
-              <span>{{ producto.codigo_barras_externo }}</span>
+              <!-- Se quitó el icono de código de barras -->
+              <span style="font-weight: 500;">{{ producto.codigo_barras_externo }}</span>
             </div>
             <div class="product-info-item">
-              <i class="fas fa-layer-group product-info-icon"></i>
-              <span>
+              <!-- Se quitó el icono de capas -->
+              <span style="font-weight: 500;">
                 <span class="stock-badge">
                   {% if producto.stock <= 0 %}
                     Sin stock
@@ -783,8 +787,8 @@
               </span>
             </div>
             <div class="product-info-item">
-              <i class="fas fa-tag product-info-icon"></i>
-              <span>Precio actual: <span class="formatted-price" data-price="{{ producto.precio_venta }}">
+              <!-- Se quitó el icono de etiqueta -->
+              <span style="font-weight: 500;">Precio actual: <span class="formatted-price" data-price="{{ producto.precio_venta }}">
                 ${{ producto.precio_venta|string|replace('.0', '') }}
               </span></span>
             </div>
