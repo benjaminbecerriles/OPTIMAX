@@ -1,523 +1,397 @@
 {% extends 'base.html' %}
 
 {% block title %}
-  Confirmación de Ajuste - {{ producto.nombre }}
+  Confirmación - {{ producto.nombre }}
 {% endblock %}
 
 {% block content %}
 <style>
-  /* Estilos globales */
-  .container {
-    max-width: 900px;
+  /* Diseño elegante inspirado en Apple */
+  :root {
+    --font-system: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', Helvetica, Arial, sans-serif;
+    --text-color: #1d1d1f;
+    --text-secondary: #86868b;
+    --color-background: #f5f5f7;
+    --color-card: #ffffff;
+    --color-border: rgba(0, 0, 0, 0.1);
+    --color-primary: #e52e2e; /* Rojo para botón guardar */
+    --color-accent: #0066cc; /* Azul Apple para selecciones */
+    --color-success: #34c759; /* Verde Apple */
+    --color-warning: #ff9f0a; /* Naranja Apple */
+    --color-danger: #ff3b30; /* Rojo Apple */
+    --border-radius: 12px;
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
+    --shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    --transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
+  
+  body {
+    font-family: var(--font-system);
+    color: var(--text-color);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: var(--color-background);
+    margin: 0;
+    padding: 0;
+  }
+  
+  .entry-container {
+    max-width: 800px;
     margin: 0 auto;
+    padding: 36px 24px;
   }
   
-  /* Encabezado y navegación */
-  .breadcrumb {
-    margin-bottom: 1.5rem;
-    font-size: 0.9rem;
-  }
-  
-  .breadcrumb-item a {
-    color: #6c757d;
-    text-decoration: none;
-  }
-  
-  .breadcrumb-item a:hover {
-    color: #e52e2e;
-  }
-  
-  .breadcrumb-item.active {
-    color: #212529;
-    font-weight: 600;
-  }
-  
-  .page-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 1.5rem;
-    color: #212529;
-    border-bottom: 2px solid #e52e2e;
-    padding-bottom: 0.75rem;
-    display: inline-block;
-  }
-  
-  /* Contenedor de confirmación */
-  .confirmation-container {
-    background-color: white;
-    border-radius: 0.5rem;
-    border: 1px solid #dee2e6;
-    overflow: hidden;
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  /* Encabezado de página */
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
     margin-bottom: 2rem;
   }
   
-  .confirmation-header {
-    padding: 1.5rem;
-    border-bottom: 1px solid #dee2e6;
-    background-color: #f8f9fa;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
+  .page-title {
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin: 0;
+    color: var(--text-color);
   }
   
-  .header-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
+  .header-actions {
+    display: flex;
+    gap: 1rem;
+    padding-top: 8px;
+  }
+  
+  /* Botones con estilo Apple */
+  .btn-icon {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
+    gap: 0.75rem;
+    padding: 0.75rem 1.25rem;
+    border-radius: 980px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: var(--transition);
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    text-align: center;
   }
   
-  .header-icon.success {
-    background-color: #d4edda;
-    color: #28a745;
+  .btn-icon i, 
+  .btn-icon span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+    line-height: 1;
   }
   
-  .header-content {
-    flex: 1;
+  .btn-outline {
+    background-color: var(--color-card);
+    color: var(--text-color);
+    border: 1px solid var(--color-border);
   }
   
-  .header-title {
-    font-size: 1.25rem;
-    font-weight: 700;
-    margin-bottom: 0.25rem;
-    color: #212529;
+  .btn-outline:hover {
+    background-color: #f2f2f2;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   }
   
-  .header-subtitle {
-    font-size: 0.9rem;
-    color: #6c757d;
+  .btn-primary {
+    background-color: var(--color-primary);
+    color: white;
+  }
+  
+  .btn-primary:hover {
+    background-color: #d12323;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(229, 46, 46, 0.25);
+  }
+  
+  /* Panel de confirmación */
+  .confirmation-panel {
+    background-color: var(--color-card);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  
+  .confirmation-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 20px;
+    background-color: rgba(52, 199, 89, 0.1);
+    border-bottom: 1px solid var(--color-border);
+  }
+  
+  .confirmation-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: var(--color-success);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+  
+  .confirmation-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+    color: var(--color-success);
+  }
+  
+  .confirmation-subtitle {
+    margin: 4px 0 0 0;
+    color: var(--text-secondary);
+    font-size: 14px;
   }
   
   .confirmation-body {
-    padding: 1.5rem;
+    padding: 24px;
   }
   
-  /* Tarjeta de producto */
-  .product-card {
+  /* Producto compacto */
+  .product-compact {
     display: flex;
-    gap: 1.5rem;
-    margin-bottom: 1.5rem;
-    padding: 1.5rem;
-    border-radius: 0.5rem;
-    border: 1px solid #dee2e6;
-    background-color: white;
+    align-items: center;
+    gap: 16px;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 20px;
+    margin-bottom: 20px;
   }
   
-  .product-img-container {
-    width: 80px;
-    height: 80px;
-    border-radius: 0.5rem;
+  .product-image-small {
+    width: 72px;
+    height: 72px;
+    border-radius: 10px;
+    background-color: var(--color-background);
     overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #f8f9fa;
-    flex-shrink: 0;
+    border: 1px solid var(--color-border);
   }
   
-  .product-img {
+  .product-image-small img {
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
   }
   
-  .product-details {
+  .product-details-compact {
     flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
   }
   
-  .product-name-row {
-    margin-bottom: 0.15rem;
-  }
-  
-  .product-title {
-    font-size: 1.1rem;
+  .product-name {
+    font-size: 18px;
     font-weight: 600;
-    margin: 0;
-    color: #212529;
+    margin: 0 0 4px 0;
+    color: var(--text-color);
   }
   
-  .product-info-row {
+  .product-meta {
     display: flex;
-    justify-content: flex-start;
-    margin-bottom: 0.15rem;
-    gap: 1rem;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-size: 14px;
+    color: var(--text-secondary);
   }
   
-  .product-info-cell {
-    font-size: 0.875rem;
-    color: #495057;
+  .stock-change {
+    margin-top: 8px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
   }
   
-  .product-info-cell:first-child {
-    min-width: 120px;
-    flex: 0 0 auto;
+  .stock-change-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
   }
   
-  .product-info-cell:last-child {
-    flex: 1;
+  .stock-label {
+    color: var(--text-secondary);
   }
   
-  .info-icon {
-    color: #6c757d;
-    width: 16px;
-    text-align: center;
+  .stock-value {
+    font-weight: 500;
+    color: var(--text-color);
   }
   
-  /* Estilos para la palomita de éxito */
-  .success-checkmark {
-    color: #1e7e34;
-    font-size: 1.8rem;
+  .arrow-icon {
+    color: var(--text-secondary);
+    font-size: 12px;
   }
   
-  /* Tabla de detalles */
+  /* Tabla de detalles de la operación */
   .details-table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 1.5rem;
-  }
-  
-  .details-table th {
-    padding: 0.75rem 1rem;
-    background-color: #f8f9fa;
-    border-bottom: 1px solid #dee2e6;
-    text-align: left;
-    font-weight: 600;
-    font-size: 0.875rem;
-    color: #495057;
+    margin-bottom: 20px;
   }
   
   .details-table td {
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid #dee2e6;
-    font-size: 0.875rem;
-    color: #212529;
+    font-size: 15px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--color-border);
   }
   
-  .details-table tbody tr:hover {
-    background-color: #f8f9fa;
+  .details-table tr:last-child td {
+    border-bottom: none;
   }
   
   .details-table .value-col {
+    text-align: right;
+    font-weight: 500;
+  }
+  
+  /* Badges */
+  .badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 13px;
     font-weight: 600;
   }
   
-  /* Resumen */
-  .summary-container {
-    background-color: #f8f9fa;
-    border-radius: 0.5rem;
-    padding: 1.25rem;
-    margin-bottom: 1.5rem;
-    border: 1px solid #dee2e6;
+  .badge-success {
+    background-color: rgba(52, 199, 89, 0.12);
+    color: var(--color-success);
   }
   
-  .summary-title {
-    font-size: 1rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-    color: #212529;
+  .badge-warning {
+    background-color: rgba(255, 159, 10, 0.12);
+    color: var(--color-warning);
   }
   
-  .summary-item {
+  .badge-danger {
+    background-color: rgba(255, 59, 48, 0.12);
+    color: var(--color-danger);
+  }
+  
+  /* Resumen financiero */
+  .financial-summary {
+    background-color: #f5f5f7;
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 16px;
+  }
+  
+  .summary-row {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 0.5rem;
+    margin-bottom: 8px;
+  }
+  
+  .summary-row:last-child {
+    margin-bottom: 0;
   }
   
   .summary-label {
-    color: #6c757d;
+    color: var(--text-secondary);
   }
   
   .summary-value {
     font-weight: 600;
-    color: #212529;
   }
   
   .summary-total {
-    margin-top: 1rem;
-    padding-top: 0.75rem;
-    border-top: 1px solid #dee2e6;
-    font-weight: 700;
-    font-size: 1.1rem;
-  }
-  
-  /* Botones */
-  .actions-container {
-    display: flex;
-    justify-content: flex-end;
-    gap: 1rem;
-    margin-top: 1.5rem;
-  }
-  
-  .btn {
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.375rem;
+    padding-top: 8px;
+    border-top: 1px solid var(--color-border);
     font-weight: 600;
-    cursor: pointer;
-    transition: all 0.15s ease-in-out;
-    text-decoration: none;
-    display: inline-flex;
+  }
+  
+  /* Mensaje de éxito */
+  .success-message {
+    margin-top: 16px;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 14px;
+    display: flex;
     align-items: center;
-    gap: 0.5rem;
+    justify-content: center;
+    gap: 6px;
   }
   
-  .btn-primary {
-    background-color: #e52e2e;
-    color: white;
-    border: none;
-  }
-  
-  .btn-primary:hover {
-    background-color: #c51818;
-  }
-  
-  .btn-outline {
-    background-color: white;
-    border: 1px solid #dee2e6;
-    color: #495057;
-  }
-  
-  .btn-outline:hover {
-    background-color: #f8f9fa;
-  }
-  
-  .btn-success {
-    background-color: #28a745;
-    color: white;
-    border: none;
-  }
-  
-  .btn-success:hover {
-    background-color: #218838;
-  }
-  
-  /* Alertas */
-  .alert {
-    padding: 1rem;
-    margin-bottom: 1rem;
-    border: 1px solid transparent;
-    border-radius: 0.375rem;
-  }
-  
-  .alert-info {
-    color: #0c5460;
-    background-color: #d1ecf1;
-    border-color: #bee5eb;
-  }
-  
-  .alert-success {
-    color: #155724;
-    background-color: #d4edda;
-    border-color: #c3e6cb;
-  }
-  
-  .alert-warning {
-    color: #856404;
-    background-color: #fff3cd;
-    border-color: #ffeeba;
-  }
-  
-  /* Estilo para impresión */
-  .print-header {
-    display: none;
-  }
-  
-  @media print {
-    .breadcrumb, .actions-container, nav, .btn {
-      display: none !important;
+  /* Diseño responsivo */
+  @media (max-width: 768px) {
+    .entry-container {
+      padding: 20px 16px;
     }
     
-    .print-header {
-      display: block;
-      text-align: center;
+    .page-header {
+      flex-direction: column;
+      gap: 16px;
       margin-bottom: 1.5rem;
     }
     
-    .print-header img {
-      height: 60px;
-      margin-bottom: 0.5rem;
-    }
-    
-    .print-header h1 {
-      font-size: 1.25rem;
-      margin-bottom: 0.25rem;
-    }
-    
-    .print-header p {
-      font-size: 0.9rem;
-      color: #6c757d;
-    }
-    
-    .confirmation-container {
-      box-shadow: none;
-      border: none;
-    }
-  }
-  
-  /* Modo oscuro y responsive */
-  @media (prefers-color-scheme: dark) {
-    .confirmation-container,
-    .product-card,
-    .confirmation-body,
-    .btn-outline {
-      background-color: #343a40;
-      border-color: #495057;
+    .header-actions {
+      width: 100%;
+      justify-content: space-between;
+      padding-top: 0;
     }
     
     .confirmation-header {
-      background-color: #212529;
-      border-color: #495057;
-    }
-    
-    .product-title,
-    .header-title,
-    .summary-title,
-    .summary-value {
-      color: #f8f9fa;
-    }
-    
-    .product-img-container {
-      background-color: #212529;
-    }
-    
-    .header-subtitle,
-    .summary-label {
-      color: #adb5bd;
-    }
-    
-    .details-table th {
-      background-color: #212529;
-      border-color: #495057;
-      color: #e9ecef;
-    }
-    
-    .details-table td {
-      border-color: #495057;
-      color: #e9ecef;
-    }
-    
-    .details-table tbody tr:hover {
-      background-color: #495057;
-    }
-    
-    .summary-container {
-      background-color: #212529;
-      border-color: #495057;
-    }
-    
-    .summary-item {
-      border-color: #495057;
-    }
-    
-    .btn-outline {
-      color: #e9ecef;
-    }
-    
-    .btn-outline:hover {
-      background-color: #495057;
-    }
-  }
-  
-  @media (max-width: 768px) {
-    .product-card {
       flex-direction: column;
-      gap: 1rem;
+      text-align: center;
+      padding: 16px;
     }
     
-    .product-img-container {
+    .product-compact {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .product-image-small {
       width: 100%;
-      height: 160px;
+      height: 120px;
     }
     
-    .product-info-row {
+    .stock-change {
       flex-direction: column;
-    }
-    
-    .product-info-cell {
-      text-align: left !important;
-      margin-bottom: 5px;
-    }
-    
-    .details-table thead {
-      display: none;
-    }
-    
-    .details-table tbody {
-      display: block;
-    }
-    
-    .details-table tbody tr {
-      display: block;
-      margin-bottom: 0.75rem;
-      border: 1px solid #dee2e6;
-      border-radius: 0.25rem;
-    }
-    
-    .details-table tbody td {
-      display: block;
-      text-align: right;
-      padding: 0.5rem 0.75rem;
-      position: relative;
-      border-bottom: 1px solid #dee2e6;
-    }
-    
-    .details-table tbody td:last-child {
-      border-bottom: none;
-    }
-    
-    .details-table tbody td::before {
-      content: attr(data-label);
-      position: absolute;
-      left: 0.75rem;
-      font-weight: 600;
-      text-align: left;
-    }
-    
-    .actions-container {
-      flex-direction: column;
-    }
-    
-    .btn {
-      width: 100%;
+      align-items: flex-start;
+      gap: 8px;
     }
   }
 </style>
 
-<div class="container">
-  <!-- Encabezado para impresión -->
-  <div class="print-header">
-    <img src="{{ url_for('static', filename='img/optimaxlogo.png') }}" alt="OptiMax Logo">
-    <h1>Comprobante de Ajuste de Inventario</h1>
-    <p>Fecha: {{ movimiento.fecha_movimiento.strftime('%d/%m/%Y %H:%M') }}</p>
+<div class="entry-container">
+  <!-- Encabezado con título y acciones -->
+  <div class="page-header">
+    <h1 class="page-title">Confirmación</h1>
+    <div class="header-actions">
+      <a href="{{ url_for('ajuste_stock') }}" class="btn-icon btn-outline">
+        <i class="fas fa-arrow-left"></i>
+        <span>Volver</span>
+      </a>
+      <a href="{{ url_for('dashboard_inventario') }}" class="btn-icon btn-primary">
+        <span>Continuar</span>
+      </a>
+    </div>
   </div>
   
-  <!-- Migas de pan (no se muestran en impresión) -->
-  <nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a href="{{ url_for('dashboard_home') }}">Dashboard</a></li>
-      <li class="breadcrumb-item"><a href="{{ url_for('ajuste_stock') }}">Ajuste de Stock</a></li>
-      <li class="breadcrumb-item active">Confirmación</li>
-    </ol>
-  </nav>
-  
-  <h1 class="page-title">Confirmación de Ajuste</h1>
-  
-  <!-- Contenedor principal -->
-  <div class="confirmation-container">
-    <!-- Encabezado de confirmación -->
+  <!-- Panel de confirmación principal -->
+  <div class="confirmation-panel">
     <div class="confirmation-header">
-      <div class="header-icon success">
-        <i class="fas fa-check-circle success-checkmark"></i>
+      <div class="confirmation-icon">
+        <i class="fas fa-check"></i>
       </div>
-      <div class="header-content">
-        <h2 class="header-title">Operación completada con éxito</h2>
-        <p class="header-subtitle">
+      <div>
+        <h2 class="confirmation-title">Operación completada con éxito</h2>
+        <p class="confirmation-subtitle">
           {% if movimiento.tipo_movimiento == 'ENTRADA' %}
             Se ha registrado correctamente la entrada de mercancía.
           {% else %}
@@ -527,61 +401,55 @@
       </div>
     </div>
     
-    <!-- Cuerpo de confirmación -->
     <div class="confirmation-body">
-      <!-- Información del producto -->
-      <div class="product-card">
-        <div class="product-img-container">
+      <!-- Producto compacto -->
+      <div class="product-compact">
+        <div class="product-image-small">
           {% if producto.foto %}
-            <img src="{{ url_for('static', filename='uploads/' ~ producto.foto) }}" alt="{{ producto.nombre }}" class="product-img">
+            <img src="{{ url_for('static', filename='uploads/' ~ producto.foto) }}" alt="{{ producto.nombre }}">
           {% else %}
-            <img src="{{ url_for('static', filename='img/default_product.jpg') }}" alt="Imagen predeterminada" class="product-img">
+            <img src="{{ url_for('static', filename='img/default_product.jpg') }}" alt="Imagen predeterminada">
           {% endif %}
         </div>
-        <div class="product-details">
-          <!-- Primera fila: Solo el nombre del producto -->
-          <div class="product-name-row">
-            <h3 class="product-title">{{ producto.nombre }}</h3>
+        <div class="product-details-compact">
+          <h3 class="product-name">{{ producto.nombre }}</h3>
+          <div class="product-meta">
+            <span>{{ producto.codigo_barras_externo }}</span>
+            <span>{{ producto.categoria|title }}</span>
           </div>
-          
-          <!-- Segunda fila: Código de barras y Stock anterior -->
-          <div class="product-info-row">
-            <div class="product-info-cell">{{ producto.codigo_barras_externo }}</div>
-            <div class="product-info-cell">
-              Stock anterior: 
-              {% if producto.unidad and producto.unidad not in ['pieza', 'piezas'] %}
-                {{ "%.3f"|format(stock_anterior) }} {{ producto.unidad }}
-              {% else %}
-                {% if stock_anterior == 1 %}
-                  {{ stock_anterior }} pieza
+          <div class="stock-change">
+            <div class="stock-change-item">
+              <span class="stock-label">Stock anterior:</span>
+              <span class="stock-value">
+                {% if producto.unidad and producto.unidad not in ['pieza', 'piezas'] %}
+                  {{ "%.3f"|format(stock_anterior) }} {{ producto.unidad }}
                 {% else %}
-                  {{ stock_anterior }} piezas
+                  {% if stock_anterior == 1 %}
+                    {{ stock_anterior }} pieza
+                  {% else %}
+                    {{ stock_anterior }} piezas
+                  {% endif %}
                 {% endif %}
-              {% endif %}
+              </span>
             </div>
-          </div>
-          
-          <!-- Tercera fila: Categoría y Stock actual -->
-          <div class="product-info-row">
-            <div class="product-info-cell">{{ producto.categoria|title }}</div>
-            <div class="product-info-cell">
-              Stock actual: 
-              {% if producto.unidad and producto.unidad not in ['pieza', 'piezas'] %}
-                {{ "%.3f"|format(producto.stock) }} {{ producto.unidad }}
-              {% else %}
-                {% if producto.stock == 1 %}
-                  {{ producto.stock }} pieza
+            <i class="fas fa-arrow-right arrow-icon"></i>
+            <div class="stock-change-item">
+              <span class="stock-label">Stock actual:</span>
+              <span class="stock-value">
+                {% if producto.stock <= 0 %}
+                  <span class="badge badge-danger">{{ producto.stock }}</span>
+                {% elif producto.stock < 6 %}
+                  <span class="badge badge-warning">{{ producto.stock }}</span>
                 {% else %}
-                  {{ producto.stock }} piezas
+                  <span class="badge badge-success">{{ producto.stock }}</span>
                 {% endif %}
-              {% endif %}
+              </span>
             </div>
           </div>
         </div>
       </div>
       
       <!-- Detalles del movimiento -->
-      <h4 class="summary-title">Detalle del Ajuste</h4>
       <table class="details-table">
         <tbody>
           <tr>
@@ -649,18 +517,6 @@
             {% endif %}
           {% else %}
             <tr>
-              <td>Método de Descuento</td>
-              <td class="value-col">
-                {% if movimiento.metodo_descuento == 'fifo' %}
-                  FIFO (primero en caducar)
-                {% elif movimiento.metodo_descuento == 'lifo' %}
-                  LIFO (último en entrar)
-                {% else %}
-                  {{ movimiento.metodo_descuento|title }}
-                {% endif %}
-              </td>
-            </tr>
-            <tr>
               <td>Impacto Financiero</td>
               <td class="value-col">
                 {% if movimiento.impacto_financiero %}
@@ -680,11 +536,9 @@
         </tbody>
       </table>
       
-      {% if movimiento.tipo_movimiento == 'ENTRADA' %}
-        <!-- Resumen financiero para entradas -->
-        <div class="summary-container">
-          <h4 class="summary-title">Resumen Financiero</h4>
-          <div class="summary-item">
+      {% if movimiento.tipo_movimiento == 'ENTRADA' and costo_total %}
+        <div class="financial-summary">
+          <div class="summary-row">
             <span class="summary-label">Cantidad</span>
             <span class="summary-value">
               {% if producto.unidad and producto.unidad not in ['pieza', 'piezas'] %}
@@ -698,60 +552,20 @@
               {% endif %}
             </span>
           </div>
-          <div class="summary-item">
+          <div class="summary-row">
             <span class="summary-label">Costo unitario</span>
             <span class="summary-value">${{ movimiento.costo_unitario|round(2) }}</span>
           </div>
-          {% if costo_total %}
-            <div class="summary-item summary-total">
-              <span class="summary-label">Costo total</span>
-              <span class="summary-value">${{ costo_total|round(2) }}</span>
-            </div>
-          {% endif %}
+          <div class="summary-row summary-total">
+            <span>Costo total</span>
+            <span>${{ costo_total|round(2) }}</span>
+          </div>
         </div>
       {% endif %}
       
-      <!-- Notas importantes -->
-      {% if movimiento.tipo_movimiento == 'ENTRADA' %}
-        <div class="alert alert-info">
-          <i class="fas fa-info-circle"></i>
-          Se ha actualizado correctamente el inventario. Los cambios se reflejarán en los informes de inventario y financieros.
-        </div>
-      {% else %}
-        {% if movimiento.impacto_financiero %}
-          <div class="alert alert-warning">
-            <i class="fas fa-exclamation-triangle"></i>
-            Esta operación ha sido registrada como una pérdida y afectará los informes financieros.
-          </div>
-        {% else %}
-          <div class="alert alert-info">
-            <i class="fas fa-info-circle"></i>
-            Esta operación ha sido registrada sin impacto financiero. Solo afectará al inventario.
-          </div>
-        {% endif %}
-      {% endif %}
-      
-      <!-- Acciones -->
-      <div class="actions-container">
-        <button class="btn btn-outline" onclick="window.print()">
-          <i class="fas fa-print"></i>
-          Imprimir
-        </button>
-        <a href="{{ url_for('ajuste_stock') }}" class="btn btn-outline">
-          <i class="fas fa-arrow-left"></i>
-          Volver a Ajustar Stock
-        </a>
-        {% if movimiento.tipo_movimiento == 'ENTRADA' %}
-          <a href="{{ url_for('dashboard_inventario') }}" class="btn btn-primary">
-            <i class="fas fa-check"></i>
-            Continuar
-          </a>
-        {% else %}
-          <a href="{{ url_for('dashboard_inventario') }}" class="btn btn-primary">
-            <i class="fas fa-check"></i>
-            Continuar
-          </a>
-        {% endif %}
+      <div class="success-message">
+        <i class="fas fa-info-circle"></i>
+        <span>Se ha actualizado correctamente el inventario.</span>
       </div>
     </div>
   </div>
