@@ -321,7 +321,13 @@ def ajuste_entrada(producto_id):
             if mantener_costo_anterior and ultima_entrada and ultima_entrada.costo_unitario:
                 costo_unitario = ultima_entrada.costo_unitario
             else:
-                costo_unitario = float(request.form.get('costo_unitario', producto.costo))
+                # MODIFICADO: Intenta obtener el valor del campo oculto primero
+                costo_unitario_real = request.form.get('costo_unitario_real')
+                if costo_unitario_real:
+                    costo_unitario = float(costo_unitario_real)
+                else:
+                    # Fallback al campo original
+                    costo_unitario = float(request.form.get('costo_unitario', producto.costo))
             
             actualizar_costo = request.form.get('actualizar_costo') == 'on'
             notas = request.form.get('notas', '')
