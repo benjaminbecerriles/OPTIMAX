@@ -1,27 +1,28 @@
 {% extends 'base.html' %}
 
 {% block title %}
-  Entrada de Mercancía - {{ producto.nombre }}
+  Registrar Entrada - {{ producto.nombre }}
 {% endblock %}
 
 {% block content %}
 <style>
-  /* Diseño elegante pero ultra-simple */
+  /* Diseño elegante inspirado en Apple */
   :root {
-    --font-system: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    --color-text: #222222; /* Texto más oscuro para mejor legibilidad */
-    --color-text-light: #505050; /* Menos opaco para mejor legibilidad */
-    --color-background: #ffffff;
-    --color-border: #e0e0e0;
-    --color-primary: #e52e2e;
-    --color-primary-light: #fdf2f2;
-    --color-success: #34c759;
-    --color-warning: #ff9f0a;
-    --color-danger: #ff3b30;
-    --color-accent: #007aff;
-    --border-radius: 10px;
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-    --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --font-system: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', Helvetica, Arial, sans-serif;
+    --text-color: #1d1d1f;
+    --text-secondary: #86868b;
+    --color-background: #f5f5f7;
+    --color-card: #ffffff;
+    --color-border: rgba(0, 0, 0, 0.1);
+    --color-primary: #e52e2e; /* Rojo para botón guardar */
+    --color-accent: #0066cc; /* Azul Apple para selecciones */
+    --color-success: #34c759; /* Verde Apple */
+    --color-warning: #ff9f0a; /* Naranja Apple */
+    --color-danger: #ff3b30; /* Rojo Apple */
+    --border-radius: 12px;
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
+    --shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    --transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
   }
   
   body {
@@ -30,259 +31,296 @@
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    background-color: var(--color-background);
+    margin: 0;
+    padding: 0;
   }
   
   .entry-container {
-    max-width: 960px;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 24px 16px;
+    padding: 36px 24px;
   }
   
-  /* Navegación simple */
-  .back-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    color: var(--color-text-light);
-    text-decoration: none;
-    margin-bottom: 24px;
-    font-size: 14px;
-  }
-  
-  .back-link:hover {
-    color: var(--color-primary);
-  }
-  
-  /* Encabezado */
-  .page-title {
-    font-size: 24px;
-    font-weight: 600;
-    color: var(--color-text);
-    margin-bottom: 24px;
-  }
-  
-  /* Tarjeta de producto */
-  .product-card {
+  /* Encabezado de página - Como en ajuste_stock.html */
+  .page-header {
     display: flex;
+    justify-content: space-between;
     align-items: flex-start;
-    gap: 20px;
-    background-color: #f9f9f9;
-    border-radius: var(--border-radius);
-    padding: 16px;
-    margin-bottom: 24px;
+    margin-bottom: 3rem; /* Aumentado el espacio entre título y paneles */
   }
   
-  .product-image {
-    width: 70px;
-    height: 70px;
-    border-radius: 6px;
-    overflow: hidden;
-    background-color: white;
+  .page-title {
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin: 0;
+    color: var(--text-color);
+  }
+  
+  .header-actions {
+    display: flex;
+    gap: 1rem;
+    padding-top: 8px;
+  }
+  
+  /* Botones con estilo Apple */
+  .btn-icon {
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid var(--color-border);
-    flex-shrink: 0;
-  }
-  
-  .product-image img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-  }
-  
-  .product-details {
-    flex: 1;
-    min-width: 0;
-  }
-  
-  .product-name {
-    font-size: 18px;
+    gap: 0.75rem;
+    padding: 0.75rem 1.25rem;
+    border-radius: 980px;
     font-weight: 500;
-    margin: 0 0 8px 0;
+    font-size: 0.95rem;
+    transition: var(--transition);
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    text-align: center;
   }
   
-  .product-meta {
+  .btn-icon i, 
+  .btn-icon span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+    line-height: 1;
+  }
+  
+  .btn-outline {
+    background-color: var(--color-card);
+    color: var(--text-color);
+    border: 1px solid var(--color-border);
+  }
+  
+  .btn-outline:hover {
+    background-color: #f2f2f2;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .btn-primary {
+    background-color: var(--color-primary);
+    color: white;
+  }
+  
+  .btn-primary:hover {
+    background-color: #d12323;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(229, 46, 46, 0.25);
+  }
+  
+  /* Diseño de dos columnas con misma altura */
+  .two-column-layout {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 12px 24px;
+    grid-template-columns: 320px 1fr;
+    grid-auto-rows: minmax(min-content, max-content);
+    gap: 24px;
+    margin-bottom: 24px;
   }
   
-  .meta-item {
+  /* Panel de producto */
+  .product-panel {
+    background-color: var(--color-card);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    height: auto; /* Altura automática */
     display: flex;
     flex-direction: column;
   }
   
-  .meta-label {
-    font-size: 12px;
-    color: var(--color-text-light);
-    margin-bottom: 2px;
+  .product-image-container {
+    width: 100%;
+    height: 250px;
+    overflow: hidden;
+    position: relative;
+    background-color: var(--color-background);
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
   }
   
-  .meta-value {
+  .product-image {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    transition: var(--transition);
+  }
+  
+  .product-info {
+    padding: 24px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .product-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-color);
+    margin: 0 0 16px 0;
+    line-height: 1.3;
+  }
+  
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+  
+  .info-row:last-child {
+    border-bottom: none;
+    margin-bottom: auto;
+  }
+  
+  .info-label {
+    color: var(--text-secondary);
     font-size: 14px;
     font-weight: 500;
   }
   
+  .info-value {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-color);
+  }
+  
   .badge {
     display: inline-block;
-    font-size: 12px;
-    padding: 2px 6px;
-    border-radius: 4px;
-    line-height: 1.2;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
   }
   
   .badge-success {
-    background-color: rgba(52, 199, 89, 0.1);
+    background-color: rgba(52, 199, 89, 0.12);
     color: var(--color-success);
   }
   
   .badge-warning {
-    background-color: rgba(255, 159, 10, 0.1);
+    background-color: rgba(255, 159, 10, 0.12);
     color: var(--color-warning);
   }
   
   .badge-danger {
-    background-color: rgba(255, 59, 48, 0.1);
+    background-color: rgba(255, 59, 48, 0.12);
     color: var(--color-danger);
   }
   
-  /* Formulario de entrada - Ultra simple */
+  /* Formulario compacto */
   .entry-form {
-    background-color: white;
+    background-color: var(--color-card);
     border-radius: var(--border-radius);
-    border: 1px solid var(--color-border);
-    box-shadow: var(--shadow);
+    box-shadow: var(--shadow-sm);
     overflow: hidden;
-    margin-bottom: 24px;
-  }
-  
-  .form-header {
+    height: auto;
     display: flex;
-    align-items: center;
-    padding: 12px 16px;
-    background-color: var(--color-primary-light);
-    border-bottom: 1px solid var(--color-border);
-  }
-  
-  .form-title {
-    font-size: 16px;
-    font-weight: 500;
-    color: var(--color-primary);
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    flex-direction: column;
   }
   
   .form-body {
-    padding: 16px;
+    padding: 24px;
+    flex-grow: 1;
+  }
+  
+  .form-section {
+    margin-bottom: 24px;
   }
   
   .form-row {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 20px;
     margin-bottom: 20px;
   }
   
-  .form-col {
-    flex: 1;
-    min-width: 120px;
-  }
-  
   .form-group {
-    margin-bottom: 16px;
+    margin-bottom: 20px;
   }
   
   .form-label {
     display: block;
     font-size: 14px;
     font-weight: 500;
-    color: var(--color-text);
-    margin-bottom: 6px;
+    color: var(--text-color);
+    margin-bottom: 8px;
   }
   
   .form-control {
     display: block;
     width: 100%;
-    padding: 10px 12px;
+    padding: 12px 14px;
     font-size: 15px;
     line-height: 1.5;
-    color: var(--color-text);
+    color: var(--text-color);
     background-color: #fff;
     background-clip: padding-box;
     border: 1px solid var(--color-border);
-    border-radius: 6px;
-    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    border-radius: 10px;
+    transition: var(--transition);
   }
   
   .form-control:focus {
     border-color: var(--color-accent);
     outline: 0;
-    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+    box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.15);
+  }
+  
+  /* Select con ícono */
+  .select-container {
+    position: relative;
+  }
+  
+  .select-container .form-control {
+    padding-right: 40px;
+    appearance: none;
+  }
+  
+  .select-icon {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    pointer-events: none;
+    font-size: 16px;
   }
   
   .form-check {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     margin-bottom: 8px;
   }
   
   .form-check-input {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     margin: 0;
+    border-radius: 4px;
+    border: 1px solid var(--color-border);
+    transition: var(--transition);
+  }
+  
+  .form-check-input:checked {
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
   }
   
   .form-check-label {
-    font-size: 14px;
-  }
-  
-  .form-text {
-    display: block;
-    margin-top: 4px;
-    font-size: 12px;
-    color: var(--color-text-light);
-  }
-  
-  /* Dropdown para costo */
-  #costoContainer {
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px dashed var(--color-border);
-  }
-  
-  .input-group {
-    display: flex;
-    position: relative;
-  }
-  
-  .input-group-text {
-    display: flex;
-    align-items: center;
-    padding: 10px 12px;
     font-size: 15px;
-    font-weight: 400;
-    line-height: 1.5;
-    color: var(--color-text);
-    text-align: center;
-    white-space: nowrap;
-    background-color: #f8f9fa;
-    border: 1px solid var(--color-border);
-    border-right: 0;
-    border-radius: 6px 0 0 6px;
+    color: var(--text-color);
   }
   
-  .input-group .form-control {
-    position: relative;
-    flex: 1 1 auto;
-    width: 1%;
-    min-width: 0;
-    border-radius: 0 6px 6px 0;
-  }
-
   /* Input con unidad */
   .quantity-input-container {
     position: relative;
@@ -291,74 +329,125 @@
   }
 
   .quantity-input-container .form-control {
-    padding-right: 65px; /* Espacio para la unidad */
+    padding-right: 70px;
   }
 
   .unit-indicator {
     position: absolute;
-    right: 12px;
-    color: var(--color-text-light);
+    right: 14px;
+    color: var(--text-secondary);
     pointer-events: none;
-    font-size: 14px;
-  }
-  
-  /* Toggle para caducidad */
-  .toggle-button {
-    border: 1px solid var(--color-border);
-    border-radius: 20px;
-    background-color: #f2f2f2;
-    padding: 0.25rem 0.75rem;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: background-color 0.3s;
-    color: var(--color-text);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 100px;
-  }
-
-  .toggle-button.active {
-    background-color: var(--color-primary);
-    color: white;
-    border-color: var(--color-primary);
-  }
-  
-  /* Accordion para secciones opcionales */
-  .accordion-item {
-    margin-bottom: 12px;
-    border: 1px solid var(--color-border);
-    border-radius: 6px;
-    overflow: hidden;
-  }
-  
-  .accordion-header {
-    cursor: pointer;
-    padding: 10px 12px;
-    background-color: #f8f9fa;
-    user-select: none;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
     font-size: 14px;
     font-weight: 500;
   }
   
-  .accordion-header:hover {
-    background-color: #f0f0f0;
-  }
-  
-  .accordion-body {
-    padding: 12px;
-    display: none;
+  /* Dropdown para costo */
+  #costoContainer {
+    margin-top: 16px;
+    padding-top: 16px;
     border-top: 1px solid var(--color-border);
   }
   
-  /* Selección de caducidad */
+  .input-group {
+    display: flex;
+    position: relative;
+    box-shadow: var(--shadow-sm);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  
+  .input-group-text {
+    display: flex;
+    align-items: center;
+    padding: 12px 14px;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.5;
+    color: var(--text-color);
+    text-align: center;
+    white-space: nowrap;
+    background-color: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-right: 0;
+    border-radius: 10px 0 0 10px;
+  }
+  
+  .input-group .form-control {
+    position: relative;
+    flex: 1 1 auto;
+    width: 1%;
+    min-width: 0;
+    border-radius: 0 10px 10px 0;
+  }
+  
+  /* Toggle para caducidad - Estilo Apple */
+  .toggle-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  
+  .toggle-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-color);
+  }
+  
+  /* Toggle estilo Apple */
+  .toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 51px;
+    height: 31px;
+  }
+  
+  .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  .toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #e4e4e4;
+    transition: .4s;
+    border-radius: 34px;
+  }
+  
+  .toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 27px;
+    width: 27px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+  }
+  
+  input:checked + .toggle-slider {
+    background-color: var(--color-accent);
+  }
+  
+  input:checked + .toggle-slider:before {
+    transform: translateX(20px);
+  }
+  
+  /* Selección de caducidad - Azul en lugar de rojo */
   .expiry-options {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
+    gap: 8px;
+    padding: 16px;
+    background-color: var(--color-background);
+    border-radius: 10px;
     margin-top: 12px;
   }
   
@@ -374,448 +463,314 @@
   
   .expiry-option label {
     display: inline-block;
-    padding: 6px 10px;
-    font-size: 13px;
-    background-color: #f8f9fa;
+    padding: 8px 12px;
+    font-size: 14px;
+    background-color: var(--color-card);
     border: 1px solid var(--color-border);
-    border-radius: 4px;
+    border-radius: 8px;
     cursor: pointer;
-    transition: all 0.15s;
+    transition: var(--transition);
+    font-weight: 500;
+    color: var(--text-color);
   }
   
   .expiry-option label:hover {
-    background-color: #f0f0f0;
+    background-color: #f2f2f2;
   }
   
   .expiry-option input:checked + label {
-    background-color: var(--color-primary);
+    background-color: var(--color-accent);
     color: white;
-    border-color: var(--color-primary);
+    border-color: var(--color-accent);
   }
   
-  /* Botones */
-  .form-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 16px;
-  }
-  
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 500;
-    text-align: center;
-    text-decoration: none;
-    vertical-align: middle;
-    cursor: pointer;
-    user-select: none;
-    padding: 8px 16px;
-    font-size: 14px;
-    border-radius: 6px;
-    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, 
-                border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-  }
-  
-  .btn-primary {
-    color: #fff;
-    background-color: var(--color-primary);
-    border: 1px solid var(--color-primary);
-  }
-  
-  .btn-primary:hover {
-    background-color: #d12323;
-  }
-  
-  .btn-outline {
-    color: var(--color-text);
-    background-color: transparent;
-    border: 1px solid var(--color-border);
-  }
-  
-  .btn-outline:hover {
-    background-color: #f8f9fa;
-  }
-  
-  /* Tabla de historial */
-  .history-section {
-    margin-top: 32px;
-  }
-  
-  .history-title {
-    font-size: 18px;
-    font-weight: 500;
+  /* Secciones colapsables estilo Apple */
+  .collapse-section {
     margin-bottom: 16px;
-    color: var(--color-text);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--color-border);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    overflow: hidden;
   }
   
-  .history-table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  
-  .history-table th {
-    padding: 10px 12px;
-    text-align: left;
-    font-weight: 500;
-    font-size: 13px;
-    color: var(--color-text);
-    border-bottom: 1px solid var(--color-border);
-  }
-  
-  .history-table td {
-    padding: 10px 12px;
-    font-size: 14px;
-    border-bottom: 1px solid var(--color-border);
-  }
-  
-  .history-table tbody tr:hover {
-    background-color: #f9f9f9;
-  }
-  
-  .history-empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 32px;
-    text-align: center;
-    background-color: #f9f9f9;
-    border-radius: 6px;
-    color: var(--color-text-light);
-  }
-  
-  /* Responsive */
-  @media (max-width: 768px) {
-    .product-card {
-      flex-direction: column;
-    }
-    
-    .product-image {
-      margin: 0 auto 12px;
-    }
-    
-    .form-row {
-      flex-direction: column;
-      gap: 12px;
-    }
-    
-    .product-meta {
-      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    }
-  }
-
-  /* Caducidad toggle header */
-  .caducidad-toggle-header {
+  .collapse-header {
+    padding: 14px 16px;
+    background-color: var(--color-card);
+    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 10px;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-color);
+    user-select: none;
   }
-
-  .caducidad-toggle-header .form-label {
-    margin-bottom: 0;
+  
+  .collapse-header:hover {
+    background-color: #f5f5f7;
+  }
+  
+  .collapse-header i {
+    color: var(--text-secondary);
+    transition: transform 0.3s ease;
+  }
+  
+  .collapse-header.active i {
+    transform: rotate(180deg);
+  }
+  
+  .collapse-content {
+    padding: 16px;
+    border-top: 1px solid var(--color-border);
+    display: none;
+  }
+  
+  /* Responsive design */
+  @media (max-width: 992px) {
+    .two-column-layout {
+      grid-template-columns: 1fr;
+    }
+    
+    .form-row {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .entry-container {
+      padding: 20px 16px;
+    }
+    
+    .page-header {
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 2rem;
+    }
+    
+    .header-actions {
+      width: 100%;
+      justify-content: space-between;
+      padding-top: 0;
+    }
+    
+    .product-image-container {
+      height: 200px;
+    }
   }
 </style>
 
 <div class="entry-container">
-  <!-- Link para volver -->
-  <a href="{{ url_for('ajuste_stock') }}" class="back-link">
-    <i class="fas fa-arrow-left"></i>
-    <span>Volver a ajuste de stock</span>
-  </a>
-  
-  <!-- Título de página -->
-  <h1 class="page-title">Entrada de mercancía</h1>
-  
-  <!-- Tarjeta del producto -->
-  <div class="product-card">
-    <div class="product-image">
-      {% if producto.foto %}
-        <img src="{{ url_for('static', filename='uploads/' ~ producto.foto) }}" alt="{{ producto.nombre }}">
-      {% else %}
-        <img src="{{ url_for('static', filename='img/default_product.jpg') }}" alt="Imagen predeterminada">
-      {% endif %}
-    </div>
-    <div class="product-details">
-      <h2 class="product-name">{{ producto.nombre }}</h2>
-      <div class="product-meta">
-        <div class="meta-item">
-          <div class="meta-label">Código</div>
-          <div class="meta-value">{{ producto.codigo_barras_externo }}</div>
-        </div>
-        
-        <div class="meta-item">
-          <div class="meta-label">Stock actual</div>
-          <div class="meta-value">
-            {% if producto.stock <= 0 %}
-              <span class="badge badge-danger">Sin stock</span>
-            {% elif producto.stock < 6 %}
-              <span class="badge badge-warning">{{ producto.stock }} unidades</span>
-            {% else %}
-              <span class="badge badge-success">{{ producto.stock }} unidades</span>
-            {% endif %}
-          </div>
-        </div>
-        
-        <div class="meta-item">
-          <div class="meta-label">Precio</div>
-          <div class="meta-value">${{ producto.precio_venta|round(2) }}</div>
-        </div>
-        
-        <div class="meta-item">
-          <div class="meta-label">Costo actual</div>
-          <div class="meta-value">${{ producto.costo|round(2) }}</div>
-        </div>
-        
-        <div class="meta-item">
-          <div class="meta-label">Fecha de última entrada</div>
-          <div class="meta-value">
-            {% if ultima_entrada %}
-              {{ ultima_entrada.fecha_formateada() }}
-            {% else %}
-              Sin entradas previas
-            {% endif %}
-          </div>
-        </div>
-        
-        <div class="meta-item">
-          <div class="meta-label">Última entrada</div>
-          <div class="meta-value">
-            {% if ultimo_lote %}
-              {{ ultimo_lote }}
-            {% else %}
-              Sin lotes registrados
-            {% endif %}
-          </div>
-        </div>
-      </div>
+  <!-- Encabezado con título y acciones -->
+  <div class="page-header">
+    <h1 class="page-title">Registrar Entrada</h1>
+    <div class="header-actions">
+      <a href="{{ url_for('ajuste_stock') }}" class="btn-icon btn-outline">
+        <i class="fas fa-arrow-left"></i>
+        <span>Volver</span>
+      </a>
+      <button type="submit" form="entradaForm" class="btn-icon btn-primary">
+        <span>Guardar entrada</span>
+      </button>
     </div>
   </div>
   
-  <!-- Formulario simplificado -->
-  <form method="POST" action="{{ url_for('ajuste_entrada', producto_id=producto.id) }}" enctype="multipart/form-data" id="entradaForm">
-    <div class="entry-form">
-      <div class="form-header">
-        <h3 class="form-title">
-          <i class="fas fa-plus-circle"></i>
-          Registrar entrada
-        </h3>
+  <!-- Diseño de dos columnas con misma altura -->
+  <div class="two-column-layout">
+    <!-- Panel de producto (izquierda) -->
+    <div class="product-panel">
+      <div class="product-image-container">
+        {% if producto.foto %}
+          <img src="{{ url_for('static', filename='uploads/' ~ producto.foto) }}" alt="{{ producto.nombre }}" class="product-image">
+        {% else %}
+          <img src="{{ url_for('static', filename='img/default_product.jpg') }}" alt="Imagen predeterminada" class="product-image">
+        {% endif %}
       </div>
-      
-      <div class="form-body">
-        <!-- Solo los campos imprescindibles visibles -->
-        <div class="form-row">
-          <div class="form-col">
-            <label for="cantidad" class="form-label">Cantidad a añadir*</label>
-            <div class="quantity-input-container">
-              <input type="text" 
-                     class="form-control" 
-                     id="cantidad" 
-                     name="cantidad" 
-                     required 
-                     value="1"
-                     inputmode="decimal">
-              <span class="unit-indicator" id="unidadIndicator">
-                {% if producto.unidad %}
-                  {% if producto.unidad == 'pieza' %}PIEZA{% else %}{{ producto.unidad|upper }}{% endif %}
-                {% else %}
-                  PIEZA
-                {% endif %}
-              </span>
-            </div>
-          </div>
-          
-          <div class="form-col">
-            <label for="motivo" class="form-label">Motivo*</label>
-            <select class="form-control" id="motivo" name="motivo" required>
-              <option value="compra">Compra a proveedor</option>
-              <option value="devolucion">Devolución de cliente</option>
-              <option value="ajuste">Ajuste de inventario</option>
-              <option value="transferencia">Transferencia entre sucursales</option>
-              <option value="otro">Otro motivo</option>
-            </select>
-          </div>
+      <div class="product-info">
+        <h2 class="product-title">{{ producto.nombre }}</h2>
+        
+        <div class="info-row">
+          <span class="info-label">Stock actual</span>
+          <span class="info-value">
+            {% if producto.stock <= 0 %}
+              <span class="badge badge-danger">Sin stock</span>
+            {% elif producto.stock < 6 %}
+              <span class="badge badge-warning">{{ producto.stock }}</span>
+            {% else %}
+              <span class="badge badge-success">{{ producto.stock }}</span>
+            {% endif %}
+          </span>
         </div>
         
-        <!-- Opciones de costo -->
-        <div class="form-group">
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="mantener_costo_anterior" name="mantener_costo_anterior" checked>
-            <label class="form-check-label" for="mantener_costo_anterior">
-              Mantener costo anterior ({% if ultima_entrada and ultima_entrada.costo_unitario %}${{ ultima_entrada.costo_unitario|round(2) }}{% else %}${{ producto.costo|round(2) }}{% endif %})
-            </label>
-          </div>
-          
-          <div id="costoContainer" style="display:none;">
-            <label for="costo_unitario" class="form-label">Ingresar nuevo costo</label>
-            <div class="input-group">
-              <span class="input-group-text">$</span>
-              <input type="text" 
-                     class="form-control" 
-                     id="costo_unitario" 
-                     name="costo_unitario" 
-                     oninput="formatCostRealtime(this)"
-                     value="{{ producto.costo|round(2) }}">
-            </div>
-            <!-- El costo principal se actualizará automáticamente con el nuevo valor -->
-            <input type="hidden" id="actualizar_costo" name="actualizar_costo" value="on">
-            <!-- Oculto para el valor real numérico -->
-            <input type="hidden" id="costo_unitario_real" name="costo_unitario_real" value="{{ producto.costo|round(2) }}">
-          </div>
+        <div class="info-row">
+          <span class="info-label">Costo actual</span>
+          <span class="info-value">${{ producto.costo|round(2) }}</span>
         </div>
         
-        <!-- Sección de caducidad con toggle -->
-        <div class="form-group">
-          <div class="caducidad-toggle-header">
-            <label class="form-label">Fecha de caducidad</label>
-            <button type="button" id="btnToggleCaducidad" class="toggle-button">DESACTIVADO</button>
-          </div>
-          
-          <input type="hidden" id="toggle_caducidad_estado" name="toggle_caducidad_estado" value="DESACTIVADO">
-          
-          <div id="caducidadOpcionesContainer" style="display:none;">
-            <div class="expiry-options">
-              <div class="expiry-option">
-                <input type="radio" name="caducidad_lapso" id="cad1dia" value="1 día">
-                <label for="cad1dia">1 día</label>
-              </div>
-              <div class="expiry-option">
-                <input type="radio" name="caducidad_lapso" id="cad3dias" value="3 días">
-                <label for="cad3dias">3 días</label>
-              </div>
-              <div class="expiry-option">
-                <input type="radio" name="caducidad_lapso" id="cad1sem" value="1 semana">
-                <label for="cad1sem">1 semana</label>
-              </div>
-              <div class="expiry-option">
-                <input type="radio" name="caducidad_lapso" id="cad2sem" value="2 semanas">
-                <label for="cad2sem">2 semanas</label>
-              </div>
-              <div class="expiry-option">
-                <input type="radio" name="caducidad_lapso" id="cad1mes" value="1 mes">
-                <label for="cad1mes">1 mes</label>
-              </div>
-              <div class="expiry-option">
-                <input type="radio" name="caducidad_lapso" id="cad3meses" value="3 meses">
-                <label for="cad3meses">3 meses</label>
-              </div>
-              <div class="expiry-option">
-                <input type="radio" name="caducidad_lapso" id="cad6meses" value="6 meses">
-                <label for="cad6meses">6 meses</label>
-              </div>
-              <div class="expiry-option">
-                <input type="radio" name="caducidad_lapso" id="cad1ano" value="1 año">
-                <label for="cad1ano">1 año</label>
-              </div>
-              <div class="expiry-option">
-                <input type="radio" name="caducidad_lapso" id="cad2anos" value="2 años">
-                <label for="cad2anos">2 años</label>
-              </div>
-              <div class="expiry-option">
-                <input type="radio" name="caducidad_lapso" id="cad3anos" value="3 años">
-                <label for="cad3anos">+3 años</label>
-              </div>
-            </div>
-          </div>
+        <div class="info-row">
+          <span class="info-label">Precio de venta</span>
+          <span class="info-value">${{ producto.precio_venta|round(2) }}</span>
         </div>
         
-        <!-- Secciones opcionales compactadas -->
-        <div class="accordion-item">
-          <div class="accordion-header" id="notasHeader">
-            <span><i class="fas fa-sticky-note" style="margin-right:6px;"></i> Notas adicionales</span>
-            <i class="fas fa-chevron-down"></i>
-          </div>
-          <div class="accordion-body" id="notasBody">
-            <input type="hidden" id="toggle_notas_estado" name="toggle_notas_estado" value="DESACTIVADO">
-            <textarea class="form-control" id="notas" name="notas" rows="2" placeholder="Información adicional..."></textarea>
-          </div>
-        </div>
-        
-        <div class="accordion-item">
-          <div class="accordion-header" id="comprobanteHeader">
-            <span><i class="fas fa-file-invoice" style="margin-right:6px;"></i> Adjuntar comprobante</span>
-            <i class="fas fa-chevron-down"></i>
-          </div>
-          <div class="accordion-body" id="comprobanteBody">
-            <input type="hidden" id="toggle_comprobante_estado" name="toggle_comprobante_estado" value="DESACTIVADO">
-            <input type="file" class="form-control" id="comprobante" name="comprobante">
-          </div>
-        </div>
-        
-        <!-- Botones de acción -->
-        <div class="form-actions">
-          <a href="{{ url_for('ajuste_stock') }}" class="btn btn-outline">Cancelar</a>
-          <button type="submit" class="btn btn-primary">Guardar entrada</button>
+        <div class="info-row">
+          <span class="info-label">Código</span>
+          <span class="info-value">{{ producto.codigo_barras_externo }}</span>
         </div>
       </div>
     </div>
-  </form>
-  
-  <!-- Historial de movimientos -->
-  <div class="history-section">
-    <h3 class="history-title">
-      <i class="fas fa-history"></i>
-      Historial de movimientos
-    </h3>
     
-    {% if historial and historial|length > 0 %}
-      <div class="table-responsive">
-        <table class="history-table">
-          <thead>
-            <tr>
-              <th>Fecha</th>
-              <th>Tipo</th>
-              <th>Lote</th>
-              <th>Cantidad</th>
-              <th>Costo</th>
-              <th>Motivo</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for mov in historial %}
-              <tr>
-                <td>{{ mov.fecha_formateada() }}</td>
-                <td>
-                  {% if mov.tipo_movimiento == 'ENTRADA' %}
-                    <span class="badge badge-success">Entrada</span>
-                  {% else %}
-                    <span class="badge badge-danger">Salida</span>
-                  {% endif %}
-                </td>
-                <td>{{ mov.numero_lote }}</td>
-                <td>
-                  {% if mov.tipo_movimiento == 'ENTRADA' %}
-                    +{{ mov.cantidad }}
-                  {% else %}
-                    -{{ mov.cantidad }}
-                  {% endif %}
-                </td>
-                <td>
-                  {% if mov.tipo_movimiento == 'ENTRADA' %}
-                    {{ mov.costo_formateado() }}
-                  {% else %}
-                    -
-                  {% endif %}
-                </td>
-                <td>{{ mov.motivo|title }}</td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+    <!-- Formulario de entrada (derecha) -->
+    <form method="POST" action="{{ url_for('ajuste_entrada', producto_id=producto.id) }}" enctype="multipart/form-data" id="entradaForm">
+      <div class="entry-form">
+        <div class="form-body">
+          <!-- Sección principal -->
+          <div class="form-section">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="cantidad" class="form-label">Cantidad a añadir</label>
+                <div class="quantity-input-container">
+                  <input type="text" 
+                         class="form-control" 
+                         id="cantidad" 
+                         name="cantidad" 
+                         required 
+                         value="1"
+                         inputmode="decimal">
+                  <span class="unit-indicator" id="unidadIndicator">
+                    {% if producto.unidad %}
+                      {% if producto.unidad == 'pieza' %}PIEZA{% else %}{{ producto.unidad|upper }}{% endif %}
+                    {% else %}
+                      PIEZA
+                    {% endif %}
+                  </span>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label for="motivo" class="form-label">Motivo</label>
+                <div class="select-container">
+                  <select class="form-control" id="motivo" name="motivo" required>
+                    <option value="compra">Compra a proveedor</option>
+                    <option value="devolucion">Devolución de cliente</option>
+                    <option value="ajuste">Ajuste de inventario</option>
+                    <option value="transferencia">Transferencia entre sucursales</option>
+                    <option value="otro">Otro motivo</option>
+                  </select>
+                  <span class="select-icon"><i class="fas fa-chevron-down"></i></span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Opciones de costo -->
+          <div class="form-section">
+            <div class="form-group">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="mantener_costo_anterior" name="mantener_costo_anterior" checked>
+                <label class="form-check-label" for="mantener_costo_anterior">
+                  Mantener costo anterior ({% if ultima_entrada and ultima_entrada.costo_unitario %}${{ ultima_entrada.costo_unitario|round(2) }}{% else %}${{ producto.costo|round(2) }}{% endif %})
+                </label>
+              </div>
+              
+              <div id="costoContainer" style="display:none;">
+                <label for="costo_unitario" class="form-label">Nuevo costo</label>
+                <div class="input-group">
+                  <span class="input-group-text">$</span>
+                  <input type="text" 
+                         class="form-control" 
+                         id="costo_unitario" 
+                         name="costo_unitario" 
+                         oninput="formatCostRealtime(this)"
+                         value="{{ producto.costo|round(2) }}">
+                </div>
+                <input type="hidden" id="actualizar_costo" name="actualizar_costo" value="on">
+                <input type="hidden" id="costo_unitario_real" name="costo_unitario_real" value="{{ producto.costo|round(2) }}">
+              </div>
+            </div>
+          </div>
+          
+          <!-- Sección de caducidad con toggle estilo Apple -->
+          <div class="form-section">
+            <div class="toggle-container">
+              <span class="toggle-label">Fecha de caducidad</span>
+              <label class="toggle-switch">
+                <input type="checkbox" id="toggle_caducidad" onchange="toggleCaducidad()">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            
+            <input type="hidden" id="toggle_caducidad_estado" name="toggle_caducidad_estado" value="DESACTIVADO">
+            
+            <div id="caducidadOpcionesContainer" style="display:none;">
+              <div class="expiry-options">
+                <div class="expiry-option">
+                  <input type="radio" name="caducidad_lapso" id="cad1dia" value="1 día">
+                  <label for="cad1dia">1 día</label>
+                </div>
+                <div class="expiry-option">
+                  <input type="radio" name="caducidad_lapso" id="cad3dias" value="3 días">
+                  <label for="cad3dias">3 días</label>
+                </div>
+                <div class="expiry-option">
+                  <input type="radio" name="caducidad_lapso" id="cad1sem" value="1 semana">
+                  <label for="cad1sem">1 semana</label>
+                </div>
+                <div class="expiry-option">
+                  <input type="radio" name="caducidad_lapso" id="cad2sem" value="2 semanas">
+                  <label for="cad2sem">2 semanas</label>
+                </div>
+                <div class="expiry-option">
+                  <input type="radio" name="caducidad_lapso" id="cad1mes" value="1 mes">
+                  <label for="cad1mes">1 mes</label>
+                </div>
+                <div class="expiry-option">
+                  <input type="radio" name="caducidad_lapso" id="cad3meses" value="3 meses">
+                  <label for="cad3meses">3 meses</label>
+                </div>
+                <div class="expiry-option">
+                  <input type="radio" name="caducidad_lapso" id="cad6meses" value="6 meses">
+                  <label for="cad6meses">6 meses</label>
+                </div>
+                <div class="expiry-option">
+                  <input type="radio" name="caducidad_lapso" id="cad1ano" value="1 año">
+                  <label for="cad1ano">1 año</label>
+                </div>
+                <div class="expiry-option">
+                  <input type="radio" name="caducidad_lapso" id="cad2anos" value="2 años">
+                  <label for="cad2anos">2 años</label>
+                </div>
+                <div class="expiry-option">
+                  <input type="radio" name="caducidad_lapso" id="cad3anos" value="3 años">
+                  <label for="cad3anos">+3 años</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Opciones adicionales colapsables -->
+          <div class="collapse-section">
+            <div class="collapse-header" onclick="toggleCollapse('notasSection')">
+              <span><i class="fas fa-sticky-note" style="margin-right:8px;"></i> Notas adicionales</span>
+              <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="collapse-content" id="notasSection">
+              <input type="hidden" id="toggle_notas_estado" name="toggle_notas_estado" value="DESACTIVADO">
+              <textarea class="form-control" id="notas" name="notas" rows="2" placeholder="Información adicional..."></textarea>
+            </div>
+          </div>
+          
+          <div class="collapse-section">
+            <div class="collapse-header" onclick="toggleCollapse('comprobanteSection')">
+              <span><i class="fas fa-file-invoice" style="margin-right:8px;"></i> Adjuntar comprobante</span>
+              <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="collapse-content" id="comprobanteSection">
+              <input type="hidden" id="toggle_comprobante_estado" name="toggle_comprobante_estado" value="DESACTIVADO">
+              <input type="file" class="form-control" id="comprobante" name="comprobante">
+            </div>
+          </div>
+        </div>
       </div>
-    {% else %}
-      <div class="history-empty">
-        <i class="fas fa-inbox" style="font-size:24px; margin-bottom:8px;"></i>
-        <p>No hay movimientos registrados para este producto.</p>
-      </div>
-    {% endif %}
+    </form>
   </div>
 </div>
 
@@ -898,8 +853,8 @@
       });
     }
 
-    // Función para formatear costo en tiempo real (similar a agregar_producto.html)
-    function formatCostRealtime(input) {
+    // Función para formatear costo en tiempo real
+    window.formatCostRealtime = function(input) {
       let value = input.value;
       
       // Eliminar el símbolo $ si está presente
@@ -945,9 +900,6 @@
       }
     }
     
-    // Asignar la función al objeto global window para que esté disponible desde HTML
-    window.formatCostRealtime = formatCostRealtime;
-    
     // Toggle costo
     const mantenerCostoCheck = document.getElementById('mantener_costo_anterior');
     const costoContainer = document.getElementById('costoContainer');
@@ -965,58 +917,51 @@
       });
     }
     
-    // Toggle caducidad
-    const btnToggleCaducidad = document.getElementById('btnToggleCaducidad');
-    const caducidadOpcionesContainer = document.getElementById('caducidadOpcionesContainer');
-    const toggleCaducidadEstado = document.getElementById('toggle_caducidad_estado');
-    
-    if (btnToggleCaducidad && caducidadOpcionesContainer && toggleCaducidadEstado) {
-      btnToggleCaducidad.addEventListener('click', function() {
-        const isActive = btnToggleCaducidad.textContent === 'ACTIVADO';
-        
-        if (isActive) {
-          // Cambiar a desactivado
-          btnToggleCaducidad.textContent = 'DESACTIVADO';
-          btnToggleCaducidad.classList.remove('active');
-          caducidadOpcionesContainer.style.display = 'none';
-          toggleCaducidadEstado.value = 'DESACTIVADO';
-        } else {
-          // Cambiar a activado
-          btnToggleCaducidad.textContent = 'ACTIVADO';
-          btnToggleCaducidad.classList.add('active');
-          caducidadOpcionesContainer.style.display = 'block';
-          toggleCaducidadEstado.value = 'ACTIVADO';
-        }
-      });
+    // Toggle caducidad - Función global
+    window.toggleCaducidad = function() {
+      const toggleCaducidad = document.getElementById('toggle_caducidad');
+      const caducidadOpcionesContainer = document.getElementById('caducidadOpcionesContainer');
+      const toggleCaducidadEstado = document.getElementById('toggle_caducidad_estado');
+      
+      if (toggleCaducidad.checked) {
+        caducidadOpcionesContainer.style.display = 'block';
+        toggleCaducidadEstado.value = 'ACTIVADO';
+      } else {
+        caducidadOpcionesContainer.style.display = 'none';
+        toggleCaducidadEstado.value = 'DESACTIVADO';
+      }
     }
     
-    // Acordeones para opciones adicionales
-    const accordionHeaders = document.querySelectorAll('.accordion-header');
-    
-    accordionHeaders.forEach(header => {
-      const targetId = header.id.replace('Header', 'Body');
-      const body = document.getElementById(targetId);
-      const stateInputId = targetId.replace('Body', '').toLowerCase().replace('caducidad', 'toggle_caducidad').replace('notas', 'toggle_notas').replace('comprobante', 'toggle_comprobante') + '_estado';
-      const stateInput = document.getElementById(stateInputId);
+    // Función para manejar los colapsables - Función global
+    window.toggleCollapse = function(id) {
+      const content = document.getElementById(id);
+      const header = content.previousElementSibling;
+      const icon = header.querySelector('i.fas.fa-chevron-down, i.fas.fa-chevron-up');
       
-      header.addEventListener('click', function() {
-        // Toggle el cuerpo
-        const isVisible = body.style.display === 'block';
-        body.style.display = isVisible ? 'none' : 'block';
+      if (content.style.display === 'block') {
+        content.style.display = 'none';
+        header.classList.remove('active');
+        icon.classList.replace('fa-chevron-up', 'fa-chevron-down');
         
-        // Cambiar el icono
-        const icon = this.querySelector('.fas.fa-chevron-down, .fas.fa-chevron-up');
-        if (icon) {
-          icon.classList.toggle('fa-chevron-down');
-          icon.classList.toggle('fa-chevron-up');
+        // Actualizar estado oculto
+        if (id === 'notasSection') {
+          document.getElementById('toggle_notas_estado').value = 'DESACTIVADO';
+        } else if (id === 'comprobanteSection') {
+          document.getElementById('toggle_comprobante_estado').value = 'DESACTIVADO';
         }
+      } else {
+        content.style.display = 'block';
+        header.classList.add('active');
+        icon.classList.replace('fa-chevron-down', 'fa-chevron-up');
         
-        // Actualizar el estado
-        if (stateInput) {
-          stateInput.value = isVisible ? 'DESACTIVADO' : 'ACTIVADO';
+        // Actualizar estado oculto
+        if (id === 'notasSection') {
+          document.getElementById('toggle_notas_estado').value = 'ACTIVADO';
+        } else if (id === 'comprobanteSection') {
+          document.getElementById('toggle_comprobante_estado').value = 'ACTIVADO';
         }
-      });
-    });
+      }
+    }
     
     // Inicializar la visualización de unidad
     updateUnitText();
@@ -1062,8 +1007,8 @@
             mensaje.style.backgroundColor = '#ff3b30';
             mensaje.style.color = 'white';
             mensaje.style.padding = '20px';
-            mensaje.style.borderRadius = '8px';
-            mensaje.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
+            mensaje.style.borderRadius = '10px';
+            mensaje.style.boxShadow = '0 4px 16px rgba(0,0,0,0.2)';
             mensaje.style.zIndex = '9999';
             mensaje.style.maxWidth = '90%';
             mensaje.style.width = '350px';
@@ -1071,14 +1016,14 @@
             
             mensaje.innerHTML = `
               <div style="font-size: 24px; margin-bottom: 10px;"><i class="fas fa-exclamation-triangle"></i></div>
-              <div style="font-size: 16px; font-weight: bold; margin-bottom: 10px;">Formato incorrecto</div>
-              <div style="margin-bottom: 15px;">Debe incluir un dígito antes del punto decimal.</div>
-              <div style="font-size: 15px; padding: 5px; background: rgba(255,255,255,0.2); border-radius: 4px; margin-bottom: 15px;">
-                <span style="font-weight: bold;">Ejemplo:</span> 0.123 <span style="color: #90ee90;">✓</span>
+              <div style="font-size: 16px; font-weight: 600; margin-bottom: 12px;">Formato incorrecto</div>
+              <div style="margin-bottom: 16px; font-size: 15px;">Debe incluir un dígito antes del punto decimal.</div>
+              <div style="font-size: 15px; padding: 8px; background: rgba(255,255,255,0.2); border-radius: 6px; margin-bottom: 16px;">
+                <span style="font-weight: 600;">Ejemplo:</span> 0.123 <span style="color: #90ee90;">✓</span>
                 &nbsp;&nbsp;&nbsp;
                 <span style="text-decoration: line-through;">.123</span> <span style="color: #ff9999;">✗</span>
               </div>
-              <button id="cerrarAlerta" style="background: white; color: #ff3b30; border: none; padding: 8px 16px; border-radius: 4px; font-weight: bold; cursor: pointer;">Entendido</button>
+              <button id="cerrarAlerta" style="background: white; color: #ff3b30; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer;">Entendido</button>
             `;
             
             document.body.appendChild(mensaje);
@@ -1124,6 +1069,7 @@
         }
         
         // Verificar que se seleccione un lapso de caducidad si está activado
+        const toggleCaducidadEstado = document.getElementById('toggle_caducidad_estado');
         if (toggleCaducidadEstado.value === 'ACTIVADO') {
           const lapsoSeleccionado = document.querySelector('input[name="caducidad_lapso"]:checked');
           if (!lapsoSeleccionado) {
@@ -1145,7 +1091,10 @@
       
       if (radioLapso) {
         // Activar toggle de caducidad y seleccionar el lapso
-        btnToggleCaducidad.click(); // Activará la caducidad
+        const toggleCaducidad = document.getElementById('toggle_caducidad');
+        toggleCaducidad.checked = true;
+        toggleCaducidad.dispatchEvent(new Event('change'));
+        
         radioLapso.checked = true;
       }
     {% endif %}
