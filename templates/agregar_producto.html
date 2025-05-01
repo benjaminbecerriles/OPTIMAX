@@ -207,12 +207,25 @@
   .heart-icon.active {
     color: red;
   }
-  .venta-icon {
-    width: 24px;
-    height: auto;
+  
+  /* MODIFICADO: Estilos para eye-icon reemplazando venta-icon */
+  .eye-icon {
+    display: inline-block;
     cursor: pointer;
-    transition: opacity 0.3s;
-    object-fit: contain;
+    transition: transform 0.2s ease;
+    font-size: 1.5rem;
+  }
+  
+  .eye-icon:hover {
+    transform: scale(1.15);
+  }
+  
+  .eye-icon.visible {
+    color: #2196F3;
+  }
+  
+  .eye-icon.hidden {
+    color: #9E9E9E;
   }
 
   /* Recuadro Morado "¿Este es tu producto?" */
@@ -587,8 +600,11 @@
             <input type="hidden" name="es_favorito" id="es_favorito" value="0">
           </div>
 
+          <!-- MODIFICADO: Ahora usa FontAwesome para el icono de ojo -->
           <div id="ventaContainer" style="display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem;">
-            <img id="ventaIcon" src="{{ url_for('static', filename='img/1.png') }}" class="venta-icon">
+            <span id="ventaIcon" class="eye-icon visible">
+              <i class="fas fa-eye"></i>
+            </span>
             <span>Producto a la Venta</span>
             <input type="hidden" name="esta_a_la_venta" id="esta_a_la_venta" value="1">
           </div>
@@ -658,7 +674,7 @@
         <div class="step-container">
           <div class="step-number">2</div>
 
-          <!-- Nombre -->
+          <!-- Nombre - MODIFICADO: Agregado required -->
           <div class="form-group">
             <div class="floating-label" style="display: none;" id="nombreFloatingLabel">Nombre del producto</div>
             <input 
@@ -667,6 +683,7 @@
               id="nombre"
               name="nombre"
               placeholder="NOMBRE DEL PRODUCTO"
+              required
             >
           </div>
 
@@ -687,7 +704,7 @@
         <div class="step-container">
           <div class="step-number">3</div>
 
-          <!-- Stock Inicial -->
+          <!-- Stock Inicial - MODIFICADO: Agregado required -->
           <div class="form-group">
             <div class="floating-label" style="display: none;" id="stockFloatingLabel">Stock inicial</div>
             <input 
@@ -697,6 +714,7 @@
               name="stock"
               min="0"
               placeholder="STOCK INICIAL"
+              required
             >
           </div>
 
@@ -735,9 +753,9 @@
         <div class="step-container">
           <div class="step-number">4</div>
 
-          <!-- Categoría (Choices.js) -->
+          <!-- Categoría (Choices.js) - MODIFICADO: Agregado required -->
           <div class="form-group">
-            <select class="form-select" name="categoria_existente" id="categoria_existente">
+            <select class="form-select" name="categoria_existente" id="categoria_existente" required>
               <option value="" disabled selected hidden>-SELECCIONA UNA CATEGORÍA-</option>
               <option value="abarrotes secos" data-custom-properties='{"color": "#FFA500"}'>Abarrotes secos</option>
               <option value="enlatados y conservas" data-custom-properties='{"color": "#DAA520"}'>Enlatados y conservas</option>
@@ -958,12 +976,13 @@
   }
 
   /* ===========================================================
-   * 3) Formatear Costo en tiempo real (optimizado)
+   * 3) Formatear Costo en tiempo real (MODIFICADO: Limite de 2 decimales)
    * ===========================================================
    */
   // Cache expresiones regulares
   const numericRegex = /[^\d.]/g;
-  const moneyPattern = /^(\d*)(\.?)(\d{0,3})/;
+  // MODIFICADO: Cambiado de {0,3} a {0,2} para limitar a 2 decimales
+  const moneyPattern = /^(\d*)(\.?)(\d{0,2})/;
   
   function formatCostRealtime(input) {
     let value = input.value;
@@ -1627,6 +1646,7 @@
     });
   }
 
+  /* MODIFICADO: Actualizado para usar FontAwesome */
   const ventaContainer = document.getElementById("ventaContainer");
   const ventaIcon = document.getElementById("ventaIcon");
   const estaAVentaInput = document.getElementById("esta_a_la_venta");
@@ -1635,10 +1655,14 @@
     ventaContainer.addEventListener("click", () => {
       if (estaAVentaInput.value === "1") {
         estaAVentaInput.value = "0";
-        ventaIcon.src = "{{ url_for('static', filename='img/2.png') }}";
+        ventaIcon.innerHTML = '<i class="fas fa-eye-slash"></i>';
+        ventaIcon.classList.remove("visible");
+        ventaIcon.classList.add("hidden");
       } else {
         estaAVentaInput.value = "1";
-        ventaIcon.src = "{{ url_for('static', filename='img/1.png') }}";
+        ventaIcon.innerHTML = '<i class="fas fa-eye"></i>';
+        ventaIcon.classList.remove("hidden");
+        ventaIcon.classList.add("visible");
       }
     });
   }
@@ -2532,6 +2556,95 @@
         });
       }
     }
+    
+    // MODIFICADO: Evitar que los datos se guarden en caché al recargar la página
+    function preventFormCaching() {
+      // Obtener el formulario
+      const productForm = document.getElementById('productForm');
+      if (productForm) {
+        // Limpiar el formulario al cargar la página
+        productForm.reset();
+        
+        // Limpiar campos adicionales que no se resetean con form.reset()
+        document.getElementById("ia_foto_filename").value = "";
+        document.getElementById("displayed_image_url").value = "";
+        document.getElementById("es_favorito").value = "0";
+        document.getElementById("esta_a_la_venta").value = "1";
+        document.getElementById("toggle_caducidad_estado").value = "DESACTIVADO";
+        
+        // Resetear Choices.js para categoría
+        if (window.categoryChoices) {
+          window.categoryChoices.setChoiceByValue("");
+        }
+        
+        // Resetear placeholder de foto si hay una imagen cargada
+        const fotoPlaceholder = document.getElementById("fotoPlaceholder");
+        if (fotoPlaceholder && fotoPlaceholder.classList.contains("has-image")) {
+          fotoPlaceholder.innerHTML = `
+            <button type="button" class="no-image-icon" id="btnCargarFoto">&#8942;</button>
+            <div class="foto-dropdown" id="fotoDropdown" style="display:none;">
+              <button type="button" class="dropdown-item btn btn-secondary" id="dropdownCargarFoto">Cargar imagen</button>
+              <button type="button" class="dropdown-item btn btn-secondary" id="dropdownGenerarIA">Generar con IA</button>
+            </div>
+          `;
+          fotoPlaceholder.classList.remove("has-image");
+          setTimeout(bindPhotoEvents, 0);
+        }
+        
+        // Resetear iconos
+        const heartIcon = document.getElementById("heartIcon");
+        if (heartIcon) {
+          heartIcon.classList.remove("active");
+          heartIcon.innerHTML = "&#9825;";
+        }
+        
+        // MODIFICADO: Reset del icono de visibilidad a estado por defecto
+        const ventaIcon = document.getElementById("ventaIcon");
+        if (ventaIcon) {
+          ventaIcon.classList.add("visible");
+          ventaIcon.classList.remove("hidden");
+          ventaIcon.innerHTML = '<i class="fas fa-eye"></i>';
+        }
+        
+        // Resetear toggle de caducidad
+        const btnToggleCaducidad = document.getElementById("btnToggleCaducidad");
+        const caducidadOpciones = document.getElementById("caducidadOpcionesContainer");
+        if (btnToggleCaducidad && caducidadOpciones) {
+          btnToggleCaducidad.textContent = "DESACTIVADO";
+          caducidadOpciones.style.display = "none";
+        }
+        
+        // Resetear selecciones de opciones de caducidad
+        document.querySelectorAll(".caducidad-options .form-check").forEach(el => {
+          el.classList.remove("selected");
+          if (el.querySelector("input[type='radio']")) {
+            el.querySelector("input[type='radio']").checked = false;
+          }
+        });
+      }
+    }
+    
+    // Aplicar limpieza al cargar la página
+    preventFormCaching();
+    
+    // Evitar que se guarden datos en back-forward cache
+    window.addEventListener('pageshow', function(e) {
+      if (e.persisted) {
+        console.log("Página restaurada desde bfcache - limpiando formulario");
+        preventFormCaching();
+      }
+    });
+    
+    // También limpiar cuando cambia la visibilidad del documento (usuario vuelve atrás y adelante)
+    document.addEventListener('visibilitychange', function(){
+      if (document.visibilityState === 'visible') {
+        const navEntries = performance.getEntriesByType('navigation');
+        if (navEntries.length > 0 && navEntries[0].type === 'back_forward') {
+          console.log("Navegación back-forward detectada - limpiando formulario");
+          preventFormCaching();
+        }
+      }
+    });
     
     console.log("✅ Parche final aplicado correctamente");
   });
