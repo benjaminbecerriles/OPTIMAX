@@ -528,7 +528,7 @@
   <!-- Link para volver -->
   <a href="{{ url_for('ajuste_stock') }}" class="back-link">
     <i class="fas fa-arrow-left"></i>
-    <span>Volver a inventario</span>
+    <span>Volver a ajuste de stock</span>
   </a>
   
   <!-- Título de página -->
@@ -657,16 +657,17 @@
             <label for="costo_unitario" class="form-label">Ingresar nuevo costo</label>
             <div class="input-group">
               <span class="input-group-text">$</span>
-              <input type="number" 
+              <input type="text" 
                      class="form-control" 
                      id="costo_unitario" 
                      name="costo_unitario" 
-                     step="0.01" 
-                     min="0" 
+                     oninput="formatCostRealtime(this)"
                      value="{{ producto.costo|round(2) }}">
             </div>
             <!-- El costo principal se actualizará automáticamente con el nuevo valor -->
             <input type="hidden" id="actualizar_costo" name="actualizar_costo" value="on">
+            <!-- Oculto para el valor real numérico -->
+            <input type="hidden" id="costo_unitario_real" name="costo_unitario_real" value="{{ producto.costo|round(2) }}">
           </div>
         </div>
         
@@ -896,14 +897,71 @@
         }
       });
     }
+
+    // Función para formatear costo en tiempo real (similar a agregar_producto.html)
+    function formatCostRealtime(input) {
+      let value = input.value;
+      
+      // Eliminar el símbolo $ si está presente
+      if (value.startsWith("$")) {
+        value = value.substring(1);
+      }
+      
+      // Eliminar comas y caracteres no numéricos (excepto punto)
+      value = value.replace(/,/g, "").replace(/[^\d.]/g, "");
+      
+      // Limitar a 2 decimales
+      const patronMoneda = /^(\d*)(\.?)(\d{0,2})/;
+      const match = value.match(patronMoneda);
+      
+      if (match) {
+        let intPart = match[1]; // Parte entera
+        let dot = match[2];    // Punto decimal
+        let decPart = match[3]; // Parte decimal
+        
+        // Formatear con separador de miles
+        let formattedInt = intPart ? Number(intPart).toLocaleString("en-US") : "";
+        
+        // Construir el resultado final
+        let result = formattedInt;
+        if (dot) {
+          result += ".";
+        }
+        result += decPart;
+        
+        // Si hay un valor, agregar el signo $ (aunque en este caso lo maneja el input-group)
+        input.value = result;
+        
+        // Actualizar campo oculto con el valor numérico real (sin comas)
+        const costoReal = document.getElementById('costo_unitario_real');
+        if (costoReal) {
+          // Convertir a valor numérico sin formato
+          let numericValue = parseFloat((intPart || "0") + "." + (decPart || "0"));
+          costoReal.value = numericValue.toFixed(2);
+        }
+        
+        // Posicionar el cursor al final
+        input.setSelectionRange(input.value.length, input.value.length);
+      }
+    }
+    
+    // Asignar la función al objeto global window para que esté disponible desde HTML
+    window.formatCostRealtime = formatCostRealtime;
     
     // Toggle costo
     const mantenerCostoCheck = document.getElementById('mantener_costo_anterior');
     const costoContainer = document.getElementById('costoContainer');
+    const costoUnitarioInput = document.getElementById('costo_unitario');
     
     if (mantenerCostoCheck && costoContainer) {
       mantenerCostoCheck.addEventListener('change', function() {
         costoContainer.style.display = this.checked ? 'none' : 'block';
+        
+        // Si se muestra el campo, formatear el valor inicial
+        if (!this.checked && costoUnitarioInput) {
+          // Inicializar el formato al mostrar
+          formatCostRealtime(costoUnitarioInput);
+        }
       });
     }
     
@@ -962,6 +1020,15 @@
     
     // Inicializar la visualización de unidad
     updateUnitText();
+    
+    // Formatear el campo de costo inicial si está disponible
+    if (costoUnitarioInput) {
+      // Aplicar formato inicial si es necesario
+      const costoValue = costoUnitarioInput.value.trim();
+      if (costoValue && !costoValue.includes(',')) {
+        formatCostRealtime(costoUnitarioInput);
+      }
+    }
     
     // Validación del formulario
     const form = document.getElementById('entradaForm');
@@ -1044,11 +1111,14 @@
         
         // Validar costo si no se mantiene el anterior
         if (!mantenerCostoCheck.checked) {
-          const costoUnitario = document.getElementById('costo_unitario');
-          if (parseFloat(costoUnitario.value) < 0) {
+          // Usar el valor del campo oculto que contiene el valor numérico real
+          const costoUnitarioReal = document.getElementById('costo_unitario_real');
+          const costoValor = parseFloat(costoUnitarioReal.value);
+          
+          if (isNaN(costoValor) || costoValor < 0) {
             event.preventDefault();
             alert('El costo unitario no puede ser negativo.');
-            costoUnitario.focus();
+            costoUnitarioInput.focus();
             return false;
           }
         }

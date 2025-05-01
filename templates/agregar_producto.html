@@ -2234,7 +2234,7 @@
 <!-- PARCHE FINAL MEJORADO -->
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    console.log("🔧 Aplicando parche final mejorado");
+    console.log("🔧 Aplicando parche final mejorado para manejo de categorías");
     
     // Variables principales
     const inputExterno = document.getElementById("codigo_barras_externo");
@@ -2242,13 +2242,92 @@
     const scanFoundRow = document.getElementById("scanFoundRow");
     const btnScanYes = document.getElementById("btnScanYes");
     const btnScanNo = document.getElementById("btnScanNo");
+    const autoContainer = document.getElementById("autocomplete-results");
     
     if (!scanFoundContainer || !scanFoundRow) {
       console.error("❌ No se encontraron elementos del cuadro rosa");
       return;
     }
     
-    // Función para actualizar TODOS los campos, incluyendo categoría
+    // Función auxiliar para obtener la instancia correcta de Choices.js
+    function getChoicesInstance() {
+      // Primero verificar si existe como variable global en window
+      if (window.categoryChoices) {
+        return window.categoryChoices;
+      }
+      
+      // Luego verificar si existe como variable local (definida en el scope del documento)
+      if (typeof categoryChoices !== 'undefined') {
+        return categoryChoices;
+      }
+      
+      // Finalmente, intentar crear una nueva instancia si el elemento existe
+      const catSelect = document.getElementById("categoria_existente");
+      if (catSelect && typeof Choices !== 'undefined') {
+        try {
+          // Crear una nueva instancia solo si no hay una ya asociada
+          if (!catSelect.choices) {
+            console.log("Creando nueva instancia de Choices.js");
+            return new Choices(catSelect, {
+              searchEnabled: false,
+              placeholder: false
+            });
+          }
+        } catch (e) {
+          console.error("Error creando instancia de Choices.js:", e);
+        }
+      }
+      
+      // No se encontró ni se pudo crear una instancia
+      return null;
+    }
+    
+    // Función segura para establecer el valor de categoría
+    function setCategoryValue(value) {
+      if (!value) return false;
+      
+      // Intentar obtener la instancia de Choices.js
+      const choicesInstance = getChoicesInstance();
+      
+      if (choicesInstance) {
+        try {
+          // Usar la instancia de Choices para establecer el valor
+          choicesInstance.setChoiceByValue(value);
+          return true;
+        } catch (e) {
+          console.warn("Error al establecer valor con Choices.js:", e);
+        }
+      }
+      
+      // Fallback: Manipulación directa del DOM si no tenemos Choices
+      const catSelect = document.getElementById("categoria_existente");
+      if (catSelect) {
+        try {
+          // Buscar la opción con el valor correspondiente
+          let found = false;
+          for (let i = 0; i < catSelect.options.length; i++) {
+            if (catSelect.options[i].value === value) {
+              catSelect.selectedIndex = i;
+              found = true;
+              break;
+            }
+          }
+          
+          if (found) {
+            // Disparar evento change para actualizar la UI
+            const event = new Event('change');
+            catSelect.dispatchEvent(event);
+            return true;
+          }
+        } catch (e) {
+          console.warn("Error al establecer valor directamente:", e);
+        }
+      }
+      
+      return false;
+    }
+    
+    // Función mejorada para actualizar TODOS los campos, incluyendo categoría
     function updateFormWithProduct(product) {
       console.log("✏️ Actualizando formulario con:", product);
       
@@ -2303,11 +2382,12 @@
         }
       }
       
-      // 4. Actualizar categoría - MEJORADO
-      if (product.categoria && window.categoryChoices) {
+      // 4. Actualizar categoría - MEJORADO CON COINCIDENCIA EXACTA Y PARCIAL
+      if (product.categoria) {
         try {
-          // Función para normalizar textos (quitar acentos y minúsculas)
+          // Función para normalizar textos (quitar acentos, minúsculas y trimear)
           const normalizeText = function(str) {
+            if (!str) return '';
             return str.normalize("NFD")
               .replace(/[\u0300-\u036f]/g, "")
               .toLowerCase()
@@ -2317,49 +2397,102 @@
           const normalizedCat = normalizeText(product.categoria);
           const catSelect = document.getElementById("categoria_existente");
           
-          if (catSelect) {
+          if (catSelect && catSelect.options) {
             let foundMatch = false;
+            let bestMatch = null;
+            let bestMatchScore = 0;
             
-            // Intentar encontrar coincidencia exacta
+            // Buscar coincidencia exacta primero
             for (let i = 0; i < catSelect.options.length; i++) {
               const option = catSelect.options[i];
+              if (!option.value) continue; // Saltar la opción vacía
+              
               const normalizedOption = normalizeText(option.value);
               
+              // Coincidencia exacta
               if (normalizedOption === normalizedCat) {
-                console.log("✅ Categoría encontrada exacta:", option.value);
-                window.categoryChoices.setChoiceByValue(option.value);
+                console.log("[Categoría] Coincidencia exacta encontrada:", option.value);
                 foundMatch = true;
+                setCategoryValue(option.value);
                 break;
               }
-            }
-            
-            // Si no hay coincidencia exacta, buscar una parcial
-            if (!foundMatch) {
-              for (let i = 0; i < catSelect.options.length; i++) {
-                const option = catSelect.options[i];
-                const normalizedOption = normalizeText(option.value);
+              
+              // Calcular puntuación de coincidencia para coincidencias parciales
+              if (normalizedOption.includes(normalizedCat) || normalizedCat.includes(normalizedOption)) {
+                let score = 0;
+                // Más puntos si es substring exacta
+                if (normalizedOption.includes(normalizedCat)) {
+                  score += normalizedCat.length;
+                }
+                if (normalizedCat.includes(normalizedOption)) {
+                  score += normalizedOption.length;
+                }
+                // Más puntos si comienza igual
+                if (normalizedOption.startsWith(normalizedCat) || normalizedCat.startsWith(normalizedOption)) {
+                  score += 5;
+                }
                 
-                if (normalizedOption.includes(normalizedCat) || 
-                    normalizedCat.includes(normalizedOption)) {
-                  console.log("✅ Categoría encontrada parcial:", option.value);
-                  window.categoryChoices.setChoiceByValue(option.value);
-                  foundMatch = true;
-                  break;
+                if (score > bestMatchScore) {
+                  bestMatchScore = score;
+                  bestMatch = option.value;
                 }
               }
             }
             
+            // Si no hay coincidencia exacta pero hay coincidencia parcial
+            if (!foundMatch && bestMatch) {
+              console.log("[Categoría] Usando coincidencia parcial:", bestMatch);
+              setCategoryValue(bestMatch);
+              foundMatch = true;
+            }
+            
+            // Si no hay ninguna coincidencia, buscar algo genérico basado en palabras clave
             if (!foundMatch) {
-              console.log("⚠️ No se encontró categoría coincidente para:", product.categoria);
+              // Palabras clave para determinar categoría
+              const keywords = {
+                "bebidas no alcohólicas": ["agua", "refresco", "jugo", "bebida", "zumo", "soda"],
+                "bebidas alcohólicas": ["cerveza", "vino", "licor", "whisky", "tequila", "ron"],
+                "botanas, dulces y snacks": ["snack", "papas", "dulce", "chocolate", "botana", "galleta"],
+                "frutas y verduras frescas": ["fruta", "verdura", "manzana", "platano", "tomate"],
+                "lácteos y huevos": ["leche", "queso", "yogurt", "huevo", "crema", "lacteo"],
+                "abarrotes secos": ["arroz", "frijol", "pasta", "cereal", "harina"],
+                "productos de limpieza y hogar": ["limpia", "jabon", "detergente", "limpieza"],
+                "cuidado personal e higiene": ["shampoo", "pasta dental", "jabon", "higiene", "desodorante"],
+                "medicamentos de mostrador (otc)": ["medicamento", "pastilla", "analgesico", "aspirina"]
+              };
+              
+              let matchedCategory = null;
+              
+              // Buscar palabras clave en el nombre del producto y la categoría
+              for (let category in keywords) {
+                for (let keyword of keywords[category]) {
+                  if (normalizedCat.includes(keyword) || 
+                      (product.nombre && normalizeText(product.nombre).includes(keyword))) {
+                    matchedCategory = category;
+                    break;
+                  }
+                }
+                if (matchedCategory) break;
+              }
+              
+              // Si se encontró una categoría por palabra clave
+              if (matchedCategory) {
+                console.log("[Categoría] Coincidencia por palabra clave:", matchedCategory);
+                setCategoryValue(matchedCategory);
+              } else {
+                // Último recurso: usar "otros (miscelánea)"
+                setCategoryValue("otros (miscelánea)");
+                console.log("[Categoría] Sin coincidencia, usando 'otros (miscelánea)' para:", normalizedCat);
+              }
             }
           }
         } catch (e) {
-          console.warn("⚠️ Error al actualizar categoría:", e);
+          console.warn("[Categoría] Error al actualizar:", e);
         }
       }
     }
     
-    // Función mejorada para saber si hay coincidencia y mostrar cuadro rosa
+    // Función mejorada para manejar códigos escaneados y mostrar el cuadro rosa
     function improvedOnScannedBarcode(code) {
       console.log("🔍 Código escaneado:", code);
       
@@ -2410,58 +2543,86 @@
           .then(data => {
             console.log("📊 Resultados:", data);
             
-            // CAMBIO: Solo mostrar cuadro rosa si hay resultados, sino solo imprimir código
+            // Solo mostrar cuadro rosa si hay resultados, sino solo imprimir código
             if (!data.results || data.results.length === 0) {
-              console.log("ℹ️ No hay coincidencias, solo imprimir código");
-              scanFoundContainer.style.display = "none";
+              console.log("ℹ️ No hay coincidencias en autocomplete, intentando con find_by_code");
+              
+              // Intentar con find_by_code como alternativa
+              fetch(`/api/find_by_code?codigo=${encodeURIComponent(code)}&t=${Date.now()}`)
+                .then(response => {
+                  if (!response.ok) throw new Error('Error en find_by_code');
+                  return response.json();
+                })
+                .then(productData => {
+                  if (productData.found) {
+                    console.log("📦 Producto encontrado con find_by_code:", productData);
+                    
+                    // Mostrar el cuadro rosa con la información
+                    showProductInRoseBox(productData);
+                  } else {
+                    console.log("❌ Producto no encontrado con ningún método");
+                    scanFoundContainer.style.display = "none";
+                  }
+                })
+                .catch(error => {
+                  console.error("❌ Error en find_by_code:", error);
+                  scanFoundContainer.style.display = "none";
+                });
+                
               return;
             }
             
-            // Encontró coincidencias - Mostrar cuadro rosa
+            // Encontró coincidencias en autocomplete - Mostrar cuadro rosa
             const product = data.results[0]; // Usar el primer resultado
-            
-            scanFoundContainer.style.display = "block";
-            scanFoundRow.innerHTML = `
-              <div class="scanFoundInner">
-                <div class="scanFoundImageBox">
-                  <img src="${product.url_imagen || ''}" alt="Producto Escaneado"
-                      onerror="this.src='${window.location.origin}/static/img/default_product.jpg';" />
-                </div>
-                <div class="scanFoundText">
-                  <div class="scanFoundTitle">¿ESTE ES TU PRODUCTO?</div>
-                  <div class="scanFoundName">${product.nombre || 'Producto sin nombre'}</div>
-                  <div class="scanFoundCode">Código: ${product.codigo_barras || ''}</div>
-                </div>
-              </div>
-            `;
-            
-            // Reconfigurar botones Sí/No
-            
-            // Botón No (siempre cierra el cuadro)
-            btnScanNo.onclick = function() {
-              scanFoundContainer.style.display = "none";
-            };
-            
-            // Botón Sí (acepta y completa el formulario)
-            btnScanYes.onclick = function() {
-              // Usar nuestra función mejorada
-              updateFormWithProduct(product);
-              scanFoundContainer.style.display = "none";
-            };
-            
-            // Ocultar automáticamente después de 30 segundos
-            setTimeout(function() {
-              if (scanFoundContainer.style.display === "block") {
-                scanFoundContainer.style.display = "none";
-              }
-            }, 30000);
+            showProductInRoseBox(product);
           })
           .catch(err => {
-            console.error("❌ Error:", err);
+            console.error("❌ Error en autocomplete:", err);
             // Error al buscar - solo imprimir el código
             scanFoundContainer.style.display = "none";
           });
       });
+    }
+    
+    // Función para mostrar producto en el cuadro rosa
+    function showProductInRoseBox(product) {
+      scanFoundContainer.style.display = "block";
+      scanFoundRow.innerHTML = `
+        <div class="scanFoundInner">
+          <div class="scanFoundImageBox">
+            <img src="${product.url_imagen || ''}" alt="Producto Escaneado"
+                onerror="this.src='${window.location.origin}/static/img/default_product.jpg';" />
+          </div>
+          <div class="scanFoundText">
+            <div class="scanFoundTitle">¿ESTE ES TU PRODUCTO?</div>
+            <div class="scanFoundName">${product.nombre || 'Producto sin nombre'}</div>
+            <div class="scanFoundCode">Código: ${product.codigo_barras || ''}</div>
+          </div>
+        </div>
+      `;
+      
+      // Reconfigurar botones Sí/No
+      // Botón No (siempre cierra el cuadro)
+      if (btnScanNo) {
+        btnScanNo.onclick = function() {
+          scanFoundContainer.style.display = "none";
+        };
+      }
+      
+      // Botón Sí (acepta y completa el formulario con nuestra función mejorada)
+      if (btnScanYes) {
+        btnScanYes.onclick = function() {
+          updateFormWithProduct(product);
+          scanFoundContainer.style.display = "none";
+        };
+      }
+      
+      // Ocultar automáticamente después de 30 segundos
+      setTimeout(function() {
+        if (scanFoundContainer.style.display === "block") {
+          scanFoundContainer.style.display = "none";
+        }
+      }, 30000);
     }
     
     // Función auxiliar para verificar si el código existe
@@ -2479,15 +2640,14 @@
         });
     }
     
-    // Parchar función principal
-    window.onScannedBarcode = improvedOnScannedBarcode;
-    
-    // Parchar también la función que maneja el autocompletado cuando se hace clic
-    // Esto es para asegurar que se usa la misma lógica de categorías
-    if (typeof autoContainer !== 'undefined') {
-      // Reemplazar el event listener del contenedor de autocompletado
-      const originalListener = autoContainer.onclick;
+    // RESTAURAR FUNCIONALIDAD DE AUTOCOMPLETADO MIENTRAS ESCRIBES
+    // Esta parte es crítica - No modificar las funciones originales de autocompletado
+    if (inputExterno && autoContainer) {
+      console.log("✅ Preservando funcionalidad de autocompletado original");
       
+      // No reemplazar los eventos originales, solo agregar nuestro parche al final
+      
+      // Asegurarnos de que el click en los resultados use nuestra función mejorada
       autoContainer.addEventListener("click", function(e) {
         const target = e.target.closest(".autocomplete-item");
         if (!target) return;
@@ -2513,8 +2673,11 @@
         
         // Ocultar resultados
         autoContainer.style.display = "none";
-      });
+      }, true); // Usar capture para que se ejecute antes que otros event listeners
     }
+    
+    // Parchar función principal de escaneo
+    window.onScannedBarcode = improvedOnScannedBarcode;
     
     // Parchar Quagga para cámara
     if (typeof iniciarEscaneoQuagga === 'function') {
@@ -2538,7 +2701,7 @@
               const modal = document.getElementById("modalEscaneoCamara");
               if (modal) modal.style.display = "none";
               
-              // Usar nuestra implementación
+              // Usar nuestra implementación mejorada
               improvedOnScannedBarcode(code);
             });
           }
@@ -2557,7 +2720,48 @@
       }
     }
     
-    // MODIFICADO: Evitar que los datos se guarden en caché al recargar la página
+    // Crear una función para verificar si la instancia de Choices.js está lista
+    function ensureChoicesReady() {
+      // Si categoryChoices ya existe o si no existe el elemento, no hacer nada
+      if (window.categoryChoices || typeof categoryChoices !== 'undefined' || !document.getElementById("categoria_existente")) {
+        return;
+      }
+      
+      // Verificar si Choices está disponible en el scope global
+      if (typeof Choices !== 'undefined') {
+        // Verificar si el elemento tiene una instancia asociada
+        const catSelect = document.getElementById("categoria_existente");
+        if (catSelect && !catSelect.choices) {
+          // Intentar acceder a la instancia creada en el código original
+          try {
+            // Buscar en el DOM si hay una clase de Choices que se haya creado ya
+            const choicesComponent = document.querySelector('.choices');
+            if (choicesComponent && choicesComponent.__choicesInstance) {
+              window.categoryChoices = choicesComponent.__choicesInstance;
+              console.log("Encontrada instancia de Choices.js existente");
+            } else {
+              // Si no hay una instancia, crear una nueva
+              console.log("Creando nueva instancia global de Choices.js");
+              window.categoryChoices = new Choices(catSelect, {
+                searchEnabled: false,
+                placeholder: false
+              });
+            }
+          } catch (e) {
+            console.error("Error al inicializar Choices.js:", e);
+          }
+        }
+      } else {
+        console.warn("Choices.js no está disponible en este momento");
+        // Programar otra verificación 
+        setTimeout(ensureChoicesReady, 500);
+      }
+    }
+    
+    // Asegurar que Choices.js esté listo
+    ensureChoicesReady();
+    
+    // Evitar que los datos se guarden en caché al recargar la página
     function preventFormCaching() {
       // Obtener el formulario
       const productForm = document.getElementById('productForm');
@@ -2566,15 +2770,30 @@
         productForm.reset();
         
         // Limpiar campos adicionales que no se resetean con form.reset()
-        document.getElementById("ia_foto_filename").value = "";
-        document.getElementById("displayed_image_url").value = "";
-        document.getElementById("es_favorito").value = "0";
-        document.getElementById("esta_a_la_venta").value = "1";
-        document.getElementById("toggle_caducidad_estado").value = "DESACTIVADO";
+        if (document.getElementById("ia_foto_filename")) {
+          document.getElementById("ia_foto_filename").value = "";
+        }
+        if (document.getElementById("displayed_image_url")) {
+          document.getElementById("displayed_image_url").value = "";
+        }
+        if (document.getElementById("es_favorito")) {
+          document.getElementById("es_favorito").value = "0";
+        }
+        if (document.getElementById("esta_a_la_venta")) {
+          document.getElementById("esta_a_la_venta").value = "1";
+        }
+        if (document.getElementById("toggle_caducidad_estado")) {
+          document.getElementById("toggle_caducidad_estado").value = "DESACTIVADO";
+        }
         
         // Resetear Choices.js para categoría
-        if (window.categoryChoices) {
-          window.categoryChoices.setChoiceByValue("");
+        const choicesInstance = getChoicesInstance();
+        if (choicesInstance) {
+          try {
+            choicesInstance.setChoiceByValue("");
+          } catch (e) {
+            console.warn("Error al resetear categoría:", e);
+          }
         }
         
         // Resetear placeholder de foto si hay una imagen cargada
@@ -2598,7 +2817,7 @@
           heartIcon.innerHTML = "&#9825;";
         }
         
-        // MODIFICADO: Reset del icono de visibilidad a estado por defecto
+        // Reset del icono de visibilidad a estado por defecto
         const ventaIcon = document.getElementById("ventaIcon");
         if (ventaIcon) {
           ventaIcon.classList.add("visible");
@@ -2635,7 +2854,7 @@
       }
     });
     
-    // También limpiar cuando cambia la visibilidad del documento (usuario vuelve atrás y adelante)
+    // También limpiar cuando cambia la visibilidad del documento
     document.addEventListener('visibilitychange', function(){
       if (document.visibilityState === 'visible') {
         const navEntries = performance.getEntriesByType('navigation');

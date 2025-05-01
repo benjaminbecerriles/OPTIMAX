@@ -134,7 +134,7 @@ function procesarCodigoBarras(code, scanFoundContainer, scanFoundRow) {
   }
 }
 
-// 2. FUNCIÓN PARA MOSTRAR LA INFORMACIÓN ENCONTRADA
+// 2. FUNCIÓN PARA MOSTRAR LA INFORMACIÓN ENCONTRADA - MEJORADA PARA CATEGORÍA
 function showScanFound(info) {
   const scanFoundContainer = document.getElementById("scanFoundContainer");
   const scanFoundRow = document.getElementById("scanFoundRow");
@@ -176,13 +176,13 @@ function showScanFound(info) {
   newBtnYes.setAttribute("data-imagen", info.url_imagen || '');
   newBtnYes.setAttribute("data-categoria", info.categoria || '');
   
-  // Configurar nuevos event listeners
+  // Configurar nuevos event listeners - MEJORADO PARA CATEGORÍA
   newBtnYes.addEventListener("click", function() {
     // Usar atributos guardados
     const nombre = this.getAttribute("data-nombre");
     const marca = this.getAttribute("data-marca");
     const imagenURL = this.getAttribute("data-imagen");
-    const cat = this.getAttribute("data-categoria");
+    const categoria = this.getAttribute("data-categoria");
     
     // Actualizar campos del formulario
     const nombreInput = document.getElementById("nombre");
@@ -235,29 +235,88 @@ function showScanFound(info) {
       }
     }
     
-    // Actualizar categoría
-    if (cat) {
+    // MEJORADO: Actualizar categoría con mejor handling
+    if (categoria && window.categoryChoices) {
       try {
-        const removeAccents = function(str) {
-          return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        // Función para normalizar textos (quitar acentos y convertir a minúsculas)
+        const normalizeText = function(str) {
+          if (!str) return '';
+          return str.normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toLowerCase()
+            .trim();
         };
         
-        const catDB = removeAccents(cat.toLowerCase().trim());
+        const normalizedCat = normalizeText(categoria);
         const catSelect = document.getElementById("categoria_existente");
         
-        if (catSelect && window.categoryChoices) {
+        if (catSelect && catSelect.options) {
+          let foundMatch = false;
+          let bestMatch = null;
+          let bestMatchScore = 0;
+          
+          // Buscar coincidencia exacta primero
           for (let i = 0; i < catSelect.options.length; i++) {
-            const rawOption = catSelect.options[i].value;
-            const catOption = removeAccents(rawOption.toLowerCase().trim());
+            const option = catSelect.options[i];
+            if (!option.value) continue; // Saltar la opción vacía
             
-            if (catOption === catDB) {
-              window.categoryChoices.setChoiceByValue(rawOption);
+            const normalizedOption = normalizeText(option.value);
+            
+            // Coincidencia exacta
+            if (normalizedOption === normalizedCat) {
+              console.log("[Categoría] Coincidencia exacta encontrada:", option.value);
+              window.categoryChoices.setChoiceByValue(option.value);
+              foundMatch = true;
               break;
             }
+            
+            // Calcular puntuación de coincidencia para coincidencias parciales
+            if (normalizedOption.includes(normalizedCat) || normalizedCat.includes(normalizedOption)) {
+              let score = 0;
+              // Más puntos si es substring exacta
+              if (normalizedOption.includes(normalizedCat)) {
+                score += normalizedCat.length;
+              }
+              if (normalizedCat.includes(normalizedOption)) {
+                score += normalizedOption.length;
+              }
+              // Más puntos si comienza igual
+              if (normalizedOption.startsWith(normalizedCat) || normalizedCat.startsWith(normalizedOption)) {
+                score += 5;
+              }
+              
+              if (score > bestMatchScore) {
+                bestMatchScore = score;
+                bestMatch = option.value;
+              }
+            }
+          }
+          
+          // Si no hay coincidencia exacta pero hay coincidencia parcial
+          if (!foundMatch && bestMatch) {
+            console.log("[Categoría] Usando coincidencia parcial:", bestMatch);
+            window.categoryChoices.setChoiceByValue(bestMatch);
+            foundMatch = true;
+          }
+          
+          // Si no hay ninguna coincidencia, buscar algo genérico
+          if (!foundMatch) {
+            // Buscar una categoría genérica como fallback
+            if (normalizedCat.includes("bebida")) {
+              window.categoryChoices.setChoiceByValue("bebidas no alcohólicas");
+            } else if (normalizedCat.includes("snack") || normalizedCat.includes("dulce")) {
+              window.categoryChoices.setChoiceByValue("botanas, dulces y snacks");
+            } else if (normalizedCat.includes("limpieza")) {
+              window.categoryChoices.setChoiceByValue("productos de limpieza y hogar");
+            } else {
+              // Último recurso: usar "otros (miscelánea)"
+              window.categoryChoices.setChoiceByValue("otros (miscelánea)");
+            }
+            console.log("[Categoría] Sin coincidencia, usando genérica para:", normalizedCat);
           }
         }
       } catch (e) {
-        console.warn("Error al actualizar categoría:", e);
+        console.warn("[Categoría] Error al actualizar:", e);
       }
     }
     
