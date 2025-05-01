@@ -6,10 +6,15 @@
 let scanFoundTimeout = null;
 let closeListenerActive = false;
 let blockScanFoundHiding = false; // Previene el cierre accidental
+let scanFoundContainerVisible = false; // Para rastrear si el cuadro está visible
 
-// 1. FUNCIÓN PRINCIPAL PARA MANEJAR CÓDIGO ESCANEADO
-function onScannedBarcode(code) {
-  console.log("onScannedBarcode llamado con:", code);
+// IMPORTANTE: Verificar si ya existe una implementación de onScannedBarcode
+// y guardarla para no sobreescribirla completamente
+const existingOnScannedBarcode = window.onScannedBarcode;
+
+// 1. FUNCIÓN PRINCIPAL PARA MANEJAR CÓDIGO ESCANEADO - MODIFICADA PARA NO SOBRESCRIBIR
+function handleScanFoundBarcode(code) {
+  console.log("[service-worker] handleScanFoundBarcode llamado con:", code);
   
   // Limpiar cualquier temporizador previo
   if (scanFoundTimeout) {
@@ -17,9 +22,9 @@ function onScannedBarcode(code) {
     scanFoundTimeout = null;
   }
   
-  // Activar bloqueo para prevenir cierre accidental
+  // Activar bloqueo para prevenir cierre accidental - AUMENTADO A 5 SEGUNDOS
   blockScanFoundHiding = true;
-  setTimeout(() => { blockScanFoundHiding = false; }, 1000);
+  setTimeout(() => { blockScanFoundHiding = false; }, 5000);
   
   // Obtener referencias a elementos del DOM
   const scanFoundContainer = document.getElementById("scanFoundContainer");
@@ -30,6 +35,22 @@ function onScannedBarcode(code) {
     return;
   }
   
+  // Si el cuadro ya está visible, ocultarlo primero para evitar superposición
+  if (scanFoundContainerVisible) {
+    scanFoundContainer.style.display = "none";
+    scanFoundContainer.classList.remove("animate-pulse");
+    scanFoundRow.innerHTML = "";
+    // Pequeña pausa para asegurar que el DOM se actualiza
+    setTimeout(() => {
+      procesarCodigoBarras(code, scanFoundContainer, scanFoundRow);
+    }, 100);
+  } else {
+    procesarCodigoBarras(code, scanFoundContainer, scanFoundRow);
+  }
+}
+
+// Nueva función separada para procesar el código de barras
+function procesarCodigoBarras(code, scanFoundContainer, scanFoundRow) {
   // Verificar si el código ya existe en nuestro inventario
   verificarCodigoBarras(code).then(exists => {
     if (exists) {
@@ -45,7 +66,22 @@ function onScannedBarcode(code) {
       return;
     }
     
-    // Hacer la petición API directamente sin mostrar carga
+    // Mostrar un indicador de carga en el cuadro rosa
+    scanFoundContainer.style.display = "block";
+    scanFoundContainerVisible = true;
+    
+    scanFoundRow.innerHTML = `
+      <div class="scanFoundInner">
+        <div class="scanFoundText">
+          <div class="scanFoundTitle">BUSCANDO INFORMACIÓN</div>
+          <div class="scanFoundName">Código: ${code}</div>
+          <div class="scanFoundCode">Consultando catálogo global...</div>
+        </div>
+      </div>
+    `;
+    scanFoundContainer.classList.add("animate-pulse");
+    
+    // Hacer la petición API para buscar el código
     fetch(`/api/find_by_code?codigo=${encodeURIComponent(code)}&t=${Date.now()}`)
       .then(res => res.json())
       .then(data => {
@@ -63,7 +99,7 @@ function onScannedBarcode(code) {
             </div>
           `;
           scanFoundContainer.classList.add("animate-pulse");
-          setupScanFoundTimeout(15000);
+          setupScanFoundTimeout(30000);  // 30 segundos (aumentado de 15s)
           return;
         }
         
@@ -72,11 +108,23 @@ function onScannedBarcode(code) {
         showScanFound(data);
         
         // Configurar temporizador para mantener visible
-        setupScanFoundTimeout(15000);
+        setupScanFoundTimeout(40000);  // 40 segundos (aumentado de 15s)
       })
       .catch(err => {
         console.error("Error en find-by-code:", err);
-        hideScanFoundContainer();
+        // No ocultar automáticamente en caso de error, mostrar mensaje
+        scanFoundContainer.style.display = "block";
+        scanFoundRow.innerHTML = `
+          <div class="scanFoundInner">
+            <div class="scanFoundText">
+              <div class="scanFoundTitle">ERROR AL BUSCAR</div>
+              <div class="scanFoundName">Código: ${code}</div>
+              <div class="scanFoundCode">Hubo un problema al consultar la información</div>
+            </div>
+          </div>
+        `;
+        scanFoundContainer.classList.add("animate-pulse");
+        setupScanFoundTimeout(20000);  // 20 segundos en caso de error
       });
   });
   
@@ -94,6 +142,9 @@ function showScanFound(info) {
   const btnScanNo = document.getElementById("btnScanNo");
   
   if (!scanFoundContainer || !scanFoundRow) return;
+  
+  // Marcar como visible
+  scanFoundContainerVisible = true;
   
   scanFoundContainer.classList.remove("animate-pulse");
   scanFoundRow.innerHTML = `
@@ -215,12 +266,18 @@ function showScanFound(info) {
   });
   
   newBtnNo.addEventListener("click", hideScanFoundContainer);
+  
+  // Añadir un log para depuración
+  console.log("✅ Cuadro rosa mostrado correctamente con datos:", info);
 }
 
 // 3. FUNCIÓN PARA OCULTAR EL CUADRO ROSA
 function hideScanFoundContainer() {
   // Si está bloqueado, no ocultar
-  if (blockScanFoundHiding) return;
+  if (blockScanFoundHiding) {
+    console.log("Intento de ocultar bloqueado - El cuadro permanecerá visible");
+    return;
+  }
   
   // Limpiar cualquier temporizador existente
   if (scanFoundTimeout) {
@@ -232,12 +289,20 @@ function hideScanFoundContainer() {
   const scanFoundRow = document.getElementById("scanFoundRow");
   
   if (scanFoundContainer) {
-    scanFoundContainer.style.display = "none";
+    // Añadir una animación de desvanecimiento
+    scanFoundContainer.style.opacity = "0";
     scanFoundContainer.classList.remove("animate-pulse");
+    scanFoundContainerVisible = false;
     
-    if (scanFoundRow) {
-      scanFoundRow.innerHTML = "";
-    }
+    // Después de la animación, ocultar completamente
+    setTimeout(() => {
+      scanFoundContainer.style.display = "none";
+      scanFoundContainer.style.opacity = "1"; // Restaurar opacidad para futuros usos
+      
+      if (scanFoundRow) {
+        scanFoundRow.innerHTML = "";
+      }
+    }, 300); // 300ms para coincidencia con la transición CSS
   }
 }
 
@@ -250,46 +315,78 @@ function setupScanFoundTimeout(duration) {
   
   // Establecer nuevo temporizador
   scanFoundTimeout = setTimeout(() => {
+    console.log(`⏰ Temporizador de ${duration/1000} segundos completado, ocultando cuadro rosa`);
     hideScanFoundContainer();
   }, duration);
   
-  console.log(`Temporizador configurado para ${duration/1000} segundos`);
+  console.log(`⏰ Temporizador configurado para ${duration/1000} segundos`);
 }
 
-// 5. CONFIGURAR LISTENER PARA CERRAR CUADRO AL HACER CLIC FUERA
+// 5. CONFIGURAR LISTENER PARA CERRAR CUADRO AL HACER CLIC FUERA - MEJORADO
 function setupCloseListener() {
   // Marcar como activo
   closeListenerActive = true;
   
   document.addEventListener("click", function(e) {
-    // No cerrar si el clic fue en el cuadro o sus elementos
-    if (e.target.closest("#scanFoundContainer") || 
-        e.target.closest("#scanFoundRow") || 
-        e.target.closest("#codigo_barras_externo") || 
-        e.target.closest("#scanIcon") || 
-        e.target.closest("#cameraIcon") || 
-        blockScanFoundHiding) {
+    // Lista de elementos "seguros" que no deben cerrar el cuadro
+    const safeElements = [
+      "#scanFoundContainer", 
+      "#scanFoundRow", 
+      "#btnScanYes",
+      "#btnScanNo",
+      "#codigo_barras_externo", 
+      "#scanIcon", 
+      "#cameraIcon",
+      // Añadir más selectores de las áreas del formulario que no deberían cerrar el cuadro
+      "#fotoPlaceholder",
+      "#nombre",
+      "#marca",
+      "#stock",
+      "#costo",
+      "#precio_venta",
+      "#categoria_existente",
+      ".choices", // Para el selector de categorías
+      "form" // Evitar que clics dentro del formulario cierren el cuadro
+    ];
+    
+    // Verificar si el clic fue en un elemento "seguro"
+    const isClickInSafeArea = safeElements.some(selector => {
+      return e.target.closest(selector) !== null;
+    });
+    
+    // Si el clic está en área segura o el bloqueo está activo, no cerrar
+    if (isClickInSafeArea || blockScanFoundHiding) {
       return;
     }
     
-    // Ocultar el cuadro rosa
-    hideScanFoundContainer();
+    // Si el cuadro está visible y el clic fue fuera de las áreas seguras, cerrarlo
+    if (scanFoundContainerVisible) {
+      console.log("Clic fuera de área segura detectado - Ocultando cuadro rosa");
+      hideScanFoundContainer();
+    }
   });
 }
 
-// 6. AÑADIR ESTILOS CSS PARA LA ANIMACIÓN DE PULSO
+// 6. AÑADIR ESTILOS CSS PARA LA ANIMACIÓN DE PULSO Y TRANSICIÓN
 document.addEventListener("DOMContentLoaded", function() {
   // Añadir estilos si no existen
   if (!document.getElementById("scannerPulseStyles")) {
     const styleEl = document.createElement("style");
     styleEl.id = "scannerPulseStyles";
     styleEl.textContent = `
+      /* Animación de pulso para el cuadro rosa */
       @keyframes scan-pulse {
         0% { opacity: 1; }
         50% { opacity: 0.85; }
         100% { opacity: 1; }
       }
       
+      /* Estilo base del cuadro con transición suave */
+      #scanFoundContainer {
+        transition: opacity 0.3s ease-in-out;
+      }
+      
+      /* Animación de pulso */
       .animate-pulse {
         animation: scan-pulse 1.5s ease-in-out infinite;
         box-shadow: 0 0 15px rgba(212, 138, 212, 0.7);
@@ -302,9 +399,17 @@ document.addEventListener("DOMContentLoaded", function() {
   const observer = new MutationObserver(function(mutations) {
     mutations.forEach(function(mutation) {
       if (mutation.attributeName === 'style' && 
-          mutation.target.id === 'scanFoundContainer' &&
-          mutation.target.style.display === 'block') {
-        console.log("scanFoundContainer ahora visible!");
+          mutation.target.id === 'scanFoundContainer') {
+        const isVisible = mutation.target.style.display === 'block';
+        scanFoundContainerVisible = isVisible;
+        
+        if (isVisible) {
+          console.log("📌 scanFoundContainer ahora visible!");
+          
+          // Reactivar bloqueo cuando se muestra
+          blockScanFoundHiding = true;
+          setTimeout(() => { blockScanFoundHiding = false; }, 5000);
+        }
       }
     });
   });
@@ -333,5 +438,32 @@ if (typeof verificarCodigoBarras !== 'function') {
   }
 }
 
-// Asegurar que la función onScannedBarcode esté disponible globalmente
-window.onScannedBarcode = onScannedBarcode;
+// SOLUCIÓN CRÍTICA: Coexistencia con implementaciones existentes
+// En lugar de sobrescribir directamente onScannedBarcode, creamos una función
+// wrapper que se integrará con la implementación existente
+if (existingOnScannedBarcode) {
+  // Si ya existe una implementación, la preservamos y creamos una función wrapper
+  window.onScannedBarcode = function(code) {
+    // Primero, procesar con nuestra implementación
+    handleScanFoundBarcode(code);
+    
+    // Luego, llamar a la implementación original si es una función
+    if (typeof existingOnScannedBarcode === 'function') {
+      // Llamar a la implementación original después de un breve retraso
+      // para evitar problemas de sincronización
+      setTimeout(() => {
+        existingOnScannedBarcode(code);
+      }, 10);
+    }
+  };
+} else {
+  // Si no hay implementación previa, usamos la nuestra directamente
+  window.onScannedBarcode = handleScanFoundBarcode;
+}
+
+// Exportar funciones clave para que puedan ser usadas externamente
+window.serviceworker = {
+  handleScanFoundBarcode: handleScanFoundBarcode,
+  showScanFound: showScanFound,
+  hideScanFoundContainer: hideScanFoundContainer
+};

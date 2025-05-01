@@ -217,13 +217,17 @@
 
   /* Recuadro Morado "¿Este es tu producto?" */
   #scanFoundContainer {
-    display: none; 
+    display: none;
     background-color: #D48AD4;
     color: #fff;
     padding: 1rem;
     border-radius: 6px;
     margin-bottom: 1rem;
+    box-shadow: 0 4px 12px rgba(212, 138, 212, 0.5);
+    transition: opacity 0.3s ease-in-out;
+    border: 1px solid rgba(255, 255, 255, 0.2);
   }
+    
   .scanFoundInner {
     display: flex;
     flex-direction: row;
@@ -593,7 +597,7 @@
 
       <!-- Col Derecha: Recuadro Morado + Form -->
       <div class="col-right">
-        <div id="scanFoundContainer">
+        <div id="scanFoundContainer" style="opacity: 1; transition: opacity 0.3s ease-in-out;">
           <div class="scanFoundRow" id="scanFoundRow"></div>
           <div class="scanFoundButtons">
             <button type="button" class="btn-scanYes" id="btnScanYes">Sí</button>
@@ -2201,6 +2205,335 @@
 
     // Inicializar eventos del menú de fotos
     bindPhotoEvents();
+  });
+</script>
+<!-- PARCHE FINAL MEJORADO -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log("🔧 Aplicando parche final mejorado");
+    
+    // Variables principales
+    const inputExterno = document.getElementById("codigo_barras_externo");
+    const scanFoundContainer = document.getElementById("scanFoundContainer");
+    const scanFoundRow = document.getElementById("scanFoundRow");
+    const btnScanYes = document.getElementById("btnScanYes");
+    const btnScanNo = document.getElementById("btnScanNo");
+    
+    if (!scanFoundContainer || !scanFoundRow) {
+      console.error("❌ No se encontraron elementos del cuadro rosa");
+      return;
+    }
+    
+    // Función para actualizar TODOS los campos, incluyendo categoría
+    function updateFormWithProduct(product) {
+      console.log("✏️ Actualizando formulario con:", product);
+      
+      // 1. Actualizar nombre
+      const nombreInput = document.getElementById("nombre");
+      if (nombreInput) {
+        nombreInput.value = product.nombre || '';
+        if (typeof updateFloatingLabel === 'function') {
+          updateFloatingLabel(nombreInput);
+        }
+      }
+      
+      // 2. Actualizar marca
+      const marcaInput = document.getElementById("marca");
+      if (marcaInput) {
+        marcaInput.value = product.marca || '';
+        if (typeof updateFloatingLabel === 'function') {
+          updateFloatingLabel(marcaInput);
+        }
+      }
+      
+      // 3. Actualizar imagen
+      if (product.url_imagen) {
+        const fotoPlaceholder = document.getElementById("fotoPlaceholder");
+        if (fotoPlaceholder) {
+          fotoPlaceholder.innerHTML = `
+            <img src="${product.url_imagen}" alt="Imagen del Producto">
+            <button type="button" class="remove-image" id="removeImageBtn">&times;</button>
+          `;
+          fotoPlaceholder.classList.add("has-image");
+          
+          // Actualizar campos ocultos
+          const iaFotoFilename = document.getElementById("ia_foto_filename");
+          if (iaFotoFilename) {
+            iaFotoFilename.value = product.url_imagen.split("/").pop();
+          }
+          
+          const displayedImageUrl = document.getElementById("displayed_image_url");
+          if (displayedImageUrl) {
+            displayedImageUrl.value = product.url_imagen;
+          }
+          
+          // Reconectar listener para eliminar imagen
+          setTimeout(function() {
+            if (typeof attachRemoveImageListener === 'function') {
+              attachRemoveImageListener();
+            }
+            if (typeof bindPhotoEvents === 'function') {
+              bindPhotoEvents();
+            }
+          }, 100);
+        }
+      }
+      
+      // 4. Actualizar categoría - MEJORADO
+      if (product.categoria && window.categoryChoices) {
+        try {
+          // Función para normalizar textos (quitar acentos y minúsculas)
+          const normalizeText = function(str) {
+            return str.normalize("NFD")
+              .replace(/[\u0300-\u036f]/g, "")
+              .toLowerCase()
+              .trim();
+          };
+          
+          const normalizedCat = normalizeText(product.categoria);
+          const catSelect = document.getElementById("categoria_existente");
+          
+          if (catSelect) {
+            let foundMatch = false;
+            
+            // Intentar encontrar coincidencia exacta
+            for (let i = 0; i < catSelect.options.length; i++) {
+              const option = catSelect.options[i];
+              const normalizedOption = normalizeText(option.value);
+              
+              if (normalizedOption === normalizedCat) {
+                console.log("✅ Categoría encontrada exacta:", option.value);
+                window.categoryChoices.setChoiceByValue(option.value);
+                foundMatch = true;
+                break;
+              }
+            }
+            
+            // Si no hay coincidencia exacta, buscar una parcial
+            if (!foundMatch) {
+              for (let i = 0; i < catSelect.options.length; i++) {
+                const option = catSelect.options[i];
+                const normalizedOption = normalizeText(option.value);
+                
+                if (normalizedOption.includes(normalizedCat) || 
+                    normalizedCat.includes(normalizedOption)) {
+                  console.log("✅ Categoría encontrada parcial:", option.value);
+                  window.categoryChoices.setChoiceByValue(option.value);
+                  foundMatch = true;
+                  break;
+                }
+              }
+            }
+            
+            if (!foundMatch) {
+              console.log("⚠️ No se encontró categoría coincidente para:", product.categoria);
+            }
+          }
+        } catch (e) {
+          console.warn("⚠️ Error al actualizar categoría:", e);
+        }
+      }
+    }
+    
+    // Función mejorada para saber si hay coincidencia y mostrar cuadro rosa
+    function improvedOnScannedBarcode(code) {
+      console.log("🔍 Código escaneado:", code);
+      
+      // Siempre actualizar el campo de entrada
+      if (inputExterno) {
+        inputExterno.value = code;
+        if (typeof updateFloatingLabel === 'function') {
+          updateFloatingLabel(inputExterno);
+        }
+      }
+      
+      // Verificar si el código ya existe en el inventario
+      verificarCodigoBarras(code).then(exists => {
+        if (exists) {
+          console.log("⚠️ Código ya existe en inventario");
+          if (typeof showBarcodeWarningModal === 'function') {
+            showBarcodeWarningModal(code);
+          }
+          return;
+        }
+        
+        // Buscar coincidencias en el catálogo global
+        console.log("🔎 Buscando en catálogo:", code);
+        
+        // Mostrar indicador temporal de búsqueda
+        scanFoundContainer.style.display = "block";
+        scanFoundRow.innerHTML = `
+          <div class="scanFoundInner">
+            <div class="scanFoundText">
+              <div class="scanFoundTitle">BUSCANDO INFORMACIÓN</div>
+              <div class="scanFoundName">Código: ${code}</div>
+              <div class="scanFoundCode">Consultando catálogo global...</div>
+            </div>
+          </div>
+        `;
+        
+        // Hacer la petición al API de autocompletado
+        fetch(`/api/autocomplete?q=${encodeURIComponent(code)}&t=${Date.now()}`, {
+          headers: {
+            'Cache-Control': 'max-age=3600',
+            'Pragma': 'no-cache'
+          }
+        })
+          .then(response => {
+            if (!response.ok) throw new Error('Error en la respuesta');
+            return response.json();
+          })
+          .then(data => {
+            console.log("📊 Resultados:", data);
+            
+            // CAMBIO: Solo mostrar cuadro rosa si hay resultados, sino solo imprimir código
+            if (!data.results || data.results.length === 0) {
+              console.log("ℹ️ No hay coincidencias, solo imprimir código");
+              scanFoundContainer.style.display = "none";
+              return;
+            }
+            
+            // Encontró coincidencias - Mostrar cuadro rosa
+            const product = data.results[0]; // Usar el primer resultado
+            
+            scanFoundContainer.style.display = "block";
+            scanFoundRow.innerHTML = `
+              <div class="scanFoundInner">
+                <div class="scanFoundImageBox">
+                  <img src="${product.url_imagen || ''}" alt="Producto Escaneado"
+                      onerror="this.src='${window.location.origin}/static/img/default_product.jpg';" />
+                </div>
+                <div class="scanFoundText">
+                  <div class="scanFoundTitle">¿ESTE ES TU PRODUCTO?</div>
+                  <div class="scanFoundName">${product.nombre || 'Producto sin nombre'}</div>
+                  <div class="scanFoundCode">Código: ${product.codigo_barras || ''}</div>
+                </div>
+              </div>
+            `;
+            
+            // Reconfigurar botones Sí/No
+            
+            // Botón No (siempre cierra el cuadro)
+            btnScanNo.onclick = function() {
+              scanFoundContainer.style.display = "none";
+            };
+            
+            // Botón Sí (acepta y completa el formulario)
+            btnScanYes.onclick = function() {
+              // Usar nuestra función mejorada
+              updateFormWithProduct(product);
+              scanFoundContainer.style.display = "none";
+            };
+            
+            // Ocultar automáticamente después de 30 segundos
+            setTimeout(function() {
+              if (scanFoundContainer.style.display === "block") {
+                scanFoundContainer.style.display = "none";
+              }
+            }, 30000);
+          })
+          .catch(err => {
+            console.error("❌ Error:", err);
+            // Error al buscar - solo imprimir el código
+            scanFoundContainer.style.display = "none";
+          });
+      });
+    }
+    
+    // Función auxiliar para verificar si el código existe
+    function verificarCodigoBarras(codigo) {
+      if (!codigo || codigo.trim() === "") {
+        return Promise.resolve(false);
+      }
+      
+      return fetch(`/api/check_barcode_exists?codigo=${encodeURIComponent(codigo)}`)
+        .then(response => response.json())
+        .then(data => data.exists)
+        .catch(error => {
+          console.error("Error al verificar código:", error);
+          return false;
+        });
+    }
+    
+    // Parchar función principal
+    window.onScannedBarcode = improvedOnScannedBarcode;
+    
+    // Parchar también la función que maneja el autocompletado cuando se hace clic
+    // Esto es para asegurar que se usa la misma lógica de categorías
+    if (typeof autoContainer !== 'undefined') {
+      // Reemplazar el event listener del contenedor de autocompletado
+      const originalListener = autoContainer.onclick;
+      
+      autoContainer.addEventListener("click", function(e) {
+        const target = e.target.closest(".autocomplete-item");
+        if (!target) return;
+        
+        // Extraer datos del elemento
+        const codBarras = target.querySelector(".autocomplete-code").innerText;
+        const nombreProd = target.getAttribute("data-nombre");
+        const marcaProd = target.getAttribute("data-marca");
+        const imagenURL = target.getAttribute("data-imagen");
+        const cat = target.getAttribute("data-categoria") || "";
+        
+        // Crear objeto de producto con formato similar al API
+        const product = {
+          codigo_barras: codBarras,
+          nombre: nombreProd,
+          marca: marcaProd,
+          url_imagen: imagenURL,
+          categoria: cat
+        };
+        
+        // Usar nuestra función mejorada para actualizar todos los campos
+        updateFormWithProduct(product);
+        
+        // Ocultar resultados
+        autoContainer.style.display = "none";
+      });
+    }
+    
+    // Parchar Quagga para cámara
+    if (typeof iniciarEscaneoQuagga === 'function') {
+      const originalQuagga = window.iniciarEscaneoQuagga;
+      
+      window.iniciarEscaneoQuagga = function() {
+        console.log("📷 Inicializando cámara con parche");
+        originalQuagga();
+        
+        // Modificar el handler después de un breve retraso
+        setTimeout(() => {
+          if (window.Quagga) {
+            Quagga.onDetected(function(result) {
+              if (!result || !result.codeResult) return;
+              
+              const code = result.codeResult.code;
+              console.log("📷 Código detectado:", code);
+              
+              // Detener escáner y cerrar modal
+              Quagga.stop();
+              const modal = document.getElementById("modalEscaneoCamara");
+              if (modal) modal.style.display = "none";
+              
+              // Usar nuestra implementación
+              improvedOnScannedBarcode(code);
+            });
+          }
+        }, 500);
+      };
+    }
+    
+    // Parchar escáner físico
+    if (typeof initBarcodeScanner === 'function') {
+      // Reinicializar escáner físico solo si existe
+      if (document.querySelector('#scanIcon')) {
+        initBarcodeScanner('#scanIcon', '#codigo_barras_externo', {
+          threshold: 150, 
+          timeoutDuration: 1000
+        });
+      }
+    }
+    
+    console.log("✅ Parche final aplicado correctamente");
   });
 </script>
 {% endblock %}

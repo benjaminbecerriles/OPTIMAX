@@ -93,10 +93,24 @@ function iniciarEscaneoQuagga() {
     if (inputExterno) {
       inputExterno.value = codigoDetectado;
 
-      // Aquí llamamos a la función onScannedBarcode si existe
-      if (typeof onScannedBarcode === "function") {
-        console.log("Llamando onScannedBarcode con:", codigoDetectado);
+      // MODIFICADO: Verificar múltiples formas de llamar a onScannedBarcode
+      // 1. Verificar si existe la función en el objeto window
+      if (typeof window.onScannedBarcode === "function") {
+        console.log("Llamando a window.onScannedBarcode con:", codigoDetectado);
+        window.onScannedBarcode(codigoDetectado);
+      } 
+      // 2. Verificar si existe en el objeto serviceworker (nuevo)
+      else if (window.serviceworker && typeof window.serviceworker.handleScanFoundBarcode === "function") {
+        console.log("Llamando a serviceworker.handleScanFoundBarcode con:", codigoDetectado);
+        window.serviceworker.handleScanFoundBarcode(codigoDetectado);
+      }
+      // 3. Búsqueda directa en el scope global
+      else if (typeof onScannedBarcode === "function") {
+        console.log("Llamando a onScannedBarcode global con:", codigoDetectado);
         onScannedBarcode(codigoDetectado);
+      }
+      else {
+        console.warn("⚠️ No se encontró ninguna función onScannedBarcode para procesar el código");
       }
     }
 

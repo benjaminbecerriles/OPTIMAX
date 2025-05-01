@@ -55,6 +55,23 @@ function initBarcodeScanner(scanIconSelector, inputSelector, options) {
     if (e.key === "Enter") {
       if (scannedString.length >= 3) {
         inputElement.value = scannedString;
+        
+        // MODIFICADO: Llamar a la función de procesamiento de código de barras
+        // Buscar primero en serviceworker (nueva implementación)
+        if (window.serviceworker && typeof window.serviceworker.handleScanFoundBarcode === 'function') {
+          console.log("Usando serviceworker.handleScanFoundBarcode desde barcode-scanner");
+          window.serviceworker.handleScanFoundBarcode(scannedString);
+        }
+        // Si no existe, usar la implementación global
+        else if (typeof window.onScannedBarcode === 'function') {
+          console.log("Usando window.onScannedBarcode desde barcode-scanner");
+          window.onScannedBarcode(scannedString);
+        }
+        // Último recurso: buscar en el scope global
+        else if (typeof onScannedBarcode === 'function') {
+          console.log("Usando onScannedBarcode global desde barcode-scanner");
+          onScannedBarcode(scannedString);
+        }
       }
       resetScanner();
       e.preventDefault();
@@ -71,6 +88,17 @@ function initBarcodeScanner(scanIconSelector, inputSelector, options) {
     scanTimeoutId = setTimeout(() => {
       if (scannedString.length >= 3) {
         inputElement.value = scannedString;
+        
+        // MODIFICADO: Misma lógica que arriba para timeout
+        if (window.serviceworker && typeof window.serviceworker.handleScanFoundBarcode === 'function') {
+          window.serviceworker.handleScanFoundBarcode(scannedString);
+        }
+        else if (typeof window.onScannedBarcode === 'function') {
+          window.onScannedBarcode(scannedString);
+        }
+        else if (typeof onScannedBarcode === 'function') {
+          onScannedBarcode(scannedString);
+        }
       }
       resetScanner();
     }, timeoutDuration);

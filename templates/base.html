@@ -22,6 +22,11 @@
     rel="stylesheet"
     href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css"
   >
+  <!-- Font Awesome 5 (AGREGADO) -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+  >
 
   <style>
     /* Quitar márgenes/padding global */
@@ -251,21 +256,39 @@
         const codigoDetectado = result.codeResult.code;
         console.log("Código detectado:", codigoDetectado);
 
-        // Asigna el código detectado al campo "Ingresar Código de Barras"
-        const inputExterno = document.getElementById("codigo_barras_externo");
-        if (inputExterno) {
-          inputExterno.value = codigoDetectado;
-
-          // Aquí llamamos a la función onScannedBarcode si existe
-          if (typeof onScannedBarcode === "function") {
-            console.log("Llamando onScannedBarcode con:", codigoDetectado);
-            onScannedBarcode(codigoDetectado);
-          }
-        }
-
         // Detén Quagga y cierra el modal
         Quagga.stop();
         cerrarModalEscaner();
+
+        // Asigna el código detectado al campo "Ingresar Código de Barras"
+        const inputExterno = document.getElementById("codigo_barras_externo");
+        if (inputExterno) {
+          // Establecer el valor directamente
+          inputExterno.value = codigoDetectado;
+          
+          // Actualizar etiqueta flotante si existe
+          if (typeof updateFloatingLabel === "function") {
+            updateFloatingLabel(inputExterno);
+          }
+
+          // Verificar si estamos en la página de agregar producto específicamente
+          if (window.location.pathname.includes('agregar-producto')) {
+            // Si estamos en agregar-producto, usar el timeout para asegurar que el cuadro rosa se muestre
+            if (typeof onScannedBarcode === "function") {
+              console.log("Detectada página agregar-producto, llamando onScannedBarcode con timeout:", codigoDetectado);
+              setTimeout(() => {
+                onScannedBarcode(codigoDetectado);
+              }, 50);
+              return; // Terminar aquí para evitar la ejecución del código genérico
+            }
+          }
+          
+          // Para otras páginas, mantener el comportamiento original
+          if (typeof onScannedBarcode === "function") {
+            console.log("Llamando onScannedBarcode directamente:", codigoDetectado);
+            onScannedBarcode(codigoDetectado);
+          }
+        }
       });
     }
 
