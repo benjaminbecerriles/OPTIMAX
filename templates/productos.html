@@ -123,6 +123,29 @@
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
   }
+  
+  /* Botón de volver (nuevo) */
+  .btn-back {
+    background-color: var(--light-background);
+    color: var(--text-color);
+    border: 1px solid var(--separator);
+    padding: 0.75rem 1.25rem;
+    border-radius: 980px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.95rem;
+    text-decoration: none;
+  }
+  
+  .btn-back:hover {
+    background-color: #e8e8e8;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    color: var(--text-color);
+  }
 
   /* Controles de filtro y búsqueda */
   .filter-controls {
@@ -1025,6 +1048,104 @@
     color: var(--green);
   }
 
+  /* Estilos para paginación (nuevo) */
+  .pagination-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+  }
+  
+  .pagination {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    gap: 0.5rem;
+  }
+  
+  .page-item {
+    margin: 0;
+  }
+  
+  .page-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    border-radius: 980px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    color: var(--text-color);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    min-width: 40px;
+    height: 40px;
+    font-size: 0.95rem;
+  }
+  
+  .page-link:hover {
+    background-color: var(--light-background);
+    transform: translateY(-2px);
+  }
+  
+  .page-item.active .page-link {
+    background-color: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+  
+  .page-item.disabled .page-link {
+    color: var(--text-secondary);
+    pointer-events: none;
+    opacity: 0.5;
+  }
+  
+  .pagination-info {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    margin-top: 0.75rem;
+    font-weight: 500;
+  }
+
+  /* Botones de acción para escáner (nuevo) */
+  .search-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+  
+  .icon-btn {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--light-background);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+  }
+  
+  .icon-btn:hover {
+    background-color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .icon-btn.scan-active {
+    background-color: rgba(229, 46, 46, 0.1);
+    border-color: var(--accent);
+    animation: blink 1s infinite;
+  }
+  
+  @keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0.6; }
+    100% { opacity: 1; }
+  }
+
   /* Responsive adjustments */
   @media (max-width: 991px) {
     .product-img-container {
@@ -1094,28 +1215,44 @@
 </style>
 
 <div class="apple-container">
-  <h1>Ver y gestionar productos existentes</h1>
-  <p class="page-description">Revisa, modifica y controla tu inventario completo desde un solo lugar.</p>
-
-  <!-- Controles superiores: botón Excel -->
-  <div class="section-header" style="margin-bottom: 32px;">
-    <div></div> <!-- Elemento vacío para mantener el espacio y la alineación -->
-    <button class="btn-excel">
-      <i class="fas fa-file-excel"></i>
-      Exportar a Excel
-    </button>
+  <!-- Encabezado modificado con botones alineados con el título -->
+  <div class="section-header">
+    <h1>Ver y gestionar productos existentes</h1>
+    <div class="d-flex gap-3">
+      <a href="{{ url_for('dashboard_inventario') }}" class="btn-back">
+        <i class="fas fa-arrow-left"></i>
+        <span>Volver</span>
+      </a>
+      <button class="btn-excel">
+        <i class="fas fa-file-excel"></i>
+        Exportar a Excel
+      </button>
+    </div>
   </div>
+  <p class="page-description">Revisa, modifica y controla tu inventario completo desde un solo lugar.</p>
   
   <div class="row filter-controls g-3">
-    <!-- Barra de búsqueda -->
+    <!-- Barra de búsqueda con botones de escáner -->
     <div class="col-md-4">
-      <div class="search-box">
-        <i class="fas fa-search"></i>
-        <input type="text" id="searchInput" placeholder="Buscar por nombre, SKU o marca..." value="{{ termino_busqueda if termino_busqueda else '' }}" class="form-control">
+      <div class="d-flex gap-2">
+        <div class="search-box flex-grow-1">
+          <i class="fas fa-search"></i>
+          <input type="text" id="searchInput" placeholder="Buscar por nombre, SKU o marca..." value="{{ termino_busqueda if termino_busqueda else '' }}" class="form-control">
+        </div>
+        <div class="search-actions">
+          <!-- Botón de escaneo con pistola de código de barras -->
+          <button class="icon-btn" id="scanButton" title="Escanear con pistola">
+            <img src="{{ url_for('static', filename='img/3.png') }}" alt="Escanear con Lector" style="width: 24px; height: 24px;">
+          </button>
+          <!-- Botón de escaneo con cámara -->
+          <button class="icon-btn" id="cameraButton" title="Escanear con cámara" onclick="iniciarEscaneoQuagga()">
+            <img src="{{ url_for('static', filename='img/4.png') }}" alt="Escanear con Cámara" style="width: 24px; height: 24px;">
+          </button>
+        </div>
       </div>
       <!-- Contador de productos -->
       <div class="products-info">
-        Mostrando {{ productos|length }} de {{ total_productos if total_productos is defined else 'XX' }} productos
+        Mostrando <span id="visibleCount">{{ productos|length }}</span> de <span id="totalCount">{{ total_productos if total_productos is defined else 'XX' }}</span> productos
       </div>
     </div>
     
@@ -1419,6 +1556,16 @@
     </a>
   </div>
   {% endif %}
+  
+  <!-- Paginación -->
+  <div class="pagination-container">
+    <ul class="pagination" id="paginationControl">
+      <!-- Se llenará con JavaScript -->
+    </ul>
+  </div>
+  <div class="pagination-info" id="paginationInfo">
+    Mostrando 30 productos por página
+  </div>
 </div>
 
 <!-- Modal de Acciones -->
@@ -1511,138 +1658,283 @@
 <div class="toast-container" id="toastContainer"></div>
 
 <script>
-  // Función para cambiar estado de favorito
-  function toggleFavorito(element) {
-    // Obtener ID del producto y estado actual
-    const productId = element.getAttribute('data-product-id');
-    const isFavorite = element.getAttribute('data-is-favorite') === '1';
-    const newState = isFavorite ? '0' : '1';
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log("DOM cargado, inicializando funciones...");
     
-    // Mostrar feedback visual inmediato
-    if (newState === '1') {
-      element.classList.add('active');
-      element.innerHTML = '&#9829;'; // Corazón lleno
-    } else {
-      element.classList.remove('active');
-      element.innerHTML = '&#9825;'; // Corazón vacío
+    // Variables globales
+    const PRODUCTS_PER_PAGE = 30; // Cambiado a 30 productos por página
+    const productsTable = document.getElementById('productsTable');
+    const tableRows = document.querySelectorAll('#productsTable tbody tr');
+    let currentPage = 1;
+    let filteredProducts = Array.from(tableRows);
+    
+    // Referencias a elementos DOM
+    const searchInput = document.getElementById('searchInput');
+    const categoryFilter = document.getElementById('categoryFilter');
+    const paginationControl = document.getElementById('paginationControl');
+    const paginationInfo = document.getElementById('paginationInfo');
+    const scanButton = document.getElementById('scanButton');
+    const cameraButton = document.getElementById('cameraButton');
+    const visibleCountSpan = document.getElementById('visibleCount');
+    const totalCountSpan = document.getElementById('totalCount');
+    
+    // Inicializar contador
+    if (totalCountSpan) {
+      totalCountSpan.textContent = tableRows.length;
     }
     
-    // Hacer la petición AJAX
-    fetch(`/api/toggle_favorite/${productId}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ status: newState })
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        // Actualizar atributo con el nuevo estado
-        element.setAttribute('data-is-favorite', newState);
-        
-        // Mostrar notificación
-        showToast(
-          newState === '1' ? 'Favorito añadido' : 'Favorito removido',
-          newState === '1' ? 'Producto marcado como favorito' : 'Producto desmarcado como favorito',
-          newState === '1' ? 'success' : 'info'
-        );
-      } else {
-        // Si hay error, revertir cambios en UI
-        const originalState = isFavorite ? '1' : '0';
-        element.setAttribute('data-is-favorite', originalState);
-        
-        if (originalState === '1') {
-          element.classList.add('active');
-          element.innerHTML = '&#9829;';
-        } else {
-          element.classList.remove('active');
-          element.innerHTML = '&#9825;';
-        }
-        
-        showToast('Error', data.message || 'No se pudo actualizar', 'error');
-      }
-    })
-    .catch(error => {
-      console.error('Error en petición:', error);
+    // Inicializar el escáner de códigos de barras con pistola
+    if (window.initBarcodeScanner && scanButton) {
+      window.initBarcodeScanner('#scanButton', '#searchInput', {
+        threshold: 150,
+        timeoutDuration: 2000
+      });
       
-      // Revertir cambios en UI en caso de error
-      if (isFavorite) {
+      // Añadir efectos visuales
+      scanButton.addEventListener('click', function() {
+        this.classList.add('scan-active');
+        setTimeout(() => {
+          this.classList.remove('scan-active');
+        }, 500);
+      });
+    }
+    
+    // Observador del valor de searchInput para activar búsqueda automáticamente al escanear
+    let prevInputValue = '';
+    const checkForScannerInput = setInterval(() => {
+      if (searchInput && searchInput.value !== prevInputValue) {
+        prevInputValue = searchInput.value;
+        // Disparar evento de input para activar la búsqueda
+        const inputEvent = new Event('input', { bubbles: true });
+        searchInput.dispatchEvent(inputEvent);
+      }
+    }, 100);  // revisar cada 100ms
+    
+    // Actualizar el contador de productos
+    function updateProductCounter() {
+      if (visibleCountSpan) {
+        visibleCountSpan.textContent = filteredProducts.length;
+      }
+    }
+    
+    // Aplicar paginación
+    function applyPagination() {
+      const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
+      
+      // Asegurar que la página actual es válida
+      if (currentPage > totalPages) {
+        currentPage = totalPages > 0 ? totalPages : 1;
+      }
+      
+      // Ocultar todas las filas
+      tableRows.forEach(row => {
+        row.style.display = 'none';
+      });
+      
+      // Mostrar solo las filas de la página actual
+      const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
+      const endIndex = Math.min(startIndex + PRODUCTS_PER_PAGE, filteredProducts.length);
+      
+      for (let i = startIndex; i < endIndex; i++) {
+        if (filteredProducts[i]) {
+          filteredProducts[i].style.display = '';
+        }
+      }
+      
+      // Actualizar controles de paginación
+      updatePaginationControls(totalPages);
+    }
+    
+    // Actualizar controles de paginación
+    function updatePaginationControls(totalPages) {
+      paginationControl.innerHTML = '';
+      
+      // Botón "Anterior"
+      const prevLi = document.createElement('li');
+      prevLi.className = 'page-item' + (currentPage === 1 ? ' disabled' : '');
+      const prevLink = document.createElement('a');
+      prevLink.className = 'page-link';
+      prevLink.href = '#';
+      prevLink.innerHTML = '<i class="fas fa-chevron-left"></i> Anterior';
+      if (currentPage > 1) {
+        prevLink.addEventListener('click', (e) => {
+          e.preventDefault();
+          currentPage--;
+          applyPagination();
+        });
+      }
+      prevLi.appendChild(prevLink);
+      paginationControl.appendChild(prevLi);
+      
+      // Números de página
+      let startPage = Math.max(1, currentPage - 2);
+      let endPage = Math.min(totalPages, startPage + 4);
+      
+      if (endPage - startPage < 4 && startPage > 1) {
+        startPage = Math.max(1, endPage - 4);
+      }
+      
+      for (let i = startPage; i <= endPage; i++) {
+        const pageLi = document.createElement('li');
+        pageLi.className = 'page-item' + (i === currentPage ? ' active' : '');
+        const pageLink = document.createElement('a');
+        pageLink.className = 'page-link';
+        pageLink.href = '#';
+        pageLink.textContent = i;
+        pageLink.addEventListener('click', (e) => {
+          e.preventDefault();
+          currentPage = i;
+          applyPagination();
+        });
+        pageLi.appendChild(pageLink);
+        paginationControl.appendChild(pageLi);
+      }
+      
+      // Botón "Siguiente"
+      const nextLi = document.createElement('li');
+      nextLi.className = 'page-item' + (currentPage === totalPages || totalPages === 0 ? ' disabled' : '');
+      const nextLink = document.createElement('a');
+      nextLink.className = 'page-link';
+      nextLink.href = '#';
+      nextLink.innerHTML = 'Siguiente <i class="fas fa-chevron-right"></i>';
+      if (currentPage < totalPages) {
+        nextLink.addEventListener('click', (e) => {
+          e.preventDefault();
+          currentPage++;
+          applyPagination();
+        });
+      }
+      nextLi.appendChild(nextLink);
+      paginationControl.appendChild(nextLi);
+      
+      // Actualizar información de paginación
+      if (paginationInfo) {
+        const totalItems = filteredProducts.length;
+        const start = totalItems > 0 ? (currentPage - 1) * PRODUCTS_PER_PAGE + 1 : 0;
+        const end = Math.min(currentPage * PRODUCTS_PER_PAGE, totalItems);
+        
+        if (totalItems > 0) {
+          paginationInfo.textContent = `Mostrando ${start} a ${end} de ${totalItems} productos`;
+        } else {
+          paginationInfo.textContent = 'No hay productos que mostrar';
+        }
+      }
+      
+      // Ocultar paginación si solo hay una página
+      paginationControl.style.display = totalPages <= 1 ? 'none' : 'flex';
+    }
+    
+    // Función para aplicar filtros
+    function applyFilters() {
+      const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+      const categorySelected = categoryFilter ? categoryFilter.value.toLowerCase() : '';
+      
+      // Aplicar filtros a la lista de productos
+      filteredProducts = Array.from(tableRows).filter(row => {
+        const productName = row.querySelector('.product-name')?.textContent.toLowerCase() || '';
+        const productCategory = row.getAttribute('data-category')?.toLowerCase() || '';
+        const productSku = row.querySelector('.product-sku')?.textContent.toLowerCase() || '';
+        const productBrand = row.querySelector('.product-brand')?.textContent.toLowerCase() || '';
+        
+        // Filtro de búsqueda
+        const matchesSearch = !searchTerm || 
+                              productName.includes(searchTerm) || 
+                              productSku.includes(searchTerm) || 
+                              productBrand.includes(searchTerm);
+        
+        // Filtro de categoría
+        const matchesCategory = !categorySelected || categorySelected === '' || productCategory === categorySelected;
+        
+        return matchesSearch && matchesCategory;
+      });
+      
+      // Actualizar contador de productos visibles
+      updateProductCounter();
+      
+      // Resetear a la primera página al filtrar
+      currentPage = 1;
+      
+      // Aplicar paginación con los productos filtrados
+      applyPagination();
+    }
+    
+    // Event handlers para filtros
+    if (searchInput) {
+      searchInput.addEventListener('input', applyFilters);
+    }
+    
+    if (categoryFilter) {
+      categoryFilter.addEventListener('change', applyFilters);
+    }
+    
+    // Función para cambiar estado de favorito
+    window.toggleFavorito = function(element) {
+      // Obtener ID del producto y estado actual
+      const productId = element.getAttribute('data-product-id');
+      const isFavorite = element.getAttribute('data-is-favorite') === '1';
+      const newState = isFavorite ? '0' : '1';
+      
+      // Mostrar feedback visual inmediato
+      if (newState === '1') {
         element.classList.add('active');
-        element.innerHTML = '&#9829;';
+        element.innerHTML = '&#9829;'; // Corazón lleno
       } else {
         element.classList.remove('active');
-        element.innerHTML = '&#9825;';
+        element.innerHTML = '&#9825;'; // Corazón vacío
       }
-      element.setAttribute('data-is-favorite', isFavorite ? '1' : '0');
       
-      showToast('Error de conexión', 'No se pudo contactar con el servidor', 'error');
-    });
-  }
-  
-  // Función para cambiar estado de visibilidad
-  function toggleVisibilidad(element) {
-    // Obtener ID del producto y estado actual
-    const productId = element.getAttribute('data-product-id');
-    const isVisible = element.getAttribute('data-is-visible') === '1';
-    const newState = isVisible ? '0' : '1';
-    
-    // Actualizar UI inmediatamente para feedback visual
-    const iconElement = element.querySelector('i');
-    
-    if (newState === '1') {
-      element.classList.remove('hidden');
-      element.classList.add('visible');
-      iconElement.className = 'fas fa-eye';
-    } else {
-      element.classList.remove('visible');
-      element.classList.add('hidden');
-      iconElement.className = 'fas fa-eye-slash';
-    }
-    
-    // Hacer la petición AJAX
-    fetch(`/api/toggle_visibility/${productId}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ status: newState })
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        // Actualizar atributo con el nuevo estado
-        element.setAttribute('data-is-visible', newState);
-        
-        // Mostrar notificación
-        showToast(
-          newState === '1' ? 'Producto visible' : 'Producto invisible',
-          newState === '1' ? 'Ahora el producto es visible para venta' : 'El producto ya no es visible para venta',
-          newState === '1' ? 'success' : 'info'
-        );
-      } else {
-        // Si hay error, revertir cambios en UI
-        const originalState = isVisible ? '1' : '0';
-        element.setAttribute('data-is-visible', originalState);
-        
-        if (originalState === '1') {
-          element.classList.remove('hidden');
-          element.classList.add('visible');
-          iconElement.className = 'fas fa-eye';
+      // Hacer la petición AJAX
+      fetch(`/api/toggle_favorite/${productId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status: newState })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Actualizar atributo con el nuevo estado
+          element.setAttribute('data-is-favorite', newState);
+          
+          // Mostrar notificación
+          showToast(
+            newState === '1' ? 'Favorito añadido' : 'Favorito removido',
+            newState === '1' ? 'Producto marcado como favorito' : 'Producto desmarcado como favorito',
+            newState === '1' ? 'success' : 'info'
+          );
         } else {
-          element.classList.remove('visible');
-          element.classList.add('hidden');
-          iconElement.className = 'fas fa-eye-slash';
+          // Si hay error, revertir cambios en UI
+          element.setAttribute('data-is-favorite', isFavorite ? '1' : '0');
+          element.classList.toggle('active', isFavorite);
+          element.innerHTML = isFavorite ? '&#9829;' : '&#9825;';
+          
+          showToast('Error', data.message || 'No se pudo actualizar', 'error');
         }
+      })
+      .catch(error => {
+        console.error('Error en petición:', error);
         
-        showToast('Error', data.message || 'No se pudo actualizar', 'error');
-      }
-    })
-    .catch(error => {
-      console.error('Error en petición:', error);
+        // Revertir cambios en UI en caso de error
+        element.setAttribute('data-is-favorite', isFavorite ? '1' : '0');
+        element.classList.toggle('active', isFavorite);
+        element.innerHTML = isFavorite ? '&#9829;' : '&#9825;';
+        
+        showToast('Error de conexión', 'No se pudo contactar con el servidor', 'error');
+      });
+    };
+    
+    // Función para cambiar estado de visibilidad
+    window.toggleVisibilidad = function(element) {
+      // Obtener ID del producto y estado actual
+      const productId = element.getAttribute('data-product-id');
+      const isVisible = element.getAttribute('data-is-visible') === '1';
+      const newState = isVisible ? '0' : '1';
       
-      // Revertir cambios en UI en caso de error
-      if (isVisible) {
+      // Actualizar UI inmediatamente para feedback visual
+      const iconElement = element.querySelector('i');
+      
+      if (newState === '1') {
         element.classList.remove('hidden');
         element.classList.add('visible');
         iconElement.className = 'fas fa-eye';
@@ -1651,140 +1943,188 @@
         element.classList.add('hidden');
         iconElement.className = 'fas fa-eye-slash';
       }
-      element.setAttribute('data-is-visible', isVisible ? '1' : '0');
       
-      showToast('Error de conexión', 'No se pudo contactar con el servidor', 'error');
-    });
-  }
-
-  // Función para mostrar notificaciones
-  function showToast(title, message, type = 'info') {
-    // Crear elemento toast
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    
-    // Determinar ícono según el tipo
-    let icon;
-    switch (type) {
-      case 'success': icon = 'fa-check-circle'; break;
-      case 'error': icon = 'fa-exclamation-circle'; break;
-      case 'warning': icon = 'fa-exclamation-triangle'; break;
-      default: icon = 'fa-info-circle';
-    }
-    
-    // Contenido del toast
-    toast.innerHTML = `
-      <div class="toast-icon">
-        <i class="fas ${icon}"></i>
-      </div>
-      <div class="toast-content">
-        <div class="toast-title">${title}</div>
-        <div class="toast-message">${message}</div>
-      </div>
-    `;
-    
-    // Agregar al contenedor
-    const container = document.getElementById('toastContainer');
-    container.appendChild(toast);
-    
-    // Remover después de 3 segundos
-    setTimeout(() => {
-      toast.style.opacity = '0';
-      toast.style.transform = 'translateY(20px)';
-      setTimeout(() => {
-        if (container.contains(toast)) {
-          container.removeChild(toast);
+      // Hacer la petición AJAX
+      fetch(`/api/toggle_visibility/${productId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status: newState })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Actualizar atributo con el nuevo estado
+          element.setAttribute('data-is-visible', newState);
+          
+          // Mostrar notificación
+          showToast(
+            newState === '1' ? 'Producto visible' : 'Producto invisible',
+            newState === '1' ? 'Ahora el producto es visible para venta' : 'El producto ya no es visible para venta',
+            newState === '1' ? 'success' : 'info'
+          );
+        } else {
+          // Si hay error, revertir cambios en UI
+          const originalState = isVisible ? '1' : '0';
+          element.setAttribute('data-is-visible', originalState);
+          
+          if (originalState === '1') {
+            element.classList.remove('hidden');
+            element.classList.add('visible');
+            iconElement.className = 'fas fa-eye';
+          } else {
+            element.classList.remove('visible');
+            element.classList.add('hidden');
+            iconElement.className = 'fas fa-eye-slash';
+          }
+          
+          showToast('Error', data.message || 'No se pudo actualizar', 'error');
         }
-      }, 300);
-    }, 3000);
-  }
-
-  // NUEVO: Función para alternar entre tipos de costo
-  function toggleCostType(type) {
-    console.log("Cambiando tipo de costo a:", type);
-    const costValues = document.querySelectorAll('.cost-value');
-    const costTitle = document.getElementById('costTypeTitle');
-    const costTypeItems = document.querySelectorAll('.cost-type-item');
+      })
+      .catch(error => {
+        console.error('Error en petición:', error);
+        
+        // Revertir cambios en UI en caso de error
+        if (isVisible) {
+          element.classList.remove('hidden');
+          element.classList.add('visible');
+          iconElement.className = 'fas fa-eye';
+        } else {
+          element.classList.remove('visible');
+          element.classList.add('hidden');
+          iconElement.className = 'fas fa-eye-slash';
+        }
+        element.setAttribute('data-is-visible', isVisible ? '1' : '0');
+        
+        showToast('Error de conexión', 'No se pudo contactar con el servidor', 'error');
+      });
+    };
     
-    // Actualizar UI del menú
-    costTypeItems.forEach(item => {
-      const icon = item.querySelector('i');
-      if (item.getAttribute('data-type') === type) {
-        item.classList.add('active');
-        icon.style.visibility = 'visible';
-      } else {
-        item.classList.remove('active');
-        icon.style.visibility = 'hidden';
+    // Función para mostrar notificaciones toast
+    window.showToast = function(title, message, type = 'info') {
+      // Crear elemento toast
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      
+      // Determinar ícono según el tipo
+      let icon;
+      switch (type) {
+        case 'success': icon = 'fa-check-circle'; break;
+        case 'error': icon = 'fa-exclamation-circle'; break;
+        case 'warning': icon = 'fa-exclamation-triangle'; break;
+        default: icon = 'fa-info-circle';
       }
-    });
+      
+      // Contenido del toast
+      toast.innerHTML = `
+        <div class="toast-icon">
+          <i class="fas ${icon}"></i>
+        </div>
+        <div class="toast-content">
+          <div class="toast-title">${title}</div>
+          <div class="toast-message">${message}</div>
+        </div>
+      `;
+      
+      // Agregar al contenedor
+      const container = document.getElementById('toastContainer');
+      container.appendChild(toast);
+      
+      // Remover después de 3 segundos
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+          if (container.contains(toast)) {
+            container.removeChild(toast);
+          }
+        }, 300);
+      }, 3000);
+    };
     
-    // Actualizar título de la columna
-    if (type === 'last') {
-      costTitle.innerHTML = 'ÚLTIMO COSTO REG.<br>POR UNIDAD';
-    } else {
-      costTitle.innerHTML = 'COSTO PROMEDIO<br>POR UNIDAD';
+    // NUEVO: Función para alternar entre tipos de costo
+    function toggleCostType(type) {
+      console.log("Cambiando tipo de costo a:", type);
+      const costValues = document.querySelectorAll('.cost-value');
+      const costTitle = document.getElementById('costTypeTitle');
+      const costTypeItems = document.querySelectorAll('.cost-type-item');
+      
+      // Actualizar UI del menú
+      costTypeItems.forEach(item => {
+        const icon = item.querySelector('i');
+        if (item.getAttribute('data-type') === type) {
+          item.classList.add('active');
+          icon.style.visibility = 'visible';
+        } else {
+          item.classList.remove('active');
+          icon.style.visibility = 'hidden';
+        }
+      });
+      
+      // Actualizar título de la columna
+      if (type === 'last') {
+        costTitle.innerHTML = 'ÚLTIMO COSTO REG.<br>POR UNIDAD';
+      } else {
+        costTitle.innerHTML = 'COSTO PROMEDIO<br>POR UNIDAD';
+      }
+      
+      // Actualizar valores mostrados
+      costValues.forEach(value => {
+        const lastCost = parseFloat(value.getAttribute('data-last-cost'));
+        const avgCost = parseFloat(value.getAttribute('data-avg-cost'));
+        const showCost = type === 'last' ? lastCost : avgCost;
+        
+        // Formatear el valor según reglas existentes
+        let formattedCost;
+        if (showCost === Math.floor(showCost)) {
+          formattedCost = '$' + showCost.toLocaleString('en-US', {maximumFractionDigits: 0});
+        } else if (Math.round(showCost * 1000) % 10 === 0) {
+          formattedCost = '$' + showCost.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}).replace(/\.00$/, '');
+        } else {
+          formattedCost = '$' + showCost.toLocaleString('en-US', {minimumFractionDigits: 3, maximumFractionDigits: 3});
+        }
+        
+        value.innerHTML = formattedCost;
+      });
+      
+      // Almacenar preferencia en sesión
+      localStorage.setItem('costDisplayType', type);
+      
+      // Notificar cambio
+      showToast(
+        'Tipo de costo actualizado',
+        type === 'last' ? 'Mostrando último costo registrado' : 'Mostrando costo promedio',
+        'info'
+      );
+      
+      // Opcional: enviar preferencia al servidor
+      fetch('/api/toggle_cost_type', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ type: type })
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log("Preferencia guardada en servidor:", data);
+      })
+      .catch(error => {
+        console.error("Error guardando preferencia:", error);
+        // Continuar aunque falle la petición al servidor
+      });
     }
     
-    // Actualizar valores mostrados
-    costValues.forEach(value => {
-      const lastCost = parseFloat(value.getAttribute('data-last-cost'));
-      const avgCost = parseFloat(value.getAttribute('data-avg-cost'));
-      const showCost = type === 'last' ? lastCost : avgCost;
-      
-      // Formatear el valor según reglas existentes
-      let formattedCost;
-      if (showCost === Math.floor(showCost)) {
-        formattedCost = '$' + showCost.toLocaleString('en-US', {maximumFractionDigits: 0});
-      } else if (Math.round(showCost * 1000) % 10 === 0) {
-        formattedCost = '$' + showCost.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}).replace(/\.00$/, '');
-      } else {
-        formattedCost = '$' + showCost.toLocaleString('en-US', {minimumFractionDigits: 3, maximumFractionDigits: 3});
-      }
-      
-      value.innerHTML = formattedCost;
-    });
-    
-    // Almacenar preferencia en sesión
-    localStorage.setItem('costDisplayType', type);
-    
-    // Notificar cambio
-    showToast(
-      'Tipo de costo actualizado',
-      type === 'last' ? 'Mostrando último costo registrado' : 'Mostrando costo promedio',
-      'info'
-    );
-    
-    // Opcional: enviar preferencia al servidor
-    fetch('/api/toggle_cost_type', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ type: type })
-    })
-    .then(response => response.json())
-    .then(data => {
-      console.log("Preferencia guardada en servidor:", data);
-    })
-    .catch(error => {
-      console.error("Error guardando preferencia:", error);
-      // Continuar aunque falle la petición al servidor
-    });
-  }
-
-  // Funcionalidad específica para el menú de columnas
-  document.addEventListener('DOMContentLoaded', function() {
-    console.log("DOM cargado, inicializando funcionalidades...");
-    
-    // Toggle menú de columnas - versión directa con estilo en línea
+    // Toggle menú de columnas
     const columnToggleBtn = document.getElementById('columnToggleBtn');
     const columnDropdown = document.getElementById('columnDropdown');
     
     if (columnToggleBtn && columnDropdown) {
       columnToggleBtn.addEventListener('click', function(e) {
-        console.log("Botón de columnas clickeado");
         e.preventDefault();
         e.stopPropagation();
+        
         // Cerrar el otro menú si está abierto
         const actionsDropdown = document.getElementById('actionsDropdown');
         if (actionsDropdown) {
@@ -1798,11 +2138,7 @@
         }
         
         // Mostrar u ocultar este menú
-        if (columnDropdown.style.display === 'block') {
-          columnDropdown.style.display = 'none';
-        } else {
-          columnDropdown.style.display = 'block';
-        }
+        columnDropdown.style.display = columnDropdown.style.display === 'block' ? 'none' : 'block';
       });
     }
     
@@ -1812,9 +2148,9 @@
     
     if (bulkActionsBtn && actionsDropdown) {
       bulkActionsBtn.addEventListener('click', function(e) {
-        console.log("Botón de acciones masivas clickeado");
         e.preventDefault();
         e.stopPropagation();
+        
         // Cerrar el otro menú si está abierto
         if (columnDropdown) {
           columnDropdown.style.display = 'none';
@@ -1827,24 +2163,16 @@
         }
         
         // Mostrar u ocultar este menú
-        if (actionsDropdown.style.display === 'block') {
-          actionsDropdown.style.display = 'none';
-        } else {
-          actionsDropdown.style.display = 'block';
-        }
+        actionsDropdown.style.display = actionsDropdown.style.display === 'block' ? 'none' : 'block';
       });
     }
     
-    // NUEVO: Toggle menú de tipos de costo
+    // Toggle menú de tipos de costo
     const costToggleBtn = document.getElementById('costToggleBtn');
     const costTypeMenu = document.getElementById('costTypeMenu');
     
-    console.log("Botón toggle costo:", costToggleBtn ? "encontrado" : "NO ENCONTRADO");
-    console.log("Menú de tipo de costo:", costTypeMenu ? "encontrado" : "NO ENCONTRADO");
-    
     if (costToggleBtn && costTypeMenu) {
       costToggleBtn.addEventListener('click', function(e) {
-        console.log("Botón de toggle de costo clickeado");
         e.preventDefault();
         e.stopPropagation();
         
@@ -1858,7 +2186,6 @@
         
         // Mostrar u ocultar menú de tipos de costo
         costTypeMenu.classList.toggle('show');
-        console.log("Estado del menú de costo:", costTypeMenu.classList.contains('show') ? "VISIBLE" : "OCULTO");
       });
       
       // Añadir eventos a opciones de tipo de costo
@@ -1866,7 +2193,6 @@
       costTypeItems.forEach(item => {
         item.addEventListener('click', function() {
           const type = this.getAttribute('data-type');
-          console.log("Item de costo clickeado:", type);
           toggleCostType(type);
           costTypeMenu.classList.remove('show');
         });
@@ -1875,30 +2201,26 @@
       // Cargar preferencia guardada
       const savedCostType = localStorage.getItem('costDisplayType');
       if (savedCostType) {
-        console.log("Cargando preferencia guardada:", savedCostType);
         toggleCostType(savedCostType);
       }
     }
     
     // Cerrar menús cuando se hace clic fuera
     document.addEventListener('click', function(e) {
-      // Cerrar menú de columnas
       if (columnDropdown && columnToggleBtn && !columnToggleBtn.contains(e.target) && !columnDropdown.contains(e.target)) {
         columnDropdown.style.display = 'none';
       }
       
-      // Cerrar menú de acciones
       if (actionsDropdown && bulkActionsBtn && !bulkActionsBtn.contains(e.target) && !actionsDropdown.contains(e.target)) {
         actionsDropdown.style.display = 'none';
       }
       
-      // Cerrar menú de tipos de costo
       if (costTypeMenu && costToggleBtn && !costToggleBtn.contains(e.target) && !costTypeMenu.contains(e.target)) {
         costTypeMenu.classList.remove('show');
       }
     });
     
-    // Funcionalidad del selector de columnas - versión directa
+    // Funcionalidad checkbox de columnas
     const columnCheckboxes = document.querySelectorAll('#columnDropdown input[type="checkbox"]');
     columnCheckboxes.forEach(checkbox => {
       checkbox.addEventListener('change', function() {
@@ -1907,197 +2229,109 @@
         const columnElements = document.querySelectorAll(columnClass);
         
         columnElements.forEach(el => {
-          if (this.checked) {
-            el.style.display = '';
-          } else {
-            el.style.display = 'none';
-          }
+          el.style.display = this.checked ? '' : 'none';
         });
       });
     });
     
-    // Búsqueda en tiempo real
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput) {
-      searchInput.addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase().trim();
-        const tableRows = document.querySelectorAll('#productsTable tbody tr');
-        
-        tableRows.forEach(row => {
-          const productName = row.querySelector('.product-name')?.innerText.toLowerCase() || '';
-          const productSku = row.querySelector('.product-sku')?.innerText.toLowerCase() || '';
-          const productBrand = row.querySelector('.product-brand')?.innerText.toLowerCase() || '';
-          
-          if (productName.includes(searchTerm) || productSku.includes(searchTerm) || productBrand.includes(searchTerm)) {
-            row.style.display = '';
-          } else {
-            row.style.display = 'none';
-          }
-        });
-        
-        // Actualizar contador de productos visibles
-        updateProductCounter();
-      });
-    }
-    
-    // Filtro por categoría
-    const categoryFilter = document.getElementById('categoryFilter');
-    if (categoryFilter) {
-      categoryFilter.addEventListener('change', function() {
-        const selectedCategory = this.value.toLowerCase();
-        const tableRows = document.querySelectorAll('#productsTable tbody tr');
-        
-        tableRows.forEach(row => {
-          const rowCategory = row.getAttribute('data-category') || '';
-          
-          if (!selectedCategory || rowCategory === selectedCategory) {
-            row.style.display = '';
-          } else {
-            row.style.display = 'none';
-          }
-        });
-        
-        // Actualizar contador de productos visibles
-        updateProductCounter();
-      });
-    }
-    
-    // Actualizar contador de productos
-    function updateProductCounter() {
-      const visibleRows = document.querySelectorAll('#productsTable tbody tr:not([style*="display: none"])');
-      const totalProducts = {{ total_productos if total_productos is defined else 'document.querySelectorAll("#productsTable tbody tr").length' }};
-      const productsInfo = document.querySelector('.products-info');
+    // Funciones para el modal de acciones
+    window.openActionsModal = function(productId, productName) {
+      const modal = document.getElementById('actionsModal');
+      const productNameEl = document.getElementById('productNameInModal');
+      const actionEdit = document.getElementById('actionEdit');
+      const actionDelete = document.getElementById('actionDelete');
+      const actionAddStock = document.getElementById('actionAddStock');
       
-      if (productsInfo) {
-        productsInfo.textContent = `Mostrando ${visibleRows.length} de ${totalProducts} productos`;
+      if (productNameEl) {
+        productNameEl.textContent = productName;
       }
-    }
+      
+      if (actionEdit) {
+        actionEdit.href = `/editar-producto/${productId}`;
+      }
+      
+      if (actionDelete) {
+        actionDelete.onclick = function(e) {
+          e.preventDefault();
+          closeActionsModal();
+          confirmDelete(productId, productName);
+        };
+      }
+      
+      if (actionAddStock) {
+        actionAddStock.href = `/reabastecer-producto/${productId}`;
+      }
+      
+      if (modal) {
+        modal.style.display = 'flex';
+      }
+    };
+    
+    window.closeActionsModal = function() {
+      const modal = document.getElementById('actionsModal');
+      if (modal) {
+        modal.style.display = 'none';
+      }
+    };
+    
+    // Función para confirmar eliminación
+    window.confirmDelete = function(id, name) {
+      const deleteProductNameEl = document.getElementById('deleteProductName');
+      const confirmDeleteEl = document.getElementById('confirmDelete');
+      
+      if (deleteProductNameEl) {
+        deleteProductNameEl.textContent = name;
+      }
+      
+      if (confirmDeleteEl) {
+        confirmDeleteEl.href = `/eliminar-producto/${id}`;
+      }
+      
+      try {
+        if (window.deleteModal) {
+          window.deleteModal.show();
+        } else if(bootstrap && bootstrap.Modal) {
+          const myModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+          myModal.show();
+        } else {
+          if (confirm(`¿Estás seguro de que deseas eliminar el producto "${name}"? Esta acción no se puede deshacer.`)) {
+            window.location.href = `/eliminar-producto/${id}`;
+          }
+        }
+      } catch (e) {
+        console.warn("Error al mostrar modal:", e);
+        if (confirm(`¿Estás seguro de que deseas eliminar el producto "${name}"? Esta acción no se puede deshacer.`)) {
+          window.location.href = `/eliminar-producto/${id}`;
+        }
+      }
+    };
+    
+    // Cerrar modal al hacer clic fuera
+    document.addEventListener('click', function(e) {
+      const modal = document.getElementById('actionsModal');
+      if (modal && e.target === modal) {
+        closeActionsModal();
+      }
+    });
+    
+    // Cerrar modal con tecla Escape
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeActionsModal();
+      }
+    });
+    
+    // Inicializar componentes
+    applyFilters();
     
     // Inicializar modal de confirmación si existe
     try {
       const deleteModalEl = document.getElementById('deleteModal');
-      if (deleteModalEl) {
+      if (deleteModalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
         window.deleteModal = new bootstrap.Modal(deleteModalEl);
       }
     } catch (e) {
       console.warn("Bootstrap modal no pudo inicializarse:", e);
-    }
-    
-    // Añadir colores a las opciones del selector de categorías
-    const options = Array.from(categoryFilter.options);
-    categoryFilter.innerHTML = '';
-    
-    options.forEach(option => {
-      const color = option.getAttribute('data-color');
-      const newOption = document.createElement('option');
-      newOption.value = option.value;
-      newOption.setAttribute('data-color', color);
-      
-      if (!option.value) {
-        newOption.textContent = option.textContent;
-        categoryFilter.appendChild(newOption);
-        return;
-      }
-      
-      newOption.style.backgroundColor = color ? color + '10' : '';
-      newOption.style.borderLeft = color ? '8px solid ' + color : '';
-      newOption.style.paddingLeft = color ? '8px' : '';
-      newOption.textContent = option.textContent;
-      
-      categoryFilter.appendChild(newOption);
-    });
-  });
-  
-  // Función para confirmar eliminación
-  function confirmDelete(id, name) {
-    const deleteProductNameEl = document.getElementById('deleteProductName');
-    const confirmDeleteEl = document.getElementById('confirmDelete');
-    
-    if (deleteProductNameEl) {
-      deleteProductNameEl.textContent = name;
-    }
-    
-    if (confirmDeleteEl) {
-      confirmDeleteEl.href = `/eliminar-producto/${id}`;
-    }
-    
-    try {
-      if (window.deleteModal) {
-        window.deleteModal.show();
-      }
-    } catch (e) {
-      if (confirm(`¿Estás seguro de que deseas eliminar el producto "${name}"? Esta acción no se puede deshacer.`)) {
-        window.location.href = `/eliminar-producto/${id}`;
-      }
-    }
-  }
-  
-  // Funciones para el modal de acciones
-  function openActionsModal(productId, productName) {
-    const modal = document.getElementById('actionsModal');
-    const productNameEl = document.getElementById('productNameInModal');
-    const actionEdit = document.getElementById('actionEdit');
-    const actionDelete = document.getElementById('actionDelete');
-    const actionAddStock = document.getElementById('actionAddStock');
-    
-    if (productNameEl) {
-      productNameEl.textContent = productName;
-    }
-    
-    if (actionEdit) {
-      actionEdit.href = `/editar-producto/${productId}`;
-    }
-    
-    if (actionDelete) {
-      actionDelete.onclick = function(e) {
-        e.preventDefault();
-        closeActionsModal();
-        confirmDelete(productId, productName);
-      };
-    }
-    
-    if (actionAddStock) {
-      actionAddStock.href = `/reabastecer-producto/${productId}`;
-    }
-    
-    if (modal) {
-      modal.style.display = 'flex';
-      
-      // Añadir animación de entrada
-      modal.querySelector('.actions-modal-content').style.opacity = '1';
-      modal.querySelector('.actions-modal-content').style.transform = 'scale(1)';
-    }
-  }
-  
-  function closeActionsModal() {
-    const modal = document.getElementById('actionsModal');
-    if (modal) {
-      // Añadir animación de salida
-      const content = modal.querySelector('.actions-modal-content');
-      content.style.opacity = '0';
-      content.style.transform = 'scale(0.95)';
-      
-      // Cerrar después de la animación
-      setTimeout(() => {
-        modal.style.display = 'none';
-        content.style.opacity = '';
-        content.style.transform = '';
-      }, 200);
-    }
-  }
-  
-  // Cerrar modal al hacer clic fuera
-  document.addEventListener('click', function(e) {
-    const modal = document.getElementById('actionsModal');
-    if (modal && e.target === modal) {
-      closeActionsModal();
-    }
-  });
-  
-  // Cerrar modal con tecla Escape
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-      closeActionsModal();
     }
   });
 </script>
