@@ -112,7 +112,7 @@
   .movimiento-icon {
     width: 50px;
     height: 50px;
-    border-radius: 6px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -184,6 +184,67 @@
     color: #c62828;
   }
   
+  /* Notas y comprobantes */
+  .movimiento-details-extra {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px dashed #e9ecef;
+  }
+  
+  .movimiento-notas {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: #6c757d;
+    flex: 1;
+    min-width: 250px;
+  }
+  
+  .movimiento-notas i {
+    flex-shrink: 0;
+    font-size: 1rem;
+    color: #adb5bd;
+    margin-top: 2px;
+  }
+  
+  .movimiento-notas span {
+    line-height: 1.4;
+    word-break: break-word;
+  }
+  
+  .movimiento-comprobante {
+    display: flex;
+    align-items: center;
+  }
+  
+  .btn-download {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #0066cc;
+    background-color: rgba(0, 102, 204, 0.1);
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+  
+  .btn-download:hover {
+    background-color: rgba(0, 102, 204, 0.15);
+    color: #0066cc;
+    transform: translateY(-1px);
+  }
+  
+  .btn-download i {
+    font-size: 1rem;
+  }
+  
   /* Sin resultados */
   .no-results {
     display: flex;
@@ -243,9 +304,9 @@
   }
   
   .page-item.active .page-link {
-    background-color: #e52e2e;
+    background-color: #0066cc;
     color: white;
-    border-color: #e52e2e;
+    border-color: #0066cc;
   }
   
   .page-item.disabled .page-link {
@@ -293,13 +354,22 @@
     .movimiento-fecha {
       font-size: 0.75rem;
     }
+    
+    .movimiento-details-extra {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    
+    .movimiento-notas {
+      margin-bottom: 0.5rem;
+    }
   }
 </style>
 
 <div class="historial-container">
   <!-- Encabezado con título y botón de volver -->
   <div class="page-header">
-    <h1 class="page-title">Historial de entradas y salidas</h1>
+    <h1 class="page-title">Historial de entradas y salidas del stock</h1>
     <a href="{{ url_for('ajuste_stock') }}" class="btn-volver">
       <i class="fas fa-arrow-left"></i>
       <span>Volver</span>
@@ -360,9 +430,28 @@
               </div>
               <div class="movimiento-cantidad {% if movimiento.tipo_movimiento == 'ENTRADA' %}cantidad-entrada{% else %}cantidad-salida{% endif %}">
                 {% if movimiento.tipo_movimiento == 'ENTRADA' %}+{% else %}-{% endif %}{{ movimiento.cantidad }} 
-                {{ "unidad" if movimiento.cantidad == 1 else "unidades" }}
+                {{ movimiento.producto.unidad or "unidad" if movimiento.cantidad == 1 else movimiento.producto.unidad or "unidades" }}
               </div>
             </div>
+            
+            {% if movimiento.notas or movimiento.comprobante %}
+            <div class="movimiento-details-extra">
+              {% if movimiento.notas %}
+              <div class="movimiento-notas">
+                <i class="fas fa-sticky-note" title="Notas"></i>
+                <span>{{ movimiento.notas }}</span>
+              </div>
+              {% endif %}
+              
+              {% if movimiento.comprobante %}
+              <div class="movimiento-comprobante">
+                <a href="{{ url_for('descargar_comprobante', movimiento_id=movimiento.id) }}" class="btn-download" title="Descargar comprobante">
+                  <i class="fas fa-file-download"></i> Descargar comprobante
+                </a>
+              </div>
+              {% endif %}
+            </div>
+            {% endif %}
           </div>
         </div>
       {% endfor %}

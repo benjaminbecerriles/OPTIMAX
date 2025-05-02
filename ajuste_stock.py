@@ -3,7 +3,7 @@ import uuid
 from datetime import datetime, timedelta, date
 from flask import (
     Blueprint, render_template, request, redirect, 
-    url_for, flash, session, jsonify
+    url_for, flash, session, jsonify, send_file
 )
 from werkzeug.utils import secure_filename
 from sqlalchemy import desc
@@ -21,7 +21,7 @@ ajuste_stock_bp = Blueprint('ajuste_stock', __name__)
 # Constantes
 UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 
                            'static', 'uploads')
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'pdf'}
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'txt', 'zip', 'rar'}
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -741,6 +741,50 @@ def crear_lote_registro(producto, cantidad, costo, fecha_caducidad=None, usuario
         print(f"ERROR al crear lote de registro: {str(e)}")
         raise e
 
+@ajuste_stock_bp.route('/descargar-comprobante/<int:movimiento_id>')
+def descargar_comprobante(movimiento_id):
+    """Permite descargar el comprobante adjunto a un movimiento de inventario."""
+    # Verificar si el usuario está logueado
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    
+    # Obtener el usuario actual
+    empresa_id = session.get('user_id')
+    
+    # Buscar el movimiento
+    movimiento = MovimientoInventario.query.get_or_404(movimiento_id)
+    
+    # Verificar que el movimiento pertenece a un producto de la empresa
+    producto = Producto.query.filter_by(
+        id=movimiento.producto_id, 
+        empresa_id=empresa_id
+    ).first_or_404()
+    
+    # Verificar que el movimiento tiene un comprobante
+    if not movimiento.comprobante:
+        flash('Este movimiento no tiene comprobante adjunto.', 'warning')
+        return redirect(url_for('historial_movimientos'))
+    
+    # Ruta completa al archivo
+    filepath = os.path.join(UPLOAD_FOLDER, movimiento.comprobante)
+    
+    # Verificar que el archivo existe
+    if not os.path.exists(filepath):
+        flash('El archivo no se encuentra en el servidor.', 'danger')
+        return redirect(url_for('historial_movimientos'))
+    
+    # Obtener el nombre original del archivo (sin el prefijo UUID)
+    filename_parts = movimiento.comprobante.split('_', 1)
+    original_filename = filename_parts[1] if len(filename_parts) > 1 else movimiento.comprobante
+    
+    # Devolver el archivo como descarga
+    return send_file(
+        filepath,
+        as_attachment=True,
+        download_name=original_filename,
+        mimetype='application/octet-stream'
+    )
+
 def init_app(app):
     """Inicializa la aplicación con este blueprint."""
     app.register_blueprint(ajuste_stock_bp, url_prefix='')
@@ -750,3 +794,4 @@ def init_app(app):
     app.add_url_rule('/ajuste-entrada/<int:producto_id>', 'ajuste_entrada', ajuste_entrada, methods=['GET', 'POST'])
     app.add_url_rule('/ajuste-salida/<int:producto_id>', 'ajuste_salida', ajuste_salida, methods=['GET', 'POST'])
     app.add_url_rule('/ajuste-confirmacion/<int:movimiento_id>', 'ajuste_confirmacion', ajuste_confirmacion)
+    app.add_url_rule('/descargar-comprobante/<int:movimiento_id>', 'descargar_comprobante', descargar_comprobante)

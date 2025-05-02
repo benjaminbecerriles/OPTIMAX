@@ -9,7 +9,7 @@ import sys
 import shutil
 import urllib.parse
 
-from flask import Flask, request, render_template, session, redirect, url_for, jsonify, flash
+from flask import Flask, request, render_template, session, redirect, url_for, jsonify, flash, send_file
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from functools import wraps
@@ -83,7 +83,7 @@ VALID_CATEGORIES = {
 # Configuración de subida de archivos
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'uploads')
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'txt', 'zip', 'rar'}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -1631,7 +1631,7 @@ def agregar_a_granel():
             for c in categorias_db
         ]
         return render_template('agregar_a_granel.html', categories=categories_list)
-        
+
 @app.route('/editar-producto/<int:prod_id>', methods=['GET','POST'])
 @login_requerido
 def editar_producto(prod_id):
