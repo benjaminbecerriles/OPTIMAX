@@ -781,7 +781,12 @@
                   {% if producto.stock <= 0 %}
                     Sin stock
                   {% else %}
-                    {{ producto.stock }} unidades
+                    {{ producto.stock }} 
+                    {% if producto.unidad and producto.unidad != 'NONE' %}
+                      {{ producto.unidad }}
+                    {% else %}
+                      {% if producto.stock == 1 %}pieza{% else %}piezas{% endif %}
+                    {% endif %}
                   {% endif %}
                 </span>
               </span>
