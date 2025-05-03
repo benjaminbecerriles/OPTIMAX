@@ -603,12 +603,12 @@
         
         <div class="info-row">
           <span class="info-label">Costo actual</span>
-          <span class="info-value">${{ producto.costo|round(2) }}</span>
+          <span class="info-value" id="costoActualValue">${{ producto.costo|round(2) }}</span>
         </div>
         
         <div class="info-row">
           <span class="info-label">Precio de venta</span>
-          <span class="info-value">${{ producto.precio_venta|round(2) }}</span>
+          <span class="info-value" id="precioVentaValue">${{ producto.precio_venta|round(2) }}</span>
         </div>
         
         <div class="info-row">
@@ -666,7 +666,7 @@
             <div class="form-group">
               <div class="form-check">
                 <input class="form-check-input" type="checkbox" id="mantener_costo_anterior" name="mantener_costo_anterior" checked>
-                <label class="form-check-label" for="mantener_costo_anterior">
+                <label class="form-check-label" for="mantener_costo_anterior" id="mantenerCostoLabel">
                   Mantener costo anterior ({% if ultima_entrada and ultima_entrada.costo_unitario %}${{ ultima_entrada.costo_unitario|round(2) }}{% else %}${{ producto.costo|round(2) }}{% endif %})
                 </label>
               </div>
@@ -776,6 +776,60 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
+    // Función simple para formatear dinero con comas
+    function formatMoney(number) {
+      if (typeof number === 'string') {
+        number = parseFloat(number.replace(/[^\d.-]/g, ''));
+      }
+      
+      if (isNaN(number)) {
+        return '$0.00';
+      }
+      
+      // Usar toLocaleString para formatear con comas
+      return '$' + number.toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+    
+    // 1. Formatear Costo Actual
+    const costoActualEl = document.getElementById('costoActualValue');
+    if (costoActualEl) {
+      const valor = parseFloat(costoActualEl.textContent.replace('$', ''));
+      costoActualEl.textContent = formatMoney(valor);
+    }
+    
+    // 2. Formatear Precio de Venta
+    const precioVentaEl = document.getElementById('precioVentaValue');
+    if (precioVentaEl) {
+      const valor = parseFloat(precioVentaEl.textContent.replace('$', ''));
+      precioVentaEl.textContent = formatMoney(valor);
+    }
+    
+    // 3. Formatear valor en Mantener costo anterior
+    const mantenerCostoLabel = document.getElementById('mantenerCostoLabel');
+    if (mantenerCostoLabel) {
+      // Obtener todo el texto de la etiqueta
+      const text = mantenerCostoLabel.textContent;
+      
+      // Buscar el valor entre paréntesis
+      const inicio = text.indexOf('($') + 2;
+      const fin = text.indexOf(')');
+      
+      if (inicio > 1 && fin > inicio) {
+        // Extraer el valor numérico
+        const valorStr = text.substring(inicio, fin);
+        const valor = parseFloat(valorStr);
+        
+        // Crear el nuevo texto con el valor formateado
+        const newText = 'Mantener costo anterior (' + formatMoney(valor) + ')';
+        
+        // Actualizar la etiqueta
+        mantenerCostoLabel.textContent = newText;
+      }
+    }
+    
     // Obtener el campo de cantidad y su unidad
     const cantidadInput = document.getElementById('cantidad');
     const unidadIndicator = document.getElementById('unidadIndicator');
