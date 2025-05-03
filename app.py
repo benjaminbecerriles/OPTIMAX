@@ -562,21 +562,30 @@ def dashboard_inventario():
     """
     Vista del dashboard de inventario
     """
-    # Obtener información del usuario y datos para el dashboard
-    empresa_id = session['user_id']
+    # Verificar si el usuario está logueado
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
     
-    # Obtener lista de productos para mostrar
+    # Obtener información del usuario
+    empresa_id = session.get('user_id')
+    
+    # Obtener lista de productos para mostrar (solo los aprobados)
     productos = Producto.query.filter_by(
         empresa_id=empresa_id,
         is_approved=True
     ).order_by(Producto.id.desc()).all()
     
+    # Calcular estadísticas
     total_productos = len(productos)
+    
+    # Productos con poco stock (por agotarse)
+    productos_por_agotarse = sum(1 for p in productos if p.stock > 0 and p.stock <= 5)
     
     return render_template(
         'dashboard_inventario.html',
         productos=productos,
-        total_productos=total_productos
+        total_productos=total_productos,
+        productos_por_agotarse=productos_por_agotarse
     )
 
 @app.route('/cambiar-precios')
@@ -1948,6 +1957,13 @@ def eliminar_producto(prod_id):
 @app.route('/historial-movimientos')
 @login_requerido
 def historial_movimientos():
+    # Verificar si el usuario está logueado
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    
+    # Obtener ID de empresa del usuario actual
+    empresa_id = session.get('user_id')
+    
     # Obtener parámetros de filtro
     tipo = request.args.get('tipo', 'todos')
     periodo = int(request.args.get('periodo', 30))
@@ -1958,9 +1974,10 @@ def historial_movimientos():
     # Calcular fecha límite según el período seleccionado
     fecha_limite = datetime.now() - timedelta(days=periodo)
     
-    # Consulta base
+    # Consulta base CON FILTRO POR EMPRESA_ID
     query = MovimientoInventario.query.join(Producto).filter(
-        MovimientoInventario.fecha_movimiento >= fecha_limite
+        MovimientoInventario.fecha_movimiento >= fecha_limite,
+        Producto.empresa_id == empresa_id  # Filtro importante por empresa_id
     )
     
     # Aplicar filtro de tipo

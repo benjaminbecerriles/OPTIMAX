@@ -471,30 +471,30 @@
   <h1>Inventario</h1>
   <p class="page-description">Gestiona tus productos, stock y precios de manera eficiente.</p>
 
-  <!-- Estadísticas -->
+  <!-- Estadísticas - MODIFICADO: valores por defecto a 0 -->
   <div class="section">
     <h2>Datos generales</h2>
     
     <div class="stats-grid">
       <div class="stat-card">
-        <div class="stat-number">{{ total_productos if total_productos is defined else '13' }}</div>
+        <div class="stat-number">{{ total_productos if total_productos is defined else '0' }}</div>
         <div class="stat-label">Total productos</div>
       </div>
       
       <div class="stat-card">
-        <div class="stat-number">{{ productos|sum(attribute='stock') if productos else '161' }}</div>
+        <div class="stat-number">{{ productos|sum(attribute='stock') if productos else '0' }}</div>
         <div class="stat-label">Unidades en stock</div>
       </div>
       
       <div class="stat-card">
-        {% set valor_total = (productos|sum(attribute='precio_venta') * productos|sum(attribute='stock'))|float if productos else 1965005.00 %}
+        {% set valor_total = (productos|sum(attribute='precio_venta') * productos|sum(attribute='stock'))|float if productos else 0.00 %}
         {% set valor_redondeado = valor_total|round(0, 'floor')|int %}
         <div class="stat-number">${{ '{:,}'.format(valor_redondeado) }}</div>
         <div class="stat-label">Valor del inventario</div>
       </div>
       
       <div class="stat-card">
-        <div class="stat-number">{{ productos|selectattr('stock', 'le', 5)|list|length if productos else '1' }}</div>
+        <div class="stat-number">{{ productos|selectattr('stock', 'gt', 0)|selectattr('stock', 'le', 5)|list|length if productos else '0' }}</div>
         <div class="stat-label">Productos por agotarse</div>
       </div>
     </div>
@@ -542,7 +542,7 @@
     </div>
   </div>
 
-  <!-- Productos -->
+  <!-- Productos - MODIFICADO: mejor visualización cuando no hay productos -->
   <div class="section">
     <div class="section-header">
       <h2>Ver y gestionar productos</h2>
@@ -624,9 +624,7 @@
           <i class="fas fa-box-open"></i>
         </div>
         <p class="empty-message">No hay productos en tu inventario</p>
-        <a href="{{ url_for('nuevo_producto') }}" class="button-link">
-          Agregar producto
-        </a>
+        <!-- MODIFICADO: Eliminar el botón cuando no hay productos -->
       </div>
     {% endif %}
   </div>
@@ -639,7 +637,7 @@
           <h3 class="alert-title">Productos por agotarse</h3>
         </div>
         
-        {% set low_stock = productos|selectattr('stock', 'le', 5)|selectattr('stock', 'gt', 0)|list if productos else [] %}
+        {% set low_stock = productos|selectattr('stock', 'gt', 0)|selectattr('stock', 'le', 5)|list if productos else [] %}
         {% if low_stock|length > 0 %}
           {% for p in low_stock[:5] %}
             <div class="alert-item">

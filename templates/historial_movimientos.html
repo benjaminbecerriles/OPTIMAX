@@ -30,7 +30,7 @@
     color: #212529;
   }
   
-  /* Botón volver con estilo Apple */
+  /* Botón volver - Azul de dashboard */
   .btn-volver {
     display: flex;
     align-items: center;
@@ -44,15 +44,19 @@
     text-decoration: none;
     cursor: pointer;
     border: none;
-    background-color: #f5f5f7;
-    color: #1d1d1f;
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    background-color: #1a237e;
+    color: #ffffff;
+    box-shadow: 0 2px 4px rgba(26, 35, 126, 0.3);
   }
   
   .btn-volver:hover {
-    background-color: #e8e8e8;
+    background-color: #151c64;
     transform: translateY(-2px);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 8px rgba(26, 35, 126, 0.4);
+  }
+  
+  .btn-volver i {
+    color: #ffffff;
   }
   
   /* Filtros y búsqueda */
@@ -65,6 +69,7 @@
     background-color: #f8f9fa;
     border-radius: 0.5rem;
     padding: 1rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
   }
   
   .filter-item {
@@ -83,9 +88,10 @@
   .filter-item select, .filter-item input {
     width: 100%;
     padding: 0.5rem;
-    border-radius: 0.25rem;
+    border-radius: 0.375rem;
     border: 1px solid #ced4da;
     font-size: 0.875rem;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
   }
   
   /* Lista de movimientos */
@@ -93,35 +99,45 @@
     margin-top: 1.5rem;
   }
   
+  /* Tarjetas de movimiento con colores más suaves */
   .movimiento-item {
     display: flex;
-    padding: 1rem 0;
-    border-bottom: 1px solid #f0f0f0;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    border-radius: 0.75rem;
     position: relative;
-    transition: background-color 0.2s;
+    transition: all 0.2s ease;
+    background-color: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    border-left: 2px solid #eaeaea; /* Borde más fino y sutil */
   }
   
-  .movimiento-item:last-child {
-    border-bottom: none;
+  /* Colorear bordes con colores extremadamente suaves */
+  .movimiento-item.entrada {
+    border-left-color: rgba(76, 175, 80, 0.2); /* Verde casi imperceptible */
+  }
+  
+  .movimiento-item.salida {
+    border-left-color: rgba(244, 67, 54, 0.2); /* Rojo casi imperceptible */
   }
   
   .movimiento-item:hover {
-    background-color: #f8f9fa;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.08);
   }
   
   .movimiento-icon {
-    width: 50px;
-    height: 50px;
-    border-radius: 8px;
+    width: 64px;
+    height: 64px;
+    border-radius: 0.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-right: 1rem;
+    margin-right: 1.25rem;
     flex-shrink: 0;
     overflow: hidden;
     background-color: #f8f9fa;
-    border: 1px solid #e9ecef;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #f0f0f0; /* Borde aún más sutil */
   }
   
   .movimiento-icon img {
@@ -138,29 +154,34 @@
   .movimiento-primary {
     display: flex;
     justify-content: space-between;
-    font-weight: 500;
-    margin-bottom: 0.25rem;
+    align-items: center;
+    margin-bottom: 0.375rem;
   }
   
   .movimiento-nombre {
-    font-size: 1rem;
+    font-size: 1.125rem;
+    font-weight: 600;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 60%;
-    color: #212529;
+    color: #333333;
   }
   
   .movimiento-fecha {
     font-size: 0.875rem;
     color: #6c757d;
     white-space: nowrap;
+    background-color: #f8f9fa;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
   }
   
   .movimiento-secondary {
     display: flex;
     justify-content: space-between;
-    font-size: 0.875rem;
+    align-items: center;
+    margin-bottom: 0.5rem;
   }
   
   .movimiento-info {
@@ -169,19 +190,47 @@
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 60%;
+    font-size: 0.875rem;
   }
   
+  /* REDUCIDAS: Cantidades más pequeñas y más discretas */
   .movimiento-cantidad {
     font-weight: 600;
     white-space: nowrap;
+    font-size: 0.85rem; /* Ahora MÁS PEQUEÑO */
+    padding: 0.2rem 0.5rem; /* Padding más reducido */
+    border-radius: 0.3rem; /* Bordes más suaves */
   }
   
   .cantidad-entrada {
-    color: #2e7d32;
+    color: #2e7d32; /* Color verde normal */
+    background-color: rgba(76, 175, 80, 0.05); /* Fondo apenas perceptible */
   }
   
   .cantidad-salida {
-    color: #c62828;
+    color: #c62828; /* Color rojo normal */
+    background-color: rgba(244, 67, 54, 0.05); /* Fondo apenas perceptible */
+  }
+  
+  .movimiento-tipo {
+    display: inline-block;
+    padding: 0.1rem 0.3rem;
+    border-radius: 0.2rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-right: 0.25rem;
+    background-color: #f7f7f7; /* Fondo neutro muy suave */
+    color: #888888; /* Color de texto más suave */
+  }
+  
+  .tipo-entrada {
+    background-color: rgba(76, 175, 80, 0.03); /* Verde extremadamente sutil */
+    color: #417F4B; /* Verde más oscuro y menos saturado */
+  }
+  
+  .tipo-salida {
+    background-color: rgba(244, 67, 54, 0.03); /* Rojo extremadamente sutil */
+    color: #9A4E48; /* Rojo más oscuro y menos saturado */
   }
   
   /* Notas y comprobantes */
@@ -189,9 +238,9 @@
     display: flex;
     flex-wrap: wrap;
     gap: 0.75rem;
-    margin-top: 0.5rem;
-    padding-top: 0.5rem;
-    border-top: 1px dashed #e9ecef;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px dashed #f0f0f0; /* Borde aún más sutil */
   }
   
   .movimiento-notas {
@@ -202,6 +251,10 @@
     color: #6c757d;
     flex: 1;
     min-width: 250px;
+    background-color: #f9f9f9;
+    padding: 0.75rem;
+    border-radius: 0.375rem;
+    border: 1px solid rgba(0,0,0,0.03); /* Borde más sutil */
   }
   
   .movimiento-notas i {
@@ -225,18 +278,19 @@
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.375rem 0.75rem;
+    padding: 0.5rem 0.75rem;
     border-radius: 6px;
     font-size: 0.875rem;
     font-weight: 500;
     color: #0066cc;
-    background-color: rgba(0, 102, 204, 0.1);
+    background-color: rgba(0, 102, 204, 0.03); /* Fondo aún más sutil */
     text-decoration: none;
     transition: all 0.2s ease;
+    border: 1px solid rgba(0, 102, 204, 0.07); /* Borde muy sutil */
   }
   
   .btn-download:hover {
-    background-color: rgba(0, 102, 204, 0.15);
+    background-color: rgba(0, 102, 204, 0.07);
     color: #0066cc;
     transform: translateY(-1px);
   }
@@ -264,7 +318,7 @@
     color: #adb5bd;
   }
   
-  /* Paginación mejorada */
+  /* Paginación */
   .pagination-container {
     display: flex;
     justify-content: center;
@@ -288,8 +342,8 @@
     align-items: center;
     justify-content: center;
     padding: 0.5rem 1rem;
-    border-radius: 980px;
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 0.5rem;
+    border: 1px solid rgba(0, 0, 0, 0.07);
     color: #212529;
     text-decoration: none;
     transition: all 0.2s ease;
@@ -329,16 +383,27 @@
     justify-content: center;
     width: 100%;
     height: 100%;
-    background-color: #f0f0f0;
-    color: #adb5bd;
+    background-color: #f5f5f5;
+    color: #bbb;
     font-size: 1.25rem;
     border-radius: 0;
+  }
+  
+  /* Separación visual entre ítems */
+  .movimiento-item + .movimiento-item {
+    margin-top: 1rem;
   }
   
   /* Estilos para dispositivos móviles */
   @media (max-width: 768px) {
     .filters-container {
       flex-direction: column;
+    }
+    
+    .movimiento-icon {
+      width: 48px;
+      height: 48px;
+      margin-right: 0.75rem;
     }
     
     .movimiento-primary, .movimiento-secondary {
@@ -352,6 +417,7 @@
     }
     
     .movimiento-fecha {
+      margin-top: 0.25rem;
       font-size: 0.75rem;
     }
     
@@ -408,7 +474,7 @@
   <div class="movimientos-list">
     {% if movimientos and movimientos|length > 0 %}
       {% for movimiento in movimientos %}
-        <div class="movimiento-item">
+        <div class="movimiento-item {{ 'entrada' if movimiento.tipo_movimiento == 'ENTRADA' else 'salida' }}">
           <div class="movimiento-icon">
             {% if movimiento.producto.foto %}
               <img src="{{ url_for('static', filename='uploads/' ~ movimiento.producto.foto) }}" alt="{{ movimiento.producto.nombre }}">
@@ -421,13 +487,24 @@
           <div class="movimiento-details">
             <div class="movimiento-primary">
               <div class="movimiento-nombre">{{ movimiento.producto.nombre }}</div>
-              <div class="movimiento-fecha">{{ movimiento.fecha_movimiento.strftime('%d/%m/%Y %H:%M') }}</div>
+              <div class="movimiento-fecha">
+                <i class="far fa-calendar-alt"></i> {{ movimiento.fecha_movimiento.strftime('%d/%m/%Y %H:%M') }}
+              </div>
             </div>
             <div class="movimiento-secondary">
               <div class="movimiento-info">
-                {{ movimiento.motivo|title }} | {{ movimiento.producto.codigo_barras_externo }}
-                {% if movimiento.numero_lote %} | Lote: {{ movimiento.numero_lote }}{% endif %}
+                <span class="movimiento-tipo {{ 'tipo-entrada' if movimiento.tipo_movimiento == 'ENTRADA' else 'tipo-salida' }}">
+                  {% if movimiento.tipo_movimiento == 'ENTRADA' %}
+                    <i class="fas fa-arrow-alt-circle-down"></i> Entrada
+                  {% else %}
+                    <i class="fas fa-arrow-alt-circle-up"></i> Salida
+                  {% endif %}
+                </span>
+                <span>{{ movimiento.motivo|title }}</span> | 
+                <span title="{{ movimiento.producto.codigo_barras_externo }}">{{ movimiento.producto.codigo_barras_externo }}</span>
+                {% if movimiento.numero_lote %} | <span title="Lote">{{ movimiento.numero_lote }}</span>{% endif %}
               </div>
+              <!-- Cantidades más pequeñas y menos saturadas -->
               <div class="movimiento-cantidad {% if movimiento.tipo_movimiento == 'ENTRADA' %}cantidad-entrada{% else %}cantidad-salida{% endif %}">
                 {% if movimiento.tipo_movimiento == 'ENTRADA' %}+{% else %}-{% endif %}{{ movimiento.cantidad }} 
                 {{ movimiento.producto.unidad or "unidad" if movimiento.cantidad == 1 else movimiento.producto.unidad or "unidades" }}
