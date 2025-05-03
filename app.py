@@ -768,10 +768,10 @@ def ver_productos():
 
     # Calcular costo promedio y días hasta caducidad para cada producto
     for producto in productos:
-        #Inicializar los atributos temporales
+        # Inicializar los atributos temporales
         producto.costo_promedio = producto.costo  # Valor predeterminado
         producto.proximo_lote_dias = None  # Valor predeterminado
-
+        
         try:
             # Buscar lotes activos con stock positivo
             lotes_activos = LoteInventario.query.filter(
@@ -779,18 +779,18 @@ def ver_productos():
                 LoteInventario.esta_activo == True,
                 LoteInventario.stock > 0
             ).all()
-
+            
             print(f"Producto {producto.id} ({producto.nombre}) - Lotes activos: {len(lotes_activos)}")
-
+            
             if lotes_activos:
                 # Cálculo del costo promedio ponderado por cantidad en stock
                 costo_total = 0
                 stock_total = 0
-
+                
                 for lote in lotes_activos:
                     costo_total += lote.costo_unitario * lote.stock
                     stock_total += lote.stock
-
+                
                 if stock_total > 0:
                     producto.costo_promedio = costo_total / stock_total
                 
@@ -802,40 +802,28 @@ def ver_productos():
                         print(f"  Lote {lote.id}: fecha caducidad = {lote.fecha_caducidad}")
                 
                 print(f"  Lotes con caducidad: {len(lotes_con_caducidad)}")
-
+                
                 if lotes_con_caducidad:
                     # Ordenar por fecha de caducidad (más cercana primero)
                     lotes_con_caducidad.sort(key=lambda x: x.fecha_caducidad)
-
-                    # Obtener la fecha actual
+                    proximo_lote = lotes_con_caducidad[0]
+                    
+                    # Calcular días hasta caducidad directamente
                     hoy = date.today()
-
-                    # Inicializar proximo_lote con None
-                    proximo_lote = None
-                    dias_calculados = None
-
-                    # Primero buscar el lote más próximo a caducar que NO ESTÉ caducado aún
-                    lotes_no_caducados = [l for l in lotes_con_caducidad if l.fecha_caducidad >= hoy]
-
-                    if lotes_no_caducados:
-                    # Si hay lotes que aún no caducan, tomamos el primero (más próximo)
-                        proximo_lote = lotes_no_caducados[0]
-                        dias_calculados = (proximo_lote.fecha_caducidad - hoy).days
-                        print(f"  Próximo lote NO caducado {proximo_lote.id} caduca en {dias_calculados} días")
-
-                    else:
-                        # Si todos están caducados, tomamos el que caducó más recientemente
-                        proximo_lote = lotes_con_caducidad[len(lotes_con_caducidad)-1]  # El último lote (caducado más recientemente)
+                    if proximo_lote.fecha_caducidad < hoy:
                         dias_calculados = -1 * (hoy - proximo_lote.fecha_caducidad).days
-                        print(f"  Todos los lotes están caducados. El menos caducado es {proximo_lote.id}: {dias_calculados} días")
+                    else:
+                        dias_calculados = (proximo_lote.fecha_caducidad - hoy).days
+                    
+                    print(f"  Próximo lote {proximo_lote.id} caduca el {proximo_lote.fecha_caducidad}")
+                    print(f"  Fecha actual: {hoy}")
+                    print(f"  Días hasta caducidad calculados: {dias_calculados}")
 
                     # Asignar el valor a la propiedad del producto
                     producto.proximo_lote_dias = dias_calculados
                     print(f"  Valor asignado a proximo_lote_dias: {producto.proximo_lote_dias}")
-
                 else:
                     print(f"  No hay lotes con fecha de caducidad")
-
             else:
                 print(f"  No hay lotes activos con stock positivo")
 
@@ -845,73 +833,40 @@ def ver_productos():
             traceback.print_exc()  # Esto dará más información sobre la excepción
             # No interrumpir el proceso por un error en un producto
             continue
-            
     
     # Verificación final
     for producto in productos:
         print(f"Producto {producto.id} final - proximo_lote_dias: {getattr(producto, 'proximo_lote_dias', 'NO DEFINIDO')}")
 
-    # Vamos a hacer un diagnóstico más profundo y crear diccionarios para la vista
+    # Vamos a hacer un diagnóstico más profundo y forzar valores para probar
     productos_dict = []
     for p in productos:
-        # PASO 1: Verificar directamente en la base de datos para diagnóstico
+        # PASO 1: Verificar directamente en la base de datos
         lotes_activos = LoteInventario.query.filter(
             LoteInventario.producto_id == p.id,
             LoteInventario.esta_activo == True,
             LoteInventario.stock > 0
-            ).all()
-
-        # PASO 2: Revisar y ajustar proximo_lote_dias si es necesario
-        # Este es un respaldo por si el cálculo anterior falló
-        if not hasattr(p, 'proximo_lote_dias') or p.proximo_lote_dias is None:
-            print(f"Calculando proximo_lote_dias como respaldo para producto {p.id}")
-            dias_calculados = None
-
-            # Buscar lotes con fecha de caducidad y ordenarlos
-            lotes_con_fecha = [l for l in lotes_activos if l.fecha_caducidad is not None]
-            if lotes_con_fecha:
-                lotes_con_fecha.sort(key=lambda x: x.fecha_caducidad)
-
-                # Obtener la fecha actual
-                hoy = date.today()
-
-                # Buscar primero los lotes no caducados
-                lotes_no_caducados = [l for l in lotes_con_fecha if l.fecha_caducidad >= hoy]
-
-                if lotes_no_caducados:
-                    # Tomar el próximo a caducar
-                    proximo_lote = lotes_no_caducados[0]
-                    dias_calculados = (proximo_lote.fecha_caducidad - hoy).days
-                elif lotes_con_fecha:
-                    # Si todos están caducados, tomar el menos caducado
-                    proximo_lote = lotes_con_fecha[-1]
-                    dias_calculados = -1 * (hoy - proximo_lote.fecha_caducidad).days
-
-                # Asignar valor calculado
-                p.proximo_lote_dias = dias_calculados
-
-        # PASO 3: Crear diccionario con datos seguro
-        p_dict = {
-            'id': p.id,
-            'nombre': p.nombre,
-            'stock': p.stock,
-            'costo': p.costo,
-            'precio_venta': p.precio_venta,
-            'categoria': p.categoria,
-            'categoria_color': p.categoria_color,
-            'foto': truncar_url(p.foto),
-            'codigo_barras_externo': p.codigo_barras_externo,
-            'marca': p.marca,
-            'es_favorito': p.es_favorito,
-            'esta_a_la_venta': p.esta_a_la_venta,
-            'unidad': getattr(p, 'unidad', None),
-            'costo_promedio': getattr(p, 'costo_promedio', p.costo),
-            'proximo_lote_dias': getattr(p, 'proximo_lote_dias', None)
-        }
+        ).all()
         
-        print(f"Diccionario final para producto {p.id}: proximo_lote_dias = {p_dict['proximo_lote_dias']}")
-        productos_dict.append(p_dict)
-
+        # PASO 2: Buscar cualquier lote con fecha de caducidad
+        proximo_lote = None
+        dias_calculados = None
+        
+        for lote in lotes_activos:
+            print(f"DEBUG LOTE: Producto {p.id}, Lote {lote.id}, Fecha caducidad: {lote.fecha_caducidad}")
+            if lote.fecha_caducidad is not None:
+                if proximo_lote is None or lote.fecha_caducidad < proximo_lote.fecha_caducidad:
+                    proximo_lote = lote
+        
+        # PASO 3: Calcular días si hay lote con fecha
+        if proximo_lote and proximo_lote.fecha_caducidad:
+            hoy = date.today()
+            if proximo_lote.fecha_caducidad < hoy:
+                dias_calculados = -1 * (hoy - proximo_lote.fecha_caducidad).days
+            else:
+                dias_calculados = (proximo_lote.fecha_caducidad - hoy).days
+            print(f"DEBUG FINAL: Producto {p.id} - Próximo lote caduca en {dias_calculados} días")
+        
         # PASO 4: Crear diccionario con datos seguros
         p_dict = {
             'id': p.id,

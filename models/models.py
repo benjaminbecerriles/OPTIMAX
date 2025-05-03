@@ -1,3 +1,5 @@
+print("=== LOADED NEW MODELS WITH USELIST=FALSE ===")
+
 from . import db
 from datetime import datetime, date
 
@@ -135,18 +137,6 @@ class Producto(db.Model):
         return (f"<Producto {self.nombre} (ID={self.id}), "
                 f"stock={self.stock}, costo={self.costo}, "
                 f"precio_venta={self.precio_venta}, aprobado={self.is_approved}>")
-                
-    def obtener_proximo_lote_caducidad(self):
-        """
-        Utiliza el método de clase en LoteInventario para obtener información
-        sobre la caducidad del próximo lote.
-        
-        Returns:
-            tuple: (lote, dias_hasta_caducidad)
-        """
-        # Importación local para evitar referencias circulares
-        from models.modelos_inventario import LoteInventario
-        return LoteInventario.obtener_proximo_lote_caducidad(self.id)
 
 # ===============================
 # MODELO 'CATÁLOGO GLOBAL'
