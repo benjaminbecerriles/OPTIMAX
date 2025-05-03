@@ -318,7 +318,7 @@
     color: #adb5bd;
   }
   
-  /* Paginación */
+  /* Paginación - ACTUALIZADA para coincidir con ajuste_stock.html */
   .pagination-container {
     display: flex;
     justify-content: center;
@@ -342,9 +342,9 @@
     align-items: center;
     justify-content: center;
     padding: 0.5rem 1rem;
-    border-radius: 0.5rem;
-    border: 1px solid rgba(0, 0, 0, 0.07);
-    color: #212529;
+    border-radius: 980px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    color: var(--text-color, #1d1d1f);
     text-decoration: none;
     transition: all 0.2s ease;
     min-width: 40px;
@@ -353,27 +353,29 @@
   }
   
   .page-link:hover {
-    background-color: #f5f5f7;
+    background-color: var(--light-background, #f5f5f7);
     transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   }
   
   .page-item.active .page-link {
-    background-color: #0066cc;
+    background-color: var(--accent, #e52e2e);
     color: white;
-    border-color: #0066cc;
+    border-color: var(--accent, #e52e2e);
   }
   
   .page-item.disabled .page-link {
-    color: #6c757d;
+    color: var(--text-secondary, #555555);
     pointer-events: none;
     opacity: 0.5;
   }
   
   .pagination-info {
-    margin-top: 0.5rem;
     text-align: center;
-    color: #6c757d;
+    color: var(--text-secondary, #555555);
     font-size: 0.875rem;
+    margin-top: 0.75rem;
+    font-weight: 500;
   }
   
   /* Placeholder para imágenes */
@@ -541,37 +543,35 @@
     {% endif %}
   </div>
   
-  <!-- Paginación adaptada para 30 elementos por página -->
+  <!-- Paginación adaptada para coincidir con la de ajuste_stock.html -->
   {% if movimientos and movimientos|length > 0 %}
     <div class="pagination-container">
-      <nav aria-label="Paginación del historial">
-        <ul class="pagination">
-          <!-- Botón Anterior -->
-          <li class="page-item {% if current_page == 1 %}disabled{% endif %}">
-            <a class="page-link" href="?page={{ current_page - 1 }}{% if request.args.get('tipo') %}&tipo={{ request.args.get('tipo') }}{% endif %}{% if request.args.get('periodo') %}&periodo={{ request.args.get('periodo') }}{% endif %}{% if request.args.get('q') %}&q={{ request.args.get('q') }}{% endif %}">Anterior</a>
+      <ul class="pagination" id="paginationControl">
+        <!-- Botón "Anterior" -->
+        <li class="page-item {% if current_page == 1 %}disabled{% endif %}">
+          <a class="page-link" href="?page={{ current_page - 1 }}{% if request.args.get('tipo') %}&tipo={{ request.args.get('tipo') }}{% endif %}{% if request.args.get('periodo') %}&periodo={{ request.args.get('periodo') }}{% endif %}{% if request.args.get('q') %}&q={{ request.args.get('q') }}{% endif %}">Anterior</a>
+        </li>
+        
+        <!-- Números de página - Utilizando 30 por página en vez de 10 -->
+        {% set per_page = 30 %}
+        {% set total_pages = (total_movimientos + per_page - 1) // per_page %}
+        {% set start_page = [current_page - 2, 1]|max %}
+        {% set end_page = [start_page + 4, total_pages + 1]|min %}
+        {% if end_page - start_page < 5 and start_page > 1 %}
+          {% set start_page = [end_page - 4, 1]|max %}
+        {% endif %}
+        
+        {% for i in range(start_page, end_page) %}
+          <li class="page-item {% if i == current_page %}active{% endif %}">
+            <a class="page-link" href="?page={{ i }}{% if request.args.get('tipo') %}&tipo={{ request.args.get('tipo') }}{% endif %}{% if request.args.get('periodo') %}&periodo={{ request.args.get('periodo') }}{% endif %}{% if request.args.get('q') %}&q={{ request.args.get('q') }}{% endif %}">{{ i }}</a>
           </li>
-          
-          <!-- Números de página - Utilizando 30 por página en vez de 10 -->
-          {% set per_page = 30 %}
-          {% set total_pages = (total_movimientos + per_page - 1) // per_page %}
-          {% set start_page = [current_page - 2, 1]|max %}
-          {% set end_page = [start_page + 4, total_pages + 1]|min %}
-          {% if end_page - start_page < 5 and start_page > 1 %}
-            {% set start_page = [end_page - 4, 1]|max %}
-          {% endif %}
-          
-          {% for i in range(start_page, end_page) %}
-            <li class="page-item {% if i == current_page %}active{% endif %}">
-              <a class="page-link" href="?page={{ i }}{% if request.args.get('tipo') %}&tipo={{ request.args.get('tipo') }}{% endif %}{% if request.args.get('periodo') %}&periodo={{ request.args.get('periodo') }}{% endif %}{% if request.args.get('q') %}&q={{ request.args.get('q') }}{% endif %}">{{ i }}</a>
-            </li>
-          {% endfor %}
-          
-          <!-- Botón Siguiente -->
-          <li class="page-item {% if current_page >= total_pages %}disabled{% endif %}">
-            <a class="page-link" href="?page={{ current_page + 1 }}{% if request.args.get('tipo') %}&tipo={{ request.args.get('tipo') }}{% endif %}{% if request.args.get('periodo') %}&periodo={{ request.args.get('periodo') }}{% endif %}{% if request.args.get('q') %}&q={{ request.args.get('q') }}{% endif %}">Siguiente</a>
-          </li>
-        </ul>
-      </nav>
+        {% endfor %}
+        
+        <!-- Botón "Siguiente" -->
+        <li class="page-item {% if current_page >= total_pages %}disabled{% endif %}">
+          <a class="page-link" href="?page={{ current_page + 1 }}{% if request.args.get('tipo') %}&tipo={{ request.args.get('tipo') }}{% endif %}{% if request.args.get('periodo') %}&periodo={{ request.args.get('periodo') }}{% endif %}{% if request.args.get('q') %}&q={{ request.args.get('q') }}{% endif %}">Siguiente</a>
+        </li>
+      </ul>
     </div>
     <div class="pagination-info">
       Mostrando {{ movimientos|length }} de {{ total_movimientos }} movimientos

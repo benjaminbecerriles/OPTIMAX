@@ -88,10 +88,11 @@
     display: flex;
     gap: 1rem;
     padding-top: 8px; /* Ajuste para alinear con la primera línea del título */
+    align-items: center; /* Asegura alineación vertical de botones */
   }
   
-  /* Botones con estilo Apple - MEJORADO PARA CENTRADO DE TEXTO */
-  .btn-icon {
+  /* Estilos comunes para los botones de acción - UNIFICADOS */
+  .btn-action {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -104,12 +105,12 @@
     text-decoration: none;
     cursor: pointer;
     border: none;
-    text-align: center; /* Centrar texto dentro del botón */
+    height: 44px; /* Altura fija para todos los botones */
+    white-space: nowrap; /* Evita que el texto se rompa */
   }
   
-  /* Fuerza centrado de texto en botones */
-  .btn-icon i, 
-  .btn-icon span {
+  .btn-action i, 
+  .btn-action span {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -117,27 +118,32 @@
     line-height: 1;
   }
   
-  .btn-outline {
-    background-color: var(--light-background);
-    color: var(--text-color);
-    border: 1px solid var(--separator);
+  /* Botón Volver estilo historial de movimientos */
+  .btn-volver {
+    background-color: var(--blue);
+    color: #ffffff;
+    box-shadow: 0 2px 4px rgba(26, 35, 126, 0.3);
   }
   
-  .btn-outline:hover {
-    background-color: #e8e8e8;
+  .btn-volver:hover {
+    background-color: #151c64;
     transform: translateY(-2px);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 8px rgba(26, 35, 126, 0.4);
+    color: #ffffff;
   }
   
-  .btn-primary {
+  /* Botón Historial */
+  .btn-historial {
     background-color: var(--accent);
     color: white;
+    box-shadow: 0 2px 4px rgba(229, 46, 46, 0.3);
   }
   
-  .btn-primary:hover {
+  .btn-historial:hover {
     background-color: var(--accent-hover);
     transform: translateY(-2px);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 8px rgba(229, 46, 46, 0.4);
+    color: white;
   }
 
   /* Filtros y búsqueda con estilo Apple - MODIFICADO */
@@ -673,12 +679,13 @@
       <p class="page-description">Registra entradas y salidas de mercancía.</p>
     </div>
     <div class="header-actions">
-      <!-- Volver a añadir el icono de flecha -->
-      <a href="{{ url_for('dashboard_inventario') }}" class="btn-icon btn-outline">
+      <!-- Botón Volver con clase btn-action y btn-volver -->
+      <a href="{{ url_for('dashboard_inventario') }}" class="btn-action btn-volver">
         <i class="fas fa-arrow-left"></i>
         <span>Volver</span>
       </a>
-      <a href="{{ url_for('historial_movimientos') }}" class="btn-icon btn-primary" id="btnHistorial">
+      <!-- Botón Historial con clase btn-action y btn-historial -->
+      <a href="{{ url_for('historial_movimientos') }}" class="btn-action btn-historial" id="btnHistorial">
         <i class="fas fa-history"></i>
         <span>Historial</span>
       </a>
