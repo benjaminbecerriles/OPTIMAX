@@ -121,63 +121,136 @@
     color: #ffffff;
   }
   
-  /* Barra de búsqueda - MEJORADA */
+  /* Barra de búsqueda - MEJORADA para coincidir con ajuste_stock.html */
   .search-container {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
     position: relative;
-    margin-bottom: 30px;
-    border-radius: 12px;
-    background-color: var(--light-background);
-    padding: 16px 20px; /* Reducido de 24px a 16px/20px */
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    align-items: center;
   }
   
-  .search-input-group {
-    display: flex;
-    align-items: center;
-    background-color: white;
+  .search-box {
+    flex: 1;
+    position: relative;
+  }
+  
+  .search-box i {
+    position: absolute;
+    left: 1.25rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gray-600);
+    font-size: 1.1rem;
+    z-index: 5;
+    pointer-events: none;
+  }
+  
+  .search-box input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 3rem;
     border-radius: 8px;
-    overflow: hidden;
-    border: 1px solid var(--separator);
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-  }
-  
-  .search-input-group:focus-within {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-light);
-  }
-  
-  .search-input {
-    flex-grow: 1;
-    padding: 14px 16px;
-    font-family: var(--font-apple);
-    font-size: 16px;
-    border: none;
-    outline: none;
-    background: transparent;
-    color: var(--text-color); /* Texto más oscuro */
-  }
-  
-  .search-input::placeholder {
-    color: #707074; /* Placeholder oscurecido */
+    border: 1px solid var(--gray-300);
+    font-size: 1rem;
+    height: 48px;
+    transition: all 0.2s ease;
     font-weight: 400;
+    background-color: var(--light-background);
   }
   
-  .search-icon-group {
+  .search-input input:focus {
+    background-color: white;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(229, 46, 46, 0.15);
+    outline: none;
+  }
+  
+  .search-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .icon-btn {
+    width: 48px;
+    height: 48px;
     display: flex;
     align-items: center;
-    padding-right: 16px;
-    gap: 12px;
-  }
-  
-  .search-icon {
-    width: 20px;
-    height: 20px;
+    justify-content: center;
+    background-color: var(--light-background);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
     cursor: pointer;
-    transition: transform 0.2s ease;
+    transition: all 0.2s ease;
+    padding: 0;
   }
   
-  .search-icon:hover {
+  .icon-btn:hover {
+    background-color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .icon-btn.scan-active {
+    background-color: rgba(229, 46, 46, 0.1);
+    border-color: var(--accent);
+    animation: blink 1s infinite;
+  }
+  
+  /* Estilos para el corazón exactamente como en productos.html */
+  .heart-icon {
+    font-size: 24px;
+    cursor: pointer;
+    display: inline-block;
+    transition: transform 0.2s ease, color 0.2s ease;
+  }
+  
+  .heart-icon:hover {
     transform: scale(1.1);
+  }
+  
+  .heart-icon.active {
+    color: var(--red);
+  }
+  
+  .heart-icon:not(.active) {
+    color: var(--gray-500);
+  }
+  
+  /* Contenedor para el checkbox de favoritos */
+  .form-heart-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    background-color: var(--light-background);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 0 16px;
+    height: 48px;
+    transition: all 0.2s ease;
+    user-select: none;
+  }
+  
+  .form-heart-container:hover {
+    background-color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .form-heart-container.active {
+    background-color: rgba(231, 76, 60, 0.1);
+    border-color: var(--red);
+  }
+  
+  .form-heart-check-input {
+    display: none;
+  }
+  
+  @keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0.6; }
+    100% { opacity: 1; }
   }
   
   /* Categorías */
@@ -224,7 +297,7 @@
   /* Slider de productos - REDISEÑO COMPLETO con ALTURA FIJA */
   .product-slider-container {
     position: relative;
-    padding: 0 50px; /* Aumentado de 30px a 50px para dar más espacio a las flechas */
+    padding: 0 70px; /* MODIFICADO: Aumentado de 60px a 70px para dar más espacio a las flechas */
     margin: 0 -10px; /* Margen negativo para compensar el padding */
   }
   
@@ -396,43 +469,43 @@
     transform: translateY(-1px);
   }
   
-  /* Botones de navegación del slider - MEJORADOS Y REPOSICIONADOS */
+  /* Botones de navegación del slider - MODIFICADOS: color rojo, icono blanco y más separados */
   .slider-arrow {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    width: 36px; /* Aumentado de 30px a 36px */
-    height: 36px; /* Aumentado de 30px a 36px */
+    width: 40px; /* Aumentado de 36px a 40px */
+    height: 40px; /* Aumentado de 36px a 40px */
     border-radius: 50%;
-    background-color: white;
-    border: 1px solid #d1d1d6; /* Color más visible que var(--separator) */
+    background-color: var(--accent); /* MODIFICADO: Cambiado a rojo */
+    border: none; /* MODIFICADO: Quitado el borde */
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.15); /* Sombra más pronunciada */
+    box-shadow: 0 2px 6px rgba(229, 46, 46, 0.3); /* MODIFICADO: Sombra con el color rojo */
     z-index: 10;
     transition: all 0.2s ease;
   }
   
   .slider-arrow:hover {
-    background-color: #f0f0f2; /* Un poco más oscuro que var(--light-background) */
+    background-color: var(--accent-hover); /* MODIFICADO: Hover más oscuro */
     transform: translateY(-50%) scale(1.1); /* Efecto de escala al hacer hover */
   }
   
   .slider-arrow-left {
-    left: 10px; /* Aumentado a 10px desde el borde */
+    left: 20px; /* MODIFICADO: Aumentado a 20px desde el borde (estaba en 15px) */
   }
   
   .slider-arrow-right {
-    right: 10px; /* Aumentado a 10px desde el borde */
+    right: 20px; /* MODIFICADO: Aumentado a 20px desde el borde (estaba en 15px) */
   }
   
   .slider-arrow svg {
     width: 18px; /* Aumentado de 16px a 18px */
     height: 18px; /* Aumentado de 16px a 18px */
     fill: none;
-    stroke: var(--text-color);
+    stroke: white; /* MODIFICADO: Cambiado a blanco */
     stroke-width: 2.5; /* Más grueso para mejor visibilidad */
   }
   
@@ -602,16 +675,27 @@
     </div>
   </div>
   
-  <!-- Barra de búsqueda -->
+  <!-- Barra de búsqueda adaptada al estilo de ajuste_stock.html -->
   <div class="search-container">
-    <div class="search-input-group">
-      <input type="text" id="searchInput" class="search-input" placeholder="Buscar por nombre, marca o código de barras..." autocomplete="off">
-      <div class="search-icon-group">
-        <!-- Icono Lector Físico -->
-        <img src="{{ url_for('static', filename='img/3.png') }}" alt="Escanear con Lector" class="search-icon" id="scanIcon">
-        <!-- Icono Cámara QuaggaJS -->
-        <img src="{{ url_for('static', filename='img/4.png') }}" alt="Escanear con Cámara" class="search-icon" id="cameraIcon" onclick="iniciarEscaneoQuagga()">
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input type="text" id="searchInput" placeholder="Buscar por nombre, marca o código de barras...">
+    </div>
+    <div class="search-actions">
+      <!-- Filtro solo favoritos -->
+      <div class="form-heart-container" id="favoritosContainer">
+        <input class="form-heart-check-input" type="checkbox" id="favoritosCheck">
+        <span class="heart-icon" id="heartIcon">&#9825;</span>
+        <span style="font-size: 0.95rem; font-weight: 500;">Solo favoritos</span>
       </div>
+      <!-- Botón de escaneo con pistola de código de barras -->
+      <button class="icon-btn" id="scanIcon" title="Escanear con pistola">
+        <img src="{{ url_for('static', filename='img/3.png') }}" alt="Escanear con Lector" style="width: 24px; height: 24px;">
+      </button>
+      <!-- Botón de escaneo con cámara -->
+      <button class="icon-btn" id="cameraIcon" title="Escanear con cámara" onclick="iniciarEscaneoQuagga()">
+        <img src="{{ url_for('static', filename='img/4.png') }}" alt="Escanear con Cámara" style="width: 24px; height: 24px;">
+      </button>
     </div>
   </div>
   
@@ -642,13 +726,13 @@
           <div class="product-slider-container">
             <div class="slider-arrow slider-arrow-left" onclick="scrollSlider('{{ categoria.nombre|lower }}', 'left')">
               <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M15 18L9 12L15 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </div>
             
             <div class="product-slider" id="slider-{{ categoria.nombre|lower }}">
               {% for producto in productos_categoria %}
-                <div class="product-card" data-product-id="{{ producto.id }}" data-product-name="{{ producto.nombre|lower }}" data-product-barcode="{{ producto.codigo_barras_externo|lower if producto.codigo_barras_externo else '' }}">
+                <div class="product-card" data-product-id="{{ producto.id }}" data-product-name="{{ producto.nombre|lower }}" data-product-barcode="{{ producto.codigo_barras_externo|lower if producto.codigo_barras_externo else '' }}" data-favorito="{{ producto.es_favorito }}">
                   <div class="product-image-container">
                     {% if producto.foto %}
                       <img src="{{ url_for('static', filename='uploads/' ~ producto.foto) }}" class="product-image" alt="{{ producto.nombre }}">
@@ -668,7 +752,9 @@
                       {% endif %}
                     </div>
                     <div class="product-price-container">
-                      <div class="current-price">${{ '{:.2f}'.format(producto.precio_venta) }}</div>
+                      <div class="current-price" id="display-price-{{ producto.id }}">
+                        ${{ '{:.2f}'.format(producto.precio_venta) }}
+                      </div>
                       <div class="price-unit">
                         {% if producto.unidad and producto.unidad != 'NONE' %}
                           / {{ producto.unidad }}
@@ -680,7 +766,7 @@
                     <div class="price-input-container">
                       <div class="price-input-group">
                         <span class="currency-symbol">$</span>
-                        <input type="text" class="price-input" value="{{ '{:.2f}'.format(producto.precio_venta) }}" 
+                        <input type="text" class="price-input" id="price-input-{{ producto.id }}" value="{{ '{:.2f}'.format(producto.precio_venta) }}" 
                               data-original-price="{{ producto.precio_venta }}"
                               oninput="formatPriceInput(this)">
                       </div>
@@ -693,7 +779,7 @@
             
             <div class="slider-arrow slider-arrow-right" onclick="scrollSlider('{{ categoria.nombre|lower }}', 'right')">
               <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M9 18L15 12L9 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </div>
           </div>
@@ -736,10 +822,43 @@
   }
   
   // ----------------------------------------------------
-  // Formateo de entrada de precios
+  // Formateo de entrada de precios con comas de miles
   // ----------------------------------------------------
+  function formatNumber(num) {
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+  
+  // Formatea el precio con comas de miles al cargar la página
+  document.addEventListener('DOMContentLoaded', function() {
+    // Formatea los precios visualizados
+    document.querySelectorAll('.current-price').forEach(function(element) {
+      const rawPrice = element.textContent.replace('$', '').trim();
+      const numPrice = parseFloat(rawPrice);
+      if (!isNaN(numPrice)) {
+        // Mantiene los decimales originales pero añade comas para miles
+        const [intPart, decPart] = rawPrice.split('.');
+        element.textContent = '$' + formatNumber(intPart) + (decPart ? '.' + decPart : '.00');
+      }
+    });
+    
+    // Formatea los precios de los inputs
+    document.querySelectorAll('.price-input').forEach(function(input) {
+      const rawPrice = input.value.trim();
+      const numPrice = parseFloat(rawPrice);
+      if (!isNaN(numPrice)) {
+        // Mantiene los decimales originales pero añade comas para miles
+        const [intPart, decPart] = rawPrice.split('.');
+        input.value = formatNumber(intPart) + (decPart ? '.' + decPart : '.00');
+      }
+    });
+  });
+  
   function formatPriceInput(input) {
-    // Eliminar caracteres no numéricos excepto el punto decimal
+    // Guardar la posición del cursor
+    const startPos = input.selectionStart;
+    const endPos = input.selectionEnd;
+    
+    // Obtener el valor actual sin formato
     let value = input.value.replace(/[^\d.]/g, '');
     
     // Asegurar que solo haya un punto decimal
@@ -748,13 +867,31 @@
       value = parts[0] + '.' + parts.slice(1).join('');
     }
     
-    // Limitar a dos decimales
+    // Limitar estrictamente a dos decimales después del punto decimal
     if (parts.length > 1) {
       value = parts[0] + '.' + parts[1].slice(0, 2);
     }
     
+    // Formatear con comas para miles (solo la parte entera)
+    let integerPart = parts[0];
+    const decimalPart = parts.length > 1 ? '.' + parts[1].slice(0, 2) : '';
+    
+    // Aplicar formato de miles a la parte entera
+    integerPart = formatNumber(integerPart);
+    
+    // Combinar para obtener el valor final formateado
+    const formattedValue = integerPart + decimalPart;
+    
     // Actualizar el valor del input
-    input.value = value;
+    input.value = formattedValue;
+    
+    // Ajustar la posición del cursor considerando las comas añadidas
+    // Esta lógica es compleja y puede necesitar ajustes según el caso
+    // Por simplicidad, intentamos mantener el cursor en una posición razonable
+    const lengthDiff = formattedValue.length - value.length;
+    if (startPos !== null && endPos !== null) {
+      input.setSelectionRange(startPos + lengthDiff, endPos + lengthDiff);
+    }
   }
   
   // ----------------------------------------------------
@@ -764,10 +901,13 @@
     const card = button.closest('.product-card');
     const inputContainer = button.closest('.price-input-container');
     const input = inputContainer.querySelector('.price-input');
-    const currentPriceElement = card.querySelector('.current-price');
+    const currentPriceElement = document.getElementById(`display-price-${productId}`);
+    
+    // Obtener el valor sin comas
+    const inputValue = input.value.replace(/,/g, '');
     
     // Validar que el precio sea mayor que cero
-    const newPrice = parseFloat(input.value);
+    const newPrice = parseFloat(inputValue);
     if (isNaN(newPrice) || newPrice <= 0) {
       showToast('El precio debe ser mayor que cero', 'error');
       return;
@@ -793,8 +933,12 @@
     })
     .then(data => {
       if (data.success) {
+        // Formatea el nuevo precio con comas
+        const [intPart, decPart] = newPrice.toFixed(2).split('.');
+        const formattedPrice = '$' + formatNumber(intPart) + '.' + decPart;
+        
         // Actualizar la interfaz
-        currentPriceElement.textContent = `$${parseFloat(newPrice).toFixed(2)}`;
+        currentPriceElement.textContent = formattedPrice;
         input.dataset.originalPrice = newPrice;
         
         // Mostrar notificación de éxito
@@ -861,8 +1005,11 @@
       
       let resultsCount = 0;
       
-      // Si no hay término de búsqueda, mostrar todo
-      if (!searchTerm) {
+      // Obtener estado del filtro de favoritos
+      const soloFavoritos = document.getElementById('favoritosCheck').checked;
+      
+      // Si no hay término de búsqueda y no está activado el filtro de favoritos, mostrar todo
+      if (!searchTerm && !soloFavoritos) {
         categorySections.forEach(section => {
           section.style.display = 'block';
           const products = section.querySelectorAll('.product-card');
@@ -878,7 +1025,7 @@
         return;
       }
       
-      // Filtrar productos por búsqueda
+      // Filtrar productos por búsqueda y/o favoritos
       categorySections.forEach(section => {
         const products = section.querySelectorAll('.product-card');
         let hasVisibleProducts = false;
@@ -887,6 +1034,7 @@
           const productName = product.dataset.productName || '';
           const productBarcode = product.dataset.productBarcode || '';
           const productBrand = product.querySelector('.product-brand')?.textContent?.toLowerCase() || '';
+          const esFavorito = product.dataset.favorito === 'True';
           
           // Coincidencia exacta para códigos de barras
           const exactBarcodeMatch = productBarcode === searchTerm;
@@ -895,8 +1043,14 @@
           const partialNameMatch = productName.includes(searchTerm);
           const partialBrandMatch = productBrand.includes(searchTerm);
           
-          // Dar prioridad a coincidencia exacta de código de barras
-          const matches = exactBarcodeMatch || partialNameMatch || partialBrandMatch;
+          // Verificar si cumple con el filtro de búsqueda
+          const matchesSearch = !searchTerm || exactBarcodeMatch || partialNameMatch || partialBrandMatch;
+          
+          // Verificar si cumple con el filtro de favoritos
+          const matchesFavorite = !soloFavoritos || esFavorito;
+          
+          // Mostrar solo si cumple con ambos filtros
+          const matches = matchesSearch && matchesFavorite;
           
           product.style.display = matches ? 'block' : 'none';
           
@@ -919,14 +1073,14 @@
       });
       
       // Mensaje sin resultados
-      showEmptyOrResults(resultsCount, searchTerm);
+      showEmptyOrResults(resultsCount, searchTerm, soloFavoritos);
       
       console.log(`>> BÚSQUEDA COMPLETADA: ${resultsCount} productos encontrados`);
       return resultsCount;
     }
     
     // Función auxiliar para mensaje vacío
-    function showEmptyOrResults(count, term) {
+    function showEmptyOrResults(count, term, soloFavoritos) {
       let emptySearch = document.getElementById('emptySearchResults');
       
       if (count === 0) {
@@ -934,18 +1088,38 @@
           emptySearch = document.createElement('div');
           emptySearch.id = 'emptySearchResults';
           emptySearch.className = 'empty-state';
+          
+          let mensaje = '';
+          if (term && soloFavoritos) {
+            mensaje = `No se encontraron productos favoritos que coincidan con "<strong>${term}</strong>"`;
+          } else if (term) {
+            mensaje = `No se encontraron productos que coincidan con "<strong>${term}</strong>"`;
+          } else if (soloFavoritos) {
+            mensaje = `No tienes productos marcados como favoritos`;
+          }
+          
           emptySearch.innerHTML = `
             <div class="empty-icon">
               <i class="fas fa-search"></i>
             </div>
-            <p class="empty-message">No se encontraron productos que coincidan con "<strong>${term}</strong>"</p>
+            <p class="empty-message">${mensaje}</p>
           `;
           
           const categoriesContainer = document.getElementById('categoriesContainer');
           categoriesContainer.prepend(emptySearch);
         } else {
           const message = emptySearch.querySelector('.empty-message');
-          message.innerHTML = `No se encontraron productos que coincidan con "<strong>${term}</strong>"`;
+          
+          let mensaje = '';
+          if (term && soloFavoritos) {
+            mensaje = `No se encontraron productos favoritos que coincidan con "<strong>${term}</strong>"`;
+          } else if (term) {
+            mensaje = `No se encontraron productos que coincidan con "<strong>${term}</strong>"`;
+          } else if (soloFavoritos) {
+            mensaje = `No tienes productos marcados como favoritos`;
+          }
+          
+          message.innerHTML = mensaje;
           emptySearch.style.display = 'block';
         }
       } else if (emptySearch) {
@@ -997,6 +1171,33 @@
         if (e.key === 'Enter') {
           performSearch();
         }
+      });
+    }
+    
+    // Escuchar cambios en el checkbox de favoritos
+    const favoritosCheck = document.getElementById('favoritosCheck');
+    const heartIcon = document.getElementById('heartIcon');
+    const favoritosContainer = document.getElementById('favoritosContainer');
+    
+    if (favoritosCheck && heartIcon && favoritosContainer) {
+      // Función para actualizar el estado visual del botón
+      function updateFavoritosButtonState() {
+        if (favoritosCheck.checked) {
+          heartIcon.innerHTML = '&#9829;'; // Corazón lleno
+          heartIcon.classList.add('active');
+          favoritosContainer.classList.add('active');
+        } else {
+          heartIcon.innerHTML = '&#9825;'; // Corazón vacío
+          heartIcon.classList.remove('active');
+          favoritosContainer.classList.remove('active');
+        }
+      }
+      
+      // Evento de clic en el contenedor completo
+      favoritosContainer.addEventListener('click', function() {
+        favoritosCheck.checked = !favoritosCheck.checked;
+        updateFavoritosButtonState();
+        performSearch();
       });
     }
     
