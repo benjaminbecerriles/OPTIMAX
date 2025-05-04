@@ -17,6 +17,9 @@
     --accent: #e52e2e;
     --accent-hover: #c51818;
     --accent-light: rgba(229, 46, 46, 0.1);
+    --save-btn-color: #ff6b6b; /* Color rojo claro para botones de guardar */
+    --save-btn-hover: #ff5252; /* Color hover para botones de guardar */
+    --blue: #1a237e; /* Azul para el botón volver */
     
     /* Colores de estado */
     --green: #2ecc71;
@@ -39,11 +42,25 @@
     padding: 36px 24px;
   }
   
-  /* Tipografía */
-  h1 {
+  /* Encabezado de página - MODIFICADO PARA ALINEACIÓN PERFECTA */
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+  }
+  
+  .header-title-container {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .page-title {
     font-size: 32px;
     font-weight: 600;
     letter-spacing: -0.02em;
+    margin: 0;
     margin-bottom: 8px;
     color: var(--text-color);
   }
@@ -51,8 +68,57 @@
   .page-description {
     font-size: 17px;
     color: var(--text-secondary);
-    margin-bottom: 24px;
+    margin-bottom: 28px;
     max-width: 600px;
+    font-weight: 400;
+  }
+  
+  .header-actions {
+    display: flex;
+    gap: 1rem;
+    padding-top: 8px; /* Ajuste para alinear con la primera línea del título */
+    align-items: center;
+  }
+  
+  /* Botón volver estilo ajuste_stock.html */
+  .btn-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.25rem;
+    border-radius: 980px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    height: 44px; /* Altura fija para todos los botones */
+    white-space: nowrap; /* Evita que el texto se rompa */
+  }
+  
+  .btn-action i, 
+  .btn-action span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+    line-height: 1;
+  }
+  
+  /* Botón Volver estilo historial de movimientos */
+  .btn-volver {
+    background-color: var(--blue);
+    color: #ffffff;
+    box-shadow: 0 2px 4px rgba(26, 35, 126, 0.3);
+  }
+  
+  .btn-volver:hover {
+    background-color: #151c64;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(26, 35, 126, 0.4);
+    color: #ffffff;
   }
   
   /* Barra de búsqueda - MEJORADA */
@@ -158,7 +224,8 @@
   /* Slider de productos - REDISEÑO COMPLETO con ALTURA FIJA */
   .product-slider-container {
     position: relative;
-    padding: 0 30px; /* Reducido de 40px a 30px */
+    padding: 0 50px; /* Aumentado de 30px a 50px para dar más espacio a las flechas */
+    margin: 0 -10px; /* Margen negativo para compensar el padding */
   }
   
   .product-slider {
@@ -248,17 +315,27 @@
     line-height: 1.2; /* Ajuste de línea para marca */
   }
   
-  /* Contenedor de precio con altura fija */
+  /* Contenedor de precio con altura fija - MODIFICADO para incluir unidad */
   .product-price-container {
     height: 24px; /* Altura fija para precio */
     margin-top: auto; /* Empuja hacia abajo, después del espacio flexible */
     margin-bottom: 8px; /* Espacio antes del input */
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 5px;
   }
   
   .current-price {
     font-size: 17px; /* Reducido de 18px a 17px */
     font-weight: 600;
     color: var(--accent);
+  }
+  
+  .price-unit {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 500;
   }
   
   /* Contenedor de input con altura fija */
@@ -300,30 +377,32 @@
     color: var(--text-color); /* Texto más oscuro */
   }
   
+  /* MODIFICADO: Botón de guardar en rojo claro */
   .save-price-btn {
     width: 100%;
     height: 36px; /* Altura fija para el botón */
-    background-color: var(--accent);
+    background-color: var(--save-btn-color); /* Cambiado a rojo claro */
     color: white;
     border: none;
     border-radius: 6px;
     font-size: 13px; /* Reducido de 14px a 13px */
     font-weight: 600; /* Aumentado de 500 a 600 */
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: background-color 0.2s ease, transform 0.2s ease;
   }
   
   .save-price-btn:hover {
-    background-color: var(--accent-hover);
+    background-color: var(--save-btn-hover);
+    transform: translateY(-1px);
   }
   
-  /* Botones de navegación del slider - MEJORADOS */
+  /* Botones de navegación del slider - MEJORADOS Y REPOSICIONADOS */
   .slider-arrow {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    width: 30px; /* Reducido de 36px a 30px */
-    height: 30px; /* Reducido de 36px a 30px */
+    width: 36px; /* Aumentado de 30px a 36px */
+    height: 36px; /* Aumentado de 30px a 36px */
     border-radius: 50%;
     background-color: white;
     border: 1px solid #d1d1d6; /* Color más visible que var(--separator) */
@@ -331,29 +410,30 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15); /* Sombra más pronunciada */
     z-index: 10;
-    transition: background-color 0.2s ease;
+    transition: all 0.2s ease;
   }
   
   .slider-arrow:hover {
     background-color: #f0f0f2; /* Un poco más oscuro que var(--light-background) */
+    transform: translateY(-50%) scale(1.1); /* Efecto de escala al hacer hover */
   }
   
   .slider-arrow-left {
-    left: 0;
+    left: 10px; /* Aumentado a 10px desde el borde */
   }
   
   .slider-arrow-right {
-    right: 0;
+    right: 10px; /* Aumentado a 10px desde el borde */
   }
   
   .slider-arrow svg {
-    width: 16px; /* Reducido de 20px a 16px */
-    height: 16px; /* Reducido de 20px a 16px */
+    width: 18px; /* Aumentado de 16px a 18px */
+    height: 18px; /* Aumentado de 16px a 18px */
     fill: none;
     stroke: var(--text-color);
-    stroke-width: 2;
+    stroke-width: 2.5; /* Más grueso para mejor visibilidad */
   }
   
   /* Estado vacío */
@@ -446,6 +526,16 @@
   
   /* Responsive */
   @media (max-width: 768px) {
+    .page-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    
+    .header-actions {
+      width: 100%;
+    }
+    
     .product-slider {
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
@@ -497,8 +587,20 @@
 </style>
 
 <div class="apple-container animated-fade">
-  <h1>Cambiar precios</h1>
-  <p class="page-description">Actualiza los precios de tus productos de forma rápida y sencilla</p>
+  <!-- NUEVA ESTRUCTURA DE ENCABEZADO -->
+  <div class="page-header">
+    <div class="header-title-container">
+      <h1 class="page-title">Cambiar precios</h1>
+      <p class="page-description">Actualiza los precios de tus productos de forma rápida y sencilla</p>
+    </div>
+    <div class="header-actions">
+      <!-- Botón Volver con clase btn-action y btn-volver -->
+      <a href="{{ url_for('dashboard_inventario') }}" class="btn-action btn-volver">
+        <i class="fas fa-arrow-left"></i>
+        <span>Volver</span>
+      </a>
+    </div>
+  </div>
   
   <!-- Barra de búsqueda -->
   <div class="search-container">
@@ -567,6 +669,13 @@
                     </div>
                     <div class="product-price-container">
                       <div class="current-price">${{ '{:.2f}'.format(producto.precio_venta) }}</div>
+                      <div class="price-unit">
+                        {% if producto.unidad and producto.unidad != 'NONE' %}
+                          / {{ producto.unidad }}
+                        {% else %}
+                          / pieza
+                        {% endif %}
+                      </div>
                     </div>
                     <div class="price-input-container">
                       <div class="price-input-group">

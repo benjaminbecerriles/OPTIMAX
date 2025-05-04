@@ -7,30 +7,78 @@
 {% block content %}
 <style>
   /* Estilos globales */
+  :root {
+    --font-apple: -apple-system, BlinkMacSystemFont, 'SF Pro Text', Helvetica, Arial, sans-serif;
+    
+    /* Colores esenciales */
+    --text-color: #1d1d1f;
+    --text-secondary: #555555;
+    --background: #ffffff;
+    --light-background: #f5f5f7;
+    --separator: rgba(0, 0, 0, 0.1);
+    --accent: #e52e2e;
+    --accent-hover: #c51818;
+    --accent-light: rgba(229, 46, 46, 0.1);
+    
+    /* Colores de estado */
+    --green: #2ecc71;
+    --orange: #f39c12;
+    --red: #e74c3c;
+    --blue: #1a237e;
+    --gray-500: #777777;
+  }
+
   .historial-container {
     max-width: 1000px;
     margin: 0 auto;
-    padding: 1rem;
+    padding: 36px 24px;
+    font-family: var(--font-apple);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    line-height: 1.5;
+    color: var(--text-color);
+    background-color: var(--background);
   }
   
-  /* Encabezado de página */
+  /* Encabezado de página - MODIFICADO PARA ALINEACIÓN PERFECTA */
   .page-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start; /* Cambiado a flex-start */
     margin-bottom: 1.5rem;
-    border-bottom: 1px solid #e9ecef;
     padding-bottom: 1rem;
   }
   
   .page-title {
-    font-size: 1.8rem;
-    font-weight: 700;
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
     margin: 0;
-    color: #212529;
+    margin-bottom: 8px; /* Espacio para la descripción */
+    color: var(--text-color);
   }
   
-  /* Botón volver - Azul de dashboard */
+  .header-title-container {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .page-description {
+    font-size: 17px;
+    color: #86868b; /* Más claro para la descripción de la página */
+    margin-bottom: 28px;
+    max-width: 600px;
+    font-weight: 400; /* Algo más ligero */
+  }
+  
+  .header-actions {
+    display: flex;
+    gap: 1rem;
+    padding-top: 8px; /* Ajuste para alinear con la primera línea del título */
+    align-items: center; /* Asegura alineación vertical de botones */
+  }
+  
+  /* Botón volver estilo ajuste_stock.html */
   .btn-volver {
     display: flex;
     align-items: center;
@@ -44,7 +92,9 @@
     text-decoration: none;
     cursor: pointer;
     border: none;
-    background-color: #1a237e;
+    height: 44px; /* Altura fija para todos los botones */
+    white-space: nowrap; /* Evita que el texto se rompa */
+    background-color: var(--blue);
     color: #ffffff;
     box-shadow: 0 2px 4px rgba(26, 35, 126, 0.3);
   }
@@ -53,6 +103,7 @@
     background-color: #151c64;
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(26, 35, 126, 0.4);
+    color: #ffffff;
   }
   
   .btn-volver i {
@@ -398,6 +449,20 @@
   
   /* Estilos para dispositivos móviles */
   @media (max-width: 768px) {
+    .historial-container {
+      padding: 24px 16px;
+    }
+    
+    .page-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    
+    .header-actions {
+      width: 100%;
+    }
+    
     .filters-container {
       flex-direction: column;
     }
@@ -435,13 +500,18 @@
 </style>
 
 <div class="historial-container">
-  <!-- Encabezado con título y botón de volver -->
+  <!-- Encabezado MODIFICADO para coincidir con ajuste-stock.html -->
   <div class="page-header">
-    <h1 class="page-title">Historial de entradas y salidas del stock</h1>
-    <a href="{{ url_for('ajuste_stock') }}" class="btn-volver">
-      <i class="fas fa-arrow-left"></i>
-      <span>Volver</span>
-    </a>
+    <div class="header-title-container">
+      <h1 class="page-title">Historial de entradas y salidas del stock</h1>
+      <p class="page-description">Consulta todos los movimientos de inventario.</p>
+    </div>
+    <div class="header-actions">
+      <a href="{{ url_for('ajuste_stock') }}" class="btn-volver">
+        <i class="fas fa-arrow-left"></i>
+        <span>Volver</span>
+      </a>
+    </div>
   </div>
   
   <!-- Filtros -->
