@@ -567,9 +567,103 @@
     color: #888;
     font-size: 0.8rem;
   }
+
+  /* NUEVOS ESTILOS PARA ENCABEZADO Y BOTONES COMO EN NUEVO_PRODUCTO.HTML */
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+  }
+  
+  .header-title-container {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .header-actions {
+    display: flex;
+    gap: 1rem;
+    padding-top: 8px; /* Ajuste para alinear con la primera línea del título */
+    align-items: center;
+  }
+  
+  .page-title {
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+    color: #1d1d1f;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', Helvetica, Arial, sans-serif;
+  }
+  
+  .btn-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.25rem;
+    border-radius: 980px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    height: 44px; /* Altura fija para todos los botones */
+    white-space: nowrap; /* Evita que el texto se rompa */
+  }
+  
+  .btn-volver {
+    background-color: #1a237e;
+    color: #ffffff;
+    box-shadow: 0 2px 4px rgba(26, 35, 126, 0.3);
+  }
+  
+  .btn-volver:hover {
+    background-color: #151c64;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(26, 35, 126, 0.4);
+    color: #ffffff;
+  }
+  
+  .btn-guardar {
+    background-color: #e52e2e;
+    color: white;
+    box-shadow: 0 2px 4px rgba(229, 46, 46, 0.3);
+    height: 44px;
+    border-radius: 980px;
+    padding: 0.75rem 1.25rem;
+    font-weight: 500;
+    font-size: 0.95rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .btn-guardar:hover {
+    background-color: #c72323;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(229, 46, 46, 0.4);
+  }
 </style>
 
 <div class="card-form">
+  <!-- NUEVO: Encabezado con estilo de nuevo_producto.html -->
+  <div class="page-header">
+    <div class="header-title-container">
+      <h1 class="page-title">Agregar producto con código de barras</h1>
+    </div>
+    <div class="header-actions">
+      <a href="{{ url_for('nuevo_producto') }}" class="btn-action btn-volver">
+        <i class="fas fa-arrow-left"></i>
+        <span>Volver</span>
+      </a>
+      <button type="submit" form="productForm" id="submitBtn" class="btn-guardar">Guardar</button>
+    </div>
+  </div>
+
   <!-- AQUÍ ESTÁ LA CORRECCIÓN: El form ahora abarca TODO el contenido -->
   <form method="POST" action="" enctype="multipart/form-data" id="productForm">
     <div class="row-form">
@@ -620,17 +714,6 @@
             <button type="button" class="btn-scanNo" id="btnScanNo">No</button>
           </div>
         </div>
-
-        <!-- Título en la parte superior -->
-        <h3 style="
-          font-weight: bold;
-          color: #000;
-          text-transform: uppercase;
-          margin-bottom: 1rem;
-          font-size: 1.2rem;
-        ">
-          Agregar producto con código de barras
-        </h3>
 
         <!-- PASO 1: CÓDIGO DE BARRAS -->
         <div class="step-container">
@@ -839,12 +922,6 @@
       <!-- FIN col-right -->
     </div>
     <!-- FIN row-form -->
-
-    <!-- BOTONES GUARDAR / CANCELAR -->
-    <div class="text-end" style="margin-top:1.5rem; margin-bottom:0.5rem;">
-      <button type="submit" id="submitBtn" class="btn-submit" style="margin-right:0.5rem;">GUARDAR</button>
-      <a href="{{ url_for('ver_productos') }}" class="btn-cancel">CANCELAR</a>
-    </div>
   </form>
 </div>
 

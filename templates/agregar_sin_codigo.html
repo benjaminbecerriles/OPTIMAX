@@ -401,264 +401,384 @@
     font-size: 0.85rem;
     margin-top: 0.25rem;
   }
+
+  /* NUEVOS ESTILOS PARA HEADER Y BOTONES COMO EN NUEVO_PRODUCTO.HTML */
+  :root {
+    --font-apple: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', Helvetica, Arial, sans-serif;
+    --text-color: #1d1d1f;
+    --text-secondary: #86868b;
+    --background: #ffffff;
+    --light-background: #f5f5f7;
+    --separator: rgba(0, 0, 0, 0.1);
+    --accent: #e52e2e;
+    --accent-hover: #c51818;
+    --accent-light: rgba(229, 46, 46, 0.1);
+    --blue: #1a237e;
+  }
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+  }
+  
+  .header-title-container {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .page-title {
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+    color: var(--text-color);
+    font-family: var(--font-apple);
+  }
+  
+  .header-actions {
+    display: flex;
+    gap: 1rem;
+    padding-top: 8px;
+    align-items: center;
+  }
+  
+  .btn-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.25rem;
+    border-radius: 980px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    height: 44px;
+    white-space: nowrap;
+  }
+  
+  .btn-action i, 
+  .btn-action span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+    line-height: 1;
+  }
+  
+  .btn-volver {
+    background-color: var(--blue);
+    color: #ffffff;
+    box-shadow: 0 2px 4px rgba(26, 35, 126, 0.3);
+  }
+  
+  .btn-volver:hover {
+    background-color: #151c64;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(26, 35, 126, 0.4);
+    color: #ffffff;
+  }
+  
+  .btn-guardar {
+    background-color: var(--accent);
+    color: white;
+    box-shadow: 0 2px 4px rgba(229, 46, 46, 0.3);
+    border-radius: 980px;
+    padding: 0.75rem 1.25rem;
+    font-weight: 500;
+    font-size: 0.95rem;
+    height: 44px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .btn-guardar:hover {
+    background-color: var(--accent-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(229, 46, 46, 0.4);
+  }
+
+  /* Ajustes responsivos */
+  @media (max-width: 768px) {
+    .page-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    
+    .header-actions {
+      width: 100%;
+    }
+  }
+
+  .content-container {
+    margin-top: 20px;
+  }
 </style>
 
 <div class="card-form">
-  <form method="POST" action="" enctype="multipart/form-data" id="productForm" novalidate>
-    <div class="row-form">
-      <!-- Col Izquierda: Foto + Checks -->
-      <div class="col-left">
-        <div class="foto-container">
-          <div class="foto-placeholder" id="fotoPlaceholder">
-            <button type="button" class="no-image-icon" id="btnCargarFoto">&#8942;</button>
-            <div class="foto-dropdown" id="fotoDropdown" style="display:none;">
-              <button type="button" class="dropdown-item btn btn-secondary" id="dropdownCargarFoto">Cargar imagen</button>
-              <button type="button" class="dropdown-item btn btn-secondary" id="dropdownGenerarIA">Generar con IA</button>
+  <!-- NUEVO: Header al estilo de nuevo_producto.html -->
+  <div class="page-header">
+    <div class="header-title-container">
+      <h1 class="page-title">Agregar producto sin código de barras</h1>
+    </div>
+    <div class="header-actions">
+      <a href="{{ url_for('nuevo_producto') }}" class="btn-action btn-volver">
+        <i class="fas fa-arrow-left"></i>
+        <span>Volver</span>
+      </a>
+      <button type="submit" id="submitBtn" form="productForm" class="btn-guardar">Guardar</button>
+    </div>
+  </div>
+
+  <div class="content-container">
+    <form method="POST" action="" enctype="multipart/form-data" id="productForm" novalidate>
+      <div class="row-form">
+        <!-- Col Izquierda: Foto + Checks -->
+        <div class="col-left">
+          <div class="foto-container">
+            <div class="foto-placeholder" id="fotoPlaceholder">
+              <button type="button" class="no-image-icon" id="btnCargarFoto">&#8942;</button>
+              <div class="foto-dropdown" id="fotoDropdown" style="display:none;">
+                <button type="button" class="dropdown-item btn btn-secondary" id="dropdownCargarFoto">Cargar imagen</button>
+                <button type="button" class="dropdown-item btn btn-secondary" id="dropdownGenerarIA">Generar con IA</button>
+              </div>
+            </div>
+            <input type="file" id="fotoInput" name="foto" style="display:none;" accept="image/*">
+            <input type="hidden" name="ia_foto_filename" id="ia_foto_filename" value="">
+            <!-- Hidden para capturar la URL de la imagen que se ve en pantalla -->
+            <input type="hidden" name="displayed_image_url" id="displayed_image_url" value="">
+            <!-- Barra de progreso para imágenes -->
+            <div class="image-upload-progress">
+              <div class="image-upload-progress-bar" id="imageProgressBar"></div>
             </div>
           </div>
-          <input type="file" id="fotoInput" name="foto" style="display:none;" accept="image/*">
-          <input type="hidden" name="ia_foto_filename" id="ia_foto_filename" value="">
-          <!-- Hidden para capturar la URL de la imagen que se ve en pantalla -->
-          <input type="hidden" name="displayed_image_url" id="displayed_image_url" value="">
-          <!-- Barra de progreso para imágenes -->
-          <div class="image-upload-progress">
-            <div class="image-upload-progress-bar" id="imageProgressBar"></div>
-          </div>
-        </div>
 
-        <div class="extra-checks" style="display: flex; flex-direction: column; gap: 0.5rem;">
-          <div id="favoritoContainer" style="display: inline-flex; align-items: center; gap: 0.5rem;">
-            <span id="heartIcon" class="heart-icon">&#9825;</span>
-            <span>Marcar como Favorito</span>
-            <input type="hidden" name="es_favorito" id="es_favorito" value="0">
-          </div>
+          <div class="extra-checks" style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <div id="favoritoContainer" style="display: inline-flex; align-items: center; gap: 0.5rem;">
+              <span id="heartIcon" class="heart-icon">&#9825;</span>
+              <span>Marcar como Favorito</span>
+              <input type="hidden" name="es_favorito" id="es_favorito" value="0">
+            </div>
 
-          <!-- MODIFICADO: Cambiado para usar ícono de ojo similar a productos.html -->
-          <div id="ventaContainer" style="display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem;">
-            <span id="ventaIcon" class="eye-icon visible">
-              <i class="fas fa-eye"></i>
-            </span>
-            <span>Producto a la Venta</span>
-            <input type="hidden" name="esta_a_la_venta" id="esta_a_la_venta" value="1">
-          </div>
-        </div>
-      </div>
-
-      <!-- Col Derecha: Form -->
-      <div class="col-right">
-        <!-- Título en la parte superior -->
-        <h3 style="
-          font-weight: bold;
-          color: #000;
-          text-transform: uppercase;
-          margin-bottom: 1rem;
-          font-size: 1.2rem;
-        ">
-          Agregar producto sin código de barras
-        </h3>
-
-        <!-- PASO 1: INFORMACIÓN DEL CÓDIGO -->
-        <div class="step-container">
-          <div class="step-number">1</div>
-          
-          <!-- Información del código de barras autogenerado -->
-          <div class="form-group" style="margin-bottom: 0;">
-            <div class="codigo-badge" id="codigoGeneradoBadge" style="display: flex; align-items: center; justify-content: flex-start; padding: 0.5rem 0.8rem; margin-bottom: 0; font-size: 0.9rem;">
-              <span style="margin-right: 0.5rem; color: #333; font-weight: 500;">Tu nuevo código de barras es:</span>
-              <span style="font-family: monospace; font-weight: 700; letter-spacing: 0.5px;" id="codigoMostrado">
-                <!-- Código cargado por JS -->
+            <!-- MODIFICADO: Cambiado para usar ícono de ojo similar a productos.html -->
+            <div id="ventaContainer" style="display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem;">
+              <span id="ventaIcon" class="eye-icon visible">
+                <i class="fas fa-eye"></i>
               </span>
-            </div>
-            <input type="hidden" id="codigo_barras_externo" name="codigo_barras_externo" value="">
-          </div>
-        </div>
-
-        <!-- PASO 2: INFORMACIÓN BÁSICA -->
-        <div class="step-container">
-          <div class="step-number">2</div>
-
-          <!-- IMPORTANTE: Para que el back sepa si es 'existente' (por default) -->
-          <input type="hidden" name="categoria_option" value="existente">
-          <!-- IMPORTANTE: Para saber si caducidad está activado o no -->
-          <input type="hidden" name="toggle_caducidad_estado" id="toggle_caducidad_estado" value="DESACTIVADO">
-
-          <!-- Nombre - MODIFICADO: Añadido required y clase required -->
-          <div class="form-group">
-            <div class="floating-label required" style="display: none;" id="nombreFloatingLabel">Nombre del producto</div>
-            <input 
-              type="text"
-              class="form-control"
-              id="nombre"
-              name="nombre"
-              placeholder="NOMBRE DEL PRODUCTO *"
-              required
-            >
-            <div class="invalid-feedback">El nombre del producto es obligatorio</div>
-          </div>
-
-          <!-- Marca -->
-          <div class="form-group" style="margin-bottom: 0;">
-            <div class="floating-label" style="display: none;" id="marcaFloatingLabel">Marca</div>
-            <input
-              type="text"
-              class="form-control"
-              id="marca"
-              name="marca"
-              placeholder="MARCA"
-            >
-          </div>
-        </div>
-
-        <!-- PASO 3: INVENTARIO Y PRECIOS -->
-        <div class="step-container">
-          <div class="step-number">3</div>
-
-          <!-- Stock Inicial - MODIFICADO: Añadido required y clase required -->
-          <div class="form-group">
-            <div class="floating-label required" style="display: none;" id="stockFloatingLabel">Stock inicial</div>
-            <input 
-              type="number"
-              class="form-control"
-              id="stock"
-              name="stock"
-              min="0"
-              placeholder="STOCK INICIAL *"
-              required
-            >
-            <div class="invalid-feedback">El stock inicial es obligatorio</div>
-          </div>
-
-          <!-- Costo / Precio - MODIFICADO: Añadido required y clase required -->
-          <div class="d-flex gap-3" style="align-items: center; margin-bottom: 0;">
-            <div class="form-group" style="flex:1; margin-bottom: 0;">
-              <div class="floating-label required" style="display: none;" id="costoFloatingLabel">Costo</div>
-              <input
-                type="text"
-                step="0.01"
-                class="form-control"
-                id="costo"
-                name="costo"
-                required
-                oninput="formatCostRealtime(this)"
-                placeholder="COSTO *"
-              >
-              <div class="invalid-feedback">El costo es obligatorio</div>
-            </div>
-            <div class="form-group" style="flex:1; margin-bottom: 0;">
-              <div class="floating-label required" style="display: none;" id="precio_ventaFloatingLabel">Precio de venta</div>
-              <input
-                type="text"
-                step="0.01"
-                class="form-control"
-                id="precio_venta"
-                name="precio_venta"
-                required
-                oninput="formatCostRealtime(this)"
-                placeholder="PRECIO DE VENTA *"
-              >
-              <div class="invalid-feedback">El precio de venta es obligatorio</div>
+              <span>Producto a la Venta</span>
+              <input type="hidden" name="esta_a_la_venta" id="esta_a_la_venta" value="1">
             </div>
           </div>
         </div>
 
-        <!-- PASO 4: CATEGORÍA Y CADUCIDAD -->
-        <div class="step-container">
-          <div class="step-number">4</div>
-
-          <!-- Categoría (Choices.js) - MODIFICADO: Añadido required -->
-          <div class="form-group">
-            <select class="form-select required" name="categoria_existente" id="categoria_existente" required>
-              <option value="" disabled selected hidden>-SELECCIONA UNA CATEGORÍA *-</option>
-              <option value="abarrotes secos" data-custom-properties='{"color": "#FFA500"}'>Abarrotes secos</option>
-              <option value="enlatados y conservas" data-custom-properties='{"color": "#DAA520"}'>Enlatados y conservas</option>
-              <option value="botanas, dulces y snacks" data-custom-properties='{"color": "#FF69B4"}'>Botanas, dulces y snacks</option>
-              <option value="bebidas no alcohólicas" data-custom-properties='{"color": "#1E90FF"}'>Bebidas no alcohólicas</option>
-              <option value="bebidas alcohólicas" data-custom-properties='{"color": "#800080"}'>Bebidas alcohólicas</option>
-              <option value="panadería y repostería" data-custom-properties='{"color": "#D2B48C"}'>Panadería y repostería</option>
-              <option value="lácteos y huevos" data-custom-properties='{"color": "#F5DEB3"}'>Lácteos y huevos</option>
-              <option value="carnes frías y embutidos" data-custom-properties='{"color": "#B22222"}'>Carnes frías y embutidos</option>
-              <option value="congelados y refrigerados" data-custom-properties='{"color": "#00CED1"}'>Congelados y refrigerados</option>
-              <option value="frutas y verduras frescas" data-custom-properties='{"color": "#32CD32"}'>Frutas y verduras frescas</option>
-              <option value="productos de limpieza y hogar" data-custom-properties='{"color": "#87CEFA"}'>Productos de limpieza y hogar</option>
-              <option value="cuidado personal e higiene" data-custom-properties='{"color": "#FFC0CB"}'>Cuidado personal e higiene</option>
-              <option value="medicamentos de mostrador (otc)" data-custom-properties='{"color": "#FF6347"}'>Medicamentos de mostrador (OTC)</option>
-              <option value="productos para bebés" data-custom-properties='{"color": "#FFB6C1"}'>Productos para bebés</option>
-              <option value="productos para mascotas" data-custom-properties='{"color": "#8FBC8F"}'>Productos para mascotas</option>
-              <option value="artículos de papelería" data-custom-properties='{"color": "#9370DB"}'>Artículos de papelería</option>
-              <option value="ferretería básica" data-custom-properties='{"color": "#708090"}'>Ferretería básica</option>
-              <option value="otros (miscelánea)" data-custom-properties='{"color": "#A9A9A9"}'>Otros (miscelánea)</option>
-            </select>
-            <div class="invalid-feedback">Debes seleccionar una categoría</div>
-          </div>
-
-          <!-- Toggle "¿TIENE FECHA DE CADUCIDAD?" -->
-          <div style="margin-top: 0.5rem; margin-bottom: 0;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-              <label style="font-size: 0.9rem; color: #666;">¿Tiene fecha de caducidad?</label>
-              <button type="button" id="btnToggleCaducidad" class="toggle-button">DESACTIVADO</button>
-            </div>
+        <!-- Col Derecha: Form -->
+        <div class="col-right">
+          <!-- PASO 1: INFORMACIÓN DEL CÓDIGO -->
+          <div class="step-container">
+            <div class="step-number">1</div>
             
-            <!-- Opciones de Caducidad -->
-            <div id="caducidadOpcionesContainer" style="display:none; margin-top:0.5rem;">
-              <p class="text-muted" style="margin-bottom:0.5rem; font-size: 0.85rem;">
-                A partir de hoy, ¿en qué lapso aproximado caducan tus productos?
-              </p>
-              <div class="caducidad-options">
-                <div class="form-check" data-id="1 día">
-                  <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad1dia" value="1 día">
-                  <label class="form-check-label" for="cad1dia">1 DÍA</label>
-                </div>
-                <div class="form-check" data-id="3 días">
-                  <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad3dias" value="3 días">
-                  <label class="form-check-label" for="cad3dias">3 DÍAS</label>
-                </div>
-                <div class="form-check" data-id="1 semana">
-                  <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad1sem" value="1 semana">
-                  <label class="form-check-label" for="cad1sem">1 SEMANA</label>
-                </div>
-                <div class="form-check" data-id="2 semanas">
-                  <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad2sem" value="2 semanas">
-                  <label class="form-check-label" for="cad2sem">2 SEMANAS</label>
-                </div>
-                <div class="form-check" data-id="1 mes">
-                  <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad1mes" value="1 mes">
-                  <label class="form-check-label" for="cad1mes">1 MES</label>
-                </div>
-                <div class="form-check" data-id="3 meses">
-                  <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad3meses" value="3 meses">
-                  <label class="form-check-label" for="cad3meses">3 MESES</label>
-                </div>
-                <div class="form-check" data-id="6 meses">
-                  <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad6meses" value="6 meses">
-                  <label class="form-check-label" for="cad6meses">6 MESES</label>
-                </div>
-                <div class="form-check" data-id="1 año">
-                  <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad1ano" value="1 año">
-                  <label class="form-check-label" for="cad1ano">1 AÑO</label>
-                </div>
-                <div class="form-check" data-id="2 años">
-                  <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad2anos" value="2 años">
-                  <label class="form-check-label" for="cad2anos">2 AÑOS</label>
-                </div>
-                <div class="form-check" data-id="más de 3 años">
-                  <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad3anos" value="más de 3 años">
-                  <label class="form-check-label" for="cad3anos">+3 AÑOS</label>
+            <!-- Información del código de barras autogenerado -->
+            <div class="form-group" style="margin-bottom: 0;">
+              <div class="codigo-badge" id="codigoGeneradoBadge" style="display: flex; align-items: center; justify-content: flex-start; padding: 0.5rem 0.8rem; margin-bottom: 0; font-size: 0.9rem;">
+                <span style="margin-right: 0.5rem; color: #333; font-weight: 500;">Tu nuevo código de barras es:</span>
+                <span style="font-family: monospace; font-weight: 700; letter-spacing: 0.5px;" id="codigoMostrado">
+                  <!-- Código cargado por JS -->
+                </span>
+              </div>
+              <input type="hidden" id="codigo_barras_externo" name="codigo_barras_externo" value="">
+            </div>
+          </div>
+
+          <!-- PASO 2: INFORMACIÓN BÁSICA -->
+          <div class="step-container">
+            <div class="step-number">2</div>
+
+            <!-- IMPORTANTE: Para que el back sepa si es 'existente' (por default) -->
+            <input type="hidden" name="categoria_option" value="existente">
+            <!-- IMPORTANTE: Para saber si caducidad está activado o no -->
+            <input type="hidden" name="toggle_caducidad_estado" id="toggle_caducidad_estado" value="DESACTIVADO">
+
+            <!-- Nombre - MODIFICADO: Añadido required y clase required -->
+            <div class="form-group">
+              <div class="floating-label required" style="display: none;" id="nombreFloatingLabel">Nombre del producto</div>
+              <input 
+                type="text"
+                class="form-control"
+                id="nombre"
+                name="nombre"
+                placeholder="NOMBRE DEL PRODUCTO *"
+                required
+              >
+              <div class="invalid-feedback">El nombre del producto es obligatorio</div>
+            </div>
+
+            <!-- Marca -->
+            <div class="form-group" style="margin-bottom: 0;">
+              <div class="floating-label" style="display: none;" id="marcaFloatingLabel">Marca</div>
+              <input
+                type="text"
+                class="form-control"
+                id="marca"
+                name="marca"
+                placeholder="MARCA"
+              >
+            </div>
+          </div>
+
+          <!-- PASO 3: INVENTARIO Y PRECIOS -->
+          <div class="step-container">
+            <div class="step-number">3</div>
+
+            <!-- Stock Inicial - MODIFICADO: Cambiado a text para validación de enteros -->
+            <div class="form-group">
+              <div class="floating-label required" style="display: none;" id="stockFloatingLabel">Stock inicial</div>
+              <input 
+                type="text"
+                class="form-control"
+                id="stock"
+                name="stock"
+                placeholder="STOCK INICIAL (SOLO ENTEROS) *"
+                required
+                onkeypress="return isNumberKey(event)"
+                onpaste="return validatePaste(event)"
+                onkeyup="validateInteger(this)"
+              >
+              <div class="invalid-feedback">El stock inicial debe ser un número entero</div>
+            </div>
+
+            <!-- Costo / Precio - MODIFICADO: Añadido required y clase required -->
+            <div class="d-flex gap-3" style="align-items: center; margin-bottom: 0;">
+              <div class="form-group" style="flex:1; margin-bottom: 0;">
+                <div class="floating-label required" style="display: none;" id="costoFloatingLabel">Costo</div>
+                <input
+                  type="text"
+                  step="0.01"
+                  class="form-control"
+                  id="costo"
+                  name="costo"
+                  required
+                  oninput="formatCostRealtime(this)"
+                  placeholder="COSTO *"
+                >
+                <div class="invalid-feedback">El costo es obligatorio</div>
+              </div>
+              <div class="form-group" style="flex:1; margin-bottom: 0;">
+                <div class="floating-label required" style="display: none;" id="precio_ventaFloatingLabel">Precio de venta</div>
+                <input
+                  type="text"
+                  step="0.01"
+                  class="form-control"
+                  id="precio_venta"
+                  name="precio_venta"
+                  required
+                  oninput="formatCostRealtime(this)"
+                  placeholder="PRECIO DE VENTA *"
+                >
+                <div class="invalid-feedback">El precio de venta es obligatorio</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PASO 4: CATEGORÍA Y CADUCIDAD -->
+          <div class="step-container">
+            <div class="step-number">4</div>
+
+            <!-- Categoría (Choices.js) - MODIFICADO: Añadido required -->
+            <div class="form-group">
+              <select class="form-select required" name="categoria_existente" id="categoria_existente" required>
+                <option value="" disabled selected hidden>-SELECCIONA UNA CATEGORÍA *-</option>
+                <option value="abarrotes secos" data-custom-properties='{"color": "#FFA500"}'>Abarrotes secos</option>
+                <option value="enlatados y conservas" data-custom-properties='{"color": "#DAA520"}'>Enlatados y conservas</option>
+                <option value="botanas, dulces y snacks" data-custom-properties='{"color": "#FF69B4"}'>Botanas, dulces y snacks</option>
+                <option value="bebidas no alcohólicas" data-custom-properties='{"color": "#1E90FF"}'>Bebidas no alcohólicas</option>
+                <option value="bebidas alcohólicas" data-custom-properties='{"color": "#800080"}'>Bebidas alcohólicas</option>
+                <option value="panadería y repostería" data-custom-properties='{"color": "#D2B48C"}'>Panadería y repostería</option>
+                <option value="lácteos y huevos" data-custom-properties='{"color": "#F5DEB3"}'>Lácteos y huevos</option>
+                <option value="carnes frías y embutidos" data-custom-properties='{"color": "#B22222"}'>Carnes frías y embutidos</option>
+                <option value="congelados y refrigerados" data-custom-properties='{"color": "#00CED1"}'>Congelados y refrigerados</option>
+                <option value="frutas y verduras frescas" data-custom-properties='{"color": "#32CD32"}'>Frutas y verduras frescas</option>
+                <option value="productos de limpieza y hogar" data-custom-properties='{"color": "#87CEFA"}'>Productos de limpieza y hogar</option>
+                <option value="cuidado personal e higiene" data-custom-properties='{"color": "#FFC0CB"}'>Cuidado personal e higiene</option>
+                <option value="medicamentos de mostrador (otc)" data-custom-properties='{"color": "#FF6347"}'>Medicamentos de mostrador (OTC)</option>
+                <option value="productos para bebés" data-custom-properties='{"color": "#FFB6C1"}'>Productos para bebés</option>
+                <option value="productos para mascotas" data-custom-properties='{"color": "#8FBC8F"}'>Productos para mascotas</option>
+                <option value="artículos de papelería" data-custom-properties='{"color": "#9370DB"}'>Artículos de papelería</option>
+                <option value="ferretería básica" data-custom-properties='{"color": "#708090"}'>Ferretería básica</option>
+                <option value="otros (miscelánea)" data-custom-properties='{"color": "#A9A9A9"}'>Otros (miscelánea)</option>
+              </select>
+              <div class="invalid-feedback">Debes seleccionar una categoría</div>
+            </div>
+
+            <!-- Toggle "¿TIENE FECHA DE CADUCIDAD?" -->
+            <div style="margin-top: 0.5rem; margin-bottom: 0;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <label style="font-size: 0.9rem; color: #666;">¿Tiene fecha de caducidad?</label>
+                <button type="button" id="btnToggleCaducidad" class="toggle-button">DESACTIVADO</button>
+              </div>
+              
+              <!-- Opciones de Caducidad -->
+              <div id="caducidadOpcionesContainer" style="display:none; margin-top:0.5rem;">
+                <p class="text-muted" style="margin-bottom:0.5rem; font-size: 0.85rem;">
+                  A partir de hoy, ¿en qué lapso aproximado caducan tus productos?
+                </p>
+                <div class="caducidad-options">
+                  <div class="form-check" data-id="1 día">
+                    <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad1dia" value="1 día">
+                    <label class="form-check-label" for="cad1dia">1 DÍA</label>
+                  </div>
+                  <div class="form-check" data-id="3 días">
+                    <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad3dias" value="3 días">
+                    <label class="form-check-label" for="cad3dias">3 DÍAS</label>
+                  </div>
+                  <div class="form-check" data-id="1 semana">
+                    <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad1sem" value="1 semana">
+                    <label class="form-check-label" for="cad1sem">1 SEMANA</label>
+                  </div>
+                  <div class="form-check" data-id="2 semanas">
+                    <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad2sem" value="2 semanas">
+                    <label class="form-check-label" for="cad2sem">2 SEMANAS</label>
+                  </div>
+                  <div class="form-check" data-id="1 mes">
+                    <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad1mes" value="1 mes">
+                    <label class="form-check-label" for="cad1mes">1 MES</label>
+                  </div>
+                  <div class="form-check" data-id="3 meses">
+                    <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad3meses" value="3 meses">
+                    <label class="form-check-label" for="cad3meses">3 MESES</label>
+                  </div>
+                  <div class="form-check" data-id="6 meses">
+                    <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad6meses" value="6 meses">
+                    <label class="form-check-label" for="cad6meses">6 MESES</label>
+                  </div>
+                  <div class="form-check" data-id="1 año">
+                    <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad1ano" value="1 año">
+                    <label class="form-check-label" for="cad1ano">1 AÑO</label>
+                  </div>
+                  <div class="form-check" data-id="2 años">
+                    <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad2anos" value="2 años">
+                    <label class="form-check-label" for="cad2anos">2 AÑOS</label>
+                  </div>
+                  <div class="form-check" data-id="más de 3 años">
+                    <input class="form-check-input" type="radio" name="caducidad_lapso" id="cad3anos" value="más de 3 años">
+                    <label class="form-check-label" for="cad3anos">+3 AÑOS</label>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
+        <!-- FIN col-right -->
       </div>
-      <!-- FIN col-right -->
-    </div>
-    <!-- FIN row-form -->
-
-    <!-- BOTONES GUARDAR / CANCELAR -->
-    <div class="text-end" style="margin-top:1.5rem; margin-bottom:0.5rem;">
-      <button type="submit" id="submitBtn" class="btn-submit" style="margin-right:0.5rem;">GUARDAR</button>
-      <a href="{{ url_for('ver_productos') }}" class="btn-cancel">CANCELAR</a>
-    </div>
-  </form>
+      <!-- FIN row-form -->
+    </form>
+  </div>
 </div>
 
 <!-- Overlay de carga -->
@@ -834,7 +954,32 @@
    * Función para validar el formulario antes de enviar
    * ===========================================================
    */
-  function validateForm(e) {
+  // Funciones para validación de números enteros
+  function isNumberKey(evt) {
+    const charCode = (evt.which) ? evt.which : evt.keyCode;
+    // Permitir solo números (0-9) y teclas de control
+    if (charCode > 31 && (charCode < 48 || charCode > 57))
+      return false;
+    return true;
+  }
+  
+  function validatePaste(evt) {
+    // Prevenir pegado de contenido no numérico
+    const clipboardData = evt.clipboardData || window.clipboardData;
+    const pastedData = clipboardData.getData('Text');
+    if (!/^\d+$/.test(pastedData)) {
+      evt.preventDefault();
+      return false;
+    }
+    return true;
+  }
+  
+  function validateInteger(input) {
+    // Eliminar cualquier carácter no numérico
+    input.value = input.value.replace(/[^\d]/g, '');
+  }
+
+function validateForm(e) {
     e.preventDefault(); // Detener envío para validación
     
     // Asegurarse de que el código de barras esté presente
@@ -873,8 +1018,20 @@
       }
     });
     
+    // Validación específica para stock (debe ser un número entero)
+    const stockInput = document.getElementById('stock');
+    if (stockInput.value && !/^\d+$/.test(stockInput.value)) {
+      stockInput.classList.add("is-invalid");
+      const feedbackElement = stockInput.nextElementSibling;
+      if (feedbackElement && feedbackElement.classList.contains("invalid-feedback")) {
+        feedbackElement.style.display = "block";
+      }
+      showCenteredNotification("El stock inicial debe ser un número entero");
+      isValid = false;
+    }
+    
     if (!isValid) {
-      showCenteredNotification("Por favor, completa todos los campos obligatorios");
+      showCenteredNotification("Por favor, corrige los errores en el formulario");
       return false;
     }
     
