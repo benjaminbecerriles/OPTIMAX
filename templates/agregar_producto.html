@@ -97,7 +97,7 @@
     width: 30px;
     height: 30px;
     border-radius: 50%;
-    background-color: #ccc;
+    background-color: #777;
     color: #fff;
     border: none;
     font-size: 18px;
@@ -787,15 +787,18 @@
         <div class="step-container">
           <div class="step-number">3</div>
 
-          <!-- Stock Inicial - MODIFICADO: Agregado required -->
+          <!-- Stock Inicial - MODIFICADO: Agregado required y validación solo enteros -->
           <div class="form-group">
             <div class="floating-label" style="display: none;" id="stockFloatingLabel">Stock inicial</div>
-            <input 
+            <input
               type="number"
               class="form-control"
               id="stock"
               name="stock"
               min="0"
+              step="1"
+              onkeypress="return (event.charCode >= 48 && event.charCode <= 57)"
+              oninput="this.value = this.value.replace(/[^0-9]/g, '')"
               placeholder="STOCK INICIAL (PIEZAS)"
               required
             >
@@ -2943,6 +2946,64 @@
     });
     
     console.log("✅ Parche final aplicado correctamente");
+  });
+  <script>
+  /* RESTO DEL CÓDIGO JAVASCRIPT... */
+  
+  // Validación adicional para campo de stock (solo números enteros)
+  document.addEventListener("DOMContentLoaded", function() {
+    const stockInput = document.getElementById("stock");
+    if (stockInput) {
+      // Prevenir pegar contenido no numérico
+      stockInput.addEventListener("paste", function(e) {
+        // Obtener el texto pegado
+        const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+        // Verificar si contiene caracteres no numéricos
+        if (/[^0-9]/.test(pastedText)) {
+          e.preventDefault();
+          // Opcional: Mostrar mensaje
+          if (typeof showCenteredNotification === 'function') {
+            showCenteredNotification("Solo se permiten números enteros en el campo de stock");
+          }
+        }
+      });
+      
+      // Prevenir el uso de decimales con la rueda del mouse
+      stockInput.addEventListener("wheel", function(e) {
+        // Prevenir el cambio de valor con la rueda
+        e.preventDefault();
+      });
+      
+      // Validar al enviar el formulario
+      const productForm = document.getElementById("productForm");
+      if (productForm) {
+        const originalSubmit = productForm.onsubmit;
+        productForm.onsubmit = function(e) {
+          // Verificar que el stock sea un número entero
+          if (stockInput.value.includes('.') || stockInput.value.includes(',')) {
+            e.preventDefault();
+            stockInput.value = Math.floor(parseFloat(stockInput.value));
+            if (typeof showCenteredNotification === 'function') {
+              showCenteredNotification("El stock ha sido redondeado a un número entero");
+            }
+            // Continuar con el envío después de la notificación
+            setTimeout(() => {
+              if (originalSubmit) {
+                originalSubmit.call(this, e);
+              } else {
+                this.submit();
+              }
+            }, 1500);
+            return false;
+          }
+          
+          // Ejecutar el handler original si existe
+          if (originalSubmit) {
+            return originalSubmit.call(this, e);
+          }
+        };
+      }
+    }
   });
 </script>
 {% endblock %}

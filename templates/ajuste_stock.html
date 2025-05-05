@@ -788,7 +788,11 @@
                   {% if producto.stock <= 0 %}
                     Sin stock
                   {% else %}
-                    {{ producto.stock }} 
+                    {% if producto.stock == producto.stock|int %}
+                      {{ producto.stock|int }}
+                    {% else %}
+                      {{ '{:.3f}'.format(producto.stock) }}
+                    {% endif %}
                     {% if producto.unidad and producto.unidad != 'NONE' %}
                       {{ producto.unidad }}
                     {% else %}
@@ -801,7 +805,7 @@
             <div class="product-info-item">
               <!-- Se quitó el icono de etiqueta -->
               <span style="font-weight: 500;">Precio actual: <span class="formatted-price" data-price="{{ producto.precio_venta }}">
-                ${{ producto.precio_venta|string|replace('.0', '') }}
+                ${{ '{:.2f}'.format(producto.precio_venta) }}
               </span></span>
             </div>
           </div>
@@ -1269,42 +1273,16 @@
       applyFiltersAndPagination();
     });
     
-    // Formatear precios para eliminar .0 y añadir comas
+    // Formatear precios para mostrar siempre 2 decimales
     function formatPrice(price) {
       // Convertir a número
       let numPrice = parseFloat(price);
       
-      // Determinar si necesitamos decimales
-      let hasSignificantDecimals = false;
-      let decimalPart = "";
-      
-      if (numPrice % 1 !== 0) {
-        // Hay decimales, verificar si son significativos
-        decimalPart = numPrice.toString().split('.')[1];
-        
-        // Si hay más de 2 decimales y al menos uno después del segundo decimal no es cero
-        if (decimalPart.length > 2 && /[1-9]/.test(decimalPart.substring(2))) {
-          hasSignificantDecimals = true;
-        }
-      }
-      
-      // Formatear con o sin decimales según corresponda
-      if (hasSignificantDecimals) {
-        // Conservar 3 decimales
-        return "$" + numPrice.toLocaleString('en-US', {
-          minimumFractionDigits: 3,
-          maximumFractionDigits: 3
-        });
-      } else if (decimalPart && decimalPart !== "0" && decimalPart !== "00") {
-        // Hay decimales significativos (1 o 2)
-        return "$" + numPrice.toLocaleString('en-US', {
-          minimumFractionDigits: decimalPart.length,
-          maximumFractionDigits: decimalPart.length
-        });
-      } else {
-        // Sin decimales
-        return "$" + Math.floor(numPrice).toLocaleString('en-US');
-      }
+      // Formatear siempre con 2 decimales
+      return "$" + numPrice.toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
     }
     
     // Aplicar formato a todos los precios

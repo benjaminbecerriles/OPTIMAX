@@ -1381,7 +1381,11 @@
           <!-- Stock con unidades personalizadas -->
           <td class="column-stock">
             <span class="stock-value {% if p.stock <= 0 %}zero{% elif p.stock < 5 %}low{% endif %}">
-              {{ p.stock }} 
+              {% if p.stock == p.stock|int %}
+                {{ p.stock|int }}
+              {% else %}
+                {{ '{:.3f}'.format(p.stock) }}
+              {% endif %}
               {% if p.unidad and p.unidad != 'NONE' %}
                 {{ p.unidad }}
               {% else %}
@@ -1392,15 +1396,7 @@
           
           <!-- Precio con formato -->
           <td class="column-price">
-            <span class="price-value">$
-              {% if p.precio_venta == p.precio_venta|int %}
-                {{ '{:,}'.format(p.precio_venta|int) }}
-              {% elif ((p.precio_venta * 1000)|int % 10) == 0 %}
-                {{ '{:,.2f}'.format(p.precio_venta).rstrip('0').rstrip('.') }}
-              {% else %}
-                {{ '{:,.3f}'.format(p.precio_venta) }}
-              {% endif %}
-            </span>
+            <span class="price-value">${{ '{:,.2f}'.format(p.precio_venta) }}</span>
           </td>
           
           <!-- NUEVO: Costo con formato y data-attributes para alternar entre tipos -->
@@ -1408,13 +1404,7 @@
             <span class="cost-value" 
                   data-last-cost="{{ p.costo }}" 
                   data-avg-cost="{{ p.costo_promedio|default(p.costo) }}">
-              ${% if p.costo == p.costo|int %}
-                {{ '{:,}'.format(p.costo|int) }}
-              {% elif ((p.costo * 1000)|int % 10) == 0 %}
-                {{ '{:,.2f}'.format(p.costo).rstrip('0').rstrip('.') }}
-              {% else %}
-                {{ '{:,.3f}'.format(p.costo) }}
-              {% endif %}
+              ${{ '{:,.2f}'.format(p.costo) }}
             </span>
           </td>
           
@@ -1802,15 +1792,8 @@
       const avgCost = parseFloat(value.getAttribute('data-avg-cost'));
       const showCost = type === 'last' ? lastCost : avgCost;
       
-      // Formatear el valor según reglas existentes
-      let formattedCost;
-      if (showCost === Math.floor(showCost)) {
-        formattedCost = '$' + showCost.toLocaleString('en-US', {maximumFractionDigits: 0});
-      } else if (Math.round(showCost * 1000) % 10 === 0) {
-        formattedCost = '$' + showCost.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}).replace(/\.00$/, '');
-      } else {
-        formattedCost = '$' + showCost.toLocaleString('en-US', {minimumFractionDigits: 3, maximumFractionDigits: 3});
-      }
+      // Formatear siempre con 2 decimales
+      const formattedCost = '$' + showCost.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
       
       value.innerHTML = formattedCost;
     });
