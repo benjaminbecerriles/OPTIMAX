@@ -834,8 +834,8 @@
                 name="stock"
                 placeholder="INGRESA EL STOCK INICIAL"
                 required
-                onkeypress="return isNumberKey(event, true)"
-                onpaste="return validatePaste(event, true)"
+                onkeypress="return isNumberKey(event, true, 3)"
+                onpaste="return validatePaste(event, true, 3)"
                 onkeyup="validateDecimal(this, 3)"
               >
               <div class="invalid-feedback">
@@ -1148,32 +1148,61 @@
    * NUEVAS FUNCIONES PARA VALIDAR ENTRADA DE STOCK (CON DECIMALES)
    * ===========================================================
    */
-  function isNumberKey(evt, allowDecimal = false) {
+  function isNumberKey(evt, allowDecimal = false, maxDecimals = 3) {
     const charCode = (evt.which) ? evt.which : evt.keyCode;
-    // Permitir punto decimal si allowDecimal es true
+
+    // Permitir punto decimal si allowDecimal es true y no hay punto aún
     if (allowDecimal && charCode === 46 && evt.target.value.indexOf('.') === -1) {
       return true;
     }
+
     // Permitir solo números (0-9) y teclas de control
     if (charCode > 31 && (charCode < 48 || charCode > 57))
-      return false;
+    return false;
+
+    // Si estamos escribiendo después del punto decimal, verificar el límite
+    if (allowDecimal && evt.target.value.indexOf('.') > -1) {
+      const parts = evt.target.value.split('.');
+      if (parts.length > 1 && parts[1].length >= maxDecimals) {
+        return false; // Bloquear más dígitos decimales si ya alcanzó el límite
+      }
+    }
+
     return true;
   }
   
-  function validatePaste(evt, allowDecimal = false) {
+  function validatePaste(evt, allowDecimal = false, maxDecimals = 3) {
     // Prevenir pegado de contenido no numérico
     const clipboardData = evt.clipboardData || window.clipboardData;
     const pastedData = clipboardData.getData('Text');
+
     if (allowDecimal) {
       // Permitir números y un solo punto decimal
       if (!/^[\d.]+$/.test(pastedData) || (pastedData.indexOf('.') !== pastedData.lastIndexOf('.'))) {
         evt.preventDefault();
         return false;
       }
-      // Si ya hay un punto en el campo y el texto pegado tiene un punto, prevenir
+
+      // Si ya hay un punto en el campo y el texto pegado tiene un punto, preveni
       if (evt.target.value.includes('.') && pastedData.includes('.')) {
         evt.preventDefault();
         return false;
+      }
+
+      // Comprobar número de decimales resultantes tras el pegado
+      const currentValue = evt.target.value;
+      const cursorPos = evt.target.selectionStart;
+      const valueBeforeCursor = currentValue.slice(0, cursorPos);
+      const valueAfterCursor = currentValue.slice(evt.target.selectionEnd);
+      const newValue = valueBeforeCursor + pastedData + valueAfterCursor;
+
+      // Verificar decimales en el valor resultante
+      if (newValue.includes('.')) {
+        const parts = newValue.split('.');
+        if (parts.length > 1 && parts[1].length > maxDecimals) {
+          evt.preventDefault();
+          return false;
+        }
       }
     } else {
       // Solo permitir dígitos
@@ -1182,8 +1211,10 @@
         return false;
       }
     }
+
     return true;
   }
+    
   
   function validateDecimal(input, maxDecimals = 3) {
     // Eliminar cualquier carácter no numérico excepto el punto decimal
