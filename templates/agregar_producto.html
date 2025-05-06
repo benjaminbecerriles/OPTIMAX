@@ -2259,7 +2259,9 @@
       
       // Verificar si se ha seleccionado una categoría
       const categoriaSelect = document.getElementById("categoria_existente");
-      if (!categoriaSelect.value) {
+      const selectedValue = categoryChoices ? categoryChoices.getValue(true) : categoriaSelect.value;
+      
+      if (!selectedValue) {
         showCenteredNotification("Debes seleccionar una categoría para el producto.");
         return;
       }
@@ -2291,6 +2293,24 @@
         // Si no hay código de barras, verificar otras validaciones y continuar
         loadingOverlay.style.display = "flex";
         productForm.submit();
+      }
+    });
+  }
+  
+  // Añadir manejo de evento para el botón de guardar
+  if (submitBtn) {
+    submitBtn.addEventListener("click", function(e) {
+      // El botón ya tiene el atributo form="productForm", pero aseguramos
+      // que se valide la categoría antes de enviar el formulario
+      
+      // Verificar si se ha seleccionado una categoría
+      const categoriaSelect = document.getElementById("categoria_existente");
+      const selectedValue = categoryChoices ? categoryChoices.getValue(true) : categoriaSelect.value;
+      
+      if (!selectedValue) {
+        e.preventDefault(); // Detener la acción del botón
+        showCenteredNotification("Debes seleccionar una categoría para el producto.");
+        return false;
       }
     });
   }
