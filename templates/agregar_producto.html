@@ -1069,6 +1069,14 @@
     }
     value = value.replace(/,/g, "").replace(numericRegex, "");
     
+    // Verificar si comienza con punto decimal
+    if (value.startsWith('.')) {
+      showCenteredNotification("No puedes iniciar el monto con punto decimal. Usa formato como 0.25, 1.50, etc.");
+      value = ''; // Limpiar el valor
+      input.value = '';
+      return;
+    }
+    
     const match = value.match(moneyPattern);
     if (match) {
       let intPart = match[1];
@@ -2246,8 +2254,15 @@
   // Manejar el envío del formulario
   if (productForm) {
     productForm.addEventListener("submit", function(e) {
-      // Verificar si el código de barras es válido
-      const codigoBarras = document.getElementById("codigo_barras_externo").value.trim();
+      // Prevenir el envío del formulario por defecto para validaciones
+      e.preventDefault();
+      
+      // Verificar si se ha seleccionado una categoría
+      const categoriaSelect = document.getElementById("categoria_existente");
+      if (!categoriaSelect.value) {
+        showCenteredNotification("Debes seleccionar una categoría para el producto.");
+        return;
+      }
       
       // Limpiar comas en el campo stock antes de enviar
       const stockInput = document.getElementById("stock");
@@ -2255,10 +2270,10 @@
         stockInput.value = stockInput.value.replace(/,/g, "");
       }
       
+      // Verificar si el código de barras es válido
+      const codigoBarras = document.getElementById("codigo_barras_externo").value.trim();
+      
       if (codigoBarras) {
-        // Prevenir envío por defecto
-        e.preventDefault();
-        
         // Verificar el código de barras
         verificarCodigoBarras(codigoBarras).then(exists => {
           if (exists) {
@@ -2273,8 +2288,9 @@
           }
         });
       } else {
-        // Si no hay código de barras, continuar normalmente
+        // Si no hay código de barras, verificar otras validaciones y continuar
         loadingOverlay.style.display = "flex";
+        productForm.submit();
       }
     });
   }
