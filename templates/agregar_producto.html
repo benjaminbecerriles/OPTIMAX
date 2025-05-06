@@ -787,18 +787,16 @@
         <div class="step-container">
           <div class="step-number">3</div>
 
-          <!-- Stock Inicial - MODIFICADO: Agregado required y validación solo enteros -->
+          <!-- Stock Inicial - MODIFICADO: Cambiado a text para permitir formato con comas -->
           <div class="form-group">
             <div class="floating-label" style="display: none;" id="stockFloatingLabel">Stock inicial</div>
             <input
-              type="number"
+              type="text"
               class="form-control"
               id="stock"
               name="stock"
-              min="0"
-              step="1"
               onkeypress="return (event.charCode >= 48 && event.charCode <= 57)"
-              oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+              oninput="formatStockNumber(this)"
               placeholder="STOCK INICIAL (PIEZAS)"
               required
             >
@@ -816,7 +814,7 @@
                 name="costo"
                 required
                 oninput="formatCostRealtime(this)"
-                placeholder="COSTO"
+                placeholder="COSTO POR PIEZA"
               >
             </div>
             <div class="form-group" style="flex:1; margin-bottom: 0;">
@@ -829,7 +827,7 @@
                 name="precio_venta"
                 required
                 oninput="formatCostRealtime(this)"
-                placeholder="PRECIO DE VENTA"
+                placeholder="PRECIO DE VENTA POR PIEZA"
               >
             </div>
           </div>
@@ -1087,6 +1085,53 @@
       }
       input.value = result;
       input.setSelectionRange(input.value.length, input.value.length);
+    }
+  }
+
+  /* ===========================================================
+   * 3.1) Formatear Stock en tiempo real (Solo enteros con comas)
+   * ===========================================================
+   */
+  function formatStockNumber(input) {
+    try {
+      // Guardar posición del cursor
+      const start = input.selectionStart;
+      const end = input.selectionEnd;
+      const oldLength = input.value.length;
+      
+      // Obtener el valor actual y eliminar caracteres no numéricos excepto comas
+      let value = input.value.replace(/[^0-9,]/g, "");
+      
+      // Eliminar todas las comas para trabajar con el número puro
+      const numericValue = value.replace(/,/g, "");
+      
+      // Si el valor está vacío, no hacer nada
+      if (numericValue === "") {
+        input.value = "";
+        return;
+      }
+      
+      // Convertir a número y formatear con comas
+      const formattedValue = parseInt(numericValue).toLocaleString("en-US");
+      
+      // Actualizar el valor en el campo
+      input.value = formattedValue;
+      
+      // Ajustar la posición del cursor después del formateo
+      const newLength = input.value.length;
+      const deltaLength = newLength - oldLength;
+      
+      if (start < oldLength) {
+        input.setSelectionRange(
+          Math.max(0, start + deltaLength),
+          Math.max(0, end + deltaLength)
+        );
+      } else {
+        input.setSelectionRange(newLength, newLength);
+      }
+    } catch (e) {
+      console.error("Error al formatear campo de stock:", e);
+      // En caso de error, no realizar cambios
     }
   }
 
@@ -2204,6 +2249,12 @@
       // Verificar si el código de barras es válido
       const codigoBarras = document.getElementById("codigo_barras_externo").value.trim();
       
+      // Limpiar comas en el campo stock antes de enviar
+      const stockInput = document.getElementById("stock");
+      if (stockInput && stockInput.value) {
+        stockInput.value = stockInput.value.replace(/,/g, "");
+      }
+      
       if (codigoBarras) {
         // Prevenir envío por defecto
         e.preventDefault();
@@ -2312,7 +2363,44 @@
   });
 </script>
 <!-- PARCHE FINAL MEJORADO -->
-<script>
+  <script>
+  /* Validación adicional para campo de stock (solo números enteros con formato) */
+  document.addEventListener("DOMContentLoaded", function() {
+    const stockInput = document.getElementById("stock");
+    if (stockInput) {
+      // Gestionar evento de pegado para aplicar formato
+      stockInput.addEventListener("paste", function(e) {
+        // Usar setTimeout para formatear después del pegado
+        setTimeout(function() {
+          formatStockNumber(stockInput);
+        }, 10);
+      });
+      
+      // Prevenir el uso de la rueda del mouse
+      stockInput.addEventListener("wheel", function(e) {
+        e.preventDefault();
+      });
+      
+      // Asegurarse de que los valores se limpian antes de enviar
+      const productForm = document.getElementById("productForm");
+      if (productForm) {
+        const originalSubmit = productForm.onsubmit;
+        productForm.onsubmit = function(e) {
+          // Limpiar las comas antes de enviar
+          if (stockInput.value) {
+            stockInput.value = stockInput.value.replace(/,/g, "");
+          }
+          
+          // Ejecutar el handler original si existe
+          if (originalSubmit) {
+            return originalSubmit.call(this, e);
+          }
+          return true;
+        };
+      }
+    }
+  });
+
   document.addEventListener('DOMContentLoaded', function() {
     console.log("🔧 Aplicando parche final mejorado para manejo de categorías");
     
@@ -2946,64 +3034,6 @@
     });
     
     console.log("✅ Parche final aplicado correctamente");
-  });
-  <script>
-  /* RESTO DEL CÓDIGO JAVASCRIPT... */
-  
-  // Validación adicional para campo de stock (solo números enteros)
-  document.addEventListener("DOMContentLoaded", function() {
-    const stockInput = document.getElementById("stock");
-    if (stockInput) {
-      // Prevenir pegar contenido no numérico
-      stockInput.addEventListener("paste", function(e) {
-        // Obtener el texto pegado
-        const pastedText = (e.clipboardData || window.clipboardData).getData('text');
-        // Verificar si contiene caracteres no numéricos
-        if (/[^0-9]/.test(pastedText)) {
-          e.preventDefault();
-          // Opcional: Mostrar mensaje
-          if (typeof showCenteredNotification === 'function') {
-            showCenteredNotification("Solo se permiten números enteros en el campo de stock");
-          }
-        }
-      });
-      
-      // Prevenir el uso de decimales con la rueda del mouse
-      stockInput.addEventListener("wheel", function(e) {
-        // Prevenir el cambio de valor con la rueda
-        e.preventDefault();
-      });
-      
-      // Validar al enviar el formulario
-      const productForm = document.getElementById("productForm");
-      if (productForm) {
-        const originalSubmit = productForm.onsubmit;
-        productForm.onsubmit = function(e) {
-          // Verificar que el stock sea un número entero
-          if (stockInput.value.includes('.') || stockInput.value.includes(',')) {
-            e.preventDefault();
-            stockInput.value = Math.floor(parseFloat(stockInput.value));
-            if (typeof showCenteredNotification === 'function') {
-              showCenteredNotification("El stock ha sido redondeado a un número entero");
-            }
-            // Continuar con el envío después de la notificación
-            setTimeout(() => {
-              if (originalSubmit) {
-                originalSubmit.call(this, e);
-              } else {
-                this.submit();
-              }
-            }, 1500);
-            return false;
-          }
-          
-          // Ejecutar el handler original si existe
-          if (originalSubmit) {
-            return originalSubmit.call(this, e);
-          }
-        };
-      }
-    }
   });
 </script>
 {% endblock %}
