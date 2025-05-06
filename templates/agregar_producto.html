@@ -733,6 +733,7 @@
                 id="codigo_barras_externo"
                 name="codigo_barras_externo"
                 placeholder="INGRESAR CÓDIGO DE BARRAS"
+                required
               >
               <!-- Icono Lector Físico -->
               <img 
@@ -1054,7 +1055,7 @@
   }
 
   /* ===========================================================
-   * 3) Formatear Costo en tiempo real (MODIFICADO: Limite de 2 decimales)
+   * 3) Formatear Costo en tiempo real (MODIFICADO: Validar que no comience con punto)
    * ===========================================================
    */
   // Cache expresiones regulares
@@ -1067,6 +1068,14 @@
     if (value.startsWith("$")) {
       value = value.substring(1);
     }
+    
+    // VALIDACIÓN: Si el valor comienza con punto, mostrar notificación y no permitir
+    if (value.startsWith('.')) {
+      showCenteredNotification("No se permite iniciar con punto decimal. Debe usar formato: 0.XX");
+      // Corregir automáticamente agregando un 0 al inicio
+      value = '0' + value;
+    }
+    
     value = value.replace(/,/g, "").replace(numericRegex, "");
     
     const match = value.match(moneyPattern);
@@ -1510,7 +1519,7 @@
           
           displayAutocompleteResults(data);
         })
-        .catch(err => {
+                  .catch(err => {
           if (err.name !== 'AbortError') {
             console.error("Error en autocomplete", err);
             autoContainer.innerHTML = "";
@@ -1652,7 +1661,7 @@
                   style="display:none;"
                   ${data.disabled ? 'data-choice-disabled aria-disabled="true"' : 'data-choice-selectable'}
                   data-id="${data.id}" data-value="${data.value}">
-                  -SELECCIONA UNA CATEGORÍA-
+                  -SELECCIONA UNA CATEGORÍA (obligatorio)-
                 </div>
               `);
             }
@@ -2025,7 +2034,10 @@
       function (err) {
         if (err) {
           console.error("Error al iniciar Quagga:", err);
-          cerrarModalEscaner();
+          videoContainer.innerHTML = `<div style="color: white; text-align: center; padding: 20px;">
+            <p>Error al acceder a la cámara: ${err.message || "Desconocido"}</p>
+            <p>Verifica que has dado permisos de cámara y refresca la página.</p>
+          </div>`;
           return;
         }
         
@@ -2045,12 +2057,33 @@
       
       const inputExterno = document.getElementById("codigo_barras_externo");
       if (inputExterno) {
+        // Establecer el valor directamente
         inputExterno.value = codigoDetectado;
-        // Actualizar etiqueta flotante
-        updateFloatingLabel(inputExterno);
+        
+        // Actualizar etiqueta flotante si existe
+        if (typeof updateFloatingLabel === "function") {
+          updateFloatingLabel(inputExterno);
+        }
+
+        // Verificar si estamos en la página de agregar producto específicamente
+        if (window.location.pathname.includes('agregar-producto')) {
+          // Si estamos en agregar-producto, usar el timeout para asegurar que el cuadro rosa se muestre
+          if (typeof onScannedBarcode === "function") {
+            console.log("Detectada página agregar-producto, llamando onScannedBarcode con timeout:", codigoDetectado);
+            setTimeout(() => {
+              onScannedBarcode(codigoDetectado);
+            }, 50);
+            return; // Terminar aquí para evitar la ejecución del código genérico
+          }
+        }
+        
+        // Para otras páginas, mantener el comportamiento original
+        if (typeof onScannedBarcode === "function") {
+          console.log("Llamando onScannedBarcode directamente:", codigoDetectado);
+          onScannedBarcode(codigoDetectado);
+        }
       }
       
-      onScannedBarcode(codigoDetectado);
       Quagga.stop();
       quaggaActive = false;
       cerrarModalEscaner();
@@ -2243,11 +2276,47 @@
   const productForm = document.getElementById("productForm");
   const submitBtn = document.getElementById("submitBtn");
   
-  // Manejar el envío del formulario
+  // Manejar el envío del formulario con validaciones adicionales
   if (productForm) {
     productForm.addEventListener("submit", function(e) {
-      // Verificar si el código de barras es válido
+      // Prevenir envío por defecto para realizar validaciones
+      e.preventDefault();
+      
+      // Verificar campos requeridos
       const codigoBarras = document.getElementById("codigo_barras_externo").value.trim();
+      if (!codigoBarras) {
+        showCenteredNotification("Debe ingresar un código de barras");
+        document.getElementById("codigo_barras_externo").focus();
+        return false;
+      }
+      
+      // Verificar campos de costo y precio
+      const costoField = document.getElementById("costo");
+      const precioField = document.getElementById("precio_venta");
+      
+      // Validar que no comiencen con punto decimal
+      if (costoField.value.trim().replace("$", "").startsWith('.')) {
+        showCenteredNotification("El costo no puede iniciar con punto decimal. Use formato: 0.XX");
+        costoField.focus();
+        return false;
+      }
+      
+      if (precioField.value.trim().replace("$", "").startsWith('.')) {
+        showCenteredNotification("El precio no puede iniciar con punto decimal. Use formato: 0.XX");
+        precioField.focus();
+        return false;
+      }
+      
+      // Validar categoría
+      const categoriaSelect = document.getElementById("categoria_existente");
+      if (!categoriaSelect.value) {
+        showCenteredNotification("Debe seleccionar una categoría");
+        // Hacer foco en Choices.js si está disponible
+        if (categoryChoices) {
+          categoryChoices.showDropdown();
+        }
+        return false;
+      }
       
       // Limpiar comas en el campo stock antes de enviar
       const stockInput = document.getElementById("stock");
@@ -2255,11 +2324,8 @@
         stockInput.value = stockInput.value.replace(/,/g, "");
       }
       
+      // Verificar si el código de barras ya existe
       if (codigoBarras) {
-        // Prevenir envío por defecto
-        e.preventDefault();
-        
-        // Verificar el código de barras
         verificarCodigoBarras(codigoBarras).then(exists => {
           if (exists) {
             // Mostrar alerta modal si el código ya existe
@@ -2273,8 +2339,9 @@
           }
         });
       } else {
-        // Si no hay código de barras, continuar normalmente
+        // Si no hay código de barras (aunque debería haberlo por validación anterior)
         loadingOverlay.style.display = "flex";
+        productForm.submit();
       }
     });
   }
