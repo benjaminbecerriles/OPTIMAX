@@ -834,9 +834,7 @@
                 name="stock"
                 placeholder="INGRESA EL STOCK INICIAL"
                 required
-                onkeypress="return isNumberKey(event, true, 3)"
-                onpaste="return validatePaste(event, true, 3)"
-                onkeyup="validateDecimal(this, 3)"
+                oninput="formatStockNumber(this)"
               >
               <div class="invalid-feedback">
                 Por favor, ingresa el stock inicial del producto (hasta 3 decimales).
@@ -853,7 +851,7 @@
                   id="costo"
                   name="costo"
                   required
-                  oninput="formatCostRealtime(this, 2)"
+                  oninput="formatCostRealtime(this)"
                   placeholder="COSTO POR"
                 >
                 <div class="invalid-feedback">
@@ -870,7 +868,7 @@
                   id="precio_venta"
                   name="precio_venta"
                   required
-                  oninput="formatCostRealtime(this, 2)"
+                  oninput="formatCostRealtime(this)"
                   placeholder="PRECIO POR"
                 >
                 <div class="invalid-feedback">
@@ -1045,21 +1043,23 @@
   }
 
 /* ===========================================================
-   * 3) Formatear Costo en tiempo real (CORREGIDO PARA PERMITIR 2 DECIMALES)
+   * 3) Formatear Costo en tiempo real (MODIFICADO PARA FUNCIONAR COMO EN AGREGAR_PRODUCTO.HTML)
    * ===========================================================
    */
-   function formatCostRealtime(input, maxDecimals = 2) {
-    // Obtener posición del cursor antes de la modificación
-    const cursorPos = input.selectionStart;
-    
-    // Obtener el valor actual sin el símbolo $
+  function formatCostRealtime(input) {
     let value = input.value;
     if (value.startsWith("$")) {
       value = value.substring(1);
     }
+    value = value.replace(/,/g, "").replace(/[^\d.]/g, "");
     
-    // Eliminar todas las comas existentes
-    value = value.replace(/,/g, "");
+    // Verificar si comienza con punto decimal
+    if (value.startsWith('.')) {
+      showCenteredNotification("No puedes iniciar el monto con punto decimal. Usa formato como 0.25, 1.50, etc.");
+      value = ''; // Limpiar el valor
+      input.value = '';
+      return;
+    }
     
     // Verificar que solo haya un punto decimal
     const pointCount = (value.match(/\./g) || []).length;
@@ -1070,173 +1070,180 @@
               value.substring(firstPointIndex + 1).replace(/\./g, '');
     }
     
-    // Permitir solo dígitos y un punto decimal
-    value = value.replace(/[^\d.]/g, "");
-    
-    // Limitar los decimales al máximo especificado
+    // Limitar a 2 decimales
     if (value.includes('.')) {
       const parts = value.split('.');
-      if (parts[1] && parts[1].length > maxDecimals) {
-        parts[1] = parts[1].substring(0, maxDecimals);
+      if (parts[1] && parts[1].length > 2) {
+        parts[1] = parts[1].substring(0, 2);
         value = parts.join('.');
       }
     }
     
     // Aplicar formato con comas para miles
-    let formattedValue = "";
     if (value) {
       // Separar parte entera y decimal
       const parts = value.split('.');
       
       // Formatear parte entera con comas
+      let formattedInt = "";
       if (parts[0]) {
-        formattedValue = parseInt(parts[0]).toLocaleString('en-US');
+        formattedInt = parseInt(parts[0]).toLocaleString('en-US');
         // Si la parte entera es 0 o está vacía, mantener el 0
-        if (formattedValue === '0' || !parts[0]) {
-          formattedValue = '0';
+        if (formattedInt === '0' || !parts[0]) {
+          formattedInt = '0';
         }
       } else {
-        formattedValue = "0";
+        formattedInt = "0";
       }
       
       // Agregar parte decimal si existe
+      let formattedValue = formattedInt;
       if (parts.length > 1) {
         formattedValue += '.' + parts[1];
       }
       
       // Agregar el símbolo $ al principio
       formattedValue = '$' + formattedValue;
+      input.value = formattedValue;
     } else {
-      formattedValue = "";
-    }
-    
-    // Aplicar el valor formateado
-    input.value = formattedValue;
-    
-    // Ajustar la posición del cursor para una mejor experiencia de usuario
-    // Si hay un símbolo $, ajustar la posición
-    let adjustedCursorPos = cursorPos;
-    
-    // Si se agregó un "$" al principio y antes no estaba, incrementar cursor
-    if (formattedValue.startsWith('$') && !value.startsWith('$')) {
-      adjustedCursorPos += 1;
-    }
-    
-    // Ajustar por comas añadidas antes de la posición del cursor
-    const valueBeforeCursor = value.substring(0, cursorPos);
-    const formattedBeforeCursor = formattedValue.substring(0, adjustedCursorPos);
-    
-    const commasBeforeInOriginal = (valueBeforeCursor.match(/,/g) || []).length;
-    const commasBeforeInFormatted = (formattedBeforeCursor.match(/,/g) || []).length;
-    
-    adjustedCursorPos += (commasBeforeInFormatted - commasBeforeInOriginal);
-    
-    // Si la longitud del valor cambió drásticamente, poner el cursor al final
-    if (Math.abs(value.length - formattedValue.length) > 3) {
-      adjustedCursorPos = formattedValue.length;
-    }
-    
-    // Aplicar la posición del cursor, con seguridad
-    if (adjustedCursorPos >= 0 && adjustedCursorPos <= formattedValue.length) {
-      setTimeout(() => {
-        input.setSelectionRange(adjustedCursorPos, adjustedCursorPos);
-      }, 0);
+      input.value = "";
     }
   }
 
   /* ===========================================================
-   * NUEVAS FUNCIONES PARA VALIDAR ENTRADA DE STOCK (CON DECIMALES)
+   * NUEVO: Formatear Stock en tiempo real (Permite decimales con comas)
    * ===========================================================
    */
-  function isNumberKey(evt, allowDecimal = false, maxDecimals = 3) {
-    const charCode = (evt.which) ? evt.which : evt.keyCode;
-
-    // Permitir punto decimal si allowDecimal es true y no hay punto aún
-    if (allowDecimal && charCode === 46 && evt.target.value.indexOf('.') === -1) {
-      return true;
-    }
-
-    // Permitir solo números (0-9) y teclas de control
-    if (charCode > 31 && (charCode < 48 || charCode > 57))
-    return false;
-
-    // Si estamos escribiendo después del punto decimal, verificar el límite
-    if (allowDecimal && evt.target.value.indexOf('.') > -1) {
-      const parts = evt.target.value.split('.');
-      if (parts.length > 1 && parts[1].length >= maxDecimals) {
-        return false; // Bloquear más dígitos decimales si ya alcanzó el límite
+  function formatStockNumber(input) {
+    try {
+      // Guardar posición del cursor antes de la modificación
+      const start = input.selectionStart;
+      const end = input.selectionEnd;
+      const oldLength = input.value.length;
+      
+      // Obtener el valor actual sin formato
+      let value = input.value;
+      
+      // Verificar si comienza con punto decimal
+      if (value.startsWith('.')) {
+        showCenteredNotification("No puedes iniciar el monto con punto decimal. Usa formato como 0.25, 1.50, etc.");
+        input.value = '';
+        return;
       }
-    }
-
-    return true;
-  }
-  
-  function validatePaste(evt, allowDecimal = false, maxDecimals = 3) {
-    // Prevenir pegado de contenido no numérico
-    const clipboardData = evt.clipboardData || window.clipboardData;
-    const pastedData = clipboardData.getData('Text');
-
-    if (allowDecimal) {
-      // Permitir números y un solo punto decimal
-      if (!/^[\d.]+$/.test(pastedData) || (pastedData.indexOf('.') !== pastedData.lastIndexOf('.'))) {
-        evt.preventDefault();
-        return false;
+      
+      // Eliminar todas las comas existentes
+      value = value.replace(/,/g, "");
+      
+      // Asegurar que solo haya un punto decimal
+      const pointCount = (value.match(/\./g) || []).length;
+      if (pointCount > 1) {
+        // Si hay más de un punto, mantener solo el primero
+        const firstPointIndex = value.indexOf('.');
+        value = value.substring(0, firstPointIndex + 1) + 
+                value.substring(firstPointIndex + 1).replace(/\./g, '');
       }
-
-      // Si ya hay un punto en el campo y el texto pegado tiene un punto, preveni
-      if (evt.target.value.includes('.') && pastedData.includes('.')) {
-        evt.preventDefault();
-        return false;
-      }
-
-      // Comprobar número de decimales resultantes tras el pegado
-      const currentValue = evt.target.value;
-      const cursorPos = evt.target.selectionStart;
-      const valueBeforeCursor = currentValue.slice(0, cursorPos);
-      const valueAfterCursor = currentValue.slice(evt.target.selectionEnd);
-      const newValue = valueBeforeCursor + pastedData + valueAfterCursor;
-
-      // Verificar decimales en el valor resultante
-      if (newValue.includes('.')) {
-        const parts = newValue.split('.');
-        if (parts.length > 1 && parts[1].length > maxDecimals) {
-          evt.preventDefault();
-          return false;
+      
+      // Eliminar todos los caracteres que no sean dígitos o punto decimal
+      value = value.replace(/[^\d.]/g, "");
+      
+      // Separar parte entera y decimal
+      let parts = ["0", ""];
+      if (value.includes('.')) {
+        parts = value.split('.');
+        if (parts[0] === "") parts[0] = "0";
+        
+        // Limitar a 3 decimales
+        if (parts[1] && parts[1].length > 3) {
+          parts[1] = parts[1].substring(0, 3);
         }
+      } else {
+        parts[0] = value || "0";
       }
-    } else {
-      // Solo permitir dígitos
-      if (!/^\d+$/.test(pastedData)) {
-        evt.preventDefault();
-        return false;
+      
+      // Formatear la parte entera con comas para miles
+      try {
+        const intValue = parseInt(parts[0]);
+        parts[0] = intValue.toLocaleString('en-US');
+      } catch (e) {
+        console.error("Error al formatear parte entera:", e);
+        parts[0] = "0";
       }
+      
+      // Reconstruir el valor completo
+      let formattedValue = parts[0];
+      if (value.includes('.') || parts[1]) {
+        formattedValue += "." + parts[1];
+      }
+      
+      // Actualizar el valor en el campo
+      input.value = formattedValue;
+      
+      // Calcular la nueva posición del cursor considerando comas añadidas
+      const newLength = formattedValue.length;
+      let newPosition = start;
+      
+      // Contar cuántas comas hay antes de la posición actual vs antes de la edición
+      const commasBefore = (input.value.substring(0, start).match(/,/g) || []).length;
+      const commasBeforeOld = (oldLength > 0 && start <= oldLength) ? 
+                            (input.value.substring(0, Math.min(start, oldLength)).match(/,/g) || []).length : 0;
+      
+      // Ajustar la posición por las comas añadidas/eliminadas
+      newPosition += (commasBefore - commasBeforeOld);
+      
+      // Si estamos al final, mover el cursor al final
+      if (start >= oldLength) {
+        newPosition = newLength;
+      }
+      
+      // Establecer la posición del cursor
+      setTimeout(() => {
+        input.setSelectionRange(
+          Math.min(newPosition, newLength),
+          Math.min(newPosition + (end - start), newLength)
+        );
+      }, 0);
+    } catch (e) {
+      console.error("Error al formatear campo de stock:", e);
+      // En caso de error, mantener el valor actual
     }
-
-    return true;
-  }
-    
-  
-  function validateDecimal(input, maxDecimals = 3) {
-    // Eliminar cualquier carácter no numérico excepto el punto decimal
-    let value = input.value.replace(/[^\d.]/g, '');
-    
-    // Asegurar que solo haya un punto decimal
-    const parts = value.split('.');
-    if (parts.length > 2) {
-      value = parts[0] + '.' + parts.slice(1).join('');
-    }
-    
-    // Limitar los decimales a maxDecimals
-    if (parts.length === 2 && parts[1].length > maxDecimals) {
-      value = parts[0] + '.' + parts[1].substring(0, maxDecimals);
-    }
-    
-    // Aplicar el valor limpio
-    input.value = value;
   }
 
   /* ===========================================================
-   * 4) FOTOGRAFÍA Y MENÚ
+   * 4) FLOATING LABELS
+   * ===========================================================
+   */
+  function updateFloatingLabel(input) {
+    if (!input) return;
+    
+    // Corregir el ID para precio_venta - puede ser precio_ventaFloatingLabel o precioVentaFloatingLabel
+    let floatingLabelId;
+    if (input.id === "precio_venta") {
+      const posibleId1 = "precio_ventaFloatingLabel";
+      const posibleId2 = "precioVentaFloatingLabel";
+      
+      // Intentar con ambos posibles IDs
+      const label1 = document.getElementById(posibleId1);
+      const label2 = document.getElementById(posibleId2);
+      
+      floatingLabelId = label1 ? posibleId1 : (label2 ? posibleId2 : input.id + 'FloatingLabel');
+    } else {
+      floatingLabelId = input.id + 'FloatingLabel';
+    }
+    
+    const floatingLabel = document.getElementById(floatingLabelId);
+    
+    if (!floatingLabel) return;
+    
+    if (input.value.trim() !== "") {
+      floatingLabel.textContent = input.placeholder;
+      floatingLabel.style.display = "block";
+    } else {
+      floatingLabel.style.display = "none";
+    }
+  }
+
+  /* ===========================================================
+   * 5) FOTOGRAFÍA Y MENÚ
    * ===========================================================
    */
   function attachRemoveImageListener() {
@@ -1960,37 +1967,6 @@
     return prefix + randomPart;
   }
 
-  // Función para actualizar las etiquetas flotantes basado en el contenido de los campos
-  function updateFloatingLabel(input) {
-    if (!input) return;
-    
-    // Corregir el ID para precio_venta - puede ser precio_ventaFloatingLabel o precioVentaFloatingLabel
-    let floatingLabelId;
-    if (input.id === "precio_venta") {
-      const posibleId1 = "precio_ventaFloatingLabel";
-      const posibleId2 = "precioVentaFloatingLabel";
-      
-      // Intentar con ambos posibles IDs
-      const label1 = document.getElementById(posibleId1);
-      const label2 = document.getElementById(posibleId2);
-      
-      floatingLabelId = label1 ? posibleId1 : (label2 ? posibleId2 : input.id + 'FloatingLabel');
-    } else {
-      floatingLabelId = input.id + 'FloatingLabel';
-    }
-    
-    const floatingLabel = document.getElementById(floatingLabelId);
-    
-    if (!floatingLabel) return;
-    
-    if (input.value.trim() !== "") {
-      floatingLabel.textContent = input.placeholder;
-      floatingLabel.style.display = "block";
-    } else {
-      floatingLabel.style.display = "none";
-    }
-  }
-
   // Inicializar código único al cargar la página
   document.addEventListener("DOMContentLoaded", function() {
     if (codigoBarrasInput) {
@@ -2253,7 +2229,7 @@
     
     // Validar stock
     const stock = document.getElementById("stock");
-    if (!stock.value || isNaN(parseFloat(stock.value))) {
+    if (!stock.value || isNaN(parseFloat(stock.value.replace(/,/g, '')))) {
       stock.classList.add('is-invalid');
       isValid = false;
       if (!firstInvalidElement) {
@@ -2339,6 +2315,13 @@
       if (!validateForm()) {
         showCenteredNotification("Por favor, completa todos los campos obligatorios");
         return;
+      }
+      
+      // Limpiar las comas del stock
+      const stockInput = document.getElementById("stock");
+      if (stockInput && stockInput.value) {
+        // Preservar decimales pero eliminar comas
+        stockInput.value = stockInput.value.replace(/,/g, "");
       }
       
       // Mostrar overlay de carga

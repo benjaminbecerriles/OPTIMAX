@@ -636,7 +636,7 @@
           <div class="step-container">
             <div class="step-number">3</div>
 
-            <!-- Stock Inicial - MODIFICADO: Cambiado a text para validación de enteros -->
+            <!-- Stock Inicial - MODIFICADO: Cambiado a texto con formato de comas -->
             <div class="form-group">
               <div class="floating-label required" style="display: none;" id="stockFloatingLabel">Stock inicial</div>
               <input 
@@ -644,11 +644,10 @@
                 class="form-control"
                 id="stock"
                 name="stock"
-                placeholder="STOCK INICIAL (PIEZAS)"
+                placeholder="STOCK INICIAL (PIEZAS) *"
                 required
-                onkeypress="return isNumberKey(event)"
-                onpaste="return validatePaste(event)"
-                onkeyup="validateInteger(this)"
+                onkeypress="return (event.charCode >= 48 && event.charCode <= 57)"
+                oninput="formatStockNumber(this)"
               >
               <div class="invalid-feedback">El stock inicial debe ser un número entero</div>
             </div>
@@ -665,7 +664,7 @@
                   name="costo"
                   required
                   oninput="formatCostRealtime(this)"
-                  placeholder="COSTO POR PIEZA"
+                  placeholder="COSTO POR PIEZA *"
                 >
                 <div class="invalid-feedback">El costo es obligatorio</div>
               </div>
@@ -679,7 +678,7 @@
                   name="precio_venta"
                   required
                   oninput="formatCostRealtime(this)"
-                  placeholder="PRECIO DE VENTA POR PIEZA"
+                  placeholder="PRECIO DE VENTA POR PIEZA *"
                 >
                 <div class="invalid-feedback">El precio de venta es obligatorio</div>
               </div>
@@ -979,6 +978,53 @@
     input.value = input.value.replace(/[^\d]/g, '');
   }
 
+  /* ===========================================================
+   * Formatear Stock en tiempo real (con comas)
+   * ===========================================================
+   */
+  function formatStockNumber(input) {
+    try {
+      // Guardar posición del cursor
+      const start = input.selectionStart;
+      const end = input.selectionEnd;
+      const oldLength = input.value.length;
+      
+      // Obtener el valor actual y eliminar caracteres no numéricos excepto comas
+      let value = input.value.replace(/[^0-9,]/g, "");
+      
+      // Eliminar todas las comas para trabajar con el número puro
+      const numericValue = value.replace(/,/g, "");
+      
+      // Si el valor está vacío, no hacer nada
+      if (numericValue === "") {
+        input.value = "";
+        return;
+      }
+      
+      // Convertir a número y formatear con comas
+      const formattedValue = parseInt(numericValue).toLocaleString("en-US");
+      
+      // Actualizar el valor en el campo
+      input.value = formattedValue;
+      
+      // Ajustar la posición del cursor después del formateo
+      const newLength = input.value.length;
+      const deltaLength = newLength - oldLength;
+      
+      if (start < oldLength) {
+        input.setSelectionRange(
+          Math.max(0, start + deltaLength),
+          Math.max(0, end + deltaLength)
+        );
+      } else {
+        input.setSelectionRange(newLength, newLength);
+      }
+    } catch (e) {
+      console.error("Error al formatear campo de stock:", e);
+      // En caso de error, no realizar cambios
+    }
+  }
+
 function validateForm(e) {
     e.preventDefault(); // Detener envío para validación
     
@@ -992,47 +1038,128 @@ function validateForm(e) {
     
     // Validar campos obligatorios
     let isValid = true;
-    const requiredFields = [
-      { id: "nombre", message: "El nombre del producto es obligatorio" },
-      { id: "stock", message: "El stock inicial es obligatorio" },
-      { id: "costo", message: "El costo es obligatorio" },
-      { id: "precio_venta", message: "El precio de venta es obligatorio" },
-      { id: "categoria_existente", message: "Debes seleccionar una categoría" }
-    ];
     
-    requiredFields.forEach(field => {
-      const element = document.getElementById(field.id);
-      const feedbackElement = element.nextElementSibling;
-      
-      if (!element.value) {
-        element.classList.add("is-invalid");
-        if (feedbackElement && feedbackElement.classList.contains("invalid-feedback")) {
-          feedbackElement.style.display = "block";
-        }
-        isValid = false;
-      } else {
-        element.classList.remove("is-invalid");
-        if (feedbackElement && feedbackElement.classList.contains("invalid-feedback")) {
-          feedbackElement.style.display = "none";
-        }
+    // Validar nombre
+    const nombreInput = document.getElementById("nombre");
+    if (!nombreInput.value.trim()) {
+      nombreInput.classList.add("is-invalid");
+      const nombreFeedback = nombreInput.nextElementSibling;
+      if (nombreFeedback && nombreFeedback.classList.contains("invalid-feedback")) {
+        nombreFeedback.style.display = "block";
       }
-    });
+      isValid = false;
+    } else {
+      nombreInput.classList.remove("is-invalid");
+      const nombreFeedback = nombreInput.nextElementSibling;
+      if (nombreFeedback && nombreFeedback.classList.contains("invalid-feedback")) {
+        nombreFeedback.style.display = "none";
+      }
+    }
     
-    // Validación específica para stock (debe ser un número entero)
+    // Validar stock
     const stockInput = document.getElementById('stock');
-    if (stockInput.value && !/^\d+$/.test(stockInput.value)) {
+    if (!stockInput.value.trim()) {
       stockInput.classList.add("is-invalid");
-      const feedbackElement = stockInput.nextElementSibling;
-      if (feedbackElement && feedbackElement.classList.contains("invalid-feedback")) {
-        feedbackElement.style.display = "block";
+      const stockFeedback = stockInput.nextElementSibling;
+      if (stockFeedback && stockFeedback.classList.contains("invalid-feedback")) {
+        stockFeedback.style.display = "block";
+      }
+      isValid = false;
+    } else if (!/^\d+$/.test(stockInput.value.replace(/,/g, ""))) {
+      stockInput.classList.add("is-invalid");
+      const stockFeedback = stockInput.nextElementSibling;
+      if (stockFeedback && stockFeedback.classList.contains("invalid-feedback")) {
+        stockFeedback.style.display = "block";
       }
       showCenteredNotification("El stock inicial debe ser un número entero");
       isValid = false;
+    } else {
+      stockInput.classList.remove("is-invalid");
+      const stockFeedback = stockInput.nextElementSibling;
+      if (stockFeedback && stockFeedback.classList.contains("invalid-feedback")) {
+        stockFeedback.style.display = "none";
+      }
+    }
+    
+    // Validar costo
+    const costoInput = document.getElementById('costo');
+    if (!costoInput.value.trim() || costoInput.value === "$") {
+      costoInput.classList.add("is-invalid");
+      const costoFeedback = costoInput.nextElementSibling;
+      if (costoFeedback && costoFeedback.classList.contains("invalid-feedback")) {
+        costoFeedback.style.display = "block";
+      }
+      isValid = false;
+    } else {
+      costoInput.classList.remove("is-invalid");
+      const costoFeedback = costoInput.nextElementSibling;
+      if (costoFeedback && costoFeedback.classList.contains("invalid-feedback")) {
+        costoFeedback.style.display = "none";
+      }
+    }
+    
+    // Validar precio
+    const precioInput = document.getElementById('precio_venta');
+    if (!precioInput.value.trim() || precioInput.value === "$") {
+      precioInput.classList.add("is-invalid");
+      const precioFeedback = precioInput.nextElementSibling;
+      if (precioFeedback && precioFeedback.classList.contains("invalid-feedback")) {
+        precioFeedback.style.display = "block";
+      }
+      isValid = false;
+    } else {
+      precioInput.classList.remove("is-invalid");
+      const precioFeedback = precioInput.nextElementSibling;
+      if (precioFeedback && precioFeedback.classList.contains("invalid-feedback")) {
+        precioFeedback.style.display = "none";
+      }
+    }
+    
+    // Validar categoría - Manejo especial por ser un select con Choices.js
+    const categoriaInput = document.getElementById('categoria_existente');
+    const categoriaContainer = categoriaInput.closest('.form-group');
+    const categoriaFeedback = categoriaContainer.querySelector('.invalid-feedback');
+    
+    if (!categoriaInput.value) {
+      // Resaltar el contenedor de Choices.js como inválido
+      const choicesElement = categoriaContainer.querySelector('.choices');
+      if (choicesElement) {
+        choicesElement.classList.add("is-invalid");
+      }
+      if (categoriaFeedback) {
+        categoriaFeedback.style.display = "block";
+      }
+      
+      // Mostrar mensaje específico de categoría
+      if (!isValid) {
+        // Si ya hay otros errores, no mostrar nuevo mensaje
+      } else {
+        showCenteredNotification("Debes seleccionar una categoría para el producto");
+      }
+      
+      isValid = false;
+    } else {
+      const choicesElement = categoriaContainer.querySelector('.choices');
+      if (choicesElement) {
+        choicesElement.classList.remove("is-invalid");
+      }
+      if (categoriaFeedback) {
+        categoriaFeedback.style.display = "none";
+      }
     }
     
     if (!isValid) {
-      showCenteredNotification("Por favor, corrige los errores en el formulario");
+      // Solo mostrar mensaje general si hay múltiples errores
+      const errorCount = document.querySelectorAll('.is-invalid').length;
+      if (errorCount > 1) {
+        showCenteredNotification("Por favor, corrige los errores en el formulario");
+      }
       return false;
+    }
+    
+    // Limpiar las comas en el campo stock antes de enviar
+    if (stockInput.value) {
+      stockInput.value = stockInput.value.replace(/,/g, "");
     }
     
     // Mostrar el overlay de carga
@@ -1100,6 +1227,14 @@ function validateForm(e) {
       value = value.substring(1);
     }
     value = value.replace(/,/g, "").replace(numericRegex, "");
+    
+    // Verificar si comienza con punto decimal
+    if (value.startsWith('.')) {
+      showCenteredNotification("No puedes iniciar el monto con punto decimal. Usa formato como 0.25, 1.50, etc.");
+      value = ''; // Limpiar el valor
+      input.value = '';
+      return;
+    }
     
     const match = value.match(moneyPattern);
     if (match) {

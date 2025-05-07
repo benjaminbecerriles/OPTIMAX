@@ -1382,9 +1382,9 @@
           <td class="column-stock">
             <span class="stock-value {% if p.stock <= 0 %}zero{% elif p.stock < 5 %}low{% endif %}">
               {% if p.stock == p.stock|int %}
-                {{ p.stock|int }}
+                {{ '{:,}'.format(p.stock|int) }}
               {% else %}
-                {{ '{:.3f}'.format(p.stock) }}
+                {{ '{:,.3f}'.format(p.stock) }}
               {% endif %}
               {% if p.unidad and p.unidad != 'NONE' %}
                 {{ p.unidad }}
