@@ -125,7 +125,7 @@
   .search-container {
     display: flex;
     gap: 0.75rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: 150px; /* TRIPLICADO de 50px a 150px para mucha más separación */
     position: relative;
     align-items: center;
   }
@@ -253,21 +253,30 @@
     100% { opacity: 1; }
   }
   
-  /* Categorías */
+  /* Categorías - MEJORADO: Más separación y borde de categoría */
   .category-section {
-    margin-bottom: 30px; /* Reducido de 36px a 30px */
+    margin-bottom: 70px; /* Aumentado a 70px para mucha más separación entre categorías */
+    border: 1px solid #eaeaea;
+    border-radius: 12px;
+    padding: 25px; /* Aumentado a 25px */
+    box-shadow: 0 3px 10px rgba(0,0,0,0.05); /* Sombra más pronunciada */
+    background-color: #fafafa;
   }
+  
+  /* Eliminar selector para primera categoría ya que aumentamos el margen de search-container */
   
   .category-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 14px; /* Reducido de 16px a 14px */
+    margin-bottom: 16px; /* Aumentado de 14px a 16px */
+    padding-bottom: 10px; /* Nuevo: padding inferior */
+    border-bottom: 1px solid #f0f0f0; /* Nuevo: separador */
   }
   
   .category-title {
-    font-size: 20px; /* Reducido de 22px a 20px */
-    font-weight: 600; /* Aumentado de 500 a 600 */
+    font-size: 22px; /* Aumentado de 20px a 22px */
+    font-weight: 600;
     margin: 0;
     display: flex;
     align-items: center;
@@ -279,63 +288,66 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 24px; /* Reducido de 28px a 24px */
-    height: 24px; /* Reducido de 28px a 24px */
+    width: 26px; /* Aumentado de 24px a 26px */
+    height: 26px; /* Aumentado de 24px a 26px */
     border-radius: 50%;
-    background-color: #eeeeee; /* Cambiado de var(--light-background) a #eeeeee */
-    color: #505050; /* Color más oscuro */
-    font-size: 13px; /* Reducido de 14px a 13px */
-    font-weight: 600; /* Aumentado de 500 a 600 */
+    background-color: #eeeeee;
+    color: #505050;
+    font-size: 13px;
+    font-weight: 600;
   }
   
   .category-color-dot {
-    width: 12px; /* Reducido de 14px a 12px */
-    height: 12px; /* Reducido de 14px a 12px */
+    width: 16px; /* Aumentado de 12px a 16px */
+    height: 16px; /* Aumentado de 12px a 16px */
     border-radius: 50%;
+    /* El color se aplica dinámicamente con category_color */
   }
   
-  /* Slider de productos - REDISEÑO COMPLETO con ALTURA FIJA */
+  /* Slider de productos - REDISEÑO COMPLETO con TARJETAS MÁS GRANDES */
   .product-slider-container {
     position: relative;
-    padding: 0 70px; /* MODIFICADO: Aumentado de 60px a 70px para dar más espacio a las flechas */
+    padding: 0 70px;
     margin: 0 -10px; /* Margen negativo para compensar el padding */
   }
   
   .product-slider {
     display: flex;
-    gap: 14px; /* Reducido de 16px a 14px */
+    gap: 16px; /* Aumentado de 14px a 16px */
     overflow-x: hidden;
     scroll-behavior: smooth;
-    padding: 4px 0 12px 0; /* Reducido */
-    margin-bottom: 4px; /* Reducido de 8px a 4px */
+    padding: 4px 0 12px 0;
+    margin-bottom: 4px;
   }
   
   .product-card {
-    flex: 0 0 180px; /* Reducido de 200px a 180px */
-    height: 310px; /* ALTURA FIJA para todas las tarjetas */
-    border-radius: 10px; /* Reducido de 12px a 10px */
+    flex: 0 0 220px;
+    height: 440px; /* AUMENTADO DRÁSTICAMENTE a 440px para asegurar que quepa todo */
+    border-radius: 12px;
     overflow: hidden;
     background-color: white;
-    border: 1px solid #e0e0e0; /* Cambiado de var(--separator) a un color más visible */
+    border: 1px solid #e0e0e0;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05); /* Sombra muy sutil añadida */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.07);
     display: flex;
-    flex-direction: column; /* Para control del diseño interno */
+    flex-direction: column;
+    position: relative; /* Añadido para mejor control de elementos internos */
   }
   
   .product-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 15px rgba(0,0,0,0.08); /* Sombra menos intensa */
+    box-shadow: 0 8px 15px rgba(0,0,0,0.08);
   }
   
   .product-image-container {
-    height: 120px; /* Reducido de 150px a 120px */
-    min-height: 120px; /* Asegurar altura mínima */
+    height: 140px; /* Reducido a 140px para dar más espacio a otros elementos */
+    min-height: 140px; 
     display: flex;
     justify-content: center;
     align-items: center;
     overflow: hidden;
-    background-color: #f8f8f8; /* Un poco más claro que var(--light-background) */
+    background-color: #f8f8f8;
+    padding: 5px;
   }
   
   .product-image {
@@ -345,87 +357,98 @@
   }
   
   .product-details {
-    padding: 12px; /* Reducido de 16px a 12px */
-    flex-grow: 1; /* Toma el espacio restante */
+    padding: 16px;
+    flex-grow: 1;
     display: flex;
-    flex-direction: column; /* Organiza el contenido verticalmente */
+    flex-direction: column;
+    height: 300px; /* Altura fija para evitar problemas de cálculo */
   }
   
-  /* NUEVO: Diseño mejorado para nombre y marca */
+  /* MEJORADO: Diseño mejorado para nombre y marca */
   .product-info-container {
     display: flex;
     flex-direction: column;
-    height: 60px; /* Altura fija para nombre+marca */
-    margin-bottom: 6px;
+    height: 78px; /* Aumentado a 78px para dar más espacio */
+    margin-bottom: 10px; /* Aumentado a 10px */
     overflow: hidden;
-    position: relative; /* Para posicionamiento absoluto de la marca */
+    position: relative;
   }
   
   .product-name {
-    font-size: 14px;
+    font-size: 16px; /* Aumentado a 16px */
     font-weight: 600;
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
-    -webkit-line-clamp: 2; /* Limitar a 2 líneas siempre */
+    -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
-    line-height: 1.35; /* Ajustado para optimizar espacio */
+    line-height: 1.4; /* Aumentado a 1.4 */
     color: var(--text-color);
-    height: 38px; /* Altura fija para 2 líneas */
-    margin-bottom: 0; /* Sin margen inferior */
+    height: 46px; /* Aumentado a 46px */
+    margin-bottom: 0;
   }
   
   .product-brand {
-    font-size: 12px;
-    color: #606060; /* Color más oscuro que var(--text-secondary) */
-    position: absolute; /* Posicionamiento absoluto para ubicación fija */
-    bottom: 0; /* Siempre en la parte inferior */
-    left: 0; /* Alineado a la izquierda */
-    right: 0; /* Extender a todo el ancho */
+    font-size: 13px; /* Aumentado de 12px a 13px */
+    color: #606060;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    line-height: 1.2; /* Ajuste de línea para marca */
+    line-height: 1.2;
   }
   
-  /* Contenedor de precio con altura fija - MODIFICADO para incluir unidad */
+  /* Contenedor de precio con altura fija */
   .product-price-container {
-    height: 24px; /* Altura fija para precio */
-    margin-top: auto; /* Empuja hacia abajo, después del espacio flexible */
-    margin-bottom: 8px; /* Espacio antes del input */
+    height: 32px;
+    margin-top: 10px; /* Valor fijo en lugar de auto */
+    margin-bottom: 12px;
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    gap: 5px;
+    gap: 6px;
   }
   
   .current-price {
-    font-size: 17px; /* Reducido de 18px a 17px */
+    font-size: 18px; /* Aumentado de 17px a 18px */
     font-weight: 600;
     color: var(--accent);
   }
   
   .price-unit {
-    font-size: 12px;
+    font-size: 13px; /* Aumentado de 12px a 13px */
     color: var(--text-secondary);
     font-weight: 500;
   }
   
   /* Contenedor de input con altura fija */
   .price-input-container {
-    height: 70px; /* Altura fija para input+botón */
+    height: 100px; /* Aumentado a 100px */
+    margin-top: 5px;
+    display: flex; /* Añadido */
+    flex-direction: column; /* Añadido */
+  }
+  
+  /* Asegurar visibilidad completa */
+  .price-input-container button {
+    display: block !important; /* Forzar visualización */
+    visibility: visible !important; /* Forzar visibilidad */
   }
   
   .price-input-group {
     display: flex;
     align-items: center;
-    height: 36px; /* Altura fija para el input */
-    border: 1px solid #d1d1d6; /* Color más visible que var(--separator) */
+    height: 42px;
+    border: 1px solid #d1d1d6;
     border-radius: 6px;
     overflow: hidden;
     background-color: white;
     transition: border-color 0.2s ease;
-    margin-bottom: 8px; /* Espacio consistente antes del botón */
+    margin-bottom: 15px; /* Aumentado a 15px */
+    width: 100%; /* Asegurar ancho completo */
   }
   
   .price-input-group:focus-within {
@@ -433,9 +456,9 @@
   }
   
   .currency-symbol {
-    padding: 0 8px;
+    padding: 0 10px; /* Aumentado de 8px a 10px */
     font-weight: 500;
-    color: #505050; /* Texto oscurecido */
+    color: #505050;
   }
   
   .price-input {
@@ -444,24 +467,29 @@
     padding: 0;
     border: none;
     outline: none;
-    font-size: 14px;
+    font-size: 15px; /* Aumentado de 14px a 15px */
     width: 100%;
     text-align: left;
-    color: var(--text-color); /* Texto más oscuro */
+    color: var(--text-color);
   }
   
-  /* MODIFICADO: Botón de guardar en rojo claro */
+  /* Botón de guardar en rojo claro */
   .save-price-btn {
     width: 100%;
-    height: 36px; /* Altura fija para el botón */
-    background-color: var(--save-btn-color); /* Cambiado a rojo claro */
+    height: 42px;
+    background-color: var(--save-btn-color);
     color: white;
     border: none;
-    border-radius: 6px;
-    font-size: 13px; /* Reducido de 14px a 13px */
-    font-weight: 600; /* Aumentado de 500 a 600 */
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
     cursor: pointer;
     transition: background-color 0.2s ease, transform 0.2s ease;
+    box-shadow: 0 2px 4px rgba(255, 107, 107, 0.2);
+    display: block !important; /* Forzar visualización */
+    opacity: 1 !important; /* Asegurar visibilidad */
+    position: relative; /* Mejor control */
+    z-index: 10; /* Elevar sobre otros elementos */
   }
   
   .save-price-btn:hover {
@@ -469,49 +497,49 @@
     transform: translateY(-1px);
   }
   
-  /* Botones de navegación del slider - MODIFICADOS: color rojo, icono blanco y más separados */
+  /* Botones de navegación del slider */
   .slider-arrow {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    width: 40px; /* Aumentado de 36px a 40px */
-    height: 40px; /* Aumentado de 36px a 40px */
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    background-color: var(--accent); /* MODIFICADO: Cambiado a rojo */
-    border: none; /* MODIFICADO: Quitado el borde */
+    background-color: var(--accent);
+    border: none;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 2px 6px rgba(229, 46, 46, 0.3); /* MODIFICADO: Sombra con el color rojo */
+    box-shadow: 0 2px 6px rgba(229, 46, 46, 0.3);
     z-index: 10;
     transition: all 0.2s ease;
   }
   
   .slider-arrow:hover {
-    background-color: var(--accent-hover); /* MODIFICADO: Hover más oscuro */
-    transform: translateY(-50%) scale(1.1); /* Efecto de escala al hacer hover */
+    background-color: var(--accent-hover);
+    transform: translateY(-50%) scale(1.1);
   }
   
   .slider-arrow-left {
-    left: 20px; /* MODIFICADO: Aumentado a 20px desde el borde (estaba en 15px) */
+    left: 20px;
   }
   
   .slider-arrow-right {
-    right: 20px; /* MODIFICADO: Aumentado a 20px desde el borde (estaba en 15px) */
+    right: 20px;
   }
   
   .slider-arrow svg {
-    width: 18px; /* Aumentado de 16px a 18px */
-    height: 18px; /* Aumentado de 16px a 18px */
+    width: 18px;
+    height: 18px;
     fill: none;
-    stroke: white; /* MODIFICADO: Cambiado a blanco */
-    stroke-width: 2.5; /* Más grueso para mejor visibilidad */
+    stroke: white;
+    stroke-width: 2.5;
   }
   
-  /* Estado vacío */
+  /* Estado vacío - MEJORADO con botón de restablecer */
   .empty-state {
-    padding: 50px 0; /* Reducido de 64px a 50px */
+    padding: 50px 0;
     text-align: center;
     background-color: var(--light-background);
     border-radius: 12px;
@@ -519,21 +547,44 @@
   }
   
   .empty-icon {
-    font-size: 32px; /* Reducido de 36px a 32px */
+    font-size: 32px;
     color: var(--text-secondary);
-    margin-bottom: 14px; /* Reducido de 16px a 14px */
+    margin-bottom: 14px;
   }
   
   .empty-message {
-    font-size: 16px; /* Reducido de 17px a 16px */
+    font-size: 16px;
     color: var(--text-secondary);
-    margin-bottom: 14px; /* Reducido de 16px a 14px */
+    margin-bottom: 20px; /* Aumentado para dar espacio al botón */
     max-width: 300px;
     margin-left: auto;
     margin-right: auto;
   }
   
-  /* Toast notificaciones - MEJORADAS */
+  /* NUEVO: Botón de restablecer */
+  .btn-reset {
+    display: inline-block;
+    background-color: white;
+    color: var(--text-color);
+    border: 1px solid #d1d1d6;
+    border-radius: 8px;
+    padding: 12px 28px; /* Aumentado tamaño del botón */
+    font-size: 15px; /* Aumentado tamaño de fuente */
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08); /* Sombra más visible */
+    text-decoration: none;
+    margin-top: 5px; /* Espacio superior adicional */
+  }
+  
+  .btn-reset:hover {
+    background-color: #f5f5f7;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transform: translateY(-1px);
+  }
+  
+  /* Toast notificaciones */
   .toast-container {
     position: fixed;
     bottom: 20px;
@@ -544,15 +595,15 @@
   .toast {
     background-color: #333;
     color: white;
-    padding: 14px 20px; /* Reducido de 16px 24px a 14px 20px */
+    padding: 14px 20px;
     border-radius: 8px;
     margin-top: 8px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.15);
     display: flex;
     align-items: center;
-    gap: 10px; /* Reducido de 12px a 10px */
+    gap: 10px;
     animation: slideIn 0.3s ease, fadeOut 0.5s ease 2.5s forwards;
-    max-width: 350px; /* Reducido de 400px a 350px */
+    max-width: 350px;
     font-weight: 500;
   }
   
@@ -613,12 +664,13 @@
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
       scroll-snap-type: x mandatory;
-      padding-bottom: 16px; /* Reducido de 24px a 16px */
+      padding-bottom: 16px;
     }
     
     .product-card {
-      flex: 0 0 70%; /* Reducido de 80% a 70% */
+      flex: 0 0 70%;
       scroll-snap-align: start;
+      height: 470px; /* Aumentado para móviles */
     }
     
     .product-slider-container {
@@ -630,17 +682,17 @@
     }
     
     h1 {
-      font-size: 26px; /* Reducido de 28px a 26px */
+      font-size: 26px;
     }
     
     .page-description {
-      font-size: 15px; /* Reducido de 16px a 15px */
+      font-size: 15px;
     }
   }
   
   @media (max-width: 480px) {
     .product-card {
-      flex: 0 0 85%; /* Reducido de 90% a 85% */
+      flex: 0 0 85%;
     }
   }
   
@@ -717,7 +769,7 @@
         <div class="category-section" data-category="{{ categoria.nombre|lower }}">
           <div class="category-header">
             <h2 class="category-title">
-              <span class="category-color-dot" style="background-color: {{ categoria.color }}"></span>
+              <span class="category-color-dot" style="background-color: {% if categoria.nombre == 'medicamentos de mostrador (otc)' %}#FF6347{% else %}{{ categoria.color }}{% endif %}"></span>
               {{ categoria.nombre|title }}
               <span class="category-badge">{{ categoria.count }}</span>
             </h2>
@@ -770,7 +822,7 @@
                               data-original-price="{{ producto.precio_venta }}"
                               oninput="formatPriceInput(this)">
                       </div>
-                      <button class="save-price-btn" onclick="updatePrice({{ producto.id }}, this)">Guardar</button>
+                      <button class="save-price-btn" onclick="updatePrice({{ producto.id }}, this)" style="display: block !important;">Guardar</button>
                     </div>
                   </div>
                 </div>
@@ -811,7 +863,7 @@
     const slider = document.getElementById(`slider-${categoryId}`);
     if (!slider) return;
     
-    const cardWidth = slider.querySelector('.product-card').offsetWidth + 14; // 14px es el gap
+    const cardWidth = slider.querySelector('.product-card').offsetWidth + 16; // 16px es el gap
     const scrollAmount = cardWidth * 3; // Scroll de 3 productos a la vez
     
     if (direction === 'left') {
@@ -1079,7 +1131,7 @@
       return resultsCount;
     }
     
-    // Función auxiliar para mensaje vacío
+    // Función auxiliar para mensaje vacío - MEJORADA con botón de restablecer
     function showEmptyOrResults(count, term, soloFavoritos) {
       let emptySearch = document.getElementById('emptySearchResults');
       
@@ -1088,6 +1140,7 @@
           emptySearch = document.createElement('div');
           emptySearch.id = 'emptySearchResults';
           emptySearch.className = 'empty-state';
+          emptySearch.style.marginTop = '20px'; // Añadido margen superior
           
           let mensaje = '';
           if (term && soloFavoritos) {
@@ -1103,6 +1156,9 @@
               <i class="fas fa-search"></i>
             </div>
             <p class="empty-message">${mensaje}</p>
+            <button class="btn-reset" onclick="resetSearch()">
+              <i class="fas fa-undo-alt" style="margin-right: 8px;"></i>Restablecer
+            </button>
           `;
           
           const categoriesContainer = document.getElementById('categoriesContainer');
@@ -1120,12 +1176,52 @@
           }
           
           message.innerHTML = mensaje;
+          
+          // Asegurar que el botón de restablecer esté presente
+          if (!emptySearch.querySelector('.btn-reset')) {
+            const resetButton = document.createElement('button');
+            resetButton.className = 'btn-reset';
+            resetButton.innerHTML = '<i class="fas fa-undo-alt" style="margin-right: 8px;"></i>Restablecer';
+            resetButton.onclick = resetSearch;
+            emptySearch.appendChild(resetButton);
+          }
+          
           emptySearch.style.display = 'block';
         }
       } else if (emptySearch) {
         emptySearch.style.display = 'none';
       }
     }
+    
+    // NUEVO: Función para restablecer la búsqueda
+    window.resetSearch = function() {
+      // Limpiar campo de búsqueda
+      if (searchInput) {
+        searchInput.value = '';
+      }
+      
+      // Desactivar filtro de favoritos
+      const favoritosCheck = document.getElementById('favoritosCheck');
+      if (favoritosCheck && favoritosCheck.checked) {
+        favoritosCheck.checked = false;
+        
+        // Actualizar visualización del botón de favoritos
+        const heartIcon = document.getElementById('heartIcon');
+        const favoritosContainer = document.getElementById('favoritosContainer');
+        
+        if (heartIcon && favoritosContainer) {
+          heartIcon.innerHTML = '&#9825;'; // Corazón vacío
+          heartIcon.classList.remove('active');
+          favoritosContainer.classList.remove('active');
+        }
+      }
+      
+      // Ejecutar búsqueda limpia
+      performSearch('');
+      
+      // Mostrar mensaje
+      showToast('Filtros restablecidos', 'success');
+    };
     
     // ==========================================
     // FUNCIONES DE ESCANEO - COMPLETAMENTE NUEVAS
