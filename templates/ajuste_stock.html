@@ -193,7 +193,7 @@
   .search-container {
     display: flex;
     gap: 0.75rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: 150px; /* MODIFICADO: Aumentado de 1.5rem a 150px para mayor espaciado como en cambiar-precios */
     position: relative;
     align-items: center;
   }
@@ -328,6 +328,9 @@
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     background-color: white;
     position: relative;
+    height: 450px; /* Altura fija para todas las tarjetas */
+    display: flex;
+    flex-direction: column;
   }
   
   .product-card:hover {
@@ -371,6 +374,9 @@
   
   .product-body {
     padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
   }
   
   .product-title {
@@ -383,6 +389,7 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
     height: 2.6rem;
+    min-height: 2.6rem;
   }
   
   .product-info {
@@ -390,6 +397,7 @@
     flex-direction: column;
     gap: 0.5rem;
     margin-bottom: 1rem;
+    flex-grow: 1;
   }
   
   .product-info-item {
@@ -399,6 +407,8 @@
     font-size: 0.875rem;
     color: var(--text-secondary);
     font-weight: 500; /* Añadido para mejor legibilidad */
+    height: 1.5rem; /* Altura fija para cada ítem de información */
+    min-height: 1.5rem;
   }
   
   .product-info-icon {
@@ -417,7 +427,8 @@
   .product-footer {
     display: flex;
     gap: 0.75rem;
-    margin-top: 1.25rem;
+    margin-top: auto; /* Empuja los botones hacia el fondo de la tarjeta */
+    min-height: 40px; /* Altura mínima para los botones */
   }
   
   .product-btn {
@@ -522,7 +533,16 @@
     font-weight: 500; /* Añadido para mejor legibilidad */
   }
   
-  /* No Results Message */
+  /* Estilos específicos para mantener alineación consistente */
+  .product-code,
+  .product-stock,
+  .product-price {
+    height: 1.8rem;
+    line-height: 1.8rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
   #noResultsMessage {
     display: none;
     text-align: center;
@@ -777,21 +797,29 @@
         <div class="product-body">
           <h3 class="product-title">{{ producto.nombre }}</h3>
           <div class="product-info">
-            <div class="product-info-item">
-              <!-- Se quitó el icono de código de barras -->
+            <div class="product-info-item product-code">
+              <!-- Código de barras -->
               <span style="font-weight: 500;">{{ producto.codigo_barras_externo }}</span>
             </div>
-            <div class="product-info-item">
-              <!-- Se quitó el icono de capas -->
+            <div class="product-info-item product-stock">
+              <!-- Stock -->
               <span style="font-weight: 500;">
                 <span class="stock-badge">
                   {% if producto.stock <= 0 %}
                     Sin stock
                   {% else %}
                     {% if producto.stock == producto.stock|int %}
-                      {{ producto.stock|int }}
+                      {% if producto.stock|int >= 1000 %}
+                        {{ "{:,}".format(producto.stock|int).replace(',', ',') }}
+                      {% else %}
+                        {{ producto.stock|int }}
+                      {% endif %}
                     {% else %}
-                      {{ '{:.3f}'.format(producto.stock) }}
+                      {% if producto.stock >= 1000 %}
+                        {{ "{:,.3f}".format(producto.stock).replace(',', ',') }}
+                      {% else %}
+                        {{ '{:.3f}'.format(producto.stock) }}
+                      {% endif %}
                     {% endif %}
                     {% if producto.unidad and producto.unidad != 'NONE' %}
                       {{ producto.unidad }}
@@ -802,8 +830,8 @@
                 </span>
               </span>
             </div>
-            <div class="product-info-item">
-              <!-- Se quitó el icono de etiqueta -->
+            <div class="product-info-item product-price">
+              <!-- Precio -->
               <span style="font-weight: 500;">Precio actual: <span class="formatted-price" data-price="{{ producto.precio_venta }}">
                 ${{ '{:.2f}'.format(producto.precio_venta) }}
               </span></span>
@@ -871,6 +899,8 @@
     
     // Inicializar contador
     totalCountSpan.textContent = totalProducts;
+    
+    // Formateo de números ya aplicado directamente en la plantilla Jinja2
     
     // Inicializar el escáner de códigos de barras con pistola
     if (window.initBarcodeScanner) {
@@ -1110,6 +1140,8 @@
       
       // Mostrar productos de la página actual
       showCurrentPage();
+      
+      // El formateo de números ya se aplica en la plantilla
     }
     
     // Función para actualizar la paginación

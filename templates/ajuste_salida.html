@@ -23,6 +23,7 @@
     --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
     --shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
     --transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+    --blue: #1a237e; /* Añadido: Azul para botón volver igual que en ajuste_stock */
   }
   
   body {
@@ -100,6 +101,20 @@
     background-color: #f2f2f2;
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Botón Volver estilo ajuste_stock.html */
+  .btn-volver {
+    background-color: var(--blue);
+    color: #ffffff;
+    box-shadow: 0 2px 4px rgba(26, 35, 126, 0.3);
+  }
+  
+  .btn-volver:hover {
+    background-color: #151c64;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(26, 35, 126, 0.4);
+    color: #ffffff;
   }
   
   .btn-primary {
@@ -462,7 +477,7 @@
   <div class="page-header">
     <h1 class="page-title">Registrar Salida</h1>
     <div class="header-actions">
-      <a href="{{ url_for('ajuste_stock') }}" class="btn-icon btn-outline">
+      <a href="{{ url_for('ajuste_stock') }}" class="btn-icon btn-volver">
         <i class="fas fa-arrow-left"></i>
         <span>Volver</span>
       </a>
@@ -492,9 +507,21 @@
             {% if producto.stock <= 0 %}
               <span class="badge badge-danger">Sin stock</span>
             {% elif producto.stock < 6 %}
-              <span class="badge badge-warning">{{ producto.stock }}</span>
+              <span class="badge badge-warning">
+                {% if producto.stock|int >= 1000 %}
+                  {{ "{:,}".format(producto.stock|int).replace(',', ',') }}
+                {% else %}
+                  {{ producto.stock|int }}
+                {% endif %}
+              </span>
             {% else %}
-              <span class="badge badge-success">{{ producto.stock }}</span>
+              <span class="badge badge-success">
+                {% if producto.stock|int >= 1000 %}
+                  {{ "{:,}".format(producto.stock|int).replace(',', ',') }}
+                {% else %}
+                  {{ producto.stock|int }}
+                {% endif %}
+              </span>
             {% endif %}
           </span>
         </div>

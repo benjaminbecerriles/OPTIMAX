@@ -6,121 +6,83 @@
 
 {% block content %}
 <style>
-  /* Estilos globales */
+  /* Estilos globales simplificados */
   :root {
-    --font-apple: -apple-system, BlinkMacSystemFont, 'SF Pro Text', Helvetica, Arial, sans-serif;
-    
-    /* Colores esenciales */
+    --font-system: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', Helvetica, Arial, sans-serif;
     --text-color: #1d1d1f;
-    --text-secondary: #555555;
-    --background: #ffffff;
-    --light-background: #f5f5f7;
-    --separator: rgba(0, 0, 0, 0.1);
-    --accent: #e52e2e;
-    --accent-hover: #c51818;
-    --accent-light: rgba(229, 46, 46, 0.1);
-    
-    /* Colores de estado */
-    --green: #2ecc71;
-    --orange: #f39c12;
-    --red: #e74c3c;
-    --blue: #1a237e;
-    --gray-500: #777777;
+    --text-secondary: #86868b;
+    --background: #f5f5f7;
+    --card-background: #ffffff;
+    --border-color: rgba(0, 0, 0, 0.1);
+    --entrada-color: #2e7d32;
+    --salida-color: #c62828;
+    --section-spacing: 16px;
   }
 
+  body {
+    font-family: var(--font-system);
+    color: var(--text-color);
+    background-color: var(--background);
+    margin: 0;
+    padding: 0;
+  }
+  
   .historial-container {
     max-width: 1000px;
     margin: 0 auto;
     padding: 36px 24px;
-    font-family: var(--font-apple);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    line-height: 1.5;
-    color: var(--text-color);
-    background-color: var(--background);
   }
   
-  /* Encabezado de página - MODIFICADO PARA ALINEACIÓN PERFECTA */
+  /* Encabezado de página */
   .page-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start; /* Cambiado a flex-start */
+    align-items: flex-start;
     margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
   }
   
   .page-title {
     font-size: 32px;
     font-weight: 600;
-    letter-spacing: -0.02em;
-    margin: 0;
-    margin-bottom: 8px; /* Espacio para la descripción */
-    color: var(--text-color);
-  }
-  
-  .header-title-container {
-    display: flex;
-    flex-direction: column;
+    margin: 0 0 8px 0;
   }
   
   .page-description {
     font-size: 17px;
-    color: #86868b; /* Más claro para la descripción de la página */
+    color: var(--text-secondary);
     margin-bottom: 28px;
     max-width: 600px;
-    font-weight: 400; /* Algo más ligero */
   }
   
   .header-actions {
-    display: flex;
-    gap: 1rem;
-    padding-top: 8px; /* Ajuste para alinear con la primera línea del título */
-    align-items: center; /* Asegura alineación vertical de botones */
+    padding-top: 8px;
   }
   
-  /* Botón volver estilo ajuste_stock.html */
+  /* Botón volver */
   .btn-volver {
     display: flex;
     align-items: center;
-    justify-content: center;
     gap: 0.75rem;
     padding: 0.75rem 1.25rem;
-    border-radius: 980px;
+    border-radius: 8px;
     font-weight: 500;
     font-size: 0.95rem;
-    transition: all 0.2s ease;
+    background-color: #1a237e;
+    color: white;
     text-decoration: none;
-    cursor: pointer;
     border: none;
-    height: 44px; /* Altura fija para todos los botones */
-    white-space: nowrap; /* Evita que el texto se rompa */
-    background-color: var(--blue);
-    color: #ffffff;
-    box-shadow: 0 2px 4px rgba(26, 35, 126, 0.3);
   }
   
-  .btn-volver:hover {
-    background-color: #151c64;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(26, 35, 126, 0.4);
-    color: #ffffff;
-  }
-  
-  .btn-volver i {
-    color: #ffffff;
-  }
-  
-  /* Filtros y búsqueda */
+  /* Filtros */
   .filters-container {
     display: flex;
-    justify-content: space-between;
     flex-wrap: wrap;
-    gap: 0.75rem;
-    margin-bottom: 1.5rem;
-    background-color: #f8f9fa;
-    border-radius: 0.5rem;
-    padding: 1rem;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    gap: 16px;
+    margin-bottom: 24px;
+    background-color: white;
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   }
   
   .filter-item {
@@ -130,65 +92,48 @@
   
   .filter-item label {
     display: block;
-    margin-bottom: 0.25rem;
-    font-size: 0.875rem;
+    margin-bottom: 8px;
+    font-size: 14px;
     font-weight: 500;
-    color: #495057;
   }
   
-  .filter-item select, .filter-item input {
+  .filter-item select,
+  .filter-item input {
     width: 100%;
-    padding: 0.5rem;
-    border-radius: 0.375rem;
-    border: 1px solid #ced4da;
-    font-size: 0.875rem;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    font-size: 14px;
   }
   
-  /* Lista de movimientos */
-  .movimientos-list {
-    margin-top: 1.5rem;
-  }
-  
-  /* Tarjetas de movimiento con colores más suaves */
+  /* Lista de movimientos - SIMPLIFICADA */
   .movimiento-item {
     display: flex;
-    padding: 1.25rem;
-    margin-bottom: 1rem;
-    border-radius: 0.75rem;
-    position: relative;
-    transition: all 0.2s ease;
+    padding: 20px;
+    margin-bottom: 16px;
     background-color: white;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-    border-left: 2px solid #eaeaea; /* Borde más fino y sutil */
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    border-left: 4px solid #eaeaea;
   }
   
-  /* Colorear bordes con colores extremadamente suaves */
   .movimiento-item.entrada {
-    border-left-color: rgba(76, 175, 80, 0.2); /* Verde casi imperceptible */
+    border-left-color: var(--entrada-color);
   }
   
   .movimiento-item.salida {
-    border-left-color: rgba(244, 67, 54, 0.2); /* Rojo casi imperceptible */
+    border-left-color: var(--salida-color);
   }
   
-  .movimiento-item:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 6px rgba(0,0,0,0.08);
-  }
-  
+  /* Icono del producto */
   .movimiento-icon {
-    width: 64px;
-    height: 64px;
-    border-radius: 0.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 1.25rem;
-    flex-shrink: 0;
+    width: 60px;
+    height: 60px;
+    margin-right: 16px;
+    border-radius: 6px;
     overflow: hidden;
-    background-color: #f8f9fa;
-    border: 1px solid #f0f0f0; /* Borde aún más sutil */
+    flex-shrink: 0;
+    border: 1px solid var(--border-color);
   }
   
   .movimiento-icon img {
@@ -197,183 +142,127 @@
     object-fit: contain;
   }
   
-  .movimiento-details {
-    flex: 1;
-    min-width: 0; /* Evita que el texto rompa el flex */
+  .movimiento-icon .no-image {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f0f0f0;
+    color: #999;
   }
   
-  .movimiento-primary {
+  /* Contenido principal del movimiento */
+  .movimiento-details {
+    flex: 1;
+  }
+  
+  /* Encabezado con nombre y fecha */
+  .movimiento-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.375rem;
+    margin-bottom: 8px;
   }
   
   .movimiento-nombre {
-    font-size: 1.125rem;
+    font-size: 18px;
     font-weight: 600;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 60%;
-    color: #333333;
   }
   
   .movimiento-fecha {
-    font-size: 0.875rem;
-    color: #6c757d;
-    white-space: nowrap;
-    background-color: #f8f9fa;
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.25rem;
+    font-size: 14px;
+    color: var(--text-secondary);
   }
   
-  .movimiento-secondary {
+  /* Área de tipo y cantidad */
+  .movimiento-main {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.5rem;
-  }
-  
-  .movimiento-info {
-    color: #6c757d;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 60%;
-    font-size: 0.875rem;
-  }
-  
-  /* REDUCIDAS: Cantidades más pequeñas y más discretas */
-  .movimiento-cantidad {
-    font-weight: 600;
-    white-space: nowrap;
-    font-size: 0.85rem; /* Ahora MÁS PEQUEÑO */
-    padding: 0.2rem 0.5rem; /* Padding más reducido */
-    border-radius: 0.3rem; /* Bordes más suaves */
-  }
-  
-  .cantidad-entrada {
-    color: #2e7d32; /* Color verde normal */
-    background-color: rgba(76, 175, 80, 0.05); /* Fondo apenas perceptible */
-  }
-  
-  .cantidad-salida {
-    color: #c62828; /* Color rojo normal */
-    background-color: rgba(244, 67, 54, 0.05); /* Fondo apenas perceptible */
+    margin-bottom: 16px;
   }
   
   .movimiento-tipo {
-    display: inline-block;
-    padding: 0.1rem 0.3rem;
-    border-radius: 0.2rem;
-    font-size: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 14px;
     font-weight: 500;
-    margin-right: 0.25rem;
-    background-color: #f7f7f7; /* Fondo neutro muy suave */
-    color: #888888; /* Color de texto más suave */
   }
   
   .tipo-entrada {
-    background-color: rgba(76, 175, 80, 0.03); /* Verde extremadamente sutil */
-    color: #417F4B; /* Verde más oscuro y menos saturado */
+    background-color: rgba(46, 125, 50, 0.1);
+    color: var(--entrada-color);
   }
   
   .tipo-salida {
-    background-color: rgba(244, 67, 54, 0.03); /* Rojo extremadamente sutil */
-    color: #9A4E48; /* Rojo más oscuro y menos saturado */
+    background-color: rgba(198, 40, 40, 0.1);
+    color: var(--salida-color);
   }
   
-  /* Notas y comprobantes */
-  .movimiento-details-extra {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    margin-top: 0.75rem;
-    padding-top: 0.75rem;
-    border-top: 1px dashed #f0f0f0; /* Borde aún más sutil */
+  .movimiento-cantidad {
+    font-weight: 600;
+    font-size: 15px;
   }
   
-  .movimiento-notas {
+  /* Información adicional en formato de tabla simple */
+  .movimiento-info-table {
+    width: 100%;
+    border-top: 1px solid #eee;
+    padding-top: 12px;
+    font-size: 14px;
+  }
+  
+  .info-row {
     display: flex;
-    align-items: flex-start;
-    gap: 0.5rem;
-    font-size: 0.875rem;
-    color: #6c757d;
+    margin-bottom: 8px;
+  }
+  
+  .info-label {
+    flex: 0 0 140px;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+  
+  .info-value {
     flex: 1;
-    min-width: 250px;
-    background-color: #f9f9f9;
-    padding: 0.75rem;
-    border-radius: 0.375rem;
-    border: 1px solid rgba(0,0,0,0.03); /* Borde más sutil */
+    color: var(--text-color);
   }
   
-  .movimiento-notas i {
-    flex-shrink: 0;
-    font-size: 1rem;
-    color: #adb5bd;
-    margin-top: 2px;
-  }
-  
-  .movimiento-notas span {
-    line-height: 1.4;
-    word-break: break-word;
-  }
-  
-  .movimiento-comprobante {
-    display: flex;
-    align-items: center;
-  }
-  
+  /* Comprobante */
   .btn-download {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 0.75rem;
-    border-radius: 6px;
-    font-size: 0.875rem;
-    font-weight: 500;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 4px;
+    background-color: #f5f5f7;
     color: #0066cc;
-    background-color: rgba(0, 102, 204, 0.03); /* Fondo aún más sutil */
     text-decoration: none;
-    transition: all 0.2s ease;
-    border: 1px solid rgba(0, 102, 204, 0.07); /* Borde muy sutil */
-  }
-  
-  .btn-download:hover {
-    background-color: rgba(0, 102, 204, 0.07);
-    color: #0066cc;
-    transform: translateY(-1px);
-  }
-  
-  .btn-download i {
-    font-size: 1rem;
+    font-size: 14px;
+    margin-top: 8px;
   }
   
   /* Sin resultados */
   .no-results {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 3rem 1rem;
-    background-color: #f8f9fa;
-    border-radius: 0.5rem;
-    color: #6c757d;
+    padding: 40px;
     text-align: center;
+    background-color: white;
+    border-radius: 8px;
+    margin-top: 20px;
   }
   
   .no-results i {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    color: #adb5bd;
+    font-size: 48px;
+    color: #ccc;
+    margin-bottom: 16px;
   }
   
-  /* Paginación - ACTUALIZADA para coincidir con ajuste_stock.html */
+  /* Paginación simplificada */
   .pagination-container {
+    margin-top: 32px;
     display: flex;
     justify-content: center;
-    margin-top: 2rem;
   }
   
   .pagination {
@@ -381,130 +270,69 @@
     list-style: none;
     padding: 0;
     margin: 0;
-    gap: 0.5rem;
+    gap: 8px;
   }
   
-  .page-item {
-    margin: 0;
-  }
-  
-  .page-link {
+  .page-item .page-link {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0.5rem 1rem;
-    border-radius: 980px;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    color: var(--text-color, #1d1d1f);
+    min-width: 36px;
+    height: 36px;
+    padding: 0 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background-color: white;
+    color: var(--text-color);
     text-decoration: none;
-    transition: all 0.2s ease;
-    min-width: 40px;
-    height: 40px;
-    font-size: 0.95rem;
-  }
-  
-  .page-link:hover {
-    background-color: var(--light-background, #f5f5f7);
-    transform: translateY(-2px);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   }
   
   .page-item.active .page-link {
-    background-color: var(--accent, #e52e2e);
+    background-color: #e52e2e;
     color: white;
-    border-color: var(--accent, #e52e2e);
+    border-color: #e52e2e;
   }
   
-  .page-item.disabled .page-link {
-    color: var(--text-secondary, #555555);
-    pointer-events: none;
-    opacity: 0.5;
-  }
-  
-  .pagination-info {
-    text-align: center;
-    color: var(--text-secondary, #555555);
-    font-size: 0.875rem;
-    margin-top: 0.75rem;
-    font-weight: 500;
-  }
-  
-  /* Placeholder para imágenes */
-  .movimiento-icon .no-image {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-    background-color: #f5f5f5;
-    color: #bbb;
-    font-size: 1.25rem;
-    border-radius: 0;
-  }
-  
-  /* Separación visual entre ítems */
-  .movimiento-item + .movimiento-item {
-    margin-top: 1rem;
-  }
-  
-  /* Estilos para dispositivos móviles */
+  /* Responsive */
   @media (max-width: 768px) {
-    .historial-container {
-      padding: 24px 16px;
-    }
-    
     .page-header {
       flex-direction: column;
-      align-items: flex-start;
-      gap: 1rem;
     }
     
     .header-actions {
-      width: 100%;
+      margin-top: 16px;
     }
     
     .filters-container {
       flex-direction: column;
     }
     
-    .movimiento-icon {
-      width: 48px;
-      height: 48px;
-      margin-right: 0.75rem;
-    }
-    
-    .movimiento-primary, .movimiento-secondary {
+    .movimiento-header,
+    .movimiento-main {
       flex-direction: column;
-      align-items: flex-start;
     }
     
-    .movimiento-nombre, .movimiento-info {
-      max-width: 100%;
-      margin-bottom: 0.25rem;
+    .movimiento-fecha,
+    .movimiento-cantidad {
+      margin-top: 4px;
     }
     
-    .movimiento-fecha {
-      margin-top: 0.25rem;
-      font-size: 0.75rem;
-    }
-    
-    .movimiento-details-extra {
+    .info-row {
       flex-direction: column;
-      gap: 0.5rem;
     }
     
-    .movimiento-notas {
-      margin-bottom: 0.5rem;
+    .info-label {
+      margin-bottom: 4px;
     }
   }
 </style>
 
 <div class="historial-container">
-  <!-- Encabezado MODIFICADO para coincidir con ajuste-stock.html -->
+  <!-- Encabezado simple -->
   <div class="page-header">
-    <div class="header-title-container">
-      <h1 class="page-title">Historial de entradas y salidas del stock</h1>
-      <p class="page-description">Consulta todos los movimientos de inventario.</p>
+    <div>
+      <h1 class="page-title">Historial de movimientos</h1>
+      <p class="page-description">Consulta los movimientos de entrada y salida del inventario.</p>
     </div>
     <div class="header-actions">
       <a href="{{ url_for('ajuste_stock') }}" class="btn-volver">
@@ -542,7 +370,7 @@
     </div>
   </div>
   
-  <!-- Lista de movimientos -->
+  <!-- Lista de movimientos simplificada -->
   <div class="movimientos-list">
     {% if movimientos and movimientos|length > 0 %}
       {% for movimiento in movimientos %}
@@ -556,50 +384,89 @@
               </div>
             {% endif %}
           </div>
+          
           <div class="movimiento-details">
-            <div class="movimiento-primary">
+            <!-- Encabezado con nombre y fecha -->
+            <div class="movimiento-header">
               <div class="movimiento-nombre">{{ movimiento.producto.nombre }}</div>
-              <div class="movimiento-fecha">
-                <i class="far fa-calendar-alt"></i> {{ movimiento.fecha_movimiento.strftime('%d/%m/%Y %H:%M') }}
-              </div>
+              <div class="movimiento-fecha">{{ movimiento.fecha_movimiento.strftime('%d/%m/%Y %H:%M') }}</div>
             </div>
-            <div class="movimiento-secondary">
-              <div class="movimiento-info">
-                <span class="movimiento-tipo {{ 'tipo-entrada' if movimiento.tipo_movimiento == 'ENTRADA' else 'tipo-salida' }}">
-                  {% if movimiento.tipo_movimiento == 'ENTRADA' %}
-                    <i class="fas fa-arrow-alt-circle-down"></i> Entrada
-                  {% else %}
-                    <i class="fas fa-arrow-alt-circle-up"></i> Salida
-                  {% endif %}
-                </span>
-                <span>{{ movimiento.motivo|title }}</span> | 
-                <span title="{{ movimiento.producto.codigo_barras_externo }}">{{ movimiento.producto.codigo_barras_externo }}</span>
-                {% if movimiento.numero_lote %} | <span title="Lote">{{ movimiento.numero_lote }}</span>{% endif %}
+            
+            <!-- Tipo y cantidad -->
+            <div class="movimiento-main">
+              <div class="movimiento-tipo {{ 'tipo-entrada' if movimiento.tipo_movimiento == 'ENTRADA' else 'tipo-salida' }}">
+                {% if movimiento.tipo_movimiento == 'ENTRADA' %}
+                  <i class="fas fa-arrow-down mr-1"></i> Entrada
+                {% else %}
+                  <i class="fas fa-arrow-up mr-1"></i> Salida
+                {% endif %}
               </div>
-              <!-- Cantidades más pequeñas y menos saturadas -->
-              <div class="movimiento-cantidad {% if movimiento.tipo_movimiento == 'ENTRADA' %}cantidad-entrada{% else %}cantidad-salida{% endif %}">
+              
+              <div class="movimiento-cantidad">
                 {% if movimiento.tipo_movimiento == 'ENTRADA' %}+{% else %}-{% endif %}{{ movimiento.cantidad }} 
                 {{ movimiento.producto.unidad or "unidad" if movimiento.cantidad == 1 else movimiento.producto.unidad or "unidades" }}
               </div>
             </div>
             
-            {% if movimiento.notas or movimiento.comprobante %}
-            <div class="movimiento-details-extra">
-              {% if movimiento.notas %}
-              <div class="movimiento-notas">
-                <i class="fas fa-sticky-note" title="Notas"></i>
-                <span>{{ movimiento.notas }}</span>
+            <!-- Información adicional en formato de tabla uniforme -->
+            <div class="movimiento-info-table">
+              <!-- Mostrar motivo para todos -->
+              <div class="info-row">
+                <div class="info-label">Motivo:</div>
+                <div class="info-value">{{ movimiento.motivo|replace('_', ' ')|title }}</div>
               </div>
+              
+              <!-- Código de barras para todos -->
+              <div class="info-row">
+                <div class="info-label">Código:</div>
+                <div class="info-value">{{ movimiento.producto.codigo_barras_externo }}</div>
+              </div>
+              
+              <!-- Solo para entradas: Costo y Lote -->
+              {% if movimiento.tipo_movimiento == 'ENTRADA' %}
+                {% if movimiento.costo_unitario is not none %}
+                <div class="info-row">
+                  <div class="info-label">Costo (histórico):</div>
+                  <div class="info-value">${{ "%.2f"|format(movimiento.costo_unitario) }}</div>
+                </div>
+                {% endif %}
+                
+                {% if movimiento.numero_lote %}
+                <div class="info-row">
+                  <div class="info-label">Lote:</div>
+                  <div class="info-value">{{ movimiento.numero_lote }}</div>
+                </div>
+                {% endif %}
               {% endif %}
               
-              {% if movimiento.comprobante %}
-              <div class="movimiento-comprobante">
-                <a href="{{ url_for('descargar_comprobante', movimiento_id=movimiento.id) }}" class="btn-download" title="Descargar comprobante">
-                  <i class="fas fa-file-download"></i> Descargar comprobante
-                </a>
-              </div>
+              <!-- Solo para salidas: Impacto -->
+              {% if movimiento.tipo_movimiento == 'SALIDA' and movimiento.impacto_financiero is not none %}
+                <div class="info-row">
+                  <div class="info-label">Impacto financiero:</div>
+                  <div class="info-value">
+                    {% if movimiento.impacto_financiero %}
+                      Se registró como pérdida
+                    {% else %}
+                      Sin impacto en finanzas
+                    {% endif %}
+                  </div>
+                </div>
+              {% endif %}
+              
+              <!-- Notas si existen -->
+              {% if movimiento.notas %}
+                <div class="info-row">
+                  <div class="info-label">Notas:</div>
+                  <div class="info-value">{{ movimiento.notas }}</div>
+                </div>
               {% endif %}
             </div>
+            
+            <!-- Comprobante si existe -->
+            {% if movimiento.comprobante %}
+              <a href="{{ url_for('descargar_comprobante', movimiento_id=movimiento.id) }}" class="btn-download">
+                <i class="fas fa-file-download"></i> Descargar comprobante
+              </a>
             {% endif %}
           </div>
         </div>
@@ -613,16 +480,14 @@
     {% endif %}
   </div>
   
-  <!-- Paginación adaptada para coincidir con la de ajuste_stock.html -->
+  <!-- Paginación simplificada -->
   {% if movimientos and movimientos|length > 0 %}
     <div class="pagination-container">
-      <ul class="pagination" id="paginationControl">
-        <!-- Botón "Anterior" -->
+      <ul class="pagination">
         <li class="page-item {% if current_page == 1 %}disabled{% endif %}">
           <a class="page-link" href="?page={{ current_page - 1 }}{% if request.args.get('tipo') %}&tipo={{ request.args.get('tipo') }}{% endif %}{% if request.args.get('periodo') %}&periodo={{ request.args.get('periodo') }}{% endif %}{% if request.args.get('q') %}&q={{ request.args.get('q') }}{% endif %}">Anterior</a>
         </li>
         
-        <!-- Números de página - Utilizando 30 por página en vez de 10 -->
         {% set per_page = 30 %}
         {% set total_pages = (total_movimientos + per_page - 1) // per_page %}
         {% set start_page = [current_page - 2, 1]|max %}
@@ -637,14 +502,10 @@
           </li>
         {% endfor %}
         
-        <!-- Botón "Siguiente" -->
         <li class="page-item {% if current_page >= total_pages %}disabled{% endif %}">
           <a class="page-link" href="?page={{ current_page + 1 }}{% if request.args.get('tipo') %}&tipo={{ request.args.get('tipo') }}{% endif %}{% if request.args.get('periodo') %}&periodo={{ request.args.get('periodo') }}{% endif %}{% if request.args.get('q') %}&q={{ request.args.get('q') }}{% endif %}">Siguiente</a>
         </li>
       </ul>
-    </div>
-    <div class="pagination-info">
-      Mostrando {{ movimientos|length }} de {{ total_movimientos }} movimientos
     </div>
   {% endif %}
 </div>
@@ -655,13 +516,6 @@
     const tipoFilter = document.getElementById('tipoFilter');
     const periodoFilter = document.getElementById('periodoFilter');
     const productoFilter = document.getElementById('productoFilter');
-    
-    // Preservar los parámetros actuales de la URL
-    function getBaseUrl() {
-      const currentParams = new URLSearchParams(window.location.search);
-      currentParams.delete('page'); // Siempre volver a la primera página cuando se cambian los filtros
-      return window.location.pathname + '?' + currentParams.toString();
-    }
     
     // Función para aplicar filtros
     function applyFilters() {
@@ -700,7 +554,7 @@
       periodoFilter.addEventListener('change', applyFilters);
     }
     
-    // Debounce para el filtro de producto (esperar a que el usuario termine de escribir)
+    // Debounce para el filtro de producto
     if (productoFilter) {
       let debounceTimeout;
       productoFilter.addEventListener('input', function() {
@@ -708,7 +562,7 @@
         debounceTimeout = setTimeout(applyFilters, 500);
       });
       
-      // Manejar la tecla Enter en el campo de búsqueda
+      // Manejar la tecla Enter
       productoFilter.addEventListener('keydown', function(e) {
         if (e.key === 'Enter') {
           e.preventDefault();
@@ -717,26 +571,6 @@
         }
       });
     }
-    
-    // Asegurarse de que los enlaces de paginación preserven los filtros actuales
-    document.querySelectorAll('.pagination .page-link').forEach(link => {
-      const url = new URL(link.href);
-      
-      // Añadir parámetros actuales
-      if (tipoFilter && tipoFilter.value !== 'todos') {
-        url.searchParams.set('tipo', tipoFilter.value);
-      }
-      
-      if (periodoFilter && periodoFilter.value !== '30') {
-        url.searchParams.set('periodo', periodoFilter.value);
-      }
-      
-      if (productoFilter && productoFilter.value.trim()) {
-        url.searchParams.set('q', productoFilter.value.trim());
-      }
-      
-      link.href = url.toString();
-    });
   });
 </script>
 {% endblock %}
