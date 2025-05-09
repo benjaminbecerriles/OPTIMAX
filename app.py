@@ -9,7 +9,7 @@ import sys
 import shutil
 import urllib.parse
 
-from flask import Flask, request, render_template, session, redirect, url_for, jsonify, flash, send_file
+from flask import Flask, request, render_template, session, redirect, url_for, jsonify, flash, send_file, make_response
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from functools import wraps
@@ -1332,6 +1332,11 @@ def agregar_producto():
 
             flash('Producto guardado exitosamente', 'success')
             
+            # MODIFICADO: Redireccionar a la página de confirmación
+            response = make_response(redirect(url_for('producto_confirmacion', producto_id=nuevo.id)))
+            response.set_cookie('pagina_origen', 'agregar_producto', max_age=300)  # Cookie válida por 5 minutos
+            return response
+            
         except Exception as e:
             db.session.rollback()
             flash(f'Error al guardar el producto: {str(e)}', 'danger')
@@ -1506,12 +1511,16 @@ def agregar_sin_codigo():
                         
             flash('Producto sin código de barras guardado exitosamente', 'success')
             
+            # MODIFICADO: Redireccionar a la página de confirmación
+            response = make_response(redirect(url_for('producto_confirmacion', producto_id=nuevo.id)))
+            response.set_cookie('pagina_origen', 'agregar_sin_codigo', max_age=300)  # Cookie válida por 5 minutos
+            return response
+            
         except Exception as e:
             db.session.rollback()
             flash(f'Error al guardar el producto: {str(e)}', 'danger')
             print(f"ERROR al guardar producto sin código: {str(e)}")
         
-        # Redirección corregida
         return redirect(url_for('ver_productos'))
         
     else:
@@ -1729,6 +1738,11 @@ def agregar_a_granel():
                         # No devolveremos el error al usuario, el producto ya se creó correctamente
                         
             flash('Producto a granel guardado exitosamente', 'success')
+            
+            # MODIFICADO: Redireccionar a la página de confirmación
+            response = make_response(redirect(url_for('producto_confirmacion', producto_id=nuevo.id)))
+            response.set_cookie('pagina_origen', 'agregar_a_granel', max_age=300)  # Cookie válida por 5 minutos
+            return response
             
         except Exception as e:
             db.session.rollback()
@@ -2102,6 +2116,34 @@ def completar_datos(prod_id):
 @login_requerido
 def nuevo_producto():
     return render_template('nuevo_producto.html')
+
+@app.route('/producto-confirmacion/<int:producto_id>')
+@login_requerido
+def producto_confirmacion(producto_id):
+    """Muestra la confirmación de un producto recién agregado."""
+    # Verificar si el usuario está logueado
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    
+    empresa_id = session.get('user_id')
+    
+    # Obtener el producto
+    producto = Producto.query.get_or_404(producto_id)
+    
+    # Verificar que el producto pertenezca a la empresa del usuario actual
+    if producto.empresa_id != empresa_id:
+        flash('No tienes permiso para ver este producto.', 'danger')
+        return redirect(url_for('ver_productos'))
+    
+    # Determinar la página de origen para el botón "Volver"
+    # Lo almacenamos en una cookie temporal
+    pagina_origen = request.cookies.get('pagina_origen', 'agregar_producto')
+    
+    return render_template(
+        'producto_confirmacion.html',
+        producto=producto,
+        pagina_origen=pagina_origen
+    )
 
 ##############################
 # REABASTECER

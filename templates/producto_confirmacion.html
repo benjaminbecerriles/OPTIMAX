@@ -1,512 +1,413 @@
 {% extends 'base.html' %}
 
 {% block title %}
-  Confirmación - {{ producto.nombre }}
+  ¡Producto Registrado Exitosamente!
 {% endblock %}
 
 {% block content %}
 <style>
-  /* Diseño elegante inspirado en Apple */
-  :root {
-    --font-system: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', Helvetica, Arial, sans-serif;
-    --text-color: #1d1d1f;
-    --text-secondary: #86868b;
-    --color-background: #f5f5f7;
-    --color-card: #ffffff;
-    --color-border: rgba(0, 0, 0, 0.1);
-    --color-primary: #e52e2e; /* Rojo para botón guardar */
-    --color-accent: #0066cc; /* Azul Apple para selecciones */
-    --color-success: #34c759; /* Verde Apple */
-    --color-warning: #ff9f0a; /* Naranja Apple */
-    --color-danger: #ff3b30; /* Rojo Apple */
-    --border-radius: 12px;
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
-    --shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-    --transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
-  }
-  
-  body {
-    font-family: var(--font-system);
-    color: var(--text-color);
-    line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    background-color: var(--color-background);
-    margin: 0;
-    padding: 0;
-  }
-  
-  .entry-container {
+  .confirmation-container {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    padding: 2rem;
     max-width: 800px;
-    margin: 0 auto;
-    padding: 36px 24px;
+    margin: 2rem auto;
   }
   
-  /* Encabezado de página */
-  .page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 2rem;
+  .header-title-container {
+    margin-bottom: 1.5rem;
   }
   
   .page-title {
-    font-size: 32px;
+    font-size: 28px;
     font-weight: 600;
     letter-spacing: -0.02em;
-    margin: 0;
-    color: var(--text-color);
+    color: #1d1d1f;
+    margin-bottom: 0.5rem;
   }
   
-  .header-actions {
-    display: flex;
-    gap: 1rem;
-    padding-top: 8px;
-  }
-  
-  /* Botones con estilo Apple */
-  .btn-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.75rem;
-    padding: 0.75rem 1.25rem;
-    border-radius: 980px;
+  .subtitle {
+    color: #4CAF50;
+    font-size: 18px;
     font-weight: 500;
-    font-size: 0.95rem;
-    transition: var(--transition);
-    text-decoration: none;
-    cursor: pointer;
-    border: none;
-    text-align: center;
-  }
-  
-  .btn-icon i, 
-  .btn-icon span {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    vertical-align: middle;
-    line-height: 1;
-  }
-  
-  .btn-outline {
-    background-color: var(--color-card);
-    color: var(--text-color);
-    border: 1px solid var(--color-border);
-  }
-  
-  .btn-outline:hover {
-    background-color: #f2f2f2;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-  
-  .btn-primary {
-    background-color: var(--color-primary);
-    color: white;
-  }
-  
-  .btn-primary:hover {
-    background-color: #d12323;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(229, 46, 46, 0.25);
-  }
-  
-  /* Panel de confirmación */
-  .confirmation-panel {
-    background-color: var(--color-card);
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow-sm);
-    overflow: hidden;
-    margin-bottom: 24px;
-  }
-  
-  .confirmation-header {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 20px;
-    background-color: rgba(52, 199, 89, 0.1);
-    border-bottom: 1px solid var(--color-border);
   }
   
   .confirmation-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background-color: var(--color-success);
-    color: white;
     display: flex;
-    align-items: center;
     justify-content: center;
-    font-size: 24px;
+    margin-bottom: 1.5rem;
+  }
+  
+  .confirmation-icon svg {
+    width: 80px;
+    height: 80px;
+    color: #4CAF50;
+  }
+  
+  .product-details {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 2rem;
+  }
+  
+  .product-image {
+    width: 220px;
+    height: 220px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #eee;
+    background-color: #f9f9f9;
     flex-shrink: 0;
   }
   
-  .confirmation-title {
-    font-size: 20px;
-    font-weight: 600;
-    margin: 0;
-    color: var(--color-success);
-  }
-  
-  .confirmation-subtitle {
-    margin: 4px 0 0 0;
-    color: var(--text-secondary);
-    font-size: 14px;
-  }
-  
-  .confirmation-body {
-    padding: 24px;
-  }
-  
-  /* Producto compacto */
-  .product-compact {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    border-bottom: 1px solid var(--color-border);
-    padding-bottom: 20px;
-    margin-bottom: 20px;
-  }
-  
-  .product-image-small {
-    width: 72px;
-    height: 72px;
-    border-radius: 10px;
-    background-color: var(--color-background);
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid var(--color-border);
-  }
-  
-  .product-image-small img {
-    max-width: 100%;
-    max-height: 100%;
+  .product-image img {
+    width: 100%;
+    height: 100%;
     object-fit: contain;
   }
   
-  .product-details-compact {
+  .product-info {
     flex: 1;
   }
   
   .product-name {
-    font-size: 18px;
+    font-size: 24px;
     font-weight: 600;
-    margin: 0 0 4px 0;
-    color: var(--text-color);
+    margin-bottom: 1rem;
   }
   
-  .product-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    font-size: 14px;
-    color: var(--text-secondary);
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(200px, 1fr));
+    gap: 1rem;
   }
   
-  .stock-change {
-    margin-top: 8px;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
+  .info-item {
+    margin-bottom: 0.5rem;
   }
   
-  .stock-change-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  
-  .stock-label {
-    color: var(--text-secondary);
-  }
-  
-  .stock-value {
+  .info-label {
     font-weight: 500;
-    color: var(--text-color);
+    color: #666;
+    font-size: 0.9rem;
   }
   
-  .arrow-icon {
-    color: var(--text-secondary);
-    font-size: 12px;
+  .info-value {
+    font-weight: 600;
+    color: #333;
+    font-size: 1.1rem;
   }
   
-  /* Tabla de detalles de la operación */
-  .details-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 20px;
-  }
-  
-  .details-table td {
-    font-size: 15px;
-    padding: 12px 0;
-    border-bottom: 1px solid var(--color-border);
-  }
-  
-  .details-table tr:last-child td {
-    border-bottom: none;
-  }
-  
-  .details-table .value-col {
-    text-align: right;
-    font-weight: 500;
-  }
-  
-  /* Badges */
-  .badge {
+  .category-badge {
     display: inline-block;
-    padding: 4px 8px;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 600;
+    padding: 0.3rem 0.8rem;
+    border-radius: 15px;
+    color: white;
+    font-weight: 500;
+    font-size: 0.9rem;
+    margin-top: 0.3rem;
   }
   
-  .badge-success {
-    background-color: rgba(52, 199, 89, 0.12);
-    color: var(--color-success);
-  }
-  
-  .badge-warning {
-    background-color: rgba(255, 159, 10, 0.12);
-    color: var(--color-warning);
-  }
-  
-  .badge-danger {
-    background-color: rgba(255, 59, 48, 0.12);
-    color: var(--color-danger);
-  }
-  
-  /* Resumen financiero */
-  .financial-summary {
-    background-color: #f5f5f7;
-    border-radius: 8px;
-    padding: 16px;
-    margin-top: 16px;
-  }
-  
-  .summary-row {
+  .action-buttons {
     display: flex;
-    justify-content: space-between;
-    margin-bottom: 8px;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
   }
   
-  .summary-row:last-child {
-    margin-bottom: 0;
-  }
-  
-  .summary-label {
-    color: var(--text-secondary);
-  }
-  
-  .summary-value {
-    font-weight: 600;
-  }
-  
-  .summary-total {
-    padding-top: 8px;
-    border-top: 1px solid var(--color-border);
-    font-weight: 600;
-  }
-  
-  /* Mensaje de éxito */
-  .success-message {
-    margin-top: 16px;
-    text-align: center;
-    color: var(--text-secondary);
-    font-size: 14px;
-    display: flex;
+  .btn-action {
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 980px;
+    font-weight: 500;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    min-width: 160px;
   }
   
-  /* Diseño responsivo */
+  .btn-primary {
+    background-color: #1a237e;
+    color: #ffffff;
+    box-shadow: 0 2px 4px rgba(26, 35, 126, 0.3);
+  }
+  
+  .btn-primary:hover {
+    background-color: #151c64;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(26, 35, 126, 0.4);
+  }
+  
+  .btn-secondary {
+    background-color: #e1e1e1;
+    color: #333;
+  }
+  
+  .btn-secondary:hover {
+    background-color: #d1d1d1;
+    transform: translateY(-2px);
+  }
+  
+  .stock-badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    color: white;
+    font-size: 0.85rem;
+    background-color: #4CAF50;
+  }
+  
+  .features-section {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #eee;
+  }
+  
+  .features-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+  
+  .features-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  
+  .feature-item {
+    flex: 1 0 calc(33.333% - 1rem);
+    min-width: 200px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+  }
+  
+  .feature-icon {
+    width: 24px;
+    height: 24px;
+    color: #1a237e;
+  }
+  
+  .feature-text {
+    font-size: 0.9rem;
+  }
+  
   @media (max-width: 768px) {
-    .entry-container {
-      padding: 20px 16px;
-    }
-    
-    .page-header {
+    .product-details {
       flex-direction: column;
-      gap: 16px;
-      margin-bottom: 1.5rem;
     }
     
-    .header-actions {
+    .product-image {
       width: 100%;
-      justify-content: space-between;
-      padding-top: 0;
+      height: 250px;
     }
     
-    .confirmation-header {
+    .info-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .action-buttons {
       flex-direction: column;
-      text-align: center;
-      padding: 16px;
     }
     
-    .product-compact {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-    
-    .product-image-small {
+    .btn-action {
       width: 100%;
-      height: 120px;
-    }
-    
-    .stock-change {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 8px;
     }
   }
 </style>
 
-<div class="entry-container">
-  <!-- Encabezado con título y acciones -->
-  <div class="page-header">
-    <h1 class="page-title">Producto Creado</h1>
-    <div class="header-actions">
-      <a href="{{ url_for('nuevo_producto') }}" class="btn-icon btn-outline">
-        <i class="fas fa-arrow-left"></i>
-        <span>Volver</span>
-      </a>
-      <a href="{{ url_for('ver_productos') }}" class="btn-icon btn-primary">
-        <span>Continuar</span>
-      </a>
-    </div>
+<div class="confirmation-container">
+  <div class="header-title-container">
+    <h1 class="page-title">¡Producto Registrado Exitosamente!</h1>
+    <p class="subtitle">El producto ha sido agregado a tu inventario</p>
   </div>
   
-  <!-- Panel de confirmación principal -->
-  <div class="confirmation-panel">
-    <div class="confirmation-header">
-      <div class="confirmation-icon">
-        <i class="fas fa-check"></i>
-      </div>
-      <div>
-        <h2 class="confirmation-title">Producto creado con éxito</h2>
-        <p class="confirmation-subtitle">
-          El producto ha sido añadido correctamente a tu inventario.
-        </p>
-      </div>
+  <div class="confirmation-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  </div>
+  
+  <div class="product-details">
+    <div class="product-image">
+      {% if producto.foto %}
+        <img src="{{ url_for('static', filename='uploads/' + producto.foto) }}" alt="{{ producto.nombre }}">
+      {% else %}
+        <img src="{{ url_for('static', filename='img/default_product.jpg') }}" alt="Imagen Predeterminada">
+      {% endif %}
     </div>
     
-    <div class="confirmation-body">
-      <!-- Producto compacto -->
-      <div class="product-compact">
-        <div class="product-image-small">
-          {% if producto.foto %}
-            <img src="{{ url_for('static', filename='uploads/' ~ producto.foto) }}" alt="{{ producto.nombre }}">
-          {% else %}
-            <img src="{{ url_for('static', filename='img/default_product.jpg') }}" alt="Imagen predeterminada">
-          {% endif %}
+    <div class="product-info">
+      <h2 class="product-name">{{ producto.nombre }}</h2>
+      
+      <div class="info-grid">
+        <div class="info-item">
+          <div class="info-label">Código de Barras</div>
+          <div class="info-value">{{ producto.codigo_barras_externo or 'No especificado' }}</div>
         </div>
-        <div class="product-details-compact">
-          <h3 class="product-name">{{ producto.nombre }}</h3>
-          <div class="product-meta">
-            <span>{{ producto.codigo_barras_externo }}</span>
-            <span>{{ producto.categoria|title }}</span>
+        
+        <div class="info-item">
+          <div class="info-label">Marca</div>
+          <div class="info-value">{{ producto.marca or 'No especificada' }}</div>
+        </div>
+        
+        <div class="info-item">
+          <div class="info-label">Precio de Venta</div>
+          <div class="info-value">${{ "%.2f"|format(producto.precio_venta) }}</div>
+        </div>
+        
+        <div class="info-item">
+          <div class="info-label">Costo</div>
+          <div class="info-value">${{ "%.2f"|format(producto.costo) }}</div>
+        </div>
+        
+        <div class="info-item">
+          <div class="info-label">Stock Inicial</div>
+          <div class="info-value">
+            {{ producto.stock }} {{ producto.unidad or 'unidades' }}
+            <span class="stock-badge">DISPONIBLE</span>
           </div>
-          <div class="stock-change">
-            <div class="stock-change-item">
-              <span class="stock-label">Stock inicial:</span>
-              <span class="stock-value">
-                {% if producto.unidad and producto.unidad not in ['pieza', 'piezas'] %}
-                  {{ "%.3f"|format(producto.stock) }} {{ producto.unidad }}
-                {% else %}
-                  {% if producto.stock == 1 %}
-                    {{ producto.stock }} pieza
-                  {% else %}
-                    {{ producto.stock }} piezas
-                  {% endif %}
-                {% endif %}
-              </span>
+        </div>
+        
+        <div class="info-item">
+          <div class="info-label">Categoría</div>
+          <div class="info-value">
+            <div class="category-badge" style="background-color: {{ producto.categoria_color or '#777777' }}">
+              {{ producto.categoria or 'Sin categoría' }}
             </div>
           </div>
         </div>
       </div>
-      
-      <!-- Detalles del producto -->
-      <table class="details-table">
-        <tbody>
-          <tr>
-            <td>ID de Producto</td>
-            <td class="value-col">{{ producto.id }}</td>
-          </tr>
-          <tr>
-            <td>Fecha de Creación</td>
-            <td class="value-col">{{ producto.fecha_creacion.strftime('%d/%m/%Y %H:%M') }}</td>
-          </tr>
-          <tr>
-            <td>Código de Barras</td>
-            <td class="value-col">{{ producto.codigo_barras_externo }}</td>
-          </tr>
-          <tr>
-            <td>Marca</td>
-            <td class="value-col">{{ producto.marca or 'Sin marca' }}</td>
-          </tr>
-          <tr>
-            <td>Categoría</td>
-            <td class="value-col">{{ producto.categoria|title }}</td>
-          </tr>
-          <tr>
-            <td>Stock Inicial</td>
-            <td class="value-col">
-              {% if producto.unidad and producto.unidad not in ['pieza', 'piezas'] %}
-                {{ "%.3f"|format(producto.stock) }} {{ producto.unidad }}
-              {% else %}
-                {% if producto.stock == 1 %}
-                  {{ producto.stock }} pieza
-                {% else %}
-                  {{ producto.stock }} piezas
-                {% endif %}
-              {% endif %}
-            </td>
-          </tr>
-          <tr>
-            <td>Costo Unitario</td>
-            <td class="value-col">${{ producto.costo|round(2) }}</td>
-          </tr>
-          <tr>
-            <td>Precio de Venta</td>
-            <td class="value-col">${{ producto.precio_venta|round(2) }}</td>
-          </tr>
-          {% if producto.has_caducidad and producto.metodo_caducidad %}
-            <tr>
-              <td>Caducidad</td>
-              <td class="value-col">{{ producto.metodo_caducidad }}</td>
-            </tr>
+    </div>
+  </div>
+  
+  <div class="features-section">
+    <h3 class="features-title">Características Adicionales</h3>
+    <div class="features-grid">
+      <div class="feature-item">
+        <div class="feature-icon">
+          {% if producto.es_favorito %}
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
+          </svg>
+          {% else %}
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+          </svg>
           {% endif %}
-        </tbody>
-      </table>
-      
-      <!-- Resumen financiero para producto -->
-      <div class="financial-summary">
-        <div class="summary-row">
-          <span class="summary-label">Costo unitario</span>
-          <span class="summary-value">${{ producto.costo|round(2) }}</span>
         </div>
-        <div class="summary-row">
-          <span class="summary-label">Precio de venta</span>
-          <span class="summary-value">${{ producto.precio_venta|round(2) }}</span>
-        </div>
-        <div class="summary-row summary-total">
-          <span>Ganancia por unidad</span>
-          <span>${{ (producto.precio_venta - producto.costo)|round(2) }}</span>
+        <div class="feature-text">
+          {% if producto.es_favorito %}
+            Producto marcado como favorito
+          {% else %}
+            No marcado como favorito
+          {% endif %}
         </div>
       </div>
       
-      <div class="success-message">
-        <i class="fas fa-info-circle"></i>
-        <span>Producto guardado correctamente en tu inventario.</span>
+      <div class="feature-item">
+        <div class="feature-icon">
+          {% if producto.esta_a_la_venta %}
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          {% else %}
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+          </svg>
+          {% endif %}
+        </div>
+        <div class="feature-text">
+          {% if producto.esta_a_la_venta %}
+            Visible para la venta
+          {% else %}
+            No visible para la venta
+          {% endif %}
+        </div>
+      </div>
+      
+      <div class="feature-item">
+        <div class="feature-icon">
+          {% if producto.has_caducidad %}
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          {% else %}
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+          {% endif %}
+        </div>
+        <div class="feature-text">
+          {% if producto.has_caducidad %}
+            Con fecha de caducidad: {{ producto.metodo_caducidad }}
+          {% else %}
+            Sin fecha de caducidad
+          {% endif %}
+        </div>
       </div>
     </div>
   </div>
+  
+  <div class="action-buttons">
+    <a href="{{ url_for('ver_productos') }}" class="btn-action btn-primary">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+      </svg>
+      Continuar al Inventario
+    </a>
+    
+    <a href="{{ url_for(pagina_origen) }}" class="btn-action btn-secondary">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-5-5m0 0l5-5m-5 5h12" />
+      </svg>
+      {% if pagina_origen == 'agregar_producto' %}
+        Agregar Otro Producto
+      {% elif pagina_origen == 'agregar_sin_codigo' %}
+        Agregar Otro Producto Sin Código
+      {% elif pagina_origen == 'agregar_a_granel' %}
+        Agregar Otro Producto a Granel
+      {% else %}
+        Volver
+      {% endif %}
+    </a>
+  </div>
 </div>
+
+<script>
+  // OPCIONAL: Animar entrada de elementos
+  document.addEventListener('DOMContentLoaded', function() {
+    const elements = [
+      '.confirmation-icon',
+      '.product-details',
+      '.features-section',
+      '.action-buttons'
+    ];
+    
+    elements.forEach((selector, index) => {
+      const element = document.querySelector(selector);
+      if (element) {
+        element.style.opacity = '0';
+        element.style.transform = 'translateY(20px)';
+        element.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+        
+        setTimeout(() => {
+          element.style.opacity = '1';
+          element.style.transform = 'translateY(0)';
+        }, 100 + (index * 200));
+      }
+    });
+  });
+</script>
 {% endblock %}

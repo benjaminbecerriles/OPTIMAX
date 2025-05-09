@@ -17,6 +17,7 @@
     --entrada-color: #2e7d32;
     --salida-color: #c62828;
     --section-spacing: 16px;
+    --blue: #1a237e; /* Variable para el color azul del botón volver */
   }
 
   body {
@@ -58,19 +59,35 @@
     padding-top: 8px;
   }
   
-  /* Botón volver */
-  .btn-volver {
+  /* Botón volver - ACTUALIZADO para que coincida con ajuste_stock.html */
+  .btn-action {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 0.75rem;
     padding: 0.75rem 1.25rem;
-    border-radius: 8px;
+    border-radius: 980px;
     font-weight: 500;
     font-size: 0.95rem;
-    background-color: #1a237e;
-    color: white;
+    transition: all 0.2s ease;
     text-decoration: none;
+    cursor: pointer;
     border: none;
+    height: 44px;
+    white-space: nowrap;
+  }
+  
+  .btn-volver {
+    background-color: var(--blue);
+    color: #ffffff;
+    box-shadow: 0 2px 4px rgba(26, 35, 126, 0.3);
+  }
+  
+  .btn-volver:hover {
+    background-color: #151c64;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(26, 35, 126, 0.4);
+    color: #ffffff;
   }
   
   /* Filtros */
@@ -335,7 +352,8 @@
       <p class="page-description">Consulta los movimientos de entrada y salida del inventario.</p>
     </div>
     <div class="header-actions">
-      <a href="{{ url_for('ajuste_stock') }}" class="btn-volver">
+      <!-- Actualizado: botón volver con las mismas clases que en ajuste_stock.html -->
+      <a href="{{ url_for('ajuste_stock') }}" class="btn-action btn-volver">
         <i class="fas fa-arrow-left"></i>
         <span>Volver</span>
       </a>
@@ -392,13 +410,13 @@
               <div class="movimiento-fecha">{{ movimiento.fecha_movimiento.strftime('%d/%m/%Y %H:%M') }}</div>
             </div>
             
-            <!-- Tipo y cantidad -->
+            <!-- Tipo y cantidad - MODIFICADO: Se eliminaron los iconos -->
             <div class="movimiento-main">
               <div class="movimiento-tipo {{ 'tipo-entrada' if movimiento.tipo_movimiento == 'ENTRADA' else 'tipo-salida' }}">
                 {% if movimiento.tipo_movimiento == 'ENTRADA' %}
-                  <i class="fas fa-arrow-down mr-1"></i> Entrada
+                  Entrada
                 {% else %}
-                  <i class="fas fa-arrow-up mr-1"></i> Salida
+                  Salida
                 {% endif %}
               </div>
               
