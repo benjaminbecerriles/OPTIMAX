@@ -796,7 +796,7 @@
               <div class="form-check">
                 <input class="form-check-input" type="checkbox" id="mantener_costo_anterior" name="mantener_costo_anterior" checked>
                 <label class="form-check-label" for="mantener_costo_anterior" id="mantenerCostoLabel">
-                  Mantener costo anterior ({% if ultima_entrada and ultima_entrada.costo_unitario %}${{ ultima_entrada.costo_unitario|round(2) }}{% else %}${{ producto.costo|round(2) }}{% endif %})
+                  Mantener costo anterior ({% if ultima_entrada and ultima_entrada.costo_unitario %}${{ ultima_entrada.costo_unitario|round(2) }}{% else %}${{ producto.costo|round(2) }}{% endif %} por {% if producto.unidad and producto.unidad != 'NONE' %}{{ producto.unidad }}{% else %}pieza{% endif %})
                 </label>
               </div>
               
@@ -997,15 +997,20 @@
       
       // Buscar el valor entre paréntesis
       const inicio = text.indexOf('($') + 2;
-      const fin = text.indexOf(')');
+      const fin = text.indexOf(' por');
       
       if (inicio > 1 && fin > inicio) {
         // Extraer el valor numérico
         const valorStr = text.substring(inicio, fin);
         const valor = parseFloat(valorStr);
         
+        // Obtener la unidad
+        const inicioUnidad = text.indexOf('por ') + 4;
+        const finUnidad = text.indexOf(')');
+        const unidad = text.substring(inicioUnidad, finUnidad);
+        
         // Crear el nuevo texto con el valor formateado
-        const newText = 'Mantener costo anterior (' + formatMoney(valor) + ')';
+        const newText = 'Mantener costo anterior (' + formatMoney(valor) + ' por ' + unidad + ')';
         
         // Actualizar la etiqueta
         mantenerCostoLabel.textContent = newText;
