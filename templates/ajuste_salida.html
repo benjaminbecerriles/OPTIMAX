@@ -437,6 +437,86 @@
     display: none;
   }
   
+  /* Notificación centrada estilo Apple */
+  .notification-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+  
+  .notification-container {
+    background-color: white;
+    border-radius: 14px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    width: 350px;
+    max-width: 90%;
+    padding: 24px;
+    text-align: center;
+    transform: translateY(20px);
+    transition: transform 0.3s ease;
+  }
+  
+  .notification-icon {
+    color: var(--color-danger);
+    font-size: 32px;
+    margin-bottom: 16px;
+  }
+  
+  .notification-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  
+  .notification-message {
+    font-size: 15px;
+    margin-bottom: 16px;
+    color: var(--text-secondary);
+  }
+  
+  .notification-example {
+    background-color: #f5f5f7;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 20px;
+    font-size: 14px;
+  }
+  
+  .notification-button {
+    background-color: var(--color-accent);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 20px;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .notification-button:hover {
+    background-color: #0055b3;
+  }
+  
+  .notification-overlay.active {
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  .notification-overlay.active .notification-container {
+    transform: translateY(0);
+  }
+  
   /* Responsive design */
   @media (max-width: 992px) {
     .two-column-layout {
@@ -627,8 +707,55 @@
   </div>
 </div>
 
+<!-- Notificación centrada - Añadido para formato inválido -->
+<div class="notification-overlay" id="notificationOverlay">
+  <div class="notification-container">
+    <div class="notification-icon">
+      <i class="fas fa-exclamation-circle"></i>
+    </div>
+    <div class="notification-title">Formato incorrecto</div>
+    <div class="notification-message">Debe incluir un dígito antes del punto decimal.</div>
+    <div class="notification-example">
+      <span style="font-weight: 600;">Ejemplo:</span> 0.123 <span style="color: #4CAF50;">✓</span>
+      &nbsp;&nbsp;&nbsp;
+      <span style="text-decoration: line-through;">.123</span> <span style="color: #FF5252;">✗</span>
+    </div>
+    <button id="notificationButton" class="notification-button">Entendido</button>
+  </div>
+</div>
+
 <script>
   document.addEventListener('DOMContentLoaded', function() {
+    // =========================================
+    // Notificación centrada mejorada
+    // =========================================
+    const notificationOverlay = document.getElementById('notificationOverlay');
+    const notificationButton = document.getElementById('notificationButton');
+    
+    // Función para mostrar notificación centrada
+    window.showFormatNotification = function() {
+      if (notificationOverlay) {
+        notificationOverlay.classList.add('active');
+        
+        // Auto-cerrar después de 5 segundos
+        setTimeout(() => {
+          hideFormatNotification();
+        }, 5000);
+      }
+    };
+    
+    // Función para ocultar notificación
+    window.hideFormatNotification = function() {
+      if (notificationOverlay) {
+        notificationOverlay.classList.remove('active');
+      }
+    };
+    
+    // Cerrar al hacer clic en el botón
+    if (notificationButton) {
+      notificationButton.addEventListener('click', hideFormatNotification);
+    }
+    
     // Función simple para formatear dinero con comas
     function formatMoney(number) {
       if (typeof number === 'string') {
@@ -659,6 +786,9 @@
       precioVentaEl.textContent = formatMoney(valor);
     }
     
+    // =========================================
+    // MANEJO DE CANTIDADES
+    // =========================================
     // Obtener el campo de cantidad y su unidad
     const cantidadInput = document.getElementById('cantidad');
     const unidadIndicator = document.getElementById('unidadIndicator');
@@ -674,66 +804,128 @@
         
         if (unidad === 'pieza') {
           // Si es 'pieza', cambia a plural cuando es más de 1
-          unidadIndicator.textContent = parseFloat(cantidadInput.value) === 1 ? 'PIEZA' : 'PIEZAS';
+          unidadIndicator.textContent = parseFloat(cantidadInput.value.replace(/,/g, '')) === 1 ? 'PIEZA' : 'PIEZAS';
         } else {
           // Mantener unidad existente (KG, L, etc.)
           unidadIndicator.textContent = unidad.toUpperCase();
         }
       {% else %}
         // Para productos sin unidad específica, usar pieza/piezas
-        unidadIndicator.textContent = parseFloat(cantidadInput.value) === 1 ? 'PIEZA' : 'PIEZAS';
+        unidadIndicator.textContent = parseFloat(cantidadInput.value.replace(/,/g, '')) === 1 ? 'PIEZA' : 'PIEZAS';
       {% endif %}
     }
     
-    // Validación del formato y limitación de decimales para el campo cantidad
-    if (cantidadInput) {
-      // Configurar manejo de entrada para el campo cantidad
-      cantidadInput.addEventListener('input', function(e) {
-        let valor = e.target.value;
+    // Formatear número con comas para los miles
+    function formatQuantityWithCommas(input) {
+      // Guardar posición del cursor
+      const start = input.selectionStart || 0;
+      const end = input.selectionEnd || 0;
+      const oldLength = input.value.length;
+      
+      // Obtener valor sin comas y evitando caracteres no válidos
+      let value = input.value.replace(/,/g, '');
+      
+      // Si es unidad decimal, permitir punto
+      if (esUnidadDecimal) {
+        // Truncar exceso de decimales si hay más de 3
+        if (value.includes('.')) {
+          const parts = value.split('.');
+          if (parts[1] && parts[1].length > 3) {
+            // Cortar a 3 decimales máximo
+            value = parts[0] + '.' + parts[1].substring(0, 3);
+          }
+        }
         
-        // Permitir campo vacío temporalmente para facilitar la edición
+        // Permitir números y un solo punto decimal con exactamente 3 decimales máximo
+        const decimalPattern = /^(\d+)(\.\d{0,3})?$/;
+        const match = value.match(decimalPattern);
+        
+        if (match && match[1]) {
+          // Formatear parte entera con comas
+          const formattedInt = parseInt(match[1]).toLocaleString('en-US');
+          
+          // Reconstruir con decimales si hay
+          if (match[2]) {
+            value = formattedInt + match[2];
+          } else {
+            value = formattedInt;
+          }
+        } else if (value === '') {
+          // Permitir campo vacío
+          input.value = '';
+          return;
+        } else {
+          // Si no coincide con el patrón, mantener el valor anterior
+          return;
+        }
+      } else {
+        // Para productos en piezas (solo enteros)
+        // Eliminar cualquier punto y carácter no numérico
+        value = value.replace(/[^\d]/g, '');
+        
+        if (value === '') {
+          // Permitir campo vacío
+          input.value = '';
+          return;
+        }
+        
+        // Formatear con comas
+        value = parseInt(value).toLocaleString('en-US');
+      }
+      
+      // Actualizar el valor en el campo
+      input.value = value;
+      
+      // Ajustar la posición del cursor para mantener la posición relativa
+      const newLength = input.value.length;
+      const deltaLength = newLength - oldLength;
+      
+      if (start < oldLength) {
+        const newPosition = Math.max(0, start + deltaLength);
+        input.setSelectionRange(newPosition, newPosition);
+      } else {
+        input.setSelectionRange(newLength, newLength);
+      }
+      
+      // Actualizar texto de unidad
+      updateUnitText();
+    }
+    
+    // Validación del formato para el campo cantidad
+    if (cantidadInput) {
+      // Configurar evento input para formateo
+      cantidadInput.addEventListener('input', function(e) {
+        const valor = e.target.value;
+        
+        // Si está vacío, permitir temporalmente
         if (valor === '') {
           return;
         }
         
-        if (esUnidadDecimal) {
-          // Para productos con unidades decimales (kg, l, etc.)
-          
-          // Patrón que permite números con hasta 3 decimales
-          // Acepta: "0", "1", "1.2", "1.23", "1.234", "10.234", etc.
-          const patronDecimal = /^(\d+)?(\.\d{0,3})?$/;
-          
-          if (!patronDecimal.test(valor)) {
-            // Si no cumple con el patrón, revertir al valor anterior
-            if (e.target.defaultValue) {
-              e.target.value = e.target.defaultValue;
-            } else {
-              e.target.value = '0';
-            }
+        // Verificar si comienza con punto decimal para unidades decimales
+        if (esUnidadDecimal && valor.startsWith('.')) {
+          // Cancelar el cambio y mostrar notificación
+          e.preventDefault();
+          // Revertir al valor anterior o vacío
+          if (e.target.defaultValue) {
+            e.target.value = e.target.defaultValue;
           } else {
-            // Actualizar el valor predeterminado para futuras validaciones
-            e.target.defaultValue = e.target.value;
+            e.target.value = '';
           }
-        } else {
-          // Para productos en piezas (solo enteros)
-          const patronEntero = /^[0-9]+$/;
-          if (!patronEntero.test(valor)) {
-            // Si no cumple con el patrón y no está vacío, revertir
-            if (e.target.defaultValue) {
-              e.target.value = e.target.defaultValue;
-            } else {
-              e.target.value = '1';
-            }
-          } else {
-            e.target.defaultValue = e.target.value;
-          }
+          // Mostrar notificación de formato
+          showFormatNotification();
+          return;
         }
         
-        // Actualizar texto de unidad si hay un valor
-        if (e.target.value) {
-          updateUnitText();
-        }
+        // Formatear con comas
+        formatQuantityWithCommas(e.target);
+        
+        // Guardar como valor predeterminado para futuras comparaciones
+        e.target.defaultValue = e.target.value;
       });
+      
+      // Inicializar con valor formateado
+      formatQuantityWithCommas(cantidadInput);
     }
     
     // Función para manejar los colapsables - Función global
@@ -766,91 +958,70 @@
     // Inicializar la visualización de unidad
     updateUnitText();
     
-    // Validación del formulario
+    // =========================================
+    // VALIDACIÓN DEL FORMULARIO
+    // =========================================
     const form = document.getElementById('salidaForm');
     
     if (form) {
       form.addEventListener('submit', function(event) {
-        let cantidadValor = cantidadInput.value.trim();
-        
-        // Verificar si es un número válido y mayor que cero
-        let numeroValido = parseFloat(cantidadValor);
-        
-        if (isNaN(numeroValido) || numeroValido <= 0) {
-          event.preventDefault();
-          alert('La cantidad debe ser mayor que cero.');
-          cantidadInput.focus();
-          return false;
-        }
-        
-        // Verificar que no exceda el stock disponible
-        const stockMaximo = {{ producto.stock }};
-        if (numeroValido > stockMaximo) {
-          event.preventDefault();
-          alert(`La cantidad no puede ser mayor que el stock disponible (${stockMaximo}).`);
-          cantidadInput.focus();
-          return false;
-        }
-        
-        // Validaciones especiales para unidades decimales
-        if (esUnidadDecimal) {
-          // Verificar formato decimal con punto obligatorio y un dígito antes
-          if (cantidadValor.includes('.') && cantidadValor.charAt(0) === '.') {
+        // 1. Validar cantidad
+        if (cantidadInput) {
+          let cantidadValor = cantidadInput.value.trim().replace(/,/g, '');
+          
+          // Verificar si es un número válido y mayor que cero
+          let numeroValido = parseFloat(cantidadValor);
+          
+          if (isNaN(numeroValido) || numeroValido <= 0) {
             event.preventDefault();
-            
-            // Mensaje mejorado con estilo personalizado
-            const mensaje = document.createElement('div');
-            mensaje.style.position = 'fixed';
-            mensaje.style.top = '50%';
-            mensaje.style.left = '50%';
-            mensaje.style.transform = 'translate(-50%, -50%)';
-            mensaje.style.backgroundColor = '#ff3b30';
-            mensaje.style.color = 'white';
-            mensaje.style.padding = '20px';
-            mensaje.style.borderRadius = '10px';
-            mensaje.style.boxShadow = '0 4px 16px rgba(0,0,0,0.2)';
-            mensaje.style.zIndex = '9999';
-            mensaje.style.maxWidth = '90%';
-            mensaje.style.width = '350px';
-            mensaje.style.textAlign = 'center';
-            
-            mensaje.innerHTML = `
-              <div style="font-size: 24px; margin-bottom: 10px;"><i class="fas fa-exclamation-triangle"></i></div>
-              <div style="font-size: 16px; font-weight: 600; margin-bottom: 12px;">Formato incorrecto</div>
-              <div style="margin-bottom: 16px; font-size: 15px;">Debe incluir un dígito antes del punto decimal.</div>
-              <div style="font-size: 15px; padding: 8px; background: rgba(255,255,255,0.2); border-radius: 6px; margin-bottom: 16px;">
-                <span style="font-weight: 600;">Ejemplo:</span> 0.123 <span style="color: #90ee90;">✓</span>
-                &nbsp;&nbsp;&nbsp;
-                <span style="text-decoration: line-through;">.123</span> <span style="color: #ff9999;">✗</span>
-              </div>
-              <button id="cerrarAlerta" style="background: white; color: #ff3b30; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer;">Entendido</button>
-            `;
-            
-            document.body.appendChild(mensaje);
-            
-            // Botón para cerrar la alerta
-            document.getElementById('cerrarAlerta').addEventListener('click', function() {
-              document.body.removeChild(mensaje);
-              cantidadInput.focus();
-            });
-            
-            // Auto-cerrar después de 5 segundos
-            setTimeout(() => {
-              if (document.body.contains(mensaje)) {
-                document.body.removeChild(mensaje);
-              }
-            }, 5000);
-            
+            alert('La cantidad debe ser mayor que cero.');
             cantidadInput.focus();
             return false;
           }
-        } else {
-          // Para piezas, verificar que sea un número entero
-          if (Math.floor(numeroValido) !== numeroValido) {
+          
+          // Verificar que no exceda el stock disponible
+          const stockMaximo = {{ producto.stock }};
+          if (numeroValido > stockMaximo) {
             event.preventDefault();
-            alert('La cantidad debe ser un número entero para este tipo de producto.');
+            alert(`La cantidad no puede ser mayor que el stock disponible (${stockMaximo}).`);
             cantidadInput.focus();
             return false;
+          }
+          
+          // Validaciones específicas según el tipo de unidad
+          if (esUnidadDecimal) {
+            // Para unidades decimales, verificar que no inicie con punto
+            if (cantidadValor.startsWith('.')) {
+              event.preventDefault();
+              showFormatNotification();
+              cantidadInput.focus();
+              return false;
+            }
+            
+            // Verificar que no tenga más de 3 decimales
+            if (cantidadValor.includes('.')) {
+              const parts = cantidadValor.split('.');
+              if (parts[1] && parts[1].length > 3) {
+                event.preventDefault();
+                alert('La cantidad no puede tener más de 3 decimales.');
+                cantidadInput.focus();
+                return false;
+              }
+            }
+            
+            // Asegurar que el valor final sea un número válido sin comas
+            cantidadInput.value = cantidadValor;
+          } else {
+            // Para piezas, verificar que sea un número entero
+            if (Math.floor(numeroValido) !== numeroValido) {
+              event.preventDefault();
+              alert('La cantidad debe ser un número entero para este tipo de producto.');
+              cantidadInput.focus();
+              return false;
+            }
+            
+            // Asegurar que el valor final sea un número sin formato
+            cantidadInput.value = Math.floor(numeroValido);
           }
         }
         

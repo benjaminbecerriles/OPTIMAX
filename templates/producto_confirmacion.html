@@ -19,7 +19,6 @@
     --color-success: #34c759; /* Verde Apple */
     --color-warning: #ff9f0a; /* Naranja Apple */
     --color-danger: #ff3b30; /* Rojo Apple */
-    --blue: #1a237e;
     --border-radius: 12px;
     --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
     --shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
@@ -47,7 +46,7 @@
   .page-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     margin-bottom: 2rem;
   }
   
@@ -57,14 +56,12 @@
     letter-spacing: -0.02em;
     margin: 0;
     color: var(--text-color);
-    display: flex;
-    align-items: center;
-    gap: 8px;
   }
   
   .header-actions {
     display: flex;
     gap: 1rem;
+    padding-top: 8px;
   }
   
   /* Botones con estilo Apple */
@@ -116,37 +113,6 @@
     box-shadow: 0 4px 8px rgba(229, 46, 46, 0.25);
   }
   
-  /* Estilos del botón volver de ajuste_stock.html */
-  .btn-action {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.75rem;
-    padding: 0.75rem 1.25rem;
-    border-radius: 980px;
-    font-weight: 500;
-    font-size: 0.95rem;
-    transition: all 0.2s ease;
-    text-decoration: none;
-    cursor: pointer;
-    border: none;
-    height: 44px;
-    white-space: nowrap;
-  }
-  
-  .btn-volver {
-    background-color: var(--blue);
-    color: #ffffff;
-    box-shadow: 0 2px 4px rgba(26, 35, 126, 0.3);
-  }
-  
-  .btn-volver:hover {
-    background-color: #151c64;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(26, 35, 126, 0.4);
-    color: #ffffff;
-  }
-  
   /* Panel de confirmación */
   .confirmation-panel {
     background-color: var(--color-card);
@@ -157,9 +123,38 @@
   }
   
   .confirmation-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
     padding: 20px;
+    background-color: rgba(52, 199, 89, 0.1);
     border-bottom: 1px solid var(--color-border);
-    background-color: rgba(52, 199, 89, 0.05);
+  }
+  
+  .confirmation-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: var(--color-success);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+  
+  .confirmation-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+    color: var(--color-success);
+  }
+  
+  .confirmation-subtitle {
+    margin: 4px 0 0 0;
+    color: var(--text-secondary);
+    font-size: 14px;
   }
   
   .confirmation-body {
@@ -199,9 +194,9 @@
   }
   
   .product-name {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 600;
-    margin: 0 0 8px 0;
+    margin: 0 0 4px 0;
     color: var(--text-color);
   }
   
@@ -209,39 +204,36 @@
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
-    font-size: 16px;
+    font-size: 14px;
     color: var(--text-secondary);
-    margin-bottom: 12px;
   }
   
   .stock-change {
-    margin-top: 12px;
-    font-size: 16px;
+    margin-top: 8px;
+    font-size: 14px;
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 12px;
   }
   
   .stock-change-item {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
   }
   
   .stock-label {
     color: var(--text-secondary);
-    font-weight: 500;
   }
   
   .stock-value {
-    font-weight: 600;
+    font-weight: 500;
     color: var(--text-color);
-    font-size: 18px;
   }
   
   .arrow-icon {
     color: var(--text-secondary);
-    font-size: 14px;
+    font-size: 12px;
   }
   
   /* Tabla de detalles de la operación */
@@ -269,9 +261,9 @@
   /* Badges */
   .badge {
     display: inline-block;
-    padding: 6px 12px;
+    padding: 4px 8px;
     border-radius: 6px;
-    font-size: 15px;
+    font-size: 13px;
     font-weight: 600;
   }
   
@@ -288,6 +280,38 @@
   .badge-danger {
     background-color: rgba(255, 59, 48, 0.12);
     color: var(--color-danger);
+  }
+  
+  /* Resumen financiero */
+  .financial-summary {
+    background-color: #f5f5f7;
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 16px;
+  }
+  
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  
+  .summary-row:last-child {
+    margin-bottom: 0;
+  }
+  
+  .summary-label {
+    color: var(--text-secondary);
+  }
+  
+  .summary-value {
+    font-weight: 600;
+  }
+  
+  .summary-total {
+    padding-top: 8px;
+    border-top: 1px solid var(--color-border);
+    font-weight: 600;
   }
   
   /* Mensaje de éxito */
@@ -321,6 +345,7 @@
     }
     
     .confirmation-header {
+      flex-direction: column;
       text-align: center;
       padding: 16px;
     }
@@ -346,16 +371,13 @@
 <div class="entry-container">
   <!-- Encabezado con título y acciones -->
   <div class="page-header">
-    <h1 class="page-title">
-      <i class="fas fa-check-circle" style="color: var(--color-success);"></i>
-      Confirmación
-    </h1>
+    <h1 class="page-title">Producto Creado</h1>
     <div class="header-actions">
-      <a href="{{ url_for('ajuste_stock') }}" class="btn-action btn-volver">
+      <a href="{{ url_for('nuevo_producto') }}" class="btn-icon btn-outline">
         <i class="fas fa-arrow-left"></i>
         <span>Volver</span>
       </a>
-      <a href="{{ url_for('dashboard_inventario') }}" class="btn-icon btn-primary">
+      <a href="{{ url_for('ver_productos') }}" class="btn-icon btn-primary">
         <span>Continuar</span>
       </a>
     </div>
@@ -363,19 +385,20 @@
   
   <!-- Panel de confirmación principal -->
   <div class="confirmation-panel">
-    <!-- Encabezado simplificado sin texto de éxito -->
     <div class="confirmation-header">
-      <h2 style="margin: 0; font-size: 20px; font-weight: 600; color: var(--color-success);">
-        {% if movimiento.tipo_movimiento == 'ENTRADA' %}
-          Entrada de Mercancía Registrada
-        {% else %}
-          Salida de Mercancía Registrada
-        {% endif %}
-      </h2>
+      <div class="confirmation-icon">
+        <i class="fas fa-check"></i>
+      </div>
+      <div>
+        <h2 class="confirmation-title">Producto creado con éxito</h2>
+        <p class="confirmation-subtitle">
+          El producto ha sido añadido correctamente a tu inventario.
+        </p>
+      </div>
     </div>
     
     <div class="confirmation-body">
-      <!-- Producto compacto mejorado -->
+      <!-- Producto compacto -->
       <div class="product-compact">
         <div class="product-image-small">
           {% if producto.foto %}
@@ -385,33 +408,22 @@
           {% endif %}
         </div>
         <div class="product-details-compact">
-          <h3 class="product-name" style="font-size: 18px;">{{ producto.codigo_barras_externo }} | {{ producto.nombre }}</h3>
-          <div class="stock-change" style="font-size: 14px;">
+          <h3 class="product-name">{{ producto.nombre }}</h3>
+          <div class="product-meta">
+            <span>{{ producto.codigo_barras_externo }}</span>
+            <span>{{ producto.categoria|title }}</span>
+          </div>
+          <div class="stock-change">
             <div class="stock-change-item">
-              <span class="stock-label">Stock anterior:</span>
-              <span class="stock-value" style="font-size: 15px;">
+              <span class="stock-label">Stock inicial:</span>
+              <span class="stock-value">
                 {% if producto.unidad and producto.unidad not in ['pieza', 'piezas'] %}
-                  {{ '{:,.3f}'.format(stock_anterior) }} {{ producto.unidad }}
-                {% else %}
-                  {% if stock_anterior == 1 %}
-                    {{ stock_anterior }} pieza
-                  {% else %}
-                    {{ '{:,}'.format(stock_anterior) }} piezas
-                  {% endif %}
-                {% endif %}
-              </span>
-            </div>
-            <i class="fas fa-arrow-right arrow-icon"></i>
-            <div class="stock-change-item">
-              <span class="stock-label">Stock actual:</span>
-              <span class="stock-value" style="font-size: 15px;">
-                {% if producto.unidad and producto.unidad not in ['pieza', 'piezas'] %}
-                  {{ '{:,.3f}'.format(producto.stock) }} {{ producto.unidad }}
+                  {{ "%.3f"|format(producto.stock) }} {{ producto.unidad }}
                 {% else %}
                   {% if producto.stock == 1 %}
                     {{ producto.stock }} pieza
                   {% else %}
-                    {{ '{:,}'.format(producto.stock) }} piezas
+                    {{ producto.stock }} piezas
                   {% endif %}
                 {% endif %}
               </span>
@@ -420,102 +432,79 @@
         </div>
       </div>
       
-      <!-- Detalles del movimiento -->
+      <!-- Detalles del producto -->
       <table class="details-table">
         <tbody>
           <tr>
-            <td>ID de Operación</td>
-            <td class="value-col">{{ movimiento.id }}</td>
+            <td>ID de Producto</td>
+            <td class="value-col">{{ producto.id }}</td>
           </tr>
           <tr>
-            <td>Fecha y Hora</td>
-            <td class="value-col">{{ movimiento.fecha_movimiento.strftime('%d/%m/%Y %H:%M') }}</td>
+            <td>Fecha de Creación</td>
+            <td class="value-col">{{ producto.fecha_creacion.strftime('%d/%m/%Y %H:%M') }}</td>
           </tr>
           <tr>
-            <td>Tipo de Movimiento</td>
+            <td>Código de Barras</td>
+            <td class="value-col">{{ producto.codigo_barras_externo }}</td>
+          </tr>
+          <tr>
+            <td>Marca</td>
+            <td class="value-col">{{ producto.marca or 'Sin marca' }}</td>
+          </tr>
+          <tr>
+            <td>Categoría</td>
+            <td class="value-col">{{ producto.categoria|title }}</td>
+          </tr>
+          <tr>
+            <td>Stock Inicial</td>
             <td class="value-col">
-              {% if movimiento.tipo_movimiento == 'ENTRADA' %}
-                <span style="color: #28a745;">Entrada de Mercancía</span>
+              {% if producto.unidad and producto.unidad not in ['pieza', 'piezas'] %}
+                {{ "%.3f"|format(producto.stock) }} {{ producto.unidad }}
               {% else %}
-                <span style="color: #dc3545;">Salida de Mercancía</span>
-              {% endif %}
-            </td>
-          </tr>
-          <tr>
-            <td>Cantidad</td>
-            <td class="value-col">
-              {% if movimiento.tipo_movimiento == 'ENTRADA' %}
-                {% if producto.unidad and producto.unidad not in ['pieza', 'piezas'] %}
-                  +{{ '{:,.3f}'.format(movimiento.cantidad) }} {{ producto.unidad }}
+                {% if producto.stock == 1 %}
+                  {{ producto.stock }} pieza
                 {% else %}
-                  {% if movimiento.cantidad == 1 %}
-                    +{{ movimiento.cantidad }} pieza
-                  {% else %}
-                    +{{ '{:,}'.format(movimiento.cantidad) }} piezas
-                  {% endif %}
-                {% endif %}
-              {% else %}
-                {% if producto.unidad and producto.unidad not in ['pieza', 'piezas'] %}
-                  -{{ '{:,.3f}'.format(movimiento.cantidad) }} {{ producto.unidad }}
-                {% else %}
-                  {% if movimiento.cantidad == 1 %}
-                    -{{ movimiento.cantidad }} pieza
-                  {% else %}
-                    -{{ '{:,}'.format(movimiento.cantidad) }} piezas
-                  {% endif %}
+                  {{ producto.stock }} piezas
                 {% endif %}
               {% endif %}
             </td>
           </tr>
           <tr>
-            <td>Motivo</td>
-            <td class="value-col">{{ movimiento.motivo }}</td>
+            <td>Costo Unitario</td>
+            <td class="value-col">${{ producto.costo|round(2) }}</td>
           </tr>
-          {% if movimiento.tipo_movimiento == 'ENTRADA' %}
+          <tr>
+            <td>Precio de Venta</td>
+            <td class="value-col">${{ producto.precio_venta|round(2) }}</td>
+          </tr>
+          {% if producto.has_caducidad and producto.metodo_caducidad %}
             <tr>
-              <td>Lote</td>
-              <td class="value-col">{{ movimiento.numero_lote }}</td>
-            </tr>
-            <tr>
-              <td>Costo Unitario (por {% if producto.unidad and producto.unidad not in ['pieza', 'piezas'] %}{{ producto.unidad }}{% else %}pieza{% endif %})</td>
-              <td class="value-col">${{ '{:,.2f}'.format(movimiento.costo_unitario) }}</td>
-            </tr>
-            {% if costo_total %}
-            <tr>
-              <td>Costo Total</td>
-              <td class="value-col">${{ '{:,.2f}'.format(costo_total) }}</td>
-            </tr>
-            {% endif %}
-            {% if movimiento.fecha_caducidad %}
-              <tr>
-                <td>Fecha de Caducidad</td>
-                <td class="value-col">{{ movimiento.fecha_caducidad.strftime('%d/%m/%Y') }}</td>
-              </tr>
-            {% endif %}
-          {% else %}
-            <tr>
-              <td>Impacto Financiero</td>
-              <td class="value-col">
-                {% if movimiento.impacto_financiero %}
-                  Registrado como pérdida
-                {% else %}
-                  Sin impacto financiero
-                {% endif %}
-              </td>
-            </tr>
-          {% endif %}
-          {% if movimiento.notas %}
-            <tr>
-              <td>Notas</td>
-              <td class="value-col">{{ movimiento.notas }}</td>
+              <td>Caducidad</td>
+              <td class="value-col">{{ producto.metodo_caducidad }}</td>
             </tr>
           {% endif %}
         </tbody>
       </table>
       
+      <!-- Resumen financiero para producto -->
+      <div class="financial-summary">
+        <div class="summary-row">
+          <span class="summary-label">Costo unitario</span>
+          <span class="summary-value">${{ producto.costo|round(2) }}</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Precio de venta</span>
+          <span class="summary-value">${{ producto.precio_venta|round(2) }}</span>
+        </div>
+        <div class="summary-row summary-total">
+          <span>Ganancia por unidad</span>
+          <span>${{ (producto.precio_venta - producto.costo)|round(2) }}</span>
+        </div>
+      </div>
+      
       <div class="success-message">
         <i class="fas fa-info-circle"></i>
-        <span>Se ha actualizado correctamente el inventario.</span>
+        <span>Producto guardado correctamente en tu inventario.</span>
       </div>
     </div>
   </div>
