@@ -593,6 +593,11 @@
                 {% else %}
                   {{ producto.stock|int }}
                 {% endif %}
+                {% if producto.unidad and producto.unidad != 'NONE' %}
+                  {{ producto.unidad }}
+                {% else %}
+                  {% if producto.stock == 1 %}pieza{% else %}piezas{% endif %}
+                {% endif %}
               </span>
             {% else %}
               <span class="badge badge-success">
@@ -601,18 +606,35 @@
                 {% else %}
                   {{ producto.stock|int }}
                 {% endif %}
+                {% if producto.unidad and producto.unidad != 'NONE' %}
+                  {{ producto.unidad }}
+                {% else %}
+                  {% if producto.stock == 1 %}pieza{% else %}piezas{% endif %}
+                {% endif %}
               </span>
             {% endif %}
           </span>
         </div>
         
         <div class="info-row">
-          <span class="info-label">Costo actual</span>
+          <span class="info-label">Costo actual por 
+            {% if producto.unidad and producto.unidad != 'NONE' %}
+              {{ producto.unidad }}
+            {% else %}
+              pieza
+            {% endif %}
+          </span>
           <span class="info-value" id="costoActualValue">${{ producto.costo|round(2) }}</span>
         </div>
         
         <div class="info-row">
-          <span class="info-label">Precio de venta</span>
+          <span class="info-label">Precio de venta por 
+            {% if producto.unidad and producto.unidad != 'NONE' %}
+              {{ producto.unidad }}
+            {% else %}
+              pieza
+            {% endif %}
+          </span>
           <span class="info-value" id="precioVentaValue">${{ producto.precio_venta|round(2) }}</span>
         </div>
         

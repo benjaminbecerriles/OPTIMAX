@@ -159,7 +159,6 @@
   .confirmation-header {
     padding: 20px;
     border-bottom: 1px solid var(--color-border);
-    background-color: rgba(52, 199, 89, 0.05);
   }
   
   .confirmation-body {
@@ -363,16 +362,8 @@
   
   <!-- Panel de confirmación principal -->
   <div class="confirmation-panel">
-    <!-- Encabezado simplificado sin texto de éxito -->
-    <div class="confirmation-header">
-      <h2 style="margin: 0; font-size: 20px; font-weight: 600; color: var(--color-success);">
-        {% if movimiento.tipo_movimiento == 'ENTRADA' %}
-          Entrada de Mercancía Registrada
-        {% else %}
-          Salida de Mercancía Registrada
-        {% endif %}
-      </h2>
-    </div>
+    <!-- Encabezado simple sin el texto y sin fondo verde -->
+    <div class="confirmation-header"></div>
     
     <div class="confirmation-body">
       <!-- Producto compacto mejorado -->

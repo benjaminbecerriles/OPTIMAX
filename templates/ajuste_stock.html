@@ -804,6 +804,7 @@
             <div class="product-info-item product-stock">
               <!-- Stock -->
               <span style="font-weight: 500;">
+                Stock actual: 
                 <span class="stock-badge">
                   {% if producto.stock <= 0 %}
                     Sin stock
@@ -830,12 +831,7 @@
                 </span>
               </span>
             </div>
-            <div class="product-info-item product-price">
-              <!-- Precio -->
-              <span style="font-weight: 500;">Precio por unidad: <span class="formatted-price" data-price="{{ producto.precio_venta }}">
-                ${{ '{:.2f}'.format(producto.precio_venta) }}
-              </span></span>
-            </div>
+            <!-- Se elimina la sección del precio aquí -->
           </div>
           <div class="product-footer">
             <a href="{{ url_for('ajuste_entrada', producto_id=producto.id) }}" class="product-btn btn-entrada">
@@ -1303,24 +1299,6 @@
       heartIcon.classList.remove('active');
       currentPage = 1;
       applyFiltersAndPagination();
-    });
-    
-    // Formatear precios para mostrar siempre 2 decimales
-    function formatPrice(price) {
-      // Convertir a número
-      let numPrice = parseFloat(price);
-      
-      // Formatear siempre con 2 decimales
-      return "$" + numPrice.toLocaleString('en-US', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      });
-    }
-    
-    // Aplicar formato a todos los precios
-    document.querySelectorAll('.formatted-price').forEach(priceElement => {
-      const originalPrice = priceElement.getAttribute('data-price');
-      priceElement.textContent = formatPrice(originalPrice);
     });
     
     // Inicializar visualización
