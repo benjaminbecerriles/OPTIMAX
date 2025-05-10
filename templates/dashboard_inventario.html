@@ -482,14 +482,12 @@
       </div>
       
       <div class="stat-card">
-        <div class="stat-number">{{ productos|sum(attribute='stock') if productos else '0' }}</div>
+        <div class="stat-number">{{ total_unidades }}</div>
         <div class="stat-label">Unidades en stock</div>
       </div>
       
       <div class="stat-card">
-        {% set valor_total = (productos|sum(attribute='precio_venta') * productos|sum(attribute='stock'))|float if productos else 0.00 %}
-        {% set valor_redondeado = valor_total|round(0, 'floor')|int %}
-        <div class="stat-number">${{ '{:,}'.format(valor_redondeado) }}</div>
+        <div class="stat-number">${{ '{:,}'.format(valor_inventario) }}</div>
         <div class="stat-label">Valor del inventario</div>
       </div>
       

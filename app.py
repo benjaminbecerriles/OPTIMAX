@@ -560,7 +560,7 @@ def dashboard_home():
 @login_requerido
 def dashboard_inventario():
     """
-    Vista del dashboard de inventario
+    Vista del dashboard de inventario con valoración híbrida (lotes o producto directo)
     """
     # Verificar si el usuario está logueado
     if not session.get('logged_in'):
@@ -570,21 +570,158 @@ def dashboard_inventario():
     empresa_id = session.get('user_id')
     
     # Obtener lista de productos para mostrar (solo los aprobados)
-    productos = Producto.query.filter_by(
+    productos_query = Producto.query.filter_by(
         empresa_id=empresa_id,
         is_approved=True
-    ).order_by(Producto.id.desc()).all()
+    ).order_by(Producto.id.desc())
+    
+    # Ejecutar query y obtener resultados
+    productos_raw = productos_query.all()
+    
+    # Crear una lista simplificada con solo los datos necesarios
+    productos = []
+    total_unidades = 0
+    valor_inventario = 0
+    
+    print("\n\n==== DIAGNÓSTICO DE PRODUCTOS Y LOTES ====")
+    
+    for p in productos_raw:
+        try:
+            p_id = p.id
+            p_nombre = p.nombre
+            
+            # Obtener todos los lotes activos con stock positivo para este producto
+            lotes_activos = LoteInventario.query.filter_by(
+                producto_id=p_id,
+                esta_activo=True
+            ).filter(LoteInventario.stock > 0).all()
+            
+            # Verificar stock y costo directos del producto
+            try:
+                p_stock_directo = float(p.stock) if p.stock is not None else 0
+                p_costo_directo = float(p.costo) if p.costo is not None else 0
+            except (TypeError, ValueError):
+                p_stock_directo = 0
+                p_costo_directo = 0
+            
+            print(f"Producto [{p_id}]: {p_nombre}")
+            print(f"  - Stock directo: {p_stock_directo}, Costo directo: {p_costo_directo}")
+            print(f"  - Lotes activos encontrados: {len(lotes_activos)}")
+            
+            # CASO 1: Si hay lotes activos, usar sus valores
+            if lotes_activos:
+                # Calcular stock total y valor total para este producto basado en lotes
+                p_stock_total = 0
+                p_valor_total = 0
+                
+                # Procesar cada lote del producto
+                for lote in lotes_activos:
+                    try:
+                        # Convertir a float
+                        lote_stock = float(lote.stock) if lote.stock is not None else 0
+                        lote_costo = float(lote.costo_unitario) if lote.costo_unitario is not None else 0
+                        
+                        # Calcular valor de este lote
+                        lote_valor = lote_stock * lote_costo
+                        
+                        # Sumar al total del producto
+                        p_stock_total += lote_stock
+                        p_valor_total += lote_valor
+                        
+                        print(f"    > Lote {lote.numero_lote}: stock={lote_stock}, costo={lote_costo}, valor={lote_valor}")
+                    except Exception as e:
+                        print(f"    > ERROR procesando lote {lote.id}: {e}")
+                
+                # Verificar si el stock del producto coincide con la suma de lotes
+                if abs(p_stock_directo - p_stock_total) > 0.001:  # Pequeña tolerancia para errores de redondeo
+                    print(f"  ⚠️ ADVERTENCIA: Stock en producto ({p_stock_directo}) NO coincide con suma de lotes ({p_stock_total})")
+                
+                # Usar los valores calculados de lotes
+                p_stock_final = p_stock_total
+                p_valor_final = p_valor_total
+                print(f"  ✅ Usando valores de lotes: stock={p_stock_final}, valor={p_valor_final}")
+            
+            # CASO 2: Si no hay lotes activos pero el producto tiene stock, usar valores directos
+            elif p_stock_directo > 0:
+                p_stock_final = p_stock_directo
+                p_valor_final = p_stock_directo * p_costo_directo
+                print(f"  ⚠️ No hay lotes activos, usando valores directos: stock={p_stock_final}, valor={p_valor_final}")
+                
+                # OPCIONAL: Crear lote automáticamente (descomenta si deseas esta funcionalidad)
+                # try:
+                #     movimiento, lote = crear_lote_registro(
+                #         producto=p,
+                #         cantidad=p_stock_directo,
+                #         costo=p_costo_directo,
+                #         fecha_caducidad=p.fecha_caducidad if hasattr(p, 'has_caducidad') and p.has_caducidad else None,
+                #         usuario_id=empresa_id
+                #     )
+                #     db.session.commit()
+                #     print(f"  ✅ Lote de registro creado automáticamente para producto {p_id}")
+                # except Exception as e:
+                #     db.session.rollback()
+                #     print(f"  ❌ Error al crear lote de registro: {str(e)}")
+            
+            # CASO 3: Producto sin stock
+            else:
+                p_stock_final = 0
+                p_valor_final = 0
+                print(f"  ℹ️ Producto sin stock")
+            
+            # Acumular totales globales
+            total_unidades += p_stock_final
+            valor_inventario += p_valor_final
+            
+            # Intentar obtener precio_venta para el diccionario
+            try:
+                p_precio = float(p.precio_venta) if p.precio_venta is not None else 0
+            except (TypeError, ValueError):
+                p_precio = 0
+            
+            # Agregar a la lista simplificada
+            productos.append({
+                'id': p_id,
+                'nombre': p_nombre,
+                'stock': p_stock_final,  # Usamos el stock calculado
+                'precio_venta': p_precio,
+                'categoria': p.categoria,
+                'categoria_color': p.categoria_color,
+                'foto': p.foto,
+                'codigo_barras_externo': p.codigo_barras_externo,
+                'marca': p.marca or '',
+                'es_favorito': p.es_favorito,
+                'esta_a_la_venta': p.esta_a_la_venta
+            })
+            
+        except Exception as e:
+            print(f"ERROR procesando producto: {e}")
+            import traceback
+            traceback.print_exc()
     
     # Calcular estadísticas
     total_productos = len(productos)
     
     # Productos con poco stock (por agotarse)
-    productos_por_agotarse = sum(1 for p in productos if p.stock > 0 and p.stock <= 5)
+    productos_por_agotarse = sum(1 for p in productos if p['stock'] > 0 and p['stock'] <= 5)
     
+    print(f"\nRESUMEN GLOBAL:")
+    print(f"TOTAL UNIDADES: {total_unidades}")
+    print(f"VALOR INVENTARIO: {valor_inventario}")
+    print(f"TOTAL PRODUCTOS: {total_productos}")
+    print(f"PRODUCTOS POR AGOTARSE: {productos_por_agotarse}")
+    print("==== FIN DIAGNÓSTICO ====\n\n")
+    
+    # Redondear el valor del inventario para mostrarlo correctamente
+    valor_inventario_redondeado = int(round(valor_inventario))
+    total_unidades_redondeado = int(round(total_unidades))
+    
+    # Renderizar template con datos simplificados
     return render_template(
         'dashboard_inventario.html',
         productos=productos,
         total_productos=total_productos,
+        total_unidades=total_unidades_redondeado,
+        valor_inventario=valor_inventario_redondeado,
         productos_por_agotarse=productos_por_agotarse
     )
 
@@ -1264,72 +1401,59 @@ def agregar_producto():
             db.session.add(nuevo)
             db.session.commit()
             
-            # Si tiene caducidad y stock positivo, crear un lote inicial con fecha de caducidad
-            if nuevo.has_caducidad and nuevo.metodo_caducidad and nuevo.stock > 0:
+            # ===== MODIFICADO: Crear siempre un lote y movimiento inicial si hay stock positivo =====
+            if nuevo.stock > 0:
                 try:
                     # Determinar la fecha de caducidad según el método
-                    fecha_actual = datetime.now()
                     fecha_caducidad = None
+                    if nuevo.has_caducidad and nuevo.metodo_caducidad:
+                        fecha_actual = datetime.now()
 
-                    if nuevo.metodo_caducidad == '1 día':
-                        fecha_caducidad = fecha_actual + timedelta(days=1)
-                    elif nuevo.metodo_caducidad == '3 días':
-                        fecha_caducidad = fecha_actual + timedelta(days=3)
-                    elif nuevo.metodo_caducidad == '1 semana':
-                        fecha_caducidad = fecha_actual + timedelta(days=7)
-                    elif nuevo.metodo_caducidad == '2 semanas':
-                        fecha_caducidad = fecha_actual + timedelta(days=14)
-                    elif nuevo.metodo_caducidad == '1 mes':
-                        fecha_caducidad = fecha_actual + timedelta(days=30)
-                    elif nuevo.metodo_caducidad == '3 meses':
-                        fecha_caducidad = fecha_actual + timedelta(days=90)
-                    elif nuevo.metodo_caducidad == '6 meses':
-                        fecha_caducidad = fecha_actual + timedelta(days=180)
-                    elif nuevo.metodo_caducidad == '1 año':
-                        fecha_caducidad = fecha_actual + timedelta(days=365)
-                    elif nuevo.metodo_caducidad == '2 años':
-                        fecha_caducidad = fecha_actual + timedelta(days=730)
-                    elif nuevo.metodo_caducidad == '3 años' or nuevo.metodo_caducidad == 'más de 3 años':
-                        fecha_caducidad = fecha_actual + timedelta(days=1460)  # 4 años (considerados como +3 años)
+                        if nuevo.metodo_caducidad == '1 día':
+                            fecha_caducidad = fecha_actual + timedelta(days=1)
+                        elif nuevo.metodo_caducidad == '3 días':
+                            fecha_caducidad = fecha_actual + timedelta(days=3)
+                        elif nuevo.metodo_caducidad == '1 semana':
+                            fecha_caducidad = fecha_actual + timedelta(days=7)
+                        elif nuevo.metodo_caducidad == '2 semanas':
+                            fecha_caducidad = fecha_actual + timedelta(days=14)
+                        elif nuevo.metodo_caducidad == '1 mes':
+                            fecha_caducidad = fecha_actual + timedelta(days=30)
+                        elif nuevo.metodo_caducidad == '3 meses':
+                            fecha_caducidad = fecha_actual + timedelta(days=90)
+                        elif nuevo.metodo_caducidad == '6 meses':
+                            fecha_caducidad = fecha_actual + timedelta(days=180)
+                        elif nuevo.metodo_caducidad == '1 año':
+                            fecha_caducidad = fecha_actual + timedelta(days=365)
+                        elif nuevo.metodo_caducidad == '2 años':
+                            fecha_caducidad = fecha_actual + timedelta(days=730)
+                        elif nuevo.metodo_caducidad == '3 años' or nuevo.metodo_caducidad == 'más de 3 años':
+                            fecha_caducidad = fecha_actual + timedelta(days=1460)
 
-                    # Convertir a date
-                    if fecha_caducidad:
-                        fecha_caducidad = fecha_caducidad.date()
-                        
-                        # Crear el lote inicial
-                        nuevo_lote = LoteInventario(
-                            producto_id=nuevo.id,
-                            numero_lote="Lote de Registro",
-                            costo_unitario=nuevo.costo,
-                            stock=nuevo.stock,
-                            fecha_entrada=datetime.now(),
-                            fecha_caducidad=fecha_caducidad,
-                            esta_activo=True
-                        )
-                        
-                        # Crear un movimiento de entrada asociado
-                        movimiento_inicial = MovimientoInventario(
-                            producto_id=nuevo.id,
-                            tipo_movimiento='ENTRADA',
-                            cantidad=nuevo.stock,
-                            motivo='Registro inicial',
-                            fecha_movimiento=datetime.now(),
-                            costo_unitario=nuevo.costo,
-                            numero_lote="Lote de Registro",
-                            fecha_caducidad=fecha_caducidad,
-                            usuario_id=session['user_id']
-                        )
+                        # Convertir a date
+                        if fecha_caducidad:
+                            fecha_caducidad = fecha_caducidad.date()
+                    
+                    # Crear el lote inicial y el movimiento inicial
+                    # Usamos la función crear_lote_registro existente
+                    movimiento, lote = crear_lote_registro(
+                        producto=nuevo,
+                        cantidad=nuevo.stock,
+                        costo=nuevo.costo,
+                        fecha_caducidad=fecha_caducidad,
+                        usuario_id=session['user_id']
+                    )
+                    
+                    db.session.commit()
+                    print(f"Lote inicial y movimiento creados para producto {nuevo.id}")
 
-                        db.session.add(nuevo_lote)
-                        db.session.add(movimiento_inicial)
-                        db.session.commit()
-
-                        print(f"Lote inicial creado para producto {nuevo.id} con fecha de caducidad {fecha_caducidad}")
                 except Exception as e:
-                        db.session.rollback()
-                        print(f"Error al crear lote inicial: {str(e)}")
-                        # No devolveremos el error al usuario, el producto ya se creó correctamente
-
+                    db.session.rollback()
+                    print(f"Error al crear lote inicial y movimiento: {str(e)}")
+                    import traceback
+                    traceback.print_exc()
+                    # Continuamos aunque haya error en la creación del lote
+            
             flash('Producto guardado exitosamente', 'success')
             
             # MODIFICADO: Redireccionar a la página de confirmación
@@ -1443,71 +1567,56 @@ def agregar_sin_codigo():
             db.session.add(nuevo)
             db.session.commit()
             
-            # Si tiene caducidad y stock positivo, crear un lote inicial con fecha de caducidad
-            if nuevo.has_caducidad and nuevo.metodo_caducidad and nuevo.stock > 0:
+            # ===== MODIFICADO: Crear siempre un lote y movimiento inicial si hay stock positivo =====
+            if nuevo.stock > 0:
                 try:
                     # Determinar la fecha de caducidad según el método
-                    fecha_actual = datetime.now()
                     fecha_caducidad = None
+                    if nuevo.has_caducidad and nuevo.metodo_caducidad:
+                        fecha_actual = datetime.now()
 
-                    if nuevo.metodo_caducidad == '1 día':
-                        fecha_caducidad = fecha_actual + timedelta(days=1)
-                    elif nuevo.metodo_caducidad == '3 días':
-                        fecha_caducidad = fecha_actual + timedelta(days=3)
-                    elif nuevo.metodo_caducidad == '1 semana':
-                        fecha_caducidad = fecha_actual + timedelta(days=7)
-                    elif nuevo.metodo_caducidad == '2 semanas':
-                        fecha_caducidad = fecha_actual + timedelta(days=14)
-                    elif nuevo.metodo_caducidad == '1 mes':
-                        fecha_caducidad = fecha_actual + timedelta(days=30)
-                    elif nuevo.metodo_caducidad == '3 meses':
-                        fecha_caducidad = fecha_actual + timedelta(days=90)
-                    elif nuevo.metodo_caducidad == '6 meses':
-                        fecha_caducidad = fecha_actual + timedelta(days=180)
-                    elif nuevo.metodo_caducidad == '1 año':
-                        fecha_caducidad = fecha_actual + timedelta(days=365)
-                    elif nuevo.metodo_caducidad == '2 años':
-                        fecha_caducidad = fecha_actual + timedelta(days=730)
-                    elif nuevo.metodo_caducidad == '3 años' or nuevo.metodo_caducidad == 'más de 3 años':
-                        fecha_caducidad = fecha_actual + timedelta(days=1460)  # 4 años (considerados como +3 años)
+                        if nuevo.metodo_caducidad == '1 día':
+                            fecha_caducidad = fecha_actual + timedelta(days=1)
+                        elif nuevo.metodo_caducidad == '3 días':
+                            fecha_caducidad = fecha_actual + timedelta(days=3)
+                        elif nuevo.metodo_caducidad == '1 semana':
+                            fecha_caducidad = fecha_actual + timedelta(days=7)
+                        elif nuevo.metodo_caducidad == '2 semanas':
+                            fecha_caducidad = fecha_actual + timedelta(days=14)
+                        elif nuevo.metodo_caducidad == '1 mes':
+                            fecha_caducidad = fecha_actual + timedelta(days=30)
+                        elif nuevo.metodo_caducidad == '3 meses':
+                            fecha_caducidad = fecha_actual + timedelta(days=90)
+                        elif nuevo.metodo_caducidad == '6 meses':
+                            fecha_caducidad = fecha_actual + timedelta(days=180)
+                        elif nuevo.metodo_caducidad == '1 año':
+                            fecha_caducidad = fecha_actual + timedelta(days=365)
+                        elif nuevo.metodo_caducidad == '2 años':
+                            fecha_caducidad = fecha_actual + timedelta(days=730)
+                        elif nuevo.metodo_caducidad == '3 años' or nuevo.metodo_caducidad == 'más de 3 años':
+                            fecha_caducidad = fecha_actual + timedelta(days=1460)
 
-                    # Convertir a date
-                    if fecha_caducidad:
-                        fecha_caducidad = fecha_caducidad.date()
-                        
-                        # Crear el lote inicial
-                        nuevo_lote = LoteInventario(
-                            producto_id=nuevo.id,
-                            numero_lote="Lote de Registro",
-                            costo_unitario=nuevo.costo,
-                            stock=nuevo.stock,
-                            fecha_entrada=datetime.now(),
-                            fecha_caducidad=fecha_caducidad,
-                            esta_activo=True
-                        )
-                        
-                        # Crear un movimiento de entrada asociado
-                        movimiento_inicial = MovimientoInventario(
-                            producto_id=nuevo.id,
-                            tipo_movimiento='ENTRADA',
-                            cantidad=nuevo.stock,
-                            motivo='Registro inicial',
-                            fecha_movimiento=datetime.now(),
-                            costo_unitario=nuevo.costo,
-                            numero_lote="Lote de Registro",
-                            fecha_caducidad=fecha_caducidad,
-                            usuario_id=session['user_id']
-                        )
+                        # Convertir a date
+                        if fecha_caducidad:
+                            fecha_caducidad = fecha_caducidad.date()
+                    
+                    # Crear el lote inicial y el movimiento inicial
+                    movimiento, lote = crear_lote_registro(
+                        producto=nuevo,
+                        cantidad=nuevo.stock,
+                        costo=nuevo.costo,
+                        fecha_caducidad=fecha_caducidad,
+                        usuario_id=session['user_id']
+                    )
+                    
+                    db.session.commit()
+                    print(f"Lote inicial y movimiento creados para producto {nuevo.id}")
 
-                        db.session.add(nuevo_lote)
-                        db.session.add(movimiento_inicial)
-                        db.session.commit()
-
-                        print(f"Lote inicial creado para producto {nuevo.id} con fecha de caducidad {fecha_caducidad}")
                 except Exception as e:
-                        db.session.rollback()
-                        print(f"Error al crear lote inicial: {str(e)}")
-                        # No devolveremos el error al usuario, el producto ya se creó correctamente
+                    db.session.rollback()
+                    print(f"Error al crear lote inicial y movimiento: {str(e)}")
+                    import traceback
+                    traceback.print_exc()
                         
             flash('Producto sin código de barras guardado exitosamente', 'success')
             
@@ -1671,71 +1780,56 @@ def agregar_a_granel():
             db.session.add(nuevo)
             db.session.commit()
             
-            # Si tiene caducidad y stock positivo, crear un lote inicial con fecha de caducidad
-            if nuevo.has_caducidad and nuevo.metodo_caducidad and nuevo.stock > 0:
+            # ===== MODIFICADO: Crear siempre un lote y movimiento inicial si hay stock positivo =====
+            if nuevo.stock > 0:
                 try:
                     # Determinar la fecha de caducidad según el método
-                    fecha_actual = datetime.now()
                     fecha_caducidad = None
+                    if nuevo.has_caducidad and nuevo.metodo_caducidad:
+                        fecha_actual = datetime.now()
 
-                    if nuevo.metodo_caducidad == '1 día':
-                        fecha_caducidad = fecha_actual + timedelta(days=1)
-                    elif nuevo.metodo_caducidad == '3 días':
-                        fecha_caducidad = fecha_actual + timedelta(days=3)
-                    elif nuevo.metodo_caducidad == '1 semana':
-                        fecha_caducidad = fecha_actual + timedelta(days=7)
-                    elif nuevo.metodo_caducidad == '2 semanas':
-                        fecha_caducidad = fecha_actual + timedelta(days=14)
-                    elif nuevo.metodo_caducidad == '1 mes':
-                        fecha_caducidad = fecha_actual + timedelta(days=30)
-                    elif nuevo.metodo_caducidad == '3 meses':
-                        fecha_caducidad = fecha_actual + timedelta(days=90)
-                    elif nuevo.metodo_caducidad == '6 meses':
-                        fecha_caducidad = fecha_actual + timedelta(days=180)
-                    elif nuevo.metodo_caducidad == '1 año':
-                        fecha_caducidad = fecha_actual + timedelta(days=365)
-                    elif nuevo.metodo_caducidad == '2 años':
-                        fecha_caducidad = fecha_actual + timedelta(days=730)
-                    elif nuevo.metodo_caducidad == '3 años' or nuevo.metodo_caducidad == 'más de 3 años':
-                        fecha_caducidad = fecha_actual + timedelta(days=1460)  # 4 años (considerados como +3 años)
+                        if nuevo.metodo_caducidad == '1 día':
+                            fecha_caducidad = fecha_actual + timedelta(days=1)
+                        elif nuevo.metodo_caducidad == '3 días':
+                            fecha_caducidad = fecha_actual + timedelta(days=3)
+                        elif nuevo.metodo_caducidad == '1 semana':
+                            fecha_caducidad = fecha_actual + timedelta(days=7)
+                        elif nuevo.metodo_caducidad == '2 semanas':
+                            fecha_caducidad = fecha_actual + timedelta(days=14)
+                        elif nuevo.metodo_caducidad == '1 mes':
+                            fecha_caducidad = fecha_actual + timedelta(days=30)
+                        elif nuevo.metodo_caducidad == '3 meses':
+                            fecha_caducidad = fecha_actual + timedelta(days=90)
+                        elif nuevo.metodo_caducidad == '6 meses':
+                            fecha_caducidad = fecha_actual + timedelta(days=180)
+                        elif nuevo.metodo_caducidad == '1 año':
+                            fecha_caducidad = fecha_actual + timedelta(days=365)
+                        elif nuevo.metodo_caducidad == '2 años':
+                            fecha_caducidad = fecha_actual + timedelta(days=730)
+                        elif nuevo.metodo_caducidad == '3 años' or nuevo.metodo_caducidad == 'más de 3 años':
+                            fecha_caducidad = fecha_actual + timedelta(days=1460)
 
-                    # Convertir a date
-                    if fecha_caducidad:
-                        fecha_caducidad = fecha_caducidad.date()
-                        
-                        # Crear el lote inicial
-                        nuevo_lote = LoteInventario(
-                            producto_id=nuevo.id,
-                            numero_lote="Lote de Registro",
-                            costo_unitario=nuevo.costo,
-                            stock=nuevo.stock,
-                            fecha_entrada=datetime.now(),
-                            fecha_caducidad=fecha_caducidad,
-                            esta_activo=True
-                        )
-                        
-                        # Crear un movimiento de entrada asociado
-                        movimiento_inicial = MovimientoInventario(
-                            producto_id=nuevo.id,
-                            tipo_movimiento='ENTRADA',
-                            cantidad=nuevo.stock,
-                            motivo='Registro inicial',
-                            fecha_movimiento=datetime.now(),
-                            costo_unitario=nuevo.costo,
-                            numero_lote="Lote de Registro",
-                            fecha_caducidad=fecha_caducidad,
-                            usuario_id=session['user_id']
-                        )
+                        # Convertir a date
+                        if fecha_caducidad:
+                            fecha_caducidad = fecha_caducidad.date()
+                    
+                    # Crear el lote inicial y el movimiento inicial
+                    movimiento, lote = crear_lote_registro(
+                        producto=nuevo,
+                        cantidad=nuevo.stock,
+                        costo=nuevo.costo,
+                        fecha_caducidad=fecha_caducidad,
+                        usuario_id=session['user_id']
+                    )
+                    
+                    db.session.commit()
+                    print(f"Lote inicial y movimiento creados para producto a granel {nuevo.id}")
 
-                        db.session.add(nuevo_lote)
-                        db.session.add(movimiento_inicial)
-                        db.session.commit()
-
-                        print(f"Lote inicial creado para producto {nuevo.id} con fecha de caducidad {fecha_caducidad}")
                 except Exception as e:
-                        db.session.rollback()
-                        print(f"Error al crear lote inicial: {str(e)}")
-                        # No devolveremos el error al usuario, el producto ya se creó correctamente
+                    db.session.rollback()
+                    print(f"Error al crear lote inicial y movimiento: {str(e)}")
+                    import traceback
+                    traceback.print_exc()
                         
             flash('Producto a granel guardado exitosamente', 'success')
             
@@ -2028,6 +2122,195 @@ def historial_movimientos():
         has_next=has_next,
         total_movimientos=total_movimientos
     )
+
+@app.route('/generar-movimientos-iniciales-debug')
+@login_requerido
+def generar_movimientos_iniciales_debug():
+    """
+    Versión depurada para generar movimientos iniciales para productos sin movimiento inicial.
+    """
+    # Verificar si el usuario está logueado
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    
+    # Obtener ID de empresa del usuario actual
+    empresa_id = session.get('user_id')
+    
+    # Iniciar registro HTML para visualizar resultados
+    resultado_html = "<h2>Diagnóstico de Movimientos Iniciales</h2>"
+    resultado_html += "<style>.success{color:green;} .error{color:red;} .warning{color:orange;}</style>"
+    resultado_html += "<ul>"
+    
+    try:
+        # Obtener todos los productos aprobados con stock positivo
+        productos = Producto.query.filter_by(
+            empresa_id=empresa_id,
+            is_approved=True
+        ).filter(Producto.stock > 0).all()
+        
+        resultado_html += f"<li>Encontrados {len(productos)} productos con stock positivo</li>"
+        
+        productos_procesados = 0
+        movimientos_creados = 0
+        lotes_creados = 0
+        productos_con_errores = 0
+        
+        for producto in productos:
+            try:
+                productos_procesados += 1
+                resultado_html += f"<li>Procesando producto ID {producto.id}: {producto.nombre} (Stock: {producto.stock})</li>"
+                
+                # 1. Verificar si ya existe movimiento inicial
+                movimientos = MovimientoInventario.query.filter_by(
+                    producto_id=producto.id
+                ).all()
+                
+                movimiento_inicial_existe = False
+                for m in movimientos:
+                    if m.motivo == 'Registro inicial' or (m.motivo and 'registro' in m.motivo.lower()):
+                        movimiento_inicial_existe = True
+                        resultado_html += f"<li class='warning'>- Ya tiene movimiento inicial (ID: {m.id})</li>"
+                        break
+                
+                # 2. Verificar si ya existe lote de registro
+                lotes = LoteInventario.query.filter_by(
+                    producto_id=producto.id
+                ).all()
+                
+                lote_registro_existe = False
+                for l in lotes:
+                    if l.numero_lote == "Lote de Registro":
+                        lote_registro_existe = True
+                        resultado_html += f"<li class='warning'>- Ya tiene Lote de Registro (ID: {l.id}, Stock: {l.stock})</li>"
+                        break
+                
+                # 3. Crear movimiento y lote si no existen
+                if not movimiento_inicial_existe or not lote_registro_existe:
+                    # Determinar fecha_caducidad si aplica
+                    fecha_caducidad = None
+                    if hasattr(producto, 'has_caducidad') and producto.has_caducidad and producto.metodo_caducidad:
+                        try:
+                            fecha_actual = datetime.now()
+                            
+                            if producto.metodo_caducidad == '1 día':
+                                fecha_caducidad = fecha_actual + timedelta(days=1)
+                            elif producto.metodo_caducidad == '3 días':
+                                fecha_caducidad = fecha_actual + timedelta(days=3)
+                            elif producto.metodo_caducidad == '1 semana':
+                                fecha_caducidad = fecha_actual + timedelta(days=7)
+                            elif producto.metodo_caducidad == '2 semanas':
+                                fecha_caducidad = fecha_actual + timedelta(days=14)
+                            elif producto.metodo_caducidad == '1 mes':
+                                fecha_caducidad = fecha_actual + timedelta(days=30)
+                            elif producto.metodo_caducidad == '3 meses':
+                                fecha_caducidad = fecha_actual + timedelta(days=90)
+                            elif producto.metodo_caducidad == '6 meses':
+                                fecha_caducidad = fecha_actual + timedelta(days=180)
+                            elif producto.metodo_caducidad == '1 año':
+                                fecha_caducidad = fecha_actual + timedelta(days=365)
+                            elif producto.metodo_caducidad == '2 años':
+                                fecha_caducidad = fecha_actual + timedelta(days=730)
+                            elif producto.metodo_caducidad == '3 años':
+                                fecha_caducidad = fecha_actual + timedelta(days=1460)
+                            
+                            # Convertir a date
+                            if fecha_caducidad:
+                                fecha_caducidad = fecha_caducidad.date()
+                        except Exception as e:
+                            resultado_html += f"<li class='error'>- Error al calcular fecha de caducidad: {str(e)}</li>"
+                    
+                    # Crear movimiento si no existe
+                    if not movimiento_inicial_existe:
+                        try:
+                            costo = producto.costo if hasattr(producto, 'costo') and producto.costo is not None else 0
+                            nuevo_movimiento = MovimientoInventario(
+                                producto_id=producto.id,
+                                tipo_movimiento='ENTRADA',
+                                cantidad=float(producto.stock),
+                                motivo='Registro inicial',
+                                fecha_movimiento=datetime.now(),
+                                costo_unitario=float(costo),
+                                numero_lote="Lote de Registro",
+                                fecha_caducidad=fecha_caducidad,
+                                usuario_id=empresa_id
+                            )
+                            db.session.add(nuevo_movimiento)
+                            db.session.flush()  # Para obtener el ID asignado
+                            
+                            movimientos_creados += 1
+                            resultado_html += f"<li class='success'>- Creado movimiento inicial ID: {nuevo_movimiento.id}</li>"
+                        except Exception as e:
+                            resultado_html += f"<li class='error'>- Error al crear movimiento: {str(e)}</li>"
+                            import traceback
+                            resultado_html += f"<li class='error'>- Trace: {traceback.format_exc()}</li>"
+                    
+                    # Crear lote si no existe
+                    if not lote_registro_existe:
+                        try:
+                            costo = producto.costo if hasattr(producto, 'costo') and producto.costo is not None else 0
+                            nuevo_lote = LoteInventario(
+                                producto_id=producto.id,
+                                numero_lote="Lote de Registro",
+                                costo_unitario=float(costo),
+                                stock=float(producto.stock),
+                                fecha_entrada=datetime.now(),
+                                fecha_caducidad=fecha_caducidad,
+                                esta_activo=True
+                            )
+                            db.session.add(nuevo_lote)
+                            db.session.flush()  # Para obtener el ID asignado
+                            
+                            lotes_creados += 1
+                            resultado_html += f"<li class='success'>- Creado lote de registro ID: {nuevo_lote.id}</li>"
+                        except Exception as e:
+                            resultado_html += f"<li class='error'>- Error al crear lote: {str(e)}</li>"
+                            import traceback
+                            resultado_html += f"<li class='error'>- Trace: {traceback.format_exc()}</li>"
+                
+                # Actualizar todo el producto cada vez (commit por producto)
+                db.session.commit()
+                resultado_html += "<li class='success'>- Commit exitoso para este producto</li>"
+                
+            except Exception as e:
+                db.session.rollback()
+                productos_con_errores += 1
+                resultado_html += f"<li class='error'>Error general para producto {producto.id}: {str(e)}</li>"
+                import traceback
+                resultado_html += f"<li class='error'>Trace: {traceback.format_exc()}</li>"
+        
+        # Resumen final
+        resultado_html += "</ul>"
+        resultado_html += f"""
+        <h3>Resumen del Proceso</h3>
+        <ul>
+            <li>Productos procesados: {productos_procesados}</li>
+            <li>Movimientos iniciales creados: {movimientos_creados}</li>
+            <li>Lotes de registro creados: {lotes_creados}</li>
+            <li>Productos con errores: {productos_con_errores}</li>
+        </ul>
+        
+        <p>
+            <a href="{url_for('historial_movimientos')}?periodo=365" 
+               style="display:inline-block; padding:10px 20px; background-color:#e52e2e; 
+                      color:white; text-decoration:none; border-radius:5px;">
+                Ver Historial de Movimientos (Último año)
+            </a>
+        </p>
+        """
+        
+        return resultado_html
+        
+    except Exception as e:
+        db.session.rollback()
+        import traceback
+        return f"""
+        <h2>Error General en el Proceso</h2>
+        <p style="color:red;">Se produjo un error: {str(e)}</p>
+        <pre>{traceback.format_exc()}</pre>
+        <p>
+            <a href="{url_for('dashboard_home')}" style="color:#0066cc;">Volver al Dashboard</a>
+        </p>
+        """
 
 ##############################
 # ESCÁNER / CAPTURA RÁPIDA
