@@ -20,6 +20,7 @@
     --save-btn-color: #ff6b6b; /* Color rojo claro para botones de guardar */
     --save-btn-hover: #ff5252; /* Color hover para botones de guardar */
     --blue: #1a237e; /* Azul para el botón volver */
+    --discount-color: #1a9951; /* Verde para precios con descuento */
     
     /* Colores de estado */
     --green: #2ecc71;
@@ -403,13 +404,13 @@
   
   /* Contenedor de precio con altura fija */
   .product-price-container {
-    height: 32px;
+    height: 40px; /* Aumentado a 40px para acomodar precios con descuento */
     margin-top: 10px; /* Valor fijo en lugar de auto */
     margin-bottom: 12px;
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    align-items: flex-start;
     justify-content: flex-start;
-    gap: 6px;
   }
   
   .current-price {
@@ -422,6 +423,29 @@
     font-size: 13px; /* Aumentado de 12px a 13px */
     color: var(--text-secondary);
     font-weight: 500;
+  }
+  
+  /* Estilos para precios con descuento */
+  .price-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  
+  .original-price {
+    text-decoration: line-through;
+    color: #666;
+    font-size: 14px;
+    margin-top: 2px;
+  }
+  
+  .discount-badge {
+    background: #e74c3c;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    margin-left: 8px;
   }
   
   /* Contenedor de input con altura fija */
@@ -804,9 +828,28 @@
                       {% endif %}
                     </div>
                     <div class="product-price-container">
-                      <div class="current-price" id="display-price-{{ producto.id }}">
-                        ${{ '{:.2f}'.format(producto.precio_venta) }}
-                      </div>
+                      {% if producto.tiene_descuento %}
+                        <div class="price-row">
+                          {% if producto.tipo_descuento == 'percentage' %}
+                            {% set precio_final = producto.precio_venta * (1 - producto.valor_descuento / 100) %}
+                          {% else %}
+                            {% set precio_final = producto.precio_venta - producto.valor_descuento %}
+                          {% endif %}
+                          <div class="current-price" id="display-price-{{ producto.id }}" style="color: var(--discount-color);">
+                            ${{ '{:.2f}'.format(precio_final) }}
+                          </div>
+                          <div class="discount-badge" style="background: #e74c3c; color: white; padding: 3px 8px; border-radius: 4px; font-size: 11px; margin-left: 8px;">
+                            -{{ '{:.0f}'.format(producto.valor_descuento) }}{{ '%' if producto.tipo_descuento == 'percentage' else '$' }}
+                          </div>
+                        </div>
+                        <div class="original-price" style="text-decoration: line-through; color: #666; font-size: 14px; margin-top: 2px;">
+                          ${{ '{:.2f}'.format(producto.precio_venta) }}
+                        </div>
+                      {% else %}
+                        <div class="current-price" id="display-price-{{ producto.id }}">
+                          ${{ '{:.2f}'.format(producto.precio_venta) }}
+                        </div>
+                      {% endif %}
                       <div class="price-unit">
                         {% if producto.unidad and producto.unidad != 'NONE' %}
                           / {{ producto.unidad }}
@@ -954,6 +997,7 @@
     const inputContainer = button.closest('.price-input-container');
     const input = inputContainer.querySelector('.price-input');
     const currentPriceElement = document.getElementById(`display-price-${productId}`);
+    const priceContainer = currentPriceElement.closest('.product-price-container');
     
     // Obtener el valor sin comas
     const inputValue = input.value.replace(/,/g, '');
@@ -989,8 +1033,29 @@
         const [intPart, decPart] = newPrice.toFixed(2).split('.');
         const formattedPrice = '$' + formatNumber(intPart) + '.' + decPart;
         
-        // Actualizar la interfaz
-        currentPriceElement.textContent = formattedPrice;
+        // Si hay descuento activo, mantener la estructura existente
+        if (data.tiene_descuento) {
+          // Verificar si el precio final y la estructura de descuento están en la respuesta
+          if (data.precio_final !== undefined) {
+            const [finalIntPart, finalDecPart] = parseFloat(data.precio_final).toFixed(2).split('.');
+            const formattedFinalPrice = '$' + formatNumber(finalIntPart) + '.' + finalDecPart;
+            
+            // Actualizar solo el precio original (tachado)
+            const originalPriceElement = priceContainer.querySelector('.original-price');
+            if (originalPriceElement) {
+              originalPriceElement.textContent = formattedPrice;
+            }
+            
+            // Actualizar el precio actual (con descuento)
+            currentPriceElement.textContent = formattedFinalPrice;
+            currentPriceElement.style.color = 'var(--discount-color)';
+          }
+        } else {
+          // Sin descuento, actualizar normalmente
+          currentPriceElement.textContent = formattedPrice;
+          currentPriceElement.style.color = ''; // Reset color
+        }
+        
         input.dataset.originalPrice = newPrice;
         
         // Mostrar notificación de éxito

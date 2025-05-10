@@ -133,6 +133,24 @@ class Producto(db.Model):
     # Divisa (mxn, usd, etc.)
     divisa = db.Column(db.String(3), default='mxn')
 
+    # =========================================================================
+    # NUEVO: CAMPOS PARA SISTEMA DE DESCUENTOS
+    # =========================================================================
+    # Indica si el producto tiene un descuento activo
+    tiene_descuento = db.Column(db.Boolean, default=False)
+    
+    # Tipo de descuento: 'percentage' (porcentaje) o 'fixed' (cantidad fija)
+    tipo_descuento = db.Column(db.String(20), nullable=True)
+    
+    # Valor del descuento (porcentaje o cantidad)
+    valor_descuento = db.Column(db.Float, default=0.0)
+    
+    # Fecha de inicio del descuento (opcional)
+    fecha_inicio_descuento = db.Column(db.DateTime, nullable=True)
+    
+    # Fecha de fin del descuento (opcional)
+    fecha_fin_descuento = db.Column(db.DateTime, nullable=True)
+
     def __repr__(self):
         return (f"<Producto {self.nombre} (ID={self.id}), "
                 f"stock={self.stock}, costo={self.costo}, "

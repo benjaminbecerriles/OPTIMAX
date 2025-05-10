@@ -8,7 +8,7 @@
   :root {
     --font-apple: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', Helvetica, Arial, sans-serif;
     
-    /* Colores esenciales - TEXTO OSCURECIDO */
+    /* Colores esenciales */
     --text-color: #1d1d1f;
     --text-secondary: #515154;
     --text-tertiary: #86868b;
@@ -112,14 +112,111 @@
     color: #ffffff;
   }
   
-  /* Barra de búsqueda */
+  /* Controles simplificados */
+  .controls-container {
+    background-color: var(--light-background);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 48px;
+    border: 1px solid #e0e0e0;
+  }
+  
+  .controls-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: var(--text-color);
+  }
+  
+  .controls-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  
+  .discount-input-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: white;
+    border: 1px solid #d1d1d6;
+    border-radius: 8px;
+    padding: 8px 12px;
+    min-width: 180px;
+  }
+  
+  .discount-label {
+    font-size: 15px;
+    color: var(--text-secondary);
+    min-width: 60px;
+  }
+  
+  .discount-input {
+    width: 60px;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-color);
+    text-align: center;
+  }
+  
+  .discount-unit {
+    font-size: 15px;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+  
+  .toggle-buttons {
+    display: flex;
+    gap: 8px;
+  }
+  
+  .toggle-btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: 1px solid #d1d1d6;
+    background-color: white;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--text-secondary);
+  }
+  
+  .toggle-btn.active {
+    background-color: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+  
+  .apply-btn {
+    background-color: var(--discount-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 24px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(26, 153, 81, 0.3);
+  }
+  
+  .apply-btn:hover {
+    background-color: var(--discount-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(26, 153, 81, 0.4);
+  }
+  
+  /* Búsqueda */
   .search-container {
     display: flex;
     gap: 0.75rem;
-    margin-bottom: 100px;
+    margin-bottom: 32px;
     position: relative;
     align-items: center;
-    flex-wrap: wrap;
   }
   
   .search-box {
@@ -158,272 +255,82 @@
     outline: none;
   }
   
-  /* Controles de descuento */
-  .discount-controls {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-  
-  .discount-type-toggle {
-    display: flex;
-    background-color: var(--light-background);
-    border-radius: 8px;
-    border: 1px solid #dddddd;
-    overflow: hidden;
-  }
-  
-  .discount-toggle-btn {
-    padding: 0.5rem 1rem;
-    font-size: 0.95rem;
-    font-weight: 500;
-    border: none;
-    background-color: transparent;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    color: var(--text-secondary);
-  }
-  
-  .discount-toggle-btn.active {
-    background-color: var(--accent);
-    color: white;
-  }
-  
-  .discount-value-container {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    background-color: var(--light-background);
-    border: 1px solid #dddddd;
-    border-radius: 8px;
-    padding: 0.5rem 1rem;
-    min-width: 150px;
-  }
-  
-  .discount-input {
-    border: none;
-    background: transparent;
-    outline: none;
-    font-size: 1rem;
-    width: 60px;
-    text-align: center;
-    color: var(--text-color);
-    font-weight: 500;
-  }
-  
-  .discount-symbol {
-    color: var(--text-secondary);
-    font-weight: 500;
-  }
-  
-  .apply-global-btn {
-    background-color: var(--discount-color);
-    color: white;
-    border-radius: 8px;
-    border: none;
-    padding: 0.75rem 1.5rem;
-    font-size: 0.95rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 4px rgba(26, 153, 81, 0.3);
-  }
-  
-  .apply-global-btn:hover {
-    background-color: var(--discount-hover);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(26, 153, 81, 0.4);
-  }
-  
-  /* Categorías */
-  .category-section {
-    margin-bottom: 50px;
-    border: 1px solid #eaeaea;
-    border-radius: 12px;
-    padding: 25px;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.05);
-    background-color: #fafafa;
-  }
-  
-  .category-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #f0f0f0;
-  }
-  
-  .category-title {
-    font-size: 22px;
-    font-weight: 600;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    color: var(--text-color);
-  }
-  
-  .category-color-dot {
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-  }
-  
-  .category-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
-    background-color: #eeeeee;
-    color: #505050;
-    font-size: 13px;
-    font-weight: 600;
-  }
-  
-  .category-discount-controls {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-  
-  .apply-category-btn {
-    background-color: var(--discount-color);
-    color: white;
-    border-radius: 6px;
-    border: none;
-    padding: 0.5rem 1rem;
-    font-size: 0.9rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-  
-  .apply-category-btn:hover {
-    background-color: var(--discount-hover);
-  }
-  
-  /* Slider de productos */
-  .product-slider-container {
-    position: relative;
-    padding: 0 70px;
-    margin: 0 -10px;
-  }
-  
-  .product-slider {
-    display: flex;
-    gap: 16px;
-    overflow-x: hidden;
-    scroll-behavior: smooth;
-    padding: 4px 0 12px 0;
-    margin-bottom: 4px;
+  /* Grid de productos */
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+    width: 100%;
   }
   
   .product-card {
-    flex: 0 0 220px;
-    height: 460px;
-    border-radius: 12px;
-    overflow: hidden;
     background-color: white;
     border: 1px solid #e0e0e0;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.07);
-    display: flex;
-    flex-direction: column;
-    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    cursor: pointer;
   }
   
   .product-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 15px rgba(0,0,0,0.08);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  }
+  
+  .product-card.has-discount {
+    border-color: var(--discount-color);
+    background-color: rgba(26, 153, 81, 0.02);
   }
   
   .product-image-container {
-    height: 140px;
-    min-height: 140px;
+    height: 200px;
     display: flex;
     justify-content: center;
     align-items: center;
+    background-color: #f8f9fa;
     overflow: hidden;
-    background-color: #f8f8f8;
-    padding: 5px;
   }
   
   .product-image {
-    width: 100%;
-    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
     object-fit: contain;
   }
   
-  .product-details {
+  .product-info {
     padding: 16px;
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    height: 320px;
-  }
-  
-  .product-info-container {
-    display: flex;
-    flex-direction: column;
-    height: 78px;
-    margin-bottom: 10px;
-    overflow: hidden;
-    position: relative;
   }
   
   .product-name {
     font-size: 16px;
     font-weight: 600;
+    margin-bottom: 4px;
+    color: var(--text-color);
     overflow: hidden;
     text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    line-height: 1.4;
-    color: var(--text-color);
-    height: 46px;
-    margin-bottom: 0;
+    white-space: nowrap;
   }
   
   .product-brand {
     font-size: 13px;
-    color: #606060;
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    line-height: 1.2;
-  }
-  
-  /* Precios y descuentos */
-  .product-price-container {
-    height: 48px;
-    margin-top: 10px;
+    color: var(--text-secondary);
     margin-bottom: 12px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: flex-start;
   }
   
-  .price-row {
+  .product-price-section {
+    margin-bottom: 16px;
+  }
+  
+  .price-display {
     display: flex;
-    align-items: center;
-    justify-content: flex-start;
+    align-items: baseline;
     gap: 8px;
-    width: 100%;
+    margin-bottom: 4px;
   }
   
   .current-price {
-    font-size: 18px;
-    font-weight: 600;
+    font-size: 20px;
+    font-weight: 700;
     color: var(--text-color);
   }
   
@@ -434,169 +341,125 @@
   }
   
   .original-price {
-    font-size: 14px;
+    font-size: 16px;
     color: var(--text-secondary);
     text-decoration: line-through;
   }
   
   .discount-badge {
-    font-size: 12px;
-    color: white;
     background-color: var(--red);
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
     padding: 2px 6px;
     border-radius: 4px;
-    font-weight: 600;
   }
   
-  /* Controles de descuento del producto */
-  .discount-input-container {
-    height: 120px;
-    margin-top: 5px;
+  .product-controls {
     display: flex;
-    flex-direction: column;
+    align-items: center;
     gap: 8px;
   }
   
-  .product-discount-controls {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    height: 36px;
-  }
-  
-  .discount-type-select {
-    flex: 1;
-    border: 1px solid #d1d1d6;
-    border-radius: 6px;
-    height: 100%;
-    background-color: white;
-    font-size: 13px;
-    padding: 0 8px;
-    outline: none;
-    color: var(--text-color);
-  }
-  
-  .discount-value-input {
+  .mini-input {
     width: 50px;
+    padding: 6px 8px;
     border: 1px solid #d1d1d6;
     border-radius: 6px;
-    height: 100%;
-    text-align: center;
-    font-size: 13px;
-    outline: none;
-    background-color: white;
-    color: var(--text-color);
-  }
-  
-  .discount-symbol-text {
     font-size: 14px;
-    color: var(--text-secondary);
-    font-weight: 500;
-    min-width: 15px;
     text-align: center;
+    outline: none;
   }
   
-  .apply-discount-btn {
-    width: 100%;
-    height: 42px;
+  .mini-btn {
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .apply-mini-btn {
     background-color: var(--discount-color);
     color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s ease, transform 0.2s ease;
-    box-shadow: 0 2px 4px rgba(26, 153, 81, 0.2);
-    margin-top: 8px;
   }
   
-  .apply-discount-btn:hover {
+  .apply-mini-btn:hover {
     background-color: var(--discount-hover);
-    transform: translateY(-1px);
   }
   
-  .clear-discount-btn {
-    width: 100%;
-    height: 32px;
+  .remove-mini-btn {
     background-color: transparent;
-    color: var(--text-secondary);
-    border: 1px solid #d1d1d6;
-    border-radius: 6px;
-    font-size: 12px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    margin-top: 4px;
-  }
-  
-  .clear-discount-btn:hover {
-    background-color: #f8f8f8;
     color: var(--red);
-    border-color: var(--red);
+    border: 1px solid #d1d1d6;
   }
   
-  /* Botones de navegación del slider */
-  .slider-arrow {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
+  .remove-mini-btn:hover {
+    background-color: var(--red);
+    color: white;
+  }
+  
+  /* Estado vacío */
+  .empty-state {
+    padding: 64px 32px;
+    text-align: center;
+    background-color: var(--light-background);
+    border-radius: 12px;
+    margin: 48px 0;
+  }
+  
+  .empty-icon {
+    font-size: 48px;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+  }
+  
+  .empty-message {
+    font-size: 18px;
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+  }
+  
+  .empty-action {
+    display: inline-block;
+    padding: 12px 24px;
     background-color: var(--accent);
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 2px 6px rgba(229, 46, 46, 0.3);
-    z-index: 10;
+    color: white;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
     transition: all 0.2s ease;
   }
   
-  .slider-arrow:hover {
+  .empty-action:hover {
     background-color: var(--accent-hover);
-    transform: translateY(-50%) scale(1.1);
-  }
-  
-  .slider-arrow-left {
-    left: 20px;
-  }
-  
-  .slider-arrow-right {
-    right: 20px;
-  }
-  
-  .slider-arrow svg {
-    width: 18px;
-    height: 18px;
-    fill: none;
-    stroke: white;
-    stroke-width: 2.5;
+    transform: translateY(-2px);
   }
   
   /* Toast notificaciones */
   .toast-container {
     position: fixed;
-    bottom: 20px;
-    right: 20px;
+    bottom: 24px;
+    right: 24px;
     z-index: 1000;
+    max-width: 400px;
   }
   
   .toast {
     background-color: #333;
     color: white;
-    padding: 14px 20px;
+    padding: 16px 20px;
     border-radius: 8px;
-    margin-top: 8px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    margin-top: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     display: flex;
     align-items: center;
-    gap: 10px;
-    animation: slideIn 0.3s ease, fadeOut 0.5s ease 2.5s forwards;
-    max-width: 350px;
-    font-weight: 500;
+    gap: 12px;
+    animation: slideIn 0.3s ease;
+    opacity: 1;
+    transition: all 0.3s ease;
   }
   
   .toast.success {
@@ -605,6 +468,11 @@
   
   .toast.error {
     background-color: var(--red);
+  }
+  
+  .toast.fade-out {
+    opacity: 0;
+    transform: translateY(-20px);
   }
   
   @keyframes slideIn {
@@ -618,100 +486,34 @@
     }
   }
   
-  @keyframes fadeOut {
-    from {
-      opacity: 1;
-    }
-    to {
-      opacity: 0;
-      transform: translateY(-20px);
-    }
-  }
-  
-  /* Estado vacío */
-  .empty-state {
-    padding: 50px 0;
-    text-align: center;
-    background-color: var(--light-background);
-    border-radius: 12px;
-    margin-bottom: 36px;
-  }
-  
-  .empty-icon {
-    font-size: 32px;
-    color: var(--text-secondary);
-    margin-bottom: 14px;
-  }
-  
-  .empty-message {
-    font-size: 16px;
-    color: var(--text-secondary);
-    margin-bottom: 20px;
-    max-width: 300px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  
   /* Responsive */
   @media (max-width: 768px) {
-    .page-header {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 1rem;
+    .apple-container {
+      padding: 24px 16px;
     }
     
-    .header-actions {
-      width: 100%;
+    .page-header {
+      flex-direction: column;
+      gap: 16px;
+    }
+    
+    .controls-content {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    
+    .products-grid {
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 16px;
     }
     
     .search-container {
       flex-direction: column;
-      margin-bottom: 60px;
     }
     
     .search-box {
       width: 100%;
       min-width: auto;
-    }
-    
-    .discount-controls {
-      width: 100%;
-      justify-content: flex-start;
-    }
-    
-    .product-slider {
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      scroll-snap-type: x mandatory;
-      padding-bottom: 16px;
-    }
-    
-    .product-card {
-      flex: 0 0 70%;
-      scroll-snap-align: start;
-      height: 490px;
-    }
-    
-    .product-slider-container {
-      padding: 0;
-    }
-    
-    .slider-arrow {
-      display: none;
-    }
-    
-    h1 {
-      font-size: 26px;
-    }
-    
-    .page-description {
-      font-size: 15px;
-    }
-  }
-  
-  @media (max-width: 480px) {
-    .product-card {
-      flex: 0 0 85%;
     }
   }
 </style>
@@ -721,7 +523,7 @@
   <div class="page-header">
     <div class="header-title-container">
       <h1 class="page-title">Aplicar descuentos</h1>
-      <p class="page-description">Aplica descuentos a tus productos de forma rápida y sencilla</p>
+      <p class="page-description">Aplica descuentos de forma rápida y sencilla con un solo clic</p>
     </div>
     <div class="header-actions">
       <a href="{{ url_for('dashboard_inventario') }}" class="btn-action btn-volver">
@@ -731,259 +533,245 @@
     </div>
   </div>
   
-  <!-- Controles principales -->
-  <div class="search-container">
-    <div class="search-box">
-      <i class="fas fa-search"></i>
-      <input type="text" id="searchInput" placeholder="Buscar por nombre, marca o código de barras...">
-    </div>
-    
-    <div class="discount-controls">
-      <div class="discount-type-toggle">
-        <button class="discount-toggle-btn active" data-type="percentage">% Porcentaje</button>
-        <button class="discount-toggle-btn" data-type="fixed">$ Cantidad fija</button>
+  <!-- Controles simplificados -->
+  <div class="controls-container">
+    <h3 class="controls-title">Aplicar descuento general</h3>
+    <div class="controls-content">
+      <div class="discount-input-group">
+        <span class="discount-label">Descuento:</span>
+        <input type="number" class="discount-input" id="globalDiscountValue" value="10" min="0" max="100">
+        <span class="discount-unit" id="discountUnit">%</span>
       </div>
       
-      <div class="discount-value-container">
-        <input type="number" class="discount-input" id="globalDiscountValue" value="10" min="0" max="99">
-        <span class="discount-symbol" id="globalDiscountSymbol">%</span>
+      <div class="toggle-buttons">
+        <button class="toggle-btn active" data-type="percentage">Porcentaje</button>
+        <button class="toggle-btn" data-type="fixed">Cantidad fija</button>
       </div>
       
-      <button class="apply-global-btn" onclick="applyGlobalDiscount()">
+      <button class="apply-btn" onclick="applyGlobalDiscount()">
         <i class="fas fa-tags"></i>
-        Aplicar a todos
+        Aplicar a todos los productos
       </button>
     </div>
   </div>
   
-  <!-- Contenedor para categorías y productos -->
-  <div id="categoriesContainer">
-    {% if categorias and categorias|length > 0 %}
-      {% set categorias_ordenadas = [] %}
-      {% for categoria in categorias %}
-        {% set productos_categoria = productos|selectattr('categoria', 'equalto', categoria.nombre)|list %}
-        {% if productos_categoria|length > 0 %}
-          {% set _ = categorias_ordenadas.append({'nombre': categoria.nombre, 'color': categoria.color, 'count': productos_categoria|length}) %}
-        {% endif %}
-      {% endfor %}
-      {% set categorias_ordenadas = categorias_ordenadas|sort(attribute='count', reverse=true) %}
-      
-      {% for categoria in categorias_ordenadas %}
-        {% set productos_categoria = productos|selectattr('categoria', 'equalto', categoria.nombre)|list %}
-        <div class="category-section" data-category="{{ categoria.nombre|lower }}">
-          <div class="category-header">
-            <h2 class="category-title">
-              <span class="category-color-dot" style="background-color: {{ categoria.color }}"></span>
-              {{ categoria.nombre|title }}
-              <span class="category-badge">{{ categoria.count }}</span>
-            </h2>
-            
-            <div class="category-discount-controls">
-              <div class="discount-type-select-container">
-                <select class="discount-type-select category-discount-type" id="categoryDiscountType-{{ categoria.nombre|lower|replace(' ', '-') }}">
-                  <option value="percentage">% Porcentaje</option>
-                  <option value="fixed">$ Cantidad fija</option>
-                </select>
-              </div>
-              
-              <div class="discount-value-container">
-                <input type="number" class="discount-input category-discount-value" id="categoryDiscountValue-{{ categoria.nombre|lower|replace(' ', '-') }}" value="10" min="0" max="99">
-                <span class="discount-symbol" id="categoryDiscountSymbol-{{ categoria.nombre|lower|replace(' ', '-') }}">%</span>
-              </div>
-              
-              <button class="apply-category-btn" onclick="applyCategoryDiscount('{{ categoria.nombre }}')">Aplicar a categoría</button>
-            </div>
+  <!-- Búsqueda -->
+  <div class="search-container">
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input type="text" id="searchInput" placeholder="Buscar por nombre, marca o código...">
+    </div>
+  </div>
+  
+  <!-- Grid de productos -->
+  <div class="products-grid" id="productsGrid">
+    {% if productos and productos|length > 0 %}
+      {% for producto in productos %}
+        <div class="product-card" 
+             data-product-id="{{ producto.id }}" 
+             data-original-price="{{ producto.precio_venta }}"
+             data-has-discount="{{ producto.tiene_descuento|lower }}"
+             data-discount-type="{{ producto.tipo_descuento if producto.tiene_descuento else '' }}"
+             data-discount-value="{{ producto.valor_descuento if producto.tiene_descuento else 0 }}"
+             data-searchable="{{ (producto.nombre + ' ' + (producto.marca or '') + ' ' + (producto.codigo_barras_externo or ''))|lower }}">
+          
+          <div class="product-image-container">
+            {% if producto.foto %}
+              <img src="{{ url_for('static', filename='uploads/' ~ producto.foto) }}" class="product-image" alt="{{ producto.nombre }}">
+            {% else %}
+              <i class="fas fa-box" style="font-size: 48px; color: #ccc;"></i>
+            {% endif %}
           </div>
           
-          <div class="product-slider-container">
-            <div class="slider-arrow slider-arrow-left" onclick="scrollSlider('{{ categoria.nombre|lower }}', 'left')">
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M15 18L9 12L15 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
+          <div class="product-info">
+            <div class="product-name">{{ producto.nombre }}</div>
+            {% if producto.marca %}
+              <div class="product-brand">{{ producto.marca }}</div>
+            {% endif %}
+            
+            <div class="product-price-section">
+              <div class="price-display">
+                {% if producto.tiene_descuento %}
+                  {% if producto.tipo_descuento == 'percentage' %}
+                    {% set precio_final = producto.precio_venta * (1 - producto.valor_descuento / 100) %}
+                  {% else %}
+                    {% set precio_final = producto.precio_venta - producto.valor_descuento %}
+                  {% endif %}
+                  <span class="discounted-price">${{ '{:.2f}'.format(precio_final) }}</span>
+                  <span class="original-price">${{ '{:.2f}'.format(producto.precio_venta) }}</span>
+                  <span class="discount-badge">-{{ '{:.0f}'.format(producto.valor_descuento) if producto.tipo_descuento == 'fixed' else '{:.0f}'.format(producto.valor_descuento) }}{{ '$' if producto.tipo_descuento == 'fixed' else '%' }}</span>
+                {% else %}
+                  <span class="current-price">${{ '{:.2f}'.format(producto.precio_venta) }}</span>
+                {% endif %}
+              </div>
             </div>
             
-            <div class="product-slider" id="slider-{{ categoria.nombre|lower }}">
-              {% for producto in productos_categoria %}
-                <div class="product-card" data-product-id="{{ producto.id }}" data-product-name="{{ producto.nombre|lower }}" data-product-barcode="{{ producto.codigo_barras_externo|lower if producto.codigo_barras_externo else '' }}" data-original-price="{{ producto.precio_venta }}">
-                  <div class="product-image-container">
-                    {% if producto.foto %}
-                      <img src="{{ url_for('static', filename='uploads/' ~ producto.foto) }}" class="product-image" alt="{{ producto.nombre }}">
-                    {% else %}
-                      <div class="product-image" style="display: flex; align-items: center; justify-content: center;">
-                        <i class="fas fa-box" style="color: var(--text-secondary);"></i>
-                      </div>
-                    {% endif %}
-                  </div>
-                  <div class="product-details">
-                    <div class="product-info-container">
-                      <div class="product-name">{{ producto.nombre }}</div>
-                      {% if producto.marca %}
-                        <div class="product-brand">{{ producto.marca }}</div>
-                      {% else %}
-                        <div class="product-brand" style="opacity: 0;">-</div>
-                      {% endif %}
-                    </div>
-                    <div class="product-price-container">
-                      <div class="price-row">
-                        <div class="current-price" id="current-price-{{ producto.id }}">
-                          ${{ '{:.2f}'.format(producto.precio_venta) }}
-                        </div>
-                      </div>
-                    </div>
-                    <div class="discount-input-container">
-                      <div class="product-discount-controls">
-                        <select class="discount-type-select product-discount-type" id="productDiscountType-{{ producto.id }}">
-                          <option value="percentage">%</option>
-                          <option value="fixed">$</option>
-                        </select>
-                        <input type="number" class="discount-value-input" id="productDiscountValue-{{ producto.id }}" value="10" min="0" max="99" oninput="previewDiscount({{ producto.id }})">
-                        <span class="discount-symbol-text" id="productDiscountSymbol-{{ producto.id }}">%</span>
-                      </div>
-                      <button class="apply-discount-btn" onclick="applyDiscount({{ producto.id }})">Aplicar descuento</button>
-                      <button class="clear-discount-btn" onclick="clearDiscount({{ producto.id }})" style="display: none;">Quitar descuento</button>
-                    </div>
-                  </div>
-                </div>
-              {% endfor %}
-            </div>
-            
-            <div class="slider-arrow slider-arrow-right" onclick="scrollSlider('{{ categoria.nombre|lower }}', 'right')">
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M9 18L15 12L9 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
+            <div class="product-controls">
+              <input type="number" class="mini-input" value="10" min="0" data-product-id="{{ producto.id }}">
+              <span style="font-size: 13px;">%</span>
+              {% if producto.tiene_descuento %}
+                <button class="mini-btn remove-mini-btn" onclick="removeDiscount({{ producto.id }})">
+                  Quitar
+                </button>
+              {% else %}
+                <button class="mini-btn apply-mini-btn" onclick="applyProductDiscount({{ producto.id }})">
+                  Aplicar
+                </button>
+              {% endif %}
             </div>
           </div>
         </div>
       {% endfor %}
     {% else %}
-      <!-- Estado vacío -->
       <div class="empty-state">
         <div class="empty-icon">
           <i class="fas fa-tags"></i>
         </div>
-        <p class="empty-message">No hay productos en tu inventario</p>
-        <a href="{{ url_for('nuevo_producto') }}" class="button-link" style="display: inline-block; padding: 10px 20px; background-color: var(--accent); color: white; text-decoration: none; border-radius: 6px; margin-top: 16px;">
+        <div class="empty-message">No hay productos en tu inventario</div>
+        <a href="{{ url_for('nuevo_producto') }}" class="empty-action">
           Agregar producto
         </a>
       </div>
     {% endif %}
   </div>
   
-  <!-- Contenedor de notificaciones toast -->
+  <!-- Contenedor de notificaciones -->
   <div class="toast-container" id="toastContainer"></div>
 </div>
 
 <script>
   // Variables globales
-  let globalDiscountType = 'percentage';
+  let currentDiscountType = 'percentage';
   
-  // ----------------------------------------------------
-  // Funciones para el slider de productos
-  // ----------------------------------------------------
-  function scrollSlider(categoryId, direction) {
-    const slider = document.getElementById(`slider-${categoryId}`);
-    if (!slider) return;
-    
-    const cardWidth = slider.querySelector('.product-card').offsetWidth + 16;
-    const scrollAmount = cardWidth * 3;
-    
-    if (direction === 'left') {
-      slider.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
-    } else {
-      slider.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-    }
+  // Inicialización
+  document.addEventListener('DOMContentLoaded', function() {
+    initializeDiscounts();
+    initializeSearch();
+    initializeToggles();
+  });
+  
+  // Configurar descuentos
+  function initializeDiscounts() {
+    // Actualizar el estado visual de las tarjetas con descuento
+    document.querySelectorAll('.product-card').forEach(card => {
+      if (card.dataset.hasDiscount === 'true') {
+        card.classList.add('has-discount');
+      }
+    });
   }
   
-  // ----------------------------------------------------
-  // Función para formatear moneda
-  // ----------------------------------------------------
-  function formatCurrency(number) {
-    return new Intl.NumberFormat('es-MX', {
-      style: 'currency',
-      currency: 'MXN'
-    }).format(number);
+  // Configurar búsqueda
+  function initializeSearch() {
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('input', function() {
+      const searchTerm = this.value.toLowerCase();
+      const cards = document.querySelectorAll('.product-card');
+      
+      cards.forEach(card => {
+        const searchable = card.dataset.searchable;
+        if (searchable.includes(searchTerm)) {
+          card.style.display = 'block';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    });
   }
   
-  // ----------------------------------------------------
-  // Función para previsualizar descuento
-  // ----------------------------------------------------
-  function previewDiscount(productId) {
-    const card = document.querySelector(`.product-card[data-product-id="${productId}"]`);
-    const originalPrice = parseFloat(card.dataset.originalPrice);
-    const discountValue = parseFloat(document.getElementById(`productDiscountValue-${productId}`).value);
-    const discountType = document.getElementById(`productDiscountType-${productId}`).value;
-    const currentPriceEl = document.getElementById(`current-price-${productId}`);
+  // Configurar toggles
+  function initializeToggles() {
+    const toggleBtns = document.querySelectorAll('.toggle-btn');
+    const discountUnit = document.getElementById('discountUnit');
     
-    if (!discountValue || discountValue <= 0) {
-      currentPriceEl.innerHTML = formatCurrency(originalPrice);
-      return;
-    }
-    
-    let newPrice;
-    let discountAmount;
-    
-    if (discountType === 'percentage') {
-      discountAmount = originalPrice * (discountValue / 100);
-      newPrice = originalPrice - discountAmount;
-    } else {
-      discountAmount = discountValue;
-      newPrice = originalPrice - discountAmount;
-    }
-    
-    if (newPrice < 0) newPrice = 0;
-    
-    currentPriceEl.innerHTML = `
-      <div style="display: flex; flex-direction: column; align-items: flex-start;">
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <span class="discounted-price">${formatCurrency(newPrice)}</span>
-          <span class="discount-badge">-${discountType === 'percentage' ? discountValue + '%' : formatCurrency(discountValue)}</span>
-        </div>
-        <span class="original-price">${formatCurrency(originalPrice)}</span>
-      </div>
-    `;
+    toggleBtns.forEach(btn => {
+      btn.addEventListener('click', function() {
+        toggleBtns.forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        currentDiscountType = this.dataset.type;
+        discountUnit.textContent = currentDiscountType === 'percentage' ? '%' : '$';
+      });
+    });
   }
   
-  // ----------------------------------------------------
-  // Aplicar descuento individual
-  // ----------------------------------------------------
-  function applyDiscount(productId) {
-    const card = document.querySelector(`.product-card[data-product-id="${productId}"]`);
-    const originalPrice = parseFloat(card.dataset.originalPrice);
-    const discountValue = parseFloat(document.getElementById(`productDiscountValue-${productId}`).value);
-    const discountType = document.getElementById(`productDiscountType-${productId}`).value;
+  // Aplicar descuento global
+  function applyGlobalDiscount() {
+    const discountValue = parseFloat(document.getElementById('globalDiscountValue').value);
     
     if (!discountValue || discountValue <= 0) {
       showToast('Por favor ingresa un descuento válido', 'error');
       return;
     }
     
-    let newPrice;
-    if (discountType === 'percentage') {
-      newPrice = originalPrice * (1 - discountValue / 100);
-    } else {
-      newPrice = originalPrice - discountValue;
+    const cards = document.querySelectorAll('.product-card');
+    let successCount = 0;
+    const promises = [];
+    
+    cards.forEach(card => {
+      if (card.style.display === 'none') return; // Skip hidden products
+      
+      const productId = card.dataset.productId;
+      const originalPrice = parseFloat(card.dataset.originalPrice);
+      
+      // Solo aplicar descuento sin cambiar el precio base
+      const promise = fetch(`/api/apply_discount/${productId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: currentDiscountType,
+          value: discountValue
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          updateProductCardDisplay(productId, originalPrice, discountValue, currentDiscountType);
+          successCount++;
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+      
+      promises.push(promise);
+    });
+    
+    Promise.all(promises).then(() => {
+      showToast(`Descuento aplicado a ${successCount} productos`, 'success');
+    });
+  }
+  
+  // Aplicar descuento individual - FUNCIÓN CORREGIDA
+  function applyProductDiscount(productId) {
+    const card = document.querySelector(`.product-card[data-product-id="${productId}"]`);
+    const input = card.querySelector('.mini-input');
+    const discountValue = parseFloat(input.value);
+    const originalPrice = parseFloat(card.dataset.originalPrice);
+    
+    if (!discountValue || discountValue <= 0) {
+      showToast('Por favor ingresa un descuento válido', 'error');
+      return;
     }
     
-    if (newPrice < 0) newPrice = 0;
+    // Por ahora, siempre usar porcentaje para descuentos individuales
+    const discountType = 'percentage';
     
-    // Actualizar precio en servidor
-    fetch(`/api/update_price/${productId}`, {
+    // Solo aplicar el descuento, NO cambiar el precio base
+    fetch(`/api/apply_discount/${productId}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ price: newPrice })
+      body: JSON.stringify({
+        type: discountType,
+        value: discountValue
+      })
     })
     .then(response => response.json())
     .then(data => {
       if (data.success) {
-        // Actualizar precio original para futuros cálculos
-        card.dataset.originalPrice = originalPrice;
-        
-        // Mostrar botón de quitar descuento
-        const clearBtn = card.querySelector('.clear-discount-btn');
-        clearBtn.style.display = 'block';
-        
+        updateProductCardDisplay(productId, originalPrice, discountValue, discountType);
         showToast('Descuento aplicado correctamente', 'success');
       } else {
         showToast('Error al aplicar descuento', 'error');
@@ -995,34 +783,38 @@
     });
   }
   
-  // ----------------------------------------------------
   // Quitar descuento
-  // ----------------------------------------------------
-  function clearDiscount(productId) {
+  function removeDiscount(productId) {
     const card = document.querySelector(`.product-card[data-product-id="${productId}"]`);
     const originalPrice = parseFloat(card.dataset.originalPrice);
     
-    // Restaurar precio original
-    fetch(`/api/update_price/${productId}`, {
+    // Solo remover descuento, sin cambiar el precio base
+    fetch(`/api/remove_discount/${productId}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ price: originalPrice })
+      }
     })
     .then(response => response.json())
     .then(data => {
       if (data.success) {
-        // Actualizar vista
-        const currentPriceEl = document.getElementById(`current-price-${productId}`);
-        currentPriceEl.innerHTML = formatCurrency(originalPrice);
+        // Actualizar vista - mostrar el precio base original
+        const priceDisplay = card.querySelector('.price-display');
+        priceDisplay.innerHTML = `<span class="current-price">$${originalPrice.toFixed(2)}</span>`;
         
-        // Ocultar botón de quitar descuento
-        const clearBtn = card.querySelector('.clear-discount-btn');
-        clearBtn.style.display = 'none';
+        // Cambiar botón a "Aplicar"
+        const controlsDiv = card.querySelector('.product-controls');
+        controlsDiv.innerHTML = `
+          <input type="number" class="mini-input" value="10" min="0" data-product-id="${productId}">
+          <span style="font-size: 13px;">%</span>
+          <button class="mini-btn apply-mini-btn" onclick="applyProductDiscount(${productId})">
+            Aplicar
+          </button>
+        `;
         
-        // Resetear input
-        document.getElementById(`productDiscountValue-${productId}`).value = '10';
+        // Quitar clase de descuento
+        card.classList.remove('has-discount');
+        card.dataset.hasDiscount = 'false';
         
         showToast('Descuento removido', 'success');
       } else {
@@ -1035,215 +827,66 @@
     });
   }
   
-  // ----------------------------------------------------
-  // Aplicar descuento a categoría
-  // ----------------------------------------------------
-  function applyCategoryDiscount(categoryName) {
-    const categoryId = categoryName.toLowerCase().replace(' ', '-');
-    const discountType = document.getElementById(`categoryDiscountType-${categoryId}`).value;
-    const discountValue = parseFloat(document.getElementById(`categoryDiscountValue-${categoryId}`).value);
+  // Actualizar display de la tarjeta
+  function updateProductCardDisplay(productId, originalPrice, discountValue, discountType) {
+    const card = document.querySelector(`.product-card[data-product-id="${productId}"]`);
+    let finalPrice;
     
-    if (!discountValue || discountValue <= 0) {
-      showToast('Por favor ingresa un descuento válido', 'error');
-      return;
+    if (discountType === 'percentage') {
+      finalPrice = originalPrice * (1 - discountValue / 100);
+    } else {
+      finalPrice = originalPrice - discountValue;
     }
     
-    // Encontrar todos los productos de la categoría
-    const categorySection = document.querySelector(`.category-section[data-category="${categoryName.toLowerCase()}"]`);
-    const productCards = categorySection.querySelectorAll('.product-card');
+    if (finalPrice < 0) finalPrice = 0;
     
-    let count = 0;
-    const promises = [];
+    // Actualizar precio
+    const priceDisplay = card.querySelector('.price-display');
+    const discountLabel = discountType === 'percentage' ? `${discountValue}%` : `$${discountValue}`;
     
-    productCards.forEach(card => {
-      const productId = card.dataset.productId;
-      const originalPrice = parseFloat(card.dataset.originalPrice);
-      
-      let newPrice;
-      if (discountType === 'percentage') {
-        newPrice = originalPrice * (1 - discountValue / 100);
-      } else {
-        newPrice = originalPrice - discountValue;
-      }
-      
-      if (newPrice < 0) newPrice = 0;
-      
-      // Actualizar en servidor
-      const promise = fetch(`/api/update_price/${productId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ price: newPrice })
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          // Actualizar vista
-          document.getElementById(`productDiscountValue-${productId}`).value = discountValue.toString();
-          document.getElementById(`productDiscountType-${productId}`).value = discountType;
-          previewDiscount(productId);
-          
-          // Mostrar botón de quitar descuento
-          const clearBtn = card.querySelector('.clear-discount-btn');
-          clearBtn.style.display = 'block';
-          
-          count++;
-        }
-      });
-      
-      promises.push(promise);
-    });
+    priceDisplay.innerHTML = `
+      <span class="discounted-price">$${finalPrice.toFixed(2)}</span>
+      <span class="original-price">$${originalPrice.toFixed(2)}</span>
+      <span class="discount-badge">-${discountLabel}</span>
+    `;
     
-    Promise.all(promises).then(() => {
-      showToast(`Descuento aplicado a ${count} productos de ${categoryName}`, 'success');
-    });
+    // Actualizar controles
+    const controlsDiv = card.querySelector('.product-controls');
+    controlsDiv.innerHTML = `
+      <input type="number" class="mini-input" value="${discountValue}" min="0" data-product-id="${productId}">
+      <span style="font-size: 13px;">${discountType === 'percentage' ? '%' : '$'}</span>
+      <button class="mini-btn remove-mini-btn" onclick="removeDiscount(${productId})">
+        Quitar
+      </button>
+    `;
+    
+    // Actualizar atributos de la tarjeta
+    card.classList.add('has-discount');
+    card.dataset.hasDiscount = 'true';
+    card.dataset.discountType = discountType;
+    card.dataset.discountValue = discountValue;
   }
   
-  // ----------------------------------------------------
-  // Aplicar descuento global
-  // ----------------------------------------------------
-  function applyGlobalDiscount() {
-    const discountValue = parseFloat(document.getElementById('globalDiscountValue').value);
-    const discountType = globalDiscountType;
-    
-    if (!discountValue || discountValue <= 0) {
-      showToast('Por favor ingresa un descuento válido', 'error');
-      return;
-    }
-    
-    // Encontrar todos los productos
-    const productCards = document.querySelectorAll('.product-card');
-    
-    let count = 0;
-    const promises = [];
-    
-    productCards.forEach(card => {
-      const productId = card.dataset.productId;
-      const originalPrice = parseFloat(card.dataset.originalPrice);
-      
-      let newPrice;
-      if (discountType === 'percentage') {
-        newPrice = originalPrice * (1 - discountValue / 100);
-      } else {
-        newPrice = originalPrice - discountValue;
-      }
-      
-      if (newPrice < 0) newPrice = 0;
-      
-      // Actualizar en servidor
-      const promise = fetch(`/api/update_price/${productId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ price: newPrice })
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          // Actualizar vista
-          document.getElementById(`productDiscountValue-${productId}`).value = discountValue.toString();
-          document.getElementById(`productDiscountType-${productId}`).value = discountType;
-          previewDiscount(productId);
-          
-          // Mostrar botón de quitar descuento
-          const clearBtn = card.querySelector('.clear-discount-btn');
-          clearBtn.style.display = 'block';
-          
-          count++;
-        }
-      });
-      
-      promises.push(promise);
-    });
-    
-    Promise.all(promises).then(() => {
-      showToast(`Descuento aplicado a ${count} productos`, 'success');
-    });
-  }
-  
-  // ----------------------------------------------------
-  // Sistema de notificaciones toast
-  // ----------------------------------------------------
+  // Sistema de notificaciones
   function showToast(message, type = 'success') {
     const toastContainer = document.getElementById('toastContainer');
     
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
-    toast.textContent = message;
+    toast.innerHTML = `
+      <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+      <span>${message}</span>
+    `;
     
     toastContainer.appendChild(toast);
     
+    // Auto-remove after 3 seconds
     setTimeout(() => {
-      toast.remove();
+      toast.classList.add('fade-out');
+      setTimeout(() => {
+        toast.remove();
+      }, 300);
     }, 3000);
   }
-  
-  // ----------------------------------------------------
-  // Event Listeners
-  // ----------------------------------------------------
-  document.addEventListener('DOMContentLoaded', function() {
-    // Toggle de tipo de descuento global
-    const toggleBtns = document.querySelectorAll('.discount-toggle-btn');
-    toggleBtns.forEach(btn => {
-      btn.addEventListener('click', function() {
-        toggleBtns.forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
-        globalDiscountType = this.dataset.type;
-        
-        const symbol = document.getElementById('globalDiscountSymbol');
-        symbol.textContent = globalDiscountType === 'percentage' ? '%' : '$';
-      });
-    });
-    
-    // Actualizar símbolos cuando cambia el tipo de descuento del producto
-    document.addEventListener('change', function(e) {
-      if (e.target.classList.contains('product-discount-type')) {
-        const productId = e.target.id.split('-')[1];
-        const symbol = document.getElementById(`productDiscountSymbol-${productId}`);
-        symbol.textContent = e.target.value === 'percentage' ? '%' : '$';
-        previewDiscount(productId);
-      }
-    });
-    
-    // Actualizar símbolos cuando cambia el tipo de descuento de categoría
-    document.addEventListener('change', function(e) {
-      if (e.target.classList.contains('category-discount-type')) {
-        const categoryId = e.target.id.split('-')[1];
-        const symbol = document.getElementById(`categoryDiscountSymbol-${categoryId}`);
-        symbol.textContent = e.target.value === 'percentage' ? '%' : '$';
-      }
-    });
-    
-    // Búsqueda
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput) {
-      searchInput.addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase();
-        const productCards = document.querySelectorAll('.product-card');
-        
-        productCards.forEach(card => {
-          const productName = card.dataset.productName;
-          const productBarcode = card.dataset.productBarcode;
-          const brand = card.querySelector('.product-brand')?.textContent?.toLowerCase() || '';
-          
-          const matches = productName.includes(searchTerm) || 
-                         productBarcode.includes(searchTerm) || 
-                         brand.includes(searchTerm);
-          
-          card.style.display = matches ? 'block' : 'none';
-        });
-        
-        // Ocultar categorías vacías
-        document.querySelectorAll('.category-section').forEach(section => {
-          const visibleCards = Array.from(section.querySelectorAll('.product-card')).filter(card => 
-            card.style.display !== 'none'
-          );
-          section.style.display = visibleCards.length > 0 ? 'block' : 'none';
-        });
-      });
-    }
-  });
 </script>
 {% endblock %}

@@ -1252,18 +1252,59 @@ def update_price(product_id):
         except ValueError:
             return jsonify({"success": False, "message": "El precio debe ser un número válido"}), 400
         
-        # Actualizar el precio
+        # Guardar el precio anterior para referencia
+        precio_anterior = producto.precio_venta
+        
+        # Actualizar el precio base
         producto.precio_venta = nuevo_precio
+        
+        # Calcular precio final SIEMPRE (incluso sin descuento)
+        precio_final = nuevo_precio
+        tiene_descuento = False
+        tipo_descuento = None
+        valor_descuento = 0.0
+        
+        # Verificar descuento activo
+        if producto.tiene_descuento and producto.valor_descuento > 0:
+            tiene_descuento = True
+            tipo_descuento = producto.tipo_descuento
+            valor_descuento = producto.valor_descuento
+            
+            if tipo_descuento == 'percentage':
+                precio_final = nuevo_precio * (1 - valor_descuento / 100)
+            else:  # fixed amount
+                precio_final = max(0, nuevo_precio - valor_descuento)
+        
+        # Commit los cambios
         db.session.commit()
         
+        # Respuesta SIEMPRE con la misma estructura
         return jsonify({
             "success": True, 
             "message": "Precio actualizado correctamente", 
-            "precio": nuevo_precio
+            "precio": nuevo_precio,  # Para compatibilidad con código existente
+            "precio_base": nuevo_precio,
+            "precio_final": precio_final,  # SIEMPRE presente
+            "precio_anterior": precio_anterior,  # Información adicional útil
+            "tiene_descuento": tiene_descuento,  # SIEMPRE boolean
+            "tipo_descuento": tipo_descuento,  # SIEMPRE string o null
+            "valor_descuento": valor_descuento  # SIEMPRE número
         })
+        
     except Exception as e:
         db.session.rollback()
-        return jsonify({"success": False, "message": f"Error al actualizar: {str(e)}"}), 500
+        return jsonify({
+            "success": False, 
+            "message": f"Error al actualizar: {str(e)}",
+            # En caso de error, también enviar estructura consistente
+            "precio": 0,
+            "precio_base": 0,
+            "precio_final": 0,
+            "precio_anterior": 0,
+            "tiene_descuento": False,
+            "tipo_descuento": None,
+            "valor_descuento": 0
+        }), 500
 
 @app.route('/agregar-producto', methods=['GET','POST'])
 @login_requerido
@@ -2431,6 +2472,84 @@ def producto_confirmacion(producto_id):
 ##############################
 # DESCUENTOS
 ##############################
+@app.route('/api/apply_discount/<int:product_id>', methods=['POST'])
+@login_requerido
+def apply_discount(product_id):
+    """Aplica un descuento a un producto específico."""
+    try:
+        producto = Producto.query.get_or_404(product_id)
+        
+        # Verificar que el producto pertenezca a la empresa del usuario
+        if producto.empresa_id != session.get('user_id'):
+            return jsonify({"success": False, "message": "Sin permisos"}), 403
+        
+        data = request.get_json()
+        discount_type = data.get('type')  # 'percentage' o 'fixed'
+        discount_value = float(data.get('value', 0))
+        
+        # Validar datos
+        if discount_type not in ['percentage', 'fixed'] or discount_value <= 0:
+            return jsonify({"success": False, "message": "Datos de descuento inválidos"}), 400
+        
+        # Validar porcentaje
+        if discount_type == 'percentage' and discount_value > 100:
+            return jsonify({"success": False, "message": "El porcentaje no puede ser mayor a 100"}), 400
+        
+        # CRÍTICO: NO modificar precio_venta aquí
+        # Solo guardamos la información del descuento
+        producto.tiene_descuento = True
+        producto.tipo_descuento = discount_type
+        producto.valor_descuento = discount_value
+        
+        # Calcular precio final SOLO para la respuesta
+        if discount_type == 'percentage':
+            precio_final = producto.precio_venta * (1 - discount_value / 100)
+        else:
+            precio_final = max(0, producto.precio_venta - discount_value)
+        
+        # NO hacer esto: producto.precio_venta = precio_final  ❌
+        
+        db.session.commit()
+        
+        return jsonify({
+            "success": True,
+            "precio_base": producto.precio_venta,  # Precio sin descuento
+            "precio_final": precio_final,  # Precio con descuento
+            "tipo_descuento": discount_type,
+            "valor_descuento": discount_value
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/api/remove_discount/<int:product_id>', methods=['POST'])
+@login_requerido
+def remove_discount(product_id):
+    """Remueve el descuento de un producto específico."""
+    try:
+        producto = Producto.query.get_or_404(product_id)
+        
+        # Verificar que el producto pertenezca a la empresa del usuario
+        if producto.empresa_id != session.get('user_id'):
+            return jsonify({"success": False, "message": "Sin permisos"}), 403
+        
+        # Remover descuento
+        producto.tiene_descuento = False
+        producto.tipo_descuento = None
+        producto.valor_descuento = 0.0
+        
+        db.session.commit()
+        
+        return jsonify({
+            "success": True,
+            "precio_base": producto.precio_venta
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"success": False, "message": str(e)}), 500
+
 @app.route('/descuentos')
 @login_requerido
 def descuentos():
