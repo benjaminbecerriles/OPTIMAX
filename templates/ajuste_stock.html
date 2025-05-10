@@ -26,6 +26,8 @@
     --red: #e74c3c;
     --blue: #1a237e;
     --gray-500: #777777; /* Cambiado a color más oscuro para mejor legibilidad */
+    --gray-600: #86868b;
+    --gray-300: #d1d1d6;
   }
 
   body {
@@ -189,11 +191,11 @@
     outline: none;
   }
   
-  /* Búsqueda con estilo Apple - CORREGIDO PARA QUE FUNCIONE COMO EN PRODUCTOS.HTML */
+  /* Búsqueda con estilo Apple - ADAPTADO DE CAMBIAR PRECIOS */
   .search-container {
     display: flex;
     gap: 0.75rem;
-    margin-bottom: 150px; /* MODIFICADO: Aumentado de 1.5rem a 150px para mayor espaciado como en cambiar-precios */
+    margin-bottom: 150px; /* MODIFICADO: Igual que en cambiar-precios */
     position: relative;
     align-items: center;
   }
@@ -226,7 +228,7 @@
     background-color: var(--light-background);
   }
   
-  .search-input input:focus {
+  .search-box input:focus {
     background-color: white;
     border-color: var(--accent);
     box-shadow: 0 0 0 3px rgba(229, 46, 46, 0.15);
@@ -270,14 +272,6 @@
     100% { opacity: 1; }
   }
   
-  /* Contador de resultados */
-  .products-summary {
-    font-size: 0.95rem;
-    color: var(--text-secondary);
-    margin-bottom: 1.5rem;
-    font-weight: 500; /* Añadido para mejor legibilidad */
-  }
-  
   /* Estilos para el corazón exactamente como en productos.html */
   .heart-icon {
     font-size: 24px;
@@ -298,19 +292,43 @@
     color: var(--gray-500);
   }
   
-  /* Contenedor para el checkbox de favoritos */
+  /* Contenedor para el checkbox de favoritos - ADAPTADO DE CAMBIAR PRECIOS */
   .form-heart-container {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
     cursor: pointer;
-    height: 100%;
-    padding: 0.75rem 0;
+    background-color: var(--light-background);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 0 16px;
+    height: 48px;
+    transition: all 0.2s ease;
+    user-select: none;
+  }
+  
+  .form-heart-container:hover {
+    background-color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .form-heart-container.active {
+    background-color: rgba(231, 76, 60, 0.1);
+    border-color: var(--red);
   }
   
   .form-heart-check-input {
     display: none;
+  }
+  
+  /* Contador de resultados */
+  .products-summary {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+    font-weight: 500; /* Añadido para mejor legibilidad */
   }
   
   /* Grid de productos */
@@ -738,22 +756,21 @@
         <option value="stock-desc">Stock (mayor a menor)</option>
       </select>
     </div>
-    <div class="filter-item">
-      <div class="form-heart-container">
-        <input class="form-heart-check-input" type="checkbox" id="favoritosCheck">
-        <span class="heart-icon" id="heartIcon">&#9825;</span>
-        <label for="favoritosCheck" style="cursor: pointer; font-size: 0.95rem; font-weight: 500;">Solo favoritos</label>
-      </div>
-    </div>
   </div>
   
+  <!-- Barra de búsqueda adaptada al estilo de cambiar_precios.html -->
   <div class="search-container">
     <div class="search-box">
-      <!-- Ícono de lupa con Font Awesome -->
       <i class="fas fa-search"></i>
       <input type="text" id="searchInput" placeholder="Buscar por nombre, código o categoría...">
     </div>
     <div class="search-actions">
+      <!-- Filtro solo favoritos igual que en cambiar-precios -->
+      <div class="form-heart-container" id="favoritosContainer">
+        <input class="form-heart-check-input" type="checkbox" id="favoritosCheck">
+        <span class="heart-icon" id="heartIcon">&#9825;</span>
+        <span style="font-size: 0.95rem; font-weight: 500;">Solo favoritos</span>
+      </div>
       <!-- Botón de escaneo con pistola de código de barras -->
       <button class="icon-btn" id="scanButton" title="Escanear con pistola">
         <img src="{{ url_for('static', filename='img/3.png') }}" alt="Escanear con Lector" style="width: 24px; height: 24px;">
@@ -1240,32 +1257,37 @@
       }
     }
     
-    // Actualizar el corazón cuando cambia el checkbox
+    // Adaptar el manejo del corazón al estilo de cambiar-precios
     const heartIcon = document.getElementById('heartIcon');
+    const favoritosContainer = document.getElementById('favoritosContainer');
     
-    favoritosCheck.addEventListener('change', function() {
-      currentPage = 1;
-      
-      // Actualizar el estilo del corazón
-      if (this.checked) {
-        heartIcon.innerHTML = '&#9829;'; // Corazón lleno
-        heartIcon.classList.add('active');
-      } else {
-        heartIcon.innerHTML = '&#9825;'; // Corazón vacío
-        heartIcon.classList.remove('active');
+    if (favoritosCheck && heartIcon && favoritosContainer) {
+      // Función para actualizar el estado visual del botón
+      function updateFavoritosButtonState() {
+        if (favoritosCheck.checked) {
+          heartIcon.innerHTML = '&#9829;'; // Corazón lleno
+          heartIcon.classList.add('active');
+          favoritosContainer.classList.add('active');
+        } else {
+          heartIcon.innerHTML = '&#9825;'; // Corazón vacío
+          heartIcon.classList.remove('active');
+          favoritosContainer.classList.remove('active');
+        }
       }
       
-      applyFiltersAndPagination();
-    });
-    
-    // También permitir hacer clic en el corazón para activar/desactivar
-    heartIcon.addEventListener('click', function() {
-      favoritosCheck.checked = !favoritosCheck.checked;
+      // Evento de clic en el contenedor completo
+      favoritosContainer.addEventListener('click', function() {
+        favoritosCheck.checked = !favoritosCheck.checked;
+        updateFavoritosButtonState();
+        currentPage = 1;
+        applyFiltersAndPagination();
+      });
       
-      // Disparar el evento change para actualizar todo
-      const event = new Event('change');
-      favoritosCheck.dispatchEvent(event);
-    });
+      // Evento de cambio en el checkbox
+      favoritosCheck.addEventListener('change', function() {
+        updateFavoritosButtonState();
+      });
+    }
     
     // Eventos de filtros
     searchInput.addEventListener('input', function() {
@@ -1297,6 +1319,7 @@
       favoritosCheck.checked = false;
       heartIcon.innerHTML = '&#9825;'; // Corazón vacío
       heartIcon.classList.remove('active');
+      favoritosContainer.classList.remove('active');
       currentPage = 1;
       applyFiltersAndPagination();
     });
