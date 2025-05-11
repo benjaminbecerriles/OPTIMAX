@@ -4,57 +4,57 @@
 
 {% block content %}
 <style>
-  /* Sistema de Diseño Apple - Consistente con dashboard_inventario.html */
+  /* Sistema de Diseño Apple - Adaptado de ajuste_stock.html */
   :root {
-    --font-apple: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', Helvetica, Arial, sans-serif;
+    --font-apple: -apple-system, BlinkMacSystemFont, 'SF Pro Text', Helvetica, Arial, sans-serif;
     
     /* Colores esenciales */
     --text-color: #1d1d1f;
-    --text-secondary: #515154;
-    --text-tertiary: #86868b;
+    --text-secondary: #555555;
     --background: #ffffff;
     --light-background: #f5f5f7;
     --separator: rgba(0, 0, 0, 0.1);
     --accent: #e52e2e;
     --accent-hover: #c51818;
     --accent-light: rgba(229, 46, 46, 0.1);
+    
+    /* Colores específicos de descuentos */
     --discount-color: #1a9951;
     --discount-hover: #147a3e;
-    --blue: #1a237e;
+    --discount-light: rgba(26, 153, 81, 0.1);
+    --discount-apply-color: #4CAF50;
+    --discount-remove-color: #F44336;
+    --warning-color: #ff9800;
     
-    /* Colores de estado */
-    --green: #2ecc71;
-    --orange: #f39c12;
-    --red: #e74c3c;
+    --blue: #1a237e;
+    --gray-300: #d1d1d6;
+    --gray-500: #777777;
+    --gray-600: #86868b;
   }
-  
+
   body {
     font-family: var(--font-apple);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    line-height: 1.5;
     color: var(--text-color);
     background-color: var(--background);
   }
-  
-  /* Contenedor principal */
-  .apple-container {
-    max-width: 1200px;
+
+  /* Contenedor principal - más estrecho */
+  .descuentos-container {
+    max-width: 1000px;
     margin: 0 auto;
     padding: 36px 24px;
   }
-  
-  /* Encabezado de página */
+
+  /* Encabezado de página con botón de quitar todos */
   .page-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 1.5rem;
     padding-bottom: 1rem;
-  }
-  
-  .header-title-container {
-    display: flex;
-    flex-direction: column;
   }
   
   .page-title {
@@ -66,9 +66,14 @@
     color: var(--text-color);
   }
   
+  .header-title-container {
+    display: flex;
+    flex-direction: column;
+  }
+  
   .page-description {
     font-size: 17px;
-    color: var(--text-secondary);
+    color: #86868b;
     margin-bottom: 28px;
     max-width: 600px;
     font-weight: 400;
@@ -111,47 +116,146 @@
     box-shadow: 0 4px 8px rgba(26, 35, 126, 0.4);
     color: #ffffff;
   }
-  
-  /* Controles simplificados */
-  .controls-container {
-    background-color: var(--light-background);
+
+  /* Botón de quitar todos los descuentos en header */
+  .btn-remove-all-header {
+    background-color: var(--warning-color);
+    color: white;
+  }
+
+  .btn-remove-all-header:hover {
+    background-color: #ff8f00;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(255, 152, 0, 0.4);
+    color: white;
+  }
+
+  /* Panel de descuentos globales mejorado */
+  .discount-panel {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
     border-radius: 12px;
     padding: 24px;
-    margin-bottom: 48px;
-    border: 1px solid #e0e0e0;
+    margin-bottom: 32px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   }
-  
-  .controls-title {
+
+  .panel-title {
     font-size: 20px;
     font-weight: 600;
-    margin-bottom: 16px;
+    margin-bottom: 8px;
     color: var(--text-color);
-  }
-  
-  .controls-content {
     display: flex;
     align-items: center;
+    gap: 8px;
+  }
+
+  /* Estado actual de descuentos */
+  .discount-status {
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    display: none;
+  }
+
+  .discount-status.warning {
+    background-color: rgba(255, 152, 0, 0.1);
+    border: 1px solid rgba(255, 152, 0, 0.2);
+    color: #f57c00;
+  }
+
+  .discount-status.info {
+    background-color: rgba(33, 150, 243, 0.1);
+    border: 1px solid rgba(33, 150, 243, 0.2);
+    color: #1976d2;
+  }
+
+  .discount-status.success {
+    background-color: var(--discount-light);
+    border: 1px solid rgba(26, 153, 81, 0.2);
+    color: var(--discount-color);
+  }
+
+  .discount-controls {
+    display: flex;
     gap: 16px;
+    align-items: center;
     flex-wrap: wrap;
   }
-  
+
+  .discount-target-selector {
+    position: relative;
+    min-width: 220px;
+  }
+
+  .discount-target-selector select {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--gray-300);
+    font-size: 0.95rem;
+    font-family: var(--font-apple);
+    background-color: white;
+    color: var(--text-color);
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236c757d' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px;
+    padding-right: 36px;
+    transition: all 0.2s ease;
+  }
+
+  .discount-target-selector select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(229, 46, 46, 0.15);
+    outline: none;
+  }
+
+  .discount-target-selector select:disabled {
+    background-color: #f5f5f5;
+    color: #999;
+    cursor: not-allowed;
+  }
+
+  .specific-selector {
+    display: none;
+    min-width: 220px;
+  }
+
+  .specific-selector select {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--gray-300);
+    font-size: 0.95rem;
+    font-family: var(--font-apple);
+    background-color: white;
+    color: var(--text-color);
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236c757d' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px;
+    padding-right: 36px;
+  }
+
   .discount-input-group {
     display: flex;
     align-items: center;
     gap: 8px;
     background-color: white;
-    border: 1px solid #d1d1d6;
+    border: 1px solid var(--gray-300);
     border-radius: 8px;
     padding: 8px 12px;
-    min-width: 180px;
+    min-width: 120px;
   }
-  
-  .discount-label {
-    font-size: 15px;
-    color: var(--text-secondary);
-    min-width: 60px;
-  }
-  
+
   .discount-input {
     width: 60px;
     border: none;
@@ -161,56 +265,58 @@
     color: var(--text-color);
     text-align: center;
   }
-  
-  .discount-unit {
+
+  .discount-label {
     font-size: 15px;
     color: var(--text-secondary);
-    font-weight: 500;
+    min-width: 20px;
   }
-  
-  .toggle-buttons {
+
+  /* Botones de acción de descuento con estilo mejorado */
+  .discount-action-btn {
     display: flex;
+    align-items: center;
     gap: 8px;
-  }
-  
-  .toggle-btn {
-    padding: 8px 16px;
-    border-radius: 6px;
-    border: 1px solid #d1d1d6;
-    background-color: white;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    color: var(--text-secondary);
-  }
-  
-  .toggle-btn.active {
-    background-color: var(--accent);
-    color: white;
-    border-color: var(--accent);
-  }
-  
-  .apply-btn {
-    background-color: var(--discount-color);
-    color: white;
-    border: none;
+    padding: 12px 24px;
     border-radius: 8px;
-    padding: 10px 24px;
     font-size: 15px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
-    box-shadow: 0 2px 4px rgba(26, 153, 81, 0.3);
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
-  
-  .apply-btn:hover {
-    background-color: var(--discount-hover);
+
+  .btn-apply-discount {
+    background-color: var(--discount-apply-color);
+    color: white;
+  }
+
+  .btn-apply-discount:hover:not(:disabled) {
+    background-color: #43A047;
     transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(26, 153, 81, 0.4);
+    box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
   }
-  
-  /* Búsqueda */
+
+  .btn-apply-discount:disabled {
+    background-color: #cccccc;
+    color: #666666;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  .btn-remove-discount {
+    background-color: var(--discount-remove-color);
+    color: white;
+  }
+
+  .btn-remove-discount:hover {
+    background-color: #E53935;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(244, 67, 54, 0.3);
+  }
+
+  /* Búsqueda estilo ajuste_stock.html */
   .search-container {
     display: flex;
     gap: 0.75rem;
@@ -222,7 +328,6 @@
   .search-box {
     flex: 1;
     position: relative;
-    min-width: 300px;
   }
   
   .search-box i {
@@ -230,7 +335,7 @@
     left: 1.25rem;
     top: 50%;
     transform: translateY(-50%);
-    color: var(--text-secondary);
+    color: var(--gray-600);
     font-size: 1.1rem;
     z-index: 5;
     pointer-events: none;
@@ -240,7 +345,7 @@
     width: 100%;
     padding: 0.75rem 1rem 0.75rem 3rem;
     border-radius: 8px;
-    border: 1px solid #dddddd;
+    border: 1px solid var(--gray-300);
     font-size: 1rem;
     height: 48px;
     transition: all 0.2s ease;
@@ -255,190 +360,421 @@
     outline: none;
   }
   
-  /* Grid de productos */
-  .products-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 24px;
-    width: 100%;
+  .search-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .icon-btn {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--light-background);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+  }
+  
+  .icon-btn:hover {
+    background-color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .icon-btn.scan-active {
+    background-color: rgba(229, 46, 46, 0.1);
+    border-color: var(--accent);
+    animation: blink 1s infinite;
+  }
+  
+  @keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0.6; }
+    100% { opacity: 1; }
+  }
+
+  /* Estilos para el corazón */
+  .heart-icon {
+    font-size: 24px;
+    cursor: pointer;
+    display: inline-block;
+    transition: transform 0.2s ease, color 0.2s ease;
+  }
+  
+  .heart-icon:hover {
+    transform: scale(1.1);
+  }
+  
+  .heart-icon.active {
+    color: #e74c3c;
+  }
+  
+  .heart-icon:not(.active) {
+    color: var(--gray-500);
+  }
+  
+  .form-heart-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    background-color: var(--light-background);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 0 16px;
+    height: 48px;
+    transition: all 0.2s ease;
+    user-select: none;
+  }
+  
+  .form-heart-container:hover {
+    background-color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .form-heart-container.active {
+    background-color: rgba(231, 76, 60, 0.1);
+    border-color: #e74c3c;
+  }
+  
+  .form-heart-check-input {
+    display: none;
+  }
+
+  /* Categorías estilo cambiar_precios.html */
+  .category-section {
+    margin-bottom: 50px;
+    border: 1px solid #eaeaea;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+    background-color: #fafafa;
+    position: relative;
+  }
+  
+  .category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  .category-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--text-color);
+  }
+  
+  .category-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: #eeeeee;
+    color: #505050;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  
+  .category-color-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+  }
+
+  .category-status {
+    color: var(--discount-color);
+    font-weight: 500;
+    font-size: 14px;
+  }
+
+  /* Slider de productos estilo cambiar_precios.html */
+  .product-slider-container {
+    position: relative;
+    padding: 0 60px;
+    margin: 0;
+  }
+  
+  .product-slider {
+    display: flex;
+    gap: 14px;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+    padding: 4px 0 12px 0;
+    margin-bottom: 4px;
   }
   
   .product-card {
-    background-color: white;
-    border: 1px solid #e0e0e0;
+    flex: 0 0 200px;
+    height: 360px;
     border-radius: 12px;
     overflow: hidden;
-    transition: all 0.3s ease;
-    cursor: pointer;
+    background-color: white;
+    border: 1px solid #e0e0e0;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.07);
+    display: flex;
+    flex-direction: column;
+    position: relative;
   }
   
   .product-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.08);
   }
-  
+
   .product-card.has-discount {
     border-color: var(--discount-color);
     background-color: rgba(26, 153, 81, 0.02);
   }
   
   .product-image-container {
-    height: 200px;
+    height: 120px;
+    min-height: 120px;
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #f8f9fa;
     overflow: hidden;
+    background-color: #f8f8f8;
+    padding: 5px;
   }
   
   .product-image {
-    max-width: 100%;
-    max-height: 100%;
+    width: 100%;
+    height: 100%;
     object-fit: contain;
   }
+
+  .discount-tag {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background-color: var(--discount-color);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    z-index: 10;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
   
-  .product-info {
-    padding: 16px;
+  .product-details {
+    padding: 12px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    height: 240px;
+  }
+  
+  .product-info-container {
+    display: flex;
+    flex-direction: column;
+    height: 70px;
+    margin-bottom: 8px;
+    overflow: hidden;
+    position: relative;
   }
   
   .product-name {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 600;
-    margin-bottom: 4px;
-    color: var(--text-color);
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    line-height: 1.3;
+    color: var(--text-color);
+    height: 40px;
+    margin-bottom: 0;
   }
   
   .product-brand {
-    font-size: 13px;
-    color: var(--text-secondary);
-    margin-bottom: 12px;
+    font-size: 12px;
+    color: #606060;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
   }
   
-  .product-price-section {
-    margin-bottom: 16px;
+  .product-price-container {
+    height: 60px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
   }
   
   .price-display {
     display: flex;
     align-items: baseline;
-    gap: 8px;
+    gap: 6px;
     margin-bottom: 4px;
   }
   
   .current-price {
-    font-size: 20px;
-    font-weight: 700;
+    font-size: 16px;
+    font-weight: 600;
     color: var(--text-color);
   }
-  
+
   .discounted-price {
-    font-size: 20px;
-    font-weight: 700;
+    font-size: 16px;
+    font-weight: 600;
     color: var(--discount-color);
   }
   
   .original-price {
-    font-size: 16px;
-    color: var(--text-secondary);
     text-decoration: line-through;
+    color: #666;
+    font-size: 13px;
+    margin-top: 2px;
   }
   
-  .discount-badge {
-    background-color: var(--red);
-    color: white;
-    font-size: 12px;
-    font-weight: 600;
-    padding: 2px 6px;
-    border-radius: 4px;
+  .price-unit {
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-weight: 500;
   }
-  
-  .product-controls {
+
+  /* Controles de descuento del producto */
+  .product-discount-controls {
+    margin-top: auto;
+    height: 70px;
     display: flex;
-    align-items: center;
+    flex-direction: column;
     gap: 8px;
   }
-  
-  .mini-input {
-    width: 50px;
-    padding: 6px 8px;
-    border: 1px solid #d1d1d6;
+
+  .discount-input-container {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .product-discount-input {
+    width: 45px;
+    padding: 6px;
+    border: 1px solid var(--gray-300);
     border-radius: 6px;
     font-size: 14px;
     text-align: center;
     outline: none;
   }
-  
-  .mini-btn {
-    padding: 6px 12px;
-    font-size: 13px;
-    font-weight: 600;
+
+  .product-discount-btn {
+    flex: 1;
+    padding: 8px 12px;
     border-radius: 6px;
-    border: none;
+    font-weight: 500;
+    font-size: 13px;
     cursor: pointer;
     transition: all 0.2s ease;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
   }
-  
-  .apply-mini-btn {
-    background-color: var(--discount-color);
-    color: white;
+
+  .btn-apply-product-discount {
+    background-color: rgba(76, 175, 80, 0.1);
+    color: #2E7D32;
+    border: 1px solid rgba(76, 175, 80, 0.3);
   }
-  
-  .apply-mini-btn:hover {
-    background-color: var(--discount-hover);
+
+  .btn-apply-product-discount:hover {
+    background-color: rgba(76, 175, 80, 0.2);
+    transform: translateY(-1px);
   }
-  
-  .remove-mini-btn {
-    background-color: transparent;
-    color: var(--red);
-    border: 1px solid #d1d1d6;
+
+  .btn-remove-product-discount {
+    background-color: rgba(244, 67, 54, 0.1);
+    color: #C62828;
+    border: 1px solid rgba(244, 67, 54, 0.3);
   }
-  
-  .remove-mini-btn:hover {
-    background-color: var(--red);
-    color: white;
+
+  .btn-remove-product-discount:hover {
+    background-color: rgba(244, 67, 54, 0.2);
+    transform: translateY(-1px);
   }
-  
-  /* Estado vacío */
-  .empty-state {
-    padding: 64px 32px;
+
+  .disabled-message {
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: var(--text-secondary);
+    background-color: #f5f5f5;
+    border-radius: 6px;
     text-align: center;
-    background-color: var(--light-background);
-    border-radius: 12px;
-    margin: 48px 0;
+    padding: 0 8px;
   }
-  
-  .empty-icon {
-    font-size: 48px;
-    color: var(--text-secondary);
-    margin-bottom: 16px;
-  }
-  
-  .empty-message {
-    font-size: 18px;
-    color: var(--text-secondary);
-    margin-bottom: 24px;
-  }
-  
-  .empty-action {
-    display: inline-block;
-    padding: 12px 24px;
+
+  /* Botones de navegación del slider */
+  .slider-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
     background-color: var(--accent);
-    color: white;
-    border-radius: 8px;
-    text-decoration: none;
-    font-weight: 600;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(229, 46, 46, 0.3);
+    z-index: 10;
     transition: all 0.2s ease;
   }
   
-  .empty-action:hover {
+  .slider-arrow:hover {
     background-color: var(--accent-hover);
-    transform: translateY(-2px);
+    transform: translateY(-50%) scale(1.1);
   }
   
-  /* Toast notificaciones */
+  .slider-arrow-left {
+    left: 16px;
+  }
+  
+  .slider-arrow-right {
+    right: 16px;
+  }
+  
+  .slider-arrow svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: white;
+    stroke-width: 2.5;
+  }
+
+  /* Toast notifications */
   .toast-container {
     position: fixed;
     bottom: 24px;
@@ -446,7 +782,7 @@
     z-index: 1000;
     max-width: 400px;
   }
-  
+
   .toast {
     background-color: #333;
     color: white;
@@ -461,20 +797,20 @@
     opacity: 1;
     transition: all 0.3s ease;
   }
-  
+
   .toast.success {
-    background-color: var(--green);
+    background-color: #2ecc71;
   }
-  
+
   .toast.error {
-    background-color: var(--red);
+    background-color: #e74c3c;
   }
-  
+
   .toast.fade-out {
     opacity: 0;
     transform: translateY(-20px);
   }
-  
+
   @keyframes slideIn {
     from {
       transform: translateX(100%);
@@ -485,139 +821,323 @@
       opacity: 1;
     }
   }
+
+  /* Escáner de código de barras */
+  #quaggaScanner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 9999;
+    display: none;
+  }
   
+  #quaggaScanner.active {
+    display: block;
+  }
+  
+  #scanner-container {
+    width: 100%;
+    max-width: 640px;
+    height: 480px;
+    margin: 50px auto;
+    position: relative;
+    border: 3px solid var(--accent);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  
+  #closeScanner {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: var(--text-color);
+    cursor: pointer;
+    z-index: 10000;
+    border: none;
+  }
+
   /* Responsive */
   @media (max-width: 768px) {
-    .apple-container {
+    .descuentos-container {
       padding: 24px 16px;
     }
     
     .page-header {
       flex-direction: column;
-      gap: 16px;
+      align-items: flex-start;
+      gap: 1rem;
     }
     
-    .controls-content {
+    .header-actions {
+      width: 100%;
+      flex-direction: column;
+    }
+    
+    .discount-controls {
       flex-direction: column;
       align-items: stretch;
     }
     
-    .products-grid {
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: 16px;
+    .discount-target-selector,
+    .specific-selector {
+      width: 100%;
     }
     
     .search-container {
       flex-direction: column;
     }
     
-    .search-box {
+    .search-actions {
       width: 100%;
-      min-width: auto;
+      justify-content: flex-end;
+    }
+    
+    .product-slider-container {
+      padding: 0;
+    }
+    
+    .slider-arrow {
+      display: none;
+    }
+    
+    .product-slider {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scroll-snap-type: x mandatory;
+    }
+    
+    .product-card {
+      flex: 0 0 65%;
+      scroll-snap-align: start;
     }
   }
 </style>
 
-<div class="apple-container">
-  <!-- Encabezado -->
+<div class="descuentos-container">
+  <!-- Encabezado con botón de quitar todos -->
   <div class="page-header">
     <div class="header-title-container">
-      <h1 class="page-title">Aplicar descuentos</h1>
-      <p class="page-description">Aplica descuentos de forma rápida y sencilla con un solo clic</p>
+      <h1 class="page-title">Aplicar Descuentos</h1>
+      <p class="page-description">Gestiona descuentos de manera rápida y eficiente.</p>
     </div>
     <div class="header-actions">
+      <button class="btn-action btn-remove-all-header" onclick="removeAllDiscounts()" id="removeAllBtn" style="display: none;">
+        <i class="fas fa-times-circle"></i>
+        <span>Quitar todos los descuentos</span>
+      </button>
       <a href="{{ url_for('dashboard_inventario') }}" class="btn-action btn-volver">
         <i class="fas fa-arrow-left"></i>
         <span>Volver</span>
       </a>
     </div>
   </div>
-  
-  <!-- Controles simplificados -->
-  <div class="controls-container">
-    <h3 class="controls-title">Aplicar descuento general</h3>
-    <div class="controls-content">
+
+  <!-- Panel de descuentos globales -->
+  <div class="discount-panel">
+    <h3 class="panel-title">
+      <i class="fas fa-tags"></i>
+      Aplicar descuento masivo
+    </h3>
+    
+    <!-- Estado actual de descuentos -->
+    <div class="discount-status" id="discountStatus"></div>
+    
+    <div class="discount-controls">
+      <div class="discount-target-selector">
+        <select id="discountTarget">
+          <option value="all">Aplicar a todos los productos</option>
+          <option value="category">Aplicar por categoría</option>
+          <option value="brand">Aplicar por marca</option>
+        </select>
+      </div>
+      
+      <div class="specific-selector" id="categorySelector">
+        <select id="specificCategory">
+          <option value="">Selecciona una categoría</option>
+          {% for categoria in categorias %}
+            <option value="{{ categoria.nombre }}">{{ categoria.nombre|title }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="specific-selector" id="brandSelector">
+        <select id="specificBrand">
+          <option value="">Selecciona una marca</option>
+          {% set brands = productos|map(attribute='marca')|unique|list %}
+          {% for brand in brands %}
+            {% if brand %}
+              <option value="{{ brand }}">{{ brand }}</option>
+            {% endif %}
+          {% endfor %}
+        </select>
+      </div>
+      
       <div class="discount-input-group">
-        <span class="discount-label">Descuento:</span>
-        <input type="number" class="discount-input" id="globalDiscountValue" value="10" min="0" max="100">
-        <span class="discount-unit" id="discountUnit">%</span>
+        <input type="number" class="discount-input" id="globalDiscountValue" value="10" min="1" max="100" required>
+        <span class="discount-label">%</span>
       </div>
       
-      <div class="toggle-buttons">
-        <button class="toggle-btn active" data-type="percentage">Porcentaje</button>
-        <button class="toggle-btn" data-type="fixed">Cantidad fija</button>
-      </div>
+      <button class="discount-action-btn btn-apply-discount" id="applyGlobalDiscountBtn" onclick="applyGlobalDiscount()">
+        <i class="fas fa-percent"></i>
+        Aplicar descuentos
+      </button>
       
-      <button class="apply-btn" onclick="applyGlobalDiscount()">
-        <i class="fas fa-tags"></i>
-        Aplicar a todos los productos
+      <button class="discount-action-btn btn-remove-discount" id="removeGlobalDiscountBtn" onclick="removeGlobalDiscount()" style="display: none;">
+        <i class="fas fa-times"></i>
+        Quitar descuentos
       </button>
     </div>
   </div>
-  
+
   <!-- Búsqueda -->
   <div class="search-container">
     <div class="search-box">
       <i class="fas fa-search"></i>
       <input type="text" id="searchInput" placeholder="Buscar por nombre, marca o código...">
     </div>
+    <div class="search-actions">
+      <div class="form-heart-container" id="favoritosContainer">
+        <input class="form-heart-check-input" type="checkbox" id="favoritosCheck">
+        <span class="heart-icon" id="heartIcon">&#9825;</span>
+        <span style="font-size: 0.95rem; font-weight: 500;">Solo favoritos</span>
+      </div>
+      <button class="icon-btn" id="scanButton" title="Escanear con pistola">
+        <img src="{{ url_for('static', filename='img/3.png') }}" alt="Escanear con Lector" style="width: 24px; height: 24px;">
+      </button>
+      <button class="icon-btn" id="cameraButton" title="Escanear con cámara">
+        <img src="{{ url_for('static', filename='img/4.png') }}" alt="Escanear con Cámara" style="width: 24px; height: 24px;">
+      </button>
+    </div>
   </div>
-  
-  <!-- Grid de productos -->
-  <div class="products-grid" id="productsGrid">
-    {% if productos and productos|length > 0 %}
-      {% for producto in productos %}
-        <div class="product-card" 
-             data-product-id="{{ producto.id }}" 
-             data-original-price="{{ producto.precio_venta }}"
-             data-has-discount="{{ producto.tiene_descuento|lower }}"
-             data-discount-type="{{ producto.tipo_descuento if producto.tiene_descuento else '' }}"
-             data-discount-value="{{ producto.valor_descuento if producto.tiene_descuento else 0 }}"
-             data-searchable="{{ (producto.nombre + ' ' + (producto.marca or '') + ' ' + (producto.codigo_barras_externo or ''))|lower }}">
-          
-          <div class="product-image-container">
-            {% if producto.foto %}
-              <img src="{{ url_for('static', filename='uploads/' ~ producto.foto) }}" class="product-image" alt="{{ producto.nombre }}">
-            {% else %}
-              <i class="fas fa-box" style="font-size: 48px; color: #ccc;"></i>
-            {% endif %}
+
+  <!-- Contenedor de categorías y productos -->
+  <div id="categoriesContainer">
+    {% if categorias and categorias|length > 0 %}
+      {% set categorias_ordenadas = [] %}
+      {% for categoria in categorias %}
+        {% set productos_categoria = productos|selectattr('categoria', 'equalto', categoria.nombre)|list %}
+        {% if productos_categoria|length > 0 %}
+          {% set _ = categorias_ordenadas.append({'nombre': categoria.nombre, 'color': categoria.color, 'count': productos_categoria|length}) %}
+        {% endif %}
+      {% endfor %}
+      {% set categorias_ordenadas = categorias_ordenadas|sort(attribute='count', reverse=true) %}
+      
+      {% for categoria in categorias_ordenadas %}
+        {% set productos_categoria = productos|selectattr('categoria', 'equalto', categoria.nombre)|list %}
+        <div class="category-section" data-category="{{ categoria.nombre|lower }}">
+          <div class="category-header">
+            <h2 class="category-title">
+              <span class="category-color-dot" style="background-color: {{ categoria.color }}"></span>
+              {{ categoria.nombre|title }}
+              <span class="category-badge">{{ categoria.count }}</span>
+              <span class="category-status" id="category-status-{{ categoria.nombre|lower }}" style="display: none;"> (En descuento)</span>
+            </h2>
+            <button class="discount-action-btn btn-remove-discount" id="remove-category-{{ categoria.nombre|lower }}" 
+                    onclick="removeCategoryDiscount('{{ categoria.nombre|lower }}')" style="display: none;">
+              <i class="fas fa-times"></i>
+              Quitar descuento
+            </button>
           </div>
           
-          <div class="product-info">
-            <div class="product-name">{{ producto.nombre }}</div>
-            {% if producto.marca %}
-              <div class="product-brand">{{ producto.marca }}</div>
-            {% endif %}
-            
-            <div class="product-price-section">
-              <div class="price-display">
-                {% if producto.tiene_descuento %}
-                  {% if producto.tipo_descuento == 'percentage' %}
-                    {% set precio_final = producto.precio_venta * (1 - producto.valor_descuento / 100) %}
-                  {% else %}
-                    {% set precio_final = producto.precio_venta - producto.valor_descuento %}
-                  {% endif %}
-                  <span class="discounted-price">${{ '{:.2f}'.format(precio_final) }}</span>
-                  <span class="original-price">${{ '{:.2f}'.format(producto.precio_venta) }}</span>
-                  <span class="discount-badge">-{{ '{:.0f}'.format(producto.valor_descuento) if producto.tipo_descuento == 'fixed' else '{:.0f}'.format(producto.valor_descuento) }}{{ '$' if producto.tipo_descuento == 'fixed' else '%' }}</span>
-                {% else %}
-                  <span class="current-price">${{ '{:.2f}'.format(producto.precio_venta) }}</span>
-                {% endif %}
-              </div>
+          <div class="product-slider-container">
+            <div class="slider-arrow slider-arrow-left" onclick="scrollSlider('{{ categoria.nombre|lower }}', 'left')">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15 18L9 12L15 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
             </div>
             
-            <div class="product-controls">
-              <input type="number" class="mini-input" value="10" min="0" data-product-id="{{ producto.id }}">
-              <span style="font-size: 13px;">%</span>
-              {% if producto.tiene_descuento %}
-                <button class="mini-btn remove-mini-btn" onclick="removeDiscount({{ producto.id }})">
-                  Quitar
-                </button>
-              {% else %}
-                <button class="mini-btn apply-mini-btn" onclick="applyProductDiscount({{ producto.id }})">
-                  Aplicar
-                </button>
-              {% endif %}
+            <div class="product-slider" id="slider-{{ categoria.nombre|lower }}">
+              {% for producto in productos_categoria %}
+                <div class="product-card {{ 'has-discount' if producto.tiene_descuento else '' }}" 
+                     data-product-id="{{ producto.id }}" 
+                     data-categoria="{{ producto.categoria|lower }}"
+                     data-marca="{{ producto.marca|lower if producto.marca else '' }}"
+                     data-tiene-descuento="{{ 'true' if producto.tiene_descuento else 'false' }}"
+                     data-valor-descuento="{{ producto.valor_descuento if producto.tiene_descuento else 0 }}"
+                     data-searchable="{{ (producto.nombre + ' ' + (producto.marca or '') + ' ' + (producto.codigo_barras_externo or ''))|lower }}">
+                  
+                  {% if producto.tiene_descuento %}
+                    <div class="discount-tag">
+                      -{{ '{:.0f}'.format(producto.valor_descuento) }}%
+                    </div>
+                  {% endif %}
+                  
+                  <div class="product-image-container">
+                    {% if producto.foto %}
+                      <img src="{{ url_for('static', filename='uploads/' ~ producto.foto) }}" alt="{{ producto.nombre }}" class="product-image">
+                    {% else %}
+                      <div class="product-image" style="display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-box" style="color: var(--text-secondary);"></i>
+                      </div>
+                    {% endif %}
+                  </div>
+                  
+                  <div class="product-details">
+                    <div class="product-info-container">
+                      <div class="product-name">{{ producto.nombre }}</div>
+                      {% if producto.marca %}
+                        <div class="product-brand">{{ producto.marca }}</div>
+                      {% else %}
+                        <div class="product-brand" style="opacity: 0;">-</div>
+                      {% endif %}
+                    </div>
+                    
+                    <div class="product-price-container">
+                      <div class="price-display">
+                        {% if producto.tiene_descuento %}
+                          {% set precio_final = producto.precio_venta * (1 - producto.valor_descuento / 100) %}
+                          <span class="discounted-price">${{ '{:.2f}'.format(precio_final) }}</span>
+                          <span class="original-price">${{ '{:.2f}'.format(producto.precio_venta) }}</span>
+                        {% else %}
+                          <span class="current-price">${{ '{:.2f}'.format(producto.precio_venta) }}</span>
+                        {% endif %}
+                      </div>
+                      <div class="price-unit">
+                        {% if producto.unidad and producto.unidad != 'NONE' %}
+                          / {{ producto.unidad }}
+                        {% else %}
+                          / pieza
+                        {% endif %}
+                      </div>
+                    </div>
+                    
+                    <div class="product-discount-controls">
+                      {% if producto.tiene_descuento %}
+                        <button class="product-discount-btn btn-remove-product-discount" onclick="removeProductDiscount({{ producto.id }})">
+                          <i class="fas fa-times-circle"></i>
+                          Quitar descuento
+                        </button>
+                      {% else %}
+                        <div class="discount-input-container">
+                          <input type="number" class="product-discount-input" value="10" min="1" max="100" id="discount-input-{{ producto.id }}">
+                          <span style="font-size: 12px; color: var(--text-secondary);">%</span>
+                          <button class="product-discount-btn btn-apply-product-discount" onclick="applyProductDiscount({{ producto.id }})">
+                            <i class="fas fa-check"></i>
+                            Aplicar
+                          </button>
+                        </div>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+            
+            <div class="slider-arrow slider-arrow-right" onclick="scrollSlider('{{ categoria.nombre|lower }}', 'right')">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 18L15 12L9 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
             </div>
           </div>
         </div>
@@ -625,171 +1145,569 @@
     {% else %}
       <div class="empty-state">
         <div class="empty-icon">
-          <i class="fas fa-tags"></i>
+          <i class="fas fa-tag"></i>
         </div>
-        <div class="empty-message">No hay productos en tu inventario</div>
-        <a href="{{ url_for('nuevo_producto') }}" class="empty-action">
+        <p class="empty-message">No hay productos en tu inventario</p>
+        <a href="{{ url_for('nuevo_producto') }}" class="discount-action-btn btn-apply-discount" style="display: inline-flex; margin-top: 16px;">
+          <i class="fas fa-plus"></i>
           Agregar producto
         </a>
       </div>
     {% endif %}
   </div>
-  
-  <!-- Contenedor de notificaciones -->
+
+  <!-- Notificaciones -->
   <div class="toast-container" id="toastContainer"></div>
 </div>
 
+<!-- Contenedor para escáner Quagga -->
+<div id="quaggaScanner">
+  <button id="closeScanner">&times;</button>
+  <div id="scanner-container"></div>
+</div>
+
+<!-- Scripts necesarios -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+<script src="{{ url_for('static', filename='js/barcode-scanner.js') }}"></script>
+
 <script>
-  // Variables globales
-  let currentDiscountType = 'percentage';
+  // Estado global para controlar descuentos
+  let currentDiscountState = {
+    type: null, // 'global', 'category', 'brand', 'individual', null
+    details: null // Para category/brand, almacena el valor seleccionado
+  };
   
   // Inicialización
   document.addEventListener('DOMContentLoaded', function() {
-    initializeDiscounts();
+    initializeDiscountPanel();
     initializeSearch();
-    initializeToggles();
+    initializeScanning();
+    checkDiscountStates();
   });
   
-  // Configurar descuentos
-  function initializeDiscounts() {
-    // Actualizar el estado visual de las tarjetas con descuento
-    document.querySelectorAll('.product-card').forEach(card => {
-      if (card.dataset.hasDiscount === 'true') {
-        card.classList.add('has-discount');
+  // Verificar estados de descuentos al cargar
+  function checkDiscountStates() {
+    const allCards = document.querySelectorAll('.product-card');
+    const discountedCards = document.querySelectorAll('.product-card[data-tiene-descuento="true"]');
+    
+    if (discountedCards.length === 0) {
+      currentDiscountState.type = null;
+      updateUIState();
+      return;
+    }
+    
+    // Verificar si todos tienen descuento
+    if (allCards.length === discountedCards.length) {
+      currentDiscountState.type = 'global';
+      updateUIState();
+      return;
+    }
+    
+    // Verificar si es por categoría
+    const categoriesWithDiscount = new Set();
+    const categoriesWithoutDiscount = new Set();
+    
+    allCards.forEach(card => {
+      const hasDiscount = card.dataset.tieneDescuento === 'true';
+      const categoria = card.dataset.categoria;
+      
+      if (hasDiscount) {
+        categoriesWithDiscount.add(categoria);
+      } else {
+        categoriesWithoutDiscount.add(categoria);
       }
     });
-  }
-  
-  // Configurar búsqueda
-  function initializeSearch() {
-    const searchInput = document.getElementById('searchInput');
-    searchInput.addEventListener('input', function() {
-      const searchTerm = this.value.toLowerCase();
-      const cards = document.querySelectorAll('.product-card');
-      
-      cards.forEach(card => {
-        const searchable = card.dataset.searchable;
-        if (searchable.includes(searchTerm)) {
-          card.style.display = 'block';
-        } else {
-          card.style.display = 'none';
-        }
-      });
-    });
-  }
-  
-  // Configurar toggles
-  function initializeToggles() {
-    const toggleBtns = document.querySelectorAll('.toggle-btn');
-    const discountUnit = document.getElementById('discountUnit');
     
-    toggleBtns.forEach(btn => {
-      btn.addEventListener('click', function() {
-        toggleBtns.forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
-        currentDiscountType = this.dataset.type;
-        discountUnit.textContent = currentDiscountType === 'percentage' ? '%' : '$';
-      });
+    // Verificar si alguna categoría tiene todos sus productos con descuento
+    for (const category of categoriesWithDiscount) {
+      if (!categoriesWithoutDiscount.has(category)) {
+        const categoryCards = document.querySelectorAll(`.product-card[data-categoria="${category}"]`);
+        const allCategoryHaveDiscount = Array.from(categoryCards).every(card => 
+          card.dataset.tieneDescuento === 'true'
+        );
+        
+        if (allCategoryHaveDiscount) {
+          currentDiscountState.type = 'category';
+          currentDiscountState.details = category;
+          toggleCategoryDiscountState(category, true);
+        }
+      }
+    }
+    
+    // Si no es global ni por categoría completa, es individual o mixto
+    if (!currentDiscountState.type && discountedCards.length > 0) {
+      currentDiscountState.type = 'individual';
+    }
+    
+    updateUIState();
+  }
+  
+  // Configurar panel de descuentos
+  function initializeDiscountPanel() {
+    const discountTarget = document.getElementById('discountTarget');
+    const categorySelector = document.getElementById('categorySelector');
+    const brandSelector = document.getElementById('brandSelector');
+    const applyButton = document.getElementById('applyGlobalDiscountBtn');
+    const removeButton = document.getElementById('removeGlobalDiscountBtn');
+    
+    discountTarget.addEventListener('change', function() {
+      categorySelector.style.display = this.value === 'category' ? 'block' : 'none';
+      brandSelector.style.display = this.value === 'brand' ? 'block' : 'none';
+      
+      // Actualizar el texto del botón de aplicar
+      switch(this.value) {
+        case 'all':
+          applyButton.innerHTML = '<i class="fas fa-percent"></i> Aplicar a todos los productos';
+          removeButton.innerHTML = '<i class="fas fa-times"></i> Quitar de todos los productos';
+          break;
+        case 'category':
+          applyButton.innerHTML = '<i class="fas fa-tag"></i> Aplicar por categoría';
+          removeButton.innerHTML = '<i class="fas fa-times"></i> Quitar de categoría';
+          break;
+        case 'brand':
+          applyButton.innerHTML = '<i class="fas fa-trademark"></i> Aplicar por marca';
+          removeButton.innerHTML = '<i class="fas fa-times"></i> Quitar de marca';
+          break;
+      }
+      
+      updateUIState();
     });
+    
+    // Validación de input
+    const discountInput = document.getElementById('globalDiscountValue');
+    discountInput.addEventListener('input', function() {
+      if (this.value > 100) this.value = 100;
+      if (this.value < 1) this.value = 1;
+    });
+  }
+  
+  // Actualizar estado de la UI
+  function updateUIState() {
+    const discountTarget = document.getElementById('discountTarget');
+    const applyButton = document.getElementById('applyGlobalDiscountBtn');
+    const removeButton = document.getElementById('removeGlobalDiscountBtn');
+    const removeAllButton = document.getElementById('removeAllBtn');
+    const discountStatus = document.getElementById('discountStatus');
+    
+    // Resetear disabled state
+    discountTarget.disabled = false;
+    document.getElementById('specificCategory').disabled = false;
+    document.getElementById('specificBrand').disabled = false;
+    
+    // Evaluar restricciones basadas en el estado actual
+    switch(currentDiscountState.type) {
+      case 'global':
+        // Todos los productos tienen descuento
+        discountTarget.disabled = true;
+        discountTarget.value = 'all';
+        applyButton.style.display = 'none';
+        removeButton.style.display = 'block';
+        removeAllButton.style.display = 'block';
+        
+        discountStatus.className = 'discount-status success';
+        discountStatus.style.display = 'block';
+        discountStatus.innerHTML = '<i class="fas fa-check-circle"></i> Todos los productos tienen descuento aplicado. Para aplicar otros descuentos, primero quita el descuento global.';
+        
+        // Bloquear controles individuales
+        document.querySelectorAll('.product-card').forEach(card => {
+          updateProductControls(card, true, 'Descuento global aplicado');
+        });
+        break;
+        
+      case 'category':
+        // Una categoría completa tiene descuento
+        discountTarget.disabled = true;
+        discountTarget.value = 'category';
+        applyButton.style.display = 'none';
+        removeButton.style.display = 'block';
+        removeAllButton.style.display = 'block';
+        
+        const categoryName = currentDiscountState.details;
+        discountStatus.className = 'discount-status warning';
+        discountStatus.style.display = 'block';
+        discountStatus.innerHTML = `<i class="fas fa-exclamation-triangle"></i> La categoría "${categoryName}" tiene descuento completo. Para aplicar descuento global, primero quita el descuento de esta categoría.`;
+        
+        // Solo bloquear productos de la categoría afectada
+        document.querySelectorAll(`.product-card[data-categoria="${categoryName}"]`).forEach(card => {
+          updateProductControls(card, true, 'Descuento por categoría aplicado');
+        });
+        break;
+        
+      case 'individual':
+        // Hay descuentos individuales
+        removeAllButton.style.display = 'block';
+        applyButton.style.display = 'block';
+        removeButton.style.display = 'none';
+        
+        discountStatus.className = 'discount-status info';
+        discountStatus.style.display = 'block';
+        discountStatus.innerHTML = '<i class="fas fa-info-circle"></i> Algunos productos tienen descuentos individuales. Puedes aplicar descuentos masivos, pero se sobrescribirán los individuales.';
+        break;
+        
+      default:
+        // Sin descuentos
+        removeAllButton.style.display = 'none';
+        applyButton.style.display = 'block';
+        removeButton.style.display = 'none';
+        discountStatus.style.display = 'none';
+        
+        // Reactivar todos los controles
+        document.querySelectorAll('.product-card').forEach(card => {
+          if (card.dataset.tieneDescuento === 'false') {
+            updateProductControls(card, false);
+          }
+        });
+        break;
+    }
+    
+    // Controlar disponibilidad de opciones según el selector
+    if (currentDiscountState.type && discountTarget.value !== 'all') {
+      const options = discountTarget.options;
+      for (let option of options) {
+        if (currentDiscountState.type === 'global' && option.value !== 'all') {
+          option.disabled = true;
+        } else if (currentDiscountState.type === 'category' && option.value === 'all') {
+          option.disabled = true;
+        }
+      }
+    }
   }
   
   // Aplicar descuento global
   function applyGlobalDiscount() {
+    const target = document.getElementById('discountTarget').value;
     const discountValue = parseFloat(document.getElementById('globalDiscountValue').value);
+    let targetCards = [];
     
-    if (!discountValue || discountValue <= 0) {
-      showToast('Por favor ingresa un descuento válido', 'error');
+    if (!discountValue || discountValue < 1 || discountValue > 100) {
+      showToast('Por favor ingresa un descuento válido (1-100%)', 'error');
       return;
     }
     
-    const cards = document.querySelectorAll('.product-card');
+    // Verificar si la acción está permitida
+    if (currentDiscountState.type === 'global' && target !== 'all') {
+      showToast('No puedes aplicar descuento por categoría o marca mientras hay descuento global activo', 'error');
+      return;
+    }
+    
+    if (currentDiscountState.type === 'category' && target === 'all') {
+      showToast('No puedes aplicar descuento global mientras hay descuentos por categoría', 'error');
+      return;
+    }
+    
+    // Obtener los productos objetivo
+    switch(target) {
+      case 'all':
+        targetCards = Array.from(document.querySelectorAll('.product-card'));
+        break;
+      case 'category':
+        const selectedCategory = document.getElementById('specificCategory').value;
+        if (!selectedCategory) {
+          showToast('Por favor selecciona una categoría', 'error');
+          return;
+        }
+        targetCards = Array.from(document.querySelectorAll(`.product-card[data-categoria="${selectedCategory.toLowerCase()}"]`));
+        break;
+      case 'brand':
+        const selectedBrand = document.getElementById('specificBrand').value;
+        if (!selectedBrand) {
+          showToast('Por favor selecciona una marca', 'error');
+          return;
+        }
+        targetCards = Array.from(document.querySelectorAll(`.product-card[data-marca="${selectedBrand.toLowerCase()}"]`));
+        break;
+    }
+    
+    if (targetCards.length === 0) {
+      showToast('No se encontraron productos para aplicar el descuento', 'error');
+      return;
+    }
+    
+    // Aplicar descuento
     let successCount = 0;
     const promises = [];
     
-    cards.forEach(card => {
-      if (card.style.display === 'none') return; // Skip hidden products
-      
+    targetCards.forEach(card => {
       const productId = card.dataset.productId;
-      const originalPrice = parseFloat(card.dataset.originalPrice);
       
-      // Solo aplicar descuento sin cambiar el precio base
-      const promise = fetch(`/api/apply_discount/${productId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          type: currentDiscountType,
-          value: discountValue
+      const promise = applyDiscountToProduct(productId, discountValue)
+        .then(success => {
+          if (success) successCount++;
         })
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          updateProductCardDisplay(productId, originalPrice, discountValue, currentDiscountType);
-          successCount++;
-        }
-      })
-      .catch(error => {
-        console.error('Error:', error);
-      });
+        .catch(error => {
+          console.error('Error aplicando descuento:', error);
+        });
       
       promises.push(promise);
     });
     
     Promise.all(promises).then(() => {
-      showToast(`Descuento aplicado a ${successCount} productos`, 'success');
+      showToast(`Descuento aplicado a ${successCount} de ${targetCards.length} productos`, 'success');
+      
+      // Actualizar estado global
+      if (target === 'all' && successCount === targetCards.length) {
+        currentDiscountState.type = 'global';
+      } else if (target === 'category' && successCount === targetCards.length) {
+        const category = document.getElementById('specificCategory').value.toLowerCase();
+        currentDiscountState.type = 'category';
+        currentDiscountState.details = category;
+        toggleCategoryDiscountState(category, true);
+      }
+      
+      updateUIState();
     });
   }
   
-  // Aplicar descuento individual - FUNCIÓN CORREGIDA
-  function applyProductDiscount(productId) {
-    const card = document.querySelector(`.product-card[data-product-id="${productId}"]`);
-    const input = card.querySelector('.mini-input');
-    const discountValue = parseFloat(input.value);
-    const originalPrice = parseFloat(card.dataset.originalPrice);
+  // Quitar descuento global
+  function removeGlobalDiscount() {
+    const target = document.getElementById('discountTarget').value;
+    let targetCards = [];
+    let actionText = '';
     
-    if (!discountValue || discountValue <= 0) {
-      showToast('Por favor ingresa un descuento válido', 'error');
+    switch(target) {
+      case 'all':
+        targetCards = Array.from(document.querySelectorAll('.product-card[data-tiene-descuento="true"]'));
+        actionText = 'todos los productos';
+        break;
+      case 'category':
+        const selectedCategory = document.getElementById('specificCategory').value;
+        if (!selectedCategory) {
+          showToast('Por favor selecciona una categoría', 'error');
+          return;
+        }
+        targetCards = Array.from(document.querySelectorAll(`.product-card[data-categoria="${selectedCategory.toLowerCase()}"][data-tiene-descuento="true"]`));
+        actionText = 'la categoría seleccionada';
+        break;
+      case 'brand':
+        const selectedBrand = document.getElementById('specificBrand').value;
+        if (!selectedBrand) {
+          showToast('Por favor selecciona una marca', 'error');
+          return;
+        }
+        targetCards = Array.from(document.querySelectorAll(`.product-card[data-marca="${selectedBrand.toLowerCase()}"][data-tiene-descuento="true"]`));
+        actionText = 'la marca seleccionada';
+        break;
+    }
+    
+    if (targetCards.length === 0) {
+      showToast(`No hay descuentos aplicados en ${actionText}`, 'error');
       return;
     }
     
-    // Por ahora, siempre usar porcentaje para descuentos individuales
-    const discountType = 'percentage';
+    // Confirmar acción
+    if (!confirm(`¿Estás seguro de quitar los descuentos de ${actionText}?`)) {
+      return;
+    }
     
-    // Solo aplicar el descuento, NO cambiar el precio base
-    fetch(`/api/apply_discount/${productId}`, {
+    // Quitar descuentos
+    let successCount = 0;
+    const promises = [];
+    
+    targetCards.forEach(card => {
+      const productId = card.dataset.productId;
+      
+      const promise = removeDiscountFromProduct(productId)
+        .then(success => {
+          if (success) successCount++;
+        })
+        .catch(error => {
+          console.error('Error quitando descuento:', error);
+        });
+      
+      promises.push(promise);
+    });
+    
+    Promise.all(promises).then(() => {
+      showToast(`Descuentos removidos de ${successCount} productos`, 'success');
+      
+      // Actualizar estado
+      if (target === 'all') {
+        currentDiscountState.type = null;
+      } else if (target === 'category') {
+        const category = document.getElementById('specificCategory').value.toLowerCase();
+        toggleCategoryDiscountState(category, false);
+        currentDiscountState.type = null;
+      }
+      
+      checkDiscountStates();
+      updateUIState();
+    });
+  }
+  
+  // Quitar todos los descuentos
+  function removeAllDiscounts() {
+    if (!confirm('¿Estás seguro de quitar TODOS los descuentos del sistema?')) {
+      return;
+    }
+    
+    const allDiscountedCards = Array.from(document.querySelectorAll('.product-card[data-tiene-descuento="true"]'));
+    
+    if (allDiscountedCards.length === 0) {
+      showToast('No hay descuentos aplicados en el sistema', 'error');
+      return;
+    }
+    
+    let successCount = 0;
+    const promises = [];
+    
+    allDiscountedCards.forEach(card => {
+      const productId = card.dataset.productId;
+      
+      const promise = removeDiscountFromProduct(productId)
+        .then(success => {
+          if (success) successCount++;
+        })
+        .catch(error => {
+          console.error('Error quitando descuento:', error);
+        });
+      
+      promises.push(promise);
+    });
+    
+    Promise.all(promises).then(() => {
+      showToast(`Se quitaron ${successCount} descuentos del sistema`, 'success');
+      
+      // Resetear todo el estado
+      currentDiscountState.type = null;
+      currentDiscountState.details = null;
+      
+      // Ocultar todos los elementos de descuento
+      document.getElementById('removeAllBtn').style.display = 'none';
+      
+      // Ocultar todos los estados de categoría
+      document.querySelectorAll('.category-status').forEach(status => {
+        status.style.display = 'none';
+      });
+      
+      document.querySelectorAll('[id^="remove-category-"]').forEach(btn => {
+        btn.style.display = 'none';
+      });
+      
+      // Reactivar todos los controles
+      document.querySelectorAll('.product-card').forEach(card => {
+        updateProductControls(card, false);
+      });
+      
+      updateUIState();
+    });
+  }
+  
+  // Aplicar descuento a producto individual
+  function applyProductDiscount(productId) {
+    // Verificar si el producto ya tiene descuento por categoría o global
+    const card = document.querySelector(`.product-card[data-product-id="${productId}"]`);
+    
+    if (currentDiscountState.type === 'global') {
+      showToast('No se puede aplicar descuento individual mientras hay descuento global', 'error');
+      return;
+    }
+    
+    if (currentDiscountState.type === 'category' && 
+        card.dataset.categoria === currentDiscountState.details) {
+      showToast('No se puede aplicar descuento individual a esta categoría', 'error');
+      return;
+    }
+    
+    const input = document.getElementById(`discount-input-${productId}`);
+    const discountValue = parseFloat(input.value);
+    
+    if (!discountValue || discountValue < 1 || discountValue > 100) {
+      showToast('Por favor ingresa un descuento válido (1-100%)', 'error');
+      return;
+    }
+    
+    applyDiscountToProduct(productId, discountValue)
+      .then(success => {
+        if (success) {
+          showToast('Descuento aplicado correctamente', 'success');
+          currentDiscountState.type = 'individual';
+          updateUIState();
+        } else {
+          showToast('Error al aplicar descuento', 'error');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        showToast('Error al aplicar descuento', 'error');
+      });
+  }
+  
+  // Quitar descuento de producto individual
+  function removeProductDiscount(productId) {
+    removeDiscountFromProduct(productId)
+      .then(success => {
+        if (success) {
+          showToast('Descuento removido', 'success');
+          checkDiscountStates();
+          updateUIState();
+        } else {
+          showToast('Error al remover descuento', 'error');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        showToast('Error al remover descuento', 'error');
+      });
+  }
+  
+  // Quitar descuento de categoría
+  function removeCategoryDiscount(category) {
+    const categoryCards = Array.from(document.querySelectorAll(`.product-card[data-categoria="${category}"][data-tiene-descuento="true"]`));
+    
+    if (categoryCards.length === 0) {
+      showToast('No hay descuentos en esta categoría', 'error');
+      return;
+    }
+    
+    let successCount = 0;
+    const promises = [];
+    
+    categoryCards.forEach(card => {
+      const productId = card.dataset.productId;
+      
+      const promise = removeDiscountFromProduct(productId)
+        .then(success => {
+          if (success) successCount++;
+        })
+        .catch(error => {
+          console.error('Error quitando descuento:', error);
+        });
+      
+      promises.push(promise);
+    });
+    
+    Promise.all(promises).then(() => {
+      showToast(`Descuentos removidos de ${successCount} productos`, 'success');
+      toggleCategoryDiscountState(category, false);
+      currentDiscountState.type = null;
+      updateUIState();
+    });
+  }
+  
+  // Funciones auxiliares para API
+  function applyDiscountToProduct(productId, discountValue) {
+    return fetch(`/api/apply_discount/${productId}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        type: discountType,
+        type: 'percentage',
         value: discountValue
       })
     })
     .then(response => response.json())
     .then(data => {
       if (data.success) {
-        updateProductCardDisplay(productId, originalPrice, discountValue, discountType);
-        showToast('Descuento aplicado correctamente', 'success');
-      } else {
-        showToast('Error al aplicar descuento', 'error');
+        updateProductCardDisplay(productId, data);
+        return true;
       }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      showToast('Error al aplicar descuento', 'error');
+      return false;
     });
   }
   
-  // Quitar descuento
-  function removeDiscount(productId) {
-    const card = document.querySelector(`.product-card[data-product-id="${productId}"]`);
-    const originalPrice = parseFloat(card.dataset.originalPrice);
-    
-    // Solo remover descuento, sin cambiar el precio base
-    fetch(`/api/remove_discount/${productId}`, {
+  function removeDiscountFromProduct(productId) {
+    return fetch(`/api/remove_discount/${productId}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -798,73 +1716,364 @@
     .then(response => response.json())
     .then(data => {
       if (data.success) {
-        // Actualizar vista - mostrar el precio base original
-        const priceDisplay = card.querySelector('.price-display');
-        priceDisplay.innerHTML = `<span class="current-price">$${originalPrice.toFixed(2)}</span>`;
-        
-        // Cambiar botón a "Aplicar"
-        const controlsDiv = card.querySelector('.product-controls');
-        controlsDiv.innerHTML = `
-          <input type="number" class="mini-input" value="10" min="0" data-product-id="${productId}">
-          <span style="font-size: 13px;">%</span>
-          <button class="mini-btn apply-mini-btn" onclick="applyProductDiscount(${productId})">
-            Aplicar
-          </button>
-        `;
-        
-        // Quitar clase de descuento
-        card.classList.remove('has-discount');
-        card.dataset.hasDiscount = 'false';
-        
-        showToast('Descuento removido', 'success');
-      } else {
-        showToast('Error al remover descuento', 'error');
+        updateProductCardRemoveDiscount(productId, data);
+        return true;
       }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      showToast('Error al remover descuento', 'error');
+      return false;
     });
   }
   
-  // Actualizar display de la tarjeta
-  function updateProductCardDisplay(productId, originalPrice, discountValue, discountType) {
+  // Actualizar vista de producto con descuento
+  function updateProductCardDisplay(productId, data) {
     const card = document.querySelector(`.product-card[data-product-id="${productId}"]`);
-    let finalPrice;
-    
-    if (discountType === 'percentage') {
-      finalPrice = originalPrice * (1 - discountValue / 100);
-    } else {
-      finalPrice = originalPrice - discountValue;
-    }
-    
-    if (finalPrice < 0) finalPrice = 0;
     
     // Actualizar precio
     const priceDisplay = card.querySelector('.price-display');
-    const discountLabel = discountType === 'percentage' ? `${discountValue}%` : `$${discountValue}`;
-    
     priceDisplay.innerHTML = `
-      <span class="discounted-price">$${finalPrice.toFixed(2)}</span>
-      <span class="original-price">$${originalPrice.toFixed(2)}</span>
-      <span class="discount-badge">-${discountLabel}</span>
+      <span class="discounted-price">$${data.precio_final.toFixed(2)}</span>
+      <span class="original-price">$${data.precio_base.toFixed(2)}</span>
     `;
     
-    // Actualizar controles
-    const controlsDiv = card.querySelector('.product-controls');
-    controlsDiv.innerHTML = `
-      <input type="number" class="mini-input" value="${discountValue}" min="0" data-product-id="${productId}">
-      <span style="font-size: 13px;">${discountType === 'percentage' ? '%' : '$'}</span>
-      <button class="mini-btn remove-mini-btn" onclick="removeDiscount(${productId})">
-        Quitar
-      </button>
-    `;
+    // Agregar etiqueta de descuento
+    let discountTag = card.querySelector('.discount-tag');
+    if (!discountTag) {
+      discountTag = document.createElement('div');
+      discountTag.className = 'discount-tag';
+      card.querySelector('.product-image-container').appendChild(discountTag);
+    }
+    discountTag.textContent = `-${Math.round(data.valor_descuento)}%`;
+    
+    // Actualizar controles según el estado actual
+    if (currentDiscountState.type === 'global') {
+      updateProductControls(card, true, 'Descuento global aplicado');
+    } else if (currentDiscountState.type === 'category' && 
+               card.dataset.categoria === currentDiscountState.details) {
+      updateProductControls(card, true, 'Descuento por categoría aplicado');
+    } else {
+      updateProductControls(card, true);
+    }
     
     // Actualizar atributos de la tarjeta
     card.classList.add('has-discount');
-    card.dataset.hasDiscount = 'true';
-    card.dataset.discountType = discountType;
-    card.dataset.discountValue = discountValue;
+    card.dataset.tieneDescuento = 'true';
+    card.dataset.valorDescuento = data.valor_descuento;
+  }
+  
+  // Actualizar vista al quitar descuento
+  function updateProductCardRemoveDiscount(productId, data) {
+    const card = document.querySelector(`.product-card[data-product-id="${productId}"]`);
+    
+    // Actualizar precio
+    const priceDisplay = card.querySelector('.price-display');
+    priceDisplay.innerHTML = `<span class="current-price">$${data.precio_base.toFixed(2)}</span>`;
+    
+    // Remover etiqueta de descuento
+    const discountTag = card.querySelector('.discount-tag');
+    if (discountTag) {
+      discountTag.remove();
+    }
+    
+    // Actualizar controles
+    updateProductControls(card, false);
+    
+    // Actualizar atributos de la tarjeta
+    card.classList.remove('has-discount');
+    card.dataset.tieneDescuento = 'false';
+    card.dataset.valorDescuento = '0';
+  }
+  
+  // Actualizar controles del producto
+  function updateProductControls(card, hasDiscount, message = null) {
+    const controls = card.querySelector('.product-discount-controls');
+    
+    if (hasDiscount) {
+      if (message) {
+        controls.innerHTML = `<div class="disabled-message">${message}</div>`;
+      } else {
+        controls.innerHTML = `
+          <button class="product-discount-btn btn-remove-product-discount" onclick="removeProductDiscount(${card.dataset.productId})">
+            <i class="fas fa-times-circle"></i>
+            Quitar descuento
+          </button>
+        `;
+      }
+    } else {
+      controls.innerHTML = `
+        <div class="discount-input-container">
+          <input type="number" class="product-discount-input" value="10" min="1" max="100" id="discount-input-${card.dataset.productId}">
+          <span style="font-size: 12px; color: var(--text-secondary);">%</span>
+          <button class="product-discount-btn btn-apply-product-discount" onclick="applyProductDiscount(${card.dataset.productId})">
+            <i class="fas fa-check"></i>
+            Aplicar
+          </button>
+        </div>
+      `;
+    }
+  }
+  
+  // Alternar estado de descuento de categoría
+  function toggleCategoryDiscountState(category, hasDiscount) {
+    const statusElement = document.getElementById(`category-status-${category}`);
+    const removeButton = document.getElementById(`remove-category-${category}`);
+    
+    if (statusElement && removeButton) {
+      if (hasDiscount) {
+        statusElement.style.display = 'inline';
+        removeButton.style.display = 'block';
+      } else {
+        statusElement.style.display = 'none';
+        removeButton.style.display = 'none';
+      }
+    }
+  }
+  
+  // Funciones del slider
+  function scrollSlider(categoryId, direction) {
+    const slider = document.getElementById(`slider-${categoryId}`);
+    if (!slider) return;
+    
+    const cardWidth = slider.querySelector('.product-card').offsetWidth + 14;
+    const scrollAmount = cardWidth * 3;
+    
+    if (direction === 'left') {
+      slider.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+    } else {
+      slider.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  }
+  
+  // Configurar búsqueda
+  function initializeSearch() {
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('input', applyFiltersAndSearch);
+    
+    // Configurar filtro de favoritos
+    const heartIcon = document.getElementById('heartIcon');
+    const favoritosCheck = document.getElementById('favoritosCheck');
+    const favoritosContainer = document.getElementById('favoritosContainer');
+    
+    if (favoritosCheck && heartIcon && favoritosContainer) {
+      function updateFavoritosButtonState() {
+        if (favoritosCheck.checked) {
+          heartIcon.innerHTML = '&#9829;';
+          heartIcon.classList.add('active');
+          favoritosContainer.classList.add('active');
+        } else {
+          heartIcon.innerHTML = '&#9825;';
+          heartIcon.classList.remove('active');
+          favoritosContainer.classList.remove('active');
+        }
+      }
+      
+      favoritosContainer.addEventListener('click', function() {
+        favoritosCheck.checked = !favoritosCheck.checked;
+        updateFavoritosButtonState();
+        applyFiltersAndSearch();
+      });
+    }
+  }
+  
+  // Aplicar filtros y búsqueda
+  function applyFiltersAndSearch() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const favoritosOnly = document.getElementById('favoritosCheck').checked;
+    
+    const categorySections = document.querySelectorAll('.category-section');
+    let visibleSections = 0;
+    
+    categorySections.forEach(section => {
+      const products = section.querySelectorAll('.product-card');
+      let hasVisibleProducts = false;
+      
+      products.forEach(product => {
+        const searchable = product.dataset.searchable;
+        const isFavorite = favoritosOnly ? product.getAttribute('data-favorito') === 'True' : true;
+        
+        const matchesSearch = !searchTerm || searchable.includes(searchTerm);
+        const matchesFavorite = isFavorite;
+        
+        if (matchesSearch && matchesFavorite) {
+          product.style.display = 'block';
+          hasVisibleProducts = true;
+        } else {
+          product.style.display = 'none';
+        }
+      });
+      
+      if (hasVisibleProducts) {
+        section.style.display = 'block';
+        visibleSections++;
+      } else {
+        section.style.display = 'none';
+      }
+    });
+    
+    // Mostrar mensaje de sin resultados si es necesario
+    if (visibleSections === 0) {
+      showEmptyState(searchTerm, favoritosOnly);
+    } else {
+      hideEmptyState();
+    }
+  }
+  
+  // Mostrar estado vacío
+  function showEmptyState(searchTerm, favoritosOnly) {
+    let emptyDiv = document.getElementById('emptySearchResults');
+    
+    if (!emptyDiv) {
+      emptyDiv = document.createElement('div');
+      emptyDiv.id = 'emptySearchResults';
+      emptyDiv.style.cssText = `
+        text-align: center;
+        padding: 50px 20px;
+        background-color: var(--light-background);
+        border-radius: 12px;
+        margin: 20px 0;
+      `;
+      
+      emptyDiv.innerHTML = `
+        <div style="font-size: 48px; color: var(--text-secondary); margin-bottom: 16px;">
+          <i class="fas fa-search"></i>
+        </div>
+        <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 8px; color: var(--text-color);">
+          No se encontraron productos
+        </h3>
+        <p style="color: var(--text-secondary); margin-bottom: 20px;">
+          ${searchTerm ? `No hay productos que coincidan con "${searchTerm}"` : ''}
+          ${favoritosOnly ? 'No tienes productos marcados como favoritos' : ''}
+        </p>
+        <button onclick="resetSearch()" class="discount-action-btn btn-apply-discount">
+          <i class="fas fa-undo"></i>
+          Restablecer búsqueda
+        </button>
+      `;
+      
+      document.getElementById('categoriesContainer').prepend(emptyDiv);
+    } else {
+      emptyDiv.style.display = 'block';
+    }
+  }
+  
+  // Ocultar estado vacío
+  function hideEmptyState() {
+    const emptyDiv = document.getElementById('emptySearchResults');
+    if (emptyDiv) {
+      emptyDiv.style.display = 'none';
+    }
+  }
+  
+  // Resetear búsqueda
+  function resetSearch() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('favoritosCheck').checked = false;
+    
+    const heartIcon = document.getElementById('heartIcon');
+    const favoritosContainer = document.getElementById('favoritosContainer');
+    
+    if (heartIcon && favoritosContainer) {
+      heartIcon.innerHTML = '&#9825;';
+      heartIcon.classList.remove('active');
+      favoritosContainer.classList.remove('active');
+    }
+    
+    applyFiltersAndSearch();
+  }
+  
+  // Configurar escáner
+  function initializeScanning() {
+    // Inicializar escáner con pistola
+    if (window.initBarcodeScanner) {
+      window.initBarcodeScanner('#scanButton', '#searchInput', {
+        threshold: 150,
+        timeoutDuration: 2000
+      });
+    }
+    
+    // Configurar escáner con cámara
+    const cameraButton = document.getElementById('cameraButton');
+    cameraButton.addEventListener('click', function() {
+      iniciarEscaneoQuagga();
+    });
+    
+    // Observador del valor de searchInput
+    let prevInputValue = '';
+    setInterval(() => {
+      const searchInput = document.getElementById('searchInput');
+      if (searchInput && searchInput.value !== prevInputValue) {
+        prevInputValue = searchInput.value;
+        applyFiltersAndSearch();
+      }
+    }, 100);
+  }
+  
+  // Iniciar escáneo con Quagga
+  function iniciarEscaneoQuagga() {
+    const scanner = document.getElementById('quaggaScanner');
+    const closeButton = document.getElementById('closeScanner');
+    
+    scanner.classList.add('active');
+    
+    Quagga.init({
+      inputStream: {
+        name: "Live",
+        type: "LiveStream",
+        target: document.getElementById('scanner-container'),
+        constraints: {
+          width: 640,
+          height: 480,
+          facingMode: "environment"
+        }
+      },
+      locator: {
+        patchSize: "medium",
+        halfSample: true
+      },
+      numOfWorkers: navigator.hardwareConcurrency || 4,
+      decoder: {
+        readers: [
+          "code_128_reader",
+          "ean_reader",
+          "ean_8_reader",
+          "code_39_reader",
+          "code_39_vin_reader",
+          "codabar_reader",
+          "upc_reader",
+          "upc_e_reader",
+          "i2of5_reader"
+        ]
+      },
+      locate: true
+    }, function(err) {
+      if (err) {
+        console.error("Error al iniciar Quagga:", err);
+        alert("No se pudo acceder a la cámara. Verifique los permisos.");
+        scanner.classList.remove('active');
+        return;
+      }
+      
+      Quagga.start();
+    });
+    
+    Quagga.onDetected(function(result) {
+      if (result && result.codeResult && result.codeResult.code) {
+        const code = result.codeResult.code;
+        console.log("Código detectado:", code);
+        
+        Quagga.stop();
+        scanner.classList.remove('active');
+        
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+          searchInput.value = code;
+          applyFiltersAndSearch();
+        }
+      }
+    });
+    
+    closeButton.addEventListener('click', function() {
+      Quagga.stop();
+      scanner.classList.remove('active');
+    });
   }
   
   // Sistema de notificaciones
@@ -880,7 +2089,6 @@
     
     toastContainer.appendChild(toast);
     
-    // Auto-remove after 3 seconds
     setTimeout(() => {
       toast.classList.add('fade-out');
       setTimeout(() => {
@@ -888,5 +2096,14 @@
       }, 300);
     }, 3000);
   }
+  
+  // Validar inputs de descuento
+  document.addEventListener('input', function(e) {
+    if (e.target.classList.contains('product-discount-input') || 
+        e.target.classList.contains('discount-input')) {
+      if (e.target.value > 100) e.target.value = 100;
+      if (e.target.value < 1 && e.target.value !== '') e.target.value = 1;
+    }
+  });
 </script>
 {% endblock %}
