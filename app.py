@@ -2558,16 +2558,37 @@ def descuentos():
     empresa_id = session['user_id']
     
     # Obtener lista de productos aprobados
-    productos = Producto.query.filter_by(
+    productos_db = Producto.query.filter_by(
         empresa_id=empresa_id,
         is_approved=True
     ).order_by(Producto.categoria).all()
+    
+    # Convertir objetos Producto a diccionarios simples
+    productos = []
+    for p in productos_db:
+        producto_dict = {
+            'id': p.id,
+            'nombre': p.nombre,
+            'stock': p.stock or 0,
+            'precio_venta': p.precio_venta or 0,
+            'categoria': p.categoria or '',
+            'categoria_color': p.categoria_color or '#6B7280',
+            'foto': p.foto or 'default_product.jpg',
+            'codigo_barras_externo': p.codigo_barras_externo or '',
+            'marca': p.marca or '',
+            'es_favorito': p.es_favorito or False,
+            'esta_a_la_venta': p.esta_a_la_venta or True,
+            'tiene_descuento': getattr(p, 'tiene_descuento', False),
+            'tipo_descuento': getattr(p, 'tipo_descuento', None),
+            'valor_descuento': getattr(p, 'valor_descuento', 0.0)
+        }
+        productos.append(producto_dict)
     
     # Obtener categorías únicas y sus colores
     categorias = []
     categorias_set = set()
     
-    for producto in productos:
+    for producto in productos_db:
         if producto.categoria and producto.categoria not in categorias_set:
             categorias_set.add(producto.categoria)
             categorias.append({
@@ -2580,10 +2601,48 @@ def descuentos():
     
     return render_template(
         'descuentos.html',
-        productos=productos,
+        productos=productos,  # Ahora son diccionarios simples
         categorias=categorias
     )
 
+@app.route('/api/search_products', methods=['GET'])
+@login_requerido
+def api_search_products():
+    """
+    Busca productos por nombre, marca o código para el selector de descuentos.
+    """
+    query = request.args.get('q', '').strip()
+    empresa_id = session['user_id']
+    
+    if len(query) < 2:
+        return jsonify({"results": []})
+    
+    # Buscar productos que coincidan
+    productos = Producto.query.filter(
+        Producto.empresa_id == empresa_id,
+        Producto.is_approved == True,
+        or_(
+            Producto.nombre.ilike(f"%{query}%"),
+            Producto.marca.ilike(f"%{query}%"),
+            Producto.codigo_barras_externo.ilike(f"%{query}%")
+        )
+    ).limit(10).all()
+    
+    # Convertir a diccionarios
+    results = []
+    for p in productos:
+        results.append({
+            'id': p.id,
+            'nombre': p.nombre,
+            'marca': p.marca or 'Sin marca',
+            'codigo_barras_externo': p.codigo_barras_externo or 'N/A',
+            'foto': p.foto or 'default_product.jpg',
+            'tiene_descuento': getattr(p, 'tiene_descuento', False),
+            'valor_descuento': getattr(p, 'valor_descuento', 0.0)
+        })
+    
+    return jsonify({"results": results})
+    
 ##############################
 # REABASTECER
 ##############################
