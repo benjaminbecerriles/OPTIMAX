@@ -736,16 +736,42 @@ def cambiar_precios():
     empresa_id = session['user_id']
     
     # Obtener lista de productos aprobados
-    productos = Producto.query.filter_by(
+    productos_db = Producto.query.filter_by(
         empresa_id=empresa_id,
         is_approved=True
     ).order_by(Producto.categoria).all()
+    
+    # Convertir a diccionarios con todos los campos
+    productos = []
+    for p in productos_db:
+        producto_dict = {
+            'id': p.id,
+            'nombre': p.nombre,
+            'stock': p.stock or 0,
+            'precio_venta': p.precio_venta or 0,
+            'categoria': p.categoria or '',
+            'categoria_color': p.categoria_color or '#6B7280',
+            'foto': p.foto or 'default_product.jpg',
+            'codigo_barras_externo': p.codigo_barras_externo or '',
+            'marca': p.marca or '',
+            'es_favorito': p.es_favorito or False,
+            'esta_a_la_venta': p.esta_a_la_venta or True,
+            'unidad': getattr(p, 'unidad', 'pieza'),
+            'tiene_descuento': getattr(p, 'tiene_descuento', False),
+            'tipo_descuento': getattr(p, 'tipo_descuento', None),
+            'valor_descuento': getattr(p, 'valor_descuento', 0.0),
+            # NUEVOS CAMPOS DE RASTREO
+            'origen_descuento': getattr(p, 'origen_descuento', None),
+            'descuento_grupo_id': getattr(p, 'descuento_grupo_id', None),
+            'fecha_aplicacion_descuento': getattr(p, 'fecha_aplicacion_descuento', None)
+        }
+        productos.append(producto_dict)
     
     # Obtener categorías únicas y sus colores
     categorias = []
     categorias_set = set()
     
-    for producto in productos:
+    for producto in productos_db:
         if producto.categoria and producto.categoria not in categorias_set:
             categorias_set.add(producto.categoria)
             categorias.append({
@@ -761,6 +787,7 @@ def cambiar_precios():
         productos=productos,
         categorias=categorias
     )
+
 
 ##############################
 # ADMIN
@@ -886,10 +913,8 @@ def ver_productos():
         # Guardar cambios si se hicieron modificaciones
         if fixed_count > 0:
             db.session.commit()
-            print(f"Se actualizaron automáticamente {fixed_count} lotes con fechas de caducidad")
     except Exception as e:
         db.session.rollback()
-        print(f"Error al actualizar fechas de caducidad: {str(e)}")
 
     query = Producto.query.filter_by(empresa_id=empresa_id)
     if filtro_aprobacion == 'aprobados':
@@ -926,8 +951,6 @@ def ver_productos():
                 LoteInventario.stock > 0
             ).all()
             
-            print(f"Producto {producto.id} ({producto.nombre}) - Lotes activos: {len(lotes_activos)}")
-            
             if lotes_activos:
                 # Cálculo del costo promedio ponderado por cantidad en stock
                 costo_total = 0
@@ -945,9 +968,6 @@ def ver_productos():
                 for lote in lotes_activos:
                     if lote.fecha_caducidad is not None:
                         lotes_con_caducidad.append(lote)
-                        print(f"  Lote {lote.id}: fecha caducidad = {lote.fecha_caducidad}")
-                
-                print(f"  Lotes con caducidad: {len(lotes_con_caducidad)}")
                 
                 if lotes_con_caducidad:
                     # Ordenar por fecha de caducidad (más cercana primero)
@@ -980,52 +1000,32 @@ def ver_productos():
                         else:
                             dias_calculados = (proximo_lote.fecha_caducidad - hoy).days
                         
-                        print(f"  Próximo lote {proximo_lote.id} caduca el {proximo_lote.fecha_caducidad}")
-                        print(f"  Fecha actual: {hoy}")
-                        print(f"  Días hasta caducidad calculados: {dias_calculados}")
-                        print(f"  ¿Lote ya caducado? {proximo_lote.fecha_caducidad < hoy}")
-                        print(f"  ¿Es el lote más reciente caducado? {proximo_lote == lote_caducado}")
-
                         # Asignar el valor a la propiedad del producto
                         producto.proximo_lote_dias = dias_calculados
-                        print(f"  Valor asignado a proximo_lote_dias: {producto.proximo_lote_dias}")
-                    else:
-                        print(f"  No se encontró ningún lote válido")
-                else:
-                    print(f"  No hay lotes con fecha de caducidad")
-            else:
-                print(f"  No hay lotes activos con stock positivo")
 
         except Exception as e:
-            print(f"Error procesando producto {producto.id}: {str(e)}")
-            import traceback
-            traceback.print_exc()  # Esto dará más información sobre la excepción
             # No interrumpir el proceso por un error en un producto
             continue
     
-    # Verificación final
-    for producto in productos:
-        print(f"Producto {producto.id} final - proximo_lote_dias: {getattr(producto, 'proximo_lote_dias', 'NO DEFINIDO')}")
-
-    # Vamos a hacer un diagnóstico más profundo y forzar valores para probar
+    # Crear diccionarios con todos los campos necesarios
     productos_dict = []
     for p in productos:
-        # PASO 1: Verificar directamente en la base de datos
+        # Calcular días hasta caducidad directamente
+        dias_calculados = None
+        hoy = date.today()
+        
         lotes_activos = LoteInventario.query.filter(
             LoteInventario.producto_id == p.id,
             LoteInventario.esta_activo == True,
             LoteInventario.stock > 0
         ).all()
         
-        # PASO 2: Buscar lotes con fecha de caducidad
+        # Buscar lotes con fecha de caducidad
         proximo_lote = None
         lote_caducado = None
-        dias_calculados = None
-        hoy = date.today()
 
         # Primero buscamos un lote que NO haya caducado
         for lote in lotes_activos:
-            print(f"DEBUG LOTE: Producto {p.id}, Lote {lote.id}, Fecha caducidad: {lote.fecha_caducidad}")
             if lote.fecha_caducidad is not None:
                 # Primero buscamos lotes que no hayan caducado
                 if lote.fecha_caducidad >= hoy:
@@ -1039,20 +1039,14 @@ def ver_productos():
         if proximo_lote is None and lote_caducado is not None:
             proximo_lote = lote_caducado
         
-        # PASO 3: Calcular días si hay lote con fecha
+        # Calcular días si hay lote con fecha
         if proximo_lote and proximo_lote.fecha_caducidad:
             if proximo_lote.fecha_caducidad < hoy:
                 dias_calculados = -1 * (hoy - proximo_lote.fecha_caducidad).days
             else:
                 dias_calculados = (proximo_lote.fecha_caducidad - hoy).days
-            
-            # Añadir info de depuración detallada para verificar
-            if proximo_lote.fecha_caducidad < hoy:
-                print(f"DEBUG FINAL: Producto {p.id} - Lote caducado hace {-dias_calculados} días. ¿Hay otros lotes? {len(lotes_activos)}")
-            else:
-                print(f"DEBUG FINAL: Producto {p.id} - Próximo lote caduca en {dias_calculados} días")
         
-        # PASO 4: Crear diccionario con datos seguros
+        # Crear diccionario con datos seguros - INCLUYENDO NUEVOS CAMPOS
         p_dict = {
             'id': p.id,
             'nombre': p.nombre,
@@ -1068,10 +1062,16 @@ def ver_productos():
             'esta_a_la_venta': p.esta_a_la_venta,
             'unidad': getattr(p, 'unidad', None),
             'costo_promedio': getattr(p, 'costo_promedio', p.costo),
-            'proximo_lote_dias': dias_calculados  # Usar valor calculado directamente
+            'proximo_lote_dias': dias_calculados,  # Usar valor calculado directamente
+            'tiene_descuento': getattr(p, 'tiene_descuento', False),
+            'tipo_descuento': getattr(p, 'tipo_descuento', None),
+            'valor_descuento': getattr(p, 'valor_descuento', 0.0),
+            # NUEVOS CAMPOS DE RASTREO
+            'origen_descuento': getattr(p, 'origen_descuento', None),
+            'descuento_grupo_id': getattr(p, 'descuento_grupo_id', None),
+            'fecha_aplicacion_descuento': getattr(p, 'fecha_aplicacion_descuento', None)
         }
         
-        print(f"Diccionario final para producto {p.id}: proximo_lote_dias = {p_dict['proximo_lote_dias']}")
         productos_dict.append(p_dict)
 
     return render_template(
@@ -2475,7 +2475,7 @@ def producto_confirmacion(producto_id):
 @app.route('/api/apply_discount/<int:product_id>', methods=['POST'])
 @login_requerido
 def apply_discount(product_id):
-    """Aplica un descuento a un producto específico."""
+    """Aplica un descuento a un producto específico con rastreo mejorado."""
     try:
         producto = Producto.query.get_or_404(product_id)
         
@@ -2486,6 +2486,8 @@ def apply_discount(product_id):
         data = request.get_json()
         discount_type = data.get('type')  # 'percentage' o 'fixed'
         discount_value = float(data.get('value', 0))
+        discount_origin = data.get('origin', 'individual')  # NUEVO
+        discount_group_id = data.get('group_id', None)  # NUEVO
         
         # Validar datos
         if discount_type not in ['percentage', 'fixed'] or discount_value <= 0:
@@ -2495,11 +2497,13 @@ def apply_discount(product_id):
         if discount_type == 'percentage' and discount_value > 100:
             return jsonify({"success": False, "message": "El porcentaje no puede ser mayor a 100"}), 400
         
-        # CRÍTICO: NO modificar precio_venta aquí
-        # Solo guardamos la información del descuento
+        # NUEVOS CAMPOS DE RASTREO
         producto.tiene_descuento = True
         producto.tipo_descuento = discount_type
         producto.valor_descuento = discount_value
+        producto.origen_descuento = discount_origin
+        producto.descuento_grupo_id = discount_group_id
+        producto.fecha_aplicacion_descuento = datetime.utcnow()
         
         # Calcular precio final SOLO para la respuesta
         if discount_type == 'percentage':
@@ -2507,16 +2511,16 @@ def apply_discount(product_id):
         else:
             precio_final = max(0, producto.precio_venta - discount_value)
         
-        # NO hacer esto: producto.precio_venta = precio_final  ❌
-        
         db.session.commit()
         
         return jsonify({
             "success": True,
-            "precio_base": producto.precio_venta,  # Precio sin descuento
-            "precio_final": precio_final,  # Precio con descuento
+            "precio_base": producto.precio_venta,
+            "precio_final": precio_final,
             "tipo_descuento": discount_type,
-            "valor_descuento": discount_value
+            "valor_descuento": discount_value,
+            "origen_descuento": discount_origin,
+            "descuento_grupo_id": discount_group_id
         })
         
     except Exception as e:
@@ -2550,60 +2554,138 @@ def remove_discount(product_id):
         db.session.rollback()
         return jsonify({"success": False, "message": str(e)}), 500
 
+@app.route('/descuentos/detalle/<tipo>/<grupo_id>')
+@login_requerido
+def descuentos_detalle(tipo, grupo_id):
+    """Muestra los detalles de productos con descuento por tipo y grupo"""
+    empresa_id = session['user_id']
+    
+    # Decodificar grupo_id (puede contener espacios)
+    import urllib.parse
+    grupo_id = urllib.parse.unquote(grupo_id)
+    
+    # Filtrar productos según el tipo de descuento
+    if tipo == 'global':
+        productos = Producto.query.filter_by(
+            empresa_id=empresa_id,
+            is_approved=True,
+            tiene_descuento=True,
+            origen_descuento='global'
+        ).all()
+        titulo = "Descuento Global"
+    elif tipo == 'categoria':
+        productos = Producto.query.filter_by(
+            empresa_id=empresa_id,
+            is_approved=True,
+            tiene_descuento=True,
+            origen_descuento='categoria',
+            descuento_grupo_id=grupo_id
+        ).all()
+        titulo = f"Categoría: {grupo_id}"
+    elif tipo == 'marca':
+        productos = Producto.query.filter_by(
+            empresa_id=empresa_id,
+            is_approved=True,
+            tiene_descuento=True,
+            origen_descuento='marca',
+            descuento_grupo_id=grupo_id
+        ).all()
+        titulo = f"Marca: {grupo_id}"
+    else:
+        # Por defecto, mostrar productos individuales
+        productos = Producto.query.filter_by(
+            empresa_id=empresa_id,
+            is_approved=True,
+            tiene_descuento=True,
+            origen_descuento='individual'
+        ).all()
+        titulo = "Productos Individuales"
+    
+    return render_template(
+        'descuentos_detalle.html',
+        productos=productos,
+        titulo=titulo,
+        tipo=tipo,
+        grupo_id=grupo_id
+    )
+
 @app.route('/descuentos')
 @login_requerido
 def descuentos():
     """Vista para aplicar descuentos a productos."""
-    # Obtener información del usuario
-    empresa_id = session['user_id']
-    
-    # Obtener lista de productos aprobados
-    productos_db = Producto.query.filter_by(
-        empresa_id=empresa_id,
-        is_approved=True
-    ).order_by(Producto.categoria).all()
-    
-    # Convertir objetos Producto a diccionarios simples
-    productos = []
-    for p in productos_db:
-        producto_dict = {
-            'id': p.id,
-            'nombre': p.nombre,
-            'stock': p.stock or 0,
-            'precio_venta': p.precio_venta or 0,
-            'categoria': p.categoria or '',
-            'categoria_color': p.categoria_color or '#6B7280',
-            'foto': p.foto or 'default_product.jpg',
-            'codigo_barras_externo': p.codigo_barras_externo or '',
-            'marca': p.marca or '',
-            'es_favorito': p.es_favorito or False,
-            'esta_a_la_venta': p.esta_a_la_venta or True,
-            'tiene_descuento': getattr(p, 'tiene_descuento', False),
-            'tipo_descuento': getattr(p, 'tipo_descuento', None),
-            'valor_descuento': getattr(p, 'valor_descuento', 0.0)
-        }
-        productos.append(producto_dict)
-    
-    # Obtener categorías únicas y sus colores
-    categorias = []
-    categorias_set = set()
-    
-    for producto in productos_db:
-        if producto.categoria and producto.categoria not in categorias_set:
-            categorias_set.add(producto.categoria)
-            categorias.append({
-                'nombre': producto.categoria,
-                'color': producto.categoria_color or '#6B7280' # Color por defecto si no tiene
-            })
-    
-    # Ordenar categorías alfabéticamente
-    categorias.sort(key=lambda x: x['nombre'])
-    
-    return render_template(
-        'descuentos.html',
-        productos=productos,  # Ahora son diccionarios simples
-        categorias=categorias
-    )
+    try:
+        # Obtener información del usuario
+        empresa_id = session.get('user_id')
+        
+        if not empresa_id:
+            flash('Error: Usuario no identificado', 'error')
+            return redirect(url_for('login'))
+        
+        # Obtener lista de productos aprobados
+        productos_db = Producto.query.filter_by(
+            empresa_id=empresa_id,
+            is_approved=True
+        ).order_by(Producto.categoria).all()
+        
+        # Convertir objetos Producto a diccionarios simples - INCLUYENDO NUEVOS CAMPOS
+        productos = []
+        for p in productos_db:
+            try:
+                producto_dict = {
+                    'id': p.id,
+                    'nombre': p.nombre or '',
+                    'stock': p.stock or 0,
+                    'precio_venta': p.precio_venta or 0,
+                    'categoria': p.categoria or '',
+                    'categoria_color': p.categoria_color or '#6B7280',
+                    'foto': p.foto or 'default_product.jpg',
+                    'codigo_barras_externo': p.codigo_barras_externo or '',
+                    'marca': p.marca or '',
+                    'es_favorito': p.es_favorito or False,
+                    'esta_a_la_venta': p.esta_a_la_venta or True,
+                    'tiene_descuento': getattr(p, 'tiene_descuento', False),
+                    'tipo_descuento': getattr(p, 'tipo_descuento', None),
+                    'valor_descuento': float(getattr(p, 'valor_descuento', 0.0)),
+                    # NUEVOS CAMPOS DE RASTREO
+                    'origen_descuento': getattr(p, 'origen_descuento', None),
+                    'descuento_grupo_id': getattr(p, 'descuento_grupo_id', None),
+                    'fecha_aplicacion_descuento': getattr(p, 'fecha_aplicacion_descuento', None)
+                }
+                productos.append(producto_dict)
+            except Exception as e:
+                print(f"Error procesando producto {p.id}: {str(e)}")
+                continue
+        
+        # Obtener categorías únicas y sus colores
+        categorias = []
+        categorias_set = set()
+        
+        for producto in productos_db:
+            if producto.categoria and producto.categoria not in categorias_set:
+                categorias_set.add(producto.categoria)
+                categorias.append({
+                    'nombre': producto.categoria,
+                    'color': producto.categoria_color or '#6B7280'  # Color por defecto si no tiene
+                })
+        
+        # Ordenar categorías alfabéticamente
+        categorias.sort(key=lambda x: x['nombre'])
+        
+        # Renderizar template con datos simplificados
+        return render_template(
+            'descuentos.html',
+            productos=productos,
+            categorias=categorias
+        )
+        
+    except Exception as e:
+        print(f"Error en ruta descuentos: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        
+        # En caso de error, mostrar mensaje amigable
+        flash('Error al cargar la página de descuentos', 'error')
+        return redirect(url_for('dashboard_inventario'))
 
 @app.route('/api/search_products', methods=['GET'])
 @login_requerido

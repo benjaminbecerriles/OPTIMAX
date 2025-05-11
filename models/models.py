@@ -134,7 +134,7 @@ class Producto(db.Model):
     divisa = db.Column(db.String(3), default='mxn')
 
     # =========================================================================
-    # NUEVO: CAMPOS PARA SISTEMA DE DESCUENTOS
+    # SISTEMA DE DESCUENTOS MEJORADO
     # =========================================================================
     # Indica si el producto tiene un descuento activo
     tiene_descuento = db.Column(db.Boolean, default=False)
@@ -150,6 +150,19 @@ class Producto(db.Model):
     
     # Fecha de fin del descuento (opcional)
     fecha_fin_descuento = db.Column(db.DateTime, nullable=True)
+    
+    # =========================================================================
+    # NUEVOS CAMPOS PARA RASTREO DE DESCUENTOS
+    # =========================================================================
+    
+    # Origen del descuento: 'global', 'marca', 'categoria', 'individual'
+    origen_descuento = db.Column(db.String(20), nullable=True)
+    
+    # ID del grupo que aplica el descuento (nombre de marca o categoría)
+    descuento_grupo_id = db.Column(db.String(100), nullable=True)
+    
+    # Fecha cuando se aplicó el descuento (para saber cuál fue el último)
+    fecha_aplicacion_descuento = db.Column(db.DateTime, nullable=True)
 
     def __repr__(self):
         return (f"<Producto {self.nombre} (ID={self.id}), "

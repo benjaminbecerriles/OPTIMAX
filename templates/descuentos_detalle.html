@@ -1,0 +1,599 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ titulo }} - OptiMax Manage{% endblock %}
+
+{% block content %}
+<style>
+  /* Sistema de Diseño Apple - Consistente con descuentos.html */
+  :root {
+    --font-apple: -apple-system, BlinkMacSystemFont, 'SF Pro Text', Helvetica, Arial, sans-serif;
+    
+    /* Colores esenciales */
+    --text-color: #1d1d1f;
+    --text-secondary: #555555;
+    --background: #ffffff;
+    --light-background: #f5f5f7;
+    --separator: rgba(0, 0, 0, 0.1);
+    --accent: #e52e2e;
+    --accent-hover: #c51818;
+    --accent-light: rgba(229, 46, 46, 0.1);
+    
+    /* Colores específicos de descuentos */
+    --discount-color: #1a9951;
+    --discount-hover: #147a3e;
+    --discount-light: rgba(26, 153, 81, 0.1);
+    --discount-apply-color: #4CAF50;
+    --discount-remove-color: #F44336;
+    --warning-color: #ff9800;
+    
+    --blue: #1a237e;
+    --gray-300: #d1d1d6;
+    --gray-500: #777777;
+    --gray-600: #86868b;
+  }
+
+  body {
+    font-family: var(--font-apple);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    color: var(--text-color);
+    background-color: var(--background);
+  }
+
+  /* Contenedor principal */
+  .descuentos-detalle-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 36px 24px;
+  }
+
+  /* Encabezado */
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--separator);
+  }
+  
+  .page-title {
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin: 0;
+    color: var(--text-color);
+  }
+  
+  .header-title-container {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .page-description {
+    font-size: 17px;
+    color: #86868b;
+    margin-top: 8px;
+    max-width: 600px;
+    font-weight: 400;
+  }
+  
+  .header-actions {
+    display: flex;
+    gap: 1rem;
+    padding-top: 8px;
+  }
+  
+  /* Botones de acción */
+  .btn-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.25rem;
+    border-radius: 980px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    height: 44px;
+    white-space: nowrap;
+  }
+  
+  .btn-volver {
+    background-color: var(--blue);
+    color: #ffffff;
+    box-shadow: 0 2px 4px rgba(26, 35, 126, 0.3);
+  }
+  
+  .btn-volver:hover {
+    background-color: #151c64;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(26, 35, 126, 0.4);
+    color: #ffffff;
+  }
+
+  /* Badge de descuento general */
+  .discount-badge-header {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    background-color: var(--discount-light);
+    color: var(--discount-color);
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-left: 12px;
+  }
+
+  /* Estadísticas del descuento */
+  .discount-stats {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+
+  .stat-card {
+    background: white;
+    border: 1px solid var(--separator);
+    border-radius: 12px;
+    padding: 20px;
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .stat-label {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+  }
+
+  .stat-value {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--text-color);
+  }
+
+  .stat-value.discount {
+    color: var(--discount-color);
+  }
+
+  /* Tabla de productos */
+  .products-table-container {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid var(--separator);
+    overflow: hidden;
+  }
+
+  .products-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .products-table th {
+    background: var(--light-background);
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 16px 20px;
+    text-align: left;
+    border-bottom: 1px solid var(--separator);
+  }
+
+  .products-table td {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--separator);
+    vertical-align: middle;
+  }
+
+  .products-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .products-table tr:hover {
+    background-color: var(--light-background);
+  }
+
+  /* Celda de producto */
+  .product-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .product-image {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    border-radius: 6px;
+    background-color: var(--light-background);
+  }
+
+  .product-info {
+    flex: 1;
+  }
+
+  .product-name {
+    font-weight: 500;
+    color: var(--text-color);
+    font-size: 15px;
+    line-height: 1.4;
+  }
+
+  .product-brand {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
+
+  /* Precios */
+  .price-cell {
+    text-align: right;
+  }
+
+  .price-original {
+    text-decoration: line-through;
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin-right: 8px;
+  }
+
+  .price-final {
+    color: var(--discount-color);
+    font-weight: 600;
+    font-size: 16px;
+  }
+
+  .price-discount {
+    display: block;
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+  }
+
+  /* Stock y SKU */
+  .stock-cell {
+    text-align: center;
+    font-weight: 500;
+  }
+
+  .stock-cell.low {
+    color: var(--warning-color);
+  }
+
+  .stock-cell.out {
+    color: var(--discount-remove-color);
+  }
+
+  .sku-cell {
+    font-family: monospace;
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  /* Acciones */
+  .actions-cell {
+    text-align: center;
+  }
+
+  .btn-remove-discount {
+    padding: 6px 12px;
+    background-color: var(--light-background);
+    color: var(--discount-remove-color);
+    border: 1px solid var(--separator);
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-remove-discount:hover {
+    background-color: var(--discount-remove-color);
+    color: white;
+    border-color: var(--discount-remove-color);
+  }
+
+  /* Estado vacío */
+  .empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    background: white;
+    border-radius: 12px;
+    border: 1px solid var(--separator);
+  }
+
+  .empty-icon {
+    font-size: 48px;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+  }
+
+  .empty-message {
+    font-size: 16px;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+  }
+
+  /* Toast notifications */
+  .toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 1000;
+    max-width: 400px;
+  }
+
+  .toast {
+    background-color: #333;
+    color: white;
+    padding: 16px 20px;
+    border-radius: 8px;
+    margin-top: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: slideIn 0.3s ease;
+    opacity: 1;
+    transition: all 0.3s ease;
+  }
+
+  .toast.success {
+    background-color: #2ecc71;
+  }
+
+  .toast.error {
+    background-color: #e74c3c;
+  }
+
+  .toast.warning {
+    background-color: #f39c12;
+  }
+
+  .toast.fade-out {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .products-table-container {
+      overflow-x: auto;
+    }
+
+    .products-table {
+      min-width: 800px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .descuentos-detalle-container {
+      padding: 24px 16px;
+    }
+    
+    .page-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    
+    .header-actions {
+      width: 100%;
+    }
+
+    .discount-stats {
+      flex-direction: column;
+    }
+
+    .stat-card {
+      min-width: auto;
+    }
+  }
+</style>
+
+<div class="descuentos-detalle-container">
+  <!-- Encabezado -->
+  <div class="page-header">
+    <div class="header-title-container">
+      <h1 class="page-title">
+        {{ titulo }}
+        {% if productos %}
+          <span class="discount-badge-header">
+            {% if productos[0].valor_descuento %}
+              -{{ productos[0].valor_descuento|round|int }}% descuento
+            {% endif %}
+          </span>
+        {% endif %}
+      </h1>
+      <p class="page-description">
+        Gestiona y visualiza todos los productos con este descuento aplicado.
+      </p>
+    </div>
+    <div class="header-actions">
+      <a href="{{ url_for('descuentos') }}" class="btn-action btn-volver">
+        <i class="fas fa-arrow-left"></i>
+        <span>Volver a descuentos</span>
+      </a>
+    </div>
+  </div>
+
+  {% if productos %}
+    <!-- Estadísticas del descuento -->
+    <div class="discount-stats">
+      <div class="stat-card">
+        <div class="stat-label">Total de productos</div>
+        <div class="stat-value">{{ productos|length }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Descuento promedio</div>
+        <div class="stat-value discount">
+          {% set avg_discount = (productos|sum(attribute='valor_descuento') / productos|length) %}
+          -{{ avg_discount|round|int }}%
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Stock total</div>
+        <div class="stat-value">
+          {{ productos|sum(attribute='stock')|round|int }} unidades
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Valor de inventario</div>
+        <div class="stat-value">
+          {% set total_value = 0 %}
+          {% for p in productos %}
+            {% set final_price = p.precio_venta * (1 - p.valor_descuento / 100) %}
+            {% set total_value = total_value + (final_price * p.stock) %}
+          {% endfor %}
+          ${{ total_value|round|int }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla de productos -->
+    <div class="products-table-container">
+      <table class="products-table">
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th>Categoría</th>
+            <th>SKU</th>
+            <th>Stock</th>
+            <th>Precio original</th>
+            <th>Precio con descuento</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for producto in productos %}
+            <tr data-product-id="{{ producto.id }}">
+              <td>
+                <div class="product-cell">
+                  <img src="{{ url_for('static', filename='uploads/' ~ (producto.foto or 'default_product.jpg')) }}" 
+                       alt="{{ producto.nombre }}" 
+                       class="product-image">
+                  <div class="product-info">
+                    <div class="product-name">{{ producto.nombre }}</div>
+                    <div class="product-brand">{{ producto.marca or 'Sin marca' }}</div>
+                  </div>
+                </div>
+              </td>
+              <td class="sku-cell">{{ producto.categoria or '-' }}</td>
+              <td class="sku-cell">{{ producto.codigo_barras_externo or '-' }}</td>
+              <td class="stock-cell {{ 'low' if producto.stock <= 5 else '' }}{{ 'out' if producto.stock <= 0 else '' }}">
+                {{ producto.stock|round|int }}
+              </td>
+              <td class="price-cell">
+                <span>${{ producto.precio_venta|round(2) }}</span>
+              </td>
+              <td class="price-cell">
+                {% set final_price = producto.precio_venta * (1 - producto.valor_descuento / 100) %}
+                <span class="price-final">${{ final_price|round(2) }}</span>
+                <span class="price-discount">(-{{ producto.valor_descuento|round|int }}%)</span>
+              </td>
+              <td class="actions-cell">
+                <button class="btn-remove-discount" onclick="removeProductDiscount({{ producto.id }})">
+                  <i class="fas fa-times"></i>
+                  Quitar
+                </button>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <!-- Estado vacío -->
+    <div class="empty-state">
+      <div class="empty-icon">
+        <i class="fas fa-tag"></i>
+      </div>
+      <p class="empty-message">No hay productos con este tipo de descuento</p>
+      <a href="{{ url_for('descuentos') }}" class="btn-action" style="background-color: var(--accent); color: white;">
+        <i class="fas fa-arrow-left"></i>
+        Volver a descuentos
+      </a>
+    </div>
+  {% endif %}
+
+  <!-- Notificaciones -->
+  <div class="toast-container" id="toastContainer"></div>
+</div>
+
+<script>
+  // Función para remover descuento de producto individual
+  function removeProductDiscount(productId) {
+    if (!confirm('¿Estás seguro que deseas quitar el descuento de este producto?')) {
+      return;
+    }
+
+    fetch(`/api/remove_discount/${productId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        showToast('Descuento removido', 'success');
+        // Recargar página para mostrar cambios
+        window.location.reload();
+      } else {
+        showToast('Error al remover descuento', 'error');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      showToast('Error al remover descuento', 'error');
+    });
+  }
+
+  // Sistema de notificaciones
+  function showToast(message, type = 'success') {
+    const toastContainer = document.getElementById('toastContainer');
+    
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    let icon = 'check-circle';
+    if (type === 'error') icon = 'exclamation-circle';
+    if (type === 'warning') icon = 'exclamation-triangle';
+    
+    toast.innerHTML = `
+      <i class="fas fa-${icon}"></i>
+      <span>${message}</span>
+    `;
+    
+    toastContainer.appendChild(toast);
+    
+    setTimeout(() => {
+      toast.classList.add('fade-out');
+      setTimeout(() => {
+        toast.remove();
+      }, 300);
+    }, 3000);
+  }
+</script>
+{% endblock %}

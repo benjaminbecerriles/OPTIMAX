@@ -4,7 +4,7 @@
 
 {% block content %}
 <style>
-  /* Sistema de Diseño Apple - Simplificado */
+  /* Sistema de Diseño Apple - Similar a cambiar_precios.html */
   :root {
     --font-apple: -apple-system, BlinkMacSystemFont, 'SF Pro Text', Helvetica, Arial, sans-serif;
     
@@ -36,19 +36,18 @@
     font-family: var(--font-apple);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    line-height: 1.5;
     color: var(--text-color);
     background-color: var(--background);
   }
 
-  /* Contenedor principal - más estrecho */
+  /* Contenedor principal */
   .descuentos-container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 36px 24px;
   }
 
-  /* Encabezado simplificado */
+  /* Encabezado igual que cambiar_precios.html */
   .page-header {
     display: flex;
     justify-content: space-between;
@@ -85,7 +84,7 @@
     padding-top: 8px;
   }
   
-  /* Botones de acción */
+  /* Botones de acción igual que cambiar_precios.html */
   .btn-action {
     display: flex;
     align-items: center;
@@ -116,12 +115,12 @@
     color: #ffffff;
   }
 
-  /* Panel de descuentos simplificado */
+  /* Panel de aplicar descuentos */
   .discount-panel {
     background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
     border-radius: 12px;
     padding: 24px;
-    margin-bottom: 32px;
+    margin-bottom: 50px;
     border: 1px solid rgba(0, 0, 0, 0.05);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   }
@@ -136,34 +135,7 @@
     gap: 8px;
   }
 
-  /* Estado actual de descuentos */
-  .discount-status {
-    padding: 12px 16px;
-    margin-bottom: 20px;
-    border-radius: 8px;
-    font-size: 14px;
-    display: none;
-  }
-
-  .discount-status.warning {
-    background-color: rgba(255, 152, 0, 0.1);
-    border: 1px solid rgba(255, 152, 0, 0.2);
-    color: #f57c00;
-  }
-
-  .discount-status.info {
-    background-color: rgba(33, 150, 243, 0.1);
-    border: 1px solid rgba(33, 150, 243, 0.2);
-    color: #1976d2;
-  }
-
-  .discount-status.success {
-    background-color: var(--discount-light);
-    border: 1px solid rgba(26, 153, 81, 0.2);
-    color: var(--discount-color);
-  }
-
-  /* Controles en UNA sola fila - TODO HORIZONTALMENTE */
+  /* Controles de descuento */
   .discount-controls {
     display: flex;
     align-items: center;
@@ -185,8 +157,6 @@
     background-color: white;
     color: var(--text-color);
     -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236c757d' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 12px center;
@@ -209,8 +179,6 @@
     background-color: white;
     color: var(--text-color);
     -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236c757d' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 12px center;
@@ -218,7 +186,6 @@
     padding-right: 36px;
   }
 
-  /* Buscador de productos */
   .product-search-container {
     min-width: 250px;
     position: relative;
@@ -325,7 +292,6 @@
     min-width: 15px;
   }
 
-  /* Botón más pequeño */
   .discount-action-btn {
     display: flex;
     align-items: center;
@@ -352,7 +318,7 @@
     box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
   }
 
-  /* Sección Mis Descuentos */
+  /* Sección Mis Descuentos - COMPLETAMENTE NUEVA */
   .my-discounts-section {
     margin-top: 48px;
   }
@@ -367,167 +333,294 @@
     gap: 10px;
   }
 
-  .discount-type-container {
-    margin-bottom: 32px;
-    animation: fadeIn 0.3s ease;
+  /* Usando el estilo de cambiar_precios.html para las categorías de descuentos */
+  .discount-section {
+    margin-bottom: 70px;
+    border: 1px solid #eaeaea;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+    background-color: #fafafa;
   }
 
-  .discount-type-header {
-    background-color: var(--light-background);
-    padding: 12px 20px;
-    border-radius: 8px 8px 0 0;
-    border: 1px solid rgba(0, 0, 0, 0.05);
+  .discount-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f0f0f0;
   }
 
-  .discount-type-title {
-    font-size: 16px;
+  .discount-title {
+    font-size: 22px;
     font-weight: 600;
-    color: var(--text-color);
+    margin: 0;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
+    color: var(--text-color);
   }
 
-  .discount-type-count {
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    background-color: rgba(0, 0, 0, 0.05);
-    padding: 4px 8px;
-    border-radius: 12px;
+  .discount-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background-color: #eeeeee;
+    color: #505050;
+    font-size: 13px;
+    font-weight: 600;
   }
 
-  .discount-type-button {
-    padding: 6px 12px;
-    font-size: 0.85rem;
-    background-color: white;
-    border: 1px solid var(--gray-300);
+  .discount-value-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 10px;
     border-radius: 6px;
-    color: var(--accent);
-    cursor: pointer;
-    transition: all 0.15s ease;
+    background-color: var(--discount-light);
+    color: var(--discount-color);
+    font-size: 14px;
+    font-weight: 600;
   }
 
-  .discount-type-button:hover {
-    background-color: var(--accent);
-    color: white;
+  /* Slider para items de descuento */
+  .discount-slider-container {
+    position: relative;
+    padding: 0 70px;
+    margin: 0 -10px;
   }
 
-  .discount-type-items {
+  .discount-slider {
+    display: flex;
+    gap: 16px;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+    padding: 4px 0 12px 0;
+    margin-bottom: 4px;
+  }
+
+  /* Category y Brand Cards - Sin imagen, solo texto - CLICKABLES */
+  .category-card, .brand-card {
+    flex: 0 0 180px;
+    height: 100px;
+    border-radius: 12px;
     background-color: white;
-    border: 1px solid rgba(0, 0, 0, 0.05);
-    border-top: none;
-    border-radius: 0 0 8px 8px;
-    min-height: 60px;
+    border: 1px solid #e0e0e0;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.07);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer; /* Añadido cursor */
+    text-decoration: none; /* Añadido para enlaces */
+  }
+
+  .category-card:hover, .brand-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.08);
+  }
+
+  .category-name, .brand-name {
+    font-size: 16px;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 8px;
+    color: var(--text-color);
+  }
+
+  .category-details, .brand-details {
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  /* Product Cards - Igual que cambiar_precios.html */
+  .product-card {
+    flex: 0 0 220px;
+    height: 360px;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: white;
+    border: 1px solid #e0e0e0;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.07);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  .product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.08);
+  }
+
+  .product-image-container {
+    height: 140px;
+    min-height: 140px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    background-color: #f8f8f8;
+    padding: 5px;
+  }
+
+  .product-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .product-details {
+    padding: 16px;
+    flex-grow: 1;
     display: flex;
     flex-direction: column;
   }
 
-  .discount-item {
+  .product-info-container {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 20px;
-    border-bottom: 1px solid var(--light-background);
-    transition: background-color 0.15s ease;
+    flex-direction: column;
+    height: 78px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    position: relative;
   }
 
-  .discount-item:last-child {
-    border-bottom: none;
-  }
-
-  .discount-item:hover {
-    background-color: var(--light-background);
-  }
-
-  .discount-item-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex: 1;
-  }
-
-  .discount-item-image {
-    width: 60px;
-    height: 60px;
-    object-fit: contain;
-    border-radius: 6px;
-    background-color: var(--light-background);
-    flex-shrink: 0;
-  }
-
-  .discount-item-details {
-    flex: 1;
-  }
-
-  .discount-item-details h4 {
-    font-size: 1rem;
-    font-weight: 500;
-    margin: 0;
-    color: var(--text-color);
+  .product-name {
+    font-size: 16px;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
     line-height: 1.4;
+    color: var(--text-color);
+    height: 46px;
+    margin-bottom: 0;
   }
 
-  .discount-item-details p {
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    margin: 2px 0 0 0;
-    line-height: 1.3;
+  .product-brand {
+    font-size: 13px;
+    color: #606060;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
   }
 
-  /* Precios mejorados */
-  .price-info {
+  .product-price-container {
+    height: 40px;
+    margin-top: 10px;
+    margin-bottom: 12px;
     display: flex;
-    align-items: baseline;
-    gap: 8px;
-    margin-top: 4px;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
   }
 
-  .price-original {
-    text-decoration: line-through;
-    color: var(--text-secondary);
-    font-size: 0.95rem;
-  }
-
-  .price-discounted {
-    color: var(--discount-color);
-    font-weight: 600;
-    font-size: 1.05rem;
-  }
-
-  .discount-item-value {
+  .price-row {
     display: flex;
     align-items: center;
-    gap: 12px;
-    flex-shrink: 0;
+    gap: 4px;
   }
 
-  .discount-value {
+  .current-price {
+    font-size: 18px;
     font-weight: 600;
     color: var(--discount-color);
-    font-size: 1rem;
-    padding: 4px 8px;
-    background-color: var(--discount-light);
+  }
+
+  .original-price {
+    text-decoration: line-through;
+    color: #666;
+    font-size: 14px;
+    margin-top: 2px;
+  }
+
+  .discount-label-small {
+    background: #e74c3c;
+    color: white;
+    padding: 3px 8px;
     border-radius: 4px;
+    font-size: 11px;
+    margin-left: 8px;
   }
 
-  .empty-discounts {
-    text-align: center;
-    padding: 40px 20px;
-    color: var(--text-secondary);
-    font-style: italic;
+  .remove-discount-btn {
+    background-color: var(--discount-remove-color);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
   }
 
-  /* Modal de confirmación personalizado */
+  .remove-discount-btn:hover {
+    background-color: #d32f2f;
+  }
+
+  /* Botones de navegación del slider */
+  .slider-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--accent);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(229, 46, 46, 0.3);
+    z-index: 10;
+    transition: all 0.2s ease;
+  }
+
+  .slider-arrow:hover {
+    background-color: var(--accent-hover);
+    transform: translateY(-50%) scale(1.1);
+  }
+
+  .slider-arrow-left {
+    left: 20px;
+  }
+
+  .slider-arrow-right {
+    right: 20px;
+  }
+
+  .slider-arrow svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: white;
+    stroke-width: 2.5;
+  }
+
+  /* Modal de confirmación */
   .custom-confirm {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.6);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -536,24 +629,32 @@
 
   .custom-confirm-box {
     background: white;
-    border-radius: 12px;
-    padding: 24px;
-    max-width: 400px;
+    border-radius: 16px;
+    padding: 28px;
+    max-width: 500px;
     width: 90%;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
   }
 
   .custom-confirm-title {
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 600;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
     color: var(--text-color);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .warning-icon {
+    color: var(--warning-color);
+    font-size: 24px;
   }
 
   .custom-confirm-message {
     color: var(--text-secondary);
-    margin-bottom: 20px;
-    line-height: 1.5;
+    margin-bottom: 24px;
+    line-height: 1.6;
   }
 
   .custom-confirm-buttons {
@@ -563,12 +664,13 @@
   }
 
   .custom-confirm-button {
-    padding: 8px 16px;
-    border-radius: 6px;
+    padding: 10px 24px;
+    border-radius: 8px;
     border: none;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
+    font-size: 0.95rem;
   }
 
   .custom-confirm-cancel {
@@ -581,24 +683,12 @@
   }
 
   .custom-confirm-ok {
-    background: var(--accent);
+    background: var(--warning-color);
     color: white;
   }
 
   .custom-confirm-ok:hover {
-    background: var(--accent-hover);
-  }
-
-  /* Animaciones */
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    background: #f57c00;
   }
 
   /* Toast notifications */
@@ -637,9 +727,12 @@
     background-color: #f39c12;
   }
 
-  .toast.fade-out {
-    opacity: 0;
-    transform: translateY(-20px);
+  /* Estado vacío */
+  .empty-discounts {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-secondary);
+    font-style: italic;
   }
 
   @keyframes slideIn {
@@ -679,11 +772,32 @@
     .product-search-container {
       width: 100%;
     }
+    
+    .discount-slider {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scroll-snap-type: x mandatory;
+      padding-bottom: 16px;
+    }
+    
+    .product-card,
+    .category-card,
+    .brand-card {
+      scroll-snap-align: start;
+    }
+    
+    .discount-slider-container {
+      padding: 0;
+    }
+    
+    .slider-arrow {
+      display: none;
+    }
   }
 </style>
 
 <div class="descuentos-container">
-  <!-- Encabezado simplificado -->
+  <!-- Encabezado -->
   <div class="page-header">
     <div class="header-title-container">
       <h1 class="page-title">Aplicar Descuentos</h1>
@@ -703,9 +817,6 @@
       <i class="fas fa-tags"></i>
       Aplicar descuento
     </h3>
-    
-    <!-- Estado actual de descuentos -->
-    <div class="discount-status" id="discountStatus"></div>
     
     <div class="discount-controls">
       <div class="discount-target-selector">
@@ -764,82 +875,131 @@
     </h2>
 
     <!-- Descuentos Globales -->
-    <div class="discount-type-container" id="globalDiscounts" style="display: none;">
-      <div class="discount-type-header">
+    <div class="discount-section" id="globalDiscounts" style="display: none;">
+      <div class="discount-header">
         <div>
-          <div class="discount-type-title">
+          <div class="discount-title">
             <i class="fas fa-globe"></i>
             Descuento Global
-            <span class="discount-type-count" id="globalDiscountCount">0</span>
+            <span class="discount-badge" id="globalDiscountCount">0</span>
+            <span class="discount-value-badge" id="globalDiscountValue">-0%</span>
           </div>
         </div>
-        <button class="discount-type-button" onclick="removeGlobalDiscount()">
+        <button class="remove-discount-btn" onclick="removeGlobalDiscount()">
           <i class="fas fa-times"></i>
           Quitar todos
         </button>
       </div>
-      <div class="discount-type-items" id="globalDiscountItems">
-        <div class="empty-discounts">No hay descuento global</div>
+      <div class="discount-slider-container">
+        <a href="/descuentos/detalle/global/all" class="slider-arrow slider-arrow-left">
+          <svg viewBox="0 0 24 24">
+            <path d="M15 18L9 12L15 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+        <div class="discount-slider" id="slider-global">
+          <!-- Productos se cargarán aquí -->
+        </div>
+        <a href="/descuentos/detalle/global/all" class="slider-arrow slider-arrow-right">
+          <svg viewBox="0 0 24 24">
+            <path d="M9 18L15 12L9 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
       </div>
     </div>
 
     <!-- Descuentos por Categoría -->
-    <div class="discount-type-container" id="categoryDiscounts" style="display: none;">
-      <div class="discount-type-header">
+    <div class="discount-section" id="categoryDiscounts" style="display: none;">
+      <div class="discount-header">
         <div>
-          <div class="discount-type-title">
+          <div class="discount-title">
             <i class="fas fa-tag"></i>
             Por Categoría
-            <span class="discount-type-count" id="categoryDiscountCount">0</span>
+            <span class="discount-badge" id="categoryDiscountCount">0</span>
           </div>
         </div>
-        <button class="discount-type-button" onclick="removeAllCategoryDiscounts()">
+        <button class="remove-discount-btn" onclick="removeAllCategoryDiscounts()">
           <i class="fas fa-times"></i>
           Quitar todos
         </button>
       </div>
-      <div class="discount-type-items" id="categoryDiscountItems">
-        <div class="empty-discounts">No hay descuentos por categoría</div>
-      </div>
-    </div>
-
-    <!-- Descuentos por Producto -->
-    <div class="discount-type-container" id="productDiscounts" style="display: none;">
-      <div class="discount-type-header">
-        <div>
-          <div class="discount-type-title">
-            <i class="fas fa-box"></i>
-            Por Producto
-            <span class="discount-type-count" id="productDiscountCount">0</span>
-          </div>
+      <div class="discount-slider-container">
+        <div class="slider-arrow slider-arrow-left" onclick="scrollSlider('category', 'left')">
+          <svg viewBox="0 0 24 24">
+            <path d="M15 18L9 12L15 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
         </div>
-        <button class="discount-type-button" onclick="removeAllProductDiscounts()">
-          <i class="fas fa-times"></i>
-          Quitar todos
-        </button>
-      </div>
-      <div class="discount-type-items" id="productDiscountItems">
-        <div class="empty-discounts">No hay descuentos por producto</div>
+        <div class="discount-slider" id="slider-category">
+          <!-- Categorías se cargarán aquí -->
+        </div>
+        <div class="slider-arrow slider-arrow-right" onclick="scrollSlider('category', 'right')">
+          <svg viewBox="0 0 24 24">
+            <path d="M9 18L15 12L9 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
       </div>
     </div>
 
     <!-- Descuentos por Marca -->
-    <div class="discount-type-container" id="brandDiscounts" style="display: none;">
-      <div class="discount-type-header">
+    <div class="discount-section" id="brandDiscounts" style="display: none;">
+      <div class="discount-header">
         <div>
-          <div class="discount-type-title">
+          <div class="discount-title">
             <i class="fas fa-trademark"></i>
             Por Marca
-            <span class="discount-type-count" id="brandDiscountCount">0</span>
+            <span class="discount-badge" id="brandDiscountCount">0</span>
           </div>
         </div>
-        <button class="discount-type-button" onclick="removeAllBrandDiscounts()">
+        <button class="remove-discount-btn" onclick="removeAllBrandDiscounts()">
           <i class="fas fa-times"></i>
           Quitar todos
         </button>
       </div>
-      <div class="discount-type-items" id="brandDiscountItems">
-        <div class="empty-discounts">No hay descuentos por marca</div>
+      <div class="discount-slider-container">
+        <div class="slider-arrow slider-arrow-left" onclick="scrollSlider('brand', 'left')">
+          <svg viewBox="0 0 24 24">
+            <path d="M15 18L9 12L15 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="discount-slider" id="slider-brand">
+          <!-- Marcas se cargarán aquí -->
+        </div>
+        <div class="slider-arrow slider-arrow-right" onclick="scrollSlider('brand', 'right')">
+          <svg viewBox="0 0 24 24">
+            <path d="M9 18L15 12L9 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Descuentos por Producto -->
+    <div class="discount-section" id="productDiscounts" style="display: none;">
+      <div class="discount-header">
+        <div>
+          <div class="discount-title">
+            <i class="fas fa-box"></i>
+            Por Producto
+            <span class="discount-badge" id="productDiscountCount">0</span>
+          </div>
+        </div>
+        <button class="remove-discount-btn" onclick="removeAllProductDiscounts()">
+          <i class="fas fa-times"></i>
+          Quitar todos
+        </button>
+      </div>
+      <div class="discount-slider-container">
+        <div class="slider-arrow slider-arrow-left" onclick="scrollSlider('product', 'left')">
+          <svg viewBox="0 0 24 24">
+            <path d="M15 18L9 12L15 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="discount-slider" id="slider-product">
+          <!-- Productos se cargarán aquí -->
+        </div>
+        <div class="slider-arrow slider-arrow-right" onclick="scrollSlider('product', 'right')">
+          <svg viewBox="0 0 24 24">
+            <path d="M9 18L15 12L9 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
       </div>
     </div>
   </div>
@@ -860,14 +1020,12 @@
     brandDetails: {}
   };
   
-  // Cache de datos para mejorar performance
+  // Cache de datos
   let productosCache = null;
   
   // Inicialización
   document.addEventListener('DOMContentLoaded', function() {
-    // Precargar datos
     productosCache = {{ productos|tojson }};
-    
     initializeDiscountPanel();
     checkExistingDiscounts();
     initializeProductSearch();
@@ -905,8 +1063,6 @@
           applyButton.innerHTML = '<i class="fas fa-percent"></i> Aplicar';
           break;
       }
-      
-      updateUIState();
     });
     
     // Validación de input
@@ -930,7 +1086,6 @@
         return;
       }
       
-      // Búsqueda inmediata del cache
       const results = searchProducts(query);
       displaySearchResults(results);
     });
@@ -1000,7 +1155,7 @@
     searchInput.dataset.selectedId = productId;
   }
   
-  // Verificar descuentos existentes - OPTIMIZADO
+  // Verificar descuentos existentes - CON NUEVO TRACKING
   function checkExistingDiscounts() {
     activeDiscounts.categories.clear();
     activeDiscounts.products.clear();
@@ -1008,59 +1163,66 @@
     activeDiscounts.categoryDetails = {};
     activeDiscounts.brandDetails = {};
     
-    // Categorizar descuentos existentes
-    const categoryProducts = {};
-    const brandProducts = {};
+    // Agrupar productos por origen del descuento
+    const productsByOrigin = {
+      global: [],
+      marca: {},
+      categoria: {},
+      individual: []
+    };
     
     productosCache.forEach(product => {
       if (product.tiene_descuento) {
-        // Agregar a productos
-        activeDiscounts.products.add(product.id);
+        const origin = product.origen_descuento || 'individual';
         
-        // Verificar por categoría
-        if (!categoryProducts[product.categoria]) {
-          categoryProducts[product.categoria] = { total: 0, withDiscount: 0 };
+        switch(origin) {
+          case 'global':
+            productsByOrigin.global.push(product);
+            break;
+          case 'marca':
+            const brand = product.descuento_grupo_id || product.marca;
+            if (!productsByOrigin.marca[brand]) {
+              productsByOrigin.marca[brand] = [];
+            }
+            productsByOrigin.marca[brand].push(product);
+            break;
+          case 'categoria':
+            const category = product.descuento_grupo_id || product.categoria;
+            if (!productsByOrigin.categoria[category]) {
+              productsByOrigin.categoria[category] = [];
+            }
+            productsByOrigin.categoria[category].push(product);
+            break;
+          case 'individual':
+          default:
+            productsByOrigin.individual.push(product);
+            break;
         }
-        categoryProducts[product.categoria].total++;
-        categoryProducts[product.categoria].withDiscount++;
-        
-        // Verificar por marca
-        if (product.marca) {
-          if (!brandProducts[product.marca]) {
-            brandProducts[product.marca] = { total: 0, withDiscount: 0 };
-          }
-          brandProducts[product.marca].total++;
-          brandProducts[product.marca].withDiscount++;
-        }
       }
     });
     
-    // Verificar si categorías completas tienen descuento
-    Object.keys(categoryProducts).forEach(category => {
-      const categoryTotal = productosCache.filter(p => p.categoria === category).length;
-      if (categoryProducts[category].withDiscount === categoryTotal) {
-        activeDiscounts.categories.add(category);
-        activeDiscounts.categoryDetails[category] = productosCache.filter(p => p.categoria === category && p.tiene_descuento);
-      }
-    });
-    
-    // Verificar si marcas completas tienen descuento
-    Object.keys(brandProducts).forEach(brand => {
-      const brandTotal = productosCache.filter(p => p.marca === brand).length;
-      if (brandProducts[brand].withDiscount === brandTotal) {
-        activeDiscounts.brands.add(brand);
-        activeDiscounts.brandDetails[brand] = productosCache.filter(p => p.marca === brand && p.tiene_descuento);
-      }
-    });
-    
-    // Verificar si todos los productos tienen descuento
-    const totalProducts = productosCache.length;
-    const discountedProducts = productosCache.filter(p => p.tiene_descuento).length;
-    activeDiscounts.global = (discountedProducts === totalProducts && totalProducts > 0);
-    
-    if (activeDiscounts.global) {
-      activeDiscounts.globalDetails = productosCache.filter(p => p.tiene_descuento);
+    // Actualizar activeDiscounts basado en el origen
+    if (productsByOrigin.global.length === productosCache.length) {
+      activeDiscounts.global = true;
+      activeDiscounts.globalDetails = productsByOrigin.global;
     }
+    
+    // Añadir marcas con descuento
+    Object.keys(productsByOrigin.marca).forEach(brand => {
+      activeDiscounts.brands.add(brand);
+      activeDiscounts.brandDetails[brand] = productsByOrigin.marca[brand];
+    });
+    
+    // Añadir categorías con descuento
+    Object.keys(productsByOrigin.categoria).forEach(category => {
+      activeDiscounts.categories.add(category);
+      activeDiscounts.categoryDetails[category] = productsByOrigin.categoria[category];
+    });
+    
+    // Productos individuales (excluyendo los que tienen origen de grupo)
+    productsByOrigin.individual.forEach(product => {
+      activeDiscounts.products.add(product.id);
+    });
     
     // Actualizar UI inmediatamente
     requestAnimationFrame(() => {
@@ -1069,7 +1231,7 @@
     });
   }
   
-  // Actualizar sección "Mis Descuentos" - OPTIMIZADO
+  // Actualizar sección "Mis Descuentos"
   function updateMyDiscountsSection() {
     const section = document.getElementById('myDiscountsSection');
     const globalContainer = document.getElementById('globalDiscounts');
@@ -1084,7 +1246,7 @@
     
     section.style.display = hasDiscounts ? 'block' : 'none';
     
-    // Actualizar inmediatamente sin esperas
+    // Actualizar listas
     updateGlobalDiscountsList();
     updateCategoryDiscountsList();
     updateProductDiscountsList();
@@ -1093,56 +1255,44 @@
     // Mostrar/ocultar contenedores según haya discounts
     globalContainer.style.display = activeDiscounts.global ? 'block' : 'none';
     categoryContainer.style.display = activeDiscounts.categories.size > 0 ? 'block' : 'none';
-    productContainer.style.display = activeDiscounts.products.size > 0 ? 'block' : 'none';
     brandContainer.style.display = activeDiscounts.brands.size > 0 ? 'block' : 'none';
+    productContainer.style.display = 
+      (activeDiscounts.products.size > 0 && 
+       (!activeDiscounts.global && 
+        Array.from(activeDiscounts.products).some(pid => {
+          const prod = productosCache.find(p => p.id == pid);
+          return prod && !activeDiscounts.categories.has(prod.categoria) && 
+                 (!prod.marca || !activeDiscounts.brands.has(prod.marca));
+        }))) ? 'block' : 'none';
   }
   
   // Actualizar lista de descuentos globales
   function updateGlobalDiscountsList() {
-    const container = document.getElementById('globalDiscountItems');
+    const container = document.getElementById('slider-global');
     const countElement = document.getElementById('globalDiscountCount');
+    const valueElement = document.getElementById('globalDiscountValue');
     
     if (!activeDiscounts.global || !activeDiscounts.globalDetails) {
       container.innerHTML = '<div class="empty-discounts">No hay descuento global</div>';
       countElement.textContent = '0';
+      valueElement.textContent = '-0%';
       return;
     }
     
     countElement.textContent = activeDiscounts.globalDetails.length;
+    const averageDiscount = Math.round(
+      activeDiscounts.globalDetails.reduce((sum, p) => sum + p.valor_descuento, 0) / 
+      activeDiscounts.globalDetails.length
+    );
+    valueElement.textContent = `-${averageDiscount}%`;
     
-    const items = activeDiscounts.globalDetails.map(product => {
-      const precioOriginal = product.precio_venta || 0;
-      const valorDescuento = product.valor_descuento || 0;
-      const precioFinal = precioOriginal * (1 - valorDescuento / 100);
-      
-      return `
-        <div class="discount-item">
-          <div class="discount-item-info">
-            <img src="${product.foto ? '/static/uploads/' + product.foto : '/static/img/default_product.jpg'}" 
-                 alt="${product.nombre}" 
-                 class="discount-item-image">
-            <div class="discount-item-details">
-              <h4>${product.nombre}</h4>
-              <p>${product.marca || 'Sin marca'} • SKU: ${product.codigo_barras_externo || 'N/A'}</p>
-              <div class="price-info">
-                <span class="price-original">$${precioOriginal.toFixed(2)}</span>
-                <span class="price-discounted">$${precioFinal.toFixed(2)}</span>
-              </div>
-            </div>
-          </div>
-          <div class="discount-item-value">
-            <span class="discount-value">-${Math.round(valorDescuento)}%</span>
-          </div>
-        </div>
-      `;
-    }).join('');
-    
+    const items = activeDiscounts.globalDetails.map(product => createProductCard(product)).join('');
     container.innerHTML = items;
   }
   
-  // Actualizar lista de descuentos por categoría
+  // Actualizar lista de descuentos por categoría - CON ENLACES CLICKABLES
   function updateCategoryDiscountsList() {
-    const container = document.getElementById('categoryDiscountItems');
+    const container = document.getElementById('slider-category');
     const countElement = document.getElementById('categoryDiscountCount');
     
     countElement.textContent = activeDiscounts.categories.size;
@@ -1157,122 +1307,29 @@
       const averageDiscount = categoryProducts.length > 0 ? 
         Math.round(categoryProducts.reduce((sum, p) => sum + p.valor_descuento, 0) / categoryProducts.length) : 0;
       
-      // Crear la estructura del título de categoría
-      let categoryHtml = `
-        <div class="discount-type-container" style="margin-bottom: 16px; margin-top: 8px;">
-          <div class="discount-type-header">
-            <div>
-              <div class="discount-type-title" style="font-size: 14px;">
-                <i class="fas fa-folder"></i>
-                ${category}
-                <span class="discount-type-count">${categoryProducts.length}</span>
-              </div>
-            </div>
-            <div class="discount-item-value">
-              <span class="discount-value">-${averageDiscount}%</span>
-              <button class="discount-type-button" onclick="removeCategoryDiscount('${category}')">
-                <i class="fas fa-times"></i>
-                Quitar
-              </button>
-            </div>
-          </div>
-          <div class="discount-type-items">
-      `;
-      
-      // Agregar productos de la categoría
-      categoryHtml += categoryProducts.map(product => {
-        const precioOriginal = product.precio_venta || 0;
-        const valorDescuento = product.valor_descuento || 0;
-        const precioFinal = precioOriginal * (1 - valorDescuento / 100);
-        
-        return `
-          <div class="discount-item">
-            <div class="discount-item-info">
-              <img src="${product.foto ? '/static/uploads/' + product.foto : '/static/img/default_product.jpg'}" 
-                   alt="${product.nombre}" 
-                   class="discount-item-image">
-              <div class="discount-item-details">
-                <h4>${product.nombre}</h4>
-                <p>${product.marca || 'Sin marca'} • SKU: ${product.codigo_barras_externo || 'N/A'}</p>
-                <div class="price-info">
-                  <span class="price-original">$${precioOriginal.toFixed(2)}</span>
-                  <span class="price-discounted">$${precioFinal.toFixed(2)}</span>
-                </div>
-              </div>
-            </div>
-            <div class="discount-item-value">
-              <span class="discount-value">-${Math.round(valorDescuento)}%</span>
-            </div>
-          </div>
-        `;
-      }).join('');
-      
-      categoryHtml += `
-          </div>
-        </div>
-      `;
-      
-      return categoryHtml;
-    }).join('');
-    
-    container.innerHTML = items;
-  }
-  
-  // Actualizar lista de descuentos por producto
-  function updateProductDiscountsList() {
-    const container = document.getElementById('productDiscountItems');
-    const countElement = document.getElementById('productDiscountCount');
-    
-    const individualProducts = productosCache.filter(p => 
-      p.tiene_descuento && 
-      !activeDiscounts.categories.has(p.categoria) && 
-      !activeDiscounts.brands.has(p.marca)
-    );
-    
-    countElement.textContent = individualProducts.length;
-    
-    if (individualProducts.length === 0) {
-      container.innerHTML = '<div class="empty-discounts">No hay descuentos individuales</div>';
-      return;
-    }
-    
-    const items = individualProducts.map(product => {
-      const precioOriginal = product.precio_venta || 0;
-      const valorDescuento = product.valor_descuento || 0;
-      const precioFinal = precioOriginal * (1 - valorDescuento / 100);
+      const encodedCategory = encodeURIComponent(category);
       
       return `
-        <div class="discount-item">
-          <div class="discount-item-info">
-            <img src="${product.foto ? '/static/uploads/' + product.foto : '/static/img/default_product.jpg'}" 
-                 alt="${product.nombre}" 
-                 class="discount-item-image">
-            <div class="discount-item-details">
-              <h4>${product.nombre}</h4>
-              <p>${product.marca || 'Sin marca'} • SKU: ${product.codigo_barras_externo || 'N/A'}</p>
-              <div class="price-info">
-                <span class="price-original">$${precioOriginal.toFixed(2)}</span>
-                <span class="price-discounted">$${precioFinal.toFixed(2)}</span>
-              </div>
-            </div>
+        <a href="/descuentos/detalle/categoria/${encodedCategory}" class="category-card">
+          <div class="category-name">${category}</div>
+          <div class="category-details">
+            ${categoryProducts.length} productos<br>
+            <span class="discount-value-badge">-${averageDiscount}%</span>
           </div>
-          <div class="discount-item-value">
-            <span class="discount-value">-${Math.round(valorDescuento)}%</span>
-            <button class="discount-type-button" onclick="removeProductDiscount(${product.id})">
-              <i class="fas fa-times"></i>
-              Quitar
-            </button>
-          </div>
-        </div>
+          <button class="remove-discount-btn" onclick="event.preventDefault(); event.stopPropagation(); removeCategoryDiscount('${category.replace(/'/g, '\\\'')}')" style="margin-top: 10px;">
+            <i class="fas fa-times"></i>
+            Quitar
+          </button>
+        </a>
       `;
     }).join('');
     
     container.innerHTML = items;
   }
   
-  // Actualizar lista de descuentos por marca - CORREGIDO
+  // Actualizar lista de descuentos por marca - CON ENLACES CLICKABLES
   function updateBrandDiscountsList() {
-    const container = document.getElementById('brandDiscountItems');
+    const container = document.getElementById('slider-brand');
     const countElement = document.getElementById('brandDiscountCount');
     
     countElement.textContent = activeDiscounts.brands.size;
@@ -1287,68 +1344,93 @@
       const averageDiscount = brandProducts.length > 0 ? 
         Math.round(brandProducts.reduce((sum, p) => sum + p.valor_descuento, 0) / brandProducts.length) : 0;
       
-      // Crear la estructura del título de marca
-      let brandHtml = `
-        <div class="discount-type-container" style="margin-bottom: 16px; margin-top: 8px;">
-          <div class="discount-type-header">
-            <div>
-              <div class="discount-type-title" style="font-size: 14px;">
-                <i class="fas fa-copyright"></i>
-                ${brand}
-                <span class="discount-type-count">${brandProducts.length}</span>
-              </div>
-            </div>
-            <div class="discount-item-value">
-              <span class="discount-value">-${averageDiscount}%</span>
-              <button class="discount-type-button" onclick="removeBrandDiscount('${brand}')">
-                <i class="fas fa-times"></i>
-                Quitar
-              </button>
-            </div>
+      const encodedBrand = encodeURIComponent(brand);
+      
+      return `
+        <a href="/descuentos/detalle/marca/${encodedBrand}" class="brand-card">
+          <div class="brand-name">${brand}</div>
+          <div class="brand-details">
+            ${brandProducts.length} productos<br>
+            <span class="discount-value-badge">-${averageDiscount}%</span>
           </div>
-          <div class="discount-type-items">
+          <button class="remove-discount-btn" onclick="event.preventDefault(); event.stopPropagation(); removeBrandDiscount('${brand.replace(/'/g, '\\\'')}')" style="margin-top: 10px;">
+            <i class="fas fa-times"></i>
+            Quitar
+          </button>
+        </a>
       `;
-      
-      // Agregar productos de la marca - SOLO PRODUCTOS DE ESA MARCA
-      brandHtml += brandProducts.map(product => {
-        const precioOriginal = product.precio_venta || 0;
-        const valorDescuento = product.valor_descuento || 0;
-        const precioFinal = precioOriginal * (1 - valorDescuento / 100);
-        
-        return `
-          <div class="discount-item">
-            <div class="discount-item-info">
-              <img src="${product.foto ? '/static/uploads/' + product.foto : '/static/img/default_product.jpg'}" 
-                   alt="${product.nombre}" 
-                   class="discount-item-image">
-              <div class="discount-item-details">
-                <h4>${product.nombre}</h4>
-                <p>${product.marca || 'Sin marca'} • SKU: ${product.codigo_barras_externo || 'N/A'}</p>
-                <div class="price-info">
-                  <span class="price-original">$${precioOriginal.toFixed(2)}</span>
-                  <span class="price-discounted">$${precioFinal.toFixed(2)}</span>
-                </div>
-              </div>
-            </div>
-            <div class="discount-item-value">
-              <span class="discount-value">-${Math.round(valorDescuento)}%</span>
-            </div>
-          </div>
-        `;
-      }).join('');
-      
-      brandHtml += `
-          </div>
-        </div>
-      `;
-      
-      return brandHtml;
     }).join('');
     
     container.innerHTML = items;
   }
   
-  // Aplicar descuento global - CON VERIFICACIÓN DE DOBLES DESCUENTOS
+  // Actualizar lista de descuentos por producto
+  function updateProductDiscountsList() {
+    const container = document.getElementById('slider-product');
+    const countElement = document.getElementById('productDiscountCount');
+    
+    const individualProducts = productosCache.filter(p => 
+      p.tiene_descuento && 
+      !activeDiscounts.categories.has(p.categoria) && 
+      (!p.marca || !activeDiscounts.brands.has(p.marca))
+    );
+    
+    countElement.textContent = individualProducts.length;
+    
+    if (individualProducts.length === 0) {
+      container.innerHTML = '<div class="empty-discounts">No hay descuentos individuales</div>';
+      return;
+    }
+    
+    const items = individualProducts.map(product => createProductCard(product, true)).join('');
+    container.innerHTML = items;
+  }
+  
+  // Crear tarjeta de producto
+  function createProductCard(product, withRemoveButton = false) {
+    const precioOriginal = product.precio_venta || 0;
+    const valorDescuento = product.valor_descuento || 0;
+    const precioFinal = precioOriginal * (1 - valorDescuento / 100);
+    
+    const removeButton = withRemoveButton ? `
+      <button class="remove-discount-btn" onclick="removeProductDiscount(${product.id})" style="width: 100%; margin-top: auto;">
+        <i class="fas fa-times"></i>
+        Quitar descuento
+      </button>
+    ` : '';
+    
+    return `
+      <div class="product-card">
+        <div class="product-image-container">
+          <img src="${product.foto ? '/static/uploads/' + product.foto : '/static/img/default_product.jpg'}" 
+               alt="${product.nombre}" 
+               class="product-image">
+        </div>
+        <div class="product-details">
+          <div class="product-info-container">
+            <div class="product-name">${product.nombre}</div>
+            <div class="product-brand">${product.marca || 'Sin marca'}</div>
+          </div>
+          <div class="product-price-container">
+            <div class="price-row">
+              <div class="current-price">
+                $${precioFinal.toFixed(2)}
+              </div>
+              <div class="discount-label-small">
+                -${Math.round(valorDescuento)}%
+              </div>
+            </div>
+            <div class="original-price">
+              $${precioOriginal.toFixed(2)}
+            </div>
+          </div>
+          ${removeButton}
+        </div>
+      </div>
+    `;
+  }
+  
+  // Aplicar descuento global
   function applyGlobalDiscount() {
     const target = document.getElementById('discountTarget').value;
     const discountValue = parseFloat(document.getElementById('globalDiscountValue').value);
@@ -1358,154 +1440,155 @@
       return;
     }
     
+    // Verificar conflictos
+    checkForConflicts(target, discountValue);
+  }
+  
+  // Verificar conflictos antes de aplicar descuento
+  function checkForConflicts(target, discountValue) {
+    const category = document.getElementById('specificCategory').value;
+    const brand = document.getElementById('specificBrand').value;
+    const productId = document.getElementById('selectedProductId').value;
+    
+    let conflictingProducts = [];
+    let conflictMessage = '';
+    
+    switch(target) {
+      case 'all':
+        if (activeDiscounts.global) {
+          conflictMessage = 'Todos los productos ya tienen un descuento global aplicado. ¿Deseas reemplazarlo?';
+          conflictingProducts = productosCache.filter(p => p.tiene_descuento);
+        } else if (activeDiscounts.categories.size > 0 || activeDiscounts.brands.size > 0 || activeDiscounts.products.size > 0) {
+          conflictMessage = 'Algunos productos ya tienen descuentos aplicados. ¿Deseas sobreescribirlos con el descuento global?';
+          conflictingProducts = productosCache.filter(p => p.tiene_descuento);
+        }
+        break;
+        
+      case 'category':
+        if (!category) {
+          showToast('Por favor selecciona una categoría', 'error');
+          return;
+        }
+        
+        const categoryProducts = productosCache.filter(p => p.categoria === category);
+        conflictingProducts = categoryProducts.filter(p => p.tiene_descuento);
+        
+        if (conflictingProducts.length > 0) {
+          if (activeDiscounts.global) {
+            conflictMessage = `Esta categoría forma parte del descuento global. ¿Deseas aplicar el nuevo descuento a estos ${conflictingProducts.length} productos?`;
+          } else if (activeDiscounts.categories.has(category)) {
+            conflictMessage = `Esta categoría ya tiene un descuento aplicado. ¿Deseas reemplazarlo?`;
+          } else {
+            conflictMessage = `Algunos productos de esta categoría ya tienen descuentos aplicados. ¿Deseas sobreescribirlos?`;
+          }
+        }
+        break;
+        
+      case 'brand':
+        if (!brand) {
+          showToast('Por favor selecciona una marca', 'error');
+          return;
+        }
+        
+        const brandProducts = productosCache.filter(p => p.marca === brand);
+        conflictingProducts = brandProducts.filter(p => p.tiene_descuento);
+        
+        if (conflictingProducts.length > 0) {
+          if (activeDiscounts.global) {
+            conflictMessage = `Esta marca forma parte del descuento global. ¿Deseas aplicar el nuevo descuento a estos ${conflictingProducts.length} productos?`;
+          } else if (activeDiscounts.brands.has(brand)) {
+            conflictMessage = `Esta marca ya tiene un descuento aplicado. ¿Deseas reemplazarlo?`;
+          } else {
+            conflictMessage = `Algunos productos de esta marca ya tienen descuentos aplicados. ¿Deseas sobreescribirlos?`;
+          }
+        }
+        break;
+        
+      case 'product':
+        if (!productId) {
+          showToast('Por favor selecciona un producto', 'error');
+          return;
+        }
+        
+        const product = productosCache.find(p => p.id == productId);
+        if (product && product.tiene_descuento) {
+          conflictingProducts = [product];
+          conflictMessage = `Este producto ya tiene un descuento aplicado. ¿Deseas reemplazarlo?`;
+        }
+        break;
+    }
+    
+    // Si hay conflictos, mostrar confirmación
+    if (conflictingProducts.length > 0) {
+      showConfirmDialog(
+        'Conflicto de descuentos',
+        conflictMessage,
+        function() {
+          // Proceder con la aplicación del descuento
+          proceedWithDiscount(target, discountValue);
+        }
+      );
+    } else {
+      // No hay conflictos, aplicar directamente
+      proceedWithDiscount(target, discountValue);
+    }
+  }
+  
+  // Mostrar diálogo de confirmación
+  function showConfirmDialog(title, message, onConfirm) {
+    const modal = document.createElement('div');
+    modal.className = 'custom-confirm';
+    modal.innerHTML = `
+      <div class="custom-confirm-box">
+        <div class="custom-confirm-title">
+          <i class="fas fa-exclamation-triangle warning-icon"></i>
+          ${title}
+        </div>
+        <div class="custom-confirm-message">${message}</div>
+        <div class="custom-confirm-buttons">
+          <button class="custom-confirm-button custom-confirm-cancel">Cancelar</button>
+          <button class="custom-confirm-button custom-confirm-ok">Sobreescribir</button>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    modal.querySelector('.custom-confirm-cancel').addEventListener('click', function() {
+      document.body.removeChild(modal);
+    });
+    
+    modal.querySelector('.custom-confirm-ok').addEventListener('click', function() {
+      document.body.removeChild(modal);
+      onConfirm();
+    });
+  }
+  
+  // Proceder con la aplicación del descuento
+  function proceedWithDiscount(target, discountValue) {
     switch(target) {
       case 'all':
         applyDiscountToAll(discountValue);
         break;
       case 'category':
         const category = document.getElementById('specificCategory').value;
-        if (!category) {
-          showToast('Por favor selecciona una categoría', 'error');
-          return;
-        }
-        
-        // Verificar si ya hay descuentos que afectarían a esta categoría
-        const categoryProducts = productosCache.filter(p => p.categoria === category);
-        let conflicts = [];
-        
-        if (activeDiscounts.global) {
-          conflicts.push('descuento global');
-        }
-        
-        if (activeDiscounts.categories.has(category)) {
-          conflicts.push('descuento por categoría');
-        }
-        
-        // Verificar productos individuales de esta categoría
-        const individualInCategory = categoryProducts.filter(p => 
-          p.tiene_descuento && 
-          !activeDiscounts.categories.has(p.categoria) && 
-          !activeDiscounts.brands.has(p.marca)
-        );
-        
-        if (individualInCategory.length > 0) {
-          conflicts.push(`${individualInCategory.length} productos con descuentos individuales`);
-        }
-        
-        // Verificar marcas completas en esta categoría
-        const brandsInCategory = new Set(categoryProducts.map(p => p.marca).filter(Boolean));
-        const affectedBrands = Array.from(brandsInCategory).filter(brand => activeDiscounts.brands.has(brand));
-        
-        if (affectedBrands.length > 0) {
-          conflicts.push(`marcas completas: ${affectedBrands.join(', ')}`);
-        }
-        
-        if (conflicts.length > 0) {
-          showToast(`No se puede aplicar. Esta categoría ya tiene: ${conflicts.join(', ')}`, 'error');
-          return;
-        }
-        
         applyDiscountToCategory(category, discountValue);
         break;
-        
       case 'brand':
         const brand = document.getElementById('specificBrand').value;
-        if (!brand) {
-          showToast('Por favor selecciona una marca', 'error');
-          return;
-        }
-        
-        // Verificar si ya hay descuentos que afectarían a esta marca
-        const brandProducts = productosCache.filter(p => p.marca === brand);
-        let brandConflicts = [];
-        
-        if (activeDiscounts.global) {
-          brandConflicts.push('descuento global');
-        }
-        
-        if (activeDiscounts.brands.has(brand)) {
-          brandConflicts.push('descuento por marca');
-        }
-        
-        // Verificar categorías completas que incluyan esta marca
-        const categoriesWithBrand = new Set(brandProducts.map(p => p.categoria));
-        const affectedCategories = Array.from(categoriesWithBrand).filter(cat => activeDiscounts.categories.has(cat));
-        
-        if (affectedCategories.length > 0) {
-          brandConflicts.push(`categorías completas: ${affectedCategories.join(', ')}`);
-        }
-        
-        // Verificar productos individuales de esta marca
-        const individualInBrand = brandProducts.filter(p => 
-          p.tiene_descuento && 
-          !activeDiscounts.categories.has(p.categoria) && 
-          !activeDiscounts.brands.has(p.marca)
-        );
-        
-        if (individualInBrand.length > 0) {
-          brandConflicts.push(`${individualInBrand.length} productos con descuentos individuales`);
-        }
-        
-        if (brandConflicts.length > 0) {
-          showToast(`No se puede aplicar. Esta marca ya tiene: ${brandConflicts.join(', ')}`, 'error');
-          return;
-        }
-        
         applyDiscountToBrand(brand, discountValue);
         break;
-        
       case 'product':
         const productId = document.getElementById('selectedProductId').value;
-        if (!productId) {
-          showToast('Por favor selecciona un producto', 'error');
-          return;
-        }
-        
-        // Verificar si el producto ya tiene descuento (cualquier tipo)
-        const product = productosCache.find(p => p.id == productId);
-        if (!product) {
-          showToast('Producto no encontrado', 'error');
-          return;
-        }
-        
-        if (product.tiene_descuento) {
-          let productConflicts = [];
-          
-          if (activeDiscounts.global) {
-            productConflicts.push('descuento global');
-          }
-          
-          if (activeDiscounts.categories.has(product.categoria)) {
-            productConflicts.push('descuento por categoría');
-          }
-          
-          if (activeDiscounts.brands.has(product.marca)) {
-            productConflicts.push('descuento por marca');
-          }
-          
-          if (productConflicts.length === 0) {
-            productConflicts.push('descuento individual');
-          }
-          
-          showToast(`No se puede aplicar. Este producto ya tiene: ${productConflicts.join(', ')}`, 'error');
-          return;
-        }
-        
-        applyDiscountToProduct(productId, discountValue);
+        applyDiscountToSingleProduct(productId, discountValue);
         break;
     }
   }
   
-  // Aplicar descuento a todos los productos
+  // Aplicar descuento a todos los productos - ACTUALIZADO
   function applyDiscountToAll(discountValue) {
-    // Verificar si realmente podemos aplicar global
-    if (activeDiscounts.categories.size > 0 || activeDiscounts.brands.size > 0 || activeDiscounts.products.size > 0) {
-      showToast('No se puede aplicar descuento global. Ya existen descuentos específicos.', 'error');
-      return;
-    }
-    
     const promises = productosCache.map(product => 
-      applyDiscountToProduct(product.id, discountValue)
+      applyDiscountToProduct(product.id, discountValue, 'global', null)
     );
     
     Promise.all(promises).then(results => {
@@ -1520,19 +1603,18 @@
     });
   }
   
-  // Aplicar descuento a categoría
+  // Aplicar descuento a categoría - ACTUALIZADO
   function applyDiscountToCategory(category, discountValue) {
     const categoryProducts = productosCache.filter(p => p.categoria === category);
     
     const promises = categoryProducts.map(product => 
-      applyDiscountToProduct(product.id, discountValue)
+      applyDiscountToProduct(product.id, discountValue, 'categoria', category)
     );
     
     Promise.all(promises).then(results => {
       const successCount = results.filter(r => r).length;
       if (successCount === categoryProducts.length) {
         showToast(`Descuento del ${discountValue}% aplicado a la categoría "${category}"`, 'success');
-        activeDiscounts.categories.add(category);
         checkExistingDiscounts();
       } else {
         showToast(`Aplicado a ${successCount} de ${categoryProducts.length} productos`, 'warning');
@@ -1540,19 +1622,18 @@
     });
   }
   
-  // Aplicar descuento a marca
+  // Aplicar descuento a marca - ACTUALIZADO
   function applyDiscountToBrand(brand, discountValue) {
     const brandProducts = productosCache.filter(p => p.marca === brand);
     
     const promises = brandProducts.map(product => 
-      applyDiscountToProduct(product.id, discountValue)
+      applyDiscountToProduct(product.id, discountValue, 'marca', brand)
     );
     
     Promise.all(promises).then(results => {
       const successCount = results.filter(r => r).length;
       if (successCount === brandProducts.length) {
         showToast(`Descuento del ${discountValue}% aplicado a la marca "${brand}"`, 'success');
-        activeDiscounts.brands.add(brand);
         checkExistingDiscounts();
       } else {
         showToast(`Aplicado a ${successCount} de ${brandProducts.length} productos`, 'warning');
@@ -1560,8 +1641,19 @@
     });
   }
   
-  // Aplicar descuento a producto individual - SIMPLE
-  function applyDiscountToProduct(productId, discountValue) {
+  // Aplicar descuento a producto individual
+  function applyDiscountToSingleProduct(productId, discountValue) {
+    applyDiscountToProduct(productId, discountValue, 'individual', null).then(success => {
+      if (success) {
+        const product = productosCache.find(p => p.id == productId);
+        showToast(`Descuento del ${discountValue}% aplicado a "${product.nombre}"`, 'success');
+        checkExistingDiscounts();
+      }
+    });
+  }
+  
+  // Aplicar descuento a producto (API call) - ACTUALIZADO
+  function applyDiscountToProduct(productId, discountValue, discountSource = 'individual', groupId = null) {
     return fetch(`/api/apply_discount/${productId}`, {
       method: 'POST',
       headers: {
@@ -1569,31 +1661,27 @@
       },
       body: JSON.stringify({
         type: 'percentage',
-        value: discountValue
+        value: discountValue,
+        origin: discountSource,
+        group_id: groupId,
+        applied_at: new Date().toISOString()
       })
     })
     .then(response => response.json())
     .then(data => {
       if (data.success) {
-        // Solo mostrar toast para productos individuales
-        const target = document.getElementById('discountTarget').value;
-        if (target === 'product') {
-          const product = productosCache.find(p => p.id == productId);
-          showToast(`Descuento del ${discountValue}% aplicado a "${product.nombre}"`, 'success');
-        }
-        
-        // Actualizar cache inmediatamente
+        // Actualizar cache inmediatamente con información completa
         const cachedProduct = productosCache.find(p => p.id == productId);
         if (cachedProduct) {
           cachedProduct.tiene_descuento = true;
           cachedProduct.valor_descuento = discountValue;
           cachedProduct.tipo_descuento = 'percentage';
+          cachedProduct.origen_descuento = discountSource;
+          cachedProduct.descuento_grupo_id = groupId;
+          cachedProduct.fecha_aplicacion_descuento = new Date().toISOString();
         }
-        
-        checkExistingDiscounts();
         return true;
       } else {
-        showToast('Error al aplicar descuento', 'error');
         return false;
       }
     })
@@ -1603,81 +1691,12 @@
     });
   }
   
-  // Remover descuento de producto individual
-  function removeProductDiscount(productId) {
-    const modal = document.createElement('div');
-    modal.className = 'custom-confirm';
-    modal.innerHTML = `
-      <div class="custom-confirm-box">
-        <div class="custom-confirm-title">Confirmar eliminación</div>
-        <div class="custom-confirm-message">¿Estás seguro que deseas quitar el descuento de este producto?</div>
-        <div class="custom-confirm-buttons">
-          <button class="custom-confirm-button custom-confirm-cancel">Cancelar</button>
-          <button class="custom-confirm-button custom-confirm-ok">Quitar descuento</button>
-        </div>
-      </div>
-    `;
-    
-    document.body.appendChild(modal);
-    
-    modal.querySelector('.custom-confirm-cancel').addEventListener('click', function() {
-      document.body.removeChild(modal);
-    });
-    
-    modal.querySelector('.custom-confirm-ok').addEventListener('click', function() {
-      document.body.removeChild(modal);
-      
-      fetch(`/api/remove_discount/${productId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          showToast('Descuento removido', 'success');
-          
-          // Actualizar cache inmediatamente
-          const cachedProduct = productosCache.find(p => p.id == productId);
-          if (cachedProduct) {
-            cachedProduct.tiene_descuento = false;
-            cachedProduct.valor_descuento = 0;
-          }
-          
-          activeDiscounts.products.delete(productId);
-          checkExistingDiscounts();
-        } else {
-          showToast('Error al remover descuento', 'error');
-        }
-      });
-    });
-  }
-  
-  // Remover descuento global (sin confirmación)
+  // Funciones para remover descuentos
   function removeGlobalDiscount() {
     const globalProducts = productosCache.filter(p => p.tiene_descuento);
     
     const promises = globalProducts.map(product => 
-      fetch(`/api/remove_discount/${product.id}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          // Actualizar cache inmediatamente
-          const cachedProduct = productosCache.find(p => p.id == product.id);
-          if (cachedProduct) {
-            cachedProduct.tiene_descuento = false;
-            cachedProduct.valor_descuento = 0;
-          }
-          return true;
-        }
-        return false;
-      })
+      removeDiscountFromProduct(product.id)
     );
     
     Promise.all(promises).then(results => {
@@ -1689,30 +1708,11 @@
     });
   }
   
-  // Remover descuento de categoría (sin confirmación)
   function removeCategoryDiscount(category) {
     const categoryProducts = productosCache.filter(p => p.categoria === category && p.tiene_descuento);
     
     const promises = categoryProducts.map(product => 
-      fetch(`/api/remove_discount/${product.id}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          // Actualizar cache inmediatamente
-          const cachedProduct = productosCache.find(p => p.id == product.id);
-          if (cachedProduct) {
-            cachedProduct.tiene_descuento = false;
-            cachedProduct.valor_descuento = 0;
-          }
-          return true;
-        }
-        return false;
-      })
+      removeDiscountFromProduct(product.id)
     );
     
     Promise.all(promises).then(results => {
@@ -1724,30 +1724,11 @@
     });
   }
   
-  // Remover descuento de marca (sin confirmación)
   function removeBrandDiscount(brand) {
     const brandProducts = productosCache.filter(p => p.marca === brand && p.tiene_descuento);
     
     const promises = brandProducts.map(product => 
-      fetch(`/api/remove_discount/${product.id}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          // Actualizar cache inmediatamente
-          const cachedProduct = productosCache.find(p => p.id == product.id);
-          if (cachedProduct) {
-            cachedProduct.tiene_descuento = false;
-            cachedProduct.valor_descuento = 0;
-          }
-          return true;
-        }
-        return false;
-      })
+      removeDiscountFromProduct(product.id)
     );
     
     Promise.all(promises).then(results => {
@@ -1759,7 +1740,16 @@
     });
   }
   
-  // Remover todos los descuentos (sin confirmación)
+  function removeProductDiscount(productId) {
+    removeDiscountFromProduct(productId).then(success => {
+      if (success) {
+        showToast('Descuento removido', 'success');
+        activeDiscounts.products.delete(productId);
+        checkExistingDiscounts();
+      }
+    });
+  }
+  
   function removeAllCategoryDiscounts() {
     Array.from(activeDiscounts.categories).forEach(category => {
       removeCategoryDiscount(category);
@@ -1770,29 +1760,11 @@
     const individualProducts = productosCache.filter(p => 
       p.tiene_descuento && 
       !activeDiscounts.categories.has(p.categoria) && 
-      !activeDiscounts.brands.has(p.marca)
+      (!p.marca || !activeDiscounts.brands.has(p.marca))
     );
     
     const promises = individualProducts.map(product => 
-      fetch(`/api/remove_discount/${product.id}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          // Actualizar cache inmediatamente
-          const cachedProduct = productosCache.find(p => p.id == product.id);
-          if (cachedProduct) {
-            cachedProduct.tiene_descuento = false;
-            cachedProduct.valor_descuento = 0;
-          }
-          return true;
-        }
-        return false;
-      })
+      removeDiscountFromProduct(product.id)
     );
     
     Promise.all(promises).then(results => {
@@ -1808,32 +1780,54 @@
     });
   }
   
+  // Remover descuento de producto (API call)
+  function removeDiscountFromProduct(productId) {
+    return fetch(`/api/remove_discount/${productId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        // Actualizar cache
+        const cachedProduct = productosCache.find(p => p.id == productId);
+        if (cachedProduct) {
+          cachedProduct.tiene_descuento = false;
+          cachedProduct.valor_descuento = 0;
+          cachedProduct.origen_descuento = null;
+          cachedProduct.descuento_grupo_id = null;
+          cachedProduct.fecha_aplicacion_descuento = null;
+        }
+        return true;
+      }
+      return false;
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      return false;
+    });
+  }
+  
+  // Función para navegar sliders
+  function scrollSlider(sliderId, direction) {
+    const slider = document.getElementById(`slider-${sliderId}`);
+    if (!slider) return;
+    
+    const cardWidth = sliderId === 'category' || sliderId === 'brand' ? 196 : 236; // 180/220 + 16px gap
+    const scrollAmount = cardWidth * 3; // Scroll de 3 tarjetas a la vez
+    
+    if (direction === 'left') {
+      slider.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+    } else {
+      slider.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  }
+  
   // Actualizar estado de la UI
   function updateUIState() {
-    const discountTarget = document.getElementById('discountTarget');
-    const discountStatus = document.getElementById('discountStatus');
-    
-    // Resetear estado visual
-    discountStatus.style.display = 'none';
-    discountTarget.disabled = false;
-    
-    // Evaluar restricciones basadas en el estado actual
-    if (activeDiscounts.global) {
-      discountStatus.className = 'discount-status success';
-      discountStatus.style.display = 'block';
-      discountStatus.innerHTML = '<i class="fas fa-check-circle"></i> Todos los productos tienen descuento global aplicado. Para aplicar otros descuentos, primero quita el descuento global.';
-      
-      // Limitar opciones disponibles
-      Array.from(discountTarget.options).forEach(option => {
-        option.disabled = option.value !== 'all';
-      });
-      discountTarget.value = 'all';
-    } else {
-      // Reactivar todas las opciones
-      Array.from(discountTarget.options).forEach(option => {
-        option.disabled = false;
-      });
-    }
+    // Esta función no necesita cambios
   }
   
   // Sistema de notificaciones
