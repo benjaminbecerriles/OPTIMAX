@@ -134,16 +134,16 @@ class Producto(db.Model):
     divisa = db.Column(db.String(3), default='mxn')
 
     # =========================================================================
-    # SISTEMA DE DESCUENTOS MEJORADO
+    # SISTEMA DE DESCUENTOS MEJORADO Y CORREGIDO
     # =========================================================================
-    # Indica si el producto tiene un descuento activo
-    tiene_descuento = db.Column(db.Boolean, default=False)
+    # Indica si el producto tiene un descuento activo 
+    tiene_descuento = db.Column(db.Boolean, default=False, nullable=False)
     
     # Tipo de descuento: 'percentage' (porcentaje) o 'fixed' (cantidad fija)
     tipo_descuento = db.Column(db.String(20), nullable=True)
     
-    # Valor del descuento (porcentaje o cantidad)
-    valor_descuento = db.Column(db.Float, default=0.0)
+    # Valor del descuento (porcentaje o cantidad) - Debe ser positivo
+    valor_descuento = db.Column(db.Float, default=0.0, nullable=False)
     
     # Fecha de inicio del descuento (opcional)
     fecha_inicio_descuento = db.Column(db.DateTime, nullable=True)
@@ -152,13 +152,15 @@ class Producto(db.Model):
     fecha_fin_descuento = db.Column(db.DateTime, nullable=True)
     
     # =========================================================================
-    # NUEVOS CAMPOS PARA RASTREO DE DESCUENTOS
+    # CAMPOS DE RASTREO DE DESCUENTOS (OBLIGATORIOS PARA LA VISUALIZACIÓN CORRECTA)
     # =========================================================================
     
-    # Origen del descuento: 'global', 'marca', 'categoria', 'individual'
+    # Origen del descuento: 'global', 'categoria', 'marca', 'individual'
+    # IMPORTANTE: Este campo debe estar siempre presente cuando tiene_descuento=True
     origen_descuento = db.Column(db.String(20), nullable=True)
     
-    # ID del grupo que aplica el descuento (nombre de marca o categoría)
+    # ID del grupo que aplica el descuento (nombre de marca o categoría) 
+    # IMPORTANTE: Debe contener el nombre de categoría/marca para descuentos por grupo
     descuento_grupo_id = db.Column(db.String(100), nullable=True)
     
     # Fecha cuando se aplicó el descuento (para saber cuál fue el último)
@@ -168,6 +170,50 @@ class Producto(db.Model):
         return (f"<Producto {self.nombre} (ID={self.id}), "
                 f"stock={self.stock}, costo={self.costo}, "
                 f"precio_venta={self.precio_venta}, aprobado={self.is_approved}>")
+    
+    # Método para obtener el precio con descuento aplicado
+    def get_precio_con_descuento(self):
+        """Calcula el precio final con el descuento aplicado."""
+        if not self.tiene_descuento or self.valor_descuento <= 0:
+            return self.precio_venta
+            
+        if self.tipo_descuento == 'percentage':
+            # Aplicar porcentaje (asegurar que no exceda 100%)
+            porcentaje = min(self.valor_descuento, 100.0) / 100.0
+            return self.precio_venta * (1 - porcentaje)
+        else:
+            # Aplicar monto fijo (asegurar que no sea negativo)
+            return max(0, self.precio_venta - self.valor_descuento)
+    
+    # Método para aplicar un descuento
+    def aplicar_descuento(self, valor, tipo='percentage', origen='individual', grupo_id=None):
+        """
+        Aplica un descuento al producto con todos los campos de rastreo.
+        
+        Args:
+            valor (float): Valor del descuento (porcentaje o cantidad fija)
+            tipo (str): 'percentage' o 'fixed'
+            origen (str): 'global', 'categoria', 'marca', 'individual'
+            grupo_id (str): Para descuentos de categoría o marca, el nombre del grupo
+        """
+        self.tiene_descuento = True
+        self.tipo_descuento = tipo
+        self.valor_descuento = float(valor)
+        self.origen_descuento = origen
+        self.descuento_grupo_id = grupo_id
+        self.fecha_aplicacion_descuento = datetime.utcnow()
+    
+    # Método para quitar el descuento
+    def quitar_descuento(self):
+        """Elimina completamente el descuento del producto."""
+        self.tiene_descuento = False
+        self.tipo_descuento = None
+        self.valor_descuento = 0.0
+        self.origen_descuento = None
+        self.descuento_grupo_id = None
+        self.fecha_inicio_descuento = None
+        self.fecha_fin_descuento = None
+        self.fecha_aplicacion_descuento = None
 
 # ===============================
 # MODELO 'CATÁLOGO GLOBAL'

@@ -317,6 +317,31 @@
     transform: translateY(-1px);
     box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
   }
+  
+  /* Botón de reparación de descuentos */
+  .btn-fix-discounts {
+    background-color: var(--warning-color);
+    color: white;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+    margin-bottom: 16px;
+    border: none;
+    box-shadow: 0 2px 4px rgba(255, 152, 0, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+  }
+  
+  .btn-fix-discounts:hover {
+    background-color: #f57c00;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(255, 152, 0, 0.4);
+  }
 
   /* Sección Mis Descuentos - COMPLETAMENTE NUEVA */
   .my-discounts-section {
@@ -387,26 +412,45 @@
     font-weight: 600;
   }
 
-  /* Slider para items de descuento */
+  /* Slider para items de descuento - MEJORADO */
   .discount-slider-container {
     position: relative;
     padding: 0 70px;
     margin: 0 -10px;
+    overflow: hidden; /* Asegura que no haya desbordamiento */
   }
 
   .discount-slider {
     display: flex;
-    gap: 16px;
-    overflow-x: hidden;
+    gap: 20px; /* Aumentado de 16px a 20px */
+    overflow-x: auto; /* Cambiado de hidden a auto para permitir scroll */
     scroll-behavior: smooth;
-    padding: 4px 0 12px 0;
-    margin-bottom: 4px;
+    padding: 8px 4px 16px 4px; /* Padding aumentado */
+    margin-bottom: 8px;
+    -webkit-overflow-scrolling: touch; /* Para scroll suave en iOS */
+    scrollbar-width: thin; /* Para Firefox */
+    scroll-snap-type: x mandatory; /* Para que los items queden alineados */
+  }
+  
+  /* Ocultar scrollbar pero permitir scroll */
+  .discount-slider::-webkit-scrollbar {
+    height: 4px; /* Altura pequeña */
+  }
+  
+  .discount-slider::-webkit-scrollbar-thumb {
+    background: var(--accent-light);
+    border-radius: 4px;
+  }
+  
+  /* Hacer que las tarjetas se alineen al hacer scroll */
+  .product-card, .category-card, .brand-card {
+    scroll-snap-align: start;
   }
 
-  /* Category y Brand Cards - Sin imagen, solo texto - CLICKABLES */
+  /* Category y Brand Cards - Con círculo de color y mejor espaciado */
   .category-card, .brand-card {
-    flex: 0 0 180px;
-    height: 100px;
+    flex: 0 0 240px; /* Aumentado de 180px a 240px para más espacio */
+    height: 120px; /* Aumentado de 100px a 120px para más espacio vertical */
     border-radius: 12px;
     background-color: white;
     border: 1px solid #e0e0e0;
@@ -417,13 +461,25 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    cursor: pointer; /* Añadido cursor */
-    text-decoration: none; /* Añadido para enlaces */
+    cursor: pointer; 
+    text-decoration: none;
+    position: relative; /* Para posicionar el círculo de color */
+    margin: 0 8px; /* Añadir margen horizontal para evitar que se encimen */
   }
 
   .category-card:hover, .brand-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 15px rgba(0,0,0,0.08);
+  }
+  
+  /* Círculo de color para la categoría */
+  .category-color-circle {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin-bottom: 12px;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
 
   .category-name, .brand-name {
@@ -573,13 +629,13 @@
     background-color: #d32f2f;
   }
 
-  /* Botones de navegación del slider */
+  /* Botones de navegación del slider - MEJORADOS */
   .slider-arrow {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    width: 40px;
-    height: 40px;
+    width: 46px; /* Aumentado de 40px */
+    height: 46px; /* Aumentado de 40px */
     border-radius: 50%;
     background-color: var(--accent);
     border: none;
@@ -587,7 +643,7 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 2px 6px rgba(229, 46, 46, 0.3);
+    box-shadow: 0 2px 8px rgba(229, 46, 46, 0.4);
     z-index: 10;
     transition: all 0.2s ease;
   }
@@ -595,19 +651,20 @@
   .slider-arrow:hover {
     background-color: var(--accent-hover);
     transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 4px 12px rgba(229, 46, 46, 0.6);
   }
 
   .slider-arrow-left {
-    left: 20px;
+    left: 15px;
   }
 
   .slider-arrow-right {
-    right: 20px;
+    right: 15px;
   }
 
   .slider-arrow svg {
-    width: 18px;
-    height: 18px;
+    width: 22px; /* Aumentado de 18px */
+    height: 22px; /* Aumentado de 18px */
     fill: none;
     stroke: white;
     stroke-width: 2.5;
@@ -891,19 +948,19 @@
         </button>
       </div>
       <div class="discount-slider-container">
-        <a href="/descuentos/detalle/global/all" class="slider-arrow slider-arrow-left">
+        <div class="slider-arrow slider-arrow-left" onclick="scrollSlider('global', 'left')">
           <svg viewBox="0 0 24 24">
             <path d="M15 18L9 12L15 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
-        </a>
+        </div>
         <div class="discount-slider" id="slider-global">
           <!-- Productos se cargarán aquí -->
         </div>
-        <a href="/descuentos/detalle/global/all" class="slider-arrow slider-arrow-right">
+        <div class="slider-arrow slider-arrow-right" onclick="scrollSlider('global', 'right')">
           <svg viewBox="0 0 24 24">
             <path d="M9 18L15 12L9 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
-        </a>
+        </div>
       </div>
     </div>
 
@@ -1027,7 +1084,13 @@
   document.addEventListener('DOMContentLoaded', function() {
     productosCache = {{ productos|tojson }};
     initializeDiscountPanel();
-    checkExistingDiscounts();
+    
+    // Reparar automáticamente los descuentos sin mostrar UI adicional
+    fixDiscountsAutomatically().then(() => {
+      // Después de reparar, actualizar la vista
+      checkExistingDiscounts();
+    });
+    
     initializeProductSearch();
   });
   
@@ -1155,7 +1218,60 @@
     searchInput.dataset.selectedId = productId;
   }
   
-  // ========== FUNCIÓN PRINCIPAL CORREGIDA ==========
+  // ========== FUNCIÓN PARA ARREGLAR DESCUENTOS AUTOMÁTICAMENTE ==========
+  function fixDiscountsAutomatically() {
+    return new Promise((resolve) => {
+      // Corregir productos con descuentos directamente
+      const productsWithInvalidDiscounts = productosCache.filter(p => 
+        p.tiene_descuento && (!p.origen_descuento || !p.tipo_descuento)
+      );
+      
+      // Si no hay productos que reparar, terminamos inmediatamente
+      if (productsWithInvalidDiscounts.length === 0) {
+        resolve();
+        return;
+      }
+
+      // Llamar a la API para corregir descuentos
+      fetch('/api/fix-existing-discounts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success && data.count > 0) {
+          console.log(`Reparados automáticamente ${data.count} productos con descuentos`);
+          
+          // Actualizar la cache local para los productos reparados
+          productsWithInvalidDiscounts.forEach(p => {
+            p.origen_descuento = p.origen_descuento || 'individual';
+            
+            // Si es un descuento de categoría pero falta grupo_id
+            if (p.origen_descuento === 'categoria' && !p.descuento_grupo_id) {
+              p.descuento_grupo_id = p.categoria;
+            }
+            
+            // Si es un descuento de marca pero falta grupo_id
+            if (p.origen_descuento === 'marca' && !p.descuento_grupo_id) {
+              p.descuento_grupo_id = p.marca;
+            }
+            
+            p.tipo_descuento = p.tipo_descuento || 'percentage';
+          });
+        }
+        resolve();
+      })
+      .catch(error => {
+        console.error('Error al reparar descuentos automáticamente:', error);
+        // Continuamos aunque haya error
+        resolve();
+      });
+    });
+  }
+  
+  // ========== FUNCIÓN PRINCIPAL MEJORADA ==========
   function checkExistingDiscounts() {
     activeDiscounts.categories.clear();
     activeDiscounts.products.clear();
@@ -1171,23 +1287,45 @@
       individual: []
     };
     
+    // Necesitamos contar cuántos productos tienen descuento sin origen para mostrar un mensaje
+    let productosConDescuentoSinOrigen = 0;
+    
     productosCache.forEach(product => {
       if (product.tiene_descuento) {
-        const origin = product.origen_descuento || 'individual';
+        // Si no tiene origen_descuento, incrementamos el contador y lo tratamos como individual
+        if (!product.origen_descuento) {
+          productosConDescuentoSinOrigen++;
+          productsByOrigin.individual.push(product);
+          return; // Continuamos con el siguiente producto
+        }
+        
+        const origin = product.origen_descuento;
         
         switch(origin) {
           case 'global':
             productsByOrigin.global.push(product);
             break;
           case 'marca':
+            // Si no tiene grupo_id, usamos la marca
             const brand = product.descuento_grupo_id || product.marca;
+            if (!brand) {
+              // Si no tiene ni grupo_id ni marca, lo tratamos como individual
+              productsByOrigin.individual.push(product);
+              break;
+            }
             if (!productsByOrigin.marca[brand]) {
               productsByOrigin.marca[brand] = [];
             }
             productsByOrigin.marca[brand].push(product);
             break;
           case 'categoria':
+            // Si no tiene grupo_id, usamos la categoría
             const category = product.descuento_grupo_id || product.categoria;
+            if (!category) {
+              // Si no tiene ni grupo_id ni categoría, lo tratamos como individual
+              productsByOrigin.individual.push(product);
+              break;
+            }
             if (!productsByOrigin.categoria[category]) {
               productsByOrigin.categoria[category] = [];
             }
@@ -1201,8 +1339,10 @@
       }
     });
     
-    // Actualizar activeDiscounts basado en el origen
-    if (productsByOrigin.global.length === productosCache.length) {
+    // Verificar si todos los productos tienen descuento global
+    // Para que sea global, TODOS los productos deben tener origen 'global'
+    if (productsByOrigin.global.length > 0 && 
+        productsByOrigin.global.length === productosCache.length) {
       activeDiscounts.global = true;
       activeDiscounts.globalDetails = productsByOrigin.global;
     }
@@ -1219,10 +1359,12 @@
       activeDiscounts.categoryDetails[category] = productsByOrigin.categoria[category];
     });
     
-    // CORREGIDO: Solo productos individuales que NO tienen grupo
+    // Añadir productos individuales
     productsByOrigin.individual.forEach(product => {
       activeDiscounts.products.add(product.id);
     });
+    
+    // Los problemas ya se arreglaron automáticamente, no necesitamos mostrar mensajes
     
     // Actualizar UI inmediatamente
     requestAnimationFrame(() => {
@@ -1231,29 +1373,51 @@
     });
   }
   
-  // ========== FUNCIÓN PARA LISTAR PRODUCTOS CORREGIDA ==========
   function updateProductDiscountsList() {
     const container = document.getElementById('slider-product');
     const countElement = document.getElementById('productDiscountCount');
     
-    // CORREGIDO: Filtrar solo productos con descuento individual (origen_descuento === 'individual')
-    // y que NO están incluidos en descuentos de grupo
+    // Filtrar solo productos con descuento individual
     const individualProducts = productosCache.filter(product => {
       if (!product.tiene_descuento) return false;
       
-      // Solo incluir productos con origen individual
-      return product.origen_descuento === 'individual';
+      // Incluir productos con origen individual o sin origen
+      return product.origen_descuento === 'individual' || !product.origen_descuento;
     });
     
     countElement.textContent = individualProducts.length;
     
     if (individualProducts.length === 0) {
       container.innerHTML = '<div class="empty-discounts">No hay descuentos individuales</div>';
+      document.getElementById('productDiscounts').style.display = 'none';
       return;
     }
     
+    document.getElementById('productDiscounts').style.display = 'block';
     const items = individualProducts.map(product => createProductCard(product, true)).join('');
     container.innerHTML = items;
+    
+    // Añadir enlace "Ver todos" si hay muchos productos
+    if (individualProducts.length > 10) {
+      // Añadir enlace flotante para ver todos
+      const viewAllLink = document.createElement('a');
+      viewAllLink.href = '/descuentos/detalle/individual/all';
+      viewAllLink.className = 'view-all-link';
+      viewAllLink.innerHTML = `Ver todos (${individualProducts.length})`;
+      viewAllLink.style.position = 'absolute';
+      viewAllLink.style.right = '78px';
+      viewAllLink.style.top = '10px';
+      viewAllLink.style.backgroundColor = '#e52e2e';
+      viewAllLink.style.color = 'white';
+      viewAllLink.style.padding = '5px 10px';
+      viewAllLink.style.borderRadius = '4px';
+      viewAllLink.style.textDecoration = 'none';
+      viewAllLink.style.fontSize = '14px';
+      viewAllLink.style.fontWeight = '500';
+      
+      // Agregar al contenedor
+      container.parentElement.appendChild(viewAllLink);
+    }
   }
   
   // Actualizar sección "Mis Descuentos"
@@ -1264,12 +1428,18 @@
     const productContainer = document.getElementById('productDiscounts');
     const brandContainer = document.getElementById('brandDiscounts');
     
+    // Verificar si hay cualquier tipo de descuento activo
     const hasDiscounts = activeDiscounts.global || 
-                        activeDiscounts.categories.size > 0 || 
-                        activeDiscounts.products.size > 0 || 
-                        activeDiscounts.brands.size > 0;
+                         activeDiscounts.categories.size > 0 || 
+                         activeDiscounts.products.size > 0 || 
+                         activeDiscounts.brands.size > 0;
     
-    section.style.display = hasDiscounts ? 'block' : 'none';
+    // También contar productos con descuento pero sin origen asignado
+    const productsWithDiscountNoOrigin = productosCache.filter(p => 
+      p.tiene_descuento && !p.origen_descuento
+    ).length;
+    
+    section.style.display = (hasDiscounts || productsWithDiscountNoOrigin > 0) ? 'block' : 'none';
     
     // Actualizar listas
     updateGlobalDiscountsList();
@@ -1277,17 +1447,23 @@
     updateProductDiscountsList();
     updateBrandDiscountsList();
     
-    // Mostrar/ocultar contenedores según haya discounts
+    // Mostrar/ocultar contenedores según haya descounts
     globalContainer.style.display = activeDiscounts.global ? 'block' : 'none';
     categoryContainer.style.display = activeDiscounts.categories.size > 0 ? 'block' : 'none';
     brandContainer.style.display = activeDiscounts.brands.size > 0 ? 'block' : 'none';
     
-    // CORREGIDO: Solo mostrar la sección de productos individuales si realmente hay productos con origen_descuento === 'individual'
-    const individualProducts = productosCache.filter(p => p.tiene_descuento && p.origen_descuento === 'individual');
+    // Mostrar la sección de productos individuales si hay productos con origen 'individual' o sin origen
+    const individualProducts = productosCache.filter(p => 
+      p.tiene_descuento && (p.origen_descuento === 'individual' || !p.origen_descuento)
+    );
     productContainer.style.display = individualProducts.length > 0 ? 'block' : 'none';
+    
+    // Inicializar el estado de las flechas de navegación
+    setTimeout(() => {
+      initSliderArrows();
+    }, 500);
   }
   
-  // Actualizar lista de descuentos globales
   function updateGlobalDiscountsList() {
     const container = document.getElementById('slider-global');
     const countElement = document.getElementById('globalDiscountCount');
@@ -1307,11 +1483,33 @@
     );
     valueElement.textContent = `-${averageDiscount}%`;
     
+    // Permitir ver todos los productos, no solo los primeros 10
     const items = activeDiscounts.globalDetails.map(product => createProductCard(product)).join('');
-    container.innerHTML = items;
+    container.innerHTML = items || '<div class="empty-discounts">No hay productos con descuento global</div>';
+    
+    // Añadir enlace "Ver todos" si hay muchos productos
+    if (activeDiscounts.globalDetails.length > 10) {
+      // Añadir enlace flotante para ver todos
+      const viewAllLink = document.createElement('a');
+      viewAllLink.href = '/descuentos/detalle/global/all';
+      viewAllLink.className = 'view-all-link';
+      viewAllLink.innerHTML = `Ver todos (${activeDiscounts.globalDetails.length})`;
+      viewAllLink.style.position = 'absolute';
+      viewAllLink.style.right = '78px';
+      viewAllLink.style.top = '10px';
+      viewAllLink.style.backgroundColor = '#e52e2e';
+      viewAllLink.style.color = 'white';
+      viewAllLink.style.padding = '5px 10px';
+      viewAllLink.style.borderRadius = '4px';
+      viewAllLink.style.textDecoration = 'none';
+      viewAllLink.style.fontSize = '14px';
+      viewAllLink.style.fontWeight = '500';
+      
+      // Agregar al contenedor
+      container.parentElement.appendChild(viewAllLink);
+    }
   }
   
-  // ========== FUNCIÓN PARA LISTAR MARCAS CORREGIDA ==========
   function updateBrandDiscountsList() {
     const container = document.getElementById('slider-brand');
     const countElement = document.getElementById('brandDiscountCount');
@@ -1324,11 +1522,11 @@
     }
     
     const items = Array.from(activeDiscounts.brands).map(brand => {
-      // CORREGIDO: Filtrar productos por origen y descuento_grupo_id
+      // Buscar productos por marca y origen
       const brandProducts = productosCache.filter(p => 
         p.tiene_descuento &&
         p.origen_descuento === 'marca' &&
-        p.descuento_grupo_id === brand
+        (p.descuento_grupo_id === brand || (!p.descuento_grupo_id && p.marca === brand))
       );
       
       const averageDiscount = brandProducts.length > 0 ? 
@@ -1336,8 +1534,12 @@
       
       const encodedBrand = encodeURIComponent(brand);
       
+      // Generar un color para la marca basado en el nombre para tener consistencia
+      const brandColor = getHashColor(brand);
+      
       return `
         <a href="/descuentos/detalle/marca/${encodedBrand}" class="brand-card">
+          <div class="category-color-circle" style="background-color: ${brandColor};"></div>
           <div class="brand-name">${brand}</div>
           <div class="brand-details">
             ${brandProducts.length} productos<br>
@@ -1354,7 +1556,28 @@
     container.innerHTML = items;
   }
   
-  // Actualizar lista de descuentos por categoría - CON ENLACES CLICKABLES
+  // Función para generar un color basado en un texto (para marcas)
+  function getHashColor(text) {
+    if (!text) return "#A9A9A9";
+    
+    // Generar un hash simple basado en el texto
+    let hash = 0;
+    for (let i = 0; i < text.length; i++) {
+      hash = text.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    
+    // Convertir a color hexadecimal
+    let color = '#';
+    for (let i = 0; i < 3; i++) {
+      // Usar un rango de colores más agradable (evitar colores muy claros o muy oscuros)
+      const value = ((hash >> (i * 8)) & 0xFF);
+      const adjustedValue = Math.max(Math.min(value, 220), 50); // Entre 50 y 220
+      color += ('00' + adjustedValue.toString(16)).substr(-2);
+    }
+    
+    return color;
+  }
+  
   function updateCategoryDiscountsList() {
     const container = document.getElementById('slider-category');
     const countElement = document.getElementById('categoryDiscountCount');
@@ -1367,14 +1590,24 @@
     }
     
     const items = Array.from(activeDiscounts.categories).map(category => {
-      const categoryProducts = activeDiscounts.categoryDetails[category] || [];
+      // Buscar productos por categoría y origen
+      const categoryProducts = productosCache.filter(p => 
+        p.tiene_descuento &&
+        p.origen_descuento === 'categoria' &&
+        (p.descuento_grupo_id === category || (!p.descuento_grupo_id && p.categoria === category))
+      );
+      
       const averageDiscount = categoryProducts.length > 0 ? 
         Math.round(categoryProducts.reduce((sum, p) => sum + p.valor_descuento, 0) / categoryProducts.length) : 0;
       
       const encodedCategory = encodeURIComponent(category);
       
+      // Obtener color de categoría desde CATEGORY_COLORS
+      const categoryColor = getCategoryColor(category);
+      
       return `
         <a href="/descuentos/detalle/categoria/${encodedCategory}" class="category-card">
+          <div class="category-color-circle" style="background-color: ${categoryColor};"></div>
           <div class="category-name">${category}</div>
           <div class="category-details">
             ${categoryProducts.length} productos<br>
@@ -1389,6 +1622,43 @@
     }).join('');
     
     container.innerHTML = items;
+  }
+  
+  // Función para obtener el color de categoría
+  function getCategoryColor(category) {
+    // Colores predefinidos para categorías (misma lógica que en category_colors.py)
+    const CATEGORY_COLORS = {
+      "abarrotes secos": "#FFA500",
+      "enlatados y conservas": "#DAA520",
+      "botanas, dulces y snacks": "#FF69B4",
+      "bebidas no alcohólicas": "#1E90FF",
+      "bebidas alcohólicas": "#800080",
+      "panadería y repostería": "#D2B48C",
+      "lácteos y huevos": "#F5DEB3",
+      "carnes frías y embutidos": "#B22222",
+      "congelados y refrigerados": "#00CED1",
+      "frutas y verduras frescas": "#32CD32",
+      "productos de limpieza y hogar": "#87CEFA",
+      "cuidado personal e higiene": "#FFC0CB",
+      "medicamentos de mostrador (otc)": "#FF6347",
+      "productos para bebés": "#FFB6C1",
+      "productos para mascotas": "#8FBC8F",
+      "artículos de papelería": "#9370DB",
+      "ferretería básica": "#708090",
+      "artesanías y manualidades": "#DDA0DD",
+      "productos a granel": "#BDB76B",
+      "productos orgánicos": "#6B8E23",
+      "productos gourmet": "#CD853F",
+      "suplementos alimenticios": "#DA70D6",
+      "otros (miscelánea)": "#A9A9A9"
+    };
+    
+    if (!category) {
+      return "#A9A9A9";  // Color gris predeterminado para categorías vacías
+    }
+    
+    const normalizedCategory = category.toLowerCase().trim();
+    return CATEGORY_COLORS[normalizedCategory] || "#A9A9A9";  // Gris por defecto si no se encuentra
   }
   
   // Crear tarjeta de producto
@@ -1696,7 +1966,7 @@
     });
   }
   
-  // ========== FUNCIONES PARA REMOVER DESCUENTOS CORREGIDAS ==========
+  // ========== FUNCIONES PARA REMOVER DESCUENTOS MEJORADAS ==========
   
   function removeGlobalDiscount() {
     const globalProducts = productosCache.filter(p => p.tiene_descuento && p.origen_descuento === 'global');
@@ -1715,11 +1985,11 @@
   }
   
   function removeCategoryDiscount(category) {
-    // CORREGIDO: Filtrar por origen_descuento y descuento_grupo_id
+    // Filtrar por origen_descuento y descuento_grupo_id correctamente
     const categoryProducts = productosCache.filter(p => 
       p.tiene_descuento &&
       p.origen_descuento === 'categoria' &&
-      p.descuento_grupo_id === category
+      (p.descuento_grupo_id === category || (!p.descuento_grupo_id && p.categoria === category))
     );
     
     const promises = categoryProducts.map(product => 
@@ -1736,11 +2006,11 @@
   }
   
   function removeBrandDiscount(brand) {
-    // CORREGIDO: Filtrar por origen_descuento y descuento_grupo_id
+    // Filtrar por origen_descuento y descuento_grupo_id correctamente
     const brandProducts = productosCache.filter(p => 
       p.tiene_descuento &&
       p.origen_descuento === 'marca' &&
-      p.descuento_grupo_id === brand
+      (p.descuento_grupo_id === brand || (!p.descuento_grupo_id && p.marca === brand))
     );
     
     const promises = brandProducts.map(product => 
@@ -1773,10 +2043,10 @@
   }
   
   function removeAllProductDiscounts() {
-    // CORREGIDO: Solo eliminar productos con origen individual
+    // Eliminar productos con origen individual y productos con descuento pero sin origen
     const individualProducts = productosCache.filter(p => 
       p.tiene_descuento && 
-      p.origen_descuento === 'individual'
+      (p.origen_descuento === 'individual' || !p.origen_descuento)
     );
     
     const promises = individualProducts.map(product => 
@@ -1796,7 +2066,7 @@
     });
   }
   
-  // Remover descuento de producto (API call)
+  // Remover descuento de producto (API call) - ASEGURA LIMPIAR TODOS LOS CAMPOS
   function removeDiscountFromProduct(productId) {
     return fetch(`/api/remove_discount/${productId}`, {
       method: 'POST',
@@ -1807,11 +2077,12 @@
     .then(response => response.json())
     .then(data => {
       if (data.success) {
-        // Actualizar cache
+        // Actualizar cache - LIMPIANDO TODOS LOS CAMPOS RELACIONADOS
         const cachedProduct = productosCache.find(p => p.id == productId);
         if (cachedProduct) {
           cachedProduct.tiene_descuento = false;
           cachedProduct.valor_descuento = 0;
+          cachedProduct.tipo_descuento = null;
           cachedProduct.origen_descuento = null;
           cachedProduct.descuento_grupo_id = null;
           cachedProduct.fecha_aplicacion_descuento = null;
@@ -1826,19 +2097,90 @@
     });
   }
   
-  // Función para navegar sliders
+  // Función para navegar sliders - MEJORADA
   function scrollSlider(sliderId, direction) {
     const slider = document.getElementById(`slider-${sliderId}`);
     if (!slider) return;
     
-    const cardWidth = sliderId === 'category' || sliderId === 'brand' ? 196 : 236; // 180/220 + 16px gap
-    const scrollAmount = cardWidth * 3; // Scroll de 3 tarjetas a la vez
+    // Ajustar tamaño de scroll según el tipo de tarjeta
+    let cardWidth = 0;
+    
+    if (sliderId === 'category' || sliderId === 'brand') {
+      cardWidth = 260; // 240px + 20px gap
+    } else if (sliderId === 'global' || sliderId === 'product') {
+      cardWidth = 240; // 220px + 20px gap
+    } else {
+      cardWidth = 240; // Valor por defecto
+    }
+    
+    // Scroll de 3 tarjetas a la vez (o menos si el slider es pequeño)
+    const visibleWidth = slider.clientWidth;
+    const scrollAmount = Math.min(cardWidth * 3, visibleWidth * 0.8);
+    
+    // Calcular desplazamiento actual y total
+    const scrollLeft = slider.scrollLeft;
+    const scrollWidth = slider.scrollWidth;
     
     if (direction === 'left') {
-      slider.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+      // Si estamos cerca del inicio, ir al principio
+      if (scrollLeft < scrollAmount) {
+        slider.scrollTo({ left: 0, behavior: 'smooth' });
+      } else {
+        slider.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+      }
     } else {
-      slider.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+      // Si estamos cerca del final, ir al final
+      if (scrollLeft + visibleWidth + scrollAmount > scrollWidth) {
+        slider.scrollTo({ left: scrollWidth, behavior: 'smooth' });
+      } else {
+        slider.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+      }
     }
+    
+    // Verificar si se necesitan mostrar/ocultar botones de navegación
+    setTimeout(() => {
+      updateSliderArrows(sliderId);
+    }, 300);
+  }
+  
+  // Función para actualizar visibilidad de flechas de navegación
+  function updateSliderArrows(sliderId) {
+    const slider = document.getElementById(`slider-${sliderId}`);
+    if (!slider) return;
+    
+    const leftArrow = slider.parentElement.querySelector('.slider-arrow-left');
+    const rightArrow = slider.parentElement.querySelector('.slider-arrow-right');
+    
+    if (!leftArrow || !rightArrow) return;
+    
+    // Mostrar/ocultar flecha izquierda según posición de scroll
+    if (slider.scrollLeft <= 10) {
+      leftArrow.style.opacity = '0.5';
+    } else {
+      leftArrow.style.opacity = '1';
+    }
+    
+    // Mostrar/ocultar flecha derecha según posición de scroll
+    if (slider.scrollLeft + slider.clientWidth >= slider.scrollWidth - 10) {
+      rightArrow.style.opacity = '0.5';
+    } else {
+      rightArrow.style.opacity = '1';
+    }
+  }
+  
+  // Inicializar estado de flechas después de cargar contenido
+  function initSliderArrows() {
+    ['global', 'category', 'brand', 'product'].forEach(sliderId => {
+      updateSliderArrows(sliderId);
+      
+      // Añadir listener para actualizar flechas durante scroll manual
+      const slider = document.getElementById(`slider-${sliderId}`);
+      if (slider) {
+        slider.addEventListener('scroll', () => {
+          updateSliderArrows(sliderId);
+        });
+      }
+    });
   }
   
   // Actualizar estado de la UI

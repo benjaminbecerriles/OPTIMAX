@@ -2538,10 +2538,13 @@ def remove_discount(product_id):
         if producto.empresa_id != session.get('user_id'):
             return jsonify({"success": False, "message": "Sin permisos"}), 403
         
-        # Remover descuento
+        # Remover descuento - LIMPIANDO TODOS LOS CAMPOS RELACIONADOS
         producto.tiene_descuento = False
         producto.tipo_descuento = None
         producto.valor_descuento = 0.0
+        producto.origen_descuento = None
+        producto.descuento_grupo_id = None
+        producto.fecha_aplicacion_descuento = None
         
         db.session.commit()
         
@@ -2725,6 +2728,129 @@ def api_search_products():
     
     return jsonify({"results": results})
     
+@app.route('/api/fix-existing-discounts', methods=['POST'])
+@login_requerido
+def fix_existing_discounts():
+    """Corrige los descuentos existentes que no tienen origen_descuento o descuento_grupo_id."""
+    try:
+        empresa_id = session.get('user_id')
+        if not empresa_id:
+            return jsonify({"success": False, "message": "Usuario no autenticado"}), 401
+        
+        # Obtener todos los productos con descuento pero sin origen
+        productos_descuento_sin_origen = Producto.query.filter_by(
+            empresa_id=empresa_id,
+            tiene_descuento=True,
+            origen_descuento=None
+        ).all()
+        
+        fixed_count = 0
+        
+        # Asumir que son descuentos individuales
+        for producto in productos_descuento_sin_origen:
+            producto.origen_descuento = 'individual'
+            producto.fecha_aplicacion_descuento = datetime.now()
+            fixed_count += 1
+        
+        db.session.commit()
+        
+        return jsonify({
+            "success": True,
+            "message": f"Se han corregido {fixed_count} productos con descuentos",
+            "count": fixed_count
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/corregir-descuentos', methods=['GET'])
+@login_requerido
+def corregir_descuentos_vista():
+    """Página para corregir descuentos manualmente."""
+    try:
+        empresa_id = session.get('user_id')
+        
+        # Corregir productos con tiene_descuento=True pero sin origen_descuento
+        productos_para_corregir = Producto.query.filter_by(
+            empresa_id=empresa_id,
+            tiene_descuento=True
+        ).filter(
+            (Producto.origen_descuento.is_(None)) | 
+            (Producto.origen_descuento == '')
+        ).all()
+        
+        productos_corregidos = 0
+        
+        for producto in productos_para_corregir:
+            producto.origen_descuento = 'individual'
+            productos_corregidos += 1
+        
+        # Obtener productos con descuentos globales
+        productos_descuento_global = Producto.query.filter_by(
+            empresa_id=empresa_id,
+            tiene_descuento=True,
+            origen_descuento='global'
+        ).all()
+        
+        # Corregir productos con descuentos de categoría
+        productos_categoria = db.session.query(Producto).filter(
+            Producto.empresa_id == empresa_id,
+            Producto.tiene_descuento == True,
+            Producto.origen_descuento == 'categoria',
+            Producto.descuento_grupo_id.is_(None)
+        ).all()
+        
+        for producto in productos_categoria:
+            producto.descuento_grupo_id = producto.categoria
+        
+        # Corregir productos con descuentos de marca
+        productos_marca = db.session.query(Producto).filter(
+            Producto.empresa_id == empresa_id,
+            Producto.tiene_descuento == True,
+            Producto.origen_descuento == 'marca',
+            Producto.descuento_grupo_id.is_(None)
+        ).all()
+        
+        for producto in productos_marca:
+            producto.descuento_grupo_id = producto.marca
+        
+        db.session.commit()
+        
+        mensaje = f"""
+        <html>
+        <head>
+            <title>Corrección de Descuentos</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; padding: 20px; }}
+                .result {{ margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }}
+                .success {{ color: green; }}
+                a {{ display: inline-block; margin-top: 20px; padding: 10px 15px; background: #e52e2e; color: white; text-decoration: none; border-radius: 5px; }}
+            </style>
+        </head>
+        <body>
+            <h1>Corrección de Descuentos</h1>
+            <div class="result">
+                <p class="success">✅ Se han corregido {productos_corregidos} productos con descuentos sin origen.</p>
+                <p>Productos con descuento global: {len(productos_descuento_global)}</p>
+                <p>Productos con descuento por categoría: {len(productos_categoria)}</p>
+                <p>Productos con descuento por marca: {len(productos_marca)}</p>
+            </div>
+            <a href="/descuentos">Volver a Descuentos</a>
+        </body>
+        </html>
+        """
+        
+        return mensaje
+    
+    except Exception as e:
+        db.session.rollback()
+        return f"""
+        <h1>Error al corregir descuentos</h1>
+        <p>Se produjo un error: {str(e)}</p>
+        <p><a href="/descuentos">Volver a Descuentos</a></p>
+        """
+        
 ##############################
 # REABASTECER
 ##############################
