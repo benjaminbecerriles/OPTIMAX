@@ -1271,106 +1271,149 @@
     });
   }
   
-  // ========== FUNCIÓN PRINCIPAL MEJORADA ==========
+  // ========== FUNCIÓN PRINCIPAL MEJORADA PARA USAR LA NUEVA API ==========
   function checkExistingDiscounts() {
-    activeDiscounts.categories.clear();
-    activeDiscounts.products.clear();
-    activeDiscounts.brands.clear();
-    activeDiscounts.categoryDetails = {};
-    activeDiscounts.brandDetails = {};
-    
-    // Agrupar productos por origen del descuento
-    const productsByOrigin = {
-      global: [],
-      marca: {},
-      categoria: {},
-      individual: []
-    };
-    
-    // Necesitamos contar cuántos productos tienen descuento sin origen para mostrar un mensaje
-    let productosConDescuentoSinOrigen = 0;
-    
-    productosCache.forEach(product => {
-      if (product.tiene_descuento) {
-        // Si no tiene origen_descuento, incrementamos el contador y lo tratamos como individual
-        if (!product.origen_descuento) {
-          productosConDescuentoSinOrigen++;
-          productsByOrigin.individual.push(product);
-          return; // Continuamos con el siguiente producto
+    // Consultar la API para obtener información sobre descuentos activos
+    fetch('/api/get_active_discounts')
+      .then(response => response.json())
+      .then(data => {
+        if (!data.success) {
+          console.error('Error al obtener descuentos activos:', data.message);
+          return;
         }
         
-        const origin = product.origen_descuento;
+        // Actualizar el estado global con los datos de la API
+        const discounts = data.active_discounts;
+        
+        // Limpiar el estado actual
+        activeDiscounts.categories.clear();
+        activeDiscounts.products.clear();
+        activeDiscounts.brands.clear();
+        activeDiscounts.categoryDetails = {};
+        activeDiscounts.brandDetails = {};
+        
+        // Configurar estado global con datos de la API
+        activeDiscounts.global = discounts.global;
+        
+        // Obtener productos con descuento global, individual, por categoría y por marca
+        const globalProducts = productosCache.filter(p => 
+          p.tiene_descuento && p.origen_descuento === 'global'
+        );
+        
+        if (globalProducts.length > 0) {
+          activeDiscounts.globalDetails = globalProducts;
+        }
+        
+        // Añadir categorías con descuento
+        discounts.categorias.forEach(category => {
+          activeDiscounts.categories.add(category);
+          activeDiscounts.categoryDetails[category] = productosCache.filter(p => 
+            p.tiene_descuento && 
+            p.origen_descuento === 'categoria' && 
+            p.descuento_grupo_id === category
+          );
+        });
+        
+        // Añadir marcas con descuento
+        discounts.marcas.forEach(brand => {
+          activeDiscounts.brands.add(brand);
+          activeDiscounts.brandDetails[brand] = productosCache.filter(p => 
+            p.tiene_descuento && 
+            p.origen_descuento === 'marca' && 
+            p.descuento_grupo_id === brand
+          );
+        });
+        
+        // Añadir productos individuales
+        productosCache.forEach(product => {
+          if (product.tiene_descuento && product.origen_descuento === 'individual') {
+            activeDiscounts.products.add(product.id);
+          }
+        });
+        
+        // Actualizar UI inmediatamente
+        updateMyDiscountsSection();
+        updateUIState();
+      })
+      .catch(error => {
+        console.error('Error al obtener estado de descuentos:', error);
+        
+        // Intentar fallback al método antiguo si falla la llamada API
+        fetchGlobalDiscountStatus();
+      });
+  }
+
+  // ========== FUNCIÓN DE FALLBACK PARA VERIFICAR DESCUENTO GLOBAL ==========
+  function fetchGlobalDiscountStatus() {
+    fetch('/api/get_global_discount_status')
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Actualizar estado global
+          activeDiscounts.global = data.is_global_active;
+          
+          if (data.is_global_active) {
+            // Obtener productos con origen global
+            const globalProducts = productosCache.filter(p => 
+              p.tiene_descuento && p.origen_descuento === 'global'
+            );
+            
+            if (globalProducts.length > 0) {
+              activeDiscounts.globalDetails = globalProducts;
+            }
+          }
+          
+          // Continuar con la detección de otros tipos de descuentos
+          detectOtherDiscounts();
+        } else {
+          console.error('Error al verificar estado de descuento global:', data.message);
+          detectOtherDiscounts();
+        }
+      })
+      .catch(error => {
+        console.error('Error al verificar estado de descuento global:', error);
+        detectOtherDiscounts();
+      });
+  }
+  
+  // ========== FUNCIÓN DE FALLBACK PARA OTROS TIPOS DE DESCUENTOS ==========
+  function detectOtherDiscounts() {
+    // Agrupar productos por origen del descuento
+    productosCache.forEach(product => {
+      if (product.tiene_descuento) {
+        const origin = product.origen_descuento || 'individual';
         
         switch(origin) {
-          case 'global':
-            productsByOrigin.global.push(product);
+          case 'categoria':
+            const category = product.descuento_grupo_id || product.categoria;
+            if (category) {
+              activeDiscounts.categories.add(category);
+              if (!activeDiscounts.categoryDetails[category]) {
+                activeDiscounts.categoryDetails[category] = [];
+              }
+              activeDiscounts.categoryDetails[category].push(product);
+            }
             break;
           case 'marca':
-            // Si no tiene grupo_id, usamos la marca
             const brand = product.descuento_grupo_id || product.marca;
-            if (!brand) {
-              // Si no tiene ni grupo_id ni marca, lo tratamos como individual
-              productsByOrigin.individual.push(product);
-              break;
+            if (brand) {
+              activeDiscounts.brands.add(brand);
+              if (!activeDiscounts.brandDetails[brand]) {
+                activeDiscounts.brandDetails[brand] = [];
+              }
+              activeDiscounts.brandDetails[brand].push(product);
             }
-            if (!productsByOrigin.marca[brand]) {
-              productsByOrigin.marca[brand] = [];
-            }
-            productsByOrigin.marca[brand].push(product);
-            break;
-          case 'categoria':
-            // Si no tiene grupo_id, usamos la categoría
-            const category = product.descuento_grupo_id || product.categoria;
-            if (!category) {
-              // Si no tiene ni grupo_id ni categoría, lo tratamos como individual
-              productsByOrigin.individual.push(product);
-              break;
-            }
-            if (!productsByOrigin.categoria[category]) {
-              productsByOrigin.categoria[category] = [];
-            }
-            productsByOrigin.categoria[category].push(product);
             break;
           case 'individual':
-          default:
-            productsByOrigin.individual.push(product);
+            activeDiscounts.products.add(product.id);
             break;
         }
       }
     });
     
-    // Verificar si todos los productos tienen descuento global
-    // Para que sea global, TODOS los productos deben tener origen 'global'
-    if (productsByOrigin.global.length > 0 && 
-        productsByOrigin.global.length === productosCache.length) {
-      activeDiscounts.global = true;
-      activeDiscounts.globalDetails = productsByOrigin.global;
-    }
-    
-    // Añadir marcas con descuento
-    Object.keys(productsByOrigin.marca).forEach(brand => {
-      activeDiscounts.brands.add(brand);
-      activeDiscounts.brandDetails[brand] = productsByOrigin.marca[brand];
-    });
-    
-    // Añadir categorías con descuento
-    Object.keys(productsByOrigin.categoria).forEach(category => {
-      activeDiscounts.categories.add(category);
-      activeDiscounts.categoryDetails[category] = productsByOrigin.categoria[category];
-    });
-    
-    // Añadir productos individuales
-    productsByOrigin.individual.forEach(product => {
-      activeDiscounts.products.add(product.id);
-    });
-    
-    // Los problemas ya se arreglaron automáticamente, no necesitamos mostrar mensajes
-    
-    // Actualizar UI inmediatamente
-    requestAnimationFrame(() => {
-      updateMyDiscountsSection();
-      updateUIState();
-    });
+    // Actualizar UI
+    updateMyDiscountsSection();
+    updateUIState();
   }
   
   function updateProductDiscountsList() {
@@ -1447,7 +1490,7 @@
     updateProductDiscountsList();
     updateBrandDiscountsList();
     
-    // Mostrar/ocultar contenedores según haya descounts
+    // Mostrar/ocultar contenedores según haya descuento
     globalContainer.style.display = activeDiscounts.global ? 'block' : 'none';
     categoryContainer.style.display = activeDiscounts.categories.size > 0 ? 'block' : 'none';
     brandContainer.style.display = activeDiscounts.brands.size > 0 ? 'block' : 'none';
@@ -1469,31 +1512,36 @@
     const countElement = document.getElementById('globalDiscountCount');
     const valueElement = document.getElementById('globalDiscountValue');
     
-    if (!activeDiscounts.global || !activeDiscounts.globalDetails) {
+    if (!activeDiscounts.global || !activeDiscounts.globalDetails || activeDiscounts.globalDetails.length === 0) {
       container.innerHTML = '<div class="empty-discounts">No hay descuento global</div>';
       countElement.textContent = '0';
       valueElement.textContent = '-0%';
       return;
     }
     
-    countElement.textContent = activeDiscounts.globalDetails.length;
+    // Cuenta productos con descuento global
+    const productsWithGlobalDiscount = productosCache.filter(p => 
+      p.tiene_descuento && p.origen_descuento === 'global'
+    );
+    
+    countElement.textContent = productsWithGlobalDiscount.length;
     const averageDiscount = Math.round(
-      activeDiscounts.globalDetails.reduce((sum, p) => sum + p.valor_descuento, 0) / 
-      activeDiscounts.globalDetails.length
+      productsWithGlobalDiscount.reduce((sum, p) => sum + p.valor_descuento, 0) / 
+      productsWithGlobalDiscount.length
     );
     valueElement.textContent = `-${averageDiscount}%`;
     
     // Permitir ver todos los productos, no solo los primeros 10
-    const items = activeDiscounts.globalDetails.map(product => createProductCard(product)).join('');
+    const items = productsWithGlobalDiscount.map(product => createProductCard(product)).join('');
     container.innerHTML = items || '<div class="empty-discounts">No hay productos con descuento global</div>';
     
     // Añadir enlace "Ver todos" si hay muchos productos
-    if (activeDiscounts.globalDetails.length > 10) {
+    if (productsWithGlobalDiscount.length > 10) {
       // Añadir enlace flotante para ver todos
       const viewAllLink = document.createElement('a');
       viewAllLink.href = '/descuentos/detalle/global/all';
       viewAllLink.className = 'view-all-link';
-      viewAllLink.innerHTML = `Ver todos (${activeDiscounts.globalDetails.length})`;
+      viewAllLink.innerHTML = `Ver todos (${productsWithGlobalDiscount.length})`;
       viewAllLink.style.position = 'absolute';
       viewAllLink.style.right = '78px';
       viewAllLink.style.top = '10px';
@@ -1862,25 +1910,49 @@
   
   // Aplicar descuento a todos los productos - ACTUALIZADO
   function applyDiscountToAll(discountValue) {
-    const promises = productosCache.map(product => 
-      applyDiscountToProduct(product.id, discountValue, 'global', null)
-    );
+    // Verificar si hay al menos un producto para aplicar descuento global
+    if (productosCache.length === 0) {
+      showToast('No hay productos para aplicar descuento global', 'error');
+      return;
+    }
     
-    Promise.all(promises).then(results => {
-      const successCount = results.filter(r => r).length;
-      if (successCount === productosCache.length) {
-        showToast(`Descuento del ${discountValue}% aplicado a todos los productos`, 'success');
-        activeDiscounts.global = true;
-        checkExistingDiscounts();
-      } else {
-        showToast(`Aplicado a ${successCount} de ${productosCache.length} productos`, 'warning');
-      }
-    });
+    // Para descuento global, solo necesitamos aplicarlo a un producto
+    // El backend se encargará de propagarlo a todos los demás
+    const primerProducto = productosCache[0];
+    
+    applyDiscountToProduct(primerProducto.id, discountValue, 'global', null)
+      .then(success => {
+        if (success) {
+          showToast(`Descuento global del ${discountValue}% aplicado a todos los productos`, 'success');
+          
+          // Actualizar los datos locales para reflejar inmediatamente el cambio
+          productosCache.forEach(p => {
+            p.tiene_descuento = true;
+            p.tipo_descuento = 'percentage';
+            p.valor_descuento = discountValue;
+            p.origen_descuento = 'global';
+            p.fecha_aplicacion_descuento = new Date().toISOString();
+          });
+          
+          activeDiscounts.global = true;
+          activeDiscounts.globalDetails = [...productosCache];
+          
+          // Actualizar UI
+          updateMyDiscountsSection();
+        } else {
+          showToast('Error al aplicar descuento global', 'error');
+        }
+      });
   }
   
   // Aplicar descuento a categoría - ACTUALIZADO
   function applyDiscountToCategory(category, discountValue) {
     const categoryProducts = productosCache.filter(p => p.categoria === category);
+    
+    if (categoryProducts.length === 0) {
+      showToast(`No hay productos en la categoría "${category}"`, 'error');
+      return;
+    }
     
     const promises = categoryProducts.map(product => 
       applyDiscountToProduct(product.id, discountValue, 'categoria', category)
@@ -1890,7 +1962,22 @@
       const successCount = results.filter(r => r).length;
       if (successCount === categoryProducts.length) {
         showToast(`Descuento del ${discountValue}% aplicado a la categoría "${category}"`, 'success');
-        checkExistingDiscounts();
+        
+        // Actualizar datos locales
+        categoryProducts.forEach(p => {
+          p.tiene_descuento = true;
+          p.tipo_descuento = 'percentage';
+          p.valor_descuento = discountValue;
+          p.origen_descuento = 'categoria';
+          p.descuento_grupo_id = category;
+          p.fecha_aplicacion_descuento = new Date().toISOString();
+        });
+        
+        activeDiscounts.categories.add(category);
+        activeDiscounts.categoryDetails[category] = [...categoryProducts];
+        
+        // Actualizar UI
+        updateMyDiscountsSection();
       } else {
         showToast(`Aplicado a ${successCount} de ${categoryProducts.length} productos`, 'warning');
       }
@@ -1901,6 +1988,11 @@
   function applyDiscountToBrand(brand, discountValue) {
     const brandProducts = productosCache.filter(p => p.marca === brand);
     
+    if (brandProducts.length === 0) {
+      showToast(`No hay productos de la marca "${brand}"`, 'error');
+      return;
+    }
+    
     const promises = brandProducts.map(product => 
       applyDiscountToProduct(product.id, discountValue, 'marca', brand)
     );
@@ -1909,7 +2001,22 @@
       const successCount = results.filter(r => r).length;
       if (successCount === brandProducts.length) {
         showToast(`Descuento del ${discountValue}% aplicado a la marca "${brand}"`, 'success');
-        checkExistingDiscounts();
+        
+        // Actualizar datos locales
+        brandProducts.forEach(p => {
+          p.tiene_descuento = true;
+          p.tipo_descuento = 'percentage';
+          p.valor_descuento = discountValue;
+          p.origen_descuento = 'marca';
+          p.descuento_grupo_id = brand;
+          p.fecha_aplicacion_descuento = new Date().toISOString();
+        });
+        
+        activeDiscounts.brands.add(brand);
+        activeDiscounts.brandDetails[brand] = [...brandProducts];
+        
+        // Actualizar UI
+        updateMyDiscountsSection();
       } else {
         showToast(`Aplicado a ${successCount} de ${brandProducts.length} productos`, 'warning');
       }
@@ -1921,8 +2028,23 @@
     applyDiscountToProduct(productId, discountValue, 'individual', null).then(success => {
       if (success) {
         const product = productosCache.find(p => p.id == productId);
+        
+        // Actualizar datos locales
+        if (product) {
+          product.tiene_descuento = true;
+          product.tipo_descuento = 'percentage';
+          product.valor_descuento = discountValue;
+          product.origen_descuento = 'individual';
+          product.descuento_grupo_id = null;
+          product.fecha_aplicacion_descuento = new Date().toISOString();
+        
+          activeDiscounts.products.add(product.id);
+        }
+        
         showToast(`Descuento del ${discountValue}% aplicado a "${product.nombre}"`, 'success');
-        checkExistingDiscounts();
+        
+        // Actualizar UI
+        updateMyDiscountsSection();
       }
     });
   }
@@ -1969,19 +2091,53 @@
   // ========== FUNCIONES PARA REMOVER DESCUENTOS MEJORADAS ==========
   
   function removeGlobalDiscount() {
-    const globalProducts = productosCache.filter(p => p.tiene_descuento && p.origen_descuento === 'global');
-    
-    const promises = globalProducts.map(product => 
-      removeDiscountFromProduct(product.id)
-    );
-    
-    Promise.all(promises).then(results => {
-      const successCount = results.filter(r => r).length;
-      showToast(`Descuento global removido de ${successCount} productos`, 'success');
-      activeDiscounts.global = false;
-      activeDiscounts.globalDetails = null;
-      checkExistingDiscounts();
-    });
+    // Verificar primero si hay descuento global activo usando la API
+    fetch('/api/get_global_discount_status')
+      .then(response => response.json())
+      .then(data => {
+        if (data.success && data.is_global_active) {
+          // Obtener productos con origen global
+          const globalProducts = productosCache.filter(p => 
+            p.tiene_descuento && p.origen_descuento === 'global'
+          );
+          
+          if (globalProducts.length === 0) {
+            showToast('No se encontraron productos con descuento global', 'warning');
+            return;
+          }
+          
+          const promises = globalProducts.map(product => 
+            removeDiscountFromProduct(product.id)
+          );
+          
+          Promise.all(promises).then(results => {
+            const successCount = results.filter(r => r).length;
+            showToast(`Descuento global removido de ${successCount} productos`, 'success');
+            
+            // Actualizar datos locales
+            globalProducts.forEach(p => {
+              p.tiene_descuento = false;
+              p.tipo_descuento = null;
+              p.valor_descuento = 0;
+              p.origen_descuento = null;
+              p.descuento_grupo_id = null;
+              p.fecha_aplicacion_descuento = null;
+            });
+            
+            activeDiscounts.global = false;
+            activeDiscounts.globalDetails = null;
+            
+            // Actualizar UI
+            updateMyDiscountsSection();
+          });
+        } else {
+          showToast('No hay descuento global activo para remover', 'warning');
+        }
+      })
+      .catch(error => {
+        console.error('Error al verificar descuento global:', error);
+        showToast('Error al verificar estado del descuento global', 'error');
+      });
   }
   
   function removeCategoryDiscount(category) {
@@ -1992,6 +2148,11 @@
       (p.descuento_grupo_id === category || (!p.descuento_grupo_id && p.categoria === category))
     );
     
+    if (categoryProducts.length === 0) {
+      showToast(`No se encontraron productos con descuento en la categoría "${category}"`, 'warning');
+      return;
+    }
+    
     const promises = categoryProducts.map(product => 
       removeDiscountFromProduct(product.id)
     );
@@ -1999,9 +2160,22 @@
     Promise.all(promises).then(results => {
       const successCount = results.filter(r => r).length;
       showToast(`Descuentos removidos de ${successCount} productos en "${category}"`, 'success');
+      
+      // Actualizar datos locales
+      categoryProducts.forEach(p => {
+        p.tiene_descuento = false;
+        p.tipo_descuento = null;
+        p.valor_descuento = 0;
+        p.origen_descuento = null;
+        p.descuento_grupo_id = null;
+        p.fecha_aplicacion_descuento = null;
+      });
+      
       activeDiscounts.categories.delete(category);
       delete activeDiscounts.categoryDetails[category];
-      checkExistingDiscounts();
+      
+      // Actualizar UI
+      updateMyDiscountsSection();
     });
   }
   
@@ -2013,6 +2187,11 @@
       (p.descuento_grupo_id === brand || (!p.descuento_grupo_id && p.marca === brand))
     );
     
+    if (brandProducts.length === 0) {
+      showToast(`No se encontraron productos con descuento en la marca "${brand}"`, 'warning');
+      return;
+    }
+    
     const promises = brandProducts.map(product => 
       removeDiscountFromProduct(product.id)
     );
@@ -2020,26 +2199,66 @@
     Promise.all(promises).then(results => {
       const successCount = results.filter(r => r).length;
       showToast(`Descuentos removidos de ${successCount} productos de "${brand}"`, 'success');
+      
+      // Actualizar datos locales
+      brandProducts.forEach(p => {
+        p.tiene_descuento = false;
+        p.tipo_descuento = null;
+        p.valor_descuento = 0;
+        p.origen_descuento = null;
+        p.descuento_grupo_id = null;
+        p.fecha_aplicacion_descuento = null;
+      });
+      
       activeDiscounts.brands.delete(brand);
       delete activeDiscounts.brandDetails[brand];
-      checkExistingDiscounts();
+      
+      // Actualizar UI
+      updateMyDiscountsSection();
     });
   }
   
   function removeProductDiscount(productId) {
+    const product = productosCache.find(p => p.id == productId);
+    
+    if (!product || !product.tiene_descuento) {
+      showToast('El producto no tiene descuento para remover', 'warning');
+      return;
+    }
+    
     removeDiscountFromProduct(productId).then(success => {
       if (success) {
         showToast('Descuento removido', 'success');
+        
+        // Actualizar datos locales
+        product.tiene_descuento = false;
+        product.tipo_descuento = null;
+        product.valor_descuento = 0;
+        product.origen_descuento = null;
+        product.descuento_grupo_id = null;
+        product.fecha_aplicacion_descuento = null;
+        
         activeDiscounts.products.delete(productId);
-        checkExistingDiscounts();
+        
+        // Actualizar UI
+        updateMyDiscountsSection();
       }
     });
   }
   
   function removeAllCategoryDiscounts() {
+    if (activeDiscounts.categories.size === 0) {
+      showToast('No hay descuentos por categoría para remover', 'warning');
+      return;
+    }
+    
+    const totalCategorias = activeDiscounts.categories.size;
+    
     Array.from(activeDiscounts.categories).forEach(category => {
       removeCategoryDiscount(category);
     });
+    
+    showToast(`Descuentos por categoría removidos (${totalCategorias} categorías)`, 'success');
   }
   
   function removeAllProductDiscounts() {
@@ -2049,6 +2268,11 @@
       (p.origen_descuento === 'individual' || !p.origen_descuento)
     );
     
+    if (individualProducts.length === 0) {
+      showToast('No hay descuentos individuales para remover', 'warning');
+      return;
+    }
+    
     const promises = individualProducts.map(product => 
       removeDiscountFromProduct(product.id)
     );
@@ -2056,14 +2280,38 @@
     Promise.all(promises).then(results => {
       const successCount = results.filter(r => r).length;
       showToast(`Descuentos removidos de ${successCount} productos individuales`, 'success');
-      checkExistingDiscounts();
+      
+      // Actualizar datos locales
+      individualProducts.forEach(p => {
+        p.tiene_descuento = false;
+        p.tipo_descuento = null;
+        p.valor_descuento = 0;
+        p.origen_descuento = null;
+        p.descuento_grupo_id = null;
+        p.fecha_aplicacion_descuento = null;
+      });
+      
+      // Limpiar set de productos
+      activeDiscounts.products.clear();
+      
+      // Actualizar UI
+      updateMyDiscountsSection();
     });
   }
   
   function removeAllBrandDiscounts() {
+    if (activeDiscounts.brands.size === 0) {
+      showToast('No hay descuentos por marca para remover', 'warning');
+      return;
+    }
+    
+    const totalMarcas = activeDiscounts.brands.size;
+    
     Array.from(activeDiscounts.brands).forEach(brand => {
       removeBrandDiscount(brand);
     });
+    
+    showToast(`Descuentos por marca removidos (${totalMarcas} marcas)`, 'success');
   }
   
   // Remover descuento de producto (API call) - ASEGURA LIMPIAR TODOS LOS CAMPOS

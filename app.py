@@ -2511,6 +2511,26 @@ def apply_discount(product_id):
         else:
             precio_final = max(0, producto.precio_venta - discount_value)
         
+        # Si es descuento global, aplicar a todos los productos
+        if discount_origin == 'global':
+            try:
+                empresa_id = session.get('user_id')
+                # Solo actualizar otros productos, no el actual que ya fue actualizado
+                otros_productos = Producto.query.filter(
+                    Producto.empresa_id == empresa_id,
+                    Producto.id != product_id
+                ).all()
+                
+                for otro_producto in otros_productos:
+                    # Actualizar/crear descuento global en todos
+                    otro_producto.tiene_descuento = True
+                    otro_producto.tipo_descuento = discount_type
+                    otro_producto.valor_descuento = discount_value
+                    otro_producto.origen_descuento = 'global'
+                    otro_producto.fecha_aplicacion_descuento = datetime.utcnow()
+            except Exception as e:
+                print(f"Error al aplicar descuento global: {str(e)}")
+        
         db.session.commit()
         
         return jsonify({
@@ -2555,6 +2575,112 @@ def remove_discount(product_id):
         
     except Exception as e:
         db.session.rollback()
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/api/get_global_discount_status', methods=['GET'])
+@login_requerido
+def get_global_discount_status():
+    """Obtiene el estado del descuento global"""
+    try:
+        empresa_id = session.get('user_id')
+        if not empresa_id:
+            return jsonify({"success": False, "message": "Usuario no autenticado"}), 401
+        
+        # Contar productos con descuento global
+        productos_con_global = Producto.query.filter_by(
+            empresa_id=empresa_id,
+            origen_descuento='global',
+            tiene_descuento=True
+        ).count()
+        
+        # Contar total de productos
+        total_productos = Producto.query.filter_by(
+            empresa_id=empresa_id
+        ).count()
+        
+        # Si hay al menos un producto con descuento global, consideramos que está activo
+        is_global_active = productos_con_global > 0
+        
+        # Obtener valor del descuento global (tomando el primero que encontremos)
+        valor_descuento = 0
+        tipo_descuento = None
+        primer_producto_global = Producto.query.filter_by(
+            empresa_id=empresa_id,
+            origen_descuento='global',
+            tiene_descuento=True
+        ).first()
+        
+        if primer_producto_global:
+            valor_descuento = primer_producto_global.valor_descuento
+            tipo_descuento = primer_producto_global.tipo_descuento
+        
+        return jsonify({
+            "success": True,
+            "is_global_active": is_global_active,
+            "productos_con_global": productos_con_global,
+            "total_productos": total_productos,
+            "valor_descuento": valor_descuento,
+            "tipo_descuento": tipo_descuento
+        })
+        
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/api/get_active_discounts', methods=['GET'])
+@login_requerido
+def get_active_discounts():
+    """Obtiene todos los tipos de descuentos activos para facilitar visualización"""
+    try:
+        empresa_id = session.get('user_id')
+        if not empresa_id:
+            return jsonify({"success": False, "message": "Usuario no autenticado"}), 401
+        
+        # Estructura para almacenar los resultados
+        active_discounts = {
+            "global": False,
+            "categorias": [],
+            "marcas": [],
+            "individuales": 0
+        }
+        
+        # Verificar descuento global (basta 1 producto)
+        active_discounts["global"] = Producto.query.filter_by(
+            empresa_id=empresa_id,
+            origen_descuento='global',
+            tiene_descuento=True
+        ).limit(1).count() > 0
+        
+        # Obtener categorías con descuentos
+        categorias_con_descuento = db.session.query(Producto.descuento_grupo_id).filter(
+            Producto.empresa_id == empresa_id,
+            Producto.origen_descuento == 'categoria',
+            Producto.tiene_descuento == True
+        ).distinct().all()
+        
+        active_discounts["categorias"] = [cat[0] for cat in categorias_con_descuento if cat[0]]
+        
+        # Obtener marcas con descuentos
+        marcas_con_descuento = db.session.query(Producto.descuento_grupo_id).filter(
+            Producto.empresa_id == empresa_id,
+            Producto.origen_descuento == 'marca',
+            Producto.tiene_descuento == True
+        ).distinct().all()
+        
+        active_discounts["marcas"] = [marca[0] for marca in marcas_con_descuento if marca[0]]
+        
+        # Contar productos con descuentos individuales
+        active_discounts["individuales"] = Producto.query.filter_by(
+            empresa_id=empresa_id,
+            origen_descuento='individual',
+            tiene_descuento=True
+        ).count()
+        
+        return jsonify({
+            "success": True,
+            "active_discounts": active_discounts
+        })
+        
+    except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
 @app.route('/descuentos/detalle/<tipo>/<grupo_id>')
@@ -2850,7 +2976,7 @@ def corregir_descuentos_vista():
         <p>Se produjo un error: {str(e)}</p>
         <p><a href="/descuentos">Volver a Descuentos</a></p>
         """
-        
+
 ##############################
 # REABASTECER
 ##############################
