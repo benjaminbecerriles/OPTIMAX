@@ -1155,7 +1155,7 @@
     searchInput.dataset.selectedId = productId;
   }
   
-  // Verificar descuentos existentes - CON NUEVO TRACKING
+  // ========== FUNCIÓN PRINCIPAL CORREGIDA ==========
   function checkExistingDiscounts() {
     activeDiscounts.categories.clear();
     activeDiscounts.products.clear();
@@ -1219,7 +1219,7 @@
       activeDiscounts.categoryDetails[category] = productsByOrigin.categoria[category];
     });
     
-    // Productos individuales (excluyendo los que tienen origen de grupo)
+    // CORREGIDO: Solo productos individuales que NO tienen grupo
     productsByOrigin.individual.forEach(product => {
       activeDiscounts.products.add(product.id);
     });
@@ -1229,6 +1229,31 @@
       updateMyDiscountsSection();
       updateUIState();
     });
+  }
+  
+  // ========== FUNCIÓN PARA LISTAR PRODUCTOS CORREGIDA ==========
+  function updateProductDiscountsList() {
+    const container = document.getElementById('slider-product');
+    const countElement = document.getElementById('productDiscountCount');
+    
+    // CORREGIDO: Filtrar solo productos con descuento individual (origen_descuento === 'individual')
+    // y que NO están incluidos en descuentos de grupo
+    const individualProducts = productosCache.filter(product => {
+      if (!product.tiene_descuento) return false;
+      
+      // Solo incluir productos con origen individual
+      return product.origen_descuento === 'individual';
+    });
+    
+    countElement.textContent = individualProducts.length;
+    
+    if (individualProducts.length === 0) {
+      container.innerHTML = '<div class="empty-discounts">No hay descuentos individuales</div>';
+      return;
+    }
+    
+    const items = individualProducts.map(product => createProductCard(product, true)).join('');
+    container.innerHTML = items;
   }
   
   // Actualizar sección "Mis Descuentos"
@@ -1256,14 +1281,10 @@
     globalContainer.style.display = activeDiscounts.global ? 'block' : 'none';
     categoryContainer.style.display = activeDiscounts.categories.size > 0 ? 'block' : 'none';
     brandContainer.style.display = activeDiscounts.brands.size > 0 ? 'block' : 'none';
-    productContainer.style.display = 
-      (activeDiscounts.products.size > 0 && 
-       (!activeDiscounts.global && 
-        Array.from(activeDiscounts.products).some(pid => {
-          const prod = productosCache.find(p => p.id == pid);
-          return prod && !activeDiscounts.categories.has(prod.categoria) && 
-                 (!prod.marca || !activeDiscounts.brands.has(prod.marca));
-        }))) ? 'block' : 'none';
+    
+    // CORREGIDO: Solo mostrar la sección de productos individuales si realmente hay productos con origen_descuento === 'individual'
+    const individualProducts = productosCache.filter(p => p.tiene_descuento && p.origen_descuento === 'individual');
+    productContainer.style.display = individualProducts.length > 0 ? 'block' : 'none';
   }
   
   // Actualizar lista de descuentos globales
@@ -1287,6 +1308,49 @@
     valueElement.textContent = `-${averageDiscount}%`;
     
     const items = activeDiscounts.globalDetails.map(product => createProductCard(product)).join('');
+    container.innerHTML = items;
+  }
+  
+  // ========== FUNCIÓN PARA LISTAR MARCAS CORREGIDA ==========
+  function updateBrandDiscountsList() {
+    const container = document.getElementById('slider-brand');
+    const countElement = document.getElementById('brandDiscountCount');
+    
+    countElement.textContent = activeDiscounts.brands.size;
+    
+    if (activeDiscounts.brands.size === 0) {
+      container.innerHTML = '<div class="empty-discounts">No hay descuentos por marca</div>';
+      return;
+    }
+    
+    const items = Array.from(activeDiscounts.brands).map(brand => {
+      // CORREGIDO: Filtrar productos por origen y descuento_grupo_id
+      const brandProducts = productosCache.filter(p => 
+        p.tiene_descuento &&
+        p.origen_descuento === 'marca' &&
+        p.descuento_grupo_id === brand
+      );
+      
+      const averageDiscount = brandProducts.length > 0 ? 
+        Math.round(brandProducts.reduce((sum, p) => sum + p.valor_descuento, 0) / brandProducts.length) : 0;
+      
+      const encodedBrand = encodeURIComponent(brand);
+      
+      return `
+        <a href="/descuentos/detalle/marca/${encodedBrand}" class="brand-card">
+          <div class="brand-name">${brand}</div>
+          <div class="brand-details">
+            ${brandProducts.length} productos<br>
+            <span class="discount-value-badge">-${averageDiscount}%</span>
+          </div>
+          <button class="remove-discount-btn" onclick="event.preventDefault(); event.stopPropagation(); removeBrandDiscount('${brand.replace(/'/g, '\\\'')}')" style="margin-top: 10px;">
+            <i class="fas fa-times"></i>
+            Quitar
+          </button>
+        </a>
+      `;
+    }).join('');
+    
     container.innerHTML = items;
   }
   
@@ -1324,65 +1388,6 @@
       `;
     }).join('');
     
-    container.innerHTML = items;
-  }
-  
-  // Actualizar lista de descuentos por marca - CON ENLACES CLICKABLES
-  function updateBrandDiscountsList() {
-    const container = document.getElementById('slider-brand');
-    const countElement = document.getElementById('brandDiscountCount');
-    
-    countElement.textContent = activeDiscounts.brands.size;
-    
-    if (activeDiscounts.brands.size === 0) {
-      container.innerHTML = '<div class="empty-discounts">No hay descuentos por marca</div>';
-      return;
-    }
-    
-    const items = Array.from(activeDiscounts.brands).map(brand => {
-      const brandProducts = activeDiscounts.brandDetails[brand] || [];
-      const averageDiscount = brandProducts.length > 0 ? 
-        Math.round(brandProducts.reduce((sum, p) => sum + p.valor_descuento, 0) / brandProducts.length) : 0;
-      
-      const encodedBrand = encodeURIComponent(brand);
-      
-      return `
-        <a href="/descuentos/detalle/marca/${encodedBrand}" class="brand-card">
-          <div class="brand-name">${brand}</div>
-          <div class="brand-details">
-            ${brandProducts.length} productos<br>
-            <span class="discount-value-badge">-${averageDiscount}%</span>
-          </div>
-          <button class="remove-discount-btn" onclick="event.preventDefault(); event.stopPropagation(); removeBrandDiscount('${brand.replace(/'/g, '\\\'')}')" style="margin-top: 10px;">
-            <i class="fas fa-times"></i>
-            Quitar
-          </button>
-        </a>
-      `;
-    }).join('');
-    
-    container.innerHTML = items;
-  }
-  
-  // Actualizar lista de descuentos por producto
-  function updateProductDiscountsList() {
-    const container = document.getElementById('slider-product');
-    const countElement = document.getElementById('productDiscountCount');
-    
-    const individualProducts = productosCache.filter(p => 
-      p.tiene_descuento && 
-      !activeDiscounts.categories.has(p.categoria) && 
-      (!p.marca || !activeDiscounts.brands.has(p.marca))
-    );
-    
-    countElement.textContent = individualProducts.length;
-    
-    if (individualProducts.length === 0) {
-      container.innerHTML = '<div class="empty-discounts">No hay descuentos individuales</div>';
-      return;
-    }
-    
-    const items = individualProducts.map(product => createProductCard(product, true)).join('');
     container.innerHTML = items;
   }
   
@@ -1691,9 +1696,10 @@
     });
   }
   
-  // Funciones para remover descuentos
+  // ========== FUNCIONES PARA REMOVER DESCUENTOS CORREGIDAS ==========
+  
   function removeGlobalDiscount() {
-    const globalProducts = productosCache.filter(p => p.tiene_descuento);
+    const globalProducts = productosCache.filter(p => p.tiene_descuento && p.origen_descuento === 'global');
     
     const promises = globalProducts.map(product => 
       removeDiscountFromProduct(product.id)
@@ -1709,7 +1715,12 @@
   }
   
   function removeCategoryDiscount(category) {
-    const categoryProducts = productosCache.filter(p => p.categoria === category && p.tiene_descuento);
+    // CORREGIDO: Filtrar por origen_descuento y descuento_grupo_id
+    const categoryProducts = productosCache.filter(p => 
+      p.tiene_descuento &&
+      p.origen_descuento === 'categoria' &&
+      p.descuento_grupo_id === category
+    );
     
     const promises = categoryProducts.map(product => 
       removeDiscountFromProduct(product.id)
@@ -1725,7 +1736,12 @@
   }
   
   function removeBrandDiscount(brand) {
-    const brandProducts = productosCache.filter(p => p.marca === brand && p.tiene_descuento);
+    // CORREGIDO: Filtrar por origen_descuento y descuento_grupo_id
+    const brandProducts = productosCache.filter(p => 
+      p.tiene_descuento &&
+      p.origen_descuento === 'marca' &&
+      p.descuento_grupo_id === brand
+    );
     
     const promises = brandProducts.map(product => 
       removeDiscountFromProduct(product.id)
@@ -1757,10 +1773,10 @@
   }
   
   function removeAllProductDiscounts() {
+    // CORREGIDO: Solo eliminar productos con origen individual
     const individualProducts = productosCache.filter(p => 
       p.tiene_descuento && 
-      !activeDiscounts.categories.has(p.categoria) && 
-      (!p.marca || !activeDiscounts.brands.has(p.marca))
+      p.origen_descuento === 'individual'
     );
     
     const promises = individualProducts.map(product => 
