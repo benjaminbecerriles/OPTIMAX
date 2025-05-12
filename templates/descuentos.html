@@ -375,6 +375,7 @@
     margin-bottom: 16px;
     padding-bottom: 10px;
     border-bottom: 1px solid #f0f0f0;
+    position: relative; /* Para posicionamiento absoluto */
   }
 
   .discount-title {
@@ -385,6 +386,13 @@
     align-items: center;
     gap: 12px;
     color: var(--text-color);
+  }
+  
+  /* Fijamos posición para el botón de remover */
+  .discount-header .remove-discount-btn {
+    position: absolute;
+    right: 0;
+    top: 0;
   }
 
   .discount-badge {
@@ -411,7 +419,46 @@
     font-size: 14px;
     font-weight: 600;
   }
-
+  
+  /* NUEVO: Ver Todos Link en el encabezado */
+  .view-all-header-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 10px;
+    background-color: var(--accent);
+    color: white;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    margin-left: 12px;
+    box-shadow: 0 2px 4px rgba(229, 46, 46, 0.3);
+    transition: all 0.2s ease;
+  }
+  
+  /* Estilo especial para link de descuento global - MENOS LLAMATIVO */
+  .view-all-header-link.global {
+    background-color: #6c757d;
+    box-shadow: 0 2px 4px rgba(108, 117, 125, 0.3);
+  }
+  
+  .view-all-header-link:hover {
+    background-color: var(--accent-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 3px 6px rgba(229, 46, 46, 0.4);
+  }
+  
+  .view-all-header-link.global:hover {
+    background-color: #5a6268;
+    box-shadow: 0 3px 6px rgba(90, 98, 104, 0.4);
+  }
+  
+  .header-content {
+    display: flex;
+    align-items: center;
+  }
+  
   /* Slider para items de descuento - MEJORADO */
   .discount-slider-container {
     position: relative;
@@ -425,7 +472,7 @@
     gap: 20px; /* Aumentado de 16px a 20px */
     overflow-x: auto; /* Cambiado de hidden a auto para permitir scroll */
     scroll-behavior: smooth;
-    padding: 8px 4px 16px 4px; /* Padding aumentado */
+    padding: 8px 4px 24px 4px; /* Padding aumentado */
     margin-bottom: 8px;
     -webkit-overflow-scrolling: touch; /* Para scroll suave en iOS */
     scrollbar-width: thin; /* Para Firefox */
@@ -447,10 +494,10 @@
     scroll-snap-align: start;
   }
 
-  /* Category y Brand Cards - Con círculo de color y mejor espaciado */
+  /* Category y Brand Cards - MEJORADAS PARA IGUAL ALTURA QUE PRODUCTO */
   .category-card, .brand-card {
-    flex: 0 0 240px; /* Aumentado de 180px a 240px para más espacio */
-    height: 120px; /* Aumentado de 100px a 120px para más espacio vertical */
+    flex: 0 0 220px; /* Mismo ancho que las tarjetas de producto */
+    height: 360px; /* IGUAL altura que las tarjetas de producto */
     border-radius: 12px;
     background-color: white;
     border: 1px solid #e0e0e0;
@@ -459,12 +506,35 @@
     padding: 20px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
     cursor: pointer; 
     text-decoration: none;
     position: relative; /* Para posicionar el círculo de color */
     margin: 0 8px; /* Añadir margen horizontal para evitar que se encimen */
+  }
+  
+  /* NUEVO: Estructura con espaciado fijo interno */
+  .category-card-top, .brand-card-top {
+    flex: 0 0 150px; /* Espacio fijo para el círculo y foto */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+  }
+  
+  .category-card-middle, .brand-card-middle {
+    flex: 0 0 110px; /* Espacio fijo para nombre y detalles */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+  }
+  
+  .category-card-bottom, .brand-card-bottom {
+    margin-top: auto; /* Empuja el botón hasta abajo */
+    width: 100%;
   }
 
   .category-card:hover, .brand-card:hover {
@@ -472,28 +542,70 @@
     box-shadow: 0 8px 15px rgba(0,0,0,0.08);
   }
   
-  /* Círculo de color para la categoría */
+  /* Círculo de color para la categoría - AMPLIADO */
   .category-color-circle {
-    width: 30px;
-    height: 30px;
+    width: 70px; /* Ampliado a 70px */
+    height: 70px; /* Ampliado a 70px */
     border-radius: 50%;
-    margin-bottom: 12px;
+    margin-bottom: 15px; /* Más espacio abajo */
     border: 2px solid white;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* NUEVO: Ícono dentro del círculo de color */
+  .category-icon {
+    font-size: 32px; /* Icono más grande */
+    color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  }
+  
+  /* NUEVO: Estilo específico para el círculo de marca (siempre gris) */
+  .brand-circle {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    margin-bottom: 15px;
+    border: 2px solid white;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #888888 !important; /* Siempre gris, no importa la marca */
+  }
+  
+  /* NUEVO: Estilo específico para iconos de marca (siempre mismo icono y color) */
+  .brand-icon {
+    font-size: 32px;
+    color: #f5f5f7; /* Color claro para contrastar con el fondo gris */
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
   }
 
   .category-name, .brand-name {
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 600;
     text-align: center;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     color: var(--text-color);
+    line-height: 1.3;
+    height: 50px; /* Altura fija para el nombre */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
   }
 
   .category-details, .brand-details {
     text-align: center;
-    font-size: 13px;
+    font-size: 14px;
     color: var(--text-secondary);
+    height: 50px; /* Altura fija para los detalles */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
   }
 
   /* Product Cards - Igual que cambiar_precios.html */
@@ -623,6 +735,7 @@
     font-size: 0.85rem;
     cursor: pointer;
     transition: all 0.2s ease;
+    margin-top: auto; /* Empuja el botón hasta abajo */
   }
 
   .remove-discount-btn:hover {
@@ -934,13 +1047,14 @@
     <!-- Descuentos Globales -->
     <div class="discount-section" id="globalDiscounts" style="display: none;">
       <div class="discount-header">
-        <div>
+        <div class="header-content">
           <div class="discount-title">
-            <i class="fas fa-globe"></i>
             Descuento Global
             <span class="discount-badge" id="globalDiscountCount">0</span>
             <span class="discount-value-badge" id="globalDiscountValue">-0%</span>
           </div>
+          <!-- NUEVO: Ver todos ahora está junto al título CON ESTILO GRIS -->
+          <span id="view-all-global-container"></span>
         </div>
         <button class="remove-discount-btn" onclick="removeGlobalDiscount()">
           <i class="fas fa-times"></i>
@@ -967,12 +1081,13 @@
     <!-- Descuentos por Categoría -->
     <div class="discount-section" id="categoryDiscounts" style="display: none;">
       <div class="discount-header">
-        <div>
+        <div class="header-content">
           <div class="discount-title">
-            <i class="fas fa-tag"></i>
             Por Categoría
             <span class="discount-badge" id="categoryDiscountCount">0</span>
           </div>
+          <!-- NUEVO: Ver todos contenedor para categorías -->
+          <span id="view-all-category-container"></span>
         </div>
         <button class="remove-discount-btn" onclick="removeAllCategoryDiscounts()">
           <i class="fas fa-times"></i>
@@ -999,12 +1114,13 @@
     <!-- Descuentos por Marca -->
     <div class="discount-section" id="brandDiscounts" style="display: none;">
       <div class="discount-header">
-        <div>
+        <div class="header-content">
           <div class="discount-title">
-            <i class="fas fa-trademark"></i>
             Por Marca
             <span class="discount-badge" id="brandDiscountCount">0</span>
           </div>
+          <!-- NUEVO: Ver todos contenedor para marcas -->
+          <span id="view-all-brand-container"></span>
         </div>
         <button class="remove-discount-btn" onclick="removeAllBrandDiscounts()">
           <i class="fas fa-times"></i>
@@ -1031,12 +1147,13 @@
     <!-- Descuentos por Producto -->
     <div class="discount-section" id="productDiscounts" style="display: none;">
       <div class="discount-header">
-        <div>
+        <div class="header-content">
           <div class="discount-title">
-            <i class="fas fa-box"></i>
             Por Producto
             <span class="discount-badge" id="productDiscountCount">0</span>
           </div>
+          <!-- NUEVO: Ver todos contenedor para productos -->
+          <span id="view-all-product-container"></span>
         </div>
         <button class="remove-discount-btn" onclick="removeAllProductDiscounts()">
           <i class="fas fa-times"></i>
@@ -1419,6 +1536,12 @@
   function updateProductDiscountsList() {
     const container = document.getElementById('slider-product');
     const countElement = document.getElementById('productDiscountCount');
+    const viewAllContainer = document.getElementById('view-all-product-container');
+    
+    // Limpiar el contenedor "Ver todos"
+    if (viewAllContainer) {
+      viewAllContainer.innerHTML = '';
+    }
     
     // Filtrar solo productos con descuento individual
     const individualProducts = productosCache.filter(product => {
@@ -1440,26 +1563,13 @@
     const items = individualProducts.map(product => createProductCard(product, true)).join('');
     container.innerHTML = items;
     
-    // Añadir enlace "Ver todos" si hay muchos productos
-    if (individualProducts.length > 10) {
-      // Añadir enlace flotante para ver todos
+    // Añadir enlace "Ver todos" si hay muchos productos - REUBICADO
+    if (individualProducts.length > 10 && viewAllContainer) {
       const viewAllLink = document.createElement('a');
       viewAllLink.href = '/descuentos/detalle/individual/all';
-      viewAllLink.className = 'view-all-link';
+      viewAllLink.className = 'view-all-header-link';
       viewAllLink.innerHTML = `Ver todos (${individualProducts.length})`;
-      viewAllLink.style.position = 'absolute';
-      viewAllLink.style.right = '78px';
-      viewAllLink.style.top = '10px';
-      viewAllLink.style.backgroundColor = '#e52e2e';
-      viewAllLink.style.color = 'white';
-      viewAllLink.style.padding = '5px 10px';
-      viewAllLink.style.borderRadius = '4px';
-      viewAllLink.style.textDecoration = 'none';
-      viewAllLink.style.fontSize = '14px';
-      viewAllLink.style.fontWeight = '500';
-      
-      // Agregar al contenedor
-      container.parentElement.appendChild(viewAllLink);
+      viewAllContainer.appendChild(viewAllLink);
     }
   }
   
@@ -1531,36 +1641,35 @@
     );
     valueElement.textContent = `-${averageDiscount}%`;
     
-    // Permitir ver todos los productos, no solo los primeros 10
-    const items = productsWithGlobalDiscount.map(product => createProductCard(product)).join('');
-    container.innerHTML = items || '<div class="empty-discounts">No hay productos con descuento global</div>';
-    
-    // Añadir enlace "Ver todos" si hay muchos productos
-    if (productsWithGlobalDiscount.length > 10) {
-      // Añadir enlace flotante para ver todos
-      const viewAllLink = document.createElement('a');
-      viewAllLink.href = '/descuentos/detalle/global/all';
-      viewAllLink.className = 'view-all-link';
-      viewAllLink.innerHTML = `Ver todos (${productsWithGlobalDiscount.length})`;
-      viewAllLink.style.position = 'absolute';
-      viewAllLink.style.right = '78px';
-      viewAllLink.style.top = '10px';
-      viewAllLink.style.backgroundColor = '#e52e2e';
-      viewAllLink.style.color = 'white';
-      viewAllLink.style.padding = '5px 10px';
-      viewAllLink.style.borderRadius = '4px';
-      viewAllLink.style.textDecoration = 'none';
-      viewAllLink.style.fontSize = '14px';
-      viewAllLink.style.fontWeight = '500';
-      
-      // Agregar al contenedor
-      container.parentElement.appendChild(viewAllLink);
-    }
+    // NUEVO: En lugar de mostrar todos los productos, crear una única tarjeta más larga
+    const url = '/descuentos/detalle/global/all';
+    container.innerHTML = `
+      <a href="${url}" class="category-card global-discount-card">
+        <div class="category-card-top">
+          <div class="category-color-circle" style="background-color: #e52e2e;">
+            <i class="fas fa-percentage category-icon"></i>
+          </div>
+        </div>
+        <div class="category-card-middle">
+          <div class="category-name" style="text-align: left;">Descuento Global</div>
+          <div class="category-details" style="text-align: left;">
+            ${productsWithGlobalDiscount.length} productos con<br>
+            <span class="discount-value-badge">-${averageDiscount}%</span> de descuento
+          </div>
+        </div>
+      </a>
+    `;
   }
   
   function updateBrandDiscountsList() {
     const container = document.getElementById('slider-brand');
     const countElement = document.getElementById('brandDiscountCount');
+    const viewAllContainer = document.getElementById('view-all-brand-container');
+    
+    // Limpiar el contenedor "Ver todos"
+    if (viewAllContainer) {
+      viewAllContainer.innerHTML = '';
+    }
     
     countElement.textContent = activeDiscounts.brands.size;
     
@@ -1582,26 +1691,40 @@
       
       const encodedBrand = encodeURIComponent(brand);
       
-      // Generar un color para la marca basado en el nombre para tener consistencia
-      const brandColor = getHashColor(brand);
-      
       return `
         <a href="/descuentos/detalle/marca/${encodedBrand}" class="brand-card">
-          <div class="category-color-circle" style="background-color: ${brandColor};"></div>
-          <div class="brand-name">${brand}</div>
-          <div class="brand-details">
-            ${brandProducts.length} productos<br>
-            <span class="discount-value-badge">-${averageDiscount}%</span>
+          <div class="category-card-top">
+            <div class="brand-circle">
+              <i class="far fa-bookmark brand-icon"></i>
+            </div>
           </div>
-          <button class="remove-discount-btn" onclick="event.preventDefault(); event.stopPropagation(); removeBrandDiscount('${brand.replace(/'/g, '\\\'')}')" style="margin-top: 10px;">
-            <i class="fas fa-times"></i>
-            Quitar
-          </button>
+          <div class="category-card-middle">
+            <div class="brand-name">${brand}</div>
+            <div class="brand-details">
+              ${brandProducts.length} productos<br>
+              <span class="discount-value-badge">-${averageDiscount}%</span>
+            </div>
+          </div>
+          <div class="category-card-bottom">
+            <button class="remove-discount-btn" onclick="event.preventDefault(); event.stopPropagation(); removeBrandDiscount('${brand.replace(/'/g, '\\\'')}')" style="width: 100%;">
+              <i class="fas fa-times"></i>
+              Quitar
+            </button>
+          </div>
         </a>
       `;
     }).join('');
     
     container.innerHTML = items;
+    
+    // Añadir enlace "Ver todos" si hay muchas marcas
+    if (activeDiscounts.brands.size > 10 && viewAllContainer) {
+      const viewAllLink = document.createElement('a');
+      viewAllLink.href = '/descuentos/detalle/marca/all';
+      viewAllLink.className = 'view-all-header-link';
+      viewAllLink.innerHTML = `Ver todas (${activeDiscounts.brands.size})`;
+      viewAllContainer.appendChild(viewAllLink);
+    }
   }
   
   // Función para generar un color basado en un texto (para marcas)
@@ -1629,6 +1752,12 @@
   function updateCategoryDiscountsList() {
     const container = document.getElementById('slider-category');
     const countElement = document.getElementById('categoryDiscountCount');
+    const viewAllContainer = document.getElementById('view-all-category-container');
+    
+    // Limpiar el contenedor "Ver todos"
+    if (viewAllContainer) {
+      viewAllContainer.innerHTML = '';
+    }
     
     countElement.textContent = activeDiscounts.categories.size;
     
@@ -1653,23 +1782,66 @@
       // Obtener color de categoría desde CATEGORY_COLORS
       const categoryColor = getCategoryColor(category);
       
+      // Asignar un icono específico según la categoría
+      let categoryIcon = 'box';
+      
+      if (category.includes('abarrotes')) categoryIcon = 'shopping-basket';
+      else if (category.includes('enlatados') || category.includes('conservas')) categoryIcon = 'archive';
+      else if (category.includes('snacks') || category.includes('botanas') || category.includes('dulces')) categoryIcon = 'cookie-bite';
+      else if (category.includes('bebidas') && category.includes('alcohólicas')) categoryIcon = 'wine-glass-alt';
+      else if (category.includes('bebidas')) categoryIcon = 'coffee';
+      else if (category.includes('panadería') || category.includes('repostería')) categoryIcon = 'bread-slice';
+      else if (category.includes('lácteos') || category.includes('huevos')) categoryIcon = 'egg';
+      else if (category.includes('carnes')) categoryIcon = 'drumstick-bite';
+      else if (category.includes('congelados') || category.includes('refrigerados')) categoryIcon = 'snowflake';
+      else if (category.includes('frutas') || category.includes('verduras')) categoryIcon = 'apple-alt';
+      else if (category.includes('limpieza')) categoryIcon = 'broom';
+      else if (category.includes('cuidado') || category.includes('higiene')) categoryIcon = 'shower';
+      else if (category.includes('medicamentos')) categoryIcon = 'pills';
+      else if (category.includes('bebés')) categoryIcon = 'baby';
+      else if (category.includes('mascotas')) categoryIcon = 'paw';
+      else if (category.includes('papelería')) categoryIcon = 'pencil-alt';
+      else if (category.includes('ferretería')) categoryIcon = 'tools';
+      else if (category.includes('artesanías') || category.includes('manualidades')) categoryIcon = 'palette';
+      else if (category.includes('granel')) categoryIcon = 'weight-hanging';
+      else if (category.includes('orgánicos')) categoryIcon = 'leaf';
+      else if (category.includes('gourmet')) categoryIcon = 'utensils';
+      else if (category.includes('suplementos')) categoryIcon = 'capsules';
+      
       return `
         <a href="/descuentos/detalle/categoria/${encodedCategory}" class="category-card">
-          <div class="category-color-circle" style="background-color: ${categoryColor};"></div>
-          <div class="category-name">${category}</div>
-          <div class="category-details">
-            ${categoryProducts.length} productos<br>
-            <span class="discount-value-badge">-${averageDiscount}%</span>
+          <div class="category-card-top">
+            <div class="category-color-circle" style="background-color: ${categoryColor};">
+              <i class="fas fa-${categoryIcon} category-icon"></i>
+            </div>
           </div>
-          <button class="remove-discount-btn" onclick="event.preventDefault(); event.stopPropagation(); removeCategoryDiscount('${category.replace(/'/g, '\\\'')}')" style="margin-top: 10px;">
-            <i class="fas fa-times"></i>
-            Quitar
-          </button>
+          <div class="category-card-middle">
+            <div class="category-name">${category}</div>
+            <div class="category-details">
+              ${categoryProducts.length} productos<br>
+              <span class="discount-value-badge">-${averageDiscount}%</span>
+            </div>
+          </div>
+          <div class="category-card-bottom">
+            <button class="remove-discount-btn" onclick="event.preventDefault(); event.stopPropagation(); removeCategoryDiscount('${category.replace(/'/g, '\\\'')}')" style="width: 100%;">
+              <i class="fas fa-times"></i>
+              Quitar
+            </button>
+          </div>
         </a>
       `;
     }).join('');
     
     container.innerHTML = items;
+    
+    // Añadir enlace "Ver todos" si hay muchas categorías
+    if (activeDiscounts.categories.size > 10 && viewAllContainer) {
+      const viewAllLink = document.createElement('a');
+      viewAllLink.href = '/descuentos/detalle/categoria/all';
+      viewAllLink.className = 'view-all-header-link';
+      viewAllLink.innerHTML = `Ver todas (${activeDiscounts.categories.size})`;
+      viewAllContainer.appendChild(viewAllLink);
+    }
   }
   
   // Función para obtener el color de categoría
@@ -2354,7 +2526,7 @@
     let cardWidth = 0;
     
     if (sliderId === 'category' || sliderId === 'brand') {
-      cardWidth = 260; // 240px + 20px gap
+      cardWidth = 240; // 220px + 20px gap
     } else if (sliderId === 'global' || sliderId === 'product') {
       cardWidth = 240; // 220px + 20px gap
     } else {
