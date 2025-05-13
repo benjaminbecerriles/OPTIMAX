@@ -30,6 +30,10 @@
     --gray-300: #d1d1d6;
     --gray-500: #777777;
     --gray-600: #86868b;
+    
+    /* Colores de resaltado para búsqueda */
+    --highlight-color: #FF0080;
+    --highlight-background: rgba(255, 0, 128, 0.1);
   }
 
   body {
@@ -207,6 +211,7 @@
     background-size: 16px;
   }
 
+  /* MEJORADO: Estilo de resultados de búsqueda similar a agregar_producto.html */
   .product-search-results {
     position: absolute;
     top: 100%;
@@ -216,18 +221,19 @@
     border: 1px solid var(--gray-300);
     border-radius: 8px;
     margin-top: 4px;
-    max-height: 250px;
+    max-height: 350px;
     overflow-y: auto;
     z-index: 100;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
     display: none;
+    padding: 0;
   }
 
   .product-search-result {
-    padding: 10px 12px;
+    padding: 12px;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     cursor: pointer;
     transition: background-color 0.15s ease;
     border-bottom: 1px solid var(--light-background);
@@ -237,32 +243,124 @@
     background-color: var(--light-background);
   }
 
+  .product-search-result:active {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+  
+  .product-search-result.active {
+    background-color: var(--light-background);
+    border-left: 3px solid var(--accent);
+  }
+
   .product-search-result:last-child {
     border-bottom: none;
   }
 
   .product-result-image {
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     object-fit: contain;
-    border-radius: 4px;
-    background-color: var(--light-background);
+    border-radius: 6px;
+    background-color: #f0f0f0;
+    border: 1px solid #e5e5e5;
+    padding: 2px;
   }
 
   .product-result-info {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
   }
 
   .product-result-name {
     font-weight: 500;
     font-size: 0.9rem;
     color: var(--text-color);
+    line-height: 1.3;
   }
 
   .product-result-details {
     font-size: 0.8rem;
     color: var(--text-secondary);
     margin-top: 1px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  
+  /* Nuevo estilo para los detalles del producto */
+  .product-result-sku {
+    color: #777;
+    font-size: 0.75rem;
+    font-family: monospace;
+    background-color: #f5f5f5;
+    padding: 1px 4px;
+    border-radius: 3px;
+    display: inline-block;
+  }
+  
+  /* Estilo para resaltar coincidencias en búsqueda */
+  .search-highlight {
+    color: var(--highlight-color);
+    font-weight: bold;
+    background-color: var(--highlight-background);
+    padding: 0 2px;
+    border-radius: 2px;
+  }
+  
+  /* Nuevo: Estilo para el producto seleccionado */
+  .selected-product-box {
+    display: flex;
+    align-items: center;
+    background-color: #f0f7ff;
+    border: 1px solid #c2e0ff;
+    border-radius: 8px;
+    padding: 10px 12px;
+    transition: all 0.2s ease;
+    position: relative;
+  }
+  
+  .selected-product-box img {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    border-radius: 4px;
+    margin-right: 10px;
+  }
+  
+  .selected-product-info {
+    flex: 1;
+  }
+  
+  .selected-product-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text-color);
+  }
+  
+  .selected-product-code {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+  }
+  
+  .selected-product-remove {
+    background: none;
+    border: none;
+    color: #d32f2f;
+    font-size: 1.2rem;
+    cursor: pointer;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+  }
+  
+  .selected-product-remove:hover {
+    background-color: rgba(211, 47, 47, 0.1);
   }
 
   .discount-input-group {
@@ -316,6 +414,16 @@
     background-color: #43A047;
     transform: translateY(-1px);
     box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+  }
+  
+  /* Estilo para botón disabled */
+  .btn-apply-discount:disabled,
+  .btn-apply-discount.disabled {
+    background-color: #9E9E9E;
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
   }
   
   /* Botón de reparación de descuentos */
@@ -1005,6 +1113,17 @@
     color: var(--text-secondary);
     font-style: italic;
   }
+  
+  /* Estilo para los mensajes de no se encontraron resultados */
+  .no-results-message {
+    padding: 14px;
+    text-align: center;
+    color: var(--text-secondary);
+    font-style: italic;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+    margin: 10px 0;
+  }
 
   @keyframes slideIn {
     from {
@@ -1121,7 +1240,18 @@
       </div>
 
       <div class="product-search-container" id="productSearchContainer">
-        <input type="text" class="product-search-input" id="productSearchInput" placeholder="Buscar por nombre, SKU o marca...">
+        <input type="text" class="product-search-input" id="productSearchInput" placeholder="Buscar por nombre o SKU...">
+        <!-- Nuevo: Contenedor para producto seleccionado -->
+        <div class="selected-product-box" id="selectedProductBox" style="display: none;">
+          <img id="selectedProductImage" src="/static/img/default_product.jpg" alt="Producto seleccionado">
+          <div class="selected-product-info">
+            <div class="selected-product-name" id="selectedProductName">Nombre del producto</div>
+            <div class="selected-product-code" id="selectedProductCode">SKU: ######</div>
+          </div>
+          <button type="button" class="selected-product-remove" id="selectedProductRemove">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
         <div class="product-search-results" id="productSearchResults"></div>
         <input type="hidden" id="selectedProductId">
       </div>
@@ -1307,12 +1437,19 @@
     const brandSelector = document.getElementById('brandSelector');
     const productSearchContainer = document.getElementById('productSearchContainer');
     const applyButton = document.getElementById('applyGlobalDiscountBtn');
+    const selectedProductBox = document.getElementById('selectedProductBox');
+    const searchInput = document.getElementById('productSearchInput');
     
     discountTarget.addEventListener('change', function() {
       // Ocultar todos primero
       categorySelector.style.display = 'none';
       brandSelector.style.display = 'none';
       productSearchContainer.style.display = 'none';
+      
+      // Si hay un producto seleccionado, limpiar la selección al cambiar el target
+      if (selectedProductBox && selectedProductBox.style.display === 'flex') {
+        clearProductSelection();
+      }
       
       // Mostrar el selector correspondiente
       switch(this.value) {
@@ -1327,11 +1464,20 @@
         case 'product':
           productSearchContainer.style.display = 'block';
           applyButton.innerHTML = '<i class="fas fa-box"></i> Aplicar';
+          
+          // Asegurarse de que el input de búsqueda sea visible (no el cuadro de selección)
+          if (searchInput && selectedProductBox) {
+            searchInput.style.display = 'block';
+            selectedProductBox.style.display = 'none';
+          }
           break;
         default:
           applyButton.innerHTML = '<i class="fas fa-percent"></i> Aplicar';
           break;
       }
+      
+      // Actualizar estado del botón
+      updateApplyButtonState();
     });
     
     // Validación de input
@@ -1342,21 +1488,74 @@
     });
   }
   
-  // Inicializar búsqueda de productos
+  // ========== FUNCIÓN PARA RESALTAR COINCIDENCIAS ==========
+  function highlightMatch(text, query) {
+    if (!text || !query || query.trim() === '') return text;
+    
+    // Normalizar texto y query para una búsqueda insensible a acentos/mayúsculas
+    const normalizeString = (str) => {
+      return str.normalize("NFD")
+               .replace(/[\u0300-\u036f]/g, "")
+               .toLowerCase();
+    };
+    
+    const normalizedText = normalizeString(text);
+    const normalizedQuery = normalizeString(query);
+    
+    // Encontrar dónde ocurre la coincidencia en el texto normalizado
+    const index = normalizedText.indexOf(normalizedQuery);
+    if (index === -1) return text;
+    
+    // Extraer la parte del texto original que coincide (mantiene acentos/mayúsculas)
+    const before = text.substring(0, index);
+    const match = text.substring(index, index + query.length);
+    const after = text.substring(index + query.length);
+    
+    // Retornar con el texto resaltado usando una clase CSS
+    return before + '<span class="search-highlight">' + match + '</span>' + after;
+  }
+  
+  // Inicializar búsqueda de productos mejorada
   function initializeProductSearch() {
     const searchInput = document.getElementById('productSearchInput');
     const resultsContainer = document.getElementById('productSearchResults');
+    const selectedBox = document.getElementById('selectedProductBox');
+    const applyButton = document.getElementById('applyGlobalDiscountBtn');
+    
+    // Listener para el botón de quitar producto seleccionado
+    const removeBtn = document.getElementById('selectedProductRemove');
+    if (removeBtn) {
+      removeBtn.addEventListener('click', clearProductSelection);
+    }
+    
+    // Cache para optimizar búsquedas repetidas
+    const searchCache = new Map();
+    
+    // Debounce para evitar muchas llamadas al escribir rápido
+    let searchTimeout;
     
     searchInput.addEventListener('input', function() {
       const query = this.value.trim();
+      clearTimeout(searchTimeout);
       
       if (query.length < 2) {
         resultsContainer.style.display = 'none';
         return;
       }
       
-      const results = searchProducts(query);
-      displaySearchResults(results);
+      // Usar caché si existe para esta consulta
+      if (searchCache.has(query)) {
+        displaySearchResults(searchCache.get(query), query);
+        return;
+      }
+      
+      // Debounce de 150ms para no afectar rendimiento
+      searchTimeout = setTimeout(() => {
+        const results = searchProducts(query);
+        // Guardar en caché para futuras búsquedas
+        searchCache.set(query, results);
+        displaySearchResults(results, query);
+      }, 150);
     });
     
     // Cerrar resultados al hacer clic fuera
@@ -1365,63 +1564,261 @@
         resultsContainer.style.display = 'none';
       }
     });
-  }
-  
-  // Buscar productos en cache
-  function searchProducts(query) {
-    return productosCache.filter(product => {
-      const searchableText = (
-        (product.nombre || '') + ' ' +
-        (product.marca || '') + ' ' +
-        (product.codigo_barras_externo || '')
-      ).toLowerCase();
+    
+    // Manejar eventos de teclado para navegación
+    searchInput.addEventListener('keydown', function(e) {
+      if (!resultsContainer.style.display || resultsContainer.style.display === 'none') {
+        return;
+      }
       
-      return searchableText.includes(query.toLowerCase());
-    }).slice(0, 10);
+      const items = resultsContainer.querySelectorAll('.product-search-result');
+      if (!items.length) return;
+      
+      // Encontrar el elemento actualmente activo
+      let currentIndex = -1;
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].classList.contains('active')) {
+          currentIndex = i;
+          break;
+        }
+      }
+      
+      // Manejar teclas de flecha y Enter
+      switch (e.key) {
+        case 'ArrowDown':
+          e.preventDefault();
+          if (currentIndex < 0) {
+            items[0].classList.add('active');
+          } else {
+            items[currentIndex].classList.remove('active');
+            items[(currentIndex + 1) % items.length].classList.add('active');
+          }
+          break;
+          
+        case 'ArrowUp':
+          e.preventDefault();
+          if (currentIndex < 0) {
+            items[items.length - 1].classList.add('active');
+          } else {
+            items[currentIndex].classList.remove('active');
+            items[(currentIndex - 1 + items.length) % items.length].classList.add('active');
+          }
+          break;
+          
+        case 'Enter':
+          if (currentIndex >= 0) {
+            e.preventDefault();
+            items[currentIndex].click();
+          }
+          break;
+          
+        case 'Escape':
+          e.preventDefault();
+          resultsContainer.style.display = 'none';
+          break;
+      }
+    });
+    
+    // Verificar estado del botón Aplicar cuando se cambia el target
+    const discountTarget = document.getElementById('discountTarget');
+    if (discountTarget) {
+      discountTarget.addEventListener('change', updateApplyButtonState);
+    }
+    
+    // Inicializar estado del botón
+    updateApplyButtonState();
   }
   
-  // Mostrar resultados de búsqueda
-  function displaySearchResults(results) {
+  // Actualizar estado del botón Aplicar
+  function updateApplyButtonState() {
+    const discountTarget = document.getElementById('discountTarget');
+    const applyButton = document.getElementById('applyGlobalDiscountBtn');
+    const selectedProductId = document.getElementById('selectedProductId');
+    
+    if (!discountTarget || !applyButton) return;
+    
+    // Si el target es 'product', verificar si hay un producto seleccionado
+    if (discountTarget.value === 'product') {
+      const hasSelection = selectedProductId && selectedProductId.value;
+      applyButton.disabled = !hasSelection;
+      
+      // Añadir/quitar clase visual
+      if (hasSelection) {
+        applyButton.classList.remove('disabled');
+      } else {
+        applyButton.classList.add('disabled');
+      }
+    } else {
+      // Para otros targets, habilitar siempre
+      applyButton.disabled = false;
+      applyButton.classList.remove('disabled');
+    }
+  }
+  
+  // Buscar productos en cache - MEJORADO: ahora busca en nombre y SKU pero no en marca
+  function searchProducts(query) {
+    if (!query || query.trim().length < 2) return [];
+    
+    const queryLower = query.toLowerCase().trim();
+    
+    // Función para normalizar texto (quitar acentos para mejores coincidencias)
+    const normalizeText = (text) => {
+      if (!text) return '';
+      return text.normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .toLowerCase();
+    };
+    
+    // Buscar coincidencias en nombre y SKU (no en marca)
+    return productosCache.filter(product => {
+      if (!product) return false;
+      
+      const normalizedName = normalizeText(product.nombre || '');
+      const normalizedSku = normalizeText(product.codigo_barras_externo || '');
+      
+      // Buscar coincidencias por SKU o nombre (peso diferente)
+      const skuMatch = normalizedSku.includes(normalizeText(queryLower));
+      const nameMatch = normalizedName.includes(normalizeText(queryLower));
+      
+      // Si coincide con cualquiera, incluir en resultados
+      return skuMatch || nameMatch;
+    })
+    // Ordenar primero los que coinciden con SKU, luego por nombre
+    .sort((a, b) => {
+      const aSkuMatch = (a.codigo_barras_externo || '').toLowerCase().includes(queryLower);
+      const bSkuMatch = (b.codigo_barras_externo || '').toLowerCase().includes(queryLower);
+      
+      // Primero, ordenar por coincidencia de SKU (más relevante)
+      if (aSkuMatch && !bSkuMatch) return -1;
+      if (!aSkuMatch && bSkuMatch) return 1;
+      
+      // Luego, por coincidencia exacta en el nombre
+      const aExactMatch = (a.nombre || '').toLowerCase() === queryLower;
+      const bExactMatch = (b.nombre || '').toLowerCase() === queryLower;
+      if (aExactMatch && !bExactMatch) return -1;
+      if (!aExactMatch && bExactMatch) return 1;
+      
+      // Por último, ordenar alfabéticamente
+      return (a.nombre || '').localeCompare(b.nombre || '');
+    })
+    // Limitar resultados para mejor rendimiento
+    .slice(0, 8);
+  }
+  
+  // Mostrar resultados de búsqueda - MEJORADO CON FORMATO SIMILAR A AGREGAR_PRODUCTO
+  function displaySearchResults(results, query) {
     const resultsContainer = document.getElementById('productSearchResults');
     
+    if (!resultsContainer) return;
+    
     if (results.length === 0) {
-      resultsContainer.innerHTML = '<div class="empty-discounts">No se encontraron productos</div>';
+      resultsContainer.innerHTML = `
+        <div class="no-results-message">
+          No se encontraron productos que coincidan con "${query}"
+        </div>`;
       resultsContainer.style.display = 'block';
       return;
     }
     
-    const html = results.map(product => `
-      <div class="product-search-result" onclick="selectProduct(${product.id}, '${product.nombre.replace(/'/g, '\\\'')}')"
-           data-has-discount="${product.tiene_descuento || false}"
-           data-product-id="${product.id}">
-        <img src="${product.foto ? '/static/uploads/' + product.foto : '/static/img/default_product.jpg'}" 
-             alt="${product.nombre}" 
-             class="product-result-image">
-        <div class="product-result-info">
-          <div class="product-result-name">${product.nombre}
-            ${(product.tiene_descuento) ? ' <span style="color: var(--discount-color); font-size: 0.8rem;">(-' + Math.round(product.valor_descuento) + '%)</span>' : ''}
+    const html = results.map(product => {
+      // Resaltar coincidencias en nombre y SKU
+      const highlightedName = highlightMatch(product.nombre || '', query);
+      const highlightedSku = highlightMatch(product.codigo_barras_externo || '', query);
+      
+      // Mostrar información de descuento si existe
+      const discountInfo = product.tiene_descuento 
+        ? `<span style="color: var(--discount-color); font-size: 0.8rem; margin-left: 5px;">
+            (-${Math.round(product.valor_descuento)}%)
+           </span>` 
+        : '';
+      
+      return `
+        <div class="product-search-result" 
+             onclick="selectProduct(${product.id}, '${(product.nombre || '').replace(/'/g, '\\\'')}')">
+          <img src="${product.foto ? '/static/uploads/' + product.foto : '/static/img/default_product.jpg'}" 
+               alt="${product.nombre}" 
+               class="product-result-image"
+               onerror="this.src='/static/img/default_product.jpg'">
+          <div class="product-result-info">
+            <div class="product-result-name">
+              ${highlightedName} ${discountInfo}
+            </div>
+            <div class="product-result-details">
+              <span class="product-result-sku">SKU: ${highlightedSku}</span>
+              ${product.precio_venta ? `<span>$${product.precio_venta.toFixed(2)}</span>` : ''}
+            </div>
           </div>
-          <div class="product-result-details">${product.marca || 'Sin marca'} • SKU: ${product.codigo_barras_externo || 'N/A'}</div>
         </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
     
     resultsContainer.innerHTML = html;
     resultsContainer.style.display = 'block';
   }
   
-  // Seleccionar producto de búsqueda
+  // Seleccionar producto de búsqueda - MEJORADO: ahora muestra tarjeta de selección
   function selectProduct(productId, productName) {
     const searchInput = document.getElementById('productSearchInput');
     const resultsContainer = document.getElementById('productSearchResults');
     const selectedProductId = document.getElementById('selectedProductId');
+    const selectedBox = document.getElementById('selectedProductBox');
+    const selectedNameEl = document.getElementById('selectedProductName');
+    const selectedCodeEl = document.getElementById('selectedProductCode');
+    const selectedImageEl = document.getElementById('selectedProductImage');
     
-    searchInput.value = productName;
+    // Obtener datos completos del producto
+    const product = productosCache.find(p => p.id == productId);
+    if (!product) return;
+    
+    // Actualizar elementos ocultos
     selectedProductId.value = productId;
+    
+    // Actualizar interfaz
+    if (selectedBox && selectedNameEl && selectedCodeEl) {
+      // Mostrar el cuadro de selección
+      selectedNameEl.textContent = product.nombre || productName;
+      selectedCodeEl.textContent = `SKU: ${product.codigo_barras_externo || 'N/A'}`;
+      
+      // Actualizar imagen si existe
+      if (selectedImageEl) {
+        selectedImageEl.src = product.foto ? 
+          `/static/uploads/${product.foto}` : 
+          '/static/img/default_product.jpg';
+      }
+      
+      // Ocultar input y mostrar cuadro de selección
+      searchInput.style.display = 'none';
+      selectedBox.style.display = 'flex';
+    }
+    
+    // Ocultar resultados
     resultsContainer.style.display = 'none';
     
-    // Almacenar información del producto seleccionado
-    searchInput.dataset.selectedId = productId;
+    // Actualizar estado del botón Aplicar
+    updateApplyButtonState();
+  }
+  
+  // Función para limpiar la selección de producto
+  function clearProductSelection() {
+    const searchInput = document.getElementById('productSearchInput');
+    const selectedBox = document.getElementById('selectedProductBox');
+    const selectedProductId = document.getElementById('selectedProductId');
+    
+    // Limpiar ID seleccionado
+    if (selectedProductId) {
+      selectedProductId.value = '';
+    }
+    
+    // Ocultar cuadro de selección y mostrar input
+    if (selectedBox && searchInput) {
+      selectedBox.style.display = 'none';
+      searchInput.style.display = 'block';
+      searchInput.value = '';
+      searchInput.focus();
+    }
+    
+    // Actualizar estado del botón Aplicar
+    updateApplyButtonState();
   }
   
   // ========== FUNCIÓN PARA ARREGLAR DESCUENTOS AUTOMÁTICAMENTE ==========
@@ -2316,8 +2713,13 @@
         
         showToast(`Descuento del ${discountValue}% aplicado a "${product.nombre}"`, 'success');
         
+        // Limpiar selección después de aplicar
+        clearProductSelection();
+        
         // Actualizar UI
         updateMyDiscountsSection();
+      } else {
+        showToast(`Error al aplicar descuento a "${product.nombre}"`, 'error');
       }
     });
   }
