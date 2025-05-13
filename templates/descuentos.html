@@ -513,6 +513,34 @@
     margin: 0 8px; /* Añadir margen horizontal para evitar que se encimen */
   }
   
+  /* MODIFICADO: Tarjeta de descuento global con más altura para mayor separación */
+  .global-discount-card {
+    flex: 0 0 95% !important; /* Ahora ocupa casi todo el ancho disponible */
+    height: 280px !important; /* Aumentada aún más la altura para mayor separación */
+    padding: 15px 25px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    margin: 0 auto !important; /* Centrar la tarjeta */
+    position: relative !important; /* Para posicionamiento absoluto del contenido */
+    justify-content: flex-start !important;
+  }
+  
+  /* Ocultar flechas de navegación para el slider global y ajustar contenedor */
+  #globalDiscounts .slider-arrow {
+    display: none !important;
+  }
+  
+  /* Ajustar el contenedor del slider global para eliminar padding lateral y usar todo el ancho */
+  #globalDiscounts .discount-slider-container {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  
+  /* Ajustar el slider global para centrar la tarjeta */
+  #globalDiscounts .discount-slider {
+    justify-content: center !important;
+  }
+  
   /* NUEVO: Estructura con espaciado fijo interno */
   .category-card-top, .brand-card-top {
     flex: 0 0 150px; /* Espacio fijo para el círculo y foto */
@@ -523,6 +551,17 @@
     width: 100%;
   }
   
+  /* MODIFICADO: Centrar icono circular en la parte superior */
+  .global-discount-card .category-card-top {
+    flex: 0 0 60px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    margin-left: 0 !important;
+    margin-bottom: 10px !important;
+  }
+  
   .category-card-middle, .brand-card-middle {
     flex: 0 0 110px; /* Espacio fijo para nombre y detalles */
     display: flex;
@@ -530,6 +569,11 @@
     align-items: center;
     justify-content: flex-start;
     width: 100%;
+  }
+  
+  /* MODIFICADO: Espacio medio menor para tarjeta global */
+  .global-discount-card .category-card-middle {
+    flex: 0 0 70px !important;
   }
   
   .category-card-bottom, .brand-card-bottom {
@@ -555,11 +599,11 @@
     justify-content: center;
   }
   
-  /* NUEVO: Ícono dentro del círculo de color */
-  .category-icon {
-    font-size: 32px; /* Icono más grande */
-    color: white;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  /* MODIFICADO: Círculo más pequeño para tarjeta global */
+  .global-discount-card .category-color-circle {
+    width: 50px !important;
+    height: 50px !important;
+    margin-bottom: 10px !important;
   }
   
   /* NUEVO: Estilo específico para el círculo de marca (siempre gris) */
@@ -576,11 +620,36 @@
     background-color: #888888 !important; /* Siempre gris, no importa la marca */
   }
   
-  /* NUEVO: Estilo específico para iconos de marca (siempre mismo icono y color) */
-  .brand-icon {
-    font-size: 32px;
-    color: #f5f5f7; /* Color claro para contrastar con el fondo gris */
-    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  /* NUEVO: Ícono dentro del círculo de color */
+  .category-icon {
+    font-size: 32px; /* Icono más grande */
+    color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  }
+  
+  /* Estilos específicos para el botón quitar del descuento global - posición ajustada */
+  .global-discount-card .category-card-bottom {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    position: absolute;
+    bottom: 50px; /* Mayor distancia desde el borde inferior */
+    left: 0;
+    right: 0;
+  }
+
+  .global-discount-card .remove-discount-btn {
+    width: auto;
+    min-width: 120px;
+    max-width: 150px;
+    padding: 6px 20px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+  }
+  
+  /* MODIFICADO: Ícono más pequeño para tarjeta global */
+  .global-discount-card .category-icon {
+    font-size: 24px !important;
   }
 
   .category-name, .brand-name {
@@ -596,6 +665,14 @@
     justify-content: center;
     overflow: hidden;
   }
+  
+  /* MODIFICADO: Título para tarjeta global */
+  .global-discount-card .category-name {
+    text-align: left !important;
+    justify-content: flex-start !important;
+    font-size: 20px !important;
+    height: 30px !important;
+  }
 
   .category-details, .brand-details {
     text-align: center;
@@ -606,6 +683,19 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
+  }
+  
+  /* MODIFICADO: Detalles para tarjeta global - centrado de texto */
+  .global-discount-card .category-details {
+    text-align: center !important;
+    font-size: 16px !important;
+    height: 30px !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    width: 100% !important;
   }
 
   /* Product Cards - Igual que cambiar_precios.html */
@@ -1056,24 +1146,12 @@
           <!-- NUEVO: Ver todos ahora está junto al título CON ESTILO GRIS -->
           <span id="view-all-global-container"></span>
         </div>
-        <button class="remove-discount-btn" onclick="removeGlobalDiscount()">
-          <i class="fas fa-times"></i>
-          Quitar todos
-        </button>
+        <!-- Botón "Quitar todos" eliminado de aquí -->
       </div>
       <div class="discount-slider-container">
-        <div class="slider-arrow slider-arrow-left" onclick="scrollSlider('global', 'left')">
-          <svg viewBox="0 0 24 24">
-            <path d="M15 18L9 12L15 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
+        <!-- Flechas de navegación eliminadas para el slider global -->
         <div class="discount-slider" id="slider-global">
           <!-- Productos se cargarán aquí -->
-        </div>
-        <div class="slider-arrow slider-arrow-right" onclick="scrollSlider('global', 'right')">
-          <svg viewBox="0 0 24 24">
-            <path d="M9 18L15 12L9 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
         </div>
       </div>
     </div>
@@ -1641,7 +1719,7 @@
     );
     valueElement.textContent = `-${averageDiscount}%`;
     
-    // NUEVO: En lugar de mostrar todos los productos, crear una única tarjeta más larga
+    // MODIFICADO: Tarjeta global con botón "Quitar" incluido
     const url = '/descuentos/detalle/global/all';
     container.innerHTML = `
       <a href="${url}" class="category-card global-discount-card">
@@ -1656,6 +1734,12 @@
             ${productsWithGlobalDiscount.length} productos con<br>
             <span class="discount-value-badge">-${averageDiscount}%</span> de descuento
           </div>
+        </div>
+        <div class="category-card-bottom">
+          <button class="remove-discount-btn" onclick="event.preventDefault(); event.stopPropagation(); removeGlobalDiscount()" style="width: auto; margin: 0 auto; margin-bottom: 15px; padding: 8px 25px;">
+            <i class="fas fa-times"></i>
+            Quitar
+          </button>
         </div>
       </a>
     `;
@@ -2108,6 +2192,14 @@
           
           activeDiscounts.global = true;
           activeDiscounts.globalDetails = [...productosCache];
+          
+          // NUEVO: Limpiar otras categorías, marcas y productos individuales
+          // ya que ahora todos los productos tienen el descuento global
+          activeDiscounts.categories.clear();
+          activeDiscounts.categoryDetails = {};
+          activeDiscounts.brands.clear();
+          activeDiscounts.brandDetails = {};
+          activeDiscounts.products.clear();
           
           // Actualizar UI
           updateMyDiscountsSection();
