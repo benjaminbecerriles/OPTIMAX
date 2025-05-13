@@ -85,7 +85,7 @@ class Producto(db.Model):
 
     # Configuración Avanzada
     proveedor = db.Column(db.String(100), nullable=True)
-    ubicacion = db.Column(db.String(100), nullable=True)
+    ubicacion = db.Column(db.String(100), nullable=True)  # NUEVO CAMPO
     tasa_impuesto = db.Column(db.Float, default=0.0)
     descuento = db.Column(db.Float, default=0.0)
 

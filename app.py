@@ -556,6 +556,69 @@ def dashboard_home():
         total_productos=total_productos
     )
 
+@app.route('/ubicacion-productos', methods=['GET'])
+@login_requerido
+def ubicacion_productos():
+    """
+    Vista para gestionar la ubicación física de los productos.
+    Permite asignar y ver dónde se encuentran los productos físicamente.
+    """
+    # Verificar si el usuario está logueado
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    
+    # Obtener información del usuario
+    empresa_id = session.get('user_id')
+    
+    # Parámetros de paginación
+    page = request.args.get('page', 1, type=int)
+    per_page = 20  # Productos por página
+    
+    # Obtener lista de productos para mostrar (solo los aprobados)
+    productos_query = Producto.query.filter_by(
+        empresa_id=empresa_id,
+        is_approved=True
+    ).order_by(Producto.id.desc())
+    
+    # Aplicar paginación
+    productos_paginados = productos_query.paginate(page=page, per_page=per_page, error_out=False)
+    
+    # Obtener categorías únicas para filtros
+    categorias_db = (
+        db.session.query(Producto.categoria, Producto.categoria_color)
+        .filter_by(empresa_id=empresa_id)
+        .filter(Producto.categoria.isnot(None))
+        .filter(Producto.categoria != '')
+        .distinct()
+        .all()
+    )
+    
+    categorias = [
+        {"nombre": cat[0], "color": cat[1] if cat[1] else "#6B7280"}
+        for cat in categorias_db
+    ]
+    
+    # Obtener ubicaciones únicas existentes para filtros
+    ubicaciones_db = (
+        db.session.query(Producto.ubicacion)
+        .filter_by(empresa_id=empresa_id)
+        .filter(Producto.ubicacion.isnot(None))
+        .filter(Producto.ubicacion != '')
+        .distinct()
+        .all()
+    )
+    
+    ubicaciones = [ub[0] for ub in ubicaciones_db if ub[0]]
+    
+    return render_template(
+        'ubicacion_productos.html',
+        productos=productos_paginados.items,
+        page=page,
+        total_pages=productos_paginados.pages,
+        categorias=categorias,
+        ubicaciones=ubicaciones
+    )
+
 @app.route('/dashboard/inventario')
 @login_requerido
 def dashboard_inventario():
@@ -1305,6 +1368,100 @@ def update_price(product_id):
             "tipo_descuento": None,
             "valor_descuento": 0
         }), 500
+
+@app.route('/api/actualizar-ubicacion/<int:product_id>', methods=['POST'])
+@login_requerido
+def actualizar_ubicacion(product_id):
+    """
+    API para actualizar la ubicación de un producto específico.
+    """
+    try:
+        # Obtener el producto y verificar que pertenezca a la empresa del usuario
+        producto = Producto.query.get_or_404(product_id)
+        
+        if producto.empresa_id != session.get('user_id'):
+            return jsonify({"success": False, "message": "No tienes permiso para modificar este producto"}), 403
+        
+        # Obtener la nueva ubicación desde el request
+        data = request.get_json()
+        nueva_ubicacion = data.get('ubicacion', '').strip()
+        
+        # Actualizar la ubicación
+        producto.ubicacion = nueva_ubicacion
+        db.session.commit()
+        
+        return jsonify({
+            "success": True, 
+            "message": "Ubicación actualizada correctamente",
+            "ubicacion": nueva_ubicacion
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"success": False, "message": f"Error al actualizar: {str(e)}"}), 500
+
+@app.route('/api/actualizar-ubicacion-masiva', methods=['POST'])
+@login_requerido
+def actualizar_ubicacion_masiva():
+    """
+    API para actualizar la ubicación de múltiples productos a la vez.
+    """
+    try:
+        # Obtener datos del request
+        data = request.get_json()
+        ubicacion = data.get('ubicacion', '').strip()
+        producto_ids = data.get('producto_ids', [])
+        filtro_categoria = data.get('categoria')
+        
+        empresa_id = session.get('user_id')
+        
+        # Validar datos
+        if not ubicacion:
+            return jsonify({"success": False, "message": "La ubicación no puede estar vacía"}), 400
+        
+        productos_actualizados = 0
+        
+        # Caso 1: Actualizar por IDs específicos
+        if producto_ids and len(producto_ids) > 0:
+            # Filtrar para asegurar que solo se actualicen productos de la empresa actual
+            productos = Producto.query.filter(
+                Producto.id.in_(producto_ids),
+                Producto.empresa_id == empresa_id
+            ).all()
+            
+            for producto in productos:
+                producto.ubicacion = ubicacion
+                productos_actualizados += 1
+        
+        # Caso 2: Actualizar por categoría
+        elif filtro_categoria:
+            productos = Producto.query.filter_by(
+                empresa_id=empresa_id,
+                categoria=filtro_categoria
+            ).all()
+            
+            for producto in productos:
+                producto.ubicacion = ubicacion
+                productos_actualizados += 1
+        
+        # Guardar cambios
+        if productos_actualizados > 0:
+            db.session.commit()
+            
+            return jsonify({
+                "success": True,
+                "message": f"Se actualizaron {productos_actualizados} productos",
+                "count": productos_actualizados
+            })
+        else:
+            return jsonify({
+                "success": False,
+                "message": "No se encontraron productos para actualizar"
+            }), 404
+            
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"success": False, "message": f"Error: {str(e)}"}), 500
 
 @app.route('/agregar-producto', methods=['GET','POST'])
 @login_requerido

@@ -799,6 +799,10 @@
   
   .global-discount-card .global-action {
     margin-top: 10px;
+    width: 100%; /* Hacer que el contenedor ocupe todo el ancho disponible */
+    max-width: 300px; /* Limitar el ancho máximo para que coincida con el texto de detalles */
+    display: flex;
+    justify-content: center;
   }
   
   .global-discount-card .remove-discount-btn {
@@ -810,6 +814,7 @@
     font-size: 14px;
     cursor: pointer;
     transition: all 0.2s ease;
+    width: 100%; /* Hacer que el botón ocupe todo el ancho del contenedor */
   }
   
   .global-discount-card .remove-discount-btn:hover {

@@ -471,28 +471,30 @@
   <h1>Inventario</h1>
   <p class="page-description">Gestiona tus productos, stock y precios de manera eficiente.</p>
 
-  <!-- Estadísticas - MODIFICADO: valores por defecto a 0 -->
+  <!-- Estadísticas - CORREGIDO: Formato con comas en valores numerales -->
   <div class="section">
     <h2>Datos generales</h2>
     
     <div class="stats-grid">
       <div class="stat-card">
-        <div class="stat-number">{{ total_productos if total_productos is defined else '0' }}</div>
+        <div class="stat-number">{{ '{:,}'.format(total_productos|default(0, true)) }}</div>
         <div class="stat-label">Total productos</div>
       </div>
       
       <div class="stat-card">
-        <div class="stat-number">{{ total_unidades }}</div>
+        <!-- CORREGIDO: Formato con comas para miles en unidades de stock -->
+        <div class="stat-number">{{ '{:,}'.format(total_unidades|default(0, true)) }}</div>
         <div class="stat-label">Unidades en stock</div>
       </div>
       
       <div class="stat-card">
-        <div class="stat-number">${{ '{:,}'.format(valor_inventario) }}</div>
+        <!-- CORREGIDO: Usando formato con comas para miles en valor de inventario -->
+        <div class="stat-number">${{ '{:,}'.format(valor_inventario|default(0, true)) }}</div>
         <div class="stat-label">Valor del inventario</div>
       </div>
       
       <div class="stat-card">
-        <div class="stat-number">{{ productos|selectattr('stock', 'gt', 0)|selectattr('stock', 'le', 5)|list|length if productos else '0' }}</div>
+        <div class="stat-number">{{ '{:,}'.format(productos|selectattr('stock', 'gt', 0)|selectattr('stock', 'le', 5)|list|length|default(0, true)) }}</div>
         <div class="stat-label">Productos por agotarse</div>
       </div>
     </div>
@@ -531,16 +533,17 @@
         <div class="tool-name">Descuentos</div>
       </a>
       
-      <div class="tool-item" onclick="window.location.href='#ubicacion'">
+      <!-- CORREGIDO: Link a la nueva página de ubicación de productos -->
+      <a href="{{ url_for('ubicacion_productos') }}" class="tool-item">
         <div class="tool-icon">
           <i class="fas fa-map-marker-alt"></i>
         </div>
         <div class="tool-name">Ubicación</div>
-      </div>
+      </a>
     </div>
   </div>
 
-  <!-- Productos - MODIFICADO: mejor visualización cuando no hay productos -->
+  <!-- Productos - CORREGIDO: Mejor formateo de números con comas -->
   <div class="section">
     <div class="section-header">
       <h2>Ver y gestionar productos</h2>
@@ -591,11 +594,11 @@
                 
                 <td>
                   {% if p.stock <= 0 %}
-                    <span class="badge badge-red">{{ p.stock }} unidades</span>
+                    <span class="badge badge-red">{{ '{:,}'.format(p.stock) }} unidades</span>
                   {% elif p.stock < 5 %}
-                    <span class="badge badge-orange">{{ p.stock }} unidades</span>
+                    <span class="badge badge-orange">{{ '{:,}'.format(p.stock) }} unidades</span>
                   {% else %}
-                    <span class="badge badge-green">{{ p.stock }} unidades</span>
+                    <span class="badge badge-green">{{ '{:,}'.format(p.stock) }} unidades</span>
                   {% endif %}
                 </td>
                 
@@ -640,7 +643,7 @@
           {% for p in low_stock[:5] %}
             <div class="alert-item">
               <div class="alert-content">{{ p.nombre }}</div>
-              <div class="alert-value">{{ p.stock }}</div>
+              <div class="alert-value">{{ '{:,}'.format(p.stock) }}</div>
             </div>
           {% endfor %}
         {% else %}
@@ -672,6 +675,11 @@
 
 {% block extra_js %}
 <script>
+  // Función para formatear números con separadores de miles
+  function formatNumberWithCommas(number) {
+    return new Intl.NumberFormat('es-MX').format(number);
+  }
+
   document.addEventListener('DOMContentLoaded', function() {
     // Las herramientas ya tienen animaciones de borde rojo en CSS con :hover::before
     // Ajustes adicionales para mejorar la experiencia del usuario
@@ -691,6 +699,25 @@
           this.style.transform = 'translateY(0)';
         }
       });
+    });
+
+    // Formatear todos los valores numéricos en la página para asegurar que tengan comas
+    document.querySelectorAll('.stat-number').forEach(element => {
+      // Si contiene un valor numérico, asegurarse de que tenga formato con comas
+      if (element.textContent && element.textContent.match(/\d{4,}/)) {
+        // Si comienza con $ mantenerlo
+        if (element.textContent.startsWith('$')) {
+          const numberPart = element.textContent.substring(1).replace(/,/g, '');
+          if (!isNaN(parseFloat(numberPart))) {
+            element.textContent = '$' + formatNumberWithCommas(parseFloat(numberPart));
+          }
+        } else {
+          const number = parseFloat(element.textContent.replace(/,/g, ''));
+          if (!isNaN(number)) {
+            element.textContent = formatNumberWithCommas(number);
+          }
+        }
+      }
     });
   });
 </script>
