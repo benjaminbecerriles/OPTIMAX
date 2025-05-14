@@ -1862,6 +1862,11 @@ document.addEventListener('DOMContentLoaded', function() {
             });
           }
           
+          // Guardar conteos de productos si están disponibles
+          if (locations.conteos) {
+            activeLocations.conteos = locations.conteos;
+          }
+          
           console.log("Estado de ubicaciones actualizado:", activeLocations);
           
           // Actualizar UI
@@ -1995,17 +2000,25 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
     
-    // Contar productos con ubicación global para tener un número aproximado
-    let globalProducts = [];
+    // Usar el conteo proporcionado por la API si está disponible
+    let productCount = 0;
+    
+    if (activeLocations.conteos && activeLocations.conteos.global !== undefined) {
+      productCount = activeLocations.conteos.global;
+    } else {
+      // Fallback: contar productos con ubicación global
+      let globalProducts = [];
+      productosCache.forEach(p => {
+        if (p.ubicacion_tipo === 'global') {
+          globalProducts.push(p);
+        }
+      });
+      productCount = globalProducts.length;
+    }
+    
     const globalLocationValue = activeLocations.locationValues['global'] || '';
     
-    productosCache.forEach(p => {
-      if (p.ubicacion_tipo === 'global') {
-        globalProducts.push(p);
-      }
-    });
-    
-    countElement.textContent = globalProducts.length;
+    countElement.textContent = productCount;
     valueElement.textContent = globalLocationValue;
     
     // Estructura HTML para la tarjeta global
@@ -2019,7 +2032,7 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
         <div class="global-title">Ubicación Global</div>
         <div class="global-details">
-          ${globalProducts.length} productos en
+          ${productCount} productos en
           <span class="global-badge">${globalLocationValue}</span>
         </div>
         <div class="global-action">
@@ -2032,11 +2045,11 @@ document.addEventListener('DOMContentLoaded', function() {
     `;
     
     // Añadir enlace "Ver todos" si hay muchos productos
-    if (globalProducts.length > 10 && viewAllContainer) {
+    if (productCount > 10 && viewAllContainer) {
       const viewAllLink = document.createElement('a');
       viewAllLink.href = url;
       viewAllLink.className = 'view-all-header-link global';
-      viewAllLink.innerHTML = `Ver todos (${globalProducts.length})`;
+      viewAllLink.innerHTML = `Ver todos (${productCount})`;
       viewAllContainer.appendChild(viewAllLink);
     }
   }
@@ -2059,10 +2072,20 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     const items = Array.from(activeLocations.categories).map(category => {
-      // Buscar productos por categoría con el tipo correcto
-      const categoryProducts = productosCache.filter(p => 
-        p.categoria === category && p.ubicacion_tipo === 'categoria'
-      );
+      // Obtener conteo de productos de la API si está disponible
+      let productCount = 0;
+      
+      if (activeLocations.conteos && 
+          activeLocations.conteos.categorias && 
+          activeLocations.conteos.categorias[category] !== undefined) {
+        productCount = activeLocations.conteos.categorias[category];
+      } else {
+        // Fallback: contar productos con ubicación por categoría
+        const categoryProducts = productosCache.filter(p => 
+          p.categoria === category && p.ubicacion_tipo === 'categoria'
+        );
+        productCount = categoryProducts.length;
+      }
       
       const locationValue = activeLocations.locationValues[category] || "";
       
@@ -2113,7 +2136,7 @@ document.addEventListener('DOMContentLoaded', function() {
           <div class="category-card-middle">
             <div class="category-name">${category}</div>
             <div class="category-details">
-              ${categoryProducts.length} productos<br>
+              ${productCount} productos<br>
               <span class="location-value-badge">${locationValue}</span>
             </div>
           </div>
@@ -2157,10 +2180,20 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     const items = Array.from(activeLocations.brands).map(brand => {
-      // Buscar productos por marca con el tipo correcto
-      const brandProducts = productosCache.filter(p => 
-        p.marca === brand && p.ubicacion_tipo === 'marca'
-      );
+      // Obtener conteo de productos de la API si está disponible
+      let productCount = 0;
+      
+      if (activeLocations.conteos && 
+          activeLocations.conteos.marcas && 
+          activeLocations.conteos.marcas[brand] !== undefined) {
+        productCount = activeLocations.conteos.marcas[brand];
+      } else {
+        // Fallback: contar productos con ubicación por marca
+        const brandProducts = productosCache.filter(p => 
+          p.marca === brand && p.ubicacion_tipo === 'marca'
+        );
+        productCount = brandProducts.length;
+      }
       
       const locationValue = activeLocations.locationValues[brand] || "";
       
@@ -2176,7 +2209,7 @@ document.addEventListener('DOMContentLoaded', function() {
           <div class="category-card-middle">
             <div class="brand-name">${brand}</div>
             <div class="brand-details">
-              ${brandProducts.length} productos<br>
+              ${productCount} productos<br>
               <span class="location-value-badge">${locationValue}</span>
             </div>
           </div>

@@ -1664,7 +1664,8 @@ def get_active_locations():
             "categorias": [],
             "marcas": [],
             "individuales": 0,
-            "location_values": {}
+            "location_values": {},
+            "conteos": {}  # NUEVO: Diccionario para almacenar conteos
         }
         
         # Verificar si hay productos con ubicación
@@ -1698,14 +1699,12 @@ def get_active_locations():
                 Producto.ubicacion_tipo == 'global'
             ).count()
             
+            # NUEVO: Guardar el conteo en el diccionario
+            active_locations["conteos"]["global"] = count_global
+            
             print(f"DEBUG: Encontrada ubicación global con {count_global} productos")
             
-            # Si hay ubicación global, retornamos sin buscar otras ubicaciones
-            # para evitar duplicación de productos
-            return jsonify({
-                "success": True,
-                "active_locations": active_locations
-            })
+            # ELIMINADO: Ya no retornamos temprano, continuamos procesando otras ubicaciones
         
         # PASO 2: Buscar ubicaciones por categoría
         categorias_con_ubicacion = db.session.query(
@@ -1719,6 +1718,9 @@ def get_active_locations():
             Producto.ubicacion != ''
         ).distinct().all()
         
+        # NUEVO: Inicializar conteos de categorías
+        active_locations["conteos"]["categorias"] = {}
+        
         # Procesar categorías
         for categoria_data in categorias_con_ubicacion:
             categoria = categoria_data[0]
@@ -1727,6 +1729,17 @@ def get_active_locations():
             if categoria not in active_locations["categorias"]:
                 active_locations["categorias"].append(categoria)
                 active_locations["location_values"][categoria] = ubicacion
+                
+                # NUEVO: Contar productos de esta categoría
+                count_categoria = Producto.query.filter(
+                    Producto.empresa_id == empresa_id,
+                    Producto.is_approved == True,
+                    Producto.ubicacion_tipo == 'categoria',
+                    Producto.ubicacion_grupo == categoria
+                ).count()
+                
+                # NUEVO: Guardar conteo por categoría
+                active_locations["conteos"]["categorias"][categoria] = count_categoria
         
         # Depuración
         print(f"DEBUG: Encontradas {len(active_locations['categorias'])} categorías con ubicación")
@@ -1743,6 +1756,9 @@ def get_active_locations():
             Producto.ubicacion != ''
         ).distinct().all()
         
+        # NUEVO: Inicializar conteos de marcas
+        active_locations["conteos"]["marcas"] = {}
+        
         # Procesar marcas
         for marca_data in marcas_con_ubicacion:
             marca = marca_data[0]
@@ -1751,6 +1767,17 @@ def get_active_locations():
             if marca not in active_locations["marcas"]:
                 active_locations["marcas"].append(marca)
                 active_locations["location_values"][marca] = ubicacion
+                
+                # NUEVO: Contar productos de esta marca
+                count_marca = Producto.query.filter(
+                    Producto.empresa_id == empresa_id,
+                    Producto.is_approved == True,
+                    Producto.ubicacion_tipo == 'marca',
+                    Producto.ubicacion_grupo == marca
+                ).count()
+                
+                # NUEVO: Guardar conteo por marca
+                active_locations["conteos"]["marcas"][marca] = count_marca
         
         # Depuración
         print(f"DEBUG: Encontradas {len(active_locations['marcas'])} marcas con ubicación")
@@ -1766,6 +1793,7 @@ def get_active_locations():
         ).count()
         
         active_locations["individuales"] = productos_individuales
+        active_locations["conteos"]["individuales"] = productos_individuales
         
         # Depuración
         print(f"DEBUG: Encontrados {productos_individuales} productos con ubicación individual")
