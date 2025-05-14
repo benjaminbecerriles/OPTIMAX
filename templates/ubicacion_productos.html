@@ -1,1093 +1,179 @@
-{% extends 'base.html' %}
-
-{% block title %}Ubicaciones de Productos - OptiMax{% endblock %}
-
-{% block content %}
-<style>
-  /* Sistema de Diseño Apple - Consistente con cambiar_precios.html */
-  :root {
-    --font-apple: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', Helvetica, Arial, sans-serif;
+<!-- Script para asegurar la alineación correcta de la barra de búsqueda -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Establecer margen izquierdo a 0
+      var searchBox = document.querySelector('.search-box');
+      if (searchBox) {
+        searchBox.style.setProperty('margin-left', '0', 'important');
+        searchBox.style.paddingLeft = '0';
+      }
+    });
     
-    /* Colores esenciales */
-    --text-color: #1d1d1f;
-    --text-secondary: #515154;
-    --background: #ffffff;
-    --light-background: #f5f5f7;
-    --separator: rgba(0, 0, 0, 0.1);
-    --accent: #e52e2e;
-    --accent-hover: #c51818;
-    --accent-light: rgba(229, 46, 46, 0.1);
-    --blue: #1a237e;
-    --location-color: #007aff;
-  }
-  
-  body {
-    font-family: var(--font-apple);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    color: var(--text-color);
-    background-color: var(--background);
-  }
-  
-  /* Contenedor principal */
-  .apple-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 36px 24px;
-  }
-  
-  /* Encabezado de página - BASADO EN cambiar_precios.html */
-  .page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-    width: 100%;
-  }
-  
-  .header-title-container {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .page-title {
-    font-size: 32px;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-    margin: 0;
-    margin-bottom: 8px;
-    color: var(--text-color);
-  }
-  
-  .page-description {
-    font-size: 17px;
-    color: var(--text-secondary);
-    margin-bottom: 28px;
-    max-width: 600px;
-    font-weight: 400;
-  }
-  
-  .header-actions {
-    display: flex;
-    gap: 1rem;
-    padding-top: 8px;
-    align-items: center;
-  }
-  
-  /* Botón volver estilo ajuste_stock.html */
-  .btn-action {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.75rem;
-    padding: 0.75rem 1.25rem;
-    border-radius: 980px;
-    font-weight: 500;
-    font-size: 0.95rem;
-    transition: all 0.2s ease;
-    text-decoration: none;
-    cursor: pointer;
-    border: none;
-    height: 44px;
-    white-space: nowrap;
-  }
-  
-  .btn-action i, 
-  .btn-action span {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    vertical-align: middle;
-    line-height: 1;
-  }
-  
-  /* Botón Volver estilo */
-  .btn-volver {
-    background-color: var(--blue);
-    color: #ffffff;
-    box-shadow: 0 2px 4px rgba(26, 35, 126, 0.3);
-  }
-  
-  .btn-volver:hover {
-    background-color: #151c64;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(26, 35, 126, 0.4);
-    color: #ffffff;
-  }
-  
-  /* Botón asignar en grupo */
-  .btn-assign {
-    background-color: var(--accent);
-    color: #ffffff;
-    box-shadow: 0 2px 4px rgba(229, 46, 46, 0.3);
-  }
-  
-  .btn-assign:hover {
-    background-color: var(--accent-hover);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(229, 46, 46, 0.4);
-    color: #ffffff;
-  }
-  
-  /* Barra de búsqueda - ALINEADA ESPECÍFICAMENTE */
-  .search-container {
-    display: flex;
-    gap: 0.75rem;
-    margin-bottom: 36px;
-    position: relative;
-    align-items: center;
-    width: 100%;
-  }
-  
-  .search-box {
-    flex: 1;
-    position: relative;
-    margin-right: auto;
-  }
-  
-  .search-box i {
-    position: absolute;
-    left: 1.25rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text-secondary);
-    font-size: 1.1rem;
-    z-index: 5;
-    pointer-events: none;
-  }
-  
-  .search-box input {
-    width: 100%;
-    padding: 0.75rem 1rem 0.75rem 3rem;
-    border-radius: 8px;
-    border: 1px solid #e0e0e0;
-    font-size: 1rem;
-    height: 48px;
-    transition: all 0.2s ease;
-    font-weight: 400;
-    background-color: var(--light-background);
-  }
-  
-  .search-box input:focus {
-    background-color: white;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(229, 46, 46, 0.15);
-    outline: none;
-  }
-  
-  .search-actions {
-    display: flex;
-    gap: 0.5rem;
-  }
-  
-  /* Contenedor para el filtro de sin ubicación */
-  .filter-container {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background-color: var(--light-background);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-    padding: 0 16px;
-    height: 48px;
-    transition: all 0.2s ease;
-    cursor: pointer;
-    user-select: none;
-  }
-  
-  .filter-container:hover {
-    background-color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  }
-  
-  .filter-container.active {
-    background-color: rgba(0, 122, 255, 0.1);
-    border-color: var(--location-color);
-  }
-  
-  .filter-container span {
-    font-size: 0.95rem;
-    font-weight: 500;
-  }
-  
-  .filter-check-input {
-    display: none;
-  }
-  
-  .icon-btn {
-    width: 48px;
-    height: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: var(--light-background);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    padding: 0;
-  }
-  
-  .icon-btn:hover {
-    background-color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  }
-  
-  .icon-btn.scan-active {
-    background-color: rgba(229, 46, 46, 0.1);
-    border-color: var(--accent);
-    animation: blink 1s infinite;
-  }
-  
-  /* Tabla de productos - ALINEADA PRIMERA COLUMNA IZQUIERDA */
-  .table-container {
-    border-radius: 16px;
-    overflow: hidden;
-    border: 1px solid var(--separator);
-    margin-bottom: 32px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-    width: 100%;
-    background-color: white;
-  }
-  
-  table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  
-  th {
-    padding: 16px;
-    font-weight: 600;
-    font-size: 14px;
-    color: var(--text-secondary);
-    background-color: var(--light-background);
-    border-bottom: 1px solid var(--separator);
-  }
-  
-  th:first-child {
-    text-align: left;
-  }
-  
-  th:not(:first-child) {
-    text-align: center;
-  }
-  
-  td {
-    padding: 16px;
-    border-bottom: 1px solid var(--separator);
-    font-size: 15px;
-  }
-  
-  td:first-child {
-    text-align: left;
-  }
-  
-  td:not(:first-child) {
-    text-align: center;
-  }
-  
-  tr:last-child td {
-    border-bottom: none;
-  }
-  
-  tr:hover {
-    background-color: var(--light-background);
-  }
-  
-  tr {
-    transition: background-color 0.2s ease;
-  }
-  
-  .product-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    justify-content: flex-start;
-  }
-  
-  .product-image {
-    width: 48px;
-    height: 48px;
-    border-radius: 8px;
-    object-fit: contain;
-    background-color: white;
-    border: 1px solid var(--separator);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-  }
-  
-  .product-details {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    text-align: left;
-    max-width: 200px;
-  }
-  
-  .product-name {
-    font-weight: 500;
-    margin-bottom: 4px;
-    color: var(--text-color);
-    text-align: left;
-  }
-  
-  .product-code {
-    font-size: 13px;
-    color: var(--text-secondary);
-    text-align: left;
-  }
-  
-  .location-cell {
-    max-width: 240px;
-    position: relative;
-  }
-  
-  .location-display {
-    padding: 8px 0;
-    font-weight: 500;
-    color: var(--location-color);
-    transition: all 0.2s ease;
-  }
-  
-  .location-display.empty {
-    color: var(--text-secondary);
-    font-weight: 400;
-    font-style: italic;
-  }
-  
-  .location-edit {
-    display: none;
-    justify-content: center;
-    max-width: 240px;
-    margin: 0 auto;
-  }
-  
-  .location-edit input {
-    width: 100%;
-    padding: 10px 14px;
-    border-radius: 8px;
-    border: 1px solid var(--location-color);
-    font-size: 15px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    transition: all 0.2s ease;
-  }
-  
-  .location-edit input:focus {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
-    transform: translateY(-1px);
-  }
-  
-  .location-suggestions {
-    margin-top: 8px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    justify-content: center;
-  }
-  
-  .location-suggestion {
-    font-size: 12px;
-    background-color: #f0f0f5;
-    border-radius: 6px;
-    padding: 4px 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border: 1px solid transparent;
-  }
-  
-  .location-suggestion:hover {
-    background-color: #e5e5ea;
-    transform: translateY(-1px);
-    border-color: var(--location-color);
-  }
-  
-  .action-buttons {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-  }
-  
-  .btn-icon {
-    width: 36px;
-    height: 36px;
-    padding: 0;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;
-    background-color: #f5f5f7;
-    border: 1px solid rgba(0, 0, 0, 0.05);
-    color: var(--text-secondary);
-    transition: all 0.2s ease;
-    cursor: pointer;
-  }
-  
-  .btn-icon:hover {
-    background-color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  }
-  
-  .btn-icon.edit {
-    color: var(--location-color);
-  }
-  
-  .btn-icon.edit:hover {
-    background-color: rgba(0, 122, 255, 0.1);
-    border-color: var(--location-color);
-  }
-  
-  .btn-icon.delete {
-    color: var(--accent);
-  }
-  
-  .btn-icon.delete:hover {
-    background-color: rgba(229, 46, 46, 0.1);
-    border-color: var(--accent);
-  }
-  
-  .btn-save, .btn-cancel {
-    display: none;
-  }
-  
-  /* Notificaciones */
-  .notification {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    background-color: rgba(0, 0, 0, 0.8);
-    color: white;
-    border-radius: 12px;
-    padding: 14px 20px;
-    font-size: 15px;
-    font-weight: 500;
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-    opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.3s ease, transform 0.3s ease;
-  }
-  
-  .notification.show {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  
-  .notification.success {
-    background-color: #34c759;
-  }
-  
-  .notification.error {
-    background-color: #ff3b30;
-  }
-  
-  /* Modal de edición masiva - DISEÑO MEJORADO */
-  .modal-content {
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2);
-    border: none;
-  }
-  
-  .modal-header {
-    border-bottom: 1px solid var(--separator);
-    padding: 20px 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background-color: var(--light-background);
-  }
-  
-  .modal-title {
-    font-size: 20px;
-    font-weight: 600;
-    margin: 0;
-    color: var(--text-color);
-  }
-  
-  .btn-close {
-    background-color: rgba(0, 0, 0, 0.1);
-    border-radius: 50%;
-    width: 26px;
-    height: 26px;
-    opacity: 0.7;
-    transition: all 0.2s ease;
-  }
-  
-  .btn-close:hover {
-    opacity: 1;
-    background-color: rgba(0, 0, 0, 0.15);
-    transform: scale(1.05);
-  }
-  
-  .modal-body {
-    padding: 28px;
-  }
-  
-  .modal-footer {
-    border-top: 1px solid var(--separator);
-    padding: 18px 24px;
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-    background-color: var(--light-background);
-  }
-  
-  .form-group {
-    margin-bottom: 24px;
-  }
-  
-  .form-label {
-    display: block;
-    font-weight: 600;
-    margin-bottom: 10px;
-    font-size: 15px;
-    color: var(--text-color);
-  }
-  
-  .form-control {
-    width: 100%;
-    padding: 12px 16px;
-    border-radius: 10px;
-    border: 1px solid #dcdce0;
-    font-size: 15px;
-    transition: all 0.2s ease;
-    background-color: white;
-  }
-  
-  .form-control:focus {
-    outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-light);
-    transform: translateY(-1px);
-  }
-  
-  .radio-option {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 0;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border-radius: 8px;
-    margin-bottom: 6px;
-  }
-  
-  .radio-option:hover {
-    background-color: var(--light-background);
-    padding-left: 10px;
-  }
-  
-  .radio-option input {
-    margin: 0;
-    width: 18px;
-    height: 18px;
-    accent-color: var(--accent);
-  }
-  
-  .radio-option span {
-    font-size: 15px;
-    font-weight: 500;
-  }
-  
-  /* Estado vacío */
-  .empty-state {
-    padding: 64px 0;
-    text-align: center;
-    background-color: var(--light-background);
-    border-radius: 16px;
-    border: 1px dashed var(--separator);
-    margin-bottom: 32px;
-    width: 100%;
-  }
-  
-  .empty-icon {
-    font-size: 56px;
-    color: var(--text-secondary);
-    margin-bottom: 20px;
-  }
-  
-  .empty-title {
-    font-size: 22px;
-    font-weight: 600;
-    margin-bottom: 12px;
-    color: var(--text-color);
-  }
-  
-  .empty-description {
-    color: var(--text-secondary);
-    font-size: 17px;
-    max-width: 420px;
-    margin: 0 auto 24px auto;
-    line-height: 1.5;
-  }
-  
-  /* Paginación */
-  .pagination {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    margin-top: 32px;
-  }
-  
-  .pagination-item {
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;
-    background-color: var(--light-background);
-    border: 1px solid var(--separator);
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--text-color);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-decoration: none;
-  }
-  
-  .pagination-item:hover {
-    background-color: white;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  }
-  
-  .pagination-item.active {
-    background-color: var(--accent);
-    color: white;
-    border-color: var(--accent);
-  }
-  
-  /* Toast notificaciones */
-  .toast {
-    background-color: #333;
-    color: white;
-    padding: 14px 20px;
-    border-radius: 12px;
-    margin-top: 8px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    animation: slideIn 0.3s ease, fadeOut 0.5s ease 2.5s forwards;
-    max-width: 350px;
-    font-weight: 500;
-  }
-  
-  .toast.success {
-    background-color: #34c759;
-  }
-  
-  .toast.error {
-    background-color: #ff3b30;
-  }
-  
-  @keyframes slideIn {
-    from {
-      transform: translateX(100%);
-      opacity: 0;
-    }
-    to {
-      transform: translateX(0);
-      opacity: 1;
-    }
-  }
-  
-  @keyframes fadeOut {
-    from {
-      opacity: 1;
-    }
-    to {
-      opacity: 0;
-      transform: translateY(-20px);
-    }
-  }
-  
-  /* Responsive */
-  @media (max-width: 768px) {
-    .page-header {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 16px;
-    }
+    // También ejecutar después de que la página esté completamente cargada
+    window.addEventListener('load', function() {
+      var searchBox = document.querySelector('.search-box');
+      if (searchBox) {
+        searchBox.style.setProperty('margin-left', '0', 'important');
+        searchBox.style.paddingLeft = '0';
+      }
+    });
     
-    .header-actions {
+    // Ejecutar después de un breve retraso
+    setTimeout(function() {
+      var searchBox = document.querySelector('.search-box');
+      if (searchBox) {
+        searchBox.style.setProperty('margin-left', '0', 'important');
+        searchBox.style.paddingLeft = '0';
+      }
+    }, 300);
+    </script><style>
+    /* Estilos para alineación y consistencia visual */
+    .search-container {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 36px;
+      position: relative;
+      align-items: center;
       width: 100%;
     }
     
+    .search-box {
+      flex: 1;
+      position: relative;
+      margin-right: auto;
+      margin-left: 0 !important; /* Forzar margen izquierdo 0 */
+    }
+    
+    .search-box i {
+      position: absolute;
+      left: 1.25rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #666;
+      font-size: 1.1rem;
+      z-index: 5;
+      pointer-events: none;
+    }
+    
+    .search-box input {
+      width: 100%;
+      padding: 0.75rem 1rem 0.75rem 3rem;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+      font-size: 1rem;
+      height: 48px;
+      transition: all 0.2s ease;
+      font-weight: 400;
+      background-color: #f5f5f7;
+    }
+    </style>/* Estilos críticos insertados al inicio para máxima prioridad */
+    <style>
     .search-container {
-      flex-direction: column;
-      align-items: stretch;
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 36px;
+      position: relative;
+      align-items: center;
+      width: 100%;
     }
     
-    .search-actions {
-      justify-content: space-between;
+    .search-box {
+      flex: 1;
+      position: relative;
+      margin-right: auto;
+      margin-left: 0 !important; /* Forzar margen izquierdo 0 */
     }
     
-    .table-container {
-      overflow-x: auto;
+    .search-box i {
+      position: absolute;
+      left: 1.25rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #666;
+      font-size: 1.1rem;
+      z-index: 5;
+      pointer-events: none;
     }
     
-    th, td {
-      padding: 12px 8px;
+    .search-box input {
+      width: 100%;
+      padding: 0.75rem 1rem 0.75rem 3rem;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+      font-size: 1rem;
+      height: 48px;
+      transition: all 0.2s ease;
+      font-weight: 400;
+      background-color: #f5f5f7;
     }
     
-    .product-image {
-      width: 36px;
-      height: 36px;
-    }
-  }
-  
-  @keyframes blink {
-    0% { opacity: 1; }
-    50% { opacity: 0.6; }
-    100% { opacity: 1; }
-  }
-  
-  .animated-fade {
-    animation: fadeIn 0.3s ease-out;
-  }
-  
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-</style>
-
-<div class="apple-container animated-fade">
-  <!-- Cabecera -->
-  <div class="page-header">
-    <div class="header-title-container">
-      <h1 class="page-title">Ubicaciones de Productos</h1>
-      <p class="page-description">Gestiona las ubicaciones físicas de tus productos de manera fácil y rápida</p>
-    </div>
-    <div class="header-actions">
-      <button id="btnBulkAssign" class="btn-action btn-assign" data-bs-toggle="modal" data-bs-target="#bulkLocationModal">
-        <i class="fas fa-tags"></i> Agregar masivamente
-      </button>
-      <a href="{{ url_for('dashboard_inventario') }}" class="btn-action btn-volver">
-        <i class="fas fa-arrow-left"></i>
-        <span>Volver</span>
-      </a>
-    </div>
-  </div>
-  
-  <!-- Barra de búsqueda alineada -->
-  <div class="search-container">
-    <div class="search-box" style="margin-left: 0;">
-      <i class="fas fa-search"></i>
-      <input type="text" id="searchProducts" placeholder="Buscar por nombre o código...">
-    </div>
-    <div class="search-actions">
-      <!-- Filtro sin ubicación -->
-      <div class="filter-container" id="noLocationFilter">
-        <input class="filter-check-input" type="checkbox" id="noLocationCheck">
-        <i class="fas fa-map-marker-alt"></i>
-        <span>Sin ubicación</span>
-      </div>
-      
-      <!-- Botón escanear con pistola -->
-      <button type="button" class="icon-btn" id="scanIcon" title="Escanear con pistola">
-        <img src="{{ url_for('static', filename='img/3.png') }}" alt="Escanear con Lector" style="width: 24px; height: 24px;">
-      </button>
-      
-      <!-- Botón escanear con cámara -->
-      <button type="button" class="icon-btn" id="cameraIcon" title="Escanear con cámara" onclick="iniciarEscaneoQuagga()">
-        <img src="{{ url_for('static', filename='img/4.png') }}" alt="Escanear con Cámara" style="width: 24px; height: 24px;">
-      </button>
-    </div>
-  </div>
-  
-  <!-- Tabla de productos -->
-  {% if productos and productos|length > 0 %}
-  <div class="table-container">
-    <table>
-      <thead>
-        <tr>
-          <th style="width: 40%; text-align: left;">Producto</th>
-          <th style="width: 15%; text-align: center;">Categoría</th>
-          <th style="width: 30%; text-align: center;">Ubicación</th>
-          <th style="width: 15%; text-align: center;">Acciones</th>
-        </tr>
-      </thead>
-      <tbody id="productsTableBody">
-        {% for producto in productos %}
-        <tr data-product-id="{{ producto.id }}" data-product-name="{{ producto.nombre|lower }}" data-product-code="{{ producto.codigo_barras_externo|lower if producto.codigo_barras_externo else '' }}" data-has-location="{{ '1' if producto.ubicacion else '0' }}">
-          <td>
-            <div class="product-info">
-              <img src="{{ url_for('static', filename='uploads/' ~ producto.foto) if producto.foto else url_for('static', filename='img/default_product.jpg') }}" class="product-image" alt="{{ producto.nombre }}">
-              <div class="product-details">
-                <div class="product-name">{{ producto.nombre }}</div>
-                <div class="product-code">{{ producto.codigo_barras_externo or 'SKU-' ~ producto.id }}</div>
-              </div>
-            </div>
-          </td>
-          <td style="text-align: center;">
-            {{ producto.categoria|title if producto.categoria else 'Sin categoría' }}
-          </td>
-          <td class="location-cell">
-            <div class="location-display {% if not producto.ubicacion %}empty{% endif %}">
-              {{ producto.ubicacion or 'Sin ubicación asignada' }}
-            </div>
-            <div class="location-edit">
-              <input type="text" value="{{ producto.ubicacion or '' }}" placeholder="Ej: Estante A, Bodega 2">
-              {% if ubicaciones and ubicaciones|length > 0 %}
-              <div class="location-suggestions">
-                {% for ubicacion in ubicaciones %}
-                <div class="location-suggestion">{{ ubicacion }}</div>
-                {% endfor %}
-              </div>
-              {% endif %}
-            </div>
-          </td>
-          <td>
-            <div class="action-buttons">
-              <button type="button" class="btn-icon edit btn-edit-location" title="Editar ubicación">
-                <i class="fas fa-pencil-alt"></i>
-              </button>
-              <button type="button" class="btn-icon delete btn-delete-location" title="Eliminar ubicación" {% if not producto.ubicacion %}style="display: none;"{% endif %}>
-                <i class="fas fa-trash-alt"></i>
-              </button>
-              <button type="button" class="btn-icon btn-save" title="Guardar" style="color: #34c759; display: none;">
-                <i class="fas fa-check"></i>
-              </button>
-              <button type="button" class="btn-icon btn-cancel" title="Cancelar" style="color: #ff3b30; display: none;">
-                <i class="fas fa-times"></i>
-              </button>
-            </div>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-  
-  <!-- Paginación -->
-  {% if total_pages and total_pages > 1 %}
-  <div class="pagination">
-    {% if page > 1 %}
-    <a href="{{ url_for('ubicacion_productos', page=page-1) }}" class="pagination-item">
-      <i class="fas fa-chevron-left"></i>
-    </a>
-    {% endif %}
-    
-    {% for p in range(1, total_pages + 1) %}
-    <a href="{{ url_for('ubicacion_productos', page=p) }}" class="pagination-item {% if p == page %}active{% endif %}">
-      {{ p }}
-    </a>
-    {% endfor %}
-    
-    {% if page < total_pages %}
-    <a href="{{ url_for('ubicacion_productos', page=page+1) }}" class="pagination-item">
-      <i class="fas fa-chevron-right"></i>
-    </a>
-    {% endif %}
-  </div>
-  {% endif %}
-  
-  {% else %}
-  <!-- Estado vacío -->
-  <div class="empty-state">
-    <div class="empty-icon">
-      <i class="fas fa-boxes"></i>
-    </div>
-    <h3 class="empty-title">No hay productos en tu inventario</h3>
-    <p class="empty-description">Agrega productos a tu inventario para poder asignarles ubicaciones físicas</p>
-    <a href="{{ url_for('agregar_producto') }}" class="btn-action btn-assign">
-      <i class="fas fa-plus"></i> Agregar producto
-    </a>
-  </div>
-  {% endif %}
-  
-  <!-- Modal para asignación masiva -->
-  <div class="modal fade" id="bulkLocationModal" tabindex="-1" aria-labelledby="bulkLocationModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="bulkLocationModalLabel">Agregar masivamente</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <div class="form-group">
-            <label for="bulkLocation" class="form-label">Ubicación a asignar</label>
-            <input type="text" id="bulkLocation" class="form-control" placeholder="Ej: Estante A, Bodega 2">
-            
-            {% if ubicaciones and ubicaciones|length > 0 %}
-            <div class="location-suggestions" style="margin-top: 12px;">
-              {% for ubicacion in ubicaciones %}
-              <div class="location-suggestion" onclick="document.getElementById('bulkLocation').value = this.textContent.trim()">
-                {{ ubicacion }}
-              </div>
-              {% endfor %}
-            </div>
-            {% endif %}
-          </div>
-          
-          <div class="form-group">
-            <label class="form-label">Aplicar a</label>
-            
-            <label class="radio-option">
-              <input type="radio" name="bulkType" value="category" checked>
-              <span>Todos los productos de una categoría</span>
-            </label>
-            
-            <div id="categorySelection" class="form-group" style="margin-left: 28px; padding: 10px; background-color: var(--light-background); border-radius: 10px;">
-              <label for="categorySelect" class="form-label">Selecciona categoría</label>
-              <select id="categorySelect" class="form-control">
-                {% for categoria in categorias %}
-                <option value="{{ categoria.nombre }}">{{ categoria.nombre|title }}</option>
-                {% endfor %}
-              </select>
-            </div>
-            
-            <label class="radio-option">
-              <input type="radio" name="bulkType" value="noLocation">
-              <span>Todos los productos sin ubicación</span>
-            </label>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn-action" style="background-color: #f5f5f7; color: #1d1d1f; box-shadow: none;" data-bs-dismiss="modal">Cancelar</button>
-          <button type="button" class="btn-action btn-assign" id="saveBulkLocation">Guardar</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // Referencias a elementos del DOM
-    const searchInput = document.getElementById('searchProducts');
-    const noLocationCheck = document.getElementById('noLocationCheck');
-    const noLocationFilter = document.getElementById('noLocationFilter');
-    const productRows = document.querySelectorAll('#productsTableBody tr');
-    const saveBulkLocationBtn = document.getElementById('saveBulkLocation');
-    
-    // Variable para controlar el tiempo de las notificaciones
-    let notificationTimeout;
-    
-    // Inicialización del filtro
-    noLocationFilter.addEventListener('click', function() {
-      noLocationCheck.checked = !noLocationCheck.checked;
-      this.classList.toggle('active', noLocationCheck.checked);
-      applyFilters();
-    });
-    
-    // Inicialización del buscador
-    searchInput.addEventListener('input', applyFilters);
-    
-    // Función para aplicar filtros
-    function applyFilters() {
-      const searchValue = searchInput.value.toLowerCase().trim();
-      const showOnlyNoLocation = noLocationCheck.checked;
-      
-      let visibleCount = 0;
-      
-      productRows.forEach(row => {
-        const productName = row.getAttribute('data-product-name') || '';
-        const productCode = row.getAttribute('data-product-code') || '';
-        const hasLocation = row.getAttribute('data-has-location') === '1';
-        
-        // Verificar si cumple con los filtros
-        const matchesSearch = !searchValue || 
-                             productName.includes(searchValue) || 
-                             productCode.includes(searchValue);
-        const matchesLocationFilter = !showOnlyNoLocation || !hasLocation;
-        
-        // Aplicar filtro
-        if (matchesSearch && matchesLocationFilter) {
-          row.style.display = '';
-          visibleCount++;
-        } else {
-          row.style.display = 'none';
+    /* Función de alineación ejecutada inmediatamente */
+    (function() {
+      function alignSearchBox() {
+        var searchBox = document.querySelector('.search-box');
+        if (searchBox) {
+          searchBox.style.setProperty('margin-left', '0', 'important');
+          searchBox.style.paddingLeft = '0';
         }
-      });
-      
-      // Mostrar mensaje si no hay resultados
-      showNoResultsMessage(visibleCount === 0);
-    }
-    
-    // Mostrar mensaje cuando no hay resultados
-    function showNoResultsMessage(show) {
-      let noResultsRow = document.getElementById('noResultsRow');
-      
-      if (show) {
-        if (!noResultsRow) {
-          const tbody = document.getElementById('productsTableBody');
-          noResultsRow = document.createElement('tr');
-          noResultsRow.id = 'noResultsRow';
-          noResultsRow.innerHTML = `
-            <td colspan="4" style="text-align: center; padding: 32px;">
-              <i class="fas fa-search" style="font-size: 28px; color: var(--text-secondary); margin-bottom: 16px;"></i>
-              <p style="margin: 0; font-size: 17px; color: var(--text-secondary); margin-bottom: 16px;">No se encontraron productos con los filtros seleccionados</p>
-              <button class="btn-action btn-assign" style="margin-top: 16px; display: inline-flex;" onclick="resetFilters()">
-                <i class="fas fa-undo"></i> Limpiar filtros
-              </button>
-            </td>
-          `;
-          tbody.appendChild(noResultsRow);
-        } else {
-          noResultsRow.style.display = '';
-        }
-      } else if (noResultsRow) {
-        noResultsRow.style.display = 'none';
       }
-    }
-    
-    // Función global para resetear filtros
-    window.resetFilters = function() {
-      searchInput.value = '';
-      noLocationCheck.checked = false;
-      noLocationFilter.classList.remove('active');
-      applyFilters();
-    };
-    
-    // Configuración de botones de edición para cada fila
-    productRows.forEach(row => {
-      setupRowEditing(row);
-    });
-    
-    function setupRowEditing(row) {
-      const productId = row.getAttribute('data-product-id');
-      const locationDisplay = row.querySelector('.location-display');
-      const locationEdit = row.querySelector('.location-edit');
-      const locationInput = locationEdit.querySelector('input');
-      const btnEdit = row.querySelector('.btn-edit-location');
-      const btnDelete = row.querySelector('.btn-delete-location');
-      const btnSave = row.querySelector('.btn-save');
-      const btnCancel = row.querySelector('.btn-cancel');
       
-      // Guardar valor original para caso de cancelación
-      let originalValue = locationInput.value;
+      // Ejecutar inmediatamente
+      alignSearchBox();
       
-      // Configurar sugerencias si existen
-      const suggestions = row.querySelectorAll('.location-suggestion');
-      suggestions.forEach(suggestion => {
-        suggestion.addEventListener('click', () => {
-          locationInput.value = suggestion.textContent.trim();
-          locationInput.focus();
-        });
-      });
+      // También establecer en eventos
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', alignSearchBox);
+      }
       
-      // Botón editar
-      btnEdit.addEventListener('click', () => {
-        // Primero cerrar cualquier otra edición en curso
-        document.querySelectorAll('.location-edit').forEach(edit => {
+      window.addEventListener('load', alignSearchBox);
+      
+      // Ejecutar después de un tiempo para asegurar que se aplique
+      setTimeout(alignSearchBox, 100);
+      setTimeout(alignSearchBox, 500);
+    })();
+    </style>  /* Remuevo los estilos antiguos para usar solo los de la etiqueta style */      // Crear una variable global para acceder a la fila y botones específicos
+          // desde cualquier parte del código
+          window['row_' + productId] = {
+            row: row,
+            locationDisplay: locationDisplay,
+            locationInput: locationInput,
+            btnEdit: btnEdit,
+            btnDelete: btnDelete,
+            btnSave: btnSave,
+            btnCancel: btnCancel
+          };<!-- Script mejorado para manejar la edición y eliminación de ubicaciones -->
+    <script>
+      // Objeto global para almacenar valores originales por ID de producto
+      var originalValues = {};
+      
+      // Función para editar ubicación
+      function editLocation(productId) {
+        console.log("Editando ubicación para producto ID:", productId);
+        
+        // Obtener elementos relevantes
+        var row = document.querySelector('tr[data-product-id="' + productId + '"]');
+        if (!row) {
+          console.error("No se encontró la fila para el producto ID:", productId);
+          return;
+        }
+        
+        var locationDisplay = row.querySelector('.location-display');
+        var locationEdit = row.querySelector('.location-edit');
+        var locationInput = locationEdit.querySelector('input');
+        var btnEdit = row.querySelector('.btn-edit-location');
+        var btnDelete = row.querySelector('.btn-delete-location');
+        var btnSave = row.querySelector('.btn-save');
+        var btnCancel = row.querySelector('.btn-cancel');
+        
+        // Cerrar cualquier otra edición en curso
+        document.querySelectorAll('.location-edit').forEach(function(edit) {
           if (edit !== locationEdit && edit.style.display === 'block') {
-            const otherRow = edit.closest('tr');
-            const otherDisplay = otherRow.querySelector('.location-display');
-            const otherBtnEdit = otherRow.querySelector('.btn-edit-location');
-            const otherBtnDelete = otherRow.querySelector('.btn-delete-location');
-            const otherBtnSave = otherRow.querySelector('.btn-save');
-            const otherBtnCancel = otherRow.querySelector('.btn-cancel');
+            var otherRow = edit.closest('tr');
+            var otherDisplay = otherRow.querySelector('.location-display');
+            var otherBtnEdit = otherRow.querySelector('.btn-edit-location');
+            var otherBtnDelete = otherRow.querySelector('.btn-delete-location');
+            var otherBtnSave = otherRow.querySelector('.btn-save');
+            var otherBtnCancel = otherRow.querySelector('.btn-cancel');
             
             edit.style.display = 'none';
             otherDisplay.style.display = 'block';
@@ -1102,6 +188,9 @@
           }
         });
         
+        // Guardar valor original
+        originalValues[productId] = locationInput.value;
+        
         // Activar modo edición
         locationDisplay.style.display = 'none';
         locationEdit.style.display = 'flex';
@@ -1110,26 +199,43 @@
         btnSave.style.display = 'flex';
         btnCancel.style.display = 'flex';
         locationInput.focus();
-      });
+      }
       
-      // Botón guardar
-      btnSave.addEventListener('click', () => {
-        const newLocation = locationInput.value.trim();
+      // Función para guardar ubicación
+      function saveLocation(productId) {
+        console.log("Guardando ubicación para producto ID:", productId);
+        
+        // Obtener elementos relevantes
+        var row = document.querySelector('tr[data-product-id="' + productId + '"]');
+        if (!row) {
+          console.error("No se encontró la fila para el producto ID:", productId);
+          return;
+        }
+        
+        var locationDisplay = row.querySelector('.location-display');
+        var locationEdit = row.querySelector('.location-edit');
+        var locationInput = locationEdit.querySelector('input');
+        var btnEdit = row.querySelector('.btn-edit-location');
+        var btnDelete = row.querySelector('.btn-delete-location');
+        var btnSave = row.querySelector('.btn-save');
+        var btnCancel = row.querySelector('.btn-cancel');
+        
+        var newLocation = locationInput.value.trim();
         
         // Mostrar cargando
         btnSave.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
         btnSave.disabled = true;
         
         // Llamar a la API
-        fetch(`/api/actualizar-ubicacion/${productId}`, {
+        fetch('/api/actualizar-ubicacion/' + productId, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ ubicacion: newLocation })
         })
-        .then(response => response.json())
-        .then(data => {
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
           if (data.success) {
             // Actualizar UI
             if (newLocation) {
@@ -1145,12 +251,12 @@
             }
             
             // Actualizar valor original
-            originalValue = newLocation;
+            originalValues[productId] = newLocation;
             
             // Efecto visual de éxito
             row.style.transition = "background-color 0.3s ease";
             row.style.backgroundColor = "rgba(52, 199, 89, 0.1)";
-            setTimeout(() => {
+            setTimeout(function() {
               row.style.backgroundColor = "";
             }, 1000);
             
@@ -1160,11 +266,11 @@
             throw new Error(data.message || 'Error al actualizar ubicación');
           }
         })
-        .catch(error => {
+        .catch(function(error) {
           console.error('Error:', error);
           showNotification('Error: ' + error.message, 'error');
         })
-        .finally(() => {
+        .finally(function() {
           // Restaurar botón
           btnSave.innerHTML = '<i class="fas fa-check"></i>';
           btnSave.disabled = false;
@@ -1176,28 +282,1581 @@
           btnSave.style.display = 'none';
           btnCancel.style.display = 'none';
         });
-      });
+      }
       
-      // Botón cancelar
-      btnCancel.addEventListener('click', () => {
+      // Función para cancelar edición
+      function cancelEditing(productId) {
+        console.log("Cancelando edición para producto ID:", productId);
+        
+        // Obtener elementos relevantes
+        var row = document.querySelector('tr[data-product-id="' + productId + '"]');
+        if (!row) {
+          console.error("No se encontró la fila para el producto ID:", productId);
+          return;
+        }
+        
+        var locationDisplay = row.querySelector('.location-display');
+        var locationEdit = row.querySelector('.location-edit');
+        var locationInput = locationEdit.querySelector('input');
+        var btnEdit = row.querySelector('.btn-edit-location');
+        var btnDelete = row.querySelector('.btn-delete-location');
+        var btnSave = row.querySelector('.btn-save');
+        var btnCancel = row.querySelector('.btn-cancel');
+        
         // Restaurar valor original
-        locationInput.value = originalValue;
+        locationInput.value = originalValues[productId] || '';
         
         // Volver a modo visualización
         locationDisplay.style.display = 'block';
         locationEdit.style.display = 'none';
         btnEdit.style.display = 'flex';
-        btnDelete.style.display = originalValue ? 'flex' : 'none';
+        btnDelete.style.display = originalValues[productId] ? 'flex' : 'none';
         btnSave.style.display = 'none';
         btnCancel.style.display = 'none';
-      });
+      }
       
-      // Botón eliminar
-      btnDelete.addEventListener('click', () => {
-        if (confirm('¿Estás seguro de que deseas eliminar esta ubicación?')) {
-          // Mostrar cargando
-          btnDelete.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-          btnDelete.disabled = true;
+      // Función para preparar la eliminación
+      function prepareDeleteLocation(productId) {
+        console.log("Preparando eliminación para producto ID:", productId);
+        
+        // Guardar el ID del producto para la eliminación
+        document.getElementById('delete-product-id').value = productId;
+        
+        // Mostrar el modal usando Bootstrap
+        var myModal = new bootstrap.Modal(document.getElementById('confirmModal'));
+        myModal.show();
+      }
+      
+      // Función para eliminar la ubicación
+      function deleteLocation() {
+        // Obtener el ID del producto
+        var productId = document.getElementById('delete-product-id').value;
+        
+        if (!productId) {
+          showNotification('Error: No se pudo identificar el producto', 'error');
+          return;
+        }
+        
+        console.log("Eliminando ubicación para producto ID:", productId);
+        
+        // Mostrar cargando en el botón
+        var confirmBtn = document.getElementById('confirmDeleteBtn');
+        confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Eliminando...';
+        confirmBtn.disabled = true;
+        
+        // Llamar a la API
+        fetch('/api/actualizar-ubicacion/' + productId, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ ubicacion: '' })
+        })
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
+          if (data.success) {
+            // Buscar la fila correspondiente
+            var row = document.querySelector('tr[data-product-id="' + productId + '"]');
+            
+            if (row) {
+              // Actualizar UI
+              var locationDisplay = row.querySelector('.location-display');
+              var btnDelete = row.querySelector('.btn-delete-location');
+              
+              locationDisplay.textContent = 'Sin ubicación asignada';
+              locationDisplay.classList.add('empty');
+              row.setAttribute('data-has-location', '0');
+              btnDelete.style.display = 'none';
+              
+              // Actualizar valor original
+              originalValues[productId] = '';
+            }
+            
+            // Cerrar el modal
+            var modalInstance = bootstrap.Modal.getInstance(document.getElementById('confirmModal'));
+            modalInstance.hide();
+            
+            // Mostrar notificación
+            showNotification('Ubicación eliminada correctamente', 'success');
+            
+            // Refrescar los filtros
+            if (typeof applyFilters === 'function') {
+              applyFilters();
+            }
+          } else {
+            throw new Error(data.message || 'Error al eliminar ubicación');
+          }
+        })
+        .catch(function(error) {
+          console.error('Error:', error);
+          showNotification('Error: ' + error.message, 'error');
+        })
+        .finally(function() {
+          // Restaurar el botón
+          confirmBtn.innerHTML = 'Eliminar';
+          confirmBtn.disabled = false;
+        });
+      }
+      
+      // Función para mostrar notificaciones
+      function showNotification(message, type) {
+        type = type || 'success';
+        
+        // Variable para controlar el timeout
+        var notificationTimeout;
+        
+        // Limpiar timeout previo
+        if (window.notificationTimeout) {
+          clearTimeout(window.notificationTimeout);
+        }
+        
+        // Quitar notificación existente
+        var existingNotification = document.querySelector('.notification');
+        if (existingNotification) {
+          existingNotification.remove();
+        }
+        
+        // Crear nueva notificación
+        var notification = document.createElement('div');
+        notification.className = 'notification ' + type;
+        notification.innerHTML = 
+          '<i class="fas fa-' + (type === 'success' ? 'check-circle' : 'exclamation-circle') + '"></i>' +
+          '<span>' + message + '</span>';
+        
+        // Añadir al DOM
+        document.body.appendChild(notification);
+        
+        // Mostrar
+        setTimeout(function() { 
+          notification.classList.add('show'); 
+        }, 10);
+        
+        // Ocultar después de un tiempo
+        window.notificationTimeout = setTimeout(function() {
+          notification.classList.remove('show');
+          setTimeout(function() { 
+            notification.remove(); 
+          }, 300);
+        }, 3000);
+      }
+      
+      // Función para aplicar filtros
+      function applyFilters() {
+        var searchValue = document.getElementById('searchProducts').value.toLowerCase().trim();
+        var showOnlyNoLocation = document.getElementById('noLocationCheck').checked;
+        
+        var visibleCount = 0;
+        
+        document.querySelectorAll('#productsTableBody tr').forEach(function(row) {
+          var productName = row.getAttribute('data-product-name') || '';
+          var productCode = row.getAttribute('data-product-code') || '';
+          var hasLocation = row.getAttribute('data-has-location') === '1';
+          
+          // Verificar filtros
+          var matchesSearch = !searchValue || 
+                              productName.includes(searchValue) || 
+                              productCode.includes(searchValue);
+          var matchesLocationFilter = !showOnlyNoLocation || !hasLocation;
+          
+          // Aplicar
+          if (matchesSearch && matchesLocationFilter) {
+            row.style.display = '';
+            visibleCount++;
+          } else {
+            row.style.display = 'none';
+          }
+        });
+        
+        // Mostrar mensaje sin resultados
+        var noResultsRow = document.getElementById('noResultsRow');
+        
+        if (visibleCount === 0) {
+          if (!noResultsRow) {
+            var tbody = document.getElementById('productsTableBody');
+            noResultsRow = document.createElement('tr');
+            noResultsRow.id = 'noResultsRow';
+            noResultsRow.innerHTML = 
+              '<td colspan="4" style="text-align: center; padding: 32px;">' +
+                '<i class="fas fa-search" style="font-size: 28px; color: #666; margin-bottom: 16px;"></i>' +
+                '<p style="margin: 0; font-size: 17px; color: #666; margin-bottom: 16px;">No se encontraron productos con los filtros seleccionados</p>' +
+                '<button class="btn-action btn-assign" style="margin-top: 16px; display: inline-flex;" onclick="resetFilters()">' +
+                  '<i class="fas fa-undo"></i> Limpiar filtros' +
+                '</button>' +
+              '</td>';
+            tbody.appendChild(noResultsRow);
+          } else {
+            noResultsRow.style.display = '';
+          }
+        } else if (noResultsRow) {
+          noResultsRow.style.display = 'none';
+        }
+      }
+      
+      // Función para resetear filtros
+      function resetFilters() {
+        document.getElementById('searchProducts').value = '';
+        document.getElementById('noLocationCheck').checked = false;
+        document.getElementById('noLocationFilter').classList.remove('active');
+        applyFilters();
+      }
+      
+      // Inicializar cuando el DOM está listo
+      document.addEventListener('DOMContentLoaded', function() {
+        // Configurar eventos para el filtro de ubicación
+        var noLocationFilter = document.getElementById('noLocationFilter');
+        var noLocationCheck = document.getElementById('noLocationCheck');
+        
+        if (noLocationFilter && noLocationCheck) {
+          noLocationFilter.addEventListener('click', function() {
+            noLocationCheck.checked = !noLocationCheck.checked;
+            this.classList.toggle('active', noLocationCheck.checked);
+            applyFilters();
+          });
+        }
+        
+        // Configurar eventos para la búsqueda
+        var searchInput = document.getElementById('searchProducts');
+        if (searchInput) {
+          searchInput.addEventListener('input', applyFilters);
+        }
+        
+        // Configurar sugerencias de ubicación
+        document.querySelectorAll('.location-suggestion').forEach(function(suggestion) {
+          suggestion.addEventListener('click', function() {
+            var locationInput = this.closest('.location-edit').querySelector('input');
+            if (locationInput) {
+              locationInput.value = this.textContent.trim();
+              locationInput.focus();
+            }
+          });
+        });
+        
+        // Configurar eventos de teclado para los inputs de ubicación
+        document.querySelectorAll('.location-edit input').forEach(function(input) {
+          input.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+              event.preventDefault();
+              
+              // Obtener ID del producto
+              var row = this.closest('tr');
+              if (row) {
+                var productId = row.getAttribute('data-product-id');
+                if (productId) {
+                  saveLocation(productId);
+                }
+              }
+            } else if (event.key === 'Escape') {
+              event.preventDefault();
+              
+              // Obtener ID del producto
+              var row = this.closest('tr');
+              if (row) {
+                var productId = row.getAttribute('data-product-id');
+                if (productId) {
+                  cancelEditing(productId);
+                }
+              }
+            }
+          });
+        });
+        
+        // Aplicar filtros iniciales
+        applyFilters();
+        
+        console.log("Inicialización completada - Todos los manejadores de eventos configurados");
+      });
+    </script>  .search-box i {
+        position: absolute;
+        left: 1.25rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        z-index: 5;
+        pointer-events: none;
+      }{% extends 'base.html' %}
+    
+    {% block title %}Ubicaciones de Productos - OptiMax{% endblock %}
+    
+    {% block content %}
+    <style>
+      /* Sistema de Diseño Apple - Consistente con cambiar_precios.html */
+      :root {
+        --font-apple: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', Helvetica, Arial, sans-serif;
+        
+        /* Colores esenciales */
+        --text-color: #1d1d1f;
+        --text-secondary: #515154;
+        --background: #ffffff;
+        --light-background: #f5f5f7;
+        --separator: rgba(0, 0, 0, 0.1);
+        --accent: #e52e2e;
+        --accent-hover: #c51818;
+        --accent-light: rgba(229, 46, 46, 0.1);
+        --blue: #1a237e;
+        --location-color: #007aff;
+      }
+      
+      body {
+        font-family: var(--font-apple);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        color: var(--text-color);
+        background-color: var(--background);
+      }
+      
+      /* Contenedor principal */
+      .apple-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 36px 24px;
+      }
+      
+      /* Encabezado de página - BASADO EN cambiar_precios.html */
+      .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        width: 100%;
+      }
+      
+      .header-title-container {
+        display: flex;
+        flex-direction: column;
+      }
+      
+      .page-title {
+        font-size: 32px;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        margin: 0;
+        margin-bottom: 8px;
+        color: var(--text-color);
+      }
+      
+      .page-description {
+        font-size: 17px;
+        color: var(--text-secondary);
+        margin-bottom: 28px;
+        max-width: 600px;
+        font-weight: 400;
+      }
+      
+      .header-actions {
+        display: flex;
+        gap: 1rem;
+        padding-top: 8px;
+        align-items: center;
+      }
+      
+      /* Botón volver estilo ajuste_stock.html */
+      .btn-action {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1.25rem;
+        border-radius: 980px;
+        font-weight: 500;
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        cursor: pointer;
+        border: none;
+        height: 44px;
+        white-space: nowrap;
+      }
+      
+      .btn-action i, 
+      .btn-action span {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        vertical-align: middle;
+        line-height: 1;
+      }
+      
+      /* Botón Volver estilo */
+      .btn-volver {
+        background-color: var(--blue);
+        color: #ffffff;
+        box-shadow: 0 2px 4px rgba(26, 35, 126, 0.3);
+      }
+      
+      .btn-volver:hover {
+        background-color: #151c64;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(26, 35, 126, 0.4);
+        color: #ffffff;
+      }
+      
+      /* Botón asignar en grupo */
+      .btn-assign {
+        background-color: var(--accent);
+        color: #ffffff;
+        box-shadow: 0 2px 4px rgba(229, 46, 46, 0.3);
+      }
+      
+      .btn-assign:hover {
+        background-color: var(--accent-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(229, 46, 46, 0.4);
+        color: #ffffff;
+      }
+      
+      /* Barra de búsqueda - Alineación corregida */
+      .search-container {
+        display: flex;
+        gap: 0.75rem;
+        margin-bottom: 36px;
+        position: relative;
+        align-items: center;
+        width: 100%;
+      }
+      
+      .search-box {
+        flex: 1;
+        position: relative;
+        margin-right: auto;
+        padding-left: 0 !important; /* Asegurar alineación */
+      }
+      
+      /* Asegurar que el input de búsqueda conserva la alineación */
+      .search-box input {
+        width: 100%;
+        padding: 0.75rem 1rem 0.75rem 3rem;
+        border-radius: 8px;
+        border: 1px solid #e0e0e0;
+        font-size: 1rem;
+        height: 48px;
+        transition: all 0.2s ease;
+        font-weight: 400;
+        background-color: var(--light-background);
+        text-align: left;
+      }
+      
+      .search-box input:focus {
+        background-color: white;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(229, 46, 46, 0.15);
+        outline: none;
+      }
+      
+      .search-actions {
+        display: flex;
+        gap: 0.5rem;
+      }
+      
+      /* Contenedor para el filtro de sin ubicación */
+      .filter-container {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background-color: var(--light-background);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        padding: 0 16px;
+        height: 48px;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        user-select: none;
+      }
+      
+      .filter-container:hover {
+        background-color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+      
+      .filter-container.active {
+        background-color: rgba(0, 122, 255, 0.1);
+        border-color: var(--location-color);
+      }
+      
+      .filter-container span {
+        font-size: 0.95rem;
+        font-weight: 500;
+      }
+      
+      .filter-check-input {
+        display: none;
+      }
+      
+      .icon-btn {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--light-background);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        padding: 0;
+      }
+      
+      .icon-btn:hover {
+        background-color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+      
+      .icon-btn.scan-active {
+        background-color: rgba(229, 46, 46, 0.1);
+        border-color: var(--accent);
+        animation: blink 1s infinite;
+      }
+      
+      /* Tabla de productos - ALINEADA PRIMERA COLUMNA IZQUIERDA */
+      .table-container {
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid var(--separator);
+        margin-bottom: 32px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        width: 100%;
+        background-color: white;
+      }
+      
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      
+      th {
+        padding: 16px;
+        font-weight: 600;
+        font-size: 14px;
+        color: var(--text-secondary);
+        background-color: var(--light-background);
+        border-bottom: 1px solid var(--separator);
+      }
+      
+      th:first-child {
+        text-align: left;
+      }
+      
+      th:not(:first-child) {
+        text-align: center;
+      }
+      
+      td {
+        padding: 16px;
+        border-bottom: 1px solid var(--separator);
+        font-size: 15px;
+      }
+      
+      td:first-child {
+        text-align: left;
+      }
+      
+      td:not(:first-child) {
+        text-align: center;
+      }
+      
+      tr:last-child td {
+        border-bottom: none;
+      }
+      
+      tr:hover {
+        background-color: var(--light-background);
+      }
+      
+      tr {
+        transition: background-color 0.2s ease;
+      }
+      
+      .product-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        justify-content: flex-start;
+      }
+      
+      .product-image {
+        width: 48px;
+        height: 48px;
+        border-radius: 8px;
+        object-fit: contain;
+        background-color: white;
+        border: 1px solid var(--separator);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      }
+      
+      .product-details {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+        max-width: 200px;
+      }
+      
+      .product-name {
+        font-weight: 500;
+        margin-bottom: 4px;
+        color: var(--text-color);
+        text-align: left;
+      }
+      
+      .product-code {
+        font-size: 13px;
+        color: var(--text-secondary);
+        text-align: left;
+      }
+      
+      .location-cell {
+        max-width: 240px;
+        position: relative;
+      }
+      
+      .location-display {
+        padding: 8px 0;
+        font-weight: 500;
+        color: var(--location-color);
+        transition: all 0.2s ease;
+      }
+      
+      .location-display.empty {
+        color: var(--text-secondary);
+        font-weight: 400;
+        font-style: italic;
+      }
+      
+      .location-edit {
+        display: none;
+        justify-content: center;
+        max-width: 240px;
+        margin: 0 auto;
+      }
+      
+      .location-edit input {
+        width: 100%;
+        padding: 10px 14px;
+        border-radius: 8px;
+        border: 1px solid var(--location-color);
+        font-size: 15px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        transition: all 0.2s ease;
+      }
+      
+      .location-edit input:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
+        transform: translateY(-1px);
+      }
+      
+      .location-suggestions {
+        margin-top: 8px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        justify-content: center;
+      }
+      
+      .location-suggestion {
+        font-size: 12px;
+        background-color: #f0f0f5;
+        border-radius: 6px;
+        padding: 4px 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: 1px solid transparent;
+      }
+      
+      .location-suggestion:hover {
+        background-color: #e5e5ea;
+        transform: translateY(-1px);
+        border-color: var(--location-color);
+      }
+      
+      .action-buttons {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+      }
+      
+      .btn-icon {
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        background-color: #f5f5f7;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        color: var(--text-secondary);
+        transition: all 0.2s ease;
+        cursor: pointer;
+      }
+      
+      .btn-icon:hover {
+        background-color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      }
+      
+      .btn-icon.edit {
+        color: var(--location-color);
+      }
+      
+      .btn-icon.edit:hover {
+        background-color: rgba(0, 122, 255, 0.1);
+        border-color: var(--location-color);
+      }
+      
+      .btn-icon.delete {
+        color: var(--accent);
+      }
+      
+      .btn-icon.delete:hover {
+        background-color: rgba(229, 46, 46, 0.1);
+        border-color: var(--accent);
+      }
+      
+      .btn-save, .btn-cancel {
+        display: none;
+      }
+      
+      /* Notificaciones */
+      .notification {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        background-color: rgba(0, 0, 0, 0.8);
+        color: white;
+        border-radius: 12px;
+        padding: 14px 20px;
+        font-size: 15px;
+        font-weight: 500;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.3s ease, transform 0.3s ease;
+      }
+      
+      .notification.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      
+      .notification.success {
+        background-color: #34c759;
+      }
+      
+      .notification.error {
+        background-color: #ff3b30;
+      }
+      
+      /* Modal de confirmación personalizado */
+      .confirm-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+      }
+      
+      .confirm-modal.show {
+        opacity: 1;
+        visibility: visible;
+      }
+      
+      .confirm-dialog {
+        background-color: white;
+        border-radius: 16px;
+        padding: 24px;
+        max-width: 400px;
+        width: 100%;
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2);
+        transform: translateY(20px);
+        transition: transform 0.3s ease;
+      }
+      
+      .confirm-modal.show .confirm-dialog {
+        transform: translateY(0);
+      }
+      
+      .confirm-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 16px;
+        color: var(--text-color);
+      }
+      
+      .confirm-message {
+        font-size: 15px;
+        color: var(--text-secondary);
+        margin-bottom: 24px;
+      }
+      
+      .confirm-buttons {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+      }
+      
+      .confirm-cancel {
+        background-color: var(--light-background);
+        color: var(--text-color);
+        box-shadow: none;
+      }
+      
+      .confirm-delete {
+        background-color: var(--accent);
+        color: white;
+      }
+      
+      /* Modal de edición masiva - DISEÑO MEJORADO */
+      .modal-content {
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2);
+        border: none;
+      }
+      
+      .modal-header {
+        border-bottom: 1px solid var(--separator);
+        padding: 20px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background-color: var(--light-background);
+      }
+      
+      .modal-title {
+        font-size: 20px;
+        font-weight: 600;
+        margin: 0;
+        color: var(--text-color);
+      }
+      
+      .btn-close {
+        background-color: rgba(0, 0, 0, 0.1);
+        border-radius: 50%;
+        width: 26px;
+        height: 26px;
+        opacity: 0.7;
+        transition: all 0.2s ease;
+      }
+      
+      .btn-close:hover {
+        opacity: 1;
+        background-color: rgba(0, 0, 0, 0.15);
+        transform: scale(1.05);
+      }
+      
+      .modal-body {
+        padding: 28px;
+      }
+      
+      .modal-footer {
+        border-top: 1px solid var(--separator);
+        padding: 18px 24px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        background-color: var(--light-background);
+      }
+      
+      .form-group {
+        margin-bottom: 24px;
+      }
+      
+      .form-label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 10px;
+        font-size: 15px;
+        color: var(--text-color);
+      }
+      
+      .form-control {
+        width: 100%;
+        padding: 12px 16px;
+        border-radius: 10px;
+        border: 1px solid #dcdce0;
+        font-size: 15px;
+        transition: all 0.2s ease;
+        background-color: white;
+      }
+      
+      .form-control:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-light);
+        transform: translateY(-1px);
+      }
+      
+      /* Radio options - simplificado */
+      .radio-options-container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 15px;
+      }
+      
+      .radio-option {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border-radius: 8px;
+        border: 1px solid #e0e0e0;
+        background-color: white;
+      }
+      
+      .radio-option:hover {
+        background-color: var(--light-background);
+      }
+      
+      .radio-option.selected {
+        background-color: #f0f0f5;
+        border-color: #ccc;
+      }
+      
+      .radio-option input {
+        margin: 0;
+        width: 16px;
+        height: 16px;
+        accent-color: var(--accent);
+      }
+      
+      .radio-option i {
+        color: #555;
+        font-size: 14px;
+        width: 18px;
+        text-align: center;
+      }
+      
+      .radio-option span {
+        font-size: 14px;
+        font-weight: normal;
+      }
+      
+      /* Categoría mejorada - simplificada */
+      .category-selection {
+        margin: 15px auto 0;
+        max-width: 90%;
+        transition: all 0.3s ease;
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 15px;
+        border: 1px solid #e0e0e0;
+      }
+      
+      .category-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 10px;
+        color: var(--text-color);
+        font-weight: 500;
+      }
+      
+      .category-select-container {
+        position: relative;
+      }
+      
+      .category-select-container:after {
+        content: "\f078";
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #666;
+        pointer-events: none;
+      }
+      
+      .category-select {
+        width: 100%;
+        padding: 10px 15px;
+        border-radius: 8px;
+        border: 1px solid #dcdce0;
+        font-size: 15px;
+        appearance: none;
+        background-color: white;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      
+      .category-select:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(229, 46, 46, 0.15);
+      }
+      
+      /* Estado vacío */
+      .empty-state {
+        padding: 64px 0;
+        text-align: center;
+        background-color: var(--light-background);
+        border-radius: 16px;
+        border: 1px dashed var(--separator);
+        margin-bottom: 32px;
+        width: 100%;
+      }
+      
+      .empty-icon {
+        font-size: 56px;
+        color: var(--text-secondary);
+        margin-bottom: 20px;
+      }
+      
+      .empty-title {
+        font-size: 22px;
+        font-weight: 600;
+        margin-bottom: 12px;
+        color: var(--text-color);
+      }
+      
+      .empty-description {
+        color: var(--text-secondary);
+        font-size: 17px;
+        max-width: 420px;
+        margin: 0 auto 24px auto;
+        line-height: 1.5;
+      }
+      
+      /* Paginación */
+      .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 32px;
+      }
+      
+      .pagination-item {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        background-color: var(--light-background);
+        border: 1px solid var(--separator);
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--text-color);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+      }
+      
+      .pagination-item:hover {
+        background-color: white;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      }
+      
+      .pagination-item.active {
+        background-color: var(--accent);
+        color: white;
+        border-color: var(--accent);
+      }
+      
+      /* Toast notificaciones */
+      .toast {
+        background-color: #333;
+        color: white;
+        padding: 14px 20px;
+        border-radius: 12px;
+        margin-top: 8px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        animation: slideIn 0.3s ease, fadeOut 0.5s ease 2.5s forwards;
+        max-width: 350px;
+        font-weight: 500;
+      }
+      
+      .toast.success {
+        background-color: #34c759;
+      }
+      
+      .toast.error {
+        background-color: #ff3b30;
+      }
+      
+      @keyframes slideIn {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+      
+      @keyframes fadeOut {
+        from {
+          opacity: 1;
+        }
+        to {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+      }
+      
+      /* Responsive */
+      @media (max-width: 768px) {
+        .page-header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 16px;
+        }
+        
+        .header-actions {
+          width: 100%;
+        }
+        
+        .search-container {
+          flex-direction: column;
+          align-items: stretch;
+        }
+        
+        .search-actions {
+          justify-content: space-between;
+        }
+        
+        .table-container {
+          overflow-x: auto;
+        }
+        
+        th, td {
+          padding: 12px 8px;
+        }
+        
+        .product-image {
+          width: 36px;
+          height: 36px;
+        }
+      }
+      
+      @keyframes blink {
+        0% { opacity: 1; }
+        50% { opacity: 0.6; }
+        100% { opacity: 1; }
+      }
+      
+      .animated-fade {
+        animation: fadeIn 0.3s ease-out;
+      }
+      
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+    </style>
+    
+    <div class="apple-container animated-fade">
+      <!-- Cabecera -->
+      <div class="page-header">
+        <div class="header-title-container">
+          <h1 class="page-title">Ubicaciones de Productos</h1>
+          <p class="page-description">Gestiona las ubicaciones físicas de tus productos de manera fácil y rápida</p>
+        </div>
+        <div class="header-actions">
+          <button id="btnBulkAssign" class="btn-action btn-assign" data-bs-toggle="modal" data-bs-target="#bulkLocationModal">
+            <i class="fas fa-tags"></i> Agregar masivamente
+          </button>
+          <a href="{{ url_for('dashboard_inventario') }}" class="btn-action btn-volver">
+            <i class="fas fa-arrow-left"></i>
+            <span>Volver</span>
+          </a>
+        </div>
+      </div>
+      
+      <!-- Barra de búsqueda alineada -->
+      <!-- Barra de búsqueda con estructura original preservada -->
+      <div class="search-container">
+        <div class="search-box" id="searchBoxContainer">
+          <i class="fas fa-search"></i>
+          <input type="text" id="searchProducts" placeholder="Buscar por nombre o código...">
+        </div>
+        <div class="search-actions">
+          <!-- Filtro sin ubicación -->
+          <div class="filter-container" id="noLocationFilter">
+            <input class="filter-check-input" type="checkbox" id="noLocationCheck">
+            <i class="fas fa-map-marker-alt"></i>
+            <span>Sin ubicación</span>
+          </div>
+          
+          <!-- Botón escanear con pistola -->
+          <button type="button" class="icon-btn" id="scanIcon" title="Escanear con pistola">
+            <img src="{{ url_for('static', filename='img/3.png') }}" alt="Escanear con Lector" style="width: 24px; height: 24px;">
+          </button>
+          
+          <!-- Botón escanear con cámara -->
+          <button type="button" class="icon-btn" id="cameraIcon" title="Escanear con cámara" onclick="iniciarEscaneoQuagga()">
+            <img src="{{ url_for('static', filename='img/4.png') }}" alt="Escanear con Cámara" style="width: 24px; height: 24px;">
+          </button>
+        </div>
+      </div>
+      
+      <!-- Tabla de productos -->
+      {% if productos and productos|length > 0 %}
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 40%; text-align: left;">Producto</th>
+              <th style="width: 15%; text-align: center;">Categoría</th>
+              <th style="width: 30%; text-align: center;">Ubicación</th>
+              <th style="width: 15%; text-align: center;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="productsTableBody">
+            {% for producto in productos %}
+            <tr data-product-id="{{ producto.id }}" data-product-name="{{ producto.nombre|lower }}" data-product-code="{{ producto.codigo_barras_externo|lower if producto.codigo_barras_externo else '' }}" data-has-location="{{ '1' if producto.ubicacion else '0' }}">
+              <td>
+                <div class="product-info">
+                  <img src="{{ url_for('static', filename='uploads/' ~ producto.foto) if producto.foto else url_for('static', filename='img/default_product.jpg') }}" class="product-image" alt="{{ producto.nombre }}">
+                  <div class="product-details">
+                    <div class="product-name">{{ producto.nombre }}</div>
+                    <div class="product-code">{{ producto.codigo_barras_externo or 'SKU-' ~ producto.id }}</div>
+                  </div>
+                </div>
+              </td>
+              <td style="text-align: center;">
+                {% if producto.categoria %}
+                  <span class="category-badge" style="display: inline-block; padding: 4px 8px; border-radius: 4px; background-color: {{ producto.categoria_color or '#6B7280' }}20; color: {{ producto.categoria_color or '#6B7280' }}; font-weight: 500; font-size: 13px;">
+                    {{ producto.categoria|title }}
+                  </span>
+                {% else %}
+                  <span class="category-badge" style="color: #aaa; font-style: italic; font-size: 13px;">Sin categoría</span>
+                {% endif %}
+              </td>
+              <td class="location-cell">
+                <div class="location-display {% if not producto.ubicacion %}empty{% endif %}">
+                  {{ producto.ubicacion or 'Sin ubicación asignada' }}
+                </div>
+                <div class="location-edit">
+                  <input type="text" value="{{ producto.ubicacion or '' }}" placeholder="Ej: Estante A, Bodega 2">
+                  {% if ubicaciones and ubicaciones|length > 0 %}
+                  <div class="location-suggestions">
+                    {% for ubicacion in ubicaciones %}
+                    <div class="location-suggestion">{{ ubicacion }}</div>
+                    {% endfor %}
+                  </div>
+                  {% endif %}
+                </div>
+              </td>
+              <td>
+                <div class="action-buttons">
+                  <button type="button" class="btn-icon edit btn-edit-location" title="Editar ubicación">
+                    <i class="fas fa-pencil-alt"></i>
+                  </button>
+          <!-- Botón eliminar - simplificado para usar bootstrap modal -->
+          <button type="button" class="btn-icon delete btn-delete-location" 
+                  title="Eliminar ubicación" 
+                  onclick="prepareDeleteLocation({{ producto.id }})"
+                  {% if not producto.ubicacion %}style="display: none;"{% endif %}>
+            <i class="fas fa-trash-alt"></i>
+          </button>
+                  <button type="button" class="btn-icon btn-save" title="Guardar" style="color: #34c759; display: none;">
+                    <i class="fas fa-check"></i>
+                  </button>
+                  <button type="button" class="btn-icon btn-cancel" title="Cancelar" style="color: #ff3b30; display: none;">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Paginación -->
+      {% if total_pages and total_pages > 1 %}
+      <div class="pagination">
+        {% if page > 1 %}
+        <a href="{{ url_for('ubicacion_productos', page=page-1) }}" class="pagination-item">
+          <i class="fas fa-chevron-left"></i>
+        </a>
+        {% endif %}
+        
+        {% for p in range(1, total_pages + 1) %}
+        <a href="{{ url_for('ubicacion_productos', page=p) }}" class="pagination-item {% if p == page %}active{% endif %}">
+          {{ p }}
+        </a>
+        {% endfor %}
+        
+        {% if page < total_pages %}
+        <a href="{{ url_for('ubicacion_productos', page=page+1) }}" class="pagination-item">
+          <i class="fas fa-chevron-right"></i>
+        </a>
+        {% endif %}
+      </div>
+      {% endif %}
+      
+      {% else %}
+      <!-- Estado vacío -->
+      <div class="empty-state">
+        <div class="empty-icon">
+          <i class="fas fa-boxes"></i>
+        </div>
+        <h3 class="empty-title">No hay productos en tu inventario</h3>
+        <p class="empty-description">Agrega productos a tu inventario para poder asignarles ubicaciones físicas</p>
+        <a href="{{ url_for('agregar_producto') }}" class="btn-action btn-assign">
+          <i class="fas fa-plus"></i> Agregar producto
+        </a>
+      </div>
+      {% endif %}
+      
+      <!-- Modal de confirmación usando Bootstrap en lugar de personalizado -->
+      <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="confirmModalLabel">Eliminar ubicación</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <p>¿Estás seguro de que deseas eliminar esta ubicación? Esta acción no se puede deshacer.</p>
+              <input type="hidden" id="delete-product-id" value="">
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn-action" style="background-color: #f5f5f7; color: #1d1d1f;" data-bs-dismiss="modal">Cancelar</button>
+              <button type="button" class="btn-action btn-assign" id="confirmDeleteBtn" onclick="deleteLocation()">Eliminar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Modal para asignación masiva -->
+      <div class="modal fade" id="bulkLocationModal" tabindex="-1" aria-labelledby="bulkLocationModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="bulkLocationModalLabel">
+                Agregar ubicación masivamente
+              </h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <div class="form-group">
+                <label for="bulkLocation" class="form-label">
+                  Ubicación a asignar
+                </label>
+                <input type="text" id="bulkLocation" class="form-control" placeholder="Ej: Estante A, Bodega 2">
+                
+                {% if ubicaciones and ubicaciones|length > 0 %}
+                <div class="location-suggestions" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; justify-content: flex-start;">
+                  {% for ubicacion in ubicaciones %}
+                  <div class="location-suggestion" onclick="document.getElementById('bulkLocation').value = this.textContent.trim()">
+                    {{ ubicacion }}
+                  </div>
+                  {% endfor %}
+                </div>
+                {% endif %}
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">
+                  Aplicar a
+                </label>
+                
+                <div class="radio-options-container">
+                  <label class="radio-option selected" id="radioCategory">
+                    <input type="radio" name="bulkType" value="category" checked>
+                    <span>Por categoría</span>
+                  </label>
+                  
+                  <label class="radio-option" id="radioNoLocation">
+                    <input type="radio" name="bulkType" value="noLocation">
+                    <span>Productos sin ubicación</span>
+                  </label>
+                </div>
+                
+                <div id="categorySelection" class="category-selection">
+                  <div class="category-label">
+                    <span>Selecciona categoría:</span>
+                  </div>
+                  <div class="category-select-container">
+                    <select id="categorySelect" class="category-select">
+                      {% for categoria in categorias %}
+                      <option value="{{ categoria.nombre }}">
+                        {{ categoria.nombre|title }}
+                      </option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn-action" style="background-color: #f5f5f7; color: #1d1d1f; box-shadow: none;" data-bs-dismiss="modal">Cancelar</button>
+              <button type="button" class="btn-action btn-assign" id="saveBulkLocation">
+                Guardar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+      <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        // Referencias a elementos del DOM
+        const searchInput = document.getElementById('searchProducts');
+        const noLocationCheck = document.getElementById('noLocationCheck');
+        const noLocationFilter = document.getElementById('noLocationFilter');
+        const productRows = document.querySelectorAll('#productsTableBody tr');
+        const saveBulkLocationBtn = document.getElementById('saveBulkLocation');
+        
+        // Referencias a los elementos del modal
+        const radioCategory = document.getElementById('radioCategory');
+        const radioNoLocation = document.getElementById('radioNoLocation');
+        const categorySelection = document.getElementById('categorySelection');
+        
+        // Modal de confirmación personalizado
+        const confirmModal = document.getElementById('confirmModal');
+        const confirmCancel = document.getElementById('confirmCancel');
+        const confirmDelete = document.getElementById('confirmDelete');
+        
+        // Variable para controlar el tiempo de las notificaciones
+        let notificationTimeout;
+        
+        // Alineación de barra de búsqueda - Eliminado para usar el script inyectado directamente
+        // La implementación directa en la página es más efectiva
+        
+        // Inicialización del filtro
+        noLocationFilter.addEventListener('click', function() {
+          noLocationCheck.checked = !noLocationCheck.checked;
+          this.classList.toggle('active', noLocationCheck.checked);
+          applyFilters();
+        });
+        
+        // Inicialización del buscador
+        searchInput.addEventListener('input', applyFilters);
+        
+        // Configuración de la selección de tipo en el modal
+        radioCategory.addEventListener('click', function() {
+          document.querySelector('input[name="bulkType"][value="category"]').checked = true;
+          radioCategory.classList.add('selected');
+          radioNoLocation.classList.remove('selected');
+          categorySelection.style.display = 'block';
+          categorySelection.style.opacity = '1';
+          categorySelection.style.maxHeight = '200px';
+        });
+        
+        radioNoLocation.addEventListener('click', function() {
+          document.querySelector('input[name="bulkType"][value="noLocation"]').checked = true;
+          radioNoLocation.classList.add('selected');
+          radioCategory.classList.remove('selected');
+          categorySelection.style.opacity = '0';
+          categorySelection.style.maxHeight = '0';
+          setTimeout(() => {
+            categorySelection.style.display = 'none';
+          }, 300);
+        });
+        
+        // Función para aplicar filtros
+        function applyFilters() {
+          const searchValue = searchInput.value.toLowerCase().trim();
+          const showOnlyNoLocation = noLocationCheck.checked;
+          
+          let visibleCount = 0;
+          
+          productRows.forEach(row => {
+            const productName = row.getAttribute('data-product-name') || '';
+            const productCode = row.getAttribute('data-product-code') || '';
+            const hasLocation = row.getAttribute('data-has-location') === '1';
+            
+            // Verificar si cumple con los filtros
+            const matchesSearch = !searchValue || 
+                                 productName.includes(searchValue) || 
+                                 productCode.includes(searchValue);
+            const matchesLocationFilter = !showOnlyNoLocation || !hasLocation;
+            
+            // Aplicar filtro
+            if (matchesSearch && matchesLocationFilter) {
+              row.style.display = '';
+              visibleCount++;
+            } else {
+              row.style.display = 'none';
+            }
+          });
+          
+          // Mostrar mensaje si no hay resultados
+          showNoResultsMessage(visibleCount === 0);
+        }
+        
+        // Mostrar mensaje cuando no hay resultados
+        function showNoResultsMessage(show) {
+          let noResultsRow = document.getElementById('noResultsRow');
+          
+          if (show) {
+            if (!noResultsRow) {
+              const tbody = document.getElementById('productsTableBody');
+              noResultsRow = document.createElement('tr');
+              noResultsRow.id = 'noResultsRow';
+              noResultsRow.innerHTML = `
+                <td colspan="4" style="text-align: center; padding: 32px;">
+                  <i class="fas fa-search" style="font-size: 28px; color: var(--text-secondary); margin-bottom: 16px;"></i>
+                  <p style="margin: 0; font-size: 17px; color: var(--text-secondary); margin-bottom: 16px;">No se encontraron productos con los filtros seleccionados</p>
+                  <button class="btn-action btn-assign" style="margin-top: 16px; display: inline-flex;" onclick="resetFilters()">
+                    <i class="fas fa-undo"></i> Limpiar filtros
+                  </button>
+                </td>
+              `;
+              tbody.appendChild(noResultsRow);
+            } else {
+              noResultsRow.style.display = '';
+            }
+          } else if (noResultsRow) {
+            noResultsRow.style.display = 'none';
+          }
+        }
+        
+        // Función global para resetear filtros
+        window.resetFilters = function() {
+          searchInput.value = '';
+          noLocationCheck.checked = false;
+          noLocationFilter.classList.remove('active');
+          applyFilters();
+        };
+        
+        // Configuración del modal de confirmación - Implementación corregida
+        confirmCancel.addEventListener('click', function() {
+          hideConfirmModal();
+        });
+        
+        // Ahora la eliminación se maneja directamente con el ID almacenado en el botón
+        confirmDelete.addEventListener('click', function() {
+          const productId = confirmDelete.getAttribute('data-product-id');
+          
+          if (!productId) {
+            showNotification('Error: No se pudo identificar el producto', 'error');
+            hideConfirmModal();
+            return;
+          }
+          
+          // Mostrar cargando en el botón de confirmación
+          confirmDelete.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Eliminando...';
+          confirmDelete.disabled = true;
           
           // Llamar a la API con ubicación vacía
           fetch(`/api/actualizar-ubicacion/${productId}`, {
@@ -1210,13 +1869,19 @@
           .then(response => response.json())
           .then(data => {
             if (data.success) {
-              // Actualizar UI
-              locationDisplay.textContent = 'Sin ubicación asignada';
-              locationDisplay.classList.add('empty');
-              locationInput.value = '';
-              originalValue = '';
-              row.setAttribute('data-has-location', '0');
-              btnDelete.style.display = 'none';
+              // Buscar la fila correspondiente al producto
+              const row = document.querySelector(`tr[data-product-id="${productId}"]`);
+              
+              if (row) {
+                // Actualizar UI en la fila correcta
+                const locationDisplay = row.querySelector('.location-display');
+                const btnDelete = row.querySelector('.btn-delete-location');
+                
+                locationDisplay.textContent = 'Sin ubicación asignada';
+                locationDisplay.classList.add('empty');
+                row.setAttribute('data-has-location', '0');
+                btnDelete.style.display = 'none';
+              }
               
               // Mostrar notificación
               showNotification('Ubicación eliminada correctamente', 'success');
@@ -1232,195 +1897,365 @@
             showNotification('Error: ' + error.message, 'error');
           })
           .finally(() => {
-            // Restaurar botón
-            btnDelete.innerHTML = '<i class="fas fa-trash-alt"></i>';
-            btnDelete.disabled = false;
+            // Restaurar botón y cerrar modal
+            confirmDelete.innerHTML = 'Eliminar';
+            confirmDelete.disabled = false;
+            hideConfirmModal();
+          });
+        });
+        
+        function showConfirmModal() {
+          confirmModal.classList.add('show');
+        }
+        
+        function hideConfirmModal() {
+          confirmModal.classList.remove('show');
+        }
+        
+        // Configuración de botones de edición para cada fila
+        productRows.forEach(row => {
+          setupRowEditing(row);
+        });
+        
+        // Función para eliminar ubicación (corregida y simplificada)
+        function setupRowEditing(row) {
+          const productId = row.getAttribute('data-product-id');
+          const locationDisplay = row.querySelector('.location-display');
+          const locationEdit = row.querySelector('.location-edit');
+          const locationInput = locationEdit.querySelector('input');
+          const btnEdit = row.querySelector('.btn-edit-location');
+          const btnDelete = row.querySelector('.btn-delete-location');
+          const btnSave = row.querySelector('.btn-save');
+          const btnCancel = row.querySelector('.btn-cancel');
+          
+          // Guardar valor original para caso de cancelación
+          let originalValue = locationInput.value;
+          
+          // Configurar sugerencias si existen
+          const suggestions = row.querySelectorAll('.location-suggestion');
+          suggestions.forEach(suggestion => {
+            suggestion.addEventListener('click', () => {
+              locationInput.value = suggestion.textContent.trim();
+              locationInput.focus();
+            });
+          });
+          
+          // Botón editar
+          btnEdit.addEventListener('click', () => {
+            // Primero cerrar cualquier otra edición en curso
+            document.querySelectorAll('.location-edit').forEach(edit => {
+              if (edit !== locationEdit && edit.style.display === 'block') {
+                const otherRow = edit.closest('tr');
+                const otherDisplay = otherRow.querySelector('.location-display');
+                const otherBtnEdit = otherRow.querySelector('.btn-edit-location');
+                const otherBtnDelete = otherRow.querySelector('.btn-delete-location');
+                const otherBtnSave = otherRow.querySelector('.btn-save');
+                const otherBtnCancel = otherRow.querySelector('.btn-cancel');
+                
+                edit.style.display = 'none';
+                otherDisplay.style.display = 'block';
+                otherBtnEdit.style.display = 'flex';
+                if (otherDisplay.textContent.trim() !== 'Sin ubicación asignada') {
+                  otherBtnDelete.style.display = 'flex';
+                } else {
+                  otherBtnDelete.style.display = 'none';
+                }
+                otherBtnSave.style.display = 'none';
+                otherBtnCancel.style.display = 'none';
+              }
+            });
+            
+            // Activar modo edición
+            locationDisplay.style.display = 'none';
+            locationEdit.style.display = 'flex';
+            btnEdit.style.display = 'none';
+            btnDelete.style.display = 'none';
+            btnSave.style.display = 'flex';
+            btnCancel.style.display = 'flex';
+            locationInput.focus();
+          });
+          
+          // Botón guardar
+          btnSave.addEventListener('click', () => {
+            const newLocation = locationInput.value.trim();
+            
+            // Mostrar cargando
+            btnSave.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            btnSave.disabled = true;
+            
+            // Llamar a la API
+            fetch(`/api/actualizar-ubicacion/${productId}`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ ubicacion: newLocation })
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                // Actualizar UI
+                if (newLocation) {
+                  locationDisplay.textContent = newLocation;
+                  locationDisplay.classList.remove('empty');
+                  row.setAttribute('data-has-location', '1');
+                  btnDelete.style.display = 'flex';
+                } else {
+                  locationDisplay.textContent = 'Sin ubicación asignada';
+                  locationDisplay.classList.add('empty');
+                  row.setAttribute('data-has-location', '0');
+                  btnDelete.style.display = 'none';
+                }
+                
+                // Actualizar valor original
+                originalValue = newLocation;
+                
+                // Efecto visual de éxito
+                row.style.transition = "background-color 0.3s ease";
+                row.style.backgroundColor = "rgba(52, 199, 89, 0.1)";
+                setTimeout(() => {
+                  row.style.backgroundColor = "";
+                }, 1000);
+                
+                // Mostrar notificación
+                showNotification('Ubicación actualizada correctamente', 'success');
+              } else {
+                throw new Error(data.message || 'Error al actualizar ubicación');
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              showNotification('Error: ' + error.message, 'error');
+            })
+            .finally(() => {
+              // Restaurar botón
+              btnSave.innerHTML = '<i class="fas fa-check"></i>';
+              btnSave.disabled = false;
+              
+              // Volver a modo visualización
+              locationDisplay.style.display = 'block';
+              locationEdit.style.display = 'none';
+              btnEdit.style.display = 'flex';
+              btnSave.style.display = 'none';
+              btnCancel.style.display = 'none';
+            });
+          });
+          
+          // Botón cancelar
+          btnCancel.addEventListener('click', () => {
+            // Restaurar valor original
+            locationInput.value = originalValue;
+            
+            // Volver a modo visualización
+            locationDisplay.style.display = 'block';
+            locationEdit.style.display = 'none';
+            btnEdit.style.display = 'flex';
+            btnDelete.style.display = originalValue ? 'flex' : 'none';
+            btnSave.style.display = 'none';
+            btnCancel.style.display = 'none';
+          });
+          
+          // Botón eliminar - ahora directamente en el scope correcto
+          btnDelete.addEventListener('click', () => {
+            // Guardar referencia al ID del producto actualmente seleccionado
+            confirmDelete.setAttribute('data-product-id', productId);
+            // También guardar referencia a la fila para actualizar UI
+            confirmDelete.setAttribute('data-row-id', row.id || 'row-' + productId);
+            showConfirmModal();
+          });
+          
+          // Manejar tecla Enter para guardar
+          locationInput.addEventListener('keydown', event => {
+            if (event.key === 'Enter') {
+              event.preventDefault();
+              btnSave.click();
+            } else if (event.key === 'Escape') {
+              event.preventDefault();
+              btnCancel.click();
+            }
           });
         }
-      });
-      
-      // Manejar tecla Enter para guardar
-      locationInput.addEventListener('keydown', event => {
-        if (event.key === 'Enter') {
-          event.preventDefault();
-          btnSave.click();
-        } else if (event.key === 'Escape') {
-          event.preventDefault();
-          btnCancel.click();
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                // Actualizar UI
+                locationDisplay.textContent = 'Sin ubicación asignada';
+                locationDisplay.classList.add('empty');
+                locationInput.value = '';
+                originalValue = '';
+                row.setAttribute('data-has-location', '0');
+                btnDelete.style.display = 'none';
+                
+                // Mostrar notificación
+                showNotification('Ubicación eliminada correctamente', 'success');
+                
+                // Aplicar filtros por si está activo "Sin ubicación"
+                applyFilters();
+              } else {
+                throw new Error(data.message || 'Error al eliminar ubicación');
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              showNotification('Error: ' + error.message, 'error');
+            })
+            .finally(() => {
+              // Restaurar botón
+              btnDelete.innerHTML = '<i class="fas fa-trash-alt"></i>';
+              btnDelete.disabled = false;
+            });
+          }
+          
+          // Manejar tecla Enter para guardar
+          locationInput.addEventListener('keydown', event => {
+            if (event.key === 'Enter') {
+              event.preventDefault();
+              btnSave.click();
+            } else if (event.key === 'Escape') {
+              event.preventDefault();
+              btnCancel.click();
+            }
+          });
         }
-      });
-    }
-    
-    // Configuración para asignación masiva
-    const bulkTypeRadios = document.querySelectorAll('input[name="bulkType"]');
-    const categorySelection = document.getElementById('categorySelection');
-    
-    bulkTypeRadios.forEach(radio => {
-      radio.addEventListener('change', () => {
-        categorySelection.style.display = radio.value === 'category' ? 'block' : 'none';
-      });
-    });
-    
-    // Guardar asignación masiva
-    saveBulkLocationBtn.addEventListener('click', () => {
-      const location = document.getElementById('bulkLocation').value.trim();
-      
-      if (!location) {
-        showNotification('Por favor ingresa una ubicación', 'error');
-        return;
-      }
-      
-      const bulkType = document.querySelector('input[name="bulkType"]:checked').value;
-      let data = {
-        ubicacion: location
-      };
-      
-      if (bulkType === 'category') {
-        data.categoria = document.getElementById('categorySelect').value;
-      } else if (bulkType === 'noLocation') {
-        // Para productos sin ubicación, enviamos un filtro especial
-        data.sin_ubicacion = true;
-      }
-      
-      // Mostrar cargando
-      saveBulkLocationBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
-      saveBulkLocationBtn.disabled = true;
-      
-      // Llamar a la API
-      fetch('/api/actualizar-ubicacion-masiva', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data)
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          // Cerrar modal
-          const modal = bootstrap.Modal.getInstance(document.getElementById('bulkLocationModal'));
-          modal.hide();
+        
+        // Guardar asignación masiva
+        saveBulkLocationBtn.addEventListener('click', () => {
+          const location = document.getElementById('bulkLocation').value.trim();
           
-          // Mostrar notificación
-          showNotification(`Se actualizaron ${data.count} productos`, 'success');
+          if (!location) {
+            showNotification('Por favor ingresa una ubicación', 'error');
+            return;
+          }
           
-          // Recargar página después de un breve retraso
+          const bulkType = document.querySelector('input[name="bulkType"]:checked').value;
+          let data = {
+            ubicacion: location
+          };
+          
+          if (bulkType === 'category') {
+            data.categoria = document.getElementById('categorySelect').value;
+          } else if (bulkType === 'noLocation') {
+            // Para productos sin ubicación, enviamos un filtro especial
+            data.sin_ubicacion = true;
+          }
+          
+          // Mostrar cargando
+          saveBulkLocationBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+          saveBulkLocationBtn.disabled = true;
+          
+          // Llamar a la API
+          fetch('/api/actualizar-ubicacion-masiva', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              // Cerrar modal
+              const modal = bootstrap.Modal.getInstance(document.getElementById('bulkLocationModal'));
+              modal.hide();
+              
+              // Mostrar notificación
+              showNotification(`Se actualizaron ${data.count} productos`, 'success');
+              
+              // Recargar página después de un breve retraso
+              setTimeout(() => {
+                window.location.reload();
+              }, 1500);
+            } else {
+              throw new Error(data.message || 'Error al actualizar ubicaciones');
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            showNotification(`Error: ${error.message}`, 'error');
+          })
+          .finally(() => {
+            // Restaurar botón
+            saveBulkLocationBtn.innerHTML = '<i class="fas fa-save"></i> Guardar';
+            saveBulkLocationBtn.disabled = false;
+          });
+        });
+        
+        // Sistema de notificaciones
+        function showNotification(message, type = 'success') {
+          // Limpiar cualquier notificación anterior
+          if (notificationTimeout) {
+            clearTimeout(notificationTimeout);
+          }
+          
+          // Eliminar notificación existente
+          const existingNotification = document.querySelector('.notification');
+          if (existingNotification) {
+            existingNotification.remove();
+          }
+          
+          // Crear nueva notificación
+          const notification = document.createElement('div');
+          notification.className = `notification ${type}`;
+          notification.innerHTML = `
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+            <span>${message}</span>
+          `;
+          
+          // Añadir al DOM
+          document.body.appendChild(notification);
+          
+          // Mostrar con animación
           setTimeout(() => {
-            window.location.reload();
-          }, 1500);
-        } else {
-          throw new Error(data.message || 'Error al actualizar ubicaciones');
-        }
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        showNotification(`Error: ${error.message}`, 'error');
-      })
-      .finally(() => {
-        // Restaurar botón
-        saveBulkLocationBtn.innerHTML = 'Guardar';
-        saveBulkLocationBtn.disabled = false;
-      });
-    });
-    
-    // Sistema de notificaciones
-    function showNotification(message, type = 'success') {
-      // Limpiar cualquier notificación anterior
-      if (notificationTimeout) {
-        clearTimeout(notificationTimeout);
-      }
-      
-      // Eliminar notificación existente
-      const existingNotification = document.querySelector('.notification');
-      if (existingNotification) {
-        existingNotification.remove();
-      }
-      
-      // Crear nueva notificación
-      const notification = document.createElement('div');
-      notification.className = `notification ${type}`;
-      notification.innerHTML = `
-        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
-        <span>${message}</span>
-      `;
-      
-      // Añadir al DOM
-      document.body.appendChild(notification);
-      
-      // Mostrar con animación
-      setTimeout(() => {
-        notification.classList.add('show');
-      }, 10);
-      
-      // Ocultar después de un tiempo
-      notificationTimeout = setTimeout(() => {
-        notification.classList.remove('show');
-        setTimeout(() => {
-          notification.remove();
-        }, 300);
-      }, 3000);
-    }
-    
-    // Soporte para escaneo con pistola/cámara
-    if (window.initBarcodeScanner) {
-      window.initBarcodeScanner('#scanIcon', '#searchProducts');
-    }
-    
-    // Manejo de código escaneado (para cualquier método de escaneo)
-    window.onScannedBarcode = function(code) {
-      searchInput.value = code;
-      applyFilters();
-      
-      // Buscar producto con código escaneado
-      let found = false;
-      productRows.forEach(row => {
-        if (row.getAttribute('data-product-code') === code.toLowerCase()) {
-          // Resaltar la fila
-          row.style.transition = 'background-color 0.3s';
-          row.style.backgroundColor = 'rgba(0, 122, 255, 0.2)';
-          found = true;
+            notification.classList.add('show');
+          }, 10);
           
-          // Hacer scroll para que sea visible
-          row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          
-          // Quitar resaltado después de un tiempo
-          setTimeout(() => {
-            row.style.backgroundColor = '';
+          // Ocultar después de un tiempo
+          notificationTimeout = setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+              notification.remove();
+            }, 300);
           }, 3000);
         }
-      });
-      
-      if (found) {
-        showNotification('Producto encontrado', 'success');
-      } else {
-        showNotification('No se encontró el producto con ese código', 'error');
-      }
-    };
-    
-    // Alineación específica para la barra de búsqueda
-    // Esta función se ejecuta después de que el DOM esté completamente cargado
-    function alignSearchBar() {
-      // Obtenemos la posición del título
-      const title = document.querySelector('.page-title');
-      if (title) {
-        const titleRect = title.getBoundingClientRect();
-        // Obtenemos el input de búsqueda
-        const searchBox = document.querySelector('.search-box');
-        if (searchBox) {
-          // Ajustamos el margen izquierdo del input para que comience en la misma línea que la 'U' del título
-          searchBox.style.marginLeft = titleRect.left + 'px';
+        
+        // Soporte para escaneo con pistola/cámara
+        if (window.initBarcodeScanner) {
+          window.initBarcodeScanner('#scanIcon', '#searchProducts');
         }
-      }
-    }
-    
-    // Ejecutar alineación después de un pequeño retraso para asegurar que todo está cargado
-    setTimeout(alignSearchBar, 100);
-    
-    // También ejecutar si cambia el tamaño de la ventana
-    window.addEventListener('resize', alignSearchBar);
-    
-    // Aplicar filtros iniciales
-    applyFilters();
-  });
-</script>
-{% endblock %}
+        
+        // Manejo de código escaneado (para cualquier método de escaneo)
+        window.onScannedBarcode = function(code) {
+          searchInput.value = code;
+          applyFilters();
+          
+          // Buscar producto con código escaneado
+          let found = false;
+          productRows.forEach(row => {
+            if (row.getAttribute('data-product-code') === code.toLowerCase()) {
+              // Resaltar la fila
+              row.style.transition = 'background-color 0.3s';
+              row.style.backgroundColor = 'rgba(0, 122, 255, 0.2)';
+              found = true;
+              
+              // Hacer scroll para que sea visible
+              row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              
+              // Quitar resaltado después de un tiempo
+              setTimeout(() => {
+                row.style.backgroundColor = '';
+              }, 3000);
+            }
+          });
+          
+          if (found) {
+            showNotification('Producto encontrado', 'success');
+          } else {
+            showNotification('No se encontró el producto con ese código', 'error');
+          }
+        };
+        
+        // Aplicar filtros iniciales
+        applyFilters();
+      });
+    </script>
+    {% endblock %}
