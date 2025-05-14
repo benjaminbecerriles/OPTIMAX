@@ -1375,7 +1375,8 @@
     brands: new Set(),
     globalDetails: null,
     categoryDetails: {},
-    brandDetails: {}
+    brandDetails: {},
+    locationValues: {}  // Para guardar valores de ubicación
   };
   
   // Cache de datos
@@ -1776,98 +1777,154 @@
     updateApplyButtonState();
   }
   
-  // Función para verificar ubicaciones existentes
+  // FUNCIÓN PARA OBTENER ESTADO DE UBICACIONES ACTIVAS DESDE LA API
   function checkExistingLocations() {
-    // Inicializar conjuntos para ubicaciones
-    const globalProducts = [];
-    const productsWithIndividualLocation = [];
-    const categoriesWithLocation = {};
-    const brandsWithLocation = {};
-    
-    // Recorrer todos los productos
-    productosCache.forEach(product => {
-      if (product.ubicacion) {
-        // Agrupar por tipo para simular lo que haríamos con una API real
-        // Esta lógica se reemplazaría con la respuesta de la API en un escenario real
+    fetch('/api/get_active_locations')
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          const locations = data.active_locations;
+          
+          // Actualizar el estado global con los datos de la API
+          activeLocations.global = locations.global;
+          activeLocations.locationValues = locations.location_values || {};
+          
+          // Añadir categorías con ubicación
+          locations.categorias.forEach(category => {
+            activeLocations.categories.add(category);
+          });
+          
+          // Añadir marcas con ubicación
+          locations.marcas.forEach(brand => {
+            activeLocations.brands.add(brand);
+          });
+          
+          // Actualizar UI
+          updateMyLocationsSection();
+        } else {
+          console.error('Error al obtener ubicaciones activas:', data.message);
+          detectLocationsByProducts();
+        }
+      })
+      .catch(error => {
+        console.error('Error al obtener estado de ubicaciones:', error);
+        // Si falla la API, intentamos detectar por nuestros propios medios
+        detectLocationsByProducts();
+      });
+  }
+  
+  // FALLBACK: Detectar ubicaciones manualmente en caso de que la API falle
+  function detectLocationsByProducts() {
+    // Agrupar productos por ubicación
+    const productosPorUbicacion = {};
+    const productosPorCategoriaUbicacion = {};
+    const productosPorMarcaUbicacion = {};
+
+    productosCache.forEach(producto => {
+      if (producto.ubicacion) {
+        // Para ubicación global
+        if (!productosPorUbicacion[producto.ubicacion]) {
+          productosPorUbicacion[producto.ubicacion] = [];
+        }
+        productosPorUbicacion[producto.ubicacion].push(producto);
         
-        // Para ubicaciones globales, asumimos que si más del 80% de los productos 
-        // tienen la misma ubicación, es una ubicación "global"
-        if (!categoriesWithLocation[product.categoria] && product.categoria) {
-          categoriesWithLocation[product.categoria] = [];
+        // Para categorías
+        if (producto.categoria) {
+          const key = `${producto.categoria}_${producto.ubicacion}`;
+          if (!productosPorCategoriaUbicacion[key]) {
+            productosPorCategoriaUbicacion[key] = [];
+          }
+          productosPorCategoriaUbicacion[key].push(producto);
         }
         
-        if (!brandsWithLocation[product.marca] && product.marca) {
-          brandsWithLocation[product.marca] = [];
+        // Para marcas
+        if (producto.marca) {
+          const key = `${producto.marca}_${producto.ubicacion}`;
+          if (!productosPorMarcaUbicacion[key]) {
+            productosPorMarcaUbicacion[key] = [];
+          }
+          productosPorMarcaUbicacion[key].push(producto);
         }
-        
-        // Añadir a las listas correspondientes
-        if (product.categoria) {
-          categoriesWithLocation[product.categoria].push(product);
-        }
-        
-        if (product.marca) {
-          brandsWithLocation[product.marca].push(product);
-        }
-        
-        // Si no está en ningún grupo, considerar como ubicación individual
-        productsWithIndividualLocation.push(product);
       }
     });
     
-    // Procesar los datos y actualizar estado global
+    // Detectar ubicación global (si más del 80% tienen la misma ubicación)
+    const totalProductos = productosCache.length;
+    let ubicacionGlobal = null;
+    let maxProductosGlobal = 0;
     
-    // Revisar ubicaciones por categoría
-    for (const category in categoriesWithLocation) {
-      if (categoriesWithLocation[category].length > 0) {
-        // Verificar si todos los productos de la categoría tienen la misma ubicación
-        const firstLocation = categoriesWithLocation[category][0].ubicacion;
-        const allSameLocation = categoriesWithLocation[category].every(p => p.ubicacion === firstLocation);
-        
-        if (allSameLocation) {
-          activeLocations.categories.add(category);
-          activeLocations.categoryDetails[category] = categoriesWithLocation[category];
-        }
+    for (const ubicacion in productosPorUbicacion) {
+      const count = productosPorUbicacion[ubicacion].length;
+      if (count > maxProductosGlobal) {
+        maxProductosGlobal = count;
+        ubicacionGlobal = ubicacion;
       }
     }
     
-    // Revisar ubicaciones por marca
-    for (const brand in brandsWithLocation) {
-      if (brandsWithLocation[brand].length > 0) {
-        // Verificar si todos los productos de la marca tienen la misma ubicación
-        const firstLocation = brandsWithLocation[brand][0].ubicacion;
-        const allSameLocation = brandsWithLocation[brand].every(p => p.ubicacion === firstLocation);
-        
-        if (allSameLocation) {
-          activeLocations.brands.add(brand);
-          activeLocations.brandDetails[brand] = brandsWithLocation[brand];
-        }
-      }
+    // Si más del 80% tienen la misma ubicación, considerarla global
+    if (maxProductosGlobal > 0.8 * totalProductos) {
+      activeLocations.global = true;
+      activeLocations.globalDetails = productosPorUbicacion[ubicacionGlobal];
+      activeLocations.locationValues['global'] = ubicacionGlobal;
     }
     
-    // Considerar los productos restantes como ubicaciones individuales
-    productsWithIndividualLocation.forEach(product => {
-      // Si no está en un grupo de categoría o marca, considerarlo como individual
-      const isInCategoryGroup = product.categoria && activeLocations.categories.has(product.categoria);
-      const isInBrandGroup = product.marca && activeLocations.brands.has(product.marca);
+    // Detectar categorías con ubicación dominante
+    const categoriasProcesadas = new Set();
+    
+    for (const key in productosPorCategoriaUbicacion) {
+      const [categoria, ubicacion] = key.split('_');
       
-      if (!isInCategoryGroup && !isInBrandGroup && product.ubicacion) {
-        activeLocations.products.add(product.id);
+      if (categoriasProcesadas.has(categoria)) continue;
+      
+      // Contar productos de esta categoría con esta ubicación
+      const productosCategoria = productosCache.filter(p => p.categoria === categoria);
+      const productosCategoriaUbicacion = productosPorCategoriaUbicacion[key];
+      
+      // Si más del 80% de productos de la categoría tienen la misma ubicación
+      if (productosCategoriaUbicacion.length >= 0.8 * productosCategoria.length) {
+        activeLocations.categories.add(categoria);
+        activeLocations.categoryDetails[categoria] = productosCategoriaUbicacion;
+        activeLocations.locationValues[categoria] = ubicacion;
+        categoriasProcesadas.add(categoria);
+      }
+    }
+    
+    // Detectar marcas con ubicación dominante
+    const marcasProcesadas = new Set();
+    
+    for (const key in productosPorMarcaUbicacion) {
+      const [marca, ubicacion] = key.split('_');
+      
+      if (marcasProcesadas.has(marca)) continue;
+      
+      // Contar productos de esta marca con esta ubicación
+      const productosMarca = productosCache.filter(p => p.marca === marca);
+      const productosMarcaUbicacion = productosPorMarcaUbicacion[key];
+      
+      // Si más del 80% de productos de la marca tienen la misma ubicación
+      if (productosMarcaUbicacion.length >= 0.8 * productosMarca.length) {
+        activeLocations.brands.add(marca);
+        activeLocations.brandDetails[marca] = productosMarcaUbicacion;
+        activeLocations.locationValues[marca] = ubicacion;
+        marcasProcesadas.add(marca);
+      }
+    }
+    
+    // Detectar productos con ubicación individual
+    productosCache.forEach(producto => {
+      if (producto.ubicacion) {
+        // Verificar si no está en un grupo de categoría o marca (o global)
+        const isInGlobal = activeLocations.global;
+        const isInCategory = producto.categoria && activeLocations.categories.has(producto.categoria);
+        const isInBrand = producto.marca && activeLocations.brands.has(producto.marca);
+        
+        if (!isInGlobal && !isInCategory && !isInBrand) {
+          activeLocations.products.add(producto.id);
+        }
       }
     });
     
-    // Verificar si hay una ubicación global (si todos tienen la misma ubicación)
-    const allProducts = productosCache.filter(p => p.ubicacion);
-    if (allProducts.length > 0) {
-      const firstLocation = allProducts[0].ubicacion;
-      const allSameLocation = allProducts.every(p => p.ubicacion === firstLocation);
-      
-      if (allSameLocation && allProducts.length > productosCache.length * 0.8) {
-        activeLocations.global = true;
-        activeLocations.globalDetails = allProducts;
-      }
-    }
-    
-    // Actualizar la UI
+    // Actualizar UI
     updateMyLocationsSection();
   }
   
@@ -1916,19 +1973,25 @@
       viewAllContainer.innerHTML = '';
     }
     
-    if (!activeLocations.global || !activeLocations.globalDetails || activeLocations.globalDetails.length === 0) {
+    if (!activeLocations.global) {
       container.innerHTML = '<div class="empty-locations">No hay ubicación global</div>';
       countElement.textContent = '0';
       valueElement.textContent = 'N/A';
       return;
     }
     
-    // Cuenta productos con ubicación global
-    const productsWithGlobalLocation = activeLocations.globalDetails;
+    // Contar productos con ubicación global para tener un número aproximado
+    let globalProducts = [];
+    const globalLocationValue = activeLocations.locationValues['global'] || '';
     
-    countElement.textContent = productsWithGlobalLocation.length;
-    const locationValue = productsWithGlobalLocation[0].ubicacion;
-    valueElement.textContent = locationValue;
+    productosCache.forEach(p => {
+      if (p.ubicacion === globalLocationValue) {
+        globalProducts.push(p);
+      }
+    });
+    
+    countElement.textContent = globalProducts.length;
+    valueElement.textContent = globalLocationValue;
     
     // Estructura HTML para la tarjeta global
     const url = '/ubicacion-detalle/global/all';
@@ -1941,8 +2004,8 @@
         </div>
         <div class="global-title">Ubicación Global</div>
         <div class="global-details">
-          ${productsWithGlobalLocation.length} productos en
-          <span class="global-badge">${locationValue}</span>
+          ${globalProducts.length} productos en
+          <span class="global-badge">${globalLocationValue}</span>
         </div>
         <div class="global-action">
           <button class="remove-location-btn" onclick="event.preventDefault(); event.stopPropagation(); removeGlobalLocation()">
@@ -1954,11 +2017,11 @@
     `;
     
     // Añadir enlace "Ver todos" si hay muchos productos
-    if (productsWithGlobalLocation.length > 10 && viewAllContainer) {
+    if (globalProducts.length > 10 && viewAllContainer) {
       const viewAllLink = document.createElement('a');
       viewAllLink.href = url;
       viewAllLink.className = 'view-all-header-link global';
-      viewAllLink.innerHTML = `Ver todos (${productsWithGlobalLocation.length})`;
+      viewAllLink.innerHTML = `Ver todos (${globalProducts.length})`;
       viewAllContainer.appendChild(viewAllLink);
     }
   }
@@ -1981,17 +2044,22 @@
     }
     
     const items = Array.from(activeLocations.categories).map(category => {
-      // Buscar productos por categoría
-      const categoryProducts = activeLocations.categoryDetails[category] || [];
+      // Buscar productos por categoría con su ubicación
+      const categoryProducts = productosCache.filter(p => 
+        p.categoria === category && p.ubicacion === activeLocations.locationValues[category]
+      );
       
-      const locationValue = categoryProducts.length > 0 ? categoryProducts[0].ubicacion : "";
+      const locationValue = activeLocations.locationValues[category] || "";
       
       const encodedCategory = encodeURIComponent(category);
       
       // Obtener color de categoría
       let categoryColor = "#6B7280";
-      if (categoryProducts.length > 0 && categoryProducts[0].categoria_color) {
-        categoryColor = categoryProducts[0].categoria_color;
+      
+      // Buscar producto con esta categoría para obtener su color
+      const categoryProduct = productosCache.find(p => p.categoria === category && p.categoria_color);
+      if (categoryProduct && categoryProduct.categoria_color) {
+        categoryColor = categoryProduct.categoria_color;
       }
       
       // Asignar un icono específico según la categoría
@@ -2074,10 +2142,12 @@
     }
     
     const items = Array.from(activeLocations.brands).map(brand => {
-      // Buscar productos por marca
-      const brandProducts = activeLocations.brandDetails[brand] || [];
+      // Buscar productos por marca con su ubicación
+      const brandProducts = productosCache.filter(p => 
+        p.marca === brand && p.ubicacion === activeLocations.locationValues[brand]
+      );
       
-      const locationValue = brandProducts.length > 0 ? brandProducts[0].ubicacion : "";
+      const locationValue = activeLocations.locationValues[brand] || "";
       
       const encodedBrand = encodeURIComponent(brand);
       
@@ -2128,15 +2198,9 @@
     }
     
     // Filtrar solo productos con ubicación individual
-    const individualProducts = productosCache.filter(product => {
-      if (!product.ubicacion) return false;
-      
-      // Verificar si el producto no está en un grupo de categoría o marca
-      const isInCategoryGroup = product.categoria && activeLocations.categories.has(product.categoria);
-      const isInBrandGroup = product.marca && activeLocations.brands.has(product.marca);
-      
-      return !isInCategoryGroup && !isInBrandGroup && activeLocations.products.has(product.id);
-    });
+    const individualProducts = productosCache.filter(product => 
+      product.ubicacion && activeLocations.products.has(product.id)
+    );
     
     countElement.textContent = individualProducts.length;
     
@@ -2362,39 +2426,57 @@
       return;
     }
     
-    // En un escenario real, esto sería una llamada a la API
-    // En este caso, simulamos un endpoint que asigna la ubicación a todos los productos
-    
-    // Simulamos un tiempo de proceso
+    // Mostrar indicador de carga
     showToast('Aplicando ubicación global...', 'warning');
     
-    setTimeout(() => {
-      // Actualizar los datos locales para reflejar el cambio
-      productosCache.forEach(p => {
-        p.ubicacion = locationValue;
-      });
-      
-      // Actualizar el estado global
-      activeLocations.global = true;
-      activeLocations.globalDetails = [...productosCache];
-      
-      // Limpiar otras categorías, marcas y productos individuales
-      // ya que ahora todos los productos tienen la ubicación global
-      activeLocations.categories.clear();
-      activeLocations.categoryDetails = {};
-      activeLocations.brands.clear();
-      activeLocations.brandDetails = {};
-      activeLocations.products.clear();
-      
-      // Actualizar UI
-      updateMyLocationsSection();
-      
-      showToast(`Ubicación global "${locationValue}" aplicada a todos los productos`, 'success');
-    }, 500);
+    // Llamar a la API para aplicar ubicación masiva a todos los productos
+    fetch('/api/actualizar-ubicacion-masiva', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        ubicacion: locationValue,
+        global: true
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        // Actualizar estado local
+        productosCache.forEach(p => {
+          p.ubicacion = locationValue;
+        });
+        
+        // Actualizar el estado global
+        activeLocations.global = true;
+        activeLocations.locationValues['global'] = locationValue;
+        
+        // Limpiar otras categorías, marcas y productos individuales
+        activeLocations.categories.clear();
+        activeLocations.brands.clear();
+        activeLocations.products.clear();
+        
+        // Actualizar UI
+        updateMyLocationsSection();
+        
+        showToast(`Ubicación global "${locationValue}" aplicada a ${data.count} productos`, 'success');
+      } else {
+        throw new Error(data.message || 'Error al aplicar ubicación global');
+      }
+    })
+    .catch(error => {
+      showToast('Error: ' + error.message, 'error');
+    });
   }
   
   // Aplicar ubicación a categoría
   function applyLocationToCategory(category, locationValue) {
+    if (!category) {
+      showToast('Por favor selecciona una categoría', 'error');
+      return;
+    }
+    
     const categoryProducts = productosCache.filter(p => p.categoria === category);
     
     if (categoryProducts.length === 0) {
@@ -2402,28 +2484,52 @@
       return;
     }
     
-    // Simulamos un tiempo de proceso
+    // Mostrar indicador de carga
     showToast(`Aplicando ubicación a categoría "${category}"...`, 'warning');
     
-    setTimeout(() => {
-      // Actualizar los datos locales
-      categoryProducts.forEach(p => {
-        p.ubicacion = locationValue;
-      });
-      
-      // Actualizar estado global
-      activeLocations.categories.add(category);
-      activeLocations.categoryDetails[category] = [...categoryProducts];
-      
-      // Actualizar UI
-      updateMyLocationsSection();
-      
-      showToast(`Ubicación "${locationValue}" aplicada a la categoría "${category}"`, 'success');
-    }, 500);
+    // Llamar a la API para aplicar ubicación masiva a la categoría
+    fetch('/api/actualizar-ubicacion-masiva', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        ubicacion: locationValue,
+        categoria: category
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        // Actualizar estado local
+        categoryProducts.forEach(p => {
+          p.ubicacion = locationValue;
+        });
+        
+        // Actualizar estado global
+        activeLocations.categories.add(category);
+        activeLocations.locationValues[category] = locationValue;
+        
+        // Actualizar UI
+        updateMyLocationsSection();
+        
+        showToast(`Ubicación "${locationValue}" aplicada a ${data.count} productos de la categoría "${category}"`, 'success');
+      } else {
+        throw new Error(data.message || 'Error al aplicar ubicación a la categoría');
+      }
+    })
+    .catch(error => {
+      showToast('Error: ' + error.message, 'error');
+    });
   }
   
   // Aplicar ubicación a marca
   function applyLocationToBrand(brand, locationValue) {
+    if (!brand) {
+      showToast('Por favor selecciona una marca', 'error');
+      return;
+    }
+    
     const brandProducts = productosCache.filter(p => p.marca === brand);
     
     if (brandProducts.length === 0) {
@@ -2431,28 +2537,52 @@
       return;
     }
     
-    // Simulamos un tiempo de proceso
+    // Mostrar indicador de carga
     showToast(`Aplicando ubicación a marca "${brand}"...`, 'warning');
     
-    setTimeout(() => {
-      // Actualizar los datos locales
-      brandProducts.forEach(p => {
-        p.ubicacion = locationValue;
-      });
-      
-      // Actualizar estado global
-      activeLocations.brands.add(brand);
-      activeLocations.brandDetails[brand] = [...brandProducts];
-      
-      // Actualizar UI
-      updateMyLocationsSection();
-      
-      showToast(`Ubicación "${locationValue}" aplicada a la marca "${brand}"`, 'success');
-    }, 500);
+    // Llamar a la API para aplicar ubicación masiva a la marca
+    fetch('/api/actualizar-ubicacion-masiva', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        ubicacion: locationValue,
+        marca: brand
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        // Actualizar estado local
+        brandProducts.forEach(p => {
+          p.ubicacion = locationValue;
+        });
+        
+        // Actualizar estado global
+        activeLocations.brands.add(brand);
+        activeLocations.locationValues[brand] = locationValue;
+        
+        // Actualizar UI
+        updateMyLocationsSection();
+        
+        showToast(`Ubicación "${locationValue}" aplicada a ${data.count} productos de la marca "${brand}"`, 'success');
+      } else {
+        throw new Error(data.message || 'Error al aplicar ubicación a la marca');
+      }
+    })
+    .catch(error => {
+      showToast('Error: ' + error.message, 'error');
+    });
   }
   
   // Aplicar ubicación a producto individual
   function applyLocationToSingleProduct(productId, locationValue) {
+    if (!productId) {
+      showToast('Por favor selecciona un producto', 'error');
+      return;
+    }
+    
     const product = productosCache.find(p => p.id == productId);
     
     if (!product) {
@@ -2460,24 +2590,40 @@
       return;
     }
     
-    // Simulamos un tiempo de proceso
+    // Mostrar indicador de carga
     showToast(`Aplicando ubicación a producto "${product.nombre}"...`, 'warning');
     
-    setTimeout(() => {
-      // Actualizar los datos locales
-      product.ubicacion = locationValue;
-      
-      // Actualizar estado global
-      activeLocations.products.add(product.id);
-      
-      // Actualizar UI
-      updateMyLocationsSection();
-      
-      // Limpiar selección
-      clearProductSelection();
-      
-      showToast(`Ubicación "${locationValue}" aplicada al producto "${product.nombre}"`, 'success');
-    }, 500);
+    // Llamar a la API para actualizar la ubicación del producto
+    fetch(`/api/actualizar-ubicacion/${productId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ ubicacion: locationValue })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        // Actualizar estado local
+        product.ubicacion = locationValue;
+        
+        // Actualizar estado global
+        activeLocations.products.add(parseInt(productId));
+        
+        // Actualizar UI
+        updateMyLocationsSection();
+        
+        // Limpiar selección de producto
+        clearProductSelection();
+        
+        showToast(`Ubicación "${locationValue}" aplicada al producto "${product.nombre}"`, 'success');
+      } else {
+        throw new Error(data.message || 'Error al aplicar ubicación al producto');
+      }
+    })
+    .catch(error => {
+      showToast('Error: ' + error.message, 'error');
+    });
   }
   
   // Remover ubicación global
@@ -2487,24 +2633,46 @@
       return;
     }
     
-    // Simulamos un tiempo de proceso
+    // Mostrar indicador de carga
     showToast('Removiendo ubicación global...', 'warning');
     
-    setTimeout(() => {
-      // Actualizar los datos locales
-      productosCache.forEach(p => {
-        p.ubicacion = '';
-      });
-      
-      // Actualizar estado global
-      activeLocations.global = false;
-      activeLocations.globalDetails = null;
-      
-      // Actualizar UI
-      updateMyLocationsSection();
-      
-      showToast('Ubicación global removida de todos los productos', 'success');
-    }, 500);
+    // Llamar a la API para remover ubicación global (estableciendo ubicación vacía)
+    fetch('/api/actualizar-ubicacion-masiva', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        ubicacion: '',
+        global: true,
+        remove: true
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        // Actualizar estado local
+        productosCache.forEach(p => {
+          if (p.ubicacion === activeLocations.locationValues['global']) {
+            p.ubicacion = '';
+          }
+        });
+        
+        // Actualizar estado global
+        activeLocations.global = false;
+        delete activeLocations.locationValues['global'];
+        
+        // Actualizar UI
+        updateMyLocationsSection();
+        
+        showToast(`Ubicación global removida de ${data.count} productos`, 'success');
+      } else {
+        throw new Error(data.message || 'Error al remover ubicación global');
+      }
+    })
+    .catch(error => {
+      showToast('Error: ' + error.message, 'error');
+    });
   }
   
   // Remover ubicación de categoría
@@ -2514,28 +2682,46 @@
       return;
     }
     
-    const categoryProducts = activeLocations.categoryDetails[category] || [];
-    
-    // Simulamos un tiempo de proceso
+    // Mostrar indicador de carga
     showToast(`Removiendo ubicación de categoría "${category}"...`, 'warning');
     
-    setTimeout(() => {
-      // Actualizar los datos locales
-      productosCache.forEach(p => {
-        if (p.categoria === category) {
-          p.ubicacion = '';
-        }
-      });
-      
-      // Actualizar estado global
-      activeLocations.categories.delete(category);
-      delete activeLocations.categoryDetails[category];
-      
-      // Actualizar UI
-      updateMyLocationsSection();
-      
-      showToast(`Ubicación removida de la categoría "${category}"`, 'success');
-    }, 500);
+    // Llamar a la API para remover ubicación de la categoría
+    fetch('/api/actualizar-ubicacion-masiva', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        ubicacion: '',
+        categoria: category,
+        remove: true
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        // Actualizar estado local
+        productosCache.forEach(p => {
+          if (p.categoria === category) {
+            p.ubicacion = '';
+          }
+        });
+        
+        // Actualizar estado global
+        activeLocations.categories.delete(category);
+        delete activeLocations.locationValues[category];
+        
+        // Actualizar UI
+        updateMyLocationsSection();
+        
+        showToast(`Ubicación removida de ${data.count} productos de la categoría "${category}"`, 'success');
+      } else {
+        throw new Error(data.message || 'Error al remover ubicación de la categoría');
+      }
+    })
+    .catch(error => {
+      showToast('Error: ' + error.message, 'error');
+    });
   }
   
   // Remover ubicación de marca
@@ -2545,28 +2731,46 @@
       return;
     }
     
-    const brandProducts = activeLocations.brandDetails[brand] || [];
-    
-    // Simulamos un tiempo de proceso
+    // Mostrar indicador de carga
     showToast(`Removiendo ubicación de marca "${brand}"...`, 'warning');
     
-    setTimeout(() => {
-      // Actualizar los datos locales
-      productosCache.forEach(p => {
-        if (p.marca === brand) {
-          p.ubicacion = '';
-        }
-      });
-      
-      // Actualizar estado global
-      activeLocations.brands.delete(brand);
-      delete activeLocations.brandDetails[brand];
-      
-      // Actualizar UI
-      updateMyLocationsSection();
-      
-      showToast(`Ubicación removida de la marca "${brand}"`, 'success');
-    }, 500);
+    // Llamar a la API para remover ubicación de la marca
+    fetch('/api/actualizar-ubicacion-masiva', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        ubicacion: '',
+        marca: brand,
+        remove: true
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        // Actualizar estado local
+        productosCache.forEach(p => {
+          if (p.marca === brand) {
+            p.ubicacion = '';
+          }
+        });
+        
+        // Actualizar estado global
+        activeLocations.brands.delete(brand);
+        delete activeLocations.locationValues[brand];
+        
+        // Actualizar UI
+        updateMyLocationsSection();
+        
+        showToast(`Ubicación removida de ${data.count} productos de la marca "${brand}"`, 'success');
+      } else {
+        throw new Error(data.message || 'Error al remover ubicación de la marca');
+      }
+    })
+    .catch(error => {
+      showToast('Error: ' + error.message, 'error');
+    });
   }
   
   // Remover ubicación de producto
@@ -2578,21 +2782,37 @@
       return;
     }
     
-    // Simulamos un tiempo de proceso
+    // Mostrar indicador de carga
     showToast(`Removiendo ubicación de producto "${product.nombre}"...`, 'warning');
     
-    setTimeout(() => {
-      // Actualizar los datos locales
-      product.ubicacion = '';
-      
-      // Actualizar estado global
-      activeLocations.products.delete(productId);
-      
-      // Actualizar UI
-      updateMyLocationsSection();
-      
-      showToast(`Ubicación removida del producto "${product.nombre}"`, 'success');
-    }, 500);
+    // Llamar a la API para remover ubicación del producto
+    fetch(`/api/actualizar-ubicacion/${productId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ ubicacion: '' })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        // Actualizar estado local
+        product.ubicacion = '';
+        
+        // Actualizar estado global
+        activeLocations.products.delete(parseInt(productId));
+        
+        // Actualizar UI
+        updateMyLocationsSection();
+        
+        showToast(`Ubicación removida del producto "${product.nombre}"`, 'success');
+      } else {
+        throw new Error(data.message || 'Error al remover ubicación del producto');
+      }
+    })
+    .catch(error => {
+      showToast('Error: ' + error.message, 'error');
+    });
   }
   
   // Remover todas las ubicaciones de categoría
@@ -2602,27 +2822,73 @@
       return;
     }
     
-    // Simulamos un tiempo de proceso
+    // Mostrar indicador de carga
     showToast('Removiendo todas las ubicaciones por categoría...', 'warning');
     
-    setTimeout(() => {
-      // Para cada categoría, remover la ubicación de sus productos
-      activeLocations.categories.forEach(category => {
-        productosCache.forEach(p => {
-          if (p.categoria === category) {
-            p.ubicacion = '';
-          }
-        });
+    // Obtener todas las categorías con ubicación
+    const categoriasConUbicacion = Array.from(activeLocations.categories);
+    let categoriasCompletadas = 0;
+    let totalProductosActualizados = 0;
+    
+    // Función para procesar categorías una por una
+    function procesarSiguienteCategoria(index) {
+      if (index >= categoriasConUbicacion.length) {
+        // Terminamos de procesar todas las categorías
+        showToast(`Se removieron ubicaciones de ${totalProductosActualizados} productos en todas las categorías`, 'success');
+        return;
+      }
+      
+      const categoria = categoriasConUbicacion[index];
+      
+      // Llamar a la API para remover ubicación de esta categoría
+      fetch('/api/actualizar-ubicacion-masiva', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ubicacion: '',
+          categoria: categoria,
+          remove: true
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Actualizar estado local
+          productosCache.forEach(p => {
+            if (p.categoria === categoria) {
+              p.ubicacion = '';
+            }
+          });
+          
+          // Actualizar estado global
+          activeLocations.categories.delete(categoria);
+          delete activeLocations.locationValues[categoria];
+          
+          // Sumar al total
+          totalProductosActualizados += data.count;
+          categoriasCompletadas++;
+          
+          // Procesar la siguiente categoría
+          procesarSiguienteCategoria(index + 1);
+        } else {
+          throw new Error(data.message || 'Error al remover ubicación de la categoría');
+        }
+      })
+      .catch(error => {
+        showToast('Error: ' + error.message, 'error');
+        // Intentar continuar con la siguiente categoría a pesar del error
+        procesarSiguienteCategoria(index + 1);
       });
-      
-      // Limpiar estado global
-      activeLocations.categories.clear();
-      activeLocations.categoryDetails = {};
-      
-      // Actualizar UI
+    }
+    
+    // Iniciar el proceso con la primera categoría
+    procesarSiguienteCategoria(0);
+    
+    // Actualizar UI después de que termine el proceso
+    setTimeout(() => {
       updateMyLocationsSection();
-      
-      showToast('Todas las ubicaciones por categoría han sido removidas', 'success');
     }, 500);
   }
   
@@ -2633,27 +2899,73 @@
       return;
     }
     
-    // Simulamos un tiempo de proceso
+    // Mostrar indicador de carga
     showToast('Removiendo todas las ubicaciones por marca...', 'warning');
     
-    setTimeout(() => {
-      // Para cada marca, remover la ubicación de sus productos
-      activeLocations.brands.forEach(brand => {
-        productosCache.forEach(p => {
-          if (p.marca === brand) {
-            p.ubicacion = '';
-          }
-        });
+    // Obtener todas las marcas con ubicación
+    const marcasConUbicacion = Array.from(activeLocations.brands);
+    let marcasCompletadas = 0;
+    let totalProductosActualizados = 0;
+    
+    // Función para procesar marcas una por una
+    function procesarSiguienteMarca(index) {
+      if (index >= marcasConUbicacion.length) {
+        // Terminamos de procesar todas las marcas
+        showToast(`Se removieron ubicaciones de ${totalProductosActualizados} productos en todas las marcas`, 'success');
+        return;
+      }
+      
+      const marca = marcasConUbicacion[index];
+      
+      // Llamar a la API para remover ubicación de esta marca
+      fetch('/api/actualizar-ubicacion-masiva', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ubicacion: '',
+          marca: marca,
+          remove: true
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Actualizar estado local
+          productosCache.forEach(p => {
+            if (p.marca === marca) {
+              p.ubicacion = '';
+            }
+          });
+          
+          // Actualizar estado global
+          activeLocations.brands.delete(marca);
+          delete activeLocations.locationValues[marca];
+          
+          // Sumar al total
+          totalProductosActualizados += data.count;
+          marcasCompletadas++;
+          
+          // Procesar la siguiente marca
+          procesarSiguienteMarca(index + 1);
+        } else {
+          throw new Error(data.message || 'Error al remover ubicación de la marca');
+        }
+      })
+      .catch(error => {
+        showToast('Error: ' + error.message, 'error');
+        // Intentar continuar con la siguiente marca a pesar del error
+        procesarSiguienteMarca(index + 1);
       });
-      
-      // Limpiar estado global
-      activeLocations.brands.clear();
-      activeLocations.brandDetails = {};
-      
-      // Actualizar UI
+    }
+    
+    // Iniciar el proceso con la primera marca
+    procesarSiguienteMarca(0);
+    
+    // Actualizar UI después de que termine el proceso
+    setTimeout(() => {
       updateMyLocationsSection();
-      
-      showToast('Todas las ubicaciones por marca han sido removidas', 'success');
     }, 500);
   }
   
@@ -2664,26 +2976,49 @@
       return;
     }
     
-    // Simulamos un tiempo de proceso
+    // Mostrar indicador de carga
     showToast('Removiendo todas las ubicaciones individuales...', 'warning');
     
-    setTimeout(() => {
-      // Para cada producto con ubicación individual, removerla
-      activeLocations.products.forEach(productId => {
-        const product = productosCache.find(p => p.id == productId);
-        if (product) {
-          product.ubicacion = '';
-        }
-      });
-      
-      // Limpiar estado global
-      activeLocations.products.clear();
-      
-      // Actualizar UI
-      updateMyLocationsSection();
-      
-      showToast('Todas las ubicaciones individuales han sido removidas', 'success');
-    }, 500);
+    // Obtener todos los IDs de productos con ubicación individual
+    const productosIndividuales = Array.from(activeLocations.products);
+    
+    // Llamar a la API para remover ubicación de estos productos
+    fetch('/api/actualizar-ubicacion-masiva', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        ubicacion: '',
+        producto_ids: productosIndividuales,
+        remove: true
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        // Actualizar estado local
+        productosIndividuales.forEach(productId => {
+          const product = productosCache.find(p => p.id == productId);
+          if (product) {
+            product.ubicacion = '';
+          }
+        });
+        
+        // Limpiar estado global
+        activeLocations.products.clear();
+        
+        // Actualizar UI
+        updateMyLocationsSection();
+        
+        showToast(`Ubicaciones removidas de ${data.count} productos individuales`, 'success');
+      } else {
+        throw new Error(data.message || 'Error al remover ubicaciones individuales');
+      }
+    })
+    .catch(error => {
+      showToast('Error: ' + error.message, 'error');
+    });
   }
   
   // Función para navegar sliders
