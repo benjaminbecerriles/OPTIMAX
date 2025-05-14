@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Ubicación de Productos - OptiMax{% endblock %}
+{% block title %}Ubicaciones de Productos - OptiMax{% endblock %}
 
 {% block content %}
 <style>
@@ -8,7 +8,7 @@
   :root {
     --font-apple: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', Helvetica, Arial, sans-serif;
     
-    /* Colores esenciales - TEXTO OSCURECIDO */
+    /* Colores esenciales */
     --text-color: #1d1d1f;
     --text-secondary: #515154;
     --background: #ffffff;
@@ -17,15 +17,8 @@
     --accent: #e52e2e;
     --accent-hover: #c51818;
     --accent-light: rgba(229, 46, 46, 0.1);
-    --save-btn-color: #ff6b6b;
-    --save-btn-hover: #ff5252;
     --blue: #1a237e;
-    --location-color: #3498db;
-    
-    /* Colores de estado */
-    --green: #2ecc71;
-    --orange: #f39c12;
-    --red: #e74c3c;
+    --location-color: #007aff;
   }
   
   body {
@@ -43,13 +36,14 @@
     padding: 36px 24px;
   }
   
-  /* Encabezado de página - Igual a cambiar_precios.html */
+  /* Encabezado de página - BASADO EN cambiar_precios.html */
   .page-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 1.5rem;
     padding-bottom: 1rem;
+    width: 100%;
   }
   
   .header-title-container {
@@ -122,7 +116,7 @@
     color: #ffffff;
   }
   
-  /* Botón asignar masivamente */
+  /* Botón asignar en grupo */
   .btn-assign {
     background-color: var(--accent);
     color: #ffffff;
@@ -136,18 +130,20 @@
     color: #ffffff;
   }
   
-  /* Barra de búsqueda - Igual a cambiar_precios.html */
+  /* Barra de búsqueda - ALINEADA ESPECÍFICAMENTE */
   .search-container {
     display: flex;
     gap: 0.75rem;
-    margin-bottom: 60px;
+    margin-bottom: 36px;
     position: relative;
     align-items: center;
+    width: 100%;
   }
   
   .search-box {
     flex: 1;
     position: relative;
+    margin-right: auto;
   }
   
   .search-box i {
@@ -185,10 +181,11 @@
     gap: 0.5rem;
   }
   
+  /* Contenedor para el filtro de sin ubicación */
   .filter-container {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 8px;
     background-color: var(--light-background);
     border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 8px;
@@ -196,6 +193,7 @@
     height: 48px;
     transition: all 0.2s ease;
     cursor: pointer;
+    user-select: none;
   }
   
   .filter-container:hover {
@@ -205,7 +203,7 @@
   }
   
   .filter-container.active {
-    background-color: rgba(52, 152, 219, 0.1);
+    background-color: rgba(0, 122, 255, 0.1);
     border-color: var(--location-color);
   }
   
@@ -218,280 +216,463 @@
     display: none;
   }
   
-  /* Categorías - Estilo de cambiar_precios.html */
-  .category-section {
-    margin-bottom: 70px;
-    border: 1px solid #eaeaea;
-    border-radius: 12px;
-    padding: 25px;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.05);
-    background-color: #fafafa;
-  }
-  
-  .category-header {
+  .icon-btn {
+    width: 48px;
+    height: 48px;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #f0f0f0;
-  }
-  
-  .category-title {
-    font-size: 22px;
-    font-weight: 600;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    color: var(--text-color);
-  }
-  
-  .category-badge {
-    display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
-    background-color: #eeeeee;
-    color: #505050;
-    font-size: 13px;
-    font-weight: 600;
+    background-color: var(--light-background);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
   }
   
-  .category-color-dot {
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-  }
-  
-  /* Productos - Diseño mejorado */
-  .product-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-    gap: 18px;
-    margin-top: 20px;
-  }
-  
-  .product-card {
+  .icon-btn:hover {
     background-color: white;
-    border-radius: 12px;
-    overflow: hidden;
-    border: 1px solid #e0e0e0;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.07);
-    display: flex;
-    flex-direction: column;
-    height: 300px;
-    position: relative;
-  }
-  
-  .product-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 15px rgba(0,0,0,0.08);
-  }
-  
-  .product-image-container {
-    height: 120px;
-    min-height: 120px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-    background-color: #f8f8f8;
-    padding: 5px;
-    border-bottom: 1px solid #f0f0f0;
-  }
-  
-  .product-image {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-  }
-  
-  .product-details {
-    padding: 16px;
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .product-info-container {
-    height: 64px;
-    margin-bottom: 10px;
-    overflow: hidden;
-    position: relative;
-  }
-  
-  .product-name {
-    font-size: 15px;
-    font-weight: 600;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    line-height: 1.4;
-    color: var(--text-color);
-    height: 42px;
-    margin-bottom: 0;
-  }
-  
-  .product-code {
-    font-size: 12px;
-    color: var(--text-secondary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-top: 4px;
-  }
-  
-  /* Ubicación y controles */
-  .location-container {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-top: 5px;
-  }
-  
-  .location-label {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text-secondary);
-  }
-  
-  .location-display {
-    font-size: 15px;
-    font-weight: 500;
-    padding: 6px 0;
-    color: var(--location-color);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  
-  .location-display.empty {
-    color: var(--text-secondary);
-    font-style: italic;
-    opacity: 0.7;
-  }
-  
-  .location-input-container {
-    display: none;
-    flex-direction: column;
-    gap: 8px;
-  }
-  
-  .location-input-group {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .location-input {
-    width: 100%;
-    padding: 8px 10px;
-    border-radius: 6px;
-    border: 1px solid var(--location-color);
-    font-size: 14px;
-    outline: none;
-    transition: all 0.2s ease;
-  }
-  
-  .location-input:focus {
-    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
-  }
-  
-  .suggestions-container {
-    margin-top: 2px;
-    max-height: 0;
-    overflow: hidden;
-    transition: all 0.3s ease;
-  }
-  
-  .location-input:focus + .suggestions-container {
-    max-height: 60px;
-  }
-  
-  .location-suggestions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-    padding-top: 5px;
-  }
-  
-  .suggestion-chip {
-    font-size: 11px;
-    padding: 3px 8px;
-    background-color: #eef5fb;
-    border: 1px solid #d6e9f8;
-    border-radius: 12px;
-    cursor: pointer;
-    white-space: nowrap;
-  }
-  
-  .suggestion-chip:hover {
-    background-color: #d6e9f8;
-  }
-  
-  .action-buttons {
-    display: flex;
-    gap: 5px;
-    justify-content: flex-end;
-    padding-top: 5px;
-  }
-  
-  .btn-edit, .btn-save, .btn-cancel {
-    width: 34px;
-    height: 34px;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-  
-  .btn-edit {
-    background-color: #eef5fb;
-    color: var(--location-color);
-  }
-  
-  .btn-save {
-    background-color: rgba(46, 204, 113, 0.15);
-    color: var(--green);
-    display: none;
-  }
-  
-  .btn-cancel {
-    background-color: rgba(231, 76, 60, 0.15);
-    color: var(--red);
-    display: none;
-  }
-  
-  .btn-edit:hover, .btn-save:hover, .btn-cancel:hover {
     transform: translateY(-2px);
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   }
   
-  /* Toast notificaciones */
-  .toast-container {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 1000;
+  .icon-btn.scan-active {
+    background-color: rgba(229, 46, 46, 0.1);
+    border-color: var(--accent);
+    animation: blink 1s infinite;
   }
   
+  /* Tabla de productos - ALINEADA PRIMERA COLUMNA IZQUIERDA */
+  .table-container {
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--separator);
+    margin-bottom: 32px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    width: 100%;
+    background-color: white;
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  th {
+    padding: 16px;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-secondary);
+    background-color: var(--light-background);
+    border-bottom: 1px solid var(--separator);
+  }
+  
+  th:first-child {
+    text-align: left;
+  }
+  
+  th:not(:first-child) {
+    text-align: center;
+  }
+  
+  td {
+    padding: 16px;
+    border-bottom: 1px solid var(--separator);
+    font-size: 15px;
+  }
+  
+  td:first-child {
+    text-align: left;
+  }
+  
+  td:not(:first-child) {
+    text-align: center;
+  }
+  
+  tr:last-child td {
+    border-bottom: none;
+  }
+  
+  tr:hover {
+    background-color: var(--light-background);
+  }
+  
+  tr {
+    transition: background-color 0.2s ease;
+  }
+  
+  .product-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    justify-content: flex-start;
+  }
+  
+  .product-image {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    object-fit: contain;
+    background-color: white;
+    border: 1px solid var(--separator);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  }
+  
+  .product-details {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    max-width: 200px;
+  }
+  
+  .product-name {
+    font-weight: 500;
+    margin-bottom: 4px;
+    color: var(--text-color);
+    text-align: left;
+  }
+  
+  .product-code {
+    font-size: 13px;
+    color: var(--text-secondary);
+    text-align: left;
+  }
+  
+  .location-cell {
+    max-width: 240px;
+    position: relative;
+  }
+  
+  .location-display {
+    padding: 8px 0;
+    font-weight: 500;
+    color: var(--location-color);
+    transition: all 0.2s ease;
+  }
+  
+  .location-display.empty {
+    color: var(--text-secondary);
+    font-weight: 400;
+    font-style: italic;
+  }
+  
+  .location-edit {
+    display: none;
+    justify-content: center;
+    max-width: 240px;
+    margin: 0 auto;
+  }
+  
+  .location-edit input {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--location-color);
+    font-size: 15px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    transition: all 0.2s ease;
+  }
+  
+  .location-edit input:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
+    transform: translateY(-1px);
+  }
+  
+  .location-suggestions {
+    margin-top: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+  }
+  
+  .location-suggestion {
+    font-size: 12px;
+    background-color: #f0f0f5;
+    border-radius: 6px;
+    padding: 4px 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+  }
+  
+  .location-suggestion:hover {
+    background-color: #e5e5ea;
+    transform: translateY(-1px);
+    border-color: var(--location-color);
+  }
+  
+  .action-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+  
+  .btn-icon {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background-color: #f5f5f7;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+  
+  .btn-icon:hover {
+    background-color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+  
+  .btn-icon.edit {
+    color: var(--location-color);
+  }
+  
+  .btn-icon.edit:hover {
+    background-color: rgba(0, 122, 255, 0.1);
+    border-color: var(--location-color);
+  }
+  
+  .btn-icon.delete {
+    color: var(--accent);
+  }
+  
+  .btn-icon.delete:hover {
+    background-color: rgba(229, 46, 46, 0.1);
+    border-color: var(--accent);
+  }
+  
+  .btn-save, .btn-cancel {
+    display: none;
+  }
+  
+  /* Notificaciones */
+  .notification {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    border-radius: 12px;
+    padding: 14px 20px;
+    font-size: 15px;
+    font-weight: 500;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+  
+  .notification.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  .notification.success {
+    background-color: #34c759;
+  }
+  
+  .notification.error {
+    background-color: #ff3b30;
+  }
+  
+  /* Modal de edición masiva - DISEÑO MEJORADO */
+  .modal-content {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2);
+    border: none;
+  }
+  
+  .modal-header {
+    border-bottom: 1px solid var(--separator);
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: var(--light-background);
+  }
+  
+  .modal-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+    color: var(--text-color);
+  }
+  
+  .btn-close {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    width: 26px;
+    height: 26px;
+    opacity: 0.7;
+    transition: all 0.2s ease;
+  }
+  
+  .btn-close:hover {
+    opacity: 1;
+    background-color: rgba(0, 0, 0, 0.15);
+    transform: scale(1.05);
+  }
+  
+  .modal-body {
+    padding: 28px;
+  }
+  
+  .modal-footer {
+    border-top: 1px solid var(--separator);
+    padding: 18px 24px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    background-color: var(--light-background);
+  }
+  
+  .form-group {
+    margin-bottom: 24px;
+  }
+  
+  .form-label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 10px;
+    font-size: 15px;
+    color: var(--text-color);
+  }
+  
+  .form-control {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 10px;
+    border: 1px solid #dcdce0;
+    font-size: 15px;
+    transition: all 0.2s ease;
+    background-color: white;
+  }
+  
+  .form-control:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-light);
+    transform: translateY(-1px);
+  }
+  
+  .radio-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 8px;
+    margin-bottom: 6px;
+  }
+  
+  .radio-option:hover {
+    background-color: var(--light-background);
+    padding-left: 10px;
+  }
+  
+  .radio-option input {
+    margin: 0;
+    width: 18px;
+    height: 18px;
+    accent-color: var(--accent);
+  }
+  
+  .radio-option span {
+    font-size: 15px;
+    font-weight: 500;
+  }
+  
+  /* Estado vacío */
+  .empty-state {
+    padding: 64px 0;
+    text-align: center;
+    background-color: var(--light-background);
+    border-radius: 16px;
+    border: 1px dashed var(--separator);
+    margin-bottom: 32px;
+    width: 100%;
+  }
+  
+  .empty-icon {
+    font-size: 56px;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+  }
+  
+  .empty-title {
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--text-color);
+  }
+  
+  .empty-description {
+    color: var(--text-secondary);
+    font-size: 17px;
+    max-width: 420px;
+    margin: 0 auto 24px auto;
+    line-height: 1.5;
+  }
+  
+  /* Paginación */
+  .pagination {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 32px;
+  }
+  
+  .pagination-item {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background-color: var(--light-background);
+    border: 1px solid var(--separator);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+  }
+  
+  .pagination-item:hover {
+    background-color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+  
+  .pagination-item.active {
+    background-color: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+  
+  /* Toast notificaciones */
   .toast {
     background-color: #333;
     color: white;
     padding: 14px 20px;
-    border-radius: 8px;
+    border-radius: 12px;
     margin-top: 8px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
     display: flex;
     align-items: center;
     gap: 10px;
@@ -501,11 +682,11 @@
   }
   
   .toast.success {
-    background-color: var(--green);
+    background-color: #34c759;
   }
   
   .toast.error {
-    background-color: var(--red);
+    background-color: #ff3b30;
   }
   
   @keyframes slideIn {
@@ -529,246 +710,68 @@
     }
   }
   
-  /* Estado vacío */
-  .empty-state {
-    padding: 50px 0;
-    text-align: center;
-    background-color: var(--light-background);
-    border-radius: 12px;
-    margin-bottom: 36px;
-  }
-  
-  .empty-icon {
-    font-size: 32px;
-    color: var(--text-secondary);
-    margin-bottom: 14px;
-  }
-  
-  .empty-message {
-    font-size: 16px;
-    color: var(--text-secondary);
-    margin-bottom: 20px;
-    max-width: 300px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  
-  .btn-reset {
-    display: inline-block;
-    background-color: white;
-    color: var(--text-color);
-    border: 1px solid #d1d1d6;
-    border-radius: 8px;
-    padding: 12px 28px;
-    font-size: 15px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-    text-decoration: none;
-    margin-top: 5px;
-  }
-  
-  .btn-reset:hover {
-    background-color: #f5f5f7;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    transform: translateY(-1px);
-  }
-  
-  /* Animaciones */
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-  
-  .animated-fade {
-    animation: fadeIn 0.3s ease-out;
-  }
-  
-  /* Modal para asignación masiva */
-  .modal-content {
-    border-radius: 12px;
-    overflow: hidden;
-    border: none;
-  }
-  
-  .modal-header {
-    background-color: #f8f9fa;
-    border-bottom: 1px solid var(--separator);
-    padding: 16px 20px;
-  }
-  
-  .modal-title {
-    font-weight: 600;
-    font-size: 18px;
-    color: var(--text-color);
-  }
-  
-  .modal-body {
-    padding: 20px;
-  }
-  
-  .form-group {
-    margin-bottom: 20px;
-  }
-  
-  .form-label {
-    display: block;
-    font-weight: 500;
-    margin-bottom: 8px;
-    color: var(--text-color);
-  }
-  
-  .form-control {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1px solid #d1d1d6;
-    border-radius: 8px;
-    font-size: 15px;
-    transition: all 0.2s ease;
-  }
-  
-  .form-control:focus {
-    border-color: var(--location-color);
-    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
-    outline: none;
-  }
-  
-  .selection-options {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-top: 10px;
-  }
-  
-  .option-container {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  
-  .radio-label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-  }
-  
-  .text-muted {
-    color: var(--text-secondary);
-    font-size: 13px;
-    margin-top: 5px;
-  }
-  
-  .product-items-list {
-    max-height: 200px;
-    overflow-y: auto;
-    margin-top: 10px;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    padding: 10px;
-  }
-  
-  .product-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 10px;
-    border-bottom: 1px solid #f0f0f0;
-  }
-  
-  .product-item:last-child {
-    border-bottom: none;
-  }
-  
-  .category-select, .location-select {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1px solid #d1d1d6;
-    border-radius: 8px;
-    font-size: 15px;
-    background-color: white;
-  }
-  
-  .modal-footer {
-    border-top: 1px solid var(--separator);
-    padding: 16px 20px;
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-  }
-  
-  .btn-secondary {
-    padding: 8px 16px;
-    border-radius: 6px;
-    background-color: #f5f5f7;
-    border: 1px solid #d1d1d6;
-    color: var(--text-color);
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-  
-  .btn-primary {
-    padding: 8px 16px;
-    border-radius: 6px;
-    background-color: var(--accent);
-    border: none;
-    color: white;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-  
-  .btn-primary:hover {
-    background-color: var(--accent-hover);
-    transform: translateY(-1px);
-  }
-  
   /* Responsive */
   @media (max-width: 768px) {
     .page-header {
       flex-direction: column;
       align-items: flex-start;
-      gap: 1rem;
+      gap: 16px;
     }
     
     .header-actions {
       width: 100%;
     }
     
-    .product-grid {
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    }
-    
     .search-container {
       flex-direction: column;
       align-items: stretch;
     }
+    
+    .search-actions {
+      justify-content: space-between;
+    }
+    
+    .table-container {
+      overflow-x: auto;
+    }
+    
+    th, td {
+      padding: 12px 8px;
+    }
+    
+    .product-image {
+      width: 36px;
+      height: 36px;
+    }
   }
   
-  @media (max-width: 480px) {
-    .product-grid {
-      grid-template-columns: 1fr;
-    }
+  @keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0.6; }
+    100% { opacity: 1; }
+  }
+  
+  .animated-fade {
+    animation: fadeIn 0.3s ease-out;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
 </style>
 
 <div class="apple-container animated-fade">
-  <!-- ESTRUCTURA DE ENCABEZADO IGUAL A CAMBIAR_PRECIOS.HTML -->
+  <!-- Cabecera -->
   <div class="page-header">
     <div class="header-title-container">
-      <h1 class="page-title">Ubicación de Productos</h1>
-      <p class="page-description">Define dónde se encuentran físicamente tus productos para facilitar su localización</p>
+      <h1 class="page-title">Ubicaciones de Productos</h1>
+      <p class="page-description">Gestiona las ubicaciones físicas de tus productos de manera fácil y rápida</p>
     </div>
     <div class="header-actions">
-      <!-- Botón para asignación masiva -->
-      <button type="button" class="btn-action btn-assign" data-bs-toggle="modal" data-bs-target="#ubicacionMasivaModal">
-        <i class="fas fa-tags"></i>
-        <span>Asignación masiva</span>
+      <button id="btnBulkAssign" class="btn-action btn-assign" data-bs-toggle="modal" data-bs-target="#bulkLocationModal">
+        <i class="fas fa-tags"></i> Agregar masivamente
       </button>
-      
-      <!-- Botón Volver -->
       <a href="{{ url_for('dashboard_inventario') }}" class="btn-action btn-volver">
         <i class="fas fa-arrow-left"></i>
         <span>Volver</span>
@@ -776,271 +779,336 @@
     </div>
   </div>
   
-  <!-- Barra de búsqueda adaptada al estilo de cambiar_precios.html -->
+  <!-- Barra de búsqueda alineada -->
   <div class="search-container">
-    <div class="search-box">
+    <div class="search-box" style="margin-left: 0;">
       <i class="fas fa-search"></i>
-      <input type="text" id="searchInput" placeholder="Buscar por nombre o código de barras...">
+      <input type="text" id="searchProducts" placeholder="Buscar por nombre o código...">
     </div>
     <div class="search-actions">
-      <!-- Filtro solo sin ubicación -->
-      <div class="filter-container" id="emptyLocationContainer">
-        <input class="filter-check-input" type="checkbox" id="emptyLocationCheck">
-        <i class="fas fa-map-marker-alt" style="color: var(--location-color);"></i>
-        <span style="font-size: 0.95rem; font-weight: 500;">Sin ubicación</span>
+      <!-- Filtro sin ubicación -->
+      <div class="filter-container" id="noLocationFilter">
+        <input class="filter-check-input" type="checkbox" id="noLocationCheck">
+        <i class="fas fa-map-marker-alt"></i>
+        <span>Sin ubicación</span>
       </div>
+      
+      <!-- Botón escanear con pistola -->
+      <button type="button" class="icon-btn" id="scanIcon" title="Escanear con pistola">
+        <img src="{{ url_for('static', filename='img/3.png') }}" alt="Escanear con Lector" style="width: 24px; height: 24px;">
+      </button>
+      
+      <!-- Botón escanear con cámara -->
+      <button type="button" class="icon-btn" id="cameraIcon" title="Escanear con cámara" onclick="iniciarEscaneoQuagga()">
+        <img src="{{ url_for('static', filename='img/4.png') }}" alt="Escanear con Cámara" style="width: 24px; height: 24px;">
+      </button>
     </div>
   </div>
   
-  <!-- Contenedor para categorías y productos -->
-  <div id="categoriesContainer">
-    {% if categorias and categorias|length > 0 %}
-      {# Ordenar categorías por cantidad de productos (mayor a menor) #}
-      {% set categorias_ordenadas = [] %}
-      {% for categoria in categorias %}
-        {% set productos_categoria = productos|selectattr('categoria', 'equalto', categoria.nombre)|list %}
-        {% if productos_categoria|length > 0 %}
-          {% set _ = categorias_ordenadas.append({'nombre': categoria.nombre, 'color': categoria.color, 'count': productos_categoria|length}) %}
-        {% endif %}
-      {% endfor %}
-      {% set categorias_ordenadas = categorias_ordenadas|sort(attribute='count', reverse=true) %}
-      
-      {% for categoria in categorias_ordenadas %}
-        {% set productos_categoria = productos|selectattr('categoria', 'equalto', categoria.nombre)|list %}
-        <div class="category-section" data-category="{{ categoria.nombre|lower }}">
-          <div class="category-header">
-            <h2 class="category-title">
-              <span class="category-color-dot" style="background-color: {{ categoria.color }}"></span>
-              {{ categoria.nombre|title }}
-              <span class="category-badge">{{ productos_categoria|length }}</span>
-            </h2>
-          </div>
-          
-          <div class="product-grid">
-            {% for producto in productos_categoria %}
-              <div class="product-card" 
-                   data-product-id="{{ producto.id }}" 
-                   data-product-name="{{ producto.nombre|lower }}" 
-                   data-product-barcode="{{ producto.codigo_barras_externo|lower if producto.codigo_barras_externo else '' }}"
-                   data-has-location="{{ '1' if producto.ubicacion else '0' }}">
-                <div class="product-image-container">
-                  {% if producto.foto %}
-                    <img src="{{ url_for('static', filename='uploads/' ~ producto.foto) }}" class="product-image" alt="{{ producto.nombre }}">
-                  {% else %}
-                    <div class="product-image" style="display: flex; align-items: center; justify-content: center;">
-                      <i class="fas fa-box" style="color: var(--text-secondary);"></i>
-                    </div>
-                  {% endif %}
-                </div>
-                <div class="product-details">
-                  <div class="product-info-container">
-                    <div class="product-name">{{ producto.nombre }}</div>
-                    <div class="product-code">{{ producto.codigo_barras_externo or 'SKU-' ~ '%05d'|format(producto.id) }}</div>
-                  </div>
-                  
-                  <div class="location-container">
-                    <div class="location-label">Ubicación:</div>
-                    <div class="location-display {% if not producto.ubicacion %}empty{% endif %}">
-                      {{ producto.ubicacion or 'Sin asignar' }}
-                    </div>
-                    
-                    <div class="location-input-container">
-                      <div class="location-input-group">
-                        <input type="text" class="location-input" value="{{ producto.ubicacion or '' }}" placeholder="Ej: Estante A, Bodega 2">
-                        <div class="suggestions-container">
-                          <div class="location-suggestions">
-                            {% for ubicacion in ubicaciones %}
-                              <div class="suggestion-chip">{{ ubicacion }}</div>
-                            {% endfor %}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div class="action-buttons">
-                      <button type="button" class="btn-edit" title="Editar ubicación">
-                        <i class="fas fa-pencil-alt"></i>
-                      </button>
-                      <button type="button" class="btn-save" title="Guardar">
-                        <i class="fas fa-check"></i>
-                      </button>
-                      <button type="button" class="btn-cancel" title="Cancelar">
-                        <i class="fas fa-times"></i>
-                      </button>
-                    </div>
-                  </div>
-                </div>
+  <!-- Tabla de productos -->
+  {% if productos and productos|length > 0 %}
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 40%; text-align: left;">Producto</th>
+          <th style="width: 15%; text-align: center;">Categoría</th>
+          <th style="width: 30%; text-align: center;">Ubicación</th>
+          <th style="width: 15%; text-align: center;">Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="productsTableBody">
+        {% for producto in productos %}
+        <tr data-product-id="{{ producto.id }}" data-product-name="{{ producto.nombre|lower }}" data-product-code="{{ producto.codigo_barras_externo|lower if producto.codigo_barras_externo else '' }}" data-has-location="{{ '1' if producto.ubicacion else '0' }}">
+          <td>
+            <div class="product-info">
+              <img src="{{ url_for('static', filename='uploads/' ~ producto.foto) if producto.foto else url_for('static', filename='img/default_product.jpg') }}" class="product-image" alt="{{ producto.nombre }}">
+              <div class="product-details">
+                <div class="product-name">{{ producto.nombre }}</div>
+                <div class="product-code">{{ producto.codigo_barras_externo or 'SKU-' ~ producto.id }}</div>
               </div>
-            {% endfor %}
-          </div>
-        </div>
-      {% endfor %}
-    {% else %}
-      <!-- Estado vacío -->
-      <div class="empty-state">
-        <div class="empty-icon">
-          <i class="fas fa-map-marker-alt"></i>
-        </div>
-        <p class="empty-message">No hay productos en tu inventario</p>
-        <a href="{{ url_for('nuevo_producto') }}" class="button-link" style="display: inline-block; padding: 10px 20px; background-color: var(--accent); color: white; text-decoration: none; border-radius: 6px; margin-top: 16px;">
-          Agregar producto
-        </a>
-      </div>
-    {% endif %}
+            </div>
+          </td>
+          <td style="text-align: center;">
+            {{ producto.categoria|title if producto.categoria else 'Sin categoría' }}
+          </td>
+          <td class="location-cell">
+            <div class="location-display {% if not producto.ubicacion %}empty{% endif %}">
+              {{ producto.ubicacion or 'Sin ubicación asignada' }}
+            </div>
+            <div class="location-edit">
+              <input type="text" value="{{ producto.ubicacion or '' }}" placeholder="Ej: Estante A, Bodega 2">
+              {% if ubicaciones and ubicaciones|length > 0 %}
+              <div class="location-suggestions">
+                {% for ubicacion in ubicaciones %}
+                <div class="location-suggestion">{{ ubicacion }}</div>
+                {% endfor %}
+              </div>
+              {% endif %}
+            </div>
+          </td>
+          <td>
+            <div class="action-buttons">
+              <button type="button" class="btn-icon edit btn-edit-location" title="Editar ubicación">
+                <i class="fas fa-pencil-alt"></i>
+              </button>
+              <button type="button" class="btn-icon delete btn-delete-location" title="Eliminar ubicación" {% if not producto.ubicacion %}style="display: none;"{% endif %}>
+                <i class="fas fa-trash-alt"></i>
+              </button>
+              <button type="button" class="btn-icon btn-save" title="Guardar" style="color: #34c759; display: none;">
+                <i class="fas fa-check"></i>
+              </button>
+              <button type="button" class="btn-icon btn-cancel" title="Cancelar" style="color: #ff3b30; display: none;">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
   
   <!-- Paginación -->
   {% if total_pages and total_pages > 1 %}
-    <div class="pagination-container">
-      <div class="pagination">
-        {% if page > 1 %}
-          <a href="{{ url_for('ubicacion_productos', page=page-1) }}" class="pagination-item">
-            <i class="fas fa-chevron-left"></i>
-          </a>
-        {% endif %}
-        
-        {% for p in range(1, total_pages + 1) %}
-          <a href="{{ url_for('ubicacion_productos', page=p) }}" class="pagination-item {% if p == page %}active{% endif %}">
-            {{ p }}
-          </a>
-        {% endfor %}
-        
-        {% if page < total_pages %}
-          <a href="{{ url_for('ubicacion_productos', page=page+1) }}" class="pagination-item">
-            <i class="fas fa-chevron-right"></i>
-          </a>
-        {% endif %}
-      </div>
+  <div class="pagination">
+    {% if page > 1 %}
+    <a href="{{ url_for('ubicacion_productos', page=page-1) }}" class="pagination-item">
+      <i class="fas fa-chevron-left"></i>
+    </a>
+    {% endif %}
+    
+    {% for p in range(1, total_pages + 1) %}
+    <a href="{{ url_for('ubicacion_productos', page=p) }}" class="pagination-item {% if p == page %}active{% endif %}">
+      {{ p }}
+    </a>
+    {% endfor %}
+    
+    {% if page < total_pages %}
+    <a href="{{ url_for('ubicacion_productos', page=page+1) }}" class="pagination-item">
+      <i class="fas fa-chevron-right"></i>
+    </a>
+    {% endif %}
+  </div>
+  {% endif %}
+  
+  {% else %}
+  <!-- Estado vacío -->
+  <div class="empty-state">
+    <div class="empty-icon">
+      <i class="fas fa-boxes"></i>
     </div>
+    <h3 class="empty-title">No hay productos en tu inventario</h3>
+    <p class="empty-description">Agrega productos a tu inventario para poder asignarles ubicaciones físicas</p>
+    <a href="{{ url_for('agregar_producto') }}" class="btn-action btn-assign">
+      <i class="fas fa-plus"></i> Agregar producto
+    </a>
+  </div>
   {% endif %}
   
   <!-- Modal para asignación masiva -->
-  <div class="modal fade" id="ubicacionMasivaModal" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true">
+  <div class="modal fade" id="bulkLocationModal" tabindex="-1" aria-labelledby="bulkLocationModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="modalTitle">Asignar ubicación a múltiples productos</h5>
+          <h5 class="modal-title" id="bulkLocationModalLabel">Agregar masivamente</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
           <div class="form-group">
-            <label for="ubicacionMasiva" class="form-label">Ubicación a asignar:</label>
-            <input type="text" id="ubicacionMasiva" class="form-control" placeholder="Ej: Estante A, Bodega 2">
+            <label for="bulkLocation" class="form-label">Ubicación a asignar</label>
+            <input type="text" id="bulkLocation" class="form-control" placeholder="Ej: Estante A, Bodega 2">
             
-            {% if ubicaciones|length > 0 %}
-              <div class="location-suggestions" style="margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px;">
-                {% for ubicacion in ubicaciones %}
-                  <div class="suggestion-chip" onclick="document.getElementById('ubicacionMasiva').value = this.textContent.trim()">
-                    {{ ubicacion }}
-                  </div>
-                {% endfor %}
+            {% if ubicaciones and ubicaciones|length > 0 %}
+            <div class="location-suggestions" style="margin-top: 12px;">
+              {% for ubicacion in ubicaciones %}
+              <div class="location-suggestion" onclick="document.getElementById('bulkLocation').value = this.textContent.trim()">
+                {{ ubicacion }}
               </div>
+              {% endfor %}
+            </div>
             {% endif %}
           </div>
           
           <div class="form-group">
-            <label class="form-label">Asignar a:</label>
-            <div class="selection-options">
-              <div class="option-container">
-                <label class="radio-label">
-                  <input type="radio" name="selectionType" value="category" checked>
-                  <span>Por categoría</span>
-                </label>
-              </div>
-              <div class="option-container">
-                <label class="radio-label">
-                  <input type="radio" name="selectionType" value="manual">
-                  <span>Selección manual</span>
-                </label>
-              </div>
-            </div>
-          </div>
-          
-          <div id="categorySelection" class="form-group">
-            <label for="categoriaSelector" class="form-label">Categoría:</label>
-            <select id="categoriaSelector" class="category-select">
-              {% for categoria in categorias %}
-                <option value="{{ categoria.nombre }}">{{ categoria.nombre|title }}</option>
-              {% endfor %}
-            </select>
-            <p class="text-muted">Se asignará la ubicación a todos los productos de esta categoría.</p>
-          </div>
-          
-          <div id="manualSelection" class="form-group" style="display: none;">
-            <label class="form-label">Buscar y seleccionar productos:</label>
-            <input type="text" id="searchProductsModal" class="form-control" placeholder="Escribe para buscar...">
+            <label class="form-label">Aplicar a</label>
             
-            <div class="product-items-list" id="selectedProductsList">
-              <div class="text-muted" style="text-align: center; padding: 20px;">
-                Busca productos por nombre o código
-              </div>
+            <label class="radio-option">
+              <input type="radio" name="bulkType" value="category" checked>
+              <span>Todos los productos de una categoría</span>
+            </label>
+            
+            <div id="categorySelection" class="form-group" style="margin-left: 28px; padding: 10px; background-color: var(--light-background); border-radius: 10px;">
+              <label for="categorySelect" class="form-label">Selecciona categoría</label>
+              <select id="categorySelect" class="form-control">
+                {% for categoria in categorias %}
+                <option value="{{ categoria.nombre }}">{{ categoria.nombre|title }}</option>
+                {% endfor %}
+              </select>
             </div>
+            
+            <label class="radio-option">
+              <input type="radio" name="bulkType" value="noLocation">
+              <span>Todos los productos sin ubicación</span>
+            </label>
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="button" class="btn-primary" id="saveUbicacionMasiva">Guardar</button>
+          <button type="button" class="btn-action" style="background-color: #f5f5f7; color: #1d1d1f; box-shadow: none;" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn-action btn-assign" id="saveBulkLocation">Guardar</button>
         </div>
       </div>
     </div>
   </div>
-  
-  <!-- Contenedor de notificaciones toast -->
-  <div class="toast-container" id="toastContainer"></div>
 </div>
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    // Referencias a elementos DOM
-    const searchInput = document.getElementById('searchInput');
-    const emptyLocationCheck = document.getElementById('emptyLocationCheck');
-    const emptyLocationContainer = document.getElementById('emptyLocationContainer');
-    const categorySections = document.querySelectorAll('.category-section');
-    const productCards = document.querySelectorAll('.product-card');
-    const searchProductsModal = document.getElementById('searchProductsModal');
-    const selectedProductsList = document.getElementById('selectedProductsList');
-    const saveUbicacionMasivaBtn = document.getElementById('saveUbicacionMasiva');
+    // Referencias a elementos del DOM
+    const searchInput = document.getElementById('searchProducts');
+    const noLocationCheck = document.getElementById('noLocationCheck');
+    const noLocationFilter = document.getElementById('noLocationFilter');
+    const productRows = document.querySelectorAll('#productsTableBody tr');
+    const saveBulkLocationBtn = document.getElementById('saveBulkLocation');
     
-    // Set para almacenar productos seleccionados
-    const selectedProducts = new Set();
+    // Variable para controlar el tiempo de las notificaciones
+    let notificationTimeout;
     
-    // Inicializar edición de ubicación para cada producto
-    productCards.forEach(card => {
-      setupLocationEditing(card);
+    // Inicialización del filtro
+    noLocationFilter.addEventListener('click', function() {
+      noLocationCheck.checked = !noLocationCheck.checked;
+      this.classList.toggle('active', noLocationCheck.checked);
+      applyFilters();
     });
     
-    function setupLocationEditing(card) {
-      const productId = card.dataset.productId;
-      const locationDisplay = card.querySelector('.location-display');
-      const locationInput = card.querySelector('.location-input');
-      const locationInputContainer = card.querySelector('.location-input-container');
-      const btnEdit = card.querySelector('.btn-edit');
-      const btnSave = card.querySelector('.btn-save');
-      const btnCancel = card.querySelector('.btn-cancel');
+    // Inicialización del buscador
+    searchInput.addEventListener('input', applyFilters);
+    
+    // Función para aplicar filtros
+    function applyFilters() {
+      const searchValue = searchInput.value.toLowerCase().trim();
+      const showOnlyNoLocation = noLocationCheck.checked;
       
-      // Guardar valor original
+      let visibleCount = 0;
+      
+      productRows.forEach(row => {
+        const productName = row.getAttribute('data-product-name') || '';
+        const productCode = row.getAttribute('data-product-code') || '';
+        const hasLocation = row.getAttribute('data-has-location') === '1';
+        
+        // Verificar si cumple con los filtros
+        const matchesSearch = !searchValue || 
+                             productName.includes(searchValue) || 
+                             productCode.includes(searchValue);
+        const matchesLocationFilter = !showOnlyNoLocation || !hasLocation;
+        
+        // Aplicar filtro
+        if (matchesSearch && matchesLocationFilter) {
+          row.style.display = '';
+          visibleCount++;
+        } else {
+          row.style.display = 'none';
+        }
+      });
+      
+      // Mostrar mensaje si no hay resultados
+      showNoResultsMessage(visibleCount === 0);
+    }
+    
+    // Mostrar mensaje cuando no hay resultados
+    function showNoResultsMessage(show) {
+      let noResultsRow = document.getElementById('noResultsRow');
+      
+      if (show) {
+        if (!noResultsRow) {
+          const tbody = document.getElementById('productsTableBody');
+          noResultsRow = document.createElement('tr');
+          noResultsRow.id = 'noResultsRow';
+          noResultsRow.innerHTML = `
+            <td colspan="4" style="text-align: center; padding: 32px;">
+              <i class="fas fa-search" style="font-size: 28px; color: var(--text-secondary); margin-bottom: 16px;"></i>
+              <p style="margin: 0; font-size: 17px; color: var(--text-secondary); margin-bottom: 16px;">No se encontraron productos con los filtros seleccionados</p>
+              <button class="btn-action btn-assign" style="margin-top: 16px; display: inline-flex;" onclick="resetFilters()">
+                <i class="fas fa-undo"></i> Limpiar filtros
+              </button>
+            </td>
+          `;
+          tbody.appendChild(noResultsRow);
+        } else {
+          noResultsRow.style.display = '';
+        }
+      } else if (noResultsRow) {
+        noResultsRow.style.display = 'none';
+      }
+    }
+    
+    // Función global para resetear filtros
+    window.resetFilters = function() {
+      searchInput.value = '';
+      noLocationCheck.checked = false;
+      noLocationFilter.classList.remove('active');
+      applyFilters();
+    };
+    
+    // Configuración de botones de edición para cada fila
+    productRows.forEach(row => {
+      setupRowEditing(row);
+    });
+    
+    function setupRowEditing(row) {
+      const productId = row.getAttribute('data-product-id');
+      const locationDisplay = row.querySelector('.location-display');
+      const locationEdit = row.querySelector('.location-edit');
+      const locationInput = locationEdit.querySelector('input');
+      const btnEdit = row.querySelector('.btn-edit-location');
+      const btnDelete = row.querySelector('.btn-delete-location');
+      const btnSave = row.querySelector('.btn-save');
+      const btnCancel = row.querySelector('.btn-cancel');
+      
+      // Guardar valor original para caso de cancelación
       let originalValue = locationInput.value;
       
-      // Configurar sugerencias
-      const suggestionChips = card.querySelectorAll('.suggestion-chip');
-      suggestionChips.forEach(chip => {
-        chip.addEventListener('click', () => {
-          locationInput.value = chip.textContent.trim();
+      // Configurar sugerencias si existen
+      const suggestions = row.querySelectorAll('.location-suggestion');
+      suggestions.forEach(suggestion => {
+        suggestion.addEventListener('click', () => {
+          locationInput.value = suggestion.textContent.trim();
+          locationInput.focus();
         });
       });
       
       // Botón editar
       btnEdit.addEventListener('click', () => {
-        // Ocultar pantalla de visualización
-        locationDisplay.style.display = 'none';
-        locationInputContainer.style.display = 'flex';
+        // Primero cerrar cualquier otra edición en curso
+        document.querySelectorAll('.location-edit').forEach(edit => {
+          if (edit !== locationEdit && edit.style.display === 'block') {
+            const otherRow = edit.closest('tr');
+            const otherDisplay = otherRow.querySelector('.location-display');
+            const otherBtnEdit = otherRow.querySelector('.btn-edit-location');
+            const otherBtnDelete = otherRow.querySelector('.btn-delete-location');
+            const otherBtnSave = otherRow.querySelector('.btn-save');
+            const otherBtnCancel = otherRow.querySelector('.btn-cancel');
+            
+            edit.style.display = 'none';
+            otherDisplay.style.display = 'block';
+            otherBtnEdit.style.display = 'flex';
+            if (otherDisplay.textContent.trim() !== 'Sin ubicación asignada') {
+              otherBtnDelete.style.display = 'flex';
+            } else {
+              otherBtnDelete.style.display = 'none';
+            }
+            otherBtnSave.style.display = 'none';
+            otherBtnCancel.style.display = 'none';
+          }
+        });
         
-        // Mostrar botones de guardar/cancelar
+        // Activar modo edición
+        locationDisplay.style.display = 'none';
+        locationEdit.style.display = 'flex';
         btnEdit.style.display = 'none';
+        btnDelete.style.display = 'none';
         btnSave.style.display = 'flex';
         btnCancel.style.display = 'flex';
-        
-        // Enfocar input
         locationInput.focus();
       });
       
@@ -1048,52 +1116,66 @@
       btnSave.addEventListener('click', () => {
         const newLocation = locationInput.value.trim();
         
-        // Cambiar botón a estado de carga
+        // Mostrar cargando
         btnSave.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
         btnSave.disabled = true;
         
-        // Enviar al servidor
-        saveLocation(productId, newLocation)
-          .then(success => {
-            if (success) {
-              // Actualizar visualización
-              if (newLocation) {
-                locationDisplay.textContent = newLocation;
-                locationDisplay.classList.remove('empty');
-                card.dataset.hasLocation = '1';
-              } else {
-                locationDisplay.textContent = 'Sin asignar';
-                locationDisplay.classList.add('empty');
-                card.dataset.hasLocation = '0';
-              }
-              
-              // Guardar valor original
-              originalValue = newLocation;
-              
-              // Mostrar mensaje
-              showToast('Ubicación actualizada correctamente', 'success');
+        // Llamar a la API
+        fetch(`/api/actualizar-ubicacion/${productId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ ubicacion: newLocation })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            // Actualizar UI
+            if (newLocation) {
+              locationDisplay.textContent = newLocation;
+              locationDisplay.classList.remove('empty');
+              row.setAttribute('data-has-location', '1');
+              btnDelete.style.display = 'flex';
             } else {
-              showToast('Error al guardar la ubicación', 'error');
+              locationDisplay.textContent = 'Sin ubicación asignada';
+              locationDisplay.classList.add('empty');
+              row.setAttribute('data-has-location', '0');
+              btnDelete.style.display = 'none';
             }
-          })
-          .catch(error => {
-            console.error('Error:', error);
-            showToast('Error al guardar la ubicación', 'error');
-          })
-          .finally(() => {
-            // Restaurar estado
-            btnSave.innerHTML = '<i class="fas fa-check"></i>';
-            btnSave.disabled = false;
             
-            // Volver a mostrar pantalla de visualización
-            locationDisplay.style.display = 'block';
-            locationInputContainer.style.display = 'none';
+            // Actualizar valor original
+            originalValue = newLocation;
             
-            // Restaurar botones
-            btnEdit.style.display = 'flex';
-            btnSave.style.display = 'none';
-            btnCancel.style.display = 'none';
-          });
+            // Efecto visual de éxito
+            row.style.transition = "background-color 0.3s ease";
+            row.style.backgroundColor = "rgba(52, 199, 89, 0.1)";
+            setTimeout(() => {
+              row.style.backgroundColor = "";
+            }, 1000);
+            
+            // Mostrar notificación
+            showNotification('Ubicación actualizada correctamente', 'success');
+          } else {
+            throw new Error(data.message || 'Error al actualizar ubicación');
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          showNotification('Error: ' + error.message, 'error');
+        })
+        .finally(() => {
+          // Restaurar botón
+          btnSave.innerHTML = '<i class="fas fa-check"></i>';
+          btnSave.disabled = false;
+          
+          // Volver a modo visualización
+          locationDisplay.style.display = 'block';
+          locationEdit.style.display = 'none';
+          btnEdit.style.display = 'flex';
+          btnSave.style.display = 'none';
+          btnCancel.style.display = 'none';
+        });
       });
       
       // Botón cancelar
@@ -1101,333 +1183,110 @@
         // Restaurar valor original
         locationInput.value = originalValue;
         
-        // Volver a mostrar pantalla de visualización
+        // Volver a modo visualización
         locationDisplay.style.display = 'block';
-        locationInputContainer.style.display = 'none';
-        
-        // Restaurar botones
+        locationEdit.style.display = 'none';
         btnEdit.style.display = 'flex';
+        btnDelete.style.display = originalValue ? 'flex' : 'none';
         btnSave.style.display = 'none';
         btnCancel.style.display = 'none';
       });
       
+      // Botón eliminar
+      btnDelete.addEventListener('click', () => {
+        if (confirm('¿Estás seguro de que deseas eliminar esta ubicación?')) {
+          // Mostrar cargando
+          btnDelete.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+          btnDelete.disabled = true;
+          
+          // Llamar a la API con ubicación vacía
+          fetch(`/api/actualizar-ubicacion/${productId}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ ubicacion: '' })
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              // Actualizar UI
+              locationDisplay.textContent = 'Sin ubicación asignada';
+              locationDisplay.classList.add('empty');
+              locationInput.value = '';
+              originalValue = '';
+              row.setAttribute('data-has-location', '0');
+              btnDelete.style.display = 'none';
+              
+              // Mostrar notificación
+              showNotification('Ubicación eliminada correctamente', 'success');
+              
+              // Aplicar filtros por si está activo "Sin ubicación"
+              applyFilters();
+            } else {
+              throw new Error(data.message || 'Error al eliminar ubicación');
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            showNotification('Error: ' + error.message, 'error');
+          })
+          .finally(() => {
+            // Restaurar botón
+            btnDelete.innerHTML = '<i class="fas fa-trash-alt"></i>';
+            btnDelete.disabled = false;
+          });
+        }
+      });
+      
       // Manejar tecla Enter para guardar
-      locationInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
+      locationInput.addEventListener('keydown', event => {
+        if (event.key === 'Enter') {
+          event.preventDefault();
           btnSave.click();
+        } else if (event.key === 'Escape') {
+          event.preventDefault();
+          btnCancel.click();
         }
       });
     }
     
-    // Función para guardar ubicación
-    function saveLocation(productId, location) {
-      return fetch(`/api/actualizar-ubicacion/${productId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ ubicacion: location })
-      })
-      .then(response => response.json())
-      .then(data => {
-        return data.success;
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        return false;
-      });
-    }
-    
-    // Búsqueda y filtrado
-    function applyFilters() {
-      const searchValue = searchInput.value.toLowerCase().trim();
-      const showOnlyEmpty = emptyLocationCheck.checked;
-      
-      let resultsCount = 0;
-      let visibleCategories = new Set();
-      
-      // Primero ocultar todas las categorías
-      categorySections.forEach(section => {
-        section.style.display = 'none';
-      });
-      
-      // Filtrar productos
-      productCards.forEach(card => {
-        const productName = card.dataset.productName || '';
-        const productBarcode = card.dataset.productBarcode || '';
-        const hasLocation = card.dataset.hasLocation === '1';
-        const category = card.closest('.category-section').dataset.category;
-        
-        // Verificar si cumple con el filtro de búsqueda
-        const matchesSearch = !searchValue || 
-                             productName.includes(searchValue) || 
-                             productBarcode.includes(searchValue);
-        
-        // Verificar si cumple con el filtro de ubicación
-        const matchesLocation = !showOnlyEmpty || !hasLocation;
-        
-        // Mostrar solo si cumple con ambos filtros
-        const matches = matchesSearch && matchesLocation;
-        
-        card.style.display = matches ? 'flex' : 'none';
-        
-        if (matches) {
-          resultsCount++;
-          visibleCategories.add(category);
-        }
-      });
-      
-      // Mostrar categorías con resultados
-      visibleCategories.forEach(category => {
-        const section = document.querySelector(`.category-section[data-category="${category}"]`);
-        if (section) {
-          section.style.display = 'block';
-        }
-      });
-      
-      // Mostrar mensaje si no hay resultados
-      showEmptyResults(resultsCount);
-      
-      return resultsCount;
-    }
-    
-    // Mostrar mensaje si no hay resultados
-    function showEmptyResults(count) {
-      let emptyMessage = document.getElementById('emptySearchResults');
-      
-      if (count === 0) {
-        if (!emptyMessage) {
-          emptyMessage = document.createElement('div');
-          emptyMessage.id = 'emptySearchResults';
-          emptyMessage.className = 'empty-state';
-          
-          const filterActive = emptyLocationCheck.checked;
-          const searchValue = searchInput.value.trim();
-          
-          let messageText = 'No se encontraron productos';
-          if (filterActive && searchValue) {
-            messageText = `No se encontraron productos sin ubicación que coincidan con "${searchValue}"`;
-          } else if (filterActive) {
-            messageText = 'No hay productos sin ubicación asignada';
-          } else if (searchValue) {
-            messageText = `No se encontraron productos que coincidan con "${searchValue}"`;
-          }
-          
-          emptyMessage.innerHTML = `
-            <div class="empty-icon">
-              <i class="fas fa-search"></i>
-            </div>
-            <p class="empty-message">${messageText}</p>
-            <button class="btn-reset" onclick="resetFilters()">
-              <i class="fas fa-undo-alt" style="margin-right: 8px;"></i>Limpiar filtros
-            </button>
-          `;
-          
-          document.getElementById('categoriesContainer').prepend(emptyMessage);
-        } else {
-          emptyMessage.style.display = 'block';
-          
-          const messageElement = emptyMessage.querySelector('.empty-message');
-          const filterActive = emptyLocationCheck.checked;
-          const searchValue = searchInput.value.trim();
-          
-          let messageText = 'No se encontraron productos';
-          if (filterActive && searchValue) {
-            messageText = `No se encontraron productos sin ubicación que coincidan con "${searchValue}"`;
-          } else if (filterActive) {
-            messageText = 'No hay productos sin ubicación asignada';
-          } else if (searchValue) {
-            messageText = `No se encontraron productos que coincidan con "${searchValue}"`;
-          }
-          
-          messageElement.textContent = messageText;
-        }
-      } else if (emptyMessage) {
-        emptyMessage.style.display = 'none';
-      }
-    }
-    
-    // Función global para resetear filtros
-    window.resetFilters = function() {
-      searchInput.value = '';
-      emptyLocationCheck.checked = false;
-      emptyLocationContainer.classList.remove('active');
-      applyFilters();
-    };
-    
-    // Eventos para filtros
-    searchInput.addEventListener('input', applyFilters);
-    
-    // Filtro de ubicación vacía
-    emptyLocationContainer.addEventListener('click', function() {
-      emptyLocationCheck.checked = !emptyLocationCheck.checked;
-      emptyLocationContainer.classList.toggle('active', emptyLocationCheck.checked);
-      applyFilters();
-    });
-    
-    // Selección de tipo en modal
-    const selectionTypeRadios = document.querySelectorAll('input[name="selectionType"]');
+    // Configuración para asignación masiva
+    const bulkTypeRadios = document.querySelectorAll('input[name="bulkType"]');
     const categorySelection = document.getElementById('categorySelection');
-    const manualSelection = document.getElementById('manualSelection');
     
-    selectionTypeRadios.forEach(radio => {
+    bulkTypeRadios.forEach(radio => {
       radio.addEventListener('change', () => {
-        if (radio.value === 'category') {
-          categorySelection.style.display = 'block';
-          manualSelection.style.display = 'none';
-        } else {
-          categorySelection.style.display = 'none';
-          manualSelection.style.display = 'block';
-        }
+        categorySelection.style.display = radio.value === 'category' ? 'block' : 'none';
       });
     });
-    
-    // Búsqueda en modal
-    searchProductsModal.addEventListener('input', function() {
-      const searchValue = this.value.toLowerCase().trim();
-      
-      if (searchValue.length < 2) {
-        // Mostrar solo productos seleccionados
-        showSelectedProducts();
-        return;
-      }
-      
-      // Buscar productos
-      const matchingProducts = [];
-      
-      productCards.forEach(card => {
-        const productId = card.dataset.productId;
-        const productName = card.dataset.productName || '';
-        const productBarcode = card.dataset.productBarcode || '';
-        
-        if (productName.includes(searchValue) || productBarcode.includes(searchValue)) {
-          const nameElement = card.querySelector('.product-name');
-          matchingProducts.push({
-            id: productId,
-            name: nameElement ? nameElement.textContent : 'Producto',
-            selected: selectedProducts.has(productId)
-          });
-        }
-      });
-      
-      // Mostrar resultados
-      renderSearchResults(matchingProducts);
-    });
-    
-    // Renderizar resultados de búsqueda en modal
-    function renderSearchResults(products) {
-      selectedProductsList.innerHTML = '';
-      
-      if (products.length === 0) {
-        selectedProductsList.innerHTML = `
-          <div class="text-muted" style="text-align: center; padding: 20px;">
-            No se encontraron productos
-          </div>
-        `;
-        return;
-      }
-      
-      products.forEach(product => {
-        const item = document.createElement('div');
-        item.className = 'product-item';
-        item.innerHTML = `
-          <span>${product.name}</span>
-          <label class="checkbox-container">
-            <input type="checkbox" ${product.selected ? 'checked' : ''} data-product-id="${product.id}">
-          </label>
-        `;
-        
-        // Evento para checkbox
-        const checkbox = item.querySelector('input[type="checkbox"]');
-        checkbox.addEventListener('change', function() {
-          if (this.checked) {
-            selectedProducts.add(product.id);
-          } else {
-            selectedProducts.delete(product.id);
-          }
-        });
-        
-        selectedProductsList.appendChild(item);
-      });
-    }
-    
-    // Mostrar productos seleccionados
-    function showSelectedProducts() {
-      if (selectedProducts.size === 0) {
-        selectedProductsList.innerHTML = `
-          <div class="text-muted" style="text-align: center; padding: 20px;">
-            No hay productos seleccionados
-          </div>
-        `;
-        return;
-      }
-      
-      selectedProductsList.innerHTML = '';
-      
-      selectedProducts.forEach(productId => {
-        const card = document.querySelector(`.product-card[data-product-id="${productId}"]`);
-        if (card) {
-          const nameElement = card.querySelector('.product-name');
-          const name = nameElement ? nameElement.textContent : 'Producto';
-          
-          const item = document.createElement('div');
-          item.className = 'product-item';
-          item.innerHTML = `
-            <span>${name}</span>
-            <button type="button" class="btn-remove-item" data-product-id="${productId}">
-              <i class="fas fa-times"></i>
-            </button>
-          `;
-          
-          // Evento para quitar
-          const removeBtn = item.querySelector('.btn-remove-item');
-          removeBtn.addEventListener('click', function() {
-            selectedProducts.delete(productId);
-            showSelectedProducts();
-          });
-          
-          selectedProductsList.appendChild(item);
-        }
-      });
-    }
     
     // Guardar asignación masiva
-    saveUbicacionMasivaBtn.addEventListener('click', function() {
-      const ubicacion = document.getElementById('ubicacionMasiva').value.trim();
+    saveBulkLocationBtn.addEventListener('click', () => {
+      const location = document.getElementById('bulkLocation').value.trim();
       
-      if (!ubicacion) {
-        showToast('Por favor ingresa una ubicación', 'error');
+      if (!location) {
+        showNotification('Por favor ingresa una ubicación', 'error');
         return;
       }
       
-      // Obtener tipo de selección
-      const selectionType = document.querySelector('input[name="selectionType"]:checked').value;
-      
-      // Preparar datos para enviar
+      const bulkType = document.querySelector('input[name="bulkType"]:checked').value;
       let data = {
-        ubicacion: ubicacion
+        ubicacion: location
       };
       
-      if (selectionType === 'category') {
-        // Selección por categoría
-        const categoria = document.getElementById('categoriaSelector').value;
-        data.categoria = categoria;
-      } else {
-        // Selección manual
-        if (selectedProducts.size === 0) {
-          showToast('No hay productos seleccionados', 'error');
-          return;
-        }
-        
-        data.producto_ids = Array.from(selectedProducts);
+      if (bulkType === 'category') {
+        data.categoria = document.getElementById('categorySelect').value;
+      } else if (bulkType === 'noLocation') {
+        // Para productos sin ubicación, enviamos un filtro especial
+        data.sin_ubicacion = true;
       }
       
       // Mostrar cargando
-      this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
-      this.disabled = true;
+      saveBulkLocationBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+      saveBulkLocationBtn.disabled = true;
       
-      // Enviar al servidor
+      // Llamar a la API
       fetch('/api/actualizar-ubicacion-masiva', {
         method: 'POST',
         headers: {
@@ -1439,56 +1298,129 @@
       .then(data => {
         if (data.success) {
           // Cerrar modal
-          const modal = bootstrap.Modal.getInstance(document.getElementById('ubicacionMasivaModal'));
+          const modal = bootstrap.Modal.getInstance(document.getElementById('bulkLocationModal'));
           modal.hide();
           
-          // Mostrar mensaje
-          showToast(`Se actualizaron ${data.count} productos`, 'success');
+          // Mostrar notificación
+          showNotification(`Se actualizaron ${data.count} productos`, 'success');
           
-          // Recargar página
+          // Recargar página después de un breve retraso
           setTimeout(() => {
             window.location.reload();
           }, 1500);
         } else {
-          throw new Error(data.message || 'Error al guardar las ubicaciones');
+          throw new Error(data.message || 'Error al actualizar ubicaciones');
         }
       })
       .catch(error => {
         console.error('Error:', error);
-        showToast(`Error: ${error.message}`, 'error');
+        showNotification(`Error: ${error.message}`, 'error');
       })
       .finally(() => {
         // Restaurar botón
-        this.innerHTML = 'Guardar';
-        this.disabled = false;
+        saveBulkLocationBtn.innerHTML = 'Guardar';
+        saveBulkLocationBtn.disabled = false;
       });
     });
     
     // Sistema de notificaciones
-    function showToast(message, type = 'success') {
-      const toastContainer = document.getElementById('toastContainer');
+    function showNotification(message, type = 'success') {
+      // Limpiar cualquier notificación anterior
+      if (notificationTimeout) {
+        clearTimeout(notificationTimeout);
+      }
       
-      const toast = document.createElement('div');
-      toast.className = `toast ${type}`;
-      toast.innerHTML = `
+      // Eliminar notificación existente
+      const existingNotification = document.querySelector('.notification');
+      if (existingNotification) {
+        existingNotification.remove();
+      }
+      
+      // Crear nueva notificación
+      const notification = document.createElement('div');
+      notification.className = `notification ${type}`;
+      notification.innerHTML = `
         <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
         <span>${message}</span>
       `;
       
-      toastContainer.appendChild(toast);
+      // Añadir al DOM
+      document.body.appendChild(notification);
       
+      // Mostrar con animación
       setTimeout(() => {
-        toast.remove();
+        notification.classList.add('show');
+      }, 10);
+      
+      // Ocultar después de un tiempo
+      notificationTimeout = setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+          notification.remove();
+        }, 300);
       }, 3000);
     }
     
-    // Inicializar tooltips de Bootstrap si está disponible
-    if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
-      const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-      tooltipTriggerList.map(function(tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-      });
+    // Soporte para escaneo con pistola/cámara
+    if (window.initBarcodeScanner) {
+      window.initBarcodeScanner('#scanIcon', '#searchProducts');
     }
+    
+    // Manejo de código escaneado (para cualquier método de escaneo)
+    window.onScannedBarcode = function(code) {
+      searchInput.value = code;
+      applyFilters();
+      
+      // Buscar producto con código escaneado
+      let found = false;
+      productRows.forEach(row => {
+        if (row.getAttribute('data-product-code') === code.toLowerCase()) {
+          // Resaltar la fila
+          row.style.transition = 'background-color 0.3s';
+          row.style.backgroundColor = 'rgba(0, 122, 255, 0.2)';
+          found = true;
+          
+          // Hacer scroll para que sea visible
+          row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          
+          // Quitar resaltado después de un tiempo
+          setTimeout(() => {
+            row.style.backgroundColor = '';
+          }, 3000);
+        }
+      });
+      
+      if (found) {
+        showNotification('Producto encontrado', 'success');
+      } else {
+        showNotification('No se encontró el producto con ese código', 'error');
+      }
+    };
+    
+    // Alineación específica para la barra de búsqueda
+    // Esta función se ejecuta después de que el DOM esté completamente cargado
+    function alignSearchBar() {
+      // Obtenemos la posición del título
+      const title = document.querySelector('.page-title');
+      if (title) {
+        const titleRect = title.getBoundingClientRect();
+        // Obtenemos el input de búsqueda
+        const searchBox = document.querySelector('.search-box');
+        if (searchBox) {
+          // Ajustamos el margen izquierdo del input para que comience en la misma línea que la 'U' del título
+          searchBox.style.marginLeft = titleRect.left + 'px';
+        }
+      }
+    }
+    
+    // Ejecutar alineación después de un pequeño retraso para asegurar que todo está cargado
+    setTimeout(alignSearchBar, 100);
+    
+    // También ejecutar si cambia el tamaño de la ventana
+    window.addEventListener('resize', alignSearchBar);
+    
+    // Aplicar filtros iniciales
+    applyFilters();
   });
 </script>
 {% endblock %}
