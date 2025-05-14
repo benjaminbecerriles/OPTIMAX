@@ -1,26 +1,41 @@
 {% extends 'base.html' %}
 
-{% block title %}Ubicaciones de Productos - OptiMax{% endblock %}
+{% block title %}Ubicaciones de Productos - OptiMax Manage{% endblock %}
 
 {% block content %}
 <style>
-  /* Sistema de Diseño Apple - Consistente con cambiar_precios.html */
+  /* Sistema de Diseño Apple - Similar a descuentos.html */
   :root {
-    --font-apple: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', Helvetica, Arial, sans-serif;
+    --font-apple: -apple-system, BlinkMacSystemFont, 'SF Pro Text', Helvetica, Arial, sans-serif;
     
     /* Colores esenciales */
     --text-color: #1d1d1f;
-    --text-secondary: #515154;
+    --text-secondary: #555555;
     --background: #ffffff;
     --light-background: #f5f5f7;
     --separator: rgba(0, 0, 0, 0.1);
     --accent: #e52e2e;
     --accent-hover: #c51818;
     --accent-light: rgba(229, 46, 46, 0.1);
+    
+    /* Colores específicos de ubicaciones */
+    --location-color: #4b6cb7;
+    --location-hover: #3b5998;
+    --location-light: rgba(75, 108, 183, 0.1);
+    --location-apply-color: #4b6cb7;
+    --location-remove-color: #F44336;
+    --warning-color: #ff9800;
+    
     --blue: #1a237e;
-    --location-color: #007aff;
+    --gray-300: #d1d1d6;
+    --gray-500: #777777;
+    --gray-600: #86868b;
+    
+    /* Colores de resaltado para búsqueda */
+    --highlight-color: #FF0080;
+    --highlight-background: rgba(255, 0, 128, 0.1);
   }
-  
+
   body {
     font-family: var(--font-apple);
     -webkit-font-smoothing: antialiased;
@@ -28,27 +43,21 @@
     color: var(--text-color);
     background-color: var(--background);
   }
-  
+
   /* Contenedor principal */
-  .apple-container {
+  .ubicaciones-container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 36px 24px;
   }
-  
-  /* Encabezado de página - BASADO EN cambiar_precios.html */
+
+  /* Encabezado igual que descuentos.html */
   .page-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 1.5rem;
     padding-bottom: 1rem;
-    width: 100%;
-  }
-  
-  .header-title-container {
-    display: flex;
-    flex-direction: column;
   }
   
   .page-title {
@@ -60,9 +69,14 @@
     color: var(--text-color);
   }
   
+  .header-title-container {
+    display: flex;
+    flex-direction: column;
+  }
+  
   .page-description {
     font-size: 17px;
-    color: var(--text-secondary);
+    color: #86868b;
     margin-bottom: 28px;
     max-width: 600px;
     font-weight: 400;
@@ -72,10 +86,9 @@
     display: flex;
     gap: 1rem;
     padding-top: 8px;
-    align-items: center;
   }
   
-  /* Botón volver estilo ajuste_stock.html */
+  /* Botones de acción igual que descuentos.html */
   .btn-action {
     display: flex;
     align-items: center;
@@ -93,16 +106,6 @@
     white-space: nowrap;
   }
   
-  .btn-action i, 
-  .btn-action span {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    vertical-align: middle;
-    line-height: 1;
-  }
-  
-  /* Botón Volver estilo */
   .btn-volver {
     background-color: var(--blue);
     color: #ffffff;
@@ -115,724 +118,985 @@
     box-shadow: 0 4px 8px rgba(26, 35, 126, 0.4);
     color: #ffffff;
   }
-  
-  /* Botón asignar en grupo */
-  .btn-assign {
-    background-color: var(--accent);
-    color: #ffffff;
-    box-shadow: 0 2px 4px rgba(229, 46, 46, 0.3);
-  }
-  
-  .btn-assign:hover {
-    background-color: var(--accent-hover);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(229, 46, 46, 0.4);
-    color: #ffffff;
-  }
-  
-  /* Barra de búsqueda - Alineación corregida */
-  .search-container {
-    display: flex;
-    gap: 0.75rem;
-    margin-bottom: 36px;
-    position: relative;
-    align-items: center;
-    width: 100%;
-  }
-  
-  .search-box {
-    flex: 1;
-    position: relative;
-    margin-right: auto;
-    margin-left: 0 !important; /* Forzar margen izquierdo 0 */
-    padding-left: 0 !important; /* Asegurar alineación */
-  }
-  
-  .search-box i {
-    position: absolute;
-    left: 1.25rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text-secondary);
-    font-size: 1.1rem;
-    z-index: 5;
-    pointer-events: none;
-  }
-  
-  /* Asegurar que el input de búsqueda conserva la alineación */
-  .search-box input {
-    width: 100%;
-    padding: 0.75rem 1rem 0.75rem 3rem;
-    border-radius: 8px;
-    border: 1px solid #e0e0e0;
-    font-size: 1rem;
-    height: 48px;
-    transition: all 0.2s ease;
-    font-weight: 400;
-    background-color: var(--light-background);
-    text-align: left;
-  }
-  
-  .search-box input:focus {
-    background-color: white;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(229, 46, 46, 0.15);
-    outline: none;
-  }
-  
-  .search-actions {
-    display: flex;
-    gap: 0.5rem;
-  }
-  
-  /* Contenedor para el filtro de sin ubicación */
-  .filter-container {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background-color: var(--light-background);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-    padding: 0 16px;
-    height: 48px;
-    transition: all 0.2s ease;
-    cursor: pointer;
-    user-select: none;
-  }
-  
-  .filter-container:hover {
-    background-color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  }
-  
-  .filter-container.active {
-    background-color: rgba(0, 122, 255, 0.1);
-    border-color: var(--location-color);
-  }
-  
-  .filter-container span {
-    font-size: 0.95rem;
-    font-weight: 500;
-  }
-  
-  .filter-check-input {
-    display: none;
-  }
-  
-  .icon-btn {
-    width: 48px;
-    height: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: var(--light-background);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    padding: 0;
-  }
-  
-  .icon-btn:hover {
-    background-color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  }
-  
-  .icon-btn.scan-active {
-    background-color: rgba(229, 46, 46, 0.1);
-    border-color: var(--accent);
-    animation: blink 1s infinite;
-  }
-  
-  /* Tabla de productos - ALINEADA PRIMERA COLUMNA IZQUIERDA */
-  .table-container {
-    border-radius: 16px;
-    overflow: hidden;
-    border: 1px solid var(--separator);
-    margin-bottom: 32px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-    width: 100%;
-    background-color: white;
-  }
-  
-  table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  
-  th {
-    padding: 16px;
-    font-weight: 600;
-    font-size: 14px;
-    color: var(--text-secondary);
-    background-color: var(--light-background);
-    border-bottom: 1px solid var(--separator);
-  }
-  
-  th:first-child {
-    text-align: left;
-  }
-  
-  th:not(:first-child) {
-    text-align: center;
-  }
-  
-  td {
-    padding: 16px;
-    border-bottom: 1px solid var(--separator);
-    font-size: 15px;
-  }
-  
-  td:first-child {
-    text-align: left;
-  }
-  
-  td:not(:first-child) {
-    text-align: center;
-  }
-  
-  tr:last-child td {
-    border-bottom: none;
-  }
-  
-  tr:hover {
-    background-color: var(--light-background);
-  }
-  
-  tr {
-    transition: background-color 0.2s ease;
-  }
-  
-  .product-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    justify-content: flex-start;
-  }
-  
-  .product-image {
-    width: 48px;
-    height: 48px;
-    border-radius: 8px;
-    object-fit: contain;
-    background-color: white;
-    border: 1px solid var(--separator);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-  }
-  
-  .product-details {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    text-align: left;
-    max-width: 200px;
-  }
-  
-  .product-name {
-    font-weight: 500;
-    margin-bottom: 4px;
-    color: var(--text-color);
-    text-align: left;
-  }
-  
-  .product-code {
-    font-size: 13px;
-    color: var(--text-secondary);
-    text-align: left;
-  }
-  
-  .location-cell {
-    max-width: 240px;
-    position: relative;
-  }
-  
-  .location-display {
-    padding: 8px 0;
-    font-weight: 500;
-    color: var(--location-color);
-    transition: all 0.2s ease;
-  }
-  
-  .location-display.empty {
-    color: var(--text-secondary);
-    font-weight: 400;
-    font-style: italic;
-  }
-  
-  .location-edit {
-    display: none;
-    justify-content: center;
-    max-width: 240px;
-    margin: 0 auto;
-  }
-  
-  .location-edit input {
-    width: 100%;
-    padding: 10px 14px;
-    border-radius: 8px;
-    border: 1px solid var(--location-color);
-    font-size: 15px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    transition: all 0.2s ease;
-  }
-  
-  .location-edit input:focus {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
-    transform: translateY(-1px);
-  }
-  
-  .location-suggestions {
-    margin-top: 8px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    justify-content: center;
-  }
-  
-  .location-suggestion {
-    font-size: 12px;
-    background-color: #f0f0f5;
-    border-radius: 6px;
-    padding: 4px 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border: 1px solid transparent;
-  }
-  
-  .location-suggestion:hover {
-    background-color: #e5e5ea;
-    transform: translateY(-1px);
-    border-color: var(--location-color);
-  }
-  
-  .action-buttons {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-  }
-  
-  .btn-icon {
-    width: 36px;
-    height: 36px;
-    padding: 0;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;
-    background-color: #f5f5f7;
-    border: 1px solid rgba(0, 0, 0, 0.05);
-    color: var(--text-secondary);
-    transition: all 0.2s ease;
-    cursor: pointer;
-  }
-  
-  .btn-icon:hover {
-    background-color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  }
-  
-  .btn-icon.edit {
-    color: var(--location-color);
-  }
-  
-  .btn-icon.edit:hover {
-    background-color: rgba(0, 122, 255, 0.1);
-    border-color: var(--location-color);
-  }
-  
-  .btn-icon.delete {
-    color: var(--accent);
-  }
-  
-  .btn-icon.delete:hover {
-    background-color: rgba(229, 46, 46, 0.1);
-    border-color: var(--accent);
-  }
-  
-  .btn-save, .btn-cancel {
-    display: none;
-  }
-  
-  /* Notificaciones */
-  .notification {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    background-color: rgba(0, 0, 0, 0.8);
-    color: white;
+
+  /* Panel de aplicar ubicaciones */
+  .location-panel {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
     border-radius: 12px;
-    padding: 14px 20px;
-    font-size: 15px;
-    font-weight: 500;
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-    opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.3s ease, transform 0.3s ease;
-  }
-  
-  .notification.show {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  
-  .notification.success {
-    background-color: #34c759;
-  }
-  
-  .notification.error {
-    background-color: #ff3b30;
-  }
-  
-  /* Modal de confirmación personalizado */
-  .confirm-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
-  }
-  
-  .confirm-modal.show {
-    opacity: 1;
-    visibility: visible;
-  }
-  
-  .confirm-dialog {
-    background-color: white;
-    border-radius: 16px;
     padding: 24px;
-    max-width: 400px;
-    width: 100%;
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2);
-    transform: translateY(20px);
-    transition: transform 0.3s ease;
+    margin-bottom: 50px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   }
-  
-  .confirm-modal.show .confirm-dialog {
-    transform: translateY(0);
-  }
-  
-  .confirm-title {
-    font-size: 18px;
+
+  .panel-title {
+    font-size: 20px;
     font-weight: 600;
     margin-bottom: 16px;
     color: var(--text-color);
-  }
-  
-  .confirm-message {
-    font-size: 15px;
-    color: var(--text-secondary);
-    margin-bottom: 24px;
-  }
-  
-  .confirm-buttons {
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-  }
-  
-  .confirm-cancel {
-    background-color: var(--light-background);
-    color: var(--text-color);
-    box-shadow: none;
-  }
-  
-  .confirm-delete {
-    background-color: var(--accent);
-    color: white;
-  }
-  
-  /* Modal de edición masiva - DISEÑO MEJORADO */
-  .modal-content {
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2);
-    border: none;
-  }
-  
-  .modal-header {
-    border-bottom: 1px solid var(--separator);
-    padding: 20px 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background-color: var(--light-background);
-  }
-  
-  .modal-title {
-    font-size: 20px;
-    font-weight: 600;
-    margin: 0;
-    color: var(--text-color);
-  }
-  
-  .btn-close {
-    background-color: rgba(0, 0, 0, 0.1);
-    border-radius: 50%;
-    width: 26px;
-    height: 26px;
-    opacity: 0.7;
-    transition: all 0.2s ease;
-  }
-  
-  .btn-close:hover {
-    opacity: 1;
-    background-color: rgba(0, 0, 0, 0.15);
-    transform: scale(1.05);
-  }
-  
-  .modal-body {
-    padding: 28px;
-  }
-  
-  .modal-footer {
-    border-top: 1px solid var(--separator);
-    padding: 18px 24px;
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-    background-color: var(--light-background);
-  }
-  
-  .form-group {
-    margin-bottom: 24px;
-  }
-  
-  .form-label {
-    display: block;
-    font-weight: 600;
-    margin-bottom: 10px;
-    font-size: 15px;
-    color: var(--text-color);
-  }
-  
-  .form-control {
-    width: 100%;
-    padding: 12px 16px;
-    border-radius: 10px;
-    border: 1px solid #dcdce0;
-    font-size: 15px;
-    transition: all 0.2s ease;
-    background-color: white;
-  }
-  
-  .form-control:focus {
-    outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-light);
-    transform: translateY(-1px);
-  }
-  
-  /* Radio options - simplificado */
-  .radio-options-container {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-bottom: 15px;
-  }
-  
-  .radio-option {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border-radius: 8px;
-    border: 1px solid #e0e0e0;
-    background-color: white;
-  }
-  
-  .radio-option:hover {
-    background-color: var(--light-background);
-  }
-  
-  .radio-option.selected {
-    background-color: #f0f0f5;
-    border-color: #ccc;
-  }
-  
-  .radio-option input {
-    margin: 0;
-    width: 16px;
-    height: 16px;
-    accent-color: var(--accent);
-  }
-  
-  .radio-option i {
-    color: #555;
-    font-size: 14px;
-    width: 18px;
-    text-align: center;
-  }
-  
-  .radio-option span {
-    font-size: 14px;
-    font-weight: normal;
-  }
-  
-  /* Categoría mejorada - simplificada */
-  .category-selection {
-    margin: 15px auto 0;
-    max-width: 90%;
-    transition: all 0.3s ease;
-    background-color: #f8f9fa;
-    border-radius: 10px;
-    padding: 15px;
-    border: 1px solid #e0e0e0;
-  }
-  
-  .category-label {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-bottom: 10px;
+  }
+
+  /* Controles de ubicación */
+  .location-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .location-target-selector {
+    min-width: 200px;
+  }
+
+  .location-target-selector select {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--gray-300);
+    font-size: 0.9rem;
+    font-family: var(--font-apple);
+    background-color: white;
     color: var(--text-color);
-    font-weight: 500;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236c757d' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px;
+    padding-right: 36px;
+  }
+
+  .specific-selector {
+    min-width: 200px;
+    display: none;
+  }
+
+  .specific-selector select {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--gray-300);
+    font-size: 0.9rem;
+    font-family: var(--font-apple);
+    background-color: white;
+    color: var(--text-color);
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236c757d' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px;
+    padding-right: 36px;
+  }
+
+  .product-search-container {
+    min-width: 250px;
+    position: relative;
+    display: none;
+  }
+
+  .product-search-input {
+    width: 100%;
+    padding: 10px 14px 10px 36px;
+    border-radius: 8px;
+    border: 1px solid var(--gray-300);
+    font-size: 0.9rem;
+    font-family: var(--font-apple);
+    background-color: white;
+    color: var(--text-color);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236c757d' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: left 10px center;
+    background-size: 16px;
+  }
+
+  /* Estilo de resultados de búsqueda similar a descuentos.html */
+  .product-search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid var(--gray-300);
+    border-radius: 8px;
+    margin-top: 4px;
+    max-height: 350px;
+    overflow-y: auto;
+    z-index: 100;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    display: none;
+    padding: 0;
+  }
+
+  .product-search-result {
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    border-bottom: 1px solid var(--light-background);
+  }
+
+  .product-search-result:hover {
+    background-color: var(--light-background);
+  }
+
+  .product-search-result:active {
+    background-color: rgba(0, 0, 0, 0.05);
   }
   
-  .category-select-container {
+  .product-search-result.active {
+    background-color: var(--light-background);
+    border-left: 3px solid var(--accent);
+  }
+
+  .product-search-result:last-child {
+    border-bottom: none;
+  }
+
+  .product-result-image {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    border-radius: 6px;
+    background-color: #f0f0f0;
+    border: 1px solid #e5e5e5;
+    padding: 2px;
+  }
+
+  .product-result-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .product-result-name {
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: var(--text-color);
+    line-height: 1.3;
+  }
+
+  .product-result-details {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 1px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  
+  /* Estilo para los detalles del producto */
+  .product-result-sku {
+    color: #777;
+    font-size: 0.75rem;
+    font-family: monospace;
+    background-color: #f5f5f5;
+    padding: 1px 4px;
+    border-radius: 3px;
+    display: inline-block;
+  }
+  
+  /* Estilo para resaltar coincidencias en búsqueda */
+  .search-highlight {
+    color: var(--highlight-color);
+    font-weight: bold;
+    background-color: var(--highlight-background);
+    padding: 0 2px;
+    border-radius: 2px;
+  }
+  
+  /* Estilo para el producto seleccionado */
+  .selected-product-box {
+    display: flex;
+    align-items: center;
+    background-color: #f0f7ff;
+    border: 1px solid #c2e0ff;
+    border-radius: 8px;
+    padding: 10px 12px;
+    transition: all 0.2s ease;
     position: relative;
   }
   
-  .category-select-container:after {
-    content: "\f078";
-    font-family: "Font Awesome 5 Free";
-    font-weight: 900;
-    position: absolute;
-    right: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #666;
-    pointer-events: none;
+  .selected-product-box img {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    border-radius: 4px;
+    margin-right: 10px;
   }
   
-  .category-select {
-    width: 100%;
-    padding: 10px 15px;
-    border-radius: 8px;
-    border: 1px solid #dcdce0;
-    font-size: 15px;
-    appearance: none;
-    background-color: white;
-    cursor: pointer;
-    transition: all 0.2s ease;
+  .selected-product-info {
+    flex: 1;
   }
   
-  .category-select:focus {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(229, 46, 46, 0.15);
-  }
-  
-  /* Estado vacío */
-  .empty-state {
-    padding: 64px 0;
-    text-align: center;
-    background-color: var(--light-background);
-    border-radius: 16px;
-    border: 1px dashed var(--separator);
-    margin-bottom: 32px;
-    width: 100%;
-  }
-  
-  .empty-icon {
-    font-size: 56px;
-    color: var(--text-secondary);
-    margin-bottom: 20px;
-  }
-  
-  .empty-title {
-    font-size: 22px;
+  .selected-product-name {
     font-weight: 600;
-    margin-bottom: 12px;
+    font-size: 0.95rem;
     color: var(--text-color);
   }
   
-  .empty-description {
+  .selected-product-code {
+    font-size: 0.8rem;
     color: var(--text-secondary);
-    font-size: 17px;
-    max-width: 420px;
-    margin: 0 auto 24px auto;
-    line-height: 1.5;
   }
   
-  /* Paginación */
-  .pagination {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    margin-top: 32px;
-  }
-  
-  .pagination-item {
-    width: 40px;
-    height: 40px;
+  .selected-product-remove {
+    background: none;
+    border: none;
+    color: #d32f2f;
+    font-size: 1.2rem;
+    cursor: pointer;
+    width: 28px;
+    height: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+  }
+  
+  .selected-product-remove:hover {
+    background-color: rgba(211, 47, 47, 0.1);
+  }
+
+  .location-input-group {
+    flex: 1;
+    min-width: 200px;
+    position: relative;
+  }
+
+  .location-input {
+    width: 100%;
+    padding: 10px 14px;
     border-radius: 8px;
-    background-color: var(--light-background);
-    border: 1px solid var(--separator);
-    font-size: 14px;
-    font-weight: 500;
+    border: 1px solid var(--gray-300);
+    font-size: 0.9rem;
+    font-family: var(--font-apple);
+    background-color: white;
     color: var(--text-color);
+  }
+
+  .location-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
-    text-decoration: none;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    white-space: nowrap;
   }
-  
-  .pagination-item:hover {
-    background-color: white;
+
+  .btn-apply-location {
+    background-color: var(--location-apply-color);
+    color: white;
+  }
+
+  .btn-apply-location:hover:not(:disabled) {
+    background-color: var(--location-hover);
     transform: translateY(-1px);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 8px rgba(75, 108, 183, 0.3);
   }
   
-  .pagination-item.active {
-    background-color: var(--accent);
-    color: white;
-    border-color: var(--accent);
+  /* Estilo para botón disabled */
+  .btn-apply-location:disabled,
+  .btn-apply-location.disabled {
+    background-color: #9E9E9E;
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
   }
   
-  /* Toast notificaciones */
-  .toast {
-    background-color: #333;
+  /* Botón de reparación de ubicaciones */
+  .btn-fix-locations {
+    background-color: var(--warning-color);
     color: white;
-    padding: 14px 20px;
-    border-radius: 12px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
     margin-top: 8px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    margin-bottom: 16px;
+    border: none;
+    box-shadow: 0 2px 4px rgba(255, 152, 0, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+  }
+  
+  .btn-fix-locations:hover {
+    background-color: #f57c00;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(255, 152, 0, 0.4);
+  }
+
+  /* Sección Mis Ubicaciones */
+  .my-locations-section {
+    margin-top: 48px;
+  }
+
+  .section-title {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 24px;
+    color: var(--text-color);
     display: flex;
     align-items: center;
     gap: 10px;
-    animation: slideIn 0.3s ease, fadeOut 0.5s ease 2.5s forwards;
-    max-width: 350px;
+  }
+
+  /* Usando el estilo de descuentos.html para las categorías de ubicaciones */
+  .location-section {
+    margin-bottom: 70px;
+    border: 1px solid #eaeaea;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+    background-color: #fafafa;
+  }
+
+  .location-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f0f0f0;
+    position: relative;
+  }
+
+  .location-title {
+    font-size: 22px;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--text-color);
+  }
+  
+  /* Fijamos posición para el botón de remover */
+  .location-header .remove-location-btn {
+    position: absolute;
+    right: 0;
+    top: 0;
+  }
+
+  .location-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background-color: #eeeeee;
+    color: #505050;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .location-value-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background-color: var(--location-light);
+    color: var(--location-color);
+    font-size: 14px;
+    font-weight: 600;
+  }
+  
+  /* Ver Todos Link en el encabezado */
+  .view-all-header-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 10px;
+    background-color: var(--accent);
+    color: white;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 14px;
     font-weight: 500;
+    margin-left: 12px;
+    box-shadow: 0 2px 4px rgba(229, 46, 46, 0.3);
+    transition: all 0.2s ease;
   }
   
+  /* Estilo especial para link de ubicación global */
+  .view-all-header-link.global {
+    background-color: #6c757d;
+    box-shadow: 0 2px 4px rgba(108, 117, 125, 0.3);
+  }
+  
+  .view-all-header-link:hover {
+    background-color: var(--accent-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 3px 6px rgba(229, 46, 46, 0.4);
+  }
+  
+  .view-all-header-link.global:hover {
+    background-color: #5a6268;
+    box-shadow: 0 3px 6px rgba(90, 98, 104, 0.4);
+  }
+  
+  .header-content {
+    display: flex;
+    align-items: center;
+  }
+  
+  /* Slider para items de ubicación */
+  .location-slider-container {
+    position: relative;
+    padding: 0 70px;
+    margin: 0 -10px;
+    overflow: hidden;
+  }
+
+  .location-slider {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    padding: 8px 4px 24px 4px;
+    margin-bottom: 8px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scroll-snap-type: x mandatory;
+  }
+  
+  /* Ocultar scrollbar pero permitir scroll */
+  .location-slider::-webkit-scrollbar {
+    height: 4px;
+  }
+  
+  .location-slider::-webkit-scrollbar-thumb {
+    background: var(--accent-light);
+    border-radius: 4px;
+  }
+  
+  /* Hacer que las tarjetas se alineen al hacer scroll */
+  .product-card, .category-card, .brand-card {
+    scroll-snap-align: start;
+  }
+
+  /* Category y Brand Cards */
+  .category-card, .brand-card {
+    flex: 0 0 220px;
+    height: 360px;
+    border-radius: 12px;
+    background-color: white;
+    border: 1px solid #e0e0e0;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.07);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer; 
+    text-decoration: none;
+    position: relative;
+    margin: 0 8px;
+  }
+  
+  /* Estructura con espaciado fijo interno */
+  .category-card-top, .brand-card-top {
+    flex: 0 0 150px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+  }
+  
+  /* Estilo específico para el círculo de marca (siempre gris) */
+  .brand-circle {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    margin-bottom: 15px;
+    border: 2px solid white;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #888888 !important;
+  }
+  
+  /* Ícono dentro de brand-circle - Color blanco */
+  .brand-icon {
+    font-size: 32px;
+    color: white !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  }
+  
+  /* Ícono dentro del círculo de color */
+  .category-icon {
+    font-size: 32px;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  }
+  
+  .category-card-middle, .brand-card-middle {
+    flex: 0 0 110px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+  }
+  
+  .category-card-bottom, .brand-card-bottom {
+    margin-top: auto;
+    width: 100%;
+  }
+
+  .category-card:hover, .brand-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.08);
+  }
+  
+  /* Círculo de color para la categoría */
+  .category-color-circle {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    margin-bottom: 15px;
+    border: 2px solid white;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .category-name, .brand-name {
+    font-size: 18px;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 10px;
+    color: var(--text-color);
+    line-height: 1.3;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .category-details, .brand-details {
+    text-align: center;
+    font-size: 14px;
+    color: var(--text-secondary);
+    height: 50px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* Tarjeta de ubicación global */
+  .global-location-card {
+    flex: 0 0 95% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 300px !important;
+    margin: 0 auto !important;
+    padding: 25px !important;
+    position: relative !important;
+    text-align: center !important;
+    text-decoration: none !important;
+  }
+  
+  .global-location-card .global-icon-container {
+    margin-bottom: 25px;
+  }
+  
+  .global-location-card .global-circle {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background-color: var(--location-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+  }
+  
+  .global-location-card .global-icon {
+    font-size: 30px;
+    color: white;
+  }
+  
+  .global-location-card .global-title {
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: var(--text-color);
+  }
+  
+  .global-location-card .global-details {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    gap: 8px;
+    margin-bottom: 30px;
+    color: var(--text-secondary);
+  }
+  
+  .global-location-card .global-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background-color: var(--location-light);
+    color: var(--location-color);
+    font-size: 14px;
+    font-weight: 600;
+  }
+  
+  .global-location-card .global-action {
+    margin-top: 10px;
+    width: 100%;
+    max-width: 300px;
+    display: flex;
+    justify-content: center;
+  }
+  
+  .global-location-card .remove-location-btn {
+    background-color: var(--location-remove-color);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 20px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+  }
+  
+  .global-location-card .remove-location-btn:hover {
+    background-color: #d32f2f;
+    transform: translateY(-2px);
+  }
+
+  /* Product Cards */
+  .product-card {
+    flex: 0 0 220px;
+    height: 360px;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: white;
+    border: 1px solid #e0e0e0;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.07);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  .product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.08);
+  }
+
+  .product-image-container {
+    height: 140px;
+    min-height: 140px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    background-color: #f8f8f8;
+    padding: 5px;
+  }
+
+  .product-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .product-details {
+    padding: 16px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .product-info-container {
+    display: flex;
+    flex-direction: column;
+    height: 78px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .product-name {
+    font-size: 16px;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    line-height: 1.4;
+    color: var(--text-color);
+    height: 46px;
+    margin-bottom: 0;
+  }
+
+  .product-brand {
+    font-size: 13px;
+    color: #606060;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+  }
+
+  .product-location-container {
+    height: 40px;
+    margin-top: 10px;
+    margin-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
+
+  .location-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .current-location {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--location-color);
+  }
+
+  .location-label-small {
+    background: var(--location-color);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    margin-left: 8px;
+  }
+
+  .remove-location-btn {
+    background-color: var(--location-remove-color);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: auto;
+  }
+
+  .remove-location-btn:hover {
+    background-color: #d32f2f;
+  }
+
+  /* Botones de navegación del slider */
+  .slider-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background-color: var(--accent);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(229, 46, 46, 0.4);
+    z-index: 10;
+    transition: all 0.2s ease;
+  }
+
+  .slider-arrow:hover {
+    background-color: var(--accent-hover);
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 4px 12px rgba(229, 46, 46, 0.6);
+  }
+
+  .slider-arrow-left {
+    left: 15px;
+  }
+
+  .slider-arrow-right {
+    right: 15px;
+  }
+
+  .slider-arrow svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: white;
+    stroke-width: 2.5;
+  }
+
+  /* Modal de confirmación */
+  .custom-confirm {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+
+  .custom-confirm-box {
+    background: white;
+    border-radius: 16px;
+    padding: 28px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  }
+
+  .custom-confirm-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .warning-icon {
+    color: var(--warning-color);
+    font-size: 24px;
+  }
+
+  .custom-confirm-message {
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+    line-height: 1.6;
+  }
+
+  .custom-confirm-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+  }
+
+  .custom-confirm-button {
+    padding: 10px 24px;
+    border-radius: 8px;
+    border: none;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.95rem;
+  }
+
+  .custom-confirm-cancel {
+    background: var(--light-background);
+    color: var(--text-color);
+  }
+
+  .custom-confirm-cancel:hover {
+    background: #e0e0e0;
+  }
+
+  .custom-confirm-ok {
+    background: var(--warning-color);
+    color: white;
+  }
+
+  .custom-confirm-ok:hover {
+    background: #f57c00;
+  }
+
+  /* Toast notifications */
+  .toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 1000;
+    max-width: 400px;
+  }
+
+  .toast {
+    background-color: #333;
+    color: white;
+    padding: 16px 20px;
+    border-radius: 8px;
+    margin-top: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: slideIn 0.3s ease;
+    opacity: 1;
+    transition: all 0.3s ease;
+  }
+
   .toast.success {
-    background-color: #34c759;
+    background-color: #2ecc71;
   }
-  
+
   .toast.error {
-    background-color: #ff3b30;
+    background-color: #e74c3c;
+  }
+
+  .toast.warning {
+    background-color: #f39c12;
+  }
+
+  /* Estado vacío */
+  .empty-locations {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-secondary);
+    font-style: italic;
   }
   
+  /* Estilo para los mensajes de no se encontraron resultados */
+  .no-results-message {
+    padding: 14px;
+    text-align: center;
+    color: var(--text-secondary);
+    font-style: italic;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+    margin: 10px 0;
+  }
+
   @keyframes slideIn {
     from {
       transform: translateX(100%);
@@ -843,1007 +1107,1696 @@
       opacity: 1;
     }
   }
-  
-  @keyframes fadeOut {
-    from {
-      opacity: 1;
-    }
-    to {
-      opacity: 0;
-      transform: translateY(-20px);
-    }
-  }
-  
+
   /* Responsive */
   @media (max-width: 768px) {
+    .ubicaciones-container {
+      padding: 24px 16px;
+    }
+    
     .page-header {
       flex-direction: column;
       align-items: flex-start;
-      gap: 16px;
+      gap: 1rem;
     }
     
     .header-actions {
       width: 100%;
     }
     
-    .search-container {
+    .location-controls {
       flex-direction: column;
       align-items: stretch;
     }
     
-    .search-actions {
-      justify-content: space-between;
+    .location-target-selector,
+    .specific-selector,
+    .product-search-container {
+      width: 100%;
     }
     
-    .table-container {
+    .location-slider {
       overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scroll-snap-type: x mandatory;
+      padding-bottom: 16px;
     }
     
-    th, td {
-      padding: 12px 8px;
+    .product-card,
+    .category-card,
+    .brand-card {
+      scroll-snap-align: start;
     }
     
-    .product-image {
-      width: 36px;
-      height: 36px;
+    .location-slider-container {
+      padding: 0;
     }
-  }
-  
-  @keyframes blink {
-    0% { opacity: 1; }
-    50% { opacity: 0.6; }
-    100% { opacity: 1; }
-  }
-  
-  .animated-fade {
-    animation: fadeIn 0.3s ease-out;
-  }
-  
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    
+    .slider-arrow {
+      display: none;
+    }
   }
 </style>
 
-<div class="apple-container animated-fade">
-  <!-- Cabecera -->
+<div class="ubicaciones-container">
+  <!-- Encabezado -->
   <div class="page-header">
     <div class="header-title-container">
       <h1 class="page-title">Ubicaciones de Productos</h1>
-      <p class="page-description">Gestiona las ubicaciones físicas de tus productos de manera fácil y rápida</p>
+      <p class="page-description">Gestiona las ubicaciones físicas de tus productos de manera rápida y eficiente.</p>
     </div>
     <div class="header-actions">
-      <button id="btnBulkAssign" class="btn-action btn-assign" data-bs-toggle="modal" data-bs-target="#bulkLocationModal">
-        <i class="fas fa-tags"></i> Agregar masivamente
-      </button>
       <a href="{{ url_for('dashboard_inventario') }}" class="btn-action btn-volver">
         <i class="fas fa-arrow-left"></i>
         <span>Volver</span>
       </a>
     </div>
   </div>
-  
-  <!-- Barra de búsqueda alineada -->
-  <div class="search-container">
-    <div class="search-box" id="searchBoxContainer">
-      <i class="fas fa-search"></i>
-      <input type="text" id="searchProducts" placeholder="Buscar por nombre o código...">
-    </div>
-    <div class="search-actions">
-      <!-- Filtro sin ubicación -->
-      <div class="filter-container" id="noLocationFilter">
-        <input class="filter-check-input" type="checkbox" id="noLocationCheck">
-        <i class="fas fa-map-marker-alt"></i>
-        <span>Sin ubicación</span>
+
+  <!-- Panel de aplicar ubicaciones -->
+  <div class="location-panel">
+    <h3 class="panel-title">
+      <i class="fas fa-map-marker-alt"></i>
+      Aplicar ubicación
+    </h3>
+    
+    <div class="location-controls">
+      <div class="location-target-selector">
+        <select id="locationTarget">
+          <option value="all">Aplicar a todos los productos</option>
+          <option value="category">Aplicar por categoría</option>
+          <option value="brand">Aplicar por marca</option>
+          <option value="product">Aplicar a un producto</option>
+        </select>
       </div>
       
-      <!-- Botón escanear con pistola -->
-      <button type="button" class="icon-btn" id="scanIcon" title="Escanear con pistola">
-        <img src="{{ url_for('static', filename='img/3.png') }}" alt="Escanear con Lector" style="width: 24px; height: 24px;">
-      </button>
-      
-      <!-- Botón escanear con cámara -->
-      <button type="button" class="icon-btn" id="cameraIcon" title="Escanear con cámara" onclick="iniciarEscaneoQuagga()">
-        <img src="{{ url_for('static', filename='img/4.png') }}" alt="Escanear con Cámara" style="width: 24px; height: 24px;">
-      </button>
-    </div>
-  </div>
-  
-  <!-- Tabla de productos -->
-  {% if productos and productos|length > 0 %}
-  <div class="table-container">
-    <table>
-      <thead>
-        <tr>
-          <th style="width: 40%; text-align: left;">Producto</th>
-          <th style="width: 15%; text-align: center;">Categoría</th>
-          <th style="width: 30%; text-align: center;">Ubicación</th>
-          <th style="width: 15%; text-align: center;">Acciones</th>
-        </tr>
-      </thead>
-      <tbody id="productsTableBody">
-        {% for producto in productos %}
-        <tr data-product-id="{{ producto.id }}" data-product-name="{{ producto.nombre|lower }}" data-product-code="{{ producto.codigo_barras_externo|lower if producto.codigo_barras_externo else '' }}" data-has-location="{{ '1' if producto.ubicacion else '0' }}">
-          <td>
-            <div class="product-info">
-              <img src="{{ url_for('static', filename='uploads/' ~ producto.foto) if producto.foto else url_for('static', filename='img/default_product.jpg') }}" class="product-image" alt="{{ producto.nombre }}">
-              <div class="product-details">
-                <div class="product-name">{{ producto.nombre }}</div>
-                <div class="product-code">{{ producto.codigo_barras_externo or 'SKU-' ~ producto.id }}</div>
-              </div>
-            </div>
-          </td>
-          <td style="text-align: center;">
-            {% if producto.categoria %}
-              <span class="category-badge" style="display: inline-block; padding: 4px 8px; border-radius: 4px; background-color: {{ producto.categoria_color or '#6B7280' }}20; color: {{ producto.categoria_color or '#6B7280' }}; font-weight: 500; font-size: 13px;">
-                {{ producto.categoria|title }}
-              </span>
-            {% else %}
-              <span class="category-badge" style="color: #aaa; font-style: italic; font-size: 13px;">Sin categoría</span>
-            {% endif %}
-          </td>
-          <td class="location-cell">
-            <div class="location-display {% if not producto.ubicacion %}empty{% endif %}">
-              {{ producto.ubicacion or 'Sin ubicación asignada' }}
-            </div>
-            <div class="location-edit">
-              <input type="text" value="{{ producto.ubicacion or '' }}" placeholder="Ej: Estante A, Bodega 2">
-              {% if ubicaciones and ubicaciones|length > 0 %}
-              <div class="location-suggestions">
-                {% for ubicacion in ubicaciones %}
-                <div class="location-suggestion">{{ ubicacion }}</div>
-                {% endfor %}
-              </div>
-              {% endif %}
-            </div>
-          </td>
-          <td>
-            <div class="action-buttons">
-              <button type="button" class="btn-icon edit btn-edit-location" title="Editar ubicación" onclick="editLocation({{ producto.id }})">
-                <i class="fas fa-pencil-alt"></i>
-              </button>
-              <!-- Botón eliminar - simplificado para usar bootstrap modal -->
-              <button type="button" class="btn-icon delete btn-delete-location" 
-                      title="Eliminar ubicación" 
-                      onclick="prepareDeleteLocation({{ producto.id }})"
-                      {% if not producto.ubicacion %}style="display: none;"{% endif %}>
-                <i class="fas fa-trash-alt"></i>
-              </button>
-              <button type="button" class="btn-icon btn-save" title="Guardar" onclick="saveLocation({{ producto.id }})" style="color: #34c759; display: none;">
-                <i class="fas fa-check"></i>
-              </button>
-              <button type="button" class="btn-icon btn-cancel" title="Cancelar" onclick="cancelEditing({{ producto.id }})" style="color: #ff3b30; display: none;">
-                <i class="fas fa-times"></i>
-              </button>
-            </div>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-  
-  <!-- Paginación -->
-  {% if total_pages and total_pages > 1 %}
-  <div class="pagination">
-    {% if page > 1 %}
-    <a href="{{ url_for('ubicacion_productos', page=page-1) }}" class="pagination-item">
-      <i class="fas fa-chevron-left"></i>
-    </a>
-    {% endif %}
-    
-    {% for p in range(1, total_pages + 1) %}
-    <a href="{{ url_for('ubicacion_productos', page=p) }}" class="pagination-item {% if p == page %}active{% endif %}">
-      {{ p }}
-    </a>
-    {% endfor %}
-    
-    {% if page < total_pages %}
-    <a href="{{ url_for('ubicacion_productos', page=page+1) }}" class="pagination-item">
-      <i class="fas fa-chevron-right"></i>
-    </a>
-    {% endif %}
-  </div>
-  {% endif %}
-  
-  {% else %}
-  <!-- Estado vacío -->
-  <div class="empty-state">
-    <div class="empty-icon">
-      <i class="fas fa-boxes"></i>
-    </div>
-    <h3 class="empty-title">No hay productos en tu inventario</h3>
-    <p class="empty-description">Agrega productos a tu inventario para poder asignarles ubicaciones físicas</p>
-    <a href="{{ url_for('agregar_producto') }}" class="btn-action btn-assign">
-      <i class="fas fa-plus"></i> Agregar producto
-    </a>
-  </div>
-  {% endif %}
-  
-  <!-- Modal de confirmación usando Bootstrap -->
-  <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="confirmModalLabel">Eliminar ubicación</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <p>¿Estás seguro de que deseas eliminar esta ubicación? Esta acción no se puede deshacer.</p>
-          <input type="hidden" id="delete-product-id" value="">
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn-action" style="background-color: #f5f5f7; color: #1d1d1f;" data-bs-dismiss="modal">Cancelar</button>
-          <button type="button" class="btn-action btn-assign" id="confirmDeleteBtn" onclick="deleteLocation()">Eliminar</button>
-        </div>
+      <div class="specific-selector" id="categorySelector">
+        <select id="specificCategory">
+          <option value="">Selecciona una categoría</option>
+          {% for categoria in categorias %}
+            <option value="{{ categoria.nombre }}">{{ categoria.nombre|title }}</option>
+          {% endfor %}
+        </select>
       </div>
-    </div>
-  </div>
-  
-  <!-- Modal para asignación masiva -->
-  <div class="modal fade" id="bulkLocationModal" tabindex="-1" aria-labelledby="bulkLocationModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="bulkLocationModalLabel">
-            Agregar ubicación masivamente
-          </h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <div class="form-group">
-            <label for="ubicacionMasiva" class="form-label">
-              Ubicación a asignar
-            </label>
-            <input type="text" id="ubicacionMasiva" class="form-control" placeholder="Ej: Estante A, Bodega 2">
-            
-            {% if ubicaciones and ubicaciones|length > 0 %}
-            <div class="location-suggestions" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; justify-content: flex-start;">
-              {% for ubicacion in ubicaciones %}
-              <div class="location-suggestion" onclick="document.getElementById('ubicacionMasiva').value = this.textContent.trim()">
-                {{ ubicacion }}
-              </div>
-              {% endfor %}
-            </div>
+
+      <div class="specific-selector" id="brandSelector">
+        <select id="specificBrand">
+          <option value="">Selecciona una marca</option>
+          {% set brands = productos|map(attribute='marca')|unique|list %}
+          {% for brand in brands %}
+            {% if brand %}
+              <option value="{{ brand }}">{{ brand }}</option>
             {% endif %}
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="product-search-container" id="productSearchContainer">
+        <input type="text" class="product-search-input" id="productSearchInput" placeholder="Buscar por nombre o SKU...">
+        <!-- Contenedor para producto seleccionado -->
+        <div class="selected-product-box" id="selectedProductBox" style="display: none;">
+          <img id="selectedProductImage" src="/static/img/default_product.jpg" alt="Producto seleccionado">
+          <div class="selected-product-info">
+            <div class="selected-product-name" id="selectedProductName">Nombre del producto</div>
+            <div class="selected-product-code" id="selectedProductCode">SKU: ######</div>
           </div>
-          
-          <div class="form-group">
-            <label class="form-label">
-              Aplicar a
-            </label>
-            
-            <div class="radio-options-container">
-              <label class="radio-option selected" id="radioCategory">
-                <input type="radio" name="selectionType" value="category" checked>
-                <span>Por categoría</span>
-              </label>
-              
-              <label class="radio-option" id="radioManual">
-                <input type="radio" name="selectionType" value="manual">
-                <span>Selección manual</span>
-              </label>
-            </div>
-            
-            <div id="categorySelection" class="category-selection">
-              <div class="category-label">
-                <span>Selecciona categoría:</span>
-              </div>
-              <div class="category-select-container">
-                <select id="categoriaSelector" class="category-select">
-                  {% for categoria in categorias %}
-                  <option value="{{ categoria.nombre }}">
-                    {{ categoria.nombre|title }}
-                  </option>
-                  {% endfor %}
-                </select>
-              </div>
-            </div>
-            
-            <div id="manualSelection" class="category-selection" style="display: none;">
-              <div class="category-label">
-                <span>Buscar productos:</span>
-              </div>
-              <div class="search-area">
-                <input type="text" id="searchProductsModal" class="form-control" placeholder="Buscar productos...">
-                <ul id="selectedProductsList" class="selected-products-list"></ul>
-                <div class="selected-count mt-2">
-                  Productos seleccionados: <span id="selectedCount">0</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn-action" style="background-color: #f5f5f7; color: #1d1d1f;" data-bs-dismiss="modal">Cancelar</button>
-          <button type="button" class="btn-action btn-assign" id="saveUbicacionMasiva">
-            Guardar
+          <button type="button" class="selected-product-remove" id="selectedProductRemove">
+            <i class="fas fa-times"></i>
           </button>
         </div>
+        <div class="product-search-results" id="productSearchResults"></div>
+        <input type="hidden" id="selectedProductId">
+      </div>
+      
+      <div class="location-input-group">
+        <input type="text" class="location-input" id="globalLocationValue" placeholder="Ej: Estante A, Bodega 2" required>
+      </div>
+      
+      <button class="location-action-btn btn-apply-location" id="applyGlobalLocationBtn" onclick="applyGlobalLocation()">
+        <i class="fas fa-check"></i>
+        Aplicar
+      </button>
+    </div>
+  </div>
+
+  <!-- Sección Mis Ubicaciones -->
+  <div class="my-locations-section" id="myLocationsSection" style="display: none;">
+    <h2 class="section-title">
+      <i class="fas fa-list"></i>
+      Mis Ubicaciones
+    </h2>
+
+    <!-- Ubicación Global -->
+    <div class="location-section" id="globalLocations" style="display: none;">
+      <div class="location-header">
+        <div class="header-content">
+          <div class="location-title">
+            Ubicación Global
+            <span class="location-badge" id="globalLocationCount">0</span>
+            <span class="location-value-badge" id="globalLocationValue">Estante A</span>
+          </div>
+          <span id="view-all-global-container"></span>
+        </div>
+      </div>
+      <div class="location-slider-container">
+        <div class="location-slider" id="slider-global">
+          <!-- Productos se cargarán aquí -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Ubicaciones por Categoría -->
+    <div class="location-section" id="categoryLocations" style="display: none;">
+      <div class="location-header">
+        <div class="header-content">
+          <div class="location-title">
+            Por Categoría
+            <span class="location-badge" id="categoryLocationCount">0</span>
+          </div>
+          <span id="view-all-category-container"></span>
+        </div>
+        <button class="remove-location-btn" onclick="removeAllCategoryLocations()">
+          <i class="fas fa-times"></i>
+          Quitar todos
+        </button>
+      </div>
+      <div class="location-slider-container">
+        <div class="slider-arrow slider-arrow-left" onclick="scrollSlider('category', 'left')">
+          <svg viewBox="0 0 24 24">
+            <path d="M15 18L9 12L15 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="location-slider" id="slider-category">
+          <!-- Categorías se cargarán aquí -->
+        </div>
+        <div class="slider-arrow slider-arrow-right" onclick="scrollSlider('category', 'right')">
+          <svg viewBox="0 0 24 24">
+            <path d="M9 18L15 12L9 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ubicaciones por Marca -->
+    <div class="location-section" id="brandLocations" style="display: none;">
+      <div class="location-header">
+        <div class="header-content">
+          <div class="location-title">
+            Por Marca
+            <span class="location-badge" id="brandLocationCount">0</span>
+          </div>
+          <span id="view-all-brand-container"></span>
+        </div>
+        <button class="remove-location-btn" onclick="removeAllBrandLocations()">
+          <i class="fas fa-times"></i>
+          Quitar todos
+        </button>
+      </div>
+      <div class="location-slider-container">
+        <div class="slider-arrow slider-arrow-left" onclick="scrollSlider('brand', 'left')">
+          <svg viewBox="0 0 24 24">
+            <path d="M15 18L9 12L15 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="location-slider" id="slider-brand">
+          <!-- Marcas se cargarán aquí -->
+        </div>
+        <div class="slider-arrow slider-arrow-right" onclick="scrollSlider('brand', 'right')">
+          <svg viewBox="0 0 24 24">
+            <path d="M9 18L15 12L9 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ubicaciones por Producto -->
+    <div class="location-section" id="productLocations" style="display: none;">
+      <div class="location-header">
+        <div class="header-content">
+          <div class="location-title">
+            Por Producto
+            <span class="location-badge" id="productLocationCount">0</span>
+          </div>
+          <span id="view-all-product-container"></span>
+        </div>
+        <button class="remove-location-btn" onclick="removeAllProductLocations()">
+          <i class="fas fa-times"></i>
+          Quitar todos
+        </button>
+      </div>
+      <div class="location-slider-container">
+        <div class="slider-arrow slider-arrow-left" onclick="scrollSlider('product', 'left')">
+          <svg viewBox="0 0 24 24">
+            <path d="M15 18L9 12L15 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="location-slider" id="slider-product">
+          <!-- Productos se cargarán aquí -->
+        </div>
+        <div class="slider-arrow slider-arrow-right" onclick="scrollSlider('product', 'right')">
+          <svg viewBox="0 0 24 24">
+            <path d="M9 18L15 12L9 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
       </div>
     </div>
   </div>
+
+  <!-- Notificaciones -->
+  <div class="toast-container" id="toastContainer"></div>
 </div>
 
 <script>
-  // Objeto global para almacenar valores originales por ID de producto
-  var originalValues = {};
+  // Estado global para controlar ubicaciones
+  let activeLocations = {
+    global: false,
+    categories: new Set(),
+    products: new Set(),
+    brands: new Set(),
+    globalDetails: null,
+    categoryDetails: {},
+    brandDetails: {}
+  };
   
-  // Función para editar ubicación
-  function editLocation(productId) {
-    console.log("Editando ubicación para producto ID:", productId);
-    
-    // Obtener elementos relevantes
-    var row = document.querySelector('tr[data-product-id="' + productId + '"]');
-    if (!row) {
-      console.error("No se encontró la fila para el producto ID:", productId);
-      return;
-    }
-    
-    var locationDisplay = row.querySelector('.location-display');
-    var locationEdit = row.querySelector('.location-edit');
-    var locationInput = locationEdit.querySelector('input');
-    var btnEdit = row.querySelector('.btn-edit-location');
-    var btnDelete = row.querySelector('.btn-delete-location');
-    var btnSave = row.querySelector('.btn-save');
-    var btnCancel = row.querySelector('.btn-cancel');
-    
-    // Cerrar cualquier otra edición en curso
-    document.querySelectorAll('.location-edit').forEach(function(edit) {
-      if (edit !== locationEdit && edit.style.display === 'block') {
-        var otherRow = edit.closest('tr');
-        var otherDisplay = otherRow.querySelector('.location-display');
-        var otherBtnEdit = otherRow.querySelector('.btn-edit-location');
-        var otherBtnDelete = otherRow.querySelector('.btn-delete-location');
-        var otherBtnSave = otherRow.querySelector('.btn-save');
-        var otherBtnCancel = otherRow.querySelector('.btn-cancel');
-        
-        edit.style.display = 'none';
-        otherDisplay.style.display = 'block';
-        otherBtnEdit.style.display = 'flex';
-        if (otherDisplay.textContent.trim() !== 'Sin ubicación asignada') {
-          otherBtnDelete.style.display = 'flex';
-        } else {
-          otherBtnDelete.style.display = 'none';
-        }
-        otherBtnSave.style.display = 'none';
-        otherBtnCancel.style.display = 'none';
-      }
-    });
-    
-    // Guardar valor original
-    originalValues[productId] = locationInput.value;
-    
-    // Activar modo edición
-    locationDisplay.style.display = 'none';
-    locationEdit.style.display = 'flex';
-    btnEdit.style.display = 'none';
-    btnDelete.style.display = 'none';
-    btnSave.style.display = 'flex';
-    btnCancel.style.display = 'flex';
-    locationInput.focus();
-  }
+  // Cache de datos
+  let productosCache = null;
   
-  // Función para guardar ubicación
-  function saveLocation(productId) {
-    console.log("Guardando ubicación para producto ID:", productId);
+  // Inicialización
+  document.addEventListener('DOMContentLoaded', function() {
+    productosCache = {{ productos|tojson }};
+    initializeLocationPanel();
     
-    // Obtener elementos relevantes
-    var row = document.querySelector('tr[data-product-id="' + productId + '"]');
-    if (!row) {
-      console.error("No se encontró la fila para el producto ID:", productId);
-      return;
-    }
+    // Verificar ubicaciones existentes
+    checkExistingLocations();
     
-    var locationDisplay = row.querySelector('.location-display');
-    var locationEdit = row.querySelector('.location-edit');
-    var locationInput = locationEdit.querySelector('input');
-    var btnEdit = row.querySelector('.btn-edit-location');
-    var btnDelete = row.querySelector('.btn-delete-location');
-    var btnSave = row.querySelector('.btn-save');
-    var btnCancel = row.querySelector('.btn-cancel');
+    initializeProductSearch();
+  });
+  
+  // Configurar panel de ubicaciones
+  function initializeLocationPanel() {
+    const locationTarget = document.getElementById('locationTarget');
+    const categorySelector = document.getElementById('categorySelector');
+    const brandSelector = document.getElementById('brandSelector');
+    const productSearchContainer = document.getElementById('productSearchContainer');
+    const applyButton = document.getElementById('applyGlobalLocationBtn');
+    const selectedProductBox = document.getElementById('selectedProductBox');
+    const searchInput = document.getElementById('productSearchInput');
     
-    var newLocation = locationInput.value.trim();
-    
-    // Mostrar cargando
-    btnSave.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-    btnSave.disabled = true;
-    
-    // Llamar a la API
-    fetch('/api/actualizar-ubicacion/' + productId, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ ubicacion: newLocation })
-    })
-    .then(function(response) { return response.json(); })
-    .then(function(data) {
-      if (data.success) {
-        // Actualizar UI
-        if (newLocation) {
-          locationDisplay.textContent = newLocation;
-          locationDisplay.classList.remove('empty');
-          row.setAttribute('data-has-location', '1');
-          btnDelete.style.display = 'flex';
-        } else {
-          locationDisplay.textContent = 'Sin ubicación asignada';
-          locationDisplay.classList.add('empty');
-          row.setAttribute('data-has-location', '0');
-          btnDelete.style.display = 'none';
-        }
-        
-        // Actualizar valor original
-        originalValues[productId] = newLocation;
-        
-        // Efecto visual de éxito
-        row.style.transition = "background-color 0.3s ease";
-        row.style.backgroundColor = "rgba(52, 199, 89, 0.1)";
-        setTimeout(function() {
-          row.style.backgroundColor = "";
-        }, 1000);
-        
-        // Mostrar notificación
-        showNotification('Ubicación actualizada correctamente', 'success');
-      } else {
-        throw new Error(data.message || 'Error al actualizar ubicación');
-      }
-    })
-    .catch(function(error) {
-      console.error('Error:', error);
-      showNotification('Error: ' + error.message, 'error');
-    })
-    .finally(function() {
-      // Restaurar botón
-      btnSave.innerHTML = '<i class="fas fa-check"></i>';
-      btnSave.disabled = false;
+    locationTarget.addEventListener('change', function() {
+      // Ocultar todos primero
+      categorySelector.style.display = 'none';
+      brandSelector.style.display = 'none';
+      productSearchContainer.style.display = 'none';
       
-      // Volver a modo visualización
-      locationDisplay.style.display = 'block';
-      locationEdit.style.display = 'none';
-      btnEdit.style.display = 'flex';
-      btnSave.style.display = 'none';
-      btnCancel.style.display = 'none';
-    });
-  }
-  
-  // Función para cancelar edición
-  function cancelEditing(productId) {
-    console.log("Cancelando edición para producto ID:", productId);
-    
-    // Obtener elementos relevantes
-    var row = document.querySelector('tr[data-product-id="' + productId + '"]');
-    if (!row) {
-      console.error("No se encontró la fila para el producto ID:", productId);
-      return;
-    }
-    
-    var locationDisplay = row.querySelector('.location-display');
-    var locationEdit = row.querySelector('.location-edit');
-    var locationInput = locationEdit.querySelector('input');
-    var btnEdit = row.querySelector('.btn-edit-location');
-    var btnDelete = row.querySelector('.btn-delete-location');
-    var btnSave = row.querySelector('.btn-save');
-    var btnCancel = row.querySelector('.btn-cancel');
-    
-    // Restaurar valor original
-    locationInput.value = originalValues[productId] || '';
-    
-    // Volver a modo visualización
-    locationDisplay.style.display = 'block';
-    locationEdit.style.display = 'none';
-    btnEdit.style.display = 'flex';
-    btnDelete.style.display = originalValues[productId] ? 'flex' : 'none';
-    btnSave.style.display = 'none';
-    btnCancel.style.display = 'none';
-  }
-  
-  // Función para preparar la eliminación
-  function prepareDeleteLocation(productId) {
-    console.log("Preparando eliminación para producto ID:", productId);
-    
-    // Guardar el ID del producto para la eliminación
-    document.getElementById('delete-product-id').value = productId;
-    
-    // Mostrar el modal usando Bootstrap
-    var myModal = new bootstrap.Modal(document.getElementById('confirmModal'));
-    myModal.show();
-  }
-  
-  // Función para eliminar la ubicación
-  function deleteLocation() {
-    // Obtener el ID del producto
-    var productId = document.getElementById('delete-product-id').value;
-    
-    if (!productId) {
-      showNotification('Error: No se pudo identificar el producto', 'error');
-      return;
-    }
-    
-    console.log("Eliminando ubicación para producto ID:", productId);
-    
-    // Mostrar cargando en el botón
-    var confirmBtn = document.getElementById('confirmDeleteBtn');
-    confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Eliminando...';
-    confirmBtn.disabled = true;
-    
-    // Llamar a la API
-    fetch('/api/actualizar-ubicacion/' + productId, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ ubicacion: '' })
-    })
-    .then(function(response) { return response.json(); })
-    .then(function(data) {
-      if (data.success) {
-        // Buscar la fila correspondiente
-        var row = document.querySelector('tr[data-product-id="' + productId + '"]');
-        
-        if (row) {
-          // Actualizar UI
-          var locationDisplay = row.querySelector('.location-display');
-          var btnDelete = row.querySelector('.btn-delete-location');
-          
-          locationDisplay.textContent = 'Sin ubicación asignada';
-          locationDisplay.classList.add('empty');
-          row.setAttribute('data-has-location', '0');
-          btnDelete.style.display = 'none';
-          
-          // Actualizar valor original
-          originalValues[productId] = '';
-        }
-        
-        // Cerrar el modal
-        var modalInstance = bootstrap.Modal.getInstance(document.getElementById('confirmModal'));
-        modalInstance.hide();
-        
-        // Mostrar notificación
-        showNotification('Ubicación eliminada correctamente', 'success');
-        
-        // Refrescar los filtros
-        if (typeof applyFilters === 'function') {
-          applyFilters();
-        }
-      } else {
-        throw new Error(data.message || 'Error al eliminar ubicación');
+      // Si hay un producto seleccionado, limpiar la selección al cambiar el target
+      if (selectedProductBox && selectedProductBox.style.display === 'flex') {
+        clearProductSelection();
       }
-    })
-    .catch(function(error) {
-      console.error('Error:', error);
-      showNotification('Error: ' + error.message, 'error');
-    })
-    .finally(function() {
-      // Restaurar el botón
-      confirmBtn.innerHTML = 'Eliminar';
-      confirmBtn.disabled = false;
+      
+      // Mostrar el selector correspondiente
+      switch(this.value) {
+        case 'category':
+          categorySelector.style.display = 'block';
+          applyButton.innerHTML = '<i class="fas fa-tag"></i> Aplicar';
+          break;
+        case 'brand':
+          brandSelector.style.display = 'block';
+          applyButton.innerHTML = '<i class="fas fa-trademark"></i> Aplicar';
+          break;
+        case 'product':
+          productSearchContainer.style.display = 'block';
+          applyButton.innerHTML = '<i class="fas fa-box"></i> Aplicar';
+          
+          // Asegurarse de que el input de búsqueda sea visible (no el cuadro de selección)
+          if (searchInput && selectedProductBox) {
+            searchInput.style.display = 'block';
+            selectedProductBox.style.display = 'none';
+          }
+          break;
+        default:
+          applyButton.innerHTML = '<i class="fas fa-check"></i> Aplicar';
+          break;
+      }
+      
+      // Actualizar estado del botón
+      updateApplyButtonState();
     });
   }
   
-  // Función para mostrar notificaciones
-  function showNotification(message, type) {
-    type = type || 'success';
+  // Función para resaltar coincidencias en búsqueda
+  function highlightMatch(text, query) {
+    if (!text || !query || query.trim() === '') return text;
     
-    // Variable para controlar el timeout
-    var notificationTimeout;
+    // Normalizar texto y query para una búsqueda insensible a acentos/mayúsculas
+    const normalizeString = (str) => {
+      return str.normalize("NFD")
+               .replace(/[\u0300-\u036f]/g, "")
+               .toLowerCase();
+    };
     
-    // Limpiar timeout previo
-    if (window.notificationTimeout) {
-      clearTimeout(window.notificationTimeout);
+    const normalizedText = normalizeString(text);
+    const normalizedQuery = normalizeString(query);
+    
+    // Encontrar dónde ocurre la coincidencia en el texto normalizado
+    const index = normalizedText.indexOf(normalizedQuery);
+    if (index === -1) return text;
+    
+    // Extraer la parte del texto original que coincide (mantiene acentos/mayúsculas)
+    const before = text.substring(0, index);
+    const match = text.substring(index, index + query.length);
+    const after = text.substring(index + query.length);
+    
+    // Retornar con el texto resaltado usando una clase CSS
+    return before + '<span class="search-highlight">' + match + '</span>' + after;
+  }
+  
+  // Inicializar búsqueda de productos
+  function initializeProductSearch() {
+    const searchInput = document.getElementById('productSearchInput');
+    const resultsContainer = document.getElementById('productSearchResults');
+    const selectedBox = document.getElementById('selectedProductBox');
+    const applyButton = document.getElementById('applyGlobalLocationBtn');
+    
+    // Listener para el botón de quitar producto seleccionado
+    const removeBtn = document.getElementById('selectedProductRemove');
+    if (removeBtn) {
+      removeBtn.addEventListener('click', clearProductSelection);
     }
     
-    // Quitar notificación existente
-    var existingNotification = document.querySelector('.notification');
-    if (existingNotification) {
-      existingNotification.remove();
+    // Cache para optimizar búsquedas repetidas
+    const searchCache = new Map();
+    
+    // Debounce para evitar muchas llamadas al escribir rápido
+    let searchTimeout;
+    
+    searchInput.addEventListener('input', function() {
+      const query = this.value.trim();
+      clearTimeout(searchTimeout);
+      
+      if (query.length < 2) {
+        resultsContainer.style.display = 'none';
+        return;
+      }
+      
+      // Usar caché si existe para esta consulta
+      if (searchCache.has(query)) {
+        displaySearchResults(searchCache.get(query), query);
+        return;
+      }
+      
+      // Debounce de 150ms para no afectar rendimiento
+      searchTimeout = setTimeout(() => {
+        const results = searchProducts(query);
+        // Guardar en caché para futuras búsquedas
+        searchCache.set(query, results);
+        displaySearchResults(results, query);
+      }, 150);
+    });
+    
+    // Cerrar resultados al hacer clic fuera
+    document.addEventListener('click', function(e) {
+      if (!searchInput.contains(e.target) && !resultsContainer.contains(e.target)) {
+        resultsContainer.style.display = 'none';
+      }
+    });
+    
+    // Manejar eventos de teclado para navegación
+    searchInput.addEventListener('keydown', function(e) {
+      if (!resultsContainer.style.display || resultsContainer.style.display === 'none') {
+        return;
+      }
+      
+      const items = resultsContainer.querySelectorAll('.product-search-result');
+      if (!items.length) return;
+      
+      // Encontrar el elemento actualmente activo
+      let currentIndex = -1;
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].classList.contains('active')) {
+          currentIndex = i;
+          break;
+        }
+      }
+      
+      // Manejar teclas de flecha y Enter
+      switch (e.key) {
+        case 'ArrowDown':
+          e.preventDefault();
+          if (currentIndex < 0) {
+            items[0].classList.add('active');
+          } else {
+            items[currentIndex].classList.remove('active');
+            items[(currentIndex + 1) % items.length].classList.add('active');
+          }
+          break;
+          
+        case 'ArrowUp':
+          e.preventDefault();
+          if (currentIndex < 0) {
+            items[items.length - 1].classList.add('active');
+          } else {
+            items[currentIndex].classList.remove('active');
+            items[(currentIndex - 1 + items.length) % items.length].classList.add('active');
+          }
+          break;
+          
+        case 'Enter':
+          if (currentIndex >= 0) {
+            e.preventDefault();
+            items[currentIndex].click();
+          }
+          break;
+          
+        case 'Escape':
+          e.preventDefault();
+          resultsContainer.style.display = 'none';
+          break;
+      }
+    });
+    
+    // Verificar estado del botón Aplicar cuando se cambia el target
+    const locationTarget = document.getElementById('locationTarget');
+    if (locationTarget) {
+      locationTarget.addEventListener('change', updateApplyButtonState);
     }
     
-    // Crear nueva notificación
-    var notification = document.createElement('div');
-    notification.className = 'notification ' + type;
-    notification.innerHTML = 
-      '<i class="fas fa-' + (type === 'success' ? 'check-circle' : 'exclamation-circle') + '"></i>' +
-      '<span>' + message + '</span>';
+    // Inicializar estado del botón
+    updateApplyButtonState();
+  }
+  
+  // Actualizar estado del botón Aplicar
+  function updateApplyButtonState() {
+    const locationTarget = document.getElementById('locationTarget');
+    const applyButton = document.getElementById('applyGlobalLocationBtn');
+    const selectedProductId = document.getElementById('selectedProductId');
     
-    // Añadir al DOM
-    document.body.appendChild(notification);
+    if (!locationTarget || !applyButton) return;
     
-    // Mostrar
-    setTimeout(function() { 
-      notification.classList.add('show'); 
-    }, 10);
+    // Si el target es 'product', verificar si hay un producto seleccionado
+    if (locationTarget.value === 'product') {
+      const hasSelection = selectedProductId && selectedProductId.value;
+      applyButton.disabled = !hasSelection;
+      
+      // Añadir/quitar clase visual
+      if (hasSelection) {
+        applyButton.classList.remove('disabled');
+      } else {
+        applyButton.classList.add('disabled');
+      }
+    } else {
+      // Para otros targets, habilitar siempre
+      applyButton.disabled = false;
+      applyButton.classList.remove('disabled');
+    }
+  }
+  
+  // Buscar productos en cache
+  function searchProducts(query) {
+    if (!query || query.trim().length < 2) return [];
     
-    // Ocultar después de un tiempo
-    window.notificationTimeout = setTimeout(function() {
-      notification.classList.remove('show');
-      setTimeout(function() { 
-        notification.remove(); 
+    const queryLower = query.toLowerCase().trim();
+    
+    // Función para normalizar texto (quitar acentos para mejores coincidencias)
+    const normalizeText = (text) => {
+      if (!text) return '';
+      return text.normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .toLowerCase();
+    };
+    
+    // Buscar coincidencias en nombre y SKU (no en marca)
+    return productosCache.filter(product => {
+      if (!product) return false;
+      
+      const normalizedName = normalizeText(product.nombre || '');
+      const normalizedSku = normalizeText(product.codigo_barras_externo || '');
+      
+      // Buscar coincidencias por SKU o nombre (peso diferente)
+      const skuMatch = normalizedSku.includes(normalizeText(queryLower));
+      const nameMatch = normalizedName.includes(normalizeText(queryLower));
+      
+      // Si coincide con cualquiera, incluir en resultados
+      return skuMatch || nameMatch;
+    })
+    // Ordenar primero los que coinciden con SKU, luego por nombre
+    .sort((a, b) => {
+      const aSkuMatch = (a.codigo_barras_externo || '').toLowerCase().includes(queryLower);
+      const bSkuMatch = (b.codigo_barras_externo || '').toLowerCase().includes(queryLower);
+      
+      // Primero, ordenar por coincidencia de SKU (más relevante)
+      if (aSkuMatch && !bSkuMatch) return -1;
+      if (!aSkuMatch && bSkuMatch) return 1;
+      
+      // Luego, por coincidencia exacta en el nombre
+      const aExactMatch = (a.nombre || '').toLowerCase() === queryLower;
+      const bExactMatch = (b.nombre || '').toLowerCase() === queryLower;
+      if (aExactMatch && !bExactMatch) return -1;
+      if (!aExactMatch && bExactMatch) return 1;
+      
+      // Por último, ordenar alfabéticamente
+      return (a.nombre || '').localeCompare(b.nombre || '');
+    })
+    // Limitar resultados para mejor rendimiento
+    .slice(0, 8);
+  }
+  
+  // Mostrar resultados de búsqueda
+  function displaySearchResults(results, query) {
+    const resultsContainer = document.getElementById('productSearchResults');
+    
+    if (!resultsContainer) return;
+    
+    if (results.length === 0) {
+      resultsContainer.innerHTML = `
+        <div class="no-results-message">
+          No se encontraron productos que coincidan con "${query}"
+        </div>`;
+      resultsContainer.style.display = 'block';
+      return;
+    }
+    
+    const html = results.map(product => {
+      // Resaltar coincidencias en nombre y SKU
+      const highlightedName = highlightMatch(product.nombre || '', query);
+      const highlightedSku = highlightMatch(product.codigo_barras_externo || '', query);
+      
+      // Mostrar información de ubicación si existe
+      const locationInfo = product.ubicacion 
+        ? `<span style="color: var(--location-color); font-size: 0.8rem; margin-left: 5px;">
+            (${product.ubicacion})
+           </span>` 
+        : '';
+      
+      return `
+        <div class="product-search-result" 
+             onclick="selectProduct(${product.id}, '${(product.nombre || '').replace(/'/g, '\\\'')}')">
+          <img src="${product.foto ? '/static/uploads/' + product.foto : '/static/img/default_product.jpg'}" 
+               alt="${product.nombre}" 
+               class="product-result-image"
+               onerror="this.src='/static/img/default_product.jpg'">
+          <div class="product-result-info">
+            <div class="product-result-name">
+              ${highlightedName} ${locationInfo}
+            </div>
+            <div class="product-result-details">
+              <span class="product-result-sku">SKU: ${highlightedSku}</span>
+              ${product.categoria ? `<span>${product.categoria}</span>` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+    
+    resultsContainer.innerHTML = html;
+    resultsContainer.style.display = 'block';
+  }
+  
+  // Seleccionar producto de búsqueda
+  function selectProduct(productId, productName) {
+    const searchInput = document.getElementById('productSearchInput');
+    const resultsContainer = document.getElementById('productSearchResults');
+    const selectedProductId = document.getElementById('selectedProductId');
+    const selectedBox = document.getElementById('selectedProductBox');
+    const selectedNameEl = document.getElementById('selectedProductName');
+    const selectedCodeEl = document.getElementById('selectedProductCode');
+    const selectedImageEl = document.getElementById('selectedProductImage');
+    
+    // Obtener datos completos del producto
+    const product = productosCache.find(p => p.id == productId);
+    if (!product) return;
+    
+    // Actualizar elementos ocultos
+    selectedProductId.value = productId;
+    
+    // Actualizar interfaz
+    if (selectedBox && selectedNameEl && selectedCodeEl) {
+      // Mostrar el cuadro de selección
+      selectedNameEl.textContent = product.nombre || productName;
+      selectedCodeEl.textContent = `SKU: ${product.codigo_barras_externo || 'N/A'}`;
+      
+      // Actualizar imagen si existe
+      if (selectedImageEl) {
+        selectedImageEl.src = product.foto ? 
+          `/static/uploads/${product.foto}` : 
+          '/static/img/default_product.jpg';
+      }
+      
+      // Ocultar input y mostrar cuadro de selección
+      searchInput.style.display = 'none';
+      selectedBox.style.display = 'flex';
+    }
+    
+    // Ocultar resultados
+    resultsContainer.style.display = 'none';
+    
+    // Actualizar estado del botón Aplicar
+    updateApplyButtonState();
+  }
+  
+  // Función para limpiar la selección de producto
+  function clearProductSelection() {
+    const searchInput = document.getElementById('productSearchInput');
+    const selectedBox = document.getElementById('selectedProductBox');
+    const selectedProductId = document.getElementById('selectedProductId');
+    
+    // Limpiar ID seleccionado
+    if (selectedProductId) {
+      selectedProductId.value = '';
+    }
+    
+    // Ocultar cuadro de selección y mostrar input
+    if (selectedBox && searchInput) {
+      selectedBox.style.display = 'none';
+      searchInput.style.display = 'block';
+      searchInput.value = '';
+      searchInput.focus();
+    }
+    
+    // Actualizar estado del botón Aplicar
+    updateApplyButtonState();
+  }
+  
+  // Función para verificar ubicaciones existentes
+  function checkExistingLocations() {
+    // Inicializar conjuntos para ubicaciones
+    const globalProducts = [];
+    const productsWithIndividualLocation = [];
+    const categoriesWithLocation = {};
+    const brandsWithLocation = {};
+    
+    // Recorrer todos los productos
+    productosCache.forEach(product => {
+      if (product.ubicacion) {
+        // Agrupar por tipo para simular lo que haríamos con una API real
+        // Esta lógica se reemplazaría con la respuesta de la API en un escenario real
+        
+        // Para ubicaciones globales, asumimos que si más del 80% de los productos 
+        // tienen la misma ubicación, es una ubicación "global"
+        if (!categoriesWithLocation[product.categoria] && product.categoria) {
+          categoriesWithLocation[product.categoria] = [];
+        }
+        
+        if (!brandsWithLocation[product.marca] && product.marca) {
+          brandsWithLocation[product.marca] = [];
+        }
+        
+        // Añadir a las listas correspondientes
+        if (product.categoria) {
+          categoriesWithLocation[product.categoria].push(product);
+        }
+        
+        if (product.marca) {
+          brandsWithLocation[product.marca].push(product);
+        }
+        
+        // Si no está en ningún grupo, considerar como ubicación individual
+        productsWithIndividualLocation.push(product);
+      }
+    });
+    
+    // Procesar los datos y actualizar estado global
+    
+    // Revisar ubicaciones por categoría
+    for (const category in categoriesWithLocation) {
+      if (categoriesWithLocation[category].length > 0) {
+        // Verificar si todos los productos de la categoría tienen la misma ubicación
+        const firstLocation = categoriesWithLocation[category][0].ubicacion;
+        const allSameLocation = categoriesWithLocation[category].every(p => p.ubicacion === firstLocation);
+        
+        if (allSameLocation) {
+          activeLocations.categories.add(category);
+          activeLocations.categoryDetails[category] = categoriesWithLocation[category];
+        }
+      }
+    }
+    
+    // Revisar ubicaciones por marca
+    for (const brand in brandsWithLocation) {
+      if (brandsWithLocation[brand].length > 0) {
+        // Verificar si todos los productos de la marca tienen la misma ubicación
+        const firstLocation = brandsWithLocation[brand][0].ubicacion;
+        const allSameLocation = brandsWithLocation[brand].every(p => p.ubicacion === firstLocation);
+        
+        if (allSameLocation) {
+          activeLocations.brands.add(brand);
+          activeLocations.brandDetails[brand] = brandsWithLocation[brand];
+        }
+      }
+    }
+    
+    // Considerar los productos restantes como ubicaciones individuales
+    productsWithIndividualLocation.forEach(product => {
+      // Si no está en un grupo de categoría o marca, considerarlo como individual
+      const isInCategoryGroup = product.categoria && activeLocations.categories.has(product.categoria);
+      const isInBrandGroup = product.marca && activeLocations.brands.has(product.marca);
+      
+      if (!isInCategoryGroup && !isInBrandGroup && product.ubicacion) {
+        activeLocations.products.add(product.id);
+      }
+    });
+    
+    // Verificar si hay una ubicación global (si todos tienen la misma ubicación)
+    const allProducts = productosCache.filter(p => p.ubicacion);
+    if (allProducts.length > 0) {
+      const firstLocation = allProducts[0].ubicacion;
+      const allSameLocation = allProducts.every(p => p.ubicacion === firstLocation);
+      
+      if (allSameLocation && allProducts.length > productosCache.length * 0.8) {
+        activeLocations.global = true;
+        activeLocations.globalDetails = allProducts;
+      }
+    }
+    
+    // Actualizar la UI
+    updateMyLocationsSection();
+  }
+  
+  // Actualizar sección "Mis Ubicaciones"
+  function updateMyLocationsSection() {
+    const section = document.getElementById('myLocationsSection');
+    const globalContainer = document.getElementById('globalLocations');
+    const categoryContainer = document.getElementById('categoryLocations');
+    const productContainer = document.getElementById('productLocations');
+    const brandContainer = document.getElementById('brandLocations');
+    
+    // Verificar si hay cualquier tipo de ubicación activa
+    const hasLocations = activeLocations.global || 
+                        activeLocations.categories.size > 0 || 
+                        activeLocations.products.size > 0 || 
+                        activeLocations.brands.size > 0;
+    
+    section.style.display = hasLocations ? 'block' : 'none';
+    
+    // Actualizar listas
+    updateGlobalLocationsList();
+    updateCategoryLocationsList();
+    updateProductLocationsList();
+    updateBrandLocationsList();
+    
+    // Mostrar/ocultar contenedores según haya ubicación
+    globalContainer.style.display = activeLocations.global ? 'block' : 'none';
+    categoryContainer.style.display = activeLocations.categories.size > 0 ? 'block' : 'none';
+    brandContainer.style.display = activeLocations.brands.size > 0 ? 'block' : 'none';
+    productContainer.style.display = activeLocations.products.size > 0 ? 'block' : 'none';
+    
+    // Inicializar el estado de las flechas de navegación
+    setTimeout(() => {
+      initSliderArrows();
+    }, 500);
+  }
+  
+  function updateGlobalLocationsList() {
+    const container = document.getElementById('slider-global');
+    const countElement = document.getElementById('globalLocationCount');
+    const valueElement = document.getElementById('globalLocationValue');
+    const viewAllContainer = document.getElementById('view-all-global-container');
+    
+    // Limpiar el contenedor "Ver todos"
+    if (viewAllContainer) {
+      viewAllContainer.innerHTML = '';
+    }
+    
+    if (!activeLocations.global || !activeLocations.globalDetails || activeLocations.globalDetails.length === 0) {
+      container.innerHTML = '<div class="empty-locations">No hay ubicación global</div>';
+      countElement.textContent = '0';
+      valueElement.textContent = 'N/A';
+      return;
+    }
+    
+    // Cuenta productos con ubicación global
+    const productsWithGlobalLocation = activeLocations.globalDetails;
+    
+    countElement.textContent = productsWithGlobalLocation.length;
+    const locationValue = productsWithGlobalLocation[0].ubicacion;
+    valueElement.textContent = locationValue;
+    
+    // Estructura HTML para la tarjeta global
+    const url = '/ubicacion-detalle/global/all';
+    container.innerHTML = `
+      <a href="${url}" class="global-location-card">
+        <div class="global-icon-container">
+          <div class="global-circle">
+            <i class="fas fa-map-marker-alt global-icon"></i>
+          </div>
+        </div>
+        <div class="global-title">Ubicación Global</div>
+        <div class="global-details">
+          ${productsWithGlobalLocation.length} productos en
+          <span class="global-badge">${locationValue}</span>
+        </div>
+        <div class="global-action">
+          <button class="remove-location-btn" onclick="event.preventDefault(); event.stopPropagation(); removeGlobalLocation()">
+            <i class="fas fa-times"></i>
+            Quitar
+          </button>
+        </div>
+      </a>
+    `;
+    
+    // Añadir enlace "Ver todos" si hay muchos productos
+    if (productsWithGlobalLocation.length > 10 && viewAllContainer) {
+      const viewAllLink = document.createElement('a');
+      viewAllLink.href = url;
+      viewAllLink.className = 'view-all-header-link global';
+      viewAllLink.innerHTML = `Ver todos (${productsWithGlobalLocation.length})`;
+      viewAllContainer.appendChild(viewAllLink);
+    }
+  }
+  
+  function updateCategoryLocationsList() {
+    const container = document.getElementById('slider-category');
+    const countElement = document.getElementById('categoryLocationCount');
+    const viewAllContainer = document.getElementById('view-all-category-container');
+    
+    // Limpiar el contenedor "Ver todos"
+    if (viewAllContainer) {
+      viewAllContainer.innerHTML = '';
+    }
+    
+    countElement.textContent = activeLocations.categories.size;
+    
+    if (activeLocations.categories.size === 0) {
+      container.innerHTML = '<div class="empty-locations">No hay ubicaciones por categoría</div>';
+      return;
+    }
+    
+    const items = Array.from(activeLocations.categories).map(category => {
+      // Buscar productos por categoría
+      const categoryProducts = activeLocations.categoryDetails[category] || [];
+      
+      const locationValue = categoryProducts.length > 0 ? categoryProducts[0].ubicacion : "";
+      
+      const encodedCategory = encodeURIComponent(category);
+      
+      // Obtener color de categoría
+      let categoryColor = "#6B7280";
+      if (categoryProducts.length > 0 && categoryProducts[0].categoria_color) {
+        categoryColor = categoryProducts[0].categoria_color;
+      }
+      
+      // Asignar un icono específico según la categoría
+      let categoryIcon = 'box';
+      
+      if (category.includes('abarrotes')) categoryIcon = 'shopping-basket';
+      else if (category.includes('enlatados') || category.includes('conservas')) categoryIcon = 'archive';
+      else if (category.includes('snacks') || category.includes('botanas') || category.includes('dulces')) categoryIcon = 'cookie-bite';
+      else if (category.includes('bebidas') && category.includes('alcohólicas')) categoryIcon = 'wine-glass-alt';
+      else if (category.includes('bebidas')) categoryIcon = 'coffee';
+      else if (category.includes('panadería') || category.includes('repostería')) categoryIcon = 'bread-slice';
+      else if (category.includes('lácteos') || category.includes('huevos')) categoryIcon = 'egg';
+      else if (category.includes('carnes')) categoryIcon = 'drumstick-bite';
+      else if (category.includes('congelados') || category.includes('refrigerados')) categoryIcon = 'snowflake';
+      else if (category.includes('frutas') || category.includes('verduras')) categoryIcon = 'apple-alt';
+      else if (category.includes('limpieza')) categoryIcon = 'broom';
+      else if (category.includes('cuidado') || category.includes('higiene')) categoryIcon = 'shower';
+      else if (category.includes('medicamentos')) categoryIcon = 'pills';
+      else if (category.includes('bebés')) categoryIcon = 'baby';
+      else if (category.includes('mascotas')) categoryIcon = 'paw';
+      else if (category.includes('papelería')) categoryIcon = 'pencil-alt';
+      else if (category.includes('ferretería')) categoryIcon = 'tools';
+      else if (category.includes('artesanías') || category.includes('manualidades')) categoryIcon = 'palette';
+      else if (category.includes('granel')) categoryIcon = 'weight-hanging';
+      else if (category.includes('orgánicos')) categoryIcon = 'leaf';
+      else if (category.includes('gourmet')) categoryIcon = 'utensils';
+      else if (category.includes('suplementos')) categoryIcon = 'capsules';
+      
+      return `
+        <a href="/ubicacion-detalle/categoria/${encodedCategory}" class="category-card">
+          <div class="category-card-top">
+            <div class="category-color-circle" style="background-color: ${categoryColor};">
+              <i class="fas fa-${categoryIcon} category-icon"></i>
+            </div>
+          </div>
+          <div class="category-card-middle">
+            <div class="category-name">${category}</div>
+            <div class="category-details">
+              ${categoryProducts.length} productos<br>
+              <span class="location-value-badge">${locationValue}</span>
+            </div>
+          </div>
+          <div class="category-card-bottom">
+            <button class="remove-location-btn" onclick="event.preventDefault(); event.stopPropagation(); removeCategoryLocation('${category.replace(/'/g, '\\\'')}')" style="width: 100%;">
+              <i class="fas fa-times"></i>
+              Quitar
+            </button>
+          </div>
+        </a>
+      `;
+    }).join('');
+    
+    container.innerHTML = items;
+    
+    // Añadir enlace "Ver todos" si hay muchas categorías
+    if (activeLocations.categories.size > 10 && viewAllContainer) {
+      const viewAllLink = document.createElement('a');
+      viewAllLink.href = '/ubicacion-detalle/categoria/all';
+      viewAllLink.className = 'view-all-header-link';
+      viewAllLink.innerHTML = `Ver todas (${activeLocations.categories.size})`;
+      viewAllContainer.appendChild(viewAllLink);
+    }
+  }
+  
+  function updateBrandLocationsList() {
+    const container = document.getElementById('slider-brand');
+    const countElement = document.getElementById('brandLocationCount');
+    const viewAllContainer = document.getElementById('view-all-brand-container');
+    
+    // Limpiar el contenedor "Ver todos"
+    if (viewAllContainer) {
+      viewAllContainer.innerHTML = '';
+    }
+    
+    countElement.textContent = activeLocations.brands.size;
+    
+    if (activeLocations.brands.size === 0) {
+      container.innerHTML = '<div class="empty-locations">No hay ubicaciones por marca</div>';
+      return;
+    }
+    
+    const items = Array.from(activeLocations.brands).map(brand => {
+      // Buscar productos por marca
+      const brandProducts = activeLocations.brandDetails[brand] || [];
+      
+      const locationValue = brandProducts.length > 0 ? brandProducts[0].ubicacion : "";
+      
+      const encodedBrand = encodeURIComponent(brand);
+      
+      return `
+        <a href="/ubicacion-detalle/marca/${encodedBrand}" class="brand-card">
+          <div class="category-card-top">
+            <div class="brand-circle">
+              <i class="far fa-bookmark brand-icon"></i>
+            </div>
+          </div>
+          <div class="category-card-middle">
+            <div class="brand-name">${brand}</div>
+            <div class="brand-details">
+              ${brandProducts.length} productos<br>
+              <span class="location-value-badge">${locationValue}</span>
+            </div>
+          </div>
+          <div class="category-card-bottom">
+            <button class="remove-location-btn" onclick="event.preventDefault(); event.stopPropagation(); removeBrandLocation('${brand.replace(/'/g, '\\\'')}')" style="width: 100%;">
+              <i class="fas fa-times"></i>
+              Quitar
+            </button>
+          </div>
+        </a>
+      `;
+    }).join('');
+    
+    container.innerHTML = items;
+    
+    // Añadir enlace "Ver todos" si hay muchas marcas
+    if (activeLocations.brands.size > 10 && viewAllContainer) {
+      const viewAllLink = document.createElement('a');
+      viewAllLink.href = '/ubicacion-detalle/marca/all';
+      viewAllLink.className = 'view-all-header-link';
+      viewAllLink.innerHTML = `Ver todas (${activeLocations.brands.size})`;
+      viewAllContainer.appendChild(viewAllLink);
+    }
+  }
+  
+  function updateProductLocationsList() {
+    const container = document.getElementById('slider-product');
+    const countElement = document.getElementById('productLocationCount');
+    const viewAllContainer = document.getElementById('view-all-product-container');
+    
+    // Limpiar el contenedor "Ver todos"
+    if (viewAllContainer) {
+      viewAllContainer.innerHTML = '';
+    }
+    
+    // Filtrar solo productos con ubicación individual
+    const individualProducts = productosCache.filter(product => {
+      if (!product.ubicacion) return false;
+      
+      // Verificar si el producto no está en un grupo de categoría o marca
+      const isInCategoryGroup = product.categoria && activeLocations.categories.has(product.categoria);
+      const isInBrandGroup = product.marca && activeLocations.brands.has(product.marca);
+      
+      return !isInCategoryGroup && !isInBrandGroup && activeLocations.products.has(product.id);
+    });
+    
+    countElement.textContent = individualProducts.length;
+    
+    if (individualProducts.length === 0) {
+      container.innerHTML = '<div class="empty-locations">No hay ubicaciones individuales</div>';
+      document.getElementById('productLocations').style.display = 'none';
+      return;
+    }
+    
+    document.getElementById('productLocations').style.display = 'block';
+    const items = individualProducts.map(product => createProductCard(product, true)).join('');
+    container.innerHTML = items;
+    
+    // Añadir enlace "Ver todos" si hay muchos productos
+    if (individualProducts.length > 10 && viewAllContainer) {
+      const viewAllLink = document.createElement('a');
+      viewAllLink.href = '/ubicacion-detalle/individual/all';
+      viewAllLink.className = 'view-all-header-link';
+      viewAllLink.innerHTML = `Ver todos (${individualProducts.length})`;
+      viewAllContainer.appendChild(viewAllLink);
+    }
+  }
+  
+  // Crear tarjeta de producto
+  function createProductCard(product, withRemoveButton = false) {
+    const removeButton = withRemoveButton ? `
+      <button class="remove-location-btn" onclick="removeProductLocation(${product.id})" style="width: 100%; margin-top: auto;">
+        <i class="fas fa-times"></i>
+        Quitar ubicación
+      </button>
+    ` : '';
+    
+    return `
+      <div class="product-card">
+        <div class="product-image-container">
+          <img src="${product.foto ? '/static/uploads/' + product.foto : '/static/img/default_product.jpg'}" 
+               alt="${product.nombre}" 
+               class="product-image">
+        </div>
+        <div class="product-details">
+          <div class="product-info-container">
+            <div class="product-name">${product.nombre}</div>
+            <div class="product-brand">${product.marca || 'Sin marca'}</div>
+          </div>
+          <div class="product-location-container">
+            <div class="location-row">
+              <div class="current-location">
+                ${product.ubicacion || 'Sin ubicación'}
+              </div>
+              <div class="location-label-small">
+                <i class="fas fa-map-marker-alt"></i>
+              </div>
+            </div>
+          </div>
+          ${removeButton}
+        </div>
+      </div>
+    `;
+  }
+  
+  // Aplicar ubicación global
+  function applyGlobalLocation() {
+    const target = document.getElementById('locationTarget').value;
+    const locationValue = document.getElementById('globalLocationValue').value.trim();
+    
+    if (!locationValue) {
+      showToast('Por favor ingresa una ubicación válida', 'error');
+      return;
+    }
+    
+    // Verificar conflictos
+    checkForLocationConflicts(target, locationValue);
+  }
+  
+  // Verificar conflictos antes de aplicar ubicación
+  function checkForLocationConflicts(target, locationValue) {
+    const category = document.getElementById('specificCategory').value;
+    const brand = document.getElementById('specificBrand').value;
+    const productId = document.getElementById('selectedProductId').value;
+    
+    let conflictingProducts = [];
+    let conflictMessage = '';
+    
+    switch(target) {
+      case 'all':
+        if (activeLocations.global) {
+          conflictMessage = 'Todos los productos ya tienen una ubicación global aplicada. ¿Deseas reemplazarla?';
+          conflictingProducts = productosCache.filter(p => p.ubicacion);
+        } else if (activeLocations.categories.size > 0 || activeLocations.brands.size > 0 || activeLocations.products.size > 0) {
+          conflictMessage = 'Algunos productos ya tienen ubicaciones aplicadas. ¿Deseas sobreescribirlas con la ubicación global?';
+          conflictingProducts = productosCache.filter(p => p.ubicacion);
+        }
+        break;
+        
+      case 'category':
+        if (!category) {
+          showToast('Por favor selecciona una categoría', 'error');
+          return;
+        }
+        
+        const categoryProducts = productosCache.filter(p => p.categoria === category);
+        conflictingProducts = categoryProducts.filter(p => p.ubicacion);
+        
+        if (conflictingProducts.length > 0) {
+          if (activeLocations.global) {
+            conflictMessage = `Esta categoría forma parte de la ubicación global. ¿Deseas aplicar la nueva ubicación a estos ${conflictingProducts.length} productos?`;
+          } else if (activeLocations.categories.has(category)) {
+            conflictMessage = `Esta categoría ya tiene una ubicación aplicada. ¿Deseas reemplazarla?`;
+          } else {
+            conflictMessage = `Algunos productos de esta categoría ya tienen ubicaciones aplicadas. ¿Deseas sobreescribirlas?`;
+          }
+        }
+        break;
+        
+      case 'brand':
+        if (!brand) {
+          showToast('Por favor selecciona una marca', 'error');
+          return;
+        }
+        
+        const brandProducts = productosCache.filter(p => p.marca === brand);
+        conflictingProducts = brandProducts.filter(p => p.ubicacion);
+        
+        if (conflictingProducts.length > 0) {
+          if (activeLocations.global) {
+            conflictMessage = `Esta marca forma parte de la ubicación global. ¿Deseas aplicar la nueva ubicación a estos ${conflictingProducts.length} productos?`;
+          } else if (activeLocations.brands.has(brand)) {
+            conflictMessage = `Esta marca ya tiene una ubicación aplicada. ¿Deseas reemplazarla?`;
+          } else {
+            conflictMessage = `Algunos productos de esta marca ya tienen ubicaciones aplicadas. ¿Deseas sobreescribirlas?`;
+          }
+        }
+        break;
+        
+      case 'product':
+        if (!productId) {
+          showToast('Por favor selecciona un producto', 'error');
+          return;
+        }
+        
+        const product = productosCache.find(p => p.id == productId);
+        if (product && product.ubicacion) {
+          conflictingProducts = [product];
+          conflictMessage = `Este producto ya tiene una ubicación aplicada. ¿Deseas reemplazarla?`;
+        }
+        break;
+    }
+    
+    // Si hay conflictos, mostrar confirmación
+    if (conflictingProducts.length > 0) {
+      showConfirmDialog(
+        'Conflicto de ubicaciones',
+        conflictMessage,
+        function() {
+          // Proceder con la aplicación de la ubicación
+          proceedWithLocation(target, locationValue);
+        }
+      );
+    } else {
+      // No hay conflictos, aplicar directamente
+      proceedWithLocation(target, locationValue);
+    }
+  }
+  
+  // Mostrar diálogo de confirmación
+  function showConfirmDialog(title, message, onConfirm) {
+    // Crear el modal dinámicamente
+    const modal = document.createElement('div');
+    modal.className = 'custom-confirm';
+    modal.innerHTML = `
+      <div class="custom-confirm-box">
+        <div class="custom-confirm-title">
+          <i class="fas fa-exclamation-triangle warning-icon"></i>
+          ${title}
+        </div>
+        <div class="custom-confirm-message">${message}</div>
+        <div class="custom-confirm-buttons">
+          <button class="custom-confirm-button custom-confirm-cancel">Cancelar</button>
+          <button class="custom-confirm-button custom-confirm-ok">Sobreescribir</button>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Agregar eventos
+    modal.querySelector('.custom-confirm-cancel').addEventListener('click', function() {
+      document.body.removeChild(modal);
+    });
+    
+    modal.querySelector('.custom-confirm-ok').addEventListener('click', function() {
+      document.body.removeChild(modal);
+      onConfirm();
+    });
+  }
+  
+  // Proceder con la aplicación de la ubicación
+  function proceedWithLocation(target, locationValue) {
+    switch(target) {
+      case 'all':
+        applyLocationToAll(locationValue);
+        break;
+      case 'category':
+        const category = document.getElementById('specificCategory').value;
+        applyLocationToCategory(category, locationValue);
+        break;
+      case 'brand':
+        const brand = document.getElementById('specificBrand').value;
+        applyLocationToBrand(brand, locationValue);
+        break;
+      case 'product':
+        const productId = document.getElementById('selectedProductId').value;
+        applyLocationToSingleProduct(productId, locationValue);
+        break;
+    }
+  }
+  
+  // Aplicar ubicación a todos los productos
+  function applyLocationToAll(locationValue) {
+    // Verificar si hay al menos un producto para aplicar ubicación global
+    if (productosCache.length === 0) {
+      showToast('No hay productos para aplicar ubicación global', 'error');
+      return;
+    }
+    
+    // En un escenario real, esto sería una llamada a la API
+    // En este caso, simulamos un endpoint que asigna la ubicación a todos los productos
+    
+    // Simulamos un tiempo de proceso
+    showToast('Aplicando ubicación global...', 'warning');
+    
+    setTimeout(() => {
+      // Actualizar los datos locales para reflejar el cambio
+      productosCache.forEach(p => {
+        p.ubicacion = locationValue;
+      });
+      
+      // Actualizar el estado global
+      activeLocations.global = true;
+      activeLocations.globalDetails = [...productosCache];
+      
+      // Limpiar otras categorías, marcas y productos individuales
+      // ya que ahora todos los productos tienen la ubicación global
+      activeLocations.categories.clear();
+      activeLocations.categoryDetails = {};
+      activeLocations.brands.clear();
+      activeLocations.brandDetails = {};
+      activeLocations.products.clear();
+      
+      // Actualizar UI
+      updateMyLocationsSection();
+      
+      showToast(`Ubicación global "${locationValue}" aplicada a todos los productos`, 'success');
+    }, 500);
+  }
+  
+  // Aplicar ubicación a categoría
+  function applyLocationToCategory(category, locationValue) {
+    const categoryProducts = productosCache.filter(p => p.categoria === category);
+    
+    if (categoryProducts.length === 0) {
+      showToast(`No hay productos en la categoría "${category}"`, 'error');
+      return;
+    }
+    
+    // Simulamos un tiempo de proceso
+    showToast(`Aplicando ubicación a categoría "${category}"...`, 'warning');
+    
+    setTimeout(() => {
+      // Actualizar los datos locales
+      categoryProducts.forEach(p => {
+        p.ubicacion = locationValue;
+      });
+      
+      // Actualizar estado global
+      activeLocations.categories.add(category);
+      activeLocations.categoryDetails[category] = [...categoryProducts];
+      
+      // Actualizar UI
+      updateMyLocationsSection();
+      
+      showToast(`Ubicación "${locationValue}" aplicada a la categoría "${category}"`, 'success');
+    }, 500);
+  }
+  
+  // Aplicar ubicación a marca
+  function applyLocationToBrand(brand, locationValue) {
+    const brandProducts = productosCache.filter(p => p.marca === brand);
+    
+    if (brandProducts.length === 0) {
+      showToast(`No hay productos de la marca "${brand}"`, 'error');
+      return;
+    }
+    
+    // Simulamos un tiempo de proceso
+    showToast(`Aplicando ubicación a marca "${brand}"...`, 'warning');
+    
+    setTimeout(() => {
+      // Actualizar los datos locales
+      brandProducts.forEach(p => {
+        p.ubicacion = locationValue;
+      });
+      
+      // Actualizar estado global
+      activeLocations.brands.add(brand);
+      activeLocations.brandDetails[brand] = [...brandProducts];
+      
+      // Actualizar UI
+      updateMyLocationsSection();
+      
+      showToast(`Ubicación "${locationValue}" aplicada a la marca "${brand}"`, 'success');
+    }, 500);
+  }
+  
+  // Aplicar ubicación a producto individual
+  function applyLocationToSingleProduct(productId, locationValue) {
+    const product = productosCache.find(p => p.id == productId);
+    
+    if (!product) {
+      showToast('No se encontró el producto seleccionado', 'error');
+      return;
+    }
+    
+    // Simulamos un tiempo de proceso
+    showToast(`Aplicando ubicación a producto "${product.nombre}"...`, 'warning');
+    
+    setTimeout(() => {
+      // Actualizar los datos locales
+      product.ubicacion = locationValue;
+      
+      // Actualizar estado global
+      activeLocations.products.add(product.id);
+      
+      // Actualizar UI
+      updateMyLocationsSection();
+      
+      // Limpiar selección
+      clearProductSelection();
+      
+      showToast(`Ubicación "${locationValue}" aplicada al producto "${product.nombre}"`, 'success');
+    }, 500);
+  }
+  
+  // Remover ubicación global
+  function removeGlobalLocation() {
+    if (!activeLocations.global) {
+      showToast('No hay ubicación global para remover', 'warning');
+      return;
+    }
+    
+    // Simulamos un tiempo de proceso
+    showToast('Removiendo ubicación global...', 'warning');
+    
+    setTimeout(() => {
+      // Actualizar los datos locales
+      productosCache.forEach(p => {
+        p.ubicacion = '';
+      });
+      
+      // Actualizar estado global
+      activeLocations.global = false;
+      activeLocations.globalDetails = null;
+      
+      // Actualizar UI
+      updateMyLocationsSection();
+      
+      showToast('Ubicación global removida de todos los productos', 'success');
+    }, 500);
+  }
+  
+  // Remover ubicación de categoría
+  function removeCategoryLocation(category) {
+    if (!activeLocations.categories.has(category)) {
+      showToast(`No hay ubicación para la categoría "${category}"`, 'warning');
+      return;
+    }
+    
+    const categoryProducts = activeLocations.categoryDetails[category] || [];
+    
+    // Simulamos un tiempo de proceso
+    showToast(`Removiendo ubicación de categoría "${category}"...`, 'warning');
+    
+    setTimeout(() => {
+      // Actualizar los datos locales
+      productosCache.forEach(p => {
+        if (p.categoria === category) {
+          p.ubicacion = '';
+        }
+      });
+      
+      // Actualizar estado global
+      activeLocations.categories.delete(category);
+      delete activeLocations.categoryDetails[category];
+      
+      // Actualizar UI
+      updateMyLocationsSection();
+      
+      showToast(`Ubicación removida de la categoría "${category}"`, 'success');
+    }, 500);
+  }
+  
+  // Remover ubicación de marca
+  function removeBrandLocation(brand) {
+    if (!activeLocations.brands.has(brand)) {
+      showToast(`No hay ubicación para la marca "${brand}"`, 'warning');
+      return;
+    }
+    
+    const brandProducts = activeLocations.brandDetails[brand] || [];
+    
+    // Simulamos un tiempo de proceso
+    showToast(`Removiendo ubicación de marca "${brand}"...`, 'warning');
+    
+    setTimeout(() => {
+      // Actualizar los datos locales
+      productosCache.forEach(p => {
+        if (p.marca === brand) {
+          p.ubicacion = '';
+        }
+      });
+      
+      // Actualizar estado global
+      activeLocations.brands.delete(brand);
+      delete activeLocations.brandDetails[brand];
+      
+      // Actualizar UI
+      updateMyLocationsSection();
+      
+      showToast(`Ubicación removida de la marca "${brand}"`, 'success');
+    }, 500);
+  }
+  
+  // Remover ubicación de producto
+  function removeProductLocation(productId) {
+    const product = productosCache.find(p => p.id == productId);
+    
+    if (!product || !product.ubicacion) {
+      showToast('El producto no tiene ubicación para remover', 'warning');
+      return;
+    }
+    
+    // Simulamos un tiempo de proceso
+    showToast(`Removiendo ubicación de producto "${product.nombre}"...`, 'warning');
+    
+    setTimeout(() => {
+      // Actualizar los datos locales
+      product.ubicacion = '';
+      
+      // Actualizar estado global
+      activeLocations.products.delete(productId);
+      
+      // Actualizar UI
+      updateMyLocationsSection();
+      
+      showToast(`Ubicación removida del producto "${product.nombre}"`, 'success');
+    }, 500);
+  }
+  
+  // Remover todas las ubicaciones de categoría
+  function removeAllCategoryLocations() {
+    if (activeLocations.categories.size === 0) {
+      showToast('No hay ubicaciones por categoría para remover', 'warning');
+      return;
+    }
+    
+    // Simulamos un tiempo de proceso
+    showToast('Removiendo todas las ubicaciones por categoría...', 'warning');
+    
+    setTimeout(() => {
+      // Para cada categoría, remover la ubicación de sus productos
+      activeLocations.categories.forEach(category => {
+        productosCache.forEach(p => {
+          if (p.categoria === category) {
+            p.ubicacion = '';
+          }
+        });
+      });
+      
+      // Limpiar estado global
+      activeLocations.categories.clear();
+      activeLocations.categoryDetails = {};
+      
+      // Actualizar UI
+      updateMyLocationsSection();
+      
+      showToast('Todas las ubicaciones por categoría han sido removidas', 'success');
+    }, 500);
+  }
+  
+  // Remover todas las ubicaciones de marca
+  function removeAllBrandLocations() {
+    if (activeLocations.brands.size === 0) {
+      showToast('No hay ubicaciones por marca para remover', 'warning');
+      return;
+    }
+    
+    // Simulamos un tiempo de proceso
+    showToast('Removiendo todas las ubicaciones por marca...', 'warning');
+    
+    setTimeout(() => {
+      // Para cada marca, remover la ubicación de sus productos
+      activeLocations.brands.forEach(brand => {
+        productosCache.forEach(p => {
+          if (p.marca === brand) {
+            p.ubicacion = '';
+          }
+        });
+      });
+      
+      // Limpiar estado global
+      activeLocations.brands.clear();
+      activeLocations.brandDetails = {};
+      
+      // Actualizar UI
+      updateMyLocationsSection();
+      
+      showToast('Todas las ubicaciones por marca han sido removidas', 'success');
+    }, 500);
+  }
+  
+  // Remover todas las ubicaciones individuales
+  function removeAllProductLocations() {
+    if (activeLocations.products.size === 0) {
+      showToast('No hay ubicaciones individuales para remover', 'warning');
+      return;
+    }
+    
+    // Simulamos un tiempo de proceso
+    showToast('Removiendo todas las ubicaciones individuales...', 'warning');
+    
+    setTimeout(() => {
+      // Para cada producto con ubicación individual, removerla
+      activeLocations.products.forEach(productId => {
+        const product = productosCache.find(p => p.id == productId);
+        if (product) {
+          product.ubicacion = '';
+        }
+      });
+      
+      // Limpiar estado global
+      activeLocations.products.clear();
+      
+      // Actualizar UI
+      updateMyLocationsSection();
+      
+      showToast('Todas las ubicaciones individuales han sido removidas', 'success');
+    }, 500);
+  }
+  
+  // Función para navegar sliders
+  function scrollSlider(sliderId, direction) {
+    const slider = document.getElementById(`slider-${sliderId}`);
+    if (!slider) return;
+    
+    // Ajustar tamaño de scroll según el tipo de tarjeta
+    let cardWidth = 0;
+    
+    if (sliderId === 'category' || sliderId === 'brand') {
+      cardWidth = 240; // 220px + 20px gap
+    } else if (sliderId === 'global' || sliderId === 'product') {
+      cardWidth = 240; // 220px + 20px gap
+    } else {
+      cardWidth = 240; // Valor por defecto
+    }
+    
+    // Scroll de 3 tarjetas a la vez (o menos si el slider es pequeño)
+    const visibleWidth = slider.clientWidth;
+    const scrollAmount = Math.min(cardWidth * 3, visibleWidth * 0.8);
+    
+    // Calcular desplazamiento actual y total
+    const scrollLeft = slider.scrollLeft;
+    const scrollWidth = slider.scrollWidth;
+    
+    if (direction === 'left') {
+      // Si estamos cerca del inicio, ir al principio
+      if (scrollLeft < scrollAmount) {
+        slider.scrollTo({ left: 0, behavior: 'smooth' });
+      } else {
+        slider.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+      }
+    } else {
+      // Si estamos cerca del final, ir al final
+      if (scrollLeft + visibleWidth + scrollAmount > scrollWidth) {
+        slider.scrollTo({ left: scrollWidth, behavior: 'smooth' });
+      } else {
+        slider.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+      }
+    }
+    
+    // Verificar si se necesitan mostrar/ocultar botones de navegación
+    setTimeout(() => {
+      updateSliderArrows(sliderId);
+    }, 300);
+  }
+  
+  // Función para actualizar visibilidad de flechas de navegación
+  function updateSliderArrows(sliderId) {
+    const slider = document.getElementById(`slider-${sliderId}`);
+    if (!slider) return;
+    
+    const leftArrow = slider.parentElement.querySelector('.slider-arrow-left');
+    const rightArrow = slider.parentElement.querySelector('.slider-arrow-right');
+    
+    if (!leftArrow || !rightArrow) return;
+    
+    // Mostrar/ocultar flecha izquierda según posición de scroll
+    if (slider.scrollLeft <= 10) {
+      leftArrow.style.opacity = '0.5';
+    } else {
+      leftArrow.style.opacity = '1';
+    }
+    
+    // Mostrar/ocultar flecha derecha según posición de scroll
+    if (slider.scrollLeft + slider.clientWidth >= slider.scrollWidth - 10) {
+      rightArrow.style.opacity = '0.5';
+    } else {
+      rightArrow.style.opacity = '1';
+    }
+  }
+  
+  // Inicializar estado de flechas después de cargar contenido
+  function initSliderArrows() {
+    ['global', 'category', 'brand', 'product'].forEach(sliderId => {
+      updateSliderArrows(sliderId);
+      
+      // Añadir listener para actualizar flechas durante scroll manual
+      const slider = document.getElementById(`slider-${sliderId}`);
+      if (slider) {
+        slider.addEventListener('scroll', () => {
+          updateSliderArrows(sliderId);
+        });
+      }
+    });
+  }
+  
+  // Sistema de notificaciones
+  function showToast(message, type = 'success') {
+    const toastContainer = document.getElementById('toastContainer');
+    if (!toastContainer) return;
+    
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    let icon = 'check-circle';
+    if (type === 'error') icon = 'exclamation-circle';
+    if (type === 'warning') icon = 'exclamation-triangle';
+    
+    toast.innerHTML = `
+      <i class="fas fa-${icon}"></i>
+      <span>${message}</span>
+    `;
+    
+    toastContainer.appendChild(toast);
+    
+    setTimeout(() => {
+      toast.classList.add('fade-out');
+      setTimeout(() => {
+        toast.remove();
       }, 300);
     }, 3000);
   }
-  
-  // Función para aplicar filtros
-  function applyFilters() {
-    var searchValue = document.getElementById('searchProducts').value.toLowerCase().trim();
-    var showOnlyNoLocation = document.getElementById('noLocationCheck').checked;
-    
-    var visibleCount = 0;
-    
-    document.querySelectorAll('#productsTableBody tr').forEach(function(row) {
-      var productName = row.getAttribute('data-product-name') || '';
-      var productCode = row.getAttribute('data-product-code') || '';
-      var hasLocation = row.getAttribute('data-has-location') === '1';
-      
-      // Verificar filtros
-      var matchesSearch = !searchValue || 
-                          productName.includes(searchValue) || 
-                          productCode.includes(searchValue);
-      var matchesLocationFilter = !showOnlyNoLocation || !hasLocation;
-      
-      // Aplicar
-      if (matchesSearch && matchesLocationFilter) {
-        row.style.display = '';
-        visibleCount++;
-      } else {
-        row.style.display = 'none';
-      }
-    });
-    
-    // Mostrar mensaje sin resultados
-    var noResultsRow = document.getElementById('noResultsRow');
-    
-    if (visibleCount === 0) {
-      if (!noResultsRow) {
-        var tbody = document.getElementById('productsTableBody');
-        noResultsRow = document.createElement('tr');
-        noResultsRow.id = 'noResultsRow';
-        noResultsRow.innerHTML = 
-          '<td colspan="4" style="text-align: center; padding: 32px;">' +
-            '<i class="fas fa-search" style="font-size: 28px; color: #666; margin-bottom: 16px;"></i>' +
-            '<p style="margin: 0; font-size: 17px; color: #666; margin-bottom: 16px;">No se encontraron productos con los filtros seleccionados</p>' +
-            '<button class="btn-action btn-assign" style="margin-top: 16px; display: inline-flex;" onclick="resetFilters()">' +
-              '<i class="fas fa-undo"></i> Limpiar filtros' +
-            '</button>' +
-          '</td>';
-        tbody.appendChild(noResultsRow);
-      } else {
-        noResultsRow.style.display = '';
-      }
-    } else if (noResultsRow) {
-      noResultsRow.style.display = 'none';
-    }
-  }
-  
-  // Función para resetear filtros
-  function resetFilters() {
-    document.getElementById('searchProducts').value = '';
-    document.getElementById('noLocationCheck').checked = false;
-    document.getElementById('noLocationFilter').classList.remove('active');
-    applyFilters();
-  }
-  
-  // Inicializar cuando el DOM está listo
-  document.addEventListener('DOMContentLoaded', function() {
-    // Configurar eventos para el filtro de ubicación
-    var noLocationFilter = document.getElementById('noLocationFilter');
-    var noLocationCheck = document.getElementById('noLocationCheck');
-    
-    if (noLocationFilter && noLocationCheck) {
-      noLocationFilter.addEventListener('click', function() {
-        noLocationCheck.checked = !noLocationCheck.checked;
-        this.classList.toggle('active', noLocationCheck.checked);
-        applyFilters();
-      });
-    }
-    
-    // Configurar eventos para la búsqueda
-    var searchInput = document.getElementById('searchProducts');
-    if (searchInput) {
-      searchInput.addEventListener('input', applyFilters);
-    }
-    
-    // Configurar sugerencias de ubicación
-    document.querySelectorAll('.location-suggestion').forEach(function(suggestion) {
-      suggestion.addEventListener('click', function() {
-        var locationInput = this.closest('.location-edit').querySelector('input');
-        if (locationInput) {
-          locationInput.value = this.textContent.trim();
-          locationInput.focus();
-        }
-      });
-    });
-    
-    // Configurar eventos de teclado para los inputs de ubicación
-    document.querySelectorAll('.location-edit input').forEach(function(input) {
-      input.addEventListener('keydown', function(event) {
-        if (event.key === 'Enter') {
-          event.preventDefault();
-          
-          // Obtener ID del producto
-          var row = this.closest('tr');
-          if (row) {
-            var productId = row.getAttribute('data-product-id');
-            if (productId) {
-              saveLocation(productId);
-            }
-          }
-        } else if (event.key === 'Escape') {
-          event.preventDefault();
-          
-          // Obtener ID del producto
-          var row = this.closest('tr');
-          if (row) {
-            var productId = row.getAttribute('data-product-id');
-            if (productId) {
-              cancelEditing(productId);
-            }
-          }
-        }
-      });
-    });
-    
-    // Configurar modal de asignación masiva
-    const selectionTypeRadios = document.querySelectorAll('input[name="selectionType"]');
-    const categorySelection = document.getElementById('categorySelection');
-    const manualSelection = document.getElementById('manualSelection');
-    const radioCategory = document.getElementById('radioCategory');
-    const radioManual = document.getElementById('radioManual');
-  
-    // Conjunto para almacenar IDs de productos seleccionados manualmente
-    const selectedProducts = new Set();
-    
-    if (radioCategory && radioManual) {
-      radioCategory.addEventListener('click', function() {
-        document.querySelector('input[name="selectionType"][value="category"]').checked = true;
-        radioCategory.classList.add('selected');
-        radioManual.classList.remove('selected');
-        categorySelection.style.display = 'block';
-        manualSelection.style.display = 'none';
-      });
-      
-      radioManual.addEventListener('click', function() {
-        document.querySelector('input[name="selectionType"][value="manual"]').checked = true;
-        radioManual.classList.add('selected');
-        radioCategory.classList.remove('selected');
-        categorySelection.style.display = 'none';
-        manualSelection.style.display = 'block';
-      });
-    }
-    
-    // Guardar asignación masiva
-    const saveUbicacionMasivaBtn = document.getElementById('saveUbicacionMasiva');
-    if (saveUbicacionMasivaBtn) {
-      saveUbicacionMasivaBtn.addEventListener('click', function() {
-        const ubicacion = document.getElementById('ubicacionMasiva').value.trim();
-        
-        if (!ubicacion) {
-          showNotification('Por favor ingresa una ubicación', 'error');
-          return;
-        }
-        
-        const selectionType = document.querySelector('input[name="selectionType"]:checked').value;
-        let data = {
-          ubicacion: ubicacion
-        };
-        
-        if (selectionType === 'category') {
-          data.categoria = document.getElementById('categoriaSelector').value;
-        } else if (selectionType === 'manual') {
-          // Para selección manual
-          if (selectedProducts.size === 0) {
-            showNotification('No hay productos seleccionados', 'error');
-            return;
-          }
-          
-          data.producto_ids = Array.from(selectedProducts);
-        }
-        
-        // Mostrar cargando
-        saveUbicacionMasivaBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
-        saveUbicacionMasivaBtn.disabled = true;
-        
-        // Llamar a la API
-        fetch('/api/actualizar-ubicacion-masiva', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
-          },
-          body: JSON.stringify(data)
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            // Cerrar modal
-            const modal = bootstrap.Modal.getInstance(document.getElementById('bulkLocationModal'));
-            modal.hide();
-            
-            // Mostrar notificación
-            showNotification(`Se actualizaron ${data.count} productos`, 'success');
-            
-            // Recargar página después de un breve retraso
-            setTimeout(() => {
-              window.location.reload();
-            }, 1500);
-          } else {
-            throw new Error(data.message || 'Error al guardar las ubicaciones');
-          }
-        })
-        .catch(error => {
-          console.error('Error:', error);
-          showNotification('Error: ' + error.message, 'error');
-        })
-        .finally(() => {
-          // Restaurar botón
-          saveUbicacionMasivaBtn.innerHTML = 'Guardar';
-          saveUbicacionMasivaBtn.disabled = false;
-        });
-      });
-    }
-    
-    // Buscar productos en el modal
-    const searchProductsModal = document.getElementById('searchProductsModal');
-    const selectedProductsList = document.getElementById('selectedProductsList');
-    const selectedCount = document.getElementById('selectedCount');
-    
-    if (searchProductsModal && selectedProductsList) {
-      searchProductsModal.addEventListener('input', function() {
-        const searchText = searchProductsModal.value.toLowerCase();
-        
-        // Actualizar lista de productos encontrados
-        updateProductSearchResults(searchText);
-      });
-      
-      function updateProductSearchResults(searchText) {
-        // Limpiar resultados anteriores
-        selectedProductsList.innerHTML = '';
-        
-        // Si no hay texto de búsqueda, mostrar solo los seleccionados
-        if (!searchText) {
-          displaySelectedProducts();
-          return;
-        }
-        
-        // Buscar entre los productos visibles
-        const matchingProducts = [];
-        document.querySelectorAll('#productsTableBody tr').forEach(row => {
-          const productId = row.dataset.productId;
-          const productName = row.querySelector('.product-name').textContent.toLowerCase();
-          const productCode = row.querySelector('.product-code').textContent.toLowerCase();
-          
-          if (productName.includes(searchText) || productCode.includes(searchText)) {
-            matchingProducts.push({
-              id: productId,
-              name: row.querySelector('.product-name').textContent,
-              selected: selectedProducts.has(productId)
-            });
-          }
-        });
-        
-        // Mostrar resultados
-        matchingProducts.forEach(product => {
-          const li = document.createElement('li');
-          li.innerHTML = `
-            <label>
-              <input type="checkbox" data-product-id="${product.id}" 
-                     ${product.selected ? 'checked' : ''}>
-              ${product.name}
-            </label>
-          `;
-          
-          // Manejar selección/deselección
-          const checkbox = li.querySelector('input[type="checkbox"]');
-          checkbox.addEventListener('change', () => {
-            if (checkbox.checked) {
-              selectedProducts.add(product.id);
-            } else {
-              selectedProducts.delete(product.id);
-            }
-            updateSelectedCount();
-          });
-          
-          selectedProductsList.appendChild(li);
-        });
-        
-        // Si no hay resultados
-        if (matchingProducts.length === 0) {
-          const li = document.createElement('li');
-          li.textContent = 'No se encontraron productos';
-          li.style.fontStyle = 'italic';
-          li.style.color = '#666';
-          selectedProductsList.appendChild(li);
-        }
-      }
-      
-      function displaySelectedProducts() {
-        // Mostrar solo los productos seleccionados
-        selectedProductsList.innerHTML = '';
-        
-        if (selectedProducts.size === 0) {
-          const li = document.createElement('li');
-          li.textContent = 'No hay productos seleccionados';
-          li.style.fontStyle = 'italic';
-          li.style.color = '#666';
-          selectedProductsList.appendChild(li);
-          return;
-        }
-        
-        // Crear un elemento para cada producto seleccionado
-        selectedProducts.forEach(productId => {
-          const row = document.querySelector(`tr[data-product-id="${productId}"]`);
-          if (row) {
-            const productName = row.querySelector('.product-name').textContent;
-            
-            const li = document.createElement('li');
-            li.innerHTML = `
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span>${productName}</span>
-                <button type="button" class="btn-remove-product" data-product-id="${productId}">
-                  <i class="fas fa-times"></i>
-                </button>
-              </div>
-            `;
-            
-            // Agregar evento para quitar producto
-            li.querySelector('.btn-remove-product').addEventListener('click', () => {
-              selectedProducts.delete(productId);
-              updateSelectedCount();
-              displaySelectedProducts();
-            });
-            
-            selectedProductsList.appendChild(li);
-          }
-        });
-      }
-      
-      function updateSelectedCount() {
-        if (selectedCount) {
-          selectedCount.textContent = selectedProducts.size;
-        }
-      }
-    }
-    
-    // Soporte para escaneo con pistola/cámara
-    if (window.initBarcodeScanner) {
-      window.initBarcodeScanner('#scanIcon', '#searchProducts');
-    }
-    
-    // Manejo de código escaneado (para cualquier método de escaneo)
-    window.onScannedBarcode = function(code) {
-      if (searchInput) {
-        searchInput.value = code;
-        applyFilters();
-      }
-      
-      // Buscar producto con código escaneado
-      let found = false;
-      document.querySelectorAll('#productsTableBody tr').forEach(row => {
-        if (row.getAttribute('data-product-code') === code.toLowerCase()) {
-          // Resaltar la fila
-          row.style.transition = 'background-color 0.3s';
-          row.style.backgroundColor = 'rgba(0, 122, 255, 0.2)';
-          found = true;
-          
-          // Hacer scroll para que sea visible
-          row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          
-          // Quitar resaltado después de un tiempo
-          setTimeout(() => {
-            row.style.backgroundColor = '';
-          }, 3000);
-        }
-      });
-      
-      if (found) {
-        showNotification('Producto encontrado', 'success');
-      } else {
-        showNotification('No se encontró el producto con ese código', 'error');
-      }
-    };
-    
-    // Aplicar filtros iniciales
-    applyFilters();
-  });
 </script>
 {% endblock %}

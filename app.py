@@ -570,20 +570,37 @@ def ubicacion_productos():
     # Obtener información del usuario
     empresa_id = session.get('user_id')
     
-    # Parámetros de paginación
-    page = request.args.get('page', 1, type=int)
-    per_page = 20  # Productos por página
+    # Parámetros de filtrado
+    categoria_filtro = request.args.get('categoria')
+    marca_filtro = request.args.get('marca')
+    global_view = request.args.get('global') == '1'
     
-    # Obtener lista de productos para mostrar (solo los aprobados)
+    # Consulta base
     productos_query = Producto.query.filter_by(
         empresa_id=empresa_id,
         is_approved=True
-    ).order_by(Producto.id.desc())
+    )
     
-    # Aplicar paginación
-    productos_paginados = productos_query.paginate(page=page, per_page=per_page, error_out=False)
+    # Aplicar filtros si existen
+    if categoria_filtro:
+        productos_query = productos_query.filter_by(categoria=categoria_filtro)
+    elif marca_filtro:
+        productos_query = productos_query.filter_by(marca=marca_filtro)
     
-    # Obtener categorías únicas para filtros
+    # Para vista de detalle no usamos paginación
+    if categoria_filtro or marca_filtro or global_view:
+        productos = productos_query.all()
+        page = 1
+        total_pages = 1
+    else:
+        # Parámetros de paginación para vista general
+        page = request.args.get('page', 1, type=int)
+        per_page = 100  # Ampliado para mostrar más productos
+        productos_paginados = productos_query.paginate(page=page, per_page=per_page, error_out=False)
+        productos = productos_paginados.items
+        total_pages = productos_paginados.pages
+    
+    # Obtener categorías únicas para filtros (corregido para evitar duplicados)
     categorias_db = (
         db.session.query(Producto.categoria, Producto.categoria_color)
         .filter_by(empresa_id=empresa_id)
@@ -593,10 +610,28 @@ def ubicacion_productos():
         .all()
     )
     
-    categorias = [
-        {"nombre": cat[0], "color": cat[1] if cat[1] else "#6B7280"}
-        for cat in categorias_db
-    ]
+    # Usar un conjunto para garantizar que no hay duplicados
+    categorias_set = set()
+    categorias = []
+    for cat in categorias_db:
+        if cat[0] not in categorias_set:
+            categorias_set.add(cat[0])
+            categorias.append({
+                "nombre": cat[0], 
+                "color": cat[1] if cat[1] else "#6B7280"
+            })
+    
+    # Obtener marcas únicas (también evitando duplicados)
+    marcas_db = (
+        db.session.query(Producto.marca)
+        .filter_by(empresa_id=empresa_id)
+        .filter(Producto.marca.isnot(None))
+        .filter(Producto.marca != '')
+        .distinct()
+        .all()
+    )
+    
+    marcas = list(set([marca[0] for marca in marcas_db if marca[0]]))
     
     # Obtener ubicaciones únicas existentes para filtros
     ubicaciones_db = (
@@ -608,15 +643,204 @@ def ubicacion_productos():
         .all()
     )
     
-    ubicaciones = [ub[0] for ub in ubicaciones_db if ub[0]]
+    ubicaciones = list(set([ub[0] for ub in ubicaciones_db if ub[0]]))
+    
+    # Convertir a diccionarios para JSON en JavaScript
+    productos_dict = []
+    for p in productos:
+        productos_dict.append({
+            'id': p.id,
+            'nombre': p.nombre,
+            'stock': p.stock if hasattr(p, 'stock') else 0,
+            'precio_venta': p.precio_venta if hasattr(p, 'precio_venta') else None,
+            'categoria': p.categoria,
+            'categoria_color': p.categoria_color,
+            'foto': p.foto,
+            'codigo_barras_externo': p.codigo_barras_externo,
+            'marca': p.marca if hasattr(p, 'marca') else None,
+            'ubicacion': p.ubicacion if hasattr(p, 'ubicacion') else None,
+            'es_favorito': p.es_favorito if hasattr(p, 'es_favorito') else False,
+            'esta_a_la_venta': p.esta_a_la_venta if hasattr(p, 'esta_a_la_venta') else True
+        })
     
     return render_template(
         'ubicacion_productos.html',
-        productos=productos_paginados.items,
+        productos=productos_dict,
         page=page,
-        total_pages=productos_paginados.pages,
+        total_pages=total_pages,
         categorias=categorias,
-        ubicaciones=ubicaciones
+        marcas=marcas,
+        ubicaciones=ubicaciones,
+        filtro_categoria=categoria_filtro,
+        filtro_marca=marca_filtro,
+        vista_global=global_view
+    )
+
+@app.route('/ubicacion-detalle/<string:tipo>/<path:valor>', methods=['GET'])
+@login_requerido
+def ubicacion_detalle(tipo, valor):
+    """
+    Vista para mostrar detalles de ubicaciones por tipo (global, categoría, marca, individual)
+    """
+    # Verificar si el usuario está logueado
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    
+    # Obtener información del usuario
+    empresa_id = session.get('user_id')
+    
+    # Inicializar variables
+    productos = []
+    titulo = "Ubicaciones"
+    ubicacion_valor = ""
+    
+    # Consulta base
+    productos_query = Producto.query.filter_by(
+        empresa_id=empresa_id,
+        is_approved=True
+    )
+    
+    # Filtrar según el tipo
+    if tipo == 'global':
+        # Si es 'all', mostrar todos con ubicación
+        if valor == 'all':
+            productos_query = productos_query.filter(Producto.ubicacion.isnot(None))
+            titulo = "Ubicación Global"
+            
+            # Obtener la ubicación más común como "global"
+            ubicaciones = (
+                db.session.query(Producto.ubicacion, db.func.count(Producto.id).label('total'))
+                .filter(Producto.empresa_id == empresa_id)
+                .filter(Producto.ubicacion.isnot(None))
+                .group_by(Producto.ubicacion)
+                .order_by(db.text('total DESC'))
+                .first()
+            )
+            
+            if ubicaciones:
+                ubicacion_valor = ubicaciones[0]
+        
+    elif tipo == 'categoria':
+        # Verificar si es 'all' para mostrar todas las categorías
+        if valor == 'all':
+            # Seleccionar productos con ubicación agrupados por categoría
+            categorias_con_ubicacion = (
+                db.session.query(Producto.categoria)
+                .filter(Producto.empresa_id == empresa_id)
+                .filter(Producto.ubicacion.isnot(None))
+                .group_by(Producto.categoria)
+                .all()
+            )
+            
+            # Obtener todos los productos que tienen una ubicación y pertenecen a alguna de estas categorías
+            productos_query = productos_query.filter(
+                Producto.categoria.in_([cat[0] for cat in categorias_con_ubicacion if cat[0]])
+            )
+            
+            titulo = "Ubicaciones por Categoría"
+        else:
+            # Filtrar por la categoría específica
+            productos_query = productos_query.filter_by(categoria=valor)
+            
+            # Obtener la ubicación más común para esta categoría
+            ubicaciones = (
+                db.session.query(Producto.ubicacion, db.func.count(Producto.id).label('total'))
+                .filter(Producto.empresa_id == empresa_id)
+                .filter(Producto.categoria == valor)
+                .filter(Producto.ubicacion.isnot(None))
+                .group_by(Producto.ubicacion)
+                .order_by(db.text('total DESC'))
+                .first()
+            )
+            
+            if ubicaciones:
+                ubicacion_valor = ubicaciones[0]
+                
+            titulo = f"Categoría: {valor}"
+    
+    elif tipo == 'marca':
+        # Verificar si es 'all' para mostrar todas las marcas
+        if valor == 'all':
+            # Seleccionar productos con ubicación agrupados por marca
+            marcas_con_ubicacion = (
+                db.session.query(Producto.marca)
+                .filter(Producto.empresa_id == empresa_id)
+                .filter(Producto.ubicacion.isnot(None))
+                .group_by(Producto.marca)
+                .all()
+            )
+            
+            # Obtener todos los productos que tienen una ubicación y pertenecen a alguna de estas marcas
+            productos_query = productos_query.filter(
+                Producto.marca.in_([marca[0] for marca in marcas_con_ubicacion if marca[0]])
+            )
+            
+            titulo = "Ubicaciones por Marca"
+        else:
+            # Filtrar por la marca específica
+            productos_query = productos_query.filter_by(marca=valor)
+            
+            # Obtener la ubicación más común para esta marca
+            ubicaciones = (
+                db.session.query(Producto.ubicacion, db.func.count(Producto.id).label('total'))
+                .filter(Producto.empresa_id == empresa_id)
+                .filter(Producto.marca == valor)
+                .filter(Producto.ubicacion.isnot(None))
+                .group_by(Producto.ubicacion)
+                .order_by(db.text('total DESC'))
+                .first()
+            )
+            
+            if ubicaciones:
+                ubicacion_valor = ubicaciones[0]
+                
+            titulo = f"Marca: {valor}"
+    
+    elif tipo == 'individual':
+        # Si es 'all', filtrar productos que tienen ubicación pero no están categorizados
+        if valor == 'all':
+            # Obtener productos con ubicación que no pertenecen a una categoría o marca dominante
+            # Esto es aproximado - una implementación más precisa requeriría análisis adicional
+            productos_query = productos_query.filter(Producto.ubicacion.isnot(None))
+            titulo = "Ubicaciones Individuales"
+        else:
+            # Acá sería por producto individual (usando ID)
+            try:
+                prod_id = int(valor)
+                productos_query = productos_query.filter_by(id=prod_id)
+                titulo = "Producto Individual"
+            except:
+                # Si el valor no es un ID válido, mostrar todos
+                pass
+    
+    # Obtener productos finales
+    productos_db = productos_query.all()
+    
+    # Convertir a diccionarios para JSON
+    productos = []
+    for p in productos_db:
+        productos.append({
+            'id': p.id,
+            'nombre': p.nombre,
+            'stock': p.stock if hasattr(p, 'stock') else 0,
+            'precio_venta': p.precio_venta if hasattr(p, 'precio_venta') else None,
+            'categoria': p.categoria,
+            'categoria_color': p.categoria_color,
+            'foto': p.foto,
+            'codigo_barras_externo': p.codigo_barras_externo,
+            'marca': p.marca if hasattr(p, 'marca') else None,
+            'ubicacion': p.ubicacion if hasattr(p, 'ubicacion') else None,
+            'es_favorito': p.es_favorito if hasattr(p, 'es_favorito') else False,
+            'esta_a_la_venta': p.esta_a_la_venta if hasattr(p, 'esta_a_la_venta') else True
+        })
+    
+    return render_template(
+        'ubicacion_detalle.html',
+        productos=productos,
+        titulo=titulo,
+        tipo=tipo,
+        valor=valor,
+        ubicacion_valor=ubicacion_valor
     )
 
 @app.route('/dashboard/inventario')
@@ -1400,11 +1624,149 @@ def actualizar_ubicacion(product_id):
         db.session.rollback()
         return jsonify({"success": False, "message": f"Error al actualizar: {str(e)}"}), 500
 
+@app.route('/api/get_active_locations', methods=['GET'])
+@login_requerido
+def get_active_locations():
+    """Obtiene todos los tipos de ubicaciones activas para facilitar visualización"""
+    try:
+        empresa_id = session.get('user_id')
+        if not empresa_id:
+            return jsonify({"success": False, "message": "Usuario no autenticado"}), 401
+        
+        # Estructura para almacenar los resultados
+        active_locations = {
+            "global": False,
+            "categorias": [],
+            "marcas": [],
+            "individuales": 0,
+            "location_values": {}
+        }
+        
+        # Obtener todos los productos con ubicación
+        productos_con_ubicacion = Producto.query.filter(
+            Producto.empresa_id == empresa_id,
+            Producto.is_approved == True,
+            Producto.ubicacion.isnot(None),
+            Producto.ubicacion != ''
+        ).all()
+        
+        if not productos_con_ubicacion:
+            return jsonify({"success": True, "active_locations": active_locations})
+        
+        # Contar ubicaciones por categoría
+        ubicaciones_por_categoria = {}
+        for producto in productos_con_ubicacion:
+            if not producto.categoria:
+                continue
+                
+            if producto.categoria not in ubicaciones_por_categoria:
+                ubicaciones_por_categoria[producto.categoria] = {
+                    "count": 0,
+                    "ubicaciones": {}
+                }
+                
+            ubicaciones_por_categoria[producto.categoria]["count"] += 1
+            
+            if producto.ubicacion not in ubicaciones_por_categoria[producto.categoria]["ubicaciones"]:
+                ubicaciones_por_categoria[producto.categoria]["ubicaciones"][producto.ubicacion] = 0
+                
+            ubicaciones_por_categoria[producto.categoria]["ubicaciones"][producto.ubicacion] += 1
+        
+        # Contar ubicaciones por marca
+        ubicaciones_por_marca = {}
+        for producto in productos_con_ubicacion:
+            if not producto.marca:
+                continue
+                
+            if producto.marca not in ubicaciones_por_marca:
+                ubicaciones_por_marca[producto.marca] = {
+                    "count": 0,
+                    "ubicaciones": {}
+                }
+                
+            ubicaciones_por_marca[producto.marca]["count"] += 1
+            
+            if producto.ubicacion not in ubicaciones_por_marca[producto.marca]["ubicaciones"]:
+                ubicaciones_por_marca[producto.marca]["ubicaciones"][producto.ubicacion] = 0
+                
+            ubicaciones_por_marca[producto.marca]["ubicaciones"][producto.ubicacion] += 1
+        
+        # Determinar categorías con ubicación dominante
+        for categoria, datos in ubicaciones_por_categoria.items():
+            # Verificar si hay una ubicación dominante (más del 80% de los productos tienen la misma ubicación)
+            ubicacion_dominante = None
+            for ubicacion, count in datos["ubicaciones"].items():
+                if count / datos["count"] >= 0.8:
+                    ubicacion_dominante = ubicacion
+                    break
+                    
+            if ubicacion_dominante:
+                active_locations["categorias"].append(categoria)
+                active_locations["location_values"][categoria] = ubicacion_dominante
+        
+        # Determinar marcas con ubicación dominante
+        for marca, datos in ubicaciones_por_marca.items():
+            # Verificar si hay una ubicación dominante
+            ubicacion_dominante = None
+            for ubicacion, count in datos["ubicaciones"].items():
+                if count / datos["count"] >= 0.8:
+                    ubicacion_dominante = ubicacion
+                    break
+                    
+            if ubicacion_dominante:
+                active_locations["marcas"].append(marca)
+                active_locations["location_values"][marca] = ubicacion_dominante
+        
+        # Determinar si hay una ubicación global (más del 80% de TODOS los productos tienen la misma ubicación)
+        total_productos = len(productos_con_ubicacion)
+        ubicaciones_conteo = {}
+        
+        for producto in productos_con_ubicacion:
+            if producto.ubicacion not in ubicaciones_conteo:
+                ubicaciones_conteo[producto.ubicacion] = 0
+            ubicaciones_conteo[producto.ubicacion] += 1
+        
+        # Verificar ubicación global
+        for ubicacion, count in ubicaciones_conteo.items():
+            if count / total_productos >= 0.8:
+                active_locations["global"] = True
+                active_locations["location_values"]["global"] = ubicacion
+                break
+        
+        # Contar productos con ubicación individual (que no están en categorías o marcas dominantes)
+        productos_individuales = []
+        for producto in productos_con_ubicacion:
+            # Verificar si no está en categoría o marca con ubicación dominante
+            es_individual = True
+            
+            if producto.categoria and producto.categoria in active_locations["categorias"]:
+                es_individual = False
+                
+            if producto.marca and producto.marca in active_locations["marcas"]:
+                es_individual = False
+                
+            if es_individual:
+                productos_individuales.append(producto.id)
+        
+        active_locations["individuales"] = len(productos_individuales)
+        
+        return jsonify({
+            "success": True,
+            "active_locations": active_locations
+        })
+        
+    except Exception as e:
+        print(f"Error al obtener ubicaciones activas: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"success": False, "message": str(e)}), 500
+
 @app.route('/api/actualizar-ubicacion-masiva', methods=['POST'])
 @login_requerido
 def actualizar_ubicacion_masiva():
     """
     API para actualizar la ubicación de múltiples productos a la vez.
+    Puede ser por categoría, marca, o lista de IDs.
     """
     try:
         # Obtener datos del request
@@ -1412,37 +1774,54 @@ def actualizar_ubicacion_masiva():
         ubicacion = data.get('ubicacion', '').strip()
         producto_ids = data.get('producto_ids', [])
         filtro_categoria = data.get('categoria')
+        filtro_marca = data.get('marca')
+        es_global = data.get('global', False)
         
         empresa_id = session.get('user_id')
         
         # Validar datos
-        if not ubicacion:
-            return jsonify({"success": False, "message": "La ubicación no puede estar vacía"}), 400
+        if not ubicacion and not data.get('remove', False):
+            return jsonify({"success": False, "message": "La ubicación no puede estar vacía al asignar"}), 400
         
         productos_actualizados = 0
         
-        # Caso 1: Actualizar por IDs específicos
-        if producto_ids and len(producto_ids) > 0:
+        # Caso 1: Actualizar todos (global)
+        if es_global:
+            # Actualizar todos los productos de la empresa
+            count = Producto.query.filter_by(
+                empresa_id=empresa_id,
+                is_approved=True
+            ).update({"ubicacion": ubicacion}, synchronize_session="fetch")
+            
+            productos_actualizados = count
+        
+        # Caso 2: Actualizar por IDs específicos
+        elif producto_ids and len(producto_ids) > 0:
             # Filtrar para asegurar que solo se actualicen productos de la empresa actual
-            productos = Producto.query.filter(
+            count = Producto.query.filter(
                 Producto.id.in_(producto_ids),
                 Producto.empresa_id == empresa_id
-            ).all()
+            ).update({"ubicacion": ubicacion}, synchronize_session="fetch")
             
-            for producto in productos:
-                producto.ubicacion = ubicacion
-                productos_actualizados += 1
+            productos_actualizados = count
         
-        # Caso 2: Actualizar por categoría
+        # Caso 3: Actualizar por categoría
         elif filtro_categoria:
-            productos = Producto.query.filter_by(
+            count = Producto.query.filter_by(
                 empresa_id=empresa_id,
                 categoria=filtro_categoria
-            ).all()
+            ).update({"ubicacion": ubicacion}, synchronize_session="fetch")
             
-            for producto in productos:
-                producto.ubicacion = ubicacion
-                productos_actualizados += 1
+            productos_actualizados = count
+        
+        # Caso 4: Actualizar por marca
+        elif filtro_marca:
+            count = Producto.query.filter_by(
+                empresa_id=empresa_id,
+                marca=filtro_marca
+            ).update({"ubicacion": ubicacion}, synchronize_session="fetch")
+            
+            productos_actualizados = count
         
         # Guardar cambios
         if productos_actualizados > 0:

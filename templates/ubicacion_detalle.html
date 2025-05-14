@@ -1,0 +1,432 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalle de Ubicaciones - OptiMax{% endblock %}
+
+{% block content %}
+<style>
+  /* Estilo similar a descuentos_detalle.html */
+  :root {
+    --font-apple: -apple-system, BlinkMacSystemFont, 'SF Pro Text', Helvetica, Arial, sans-serif;
+    --text-color: #1d1d1f;
+    --text-secondary: #555555;
+    --background: #ffffff;
+    --light-background: #f5f5f7;
+    --separator: rgba(0, 0, 0, 0.1);
+    --accent: #e52e2e;
+    --accent-hover: #c51818;
+    --accent-light: rgba(229, 46, 46, 0.1);
+    
+    /* Colores específicos de ubicaciones */
+    --location-color: #4b6cb7;
+    --location-hover: #3b5998;
+    --location-light: rgba(75, 108, 183, 0.1);
+    --blue: #1a237e;
+  }
+  
+  body {
+    font-family: var(--font-apple);
+    color: var(--text-color);
+    background-color: var(--background);
+    padding: 0;
+    margin: 0;
+  }
+  
+  .detail-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+  
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+  }
+  
+  .page-title {
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin: 0;
+    margin-bottom: 8px;
+    color: var(--text-color);
+  }
+  
+  .header-title-container {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .page-description {
+    font-size: 17px;
+    color: #86868b;
+    margin-bottom: 28px;
+    max-width: 600px;
+    font-weight: 400;
+  }
+  
+  .header-actions {
+    display: flex;
+    gap: 1rem;
+    padding-top: 8px;
+  }
+  
+  .btn-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.25rem;
+    border-radius: 980px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    height: 44px;
+    white-space: nowrap;
+  }
+  
+  .btn-volver {
+    background-color: var(--blue);
+    color: #ffffff;
+    box-shadow: 0 2px 4px rgba(26, 35, 126, 0.3);
+  }
+  
+  .btn-volver:hover {
+    background-color: #151c64;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(26, 35, 126, 0.4);
+    color: #ffffff;
+  }
+  
+  .btn-remove {
+    background-color: var(--accent);
+    color: #ffffff;
+    box-shadow: 0 2px 4px rgba(229, 46, 46, 0.3);
+  }
+  
+  .btn-remove:hover {
+    background-color: var(--accent-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(229, 46, 46, 0.4);
+    color: #ffffff;
+  }
+  
+  .location-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    background-color: var(--location-light);
+    color: var(--location-color);
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 16px;
+    margin-left: 16px;
+    box-shadow: 0 2px 4px rgba(75, 108, 183, 0.15);
+  }
+  
+  /* Grid de productos */
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 24px;
+    margin-top: 32px;
+    animation: fadeIn 0.3s ease-out;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .product-card {
+    background-color: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    border: 1px solid #eaeaea;
+    height: 320px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  .product-image-container {
+    height: 140px;
+    overflow: hidden;
+    background-color: #f8f8f8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+  }
+  
+  .product-image {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+  
+  .product-info {
+    padding: 16px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .product-name {
+    font-weight: 600;
+    font-size: 16px;
+    margin-bottom: 8px;
+    line-height: 1.3;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    height: 42px;
+  }
+  
+  .product-meta {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+  }
+  
+  .product-category {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    margin-top: 4px;
+    font-weight: 500;
+  }
+  
+  .product-location {
+    margin-top: auto;
+    font-weight: 600;
+    color: var(--location-color);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 15px;
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 60px 0;
+    color: #86868b;
+  }
+  
+  .empty-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    color: #c7c7cc;
+  }
+  
+  .empty-title {
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-color);
+  }
+  
+  .empty-description {
+    font-size: 17px;
+    max-width: 400px;
+    margin: 0 auto 24px auto;
+    line-height: 1.5;
+  }
+  
+  /* Responsivo */
+  @media (max-width: 768px) {
+    .page-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    
+    .header-actions {
+      width: 100%;
+    }
+    
+    .products-grid {
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 16px;
+    }
+  }
+</style>
+
+<div class="detail-container">
+  <!-- Cabecera -->
+  <div class="page-header">
+    <div class="header-title-container">
+      <h1 class="page-title">
+        {{ titulo }}
+        {% if ubicacion_valor %}
+          <span class="location-badge">
+            <i class="fas fa-map-marker-alt"></i> {{ ubicacion_valor }}
+          </span>
+        {% endif %}
+      </h1>
+      <p class="page-description">
+        {% if productos|length == 1 %}
+          1 producto
+        {% else %}
+          {{ productos|length }} productos
+        {% endif %}
+        {% if tipo == 'global' %}
+          con ubicación global
+        {% elif tipo == 'categoria' and valor != 'all' %}
+          en la categoría "{{ valor }}"
+        {% elif tipo == 'marca' and valor != 'all' %}
+          de la marca "{{ valor }}"
+        {% elif tipo == 'individual' %}
+          con ubicación individual
+        {% endif %}
+      </p>
+    </div>
+    <div class="header-actions">
+      {% if productos|length > 0 and tipo != 'all' %}
+      <button class="btn-action btn-remove" onclick="removerUbicaciones()">
+        <i class="fas fa-trash-alt"></i> Quitar ubicaciones
+      </button>
+      {% endif %}
+      <a href="{{ url_for('ubicacion_productos') }}" class="btn-action btn-volver">
+        <i class="fas fa-arrow-left"></i> Volver
+      </a>
+    </div>
+  </div>
+  
+  <!-- Grid de Productos -->
+  {% if productos|length > 0 %}
+  <div class="products-grid">
+    {% for producto in productos %}
+    <div class="product-card">
+      <div class="product-image-container">
+        <img src="{{ url_for('static', filename='uploads/' ~ producto.foto) if producto.foto else url_for('static', filename='img/default_product.jpg') }}" class="product-image" alt="{{ producto.nombre }}">
+      </div>
+      <div class="product-info">
+        <div class="product-name">{{ producto.nombre }}</div>
+        <div class="product-meta">
+          {% if producto.codigo_barras_externo %}
+          <div>SKU: {{ producto.codigo_barras_externo }}</div>
+          {% endif %}
+          {% if producto.marca %}
+          <div>{{ producto.marca }}</div>
+          {% endif %}
+        </div>
+        {% if producto.categoria %}
+        <div class="product-category" style="background-color: {{ producto.categoria_color or '#6B7280' }}20; color: {{ producto.categoria_color or '#6B7280' }};">
+          {{ producto.categoria|title }}
+        </div>
+        {% endif %}
+        <div class="product-location">
+          <i class="fas fa-map-marker-alt"></i>
+          {{ producto.ubicacion or 'Sin ubicación' }}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <!-- Estado vacío -->
+  <div class="empty-state">
+    <div class="empty-icon">
+      <i class="fas fa-map-marked-alt"></i>
+    </div>
+    <h3 class="empty-title">No hay productos con esta ubicación</h3>
+    <p class="empty-description">
+      Prueba a asignar ubicaciones a tus productos desde la pantalla principal de ubicaciones.
+    </p>
+    <a href="{{ url_for('ubicacion_productos') }}" class="btn-action btn-volver">
+      <i class="fas fa-arrow-left"></i> Volver a Ubicaciones
+    </a>
+  </div>
+  {% endif %}
+</div>
+
+<script>
+  // Función para remover ubicaciones
+  function removerUbicaciones() {
+    if (!confirm("¿Estás seguro de querer eliminar las ubicaciones de estos productos?")) {
+      return;
+    }
+    
+    // Obtener datos de los productos a actualizar
+    const tipo = "{{ tipo }}";
+    const valor = "{{ valor }}";
+    const isGlobal = tipo === 'global';
+    
+    // Construir datos para la petición
+    let data = {
+      ubicacion: '',  // Ubicación vacía para eliminar
+      remove: true
+    };
+    
+    if (isGlobal) {
+      data.global = true;
+    } else if (tipo === 'categoria') {
+      data.categoria = valor;
+    } else if (tipo === 'marca') {
+      data.marca = valor;
+    } else if (tipo === 'individual') {
+      // Para productos individuales necesitaríamos los IDs
+      // En este caso simplificado, asumimos que estamos viendo un solo producto
+      {% if productos|length == 1 %}
+      data.producto_ids = [{{ productos[0].id }}];
+      {% endif %}
+    }
+    
+    // Mostrar mensaje de carga
+    const loadingMessage = document.createElement('div');
+    loadingMessage.style.position = 'fixed';
+    loadingMessage.style.top = '50%';
+    loadingMessage.style.left = '50%';
+    loadingMessage.style.transform = 'translate(-50%, -50%)';
+    loadingMessage.style.background = 'rgba(0, 0, 0, 0.8)';
+    loadingMessage.style.color = 'white';
+    loadingMessage.style.padding = '20px 30px';
+    loadingMessage.style.borderRadius = '10px';
+    loadingMessage.style.zIndex = '9999';
+    loadingMessage.innerHTML = '<div style="display: flex; align-items: center; gap: 12px;"><i class="fas fa-spinner fa-spin" style="font-size: 20px;"></i> Eliminando ubicaciones...</div>';
+    document.body.appendChild(loadingMessage);
+    
+    // Llamar a la API
+    fetch('/api/actualizar-ubicacion-masiva', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+      // Quitar el mensaje de carga
+      document.body.removeChild(loadingMessage);
+      
+      if (data.success) {
+        // Redirigir a la página principal de ubicaciones
+        window.location.href = "/ubicacion-productos";
+      } else {
+        alert('Error: ' + (data.message || 'No se pudieron eliminar las ubicaciones'));
+      }
+    })
+    .catch(error => {
+      // Quitar el mensaje de carga
+      document.body.removeChild(loadingMessage);
+      
+      alert('Error: ' + error.message);
+    });
+  }
+</script>
+{% endblock %}
