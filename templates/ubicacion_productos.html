@@ -1180,6 +1180,17 @@
       Aplicar ubicación
     </h3>
     
+    <!-- Botón de reseteo de ubicaciones -->
+    <div class="reset-locations-container" style="margin-top: 10px; margin-bottom: 20px;">
+      <button id="resetAllLocationsBtn" class="btn-fix-locations">
+        <i class="fas fa-exclamation-triangle"></i>
+        Resetear todas las ubicaciones
+      </button>
+      <div class="info-text" style="margin-top: 8px; font-size: 12px; color: #666;">
+        Utiliza este botón si experimentas problemas con ubicaciones duplicadas o inconsistentes.
+      </div>
+    </div>
+    
     <div class="location-controls">
       <div class="location-target-selector">
         <select id="locationTarget">
@@ -1411,7 +1422,7 @@ document.addEventListener('DOMContentLoaded', function() {
     );
     
     if (productosSinTipo.length > 0) {
-      showToast(`Se detectaron ${productosSinTipo.length} productos con ubicación pero sin tipo asignado. Por favor visite /ubicacion/migrar-datos-existentes para corregir.`, 'warning');
+      showToast(`Se detectaron ${productosSinTipo.length} productos con ubicación pero sin tipo asignado. Usa el botón "Resetear todas las ubicaciones" para corregir.`, 'warning');
     }
   });
   
@@ -1801,9 +1812,17 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // FUNCIÓN PARA OBTENER ESTADO DE UBICACIONES ACTIVAS DESDE LA API
   function checkExistingLocations() {
+    console.log("Consultando API para obtener ubicaciones activas...");
     fetch('/api/get_active_locations')
-      .then(response => response.json())
+      .then(response => {
+        // Verificar si la respuesta es válida
+        if (!response.ok) {
+          throw new Error(`Error de red: ${response.status} ${response.statusText}`);
+        }
+        return response.json();
+      })
       .then(data => {
+        console.log("Respuesta de API:", data);
         if (data.success) {
           // Limpiar el estado actual
           activeLocations = {
@@ -1843,6 +1862,8 @@ document.addEventListener('DOMContentLoaded', function() {
             });
           }
           
+          console.log("Estado de ubicaciones actualizado:", activeLocations);
+          
           // Actualizar UI
           updateMyLocationsSection();
         } else {
@@ -1860,6 +1881,7 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // FALLBACK: Detectar ubicaciones manualmente en caso de que la API falle
   function detectLocationsByProducts() {
+    console.log("Ejecutando detección manual de ubicaciones...");
     // Limpiamos el estado actual
     activeLocations = {
       global: false,
@@ -1914,6 +1936,8 @@ document.addEventListener('DOMContentLoaded', function() {
         activeLocations.products.add(producto.id);
       }
     });
+    
+    console.log("Detección manual completada:", activeLocations);
     
     // Actualizar UI
     updateMyLocationsSection();
@@ -1976,7 +2000,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const globalLocationValue = activeLocations.locationValues['global'] || '';
     
     productosCache.forEach(p => {
-      if (p.ubicacion === globalLocationValue) {
+      if (p.ubicacion_tipo === 'global') {
         globalProducts.push(p);
       }
     });
@@ -2035,9 +2059,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     const items = Array.from(activeLocations.categories).map(category => {
-      // Buscar productos por categoría con su ubicación
+      // Buscar productos por categoría con el tipo correcto
       const categoryProducts = productosCache.filter(p => 
-        p.categoria === category && p.ubicacion === activeLocations.locationValues[category]
+        p.categoria === category && p.ubicacion_tipo === 'categoria'
       );
       
       const locationValue = activeLocations.locationValues[category] || "";
@@ -2133,9 +2157,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     const items = Array.from(activeLocations.brands).map(brand => {
-      // Buscar productos por marca con su ubicación
+      // Buscar productos por marca con el tipo correcto
       const brandProducts = productosCache.filter(p => 
-        p.marca === brand && p.ubicacion === activeLocations.locationValues[brand]
+        p.marca === brand && p.ubicacion_tipo === 'marca'
       );
       
       const locationValue = activeLocations.locationValues[brand] || "";
@@ -2267,6 +2291,8 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
     
+    console.log("Aplicando ubicación:", { target, locationValue });
+    
     // Verificar conflictos
     checkForLocationConflicts(target, locationValue);
   }
@@ -2395,6 +2421,9 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Proceder con la aplicación de la ubicación
   function proceedWithLocation(target, locationValue) {
+    // Mostrar indicador de carga
+    showToast(`Aplicando ubicación "${locationValue}"...`, 'warning');
+    
     switch(target) {
       case 'all':
         applyLocationToAll(locationValue);
@@ -2425,6 +2454,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Mostrar indicador de carga
     showToast('Aplicando ubicación global...', 'warning');
     
+    console.log("Enviando petición para aplicar ubicación global:", locationValue);
+    
     // Llamar a la API para aplicar ubicación masiva a todos los productos
     fetch('/api/actualizar-ubicacion-masiva', {
       method: 'POST',
@@ -2436,12 +2467,21 @@ document.addEventListener('DOMContentLoaded', function() {
         global: true
       })
     })
-    .then(response => response.json())
+    .then(response => {
+      console.log("Respuesta recibida:", response.status);
+      if (!response.ok) {
+        throw new Error(`Error de red: ${response.status} ${response.statusText}`);
+      }
+      return response.json();
+    })
     .then(data => {
+      console.log("Datos recibidos:", data);
       if (data.success) {
-        // Actualizar estado local
+        // Actualizar estado local - TODOS los productos
         productosCache.forEach(p => {
           p.ubicacion = locationValue;
+          p.ubicacion_tipo = 'global';
+          p.ubicacion_grupo = null;
         });
         
         // Limpiar el estado actual y establecer solo global
@@ -2467,6 +2507,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     })
     .catch(error => {
+      console.error("Error completo:", error);
       showToast('Error: ' + error.message, 'error');
     });
   }
@@ -2488,6 +2529,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Mostrar indicador de carga
     showToast(`Aplicando ubicación a categoría "${category}"...`, 'warning');
     
+    console.log("Enviando petición para aplicar ubicación a categoría:", { category, locationValue });
+    
     // Llamar a la API para aplicar ubicación masiva a la categoría
     fetch('/api/actualizar-ubicacion-masiva', {
       method: 'POST',
@@ -2499,46 +2542,21 @@ document.addEventListener('DOMContentLoaded', function() {
         categoria: category
       })
     })
-    .then(response => response.json())
+    .then(response => {
+      console.log("Respuesta recibida:", response.status);
+      if (!response.ok) {
+        throw new Error(`Error de red: ${response.status} ${response.statusText}`);
+      }
+      return response.json();
+    })
     .then(data => {
+      console.log("Datos recibidos:", data);
       if (data.success) {
         // Actualizar estado local de los productos
         categoryProducts.forEach(p => {
           p.ubicacion = locationValue;
-        });
-        
-        // Si había ubicación global, quitarla primero
-        if (activeLocations.global) {
-          activeLocations.global = false;
-          activeLocations.globalDetails = null;
-          delete activeLocations.locationValues['global'];
-        }
-        
-        // Eliminar esta categoría y sus productos de otras ubicaciones (marcas/productos individuales)
-        if (activeLocations.brands.size > 0) {
-          categoryProducts.forEach(p => {
-            if (p.marca && activeLocations.brands.has(p.marca)) {
-              // Si tiene marca que estaba asignada, actualizar
-              const marcaProducts = productosCache.filter(prod => 
-                prod.marca === p.marca && 
-                prod.id !== p.id && // Excluir el producto actual
-                prod.ubicacion === activeLocations.locationValues[p.marca]
-              );
-              
-              // Si ya no hay productos suficientes en la marca para mantener la ubicación
-              if (marcaProducts.length < 3) { // Umbral arbitrario para mantener la marca
-                activeLocations.brands.delete(p.marca);
-                delete activeLocations.locationValues[p.marca];
-              }
-            }
-          });
-        }
-        
-        // Quitar estos productos de asignaciones individuales
-        categoryProducts.forEach(p => {
-          if (activeLocations.products.has(p.id)) {
-            activeLocations.products.delete(p.id);
-          }
+          p.ubicacion_tipo = 'categoria';
+          p.ubicacion_grupo = category;
         });
         
         // Actualizar esta categoría como última asignación
@@ -2547,7 +2565,7 @@ document.addEventListener('DOMContentLoaded', function() {
         activeLocations.categoryDetails[category] = categoryProducts.slice();
         
         // Actualizar UI
-        updateMyLocationsSection();
+        checkExistingLocations(); // Refrescar completamente las ubicaciones desde la API
         
         showToast(`Ubicación "${locationValue}" aplicada a ${data.count} productos de la categoría "${category}"`, 'success');
       } else {
@@ -2555,6 +2573,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     })
     .catch(error => {
+      console.error("Error completo:", error);
       showToast('Error: ' + error.message, 'error');
     });
   }
@@ -2576,6 +2595,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Mostrar indicador de carga
     showToast(`Aplicando ubicación a marca "${brand}"...`, 'warning');
     
+    console.log("Enviando petición para aplicar ubicación a marca:", { brand, locationValue });
+    
     // Llamar a la API para aplicar ubicación masiva a la marca
     fetch('/api/actualizar-ubicacion-masiva', {
       method: 'POST',
@@ -2587,46 +2608,21 @@ document.addEventListener('DOMContentLoaded', function() {
         marca: brand
       })
     })
-    .then(response => response.json())
+    .then(response => {
+      console.log("Respuesta recibida:", response.status);
+      if (!response.ok) {
+        throw new Error(`Error de red: ${response.status} ${response.statusText}`);
+      }
+      return response.json();
+    })
     .then(data => {
+      console.log("Datos recibidos:", data);
       if (data.success) {
         // Actualizar estado local
         brandProducts.forEach(p => {
           p.ubicacion = locationValue;
-        });
-        
-        // Si había ubicación global, quitarla primero
-        if (activeLocations.global) {
-          activeLocations.global = false;
-          activeLocations.globalDetails = null;
-          delete activeLocations.locationValues['global'];
-        }
-        
-        // Eliminar estos productos de categorías
-        if (activeLocations.categories.size > 0) {
-          brandProducts.forEach(p => {
-            if (p.categoria && activeLocations.categories.has(p.categoria)) {
-              // Si tiene categoría que estaba asignada, actualizar
-              const categoriaProducts = productosCache.filter(prod => 
-                prod.categoria === p.categoria && 
-                prod.id !== p.id && // Excluir el producto actual
-                prod.ubicacion === activeLocations.locationValues[p.categoria]
-              );
-              
-              // Si ya no hay productos suficientes en la categoría para mantener la ubicación
-              if (categoriaProducts.length < 3) { // Umbral arbitrario para mantener la categoría
-                activeLocations.categories.delete(p.categoria);
-                delete activeLocations.locationValues[p.categoria];
-              }
-            }
-          });
-        }
-        
-        // Quitar estos productos de asignaciones individuales
-        brandProducts.forEach(p => {
-          if (activeLocations.products.has(p.id)) {
-            activeLocations.products.delete(p.id);
-          }
+          p.ubicacion_tipo = 'marca';
+          p.ubicacion_grupo = brand;
         });
         
         // Actualizar esta marca como última asignación
@@ -2635,7 +2631,7 @@ document.addEventListener('DOMContentLoaded', function() {
         activeLocations.brandDetails[brand] = brandProducts.slice();
         
         // Actualizar UI
-        updateMyLocationsSection();
+        checkExistingLocations(); // Refrescar completamente las ubicaciones desde la API
         
         showToast(`Ubicación "${locationValue}" aplicada a ${data.count} productos de la marca "${brand}"`, 'success');
       } else {
@@ -2643,6 +2639,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     })
     .catch(error => {
+      console.error("Error completo:", error);
       showToast('Error: ' + error.message, 'error');
     });
   }
@@ -2664,6 +2661,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Mostrar indicador de carga
     showToast(`Aplicando ubicación a producto "${product.nombre}"...`, 'warning');
     
+    console.log("Enviando petición para actualizar ubicación de producto:", { productId, locationValue });
+    
     // Llamar a la API para actualizar la ubicación del producto
     fetch(`/api/actualizar-ubicacion/${productId}`, {
       method: 'POST',
@@ -2672,55 +2671,26 @@ document.addEventListener('DOMContentLoaded', function() {
       },
       body: JSON.stringify({ ubicacion: locationValue })
     })
-    .then(response => response.json())
+    .then(response => {
+      console.log("Respuesta recibida:", response.status);
+      if (!response.ok) {
+        throw new Error(`Error de red: ${response.status} ${response.statusText}`);
+      }
+      return response.json();
+    })
     .then(data => {
+      console.log("Datos recibidos:", data);
       if (data.success) {
         // Actualizar estado local
         product.ubicacion = locationValue;
-        
-        // Si había ubicación global, quitarla primero
-        if (activeLocations.global) {
-          activeLocations.global = false;
-          activeLocations.globalDetails = null;
-          delete activeLocations.locationValues['global'];
-        }
-        
-        // Quitar este producto de categorías o marcas si pertenecía a alguna
-        if (product.categoria && activeLocations.categories.has(product.categoria)) {
-          // Verificar si quedan suficientes productos en la categoría
-          const categoriaProducts = productosCache.filter(p => 
-            p.categoria === product.categoria && 
-            p.id !== product.id && // Excluir el producto actual
-            p.ubicacion === activeLocations.locationValues[product.categoria]
-          );
-          
-          // Si ya no hay productos suficientes, eliminar la categoría
-          if (categoriaProducts.length < 3) { // Umbral arbitrario
-            activeLocations.categories.delete(product.categoria);
-            delete activeLocations.locationValues[product.categoria];
-          }
-        }
-        
-        if (product.marca && activeLocations.brands.has(product.marca)) {
-          // Verificar si quedan suficientes productos en la marca
-          const marcaProducts = productosCache.filter(p => 
-            p.marca === product.marca && 
-            p.id !== product.id && // Excluir el producto actual
-            p.ubicacion === activeLocations.locationValues[product.marca]
-          );
-          
-          // Si ya no hay productos suficientes, eliminar la marca
-          if (marcaProducts.length < 3) { // Umbral arbitrario
-            activeLocations.brands.delete(product.marca);
-            delete activeLocations.locationValues[product.marca];
-          }
-        }
+        product.ubicacion_tipo = 'individual';
+        product.ubicacion_grupo = null;
         
         // Actualizar estado como producto individual
         activeLocations.products.add(parseInt(productId));
         
         // Actualizar UI
-        updateMyLocationsSection();
+        checkExistingLocations(); // Refrescar completamente las ubicaciones desde la API
         
         // Limpiar selección de producto
         clearProductSelection();
@@ -2731,6 +2701,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     })
     .catch(error => {
+      console.error("Error completo:", error);
       showToast('Error: ' + error.message, 'error');
     });
   }
@@ -2745,6 +2716,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Mostrar indicador de carga
     showToast('Removiendo ubicación global...', 'warning');
     
+    console.log("Enviando petición para remover ubicación global");
+    
     // Llamar a la API para remover ubicación global (estableciendo ubicación vacía)
     fetch('/api/actualizar-ubicacion-masiva', {
       method: 'POST',
@@ -2757,13 +2730,22 @@ document.addEventListener('DOMContentLoaded', function() {
         remove: true
       })
     })
-    .then(response => response.json())
+    .then(response => {
+      console.log("Respuesta recibida:", response.status);
+      if (!response.ok) {
+        throw new Error(`Error de red: ${response.status} ${response.statusText}`);
+      }
+      return response.json();
+    })
     .then(data => {
+      console.log("Datos recibidos:", data);
       if (data.success) {
         // Actualizar estado local
         productosCache.forEach(p => {
-          if (p.ubicacion === activeLocations.locationValues['global']) {
+          if (p.ubicacion_tipo === 'global') {
             p.ubicacion = '';
+            p.ubicacion_tipo = null;
+            p.ubicacion_grupo = null;
           }
         });
         
@@ -2781,6 +2763,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     })
     .catch(error => {
+      console.error("Error completo:", error);
       showToast('Error: ' + error.message, 'error');
     });
   }
@@ -2795,6 +2778,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Mostrar indicador de carga
     showToast(`Removiendo ubicación de categoría "${category}"...`, 'warning');
     
+    console.log("Enviando petición para remover ubicación de categoría:", category);
+    
     // Llamar a la API para remover ubicación de la categoría
     fetch('/api/actualizar-ubicacion-masiva', {
       method: 'POST',
@@ -2807,13 +2792,22 @@ document.addEventListener('DOMContentLoaded', function() {
         remove: true
       })
     })
-    .then(response => response.json())
+    .then(response => {
+      console.log("Respuesta recibida:", response.status);
+      if (!response.ok) {
+        throw new Error(`Error de red: ${response.status} ${response.statusText}`);
+      }
+      return response.json();
+    })
     .then(data => {
+      console.log("Datos recibidos:", data);
       if (data.success) {
         // Actualizar estado local
         productosCache.forEach(p => {
-          if (p.categoria === category && p.ubicacion === activeLocations.locationValues[category]) {
+          if (p.categoria === category && p.ubicacion_tipo === 'categoria') {
             p.ubicacion = '';
+            p.ubicacion_tipo = null;
+            p.ubicacion_grupo = null;
           }
         });
         
@@ -2831,6 +2825,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     })
     .catch(error => {
+      console.error("Error completo:", error);
       showToast('Error: ' + error.message, 'error');
     });
   }
@@ -2845,6 +2840,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Mostrar indicador de carga
     showToast(`Removiendo ubicación de marca "${brand}"...`, 'warning');
     
+    console.log("Enviando petición para remover ubicación de marca:", brand);
+    
     // Llamar a la API para remover ubicación de la marca
     fetch('/api/actualizar-ubicacion-masiva', {
       method: 'POST',
@@ -2857,13 +2854,22 @@ document.addEventListener('DOMContentLoaded', function() {
         remove: true
       })
     })
-    .then(response => response.json())
+    .then(response => {
+      console.log("Respuesta recibida:", response.status);
+      if (!response.ok) {
+        throw new Error(`Error de red: ${response.status} ${response.statusText}`);
+      }
+      return response.json();
+    })
     .then(data => {
+      console.log("Datos recibidos:", data);
       if (data.success) {
         // Actualizar estado local
         productosCache.forEach(p => {
-          if (p.marca === brand && p.ubicacion === activeLocations.locationValues[brand]) {
+          if (p.marca === brand && p.ubicacion_tipo === 'marca') {
             p.ubicacion = '';
+            p.ubicacion_tipo = null;
+            p.ubicacion_grupo = null;
           }
         });
         
@@ -2881,6 +2887,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     })
     .catch(error => {
+      console.error("Error completo:", error);
       showToast('Error: ' + error.message, 'error');
     });
   }
@@ -2897,6 +2904,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Mostrar indicador de carga
     showToast(`Removiendo ubicación de producto "${product.nombre}"...`, 'warning');
     
+    console.log("Enviando petición para remover ubicación de producto:", productId);
+    
     // Llamar a la API para remover ubicación del producto
     fetch(`/api/actualizar-ubicacion/${productId}`, {
       method: 'POST',
@@ -2905,11 +2914,20 @@ document.addEventListener('DOMContentLoaded', function() {
       },
       body: JSON.stringify({ ubicacion: '' })
     })
-    .then(response => response.json())
+    .then(response => {
+      console.log("Respuesta recibida:", response.status);
+      if (!response.ok) {
+        throw new Error(`Error de red: ${response.status} ${response.statusText}`);
+      }
+      return response.json();
+    })
     .then(data => {
+      console.log("Datos recibidos:", data);
       if (data.success) {
         // Actualizar estado local
         product.ubicacion = '';
+        product.ubicacion_tipo = null;
+        product.ubicacion_grupo = null;
         
         // Actualizar estado global
         activeLocations.products.delete(parseInt(productId));
@@ -2923,6 +2941,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     })
     .catch(error => {
+      console.error("Error completo:", error);
       showToast('Error: ' + error.message, 'error');
     });
   }
@@ -2969,8 +2988,10 @@ document.addEventListener('DOMContentLoaded', function() {
         if (data.success) {
           // Actualizar estado local
           productosCache.forEach(p => {
-            if (p.categoria === categoria && p.ubicacion === activeLocations.locationValues[categoria]) {
+            if (p.categoria === categoria && p.ubicacion_tipo === 'categoria') {
               p.ubicacion = '';
+              p.ubicacion_tipo = null;
+              p.ubicacion_grupo = null;
             }
           });
           
@@ -3047,8 +3068,10 @@ document.addEventListener('DOMContentLoaded', function() {
         if (data.success) {
           // Actualizar estado local
           productosCache.forEach(p => {
-            if (p.marca === marca && p.ubicacion === activeLocations.locationValues[marca]) {
+            if (p.marca === marca && p.ubicacion_tipo === 'marca') {
               p.ubicacion = '';
+              p.ubicacion_tipo = null;
+              p.ubicacion_grupo = null;
             }
           });
           
@@ -3116,6 +3139,8 @@ document.addEventListener('DOMContentLoaded', function() {
           const product = productosCache.find(p => p.id == productId);
           if (product) {
             product.ubicacion = '';
+            product.ubicacion_tipo = null;
+            product.ubicacion_grupo = null;
           }
         });
         
@@ -3247,5 +3272,41 @@ document.addEventListener('DOMContentLoaded', function() {
       }, 300);
     }, 3000);
   }
+  
+  // Inicializar botón de reseteo
+  document.getElementById('resetAllLocationsBtn').addEventListener('click', function() {
+    if (confirm('¿Estás seguro de que deseas eliminar TODAS las ubicaciones? Esta acción no se puede deshacer.')) {
+      // Mostrar indicador de carga
+      this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Reseteando...';
+      this.disabled = true;
+      
+      // Llamar a la API para resetear todas las ubicaciones
+      fetch('/api/reset-product-locations', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          showToast(`Se han reseteado ${data.count} ubicaciones correctamente`, 'success');
+          // Recargar la página después de 1 segundo
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
+        } else {
+          throw new Error(data.message || 'Error al resetear ubicaciones');
+        }
+      })
+      .catch(error => {
+        showToast('Error: ' + error.message, 'error');
+        // Restaurar botón
+        this.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Resetear todas las ubicaciones';
+        this.disabled = false;
+      });
+    }
+  });
 </script>
 {% endblock %}

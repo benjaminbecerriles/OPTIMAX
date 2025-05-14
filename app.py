@@ -1610,6 +1610,13 @@ def actualizar_ubicacion(product_id):
         data = request.get_json()
         nueva_ubicacion = data.get('ubicacion', '').strip()
         
+        print(f"DEBUG: Actualizando ubicación de producto {product_id} a '{nueva_ubicacion}'")
+        print(f"DEBUG: Estado previo: tipo={producto.ubicacion_tipo}, grupo={producto.ubicacion_grupo}")
+        
+        # Limpiar ubicación anterior
+        producto.ubicacion_tipo = None
+        producto.ubicacion_grupo = None
+        
         # Actualizar la ubicación
         producto.ubicacion = nueva_ubicacion
         
@@ -1617,21 +1624,29 @@ def actualizar_ubicacion(product_id):
         if not nueva_ubicacion:
             producto.ubicacion_tipo = None
             producto.ubicacion_grupo = None
+            print(f"DEBUG: Removiendo ubicación del producto {product_id}")
         else:
             # Por defecto, si se actualiza directamente un producto, es individual
             producto.ubicacion_tipo = 'individual'
             producto.ubicacion_grupo = None
+            print(f"DEBUG: Estableciendo producto {product_id} como ubicación individual")
         
         db.session.commit()
+        print(f"DEBUG: Ubicación actualizada exitosamente para producto {product_id}")
         
         return jsonify({
             "success": True, 
             "message": "Ubicación actualizada correctamente",
-            "ubicacion": nueva_ubicacion
+            "ubicacion": nueva_ubicacion,
+            "ubicacion_tipo": producto.ubicacion_tipo,
+            "ubicacion_grupo": producto.ubicacion_grupo
         })
         
     except Exception as e:
         db.session.rollback()
+        print(f"ERROR al actualizar ubicación de producto {product_id}: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return jsonify({"success": False, "message": f"Error al actualizar: {str(e)}"}), 500
 
 @app.route('/api/get_active_locations', methods=['GET'])
@@ -1676,7 +1691,17 @@ def get_active_locations():
             active_locations["global"] = True
             active_locations["location_values"]["global"] = global_products.ubicacion
             
-            # Si hay ubicación global, retornamos inmediatamente
+            # Contar productos con ubicación global para el frontend
+            count_global = Producto.query.filter(
+                Producto.empresa_id == empresa_id,
+                Producto.is_approved == True,
+                Producto.ubicacion_tipo == 'global'
+            ).count()
+            
+            print(f"DEBUG: Encontrada ubicación global con {count_global} productos")
+            
+            # Si hay ubicación global, retornamos sin buscar otras ubicaciones
+            # para evitar duplicación de productos
             return jsonify({
                 "success": True,
                 "active_locations": active_locations
@@ -1703,6 +1728,9 @@ def get_active_locations():
                 active_locations["categorias"].append(categoria)
                 active_locations["location_values"][categoria] = ubicacion
         
+        # Depuración
+        print(f"DEBUG: Encontradas {len(active_locations['categorias'])} categorías con ubicación")
+        
         # PASO 3: Buscar ubicaciones por marca
         marcas_con_ubicacion = db.session.query(
             Producto.ubicacion_grupo, Producto.ubicacion
@@ -1724,7 +1752,11 @@ def get_active_locations():
                 active_locations["marcas"].append(marca)
                 active_locations["location_values"][marca] = ubicacion
         
-        # PASO 4: Contar productos individuales
+        # Depuración
+        print(f"DEBUG: Encontradas {len(active_locations['marcas'])} marcas con ubicación")
+        
+        # PASO 4: Contar productos individuales - SOLO contar los que realmente
+        # tienen ubicacion_tipo='individual'
         productos_individuales = Producto.query.filter(
             Producto.empresa_id == empresa_id,
             Producto.is_approved == True,
@@ -1734,6 +1766,9 @@ def get_active_locations():
         ).count()
         
         active_locations["individuales"] = productos_individuales
+        
+        # Depuración
+        print(f"DEBUG: Encontrados {productos_individuales} productos con ubicación individual")
         
         return jsonify({
             "success": True,
@@ -1926,6 +1961,8 @@ def actualizar_ubicacion_masiva():
     try:
         # Obtener datos del request
         data = request.get_json()
+        print(f"DEBUG: Datos recibidos en actualizar-ubicacion-masiva: {data}")
+        
         ubicacion = data.get('ubicacion', '').strip()
         producto_ids = data.get('producto_ids', [])
         filtro_categoria = data.get('categoria')
@@ -1949,7 +1986,19 @@ def actualizar_ubicacion_masiva():
         
         # Caso 1: Actualizar todos (global)
         if es_global:
-            # Actualizar todos los productos de la empresa
+            # PRIMERO: Limpiar todas las ubicaciones existentes para evitar duplicación
+            if not es_remover:
+                Producto.query.filter_by(
+                    empresa_id=empresa_id,
+                    is_approved=True
+                ).update({
+                    "ubicacion_tipo": None,
+                    "ubicacion_grupo": None
+                }, synchronize_session="fetch")
+                
+                print(f"DEBUG: Se limpiaron ubicaciones previas antes de aplicar global")
+            
+            # Actualizar todos los productos con la nueva ubicación global
             data_update = {
                 "ubicacion": ubicacion
             }
@@ -1968,9 +2017,22 @@ def actualizar_ubicacion_masiva():
             ).update(data_update, synchronize_session="fetch")
             
             productos_actualizados = count
+            print(f"DEBUG: Actualización global completada. Productos actualizados: {count}")
         
         # Caso 2: Actualizar por IDs específicos (individual)
         elif producto_ids and len(producto_ids) > 0:
+            # PRIMERO: Limpiar ubicaciones previas de estos productos
+            if not es_remover:
+                Producto.query.filter(
+                    Producto.id.in_(producto_ids),
+                    Producto.empresa_id == empresa_id
+                ).update({
+                    "ubicacion_tipo": None,
+                    "ubicacion_grupo": None
+                }, synchronize_session="fetch")
+                
+                print(f"DEBUG: Se limpiaron ubicaciones previas para {len(producto_ids)} productos individuales")
+            
             # Filtrar para asegurar que solo se actualicen productos de la empresa actual
             data_update = {
                 "ubicacion": ubicacion
@@ -1990,9 +2052,22 @@ def actualizar_ubicacion_masiva():
             ).update(data_update, synchronize_session="fetch")
             
             productos_actualizados = count
+            print(f"DEBUG: Actualización por IDs completada. Productos actualizados: {count}")
         
         # Caso 3: Actualizar por categoría
         elif filtro_categoria:
+            # PRIMERO: Limpiar ubicaciones previas de estos productos
+            if not es_remover:
+                Producto.query.filter_by(
+                    empresa_id=empresa_id,
+                    categoria=filtro_categoria
+                ).update({
+                    "ubicacion_tipo": None,
+                    "ubicacion_grupo": None
+                }, synchronize_session="fetch")
+                
+                print(f"DEBUG: Se limpiaron ubicaciones previas para productos de categoría {filtro_categoria}")
+            
             data_update = {
                 "ubicacion": ubicacion
             }
@@ -2011,9 +2086,22 @@ def actualizar_ubicacion_masiva():
             ).update(data_update, synchronize_session="fetch")
             
             productos_actualizados = count
+            print(f"DEBUG: Actualización por categoría completada. Productos actualizados: {count}")
         
         # Caso 4: Actualizar por marca
         elif filtro_marca:
+            # PRIMERO: Limpiar ubicaciones previas de estos productos
+            if not es_remover:
+                Producto.query.filter_by(
+                    empresa_id=empresa_id,
+                    marca=filtro_marca
+                ).update({
+                    "ubicacion_tipo": None,
+                    "ubicacion_grupo": None
+                }, synchronize_session="fetch")
+                
+                print(f"DEBUG: Se limpiaron ubicaciones previas para productos de marca {filtro_marca}")
+            
             data_update = {
                 "ubicacion": ubicacion
             }
@@ -2032,6 +2120,7 @@ def actualizar_ubicacion_masiva():
             ).update(data_update, synchronize_session="fetch")
             
             productos_actualizados = count
+            print(f"DEBUG: Actualización por marca completada. Productos actualizados: {count}")
         
         # Guardar cambios
         if productos_actualizados > 0:
@@ -2050,6 +2139,48 @@ def actualizar_ubicacion_masiva():
             
     except Exception as e:
         db.session.rollback()
+        print(f"ERROR en actualizar-ubicacion-masiva: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"success": False, "message": f"Error: {str(e)}"}), 500
+
+@app.route('/api/reset-product-locations', methods=['POST'])
+@login_requerido
+def reset_product_locations():
+    """
+    API para resetear todas las ubicaciones de productos para la empresa actual.
+    Útil cuando hay inconsistencias y se quiere empezar de cero.
+    """
+    try:
+        empresa_id = session.get('user_id')
+        if not empresa_id:
+            return jsonify({"success": False, "message": "Usuario no autenticado"}), 401
+        
+        # Actualizar todos los productos para quitar ubicaciones
+        data_update = {
+            "ubicacion": '',
+            "ubicacion_tipo": None,
+            "ubicacion_grupo": None
+        }
+        
+        count = Producto.query.filter_by(
+            empresa_id=empresa_id,
+            is_approved=True
+        ).update(data_update, synchronize_session="fetch")
+        
+        db.session.commit()
+        
+        return jsonify({
+            "success": True,
+            "message": f"Se han reseteado las ubicaciones de {count} productos",
+            "count": count
+        })
+    
+    except Exception as e:
+        db.session.rollback()
+        print(f"ERROR al resetear ubicaciones: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return jsonify({"success": False, "message": f"Error: {str(e)}"}), 500
 
 @app.route('/agregar-producto', methods=['GET','POST'])
