@@ -1612,6 +1612,16 @@ def actualizar_ubicacion(product_id):
         
         # Actualizar la ubicación
         producto.ubicacion = nueva_ubicacion
+        
+        # Si la ubicación es vacía, quitar el tipo y grupo
+        if not nueva_ubicacion:
+            producto.ubicacion_tipo = None
+            producto.ubicacion_grupo = None
+        else:
+            # Por defecto, si se actualiza directamente un producto, es individual
+            producto.ubicacion_tipo = 'individual'
+            producto.ubicacion_grupo = None
+        
         db.session.commit()
         
         return jsonify({
@@ -1642,113 +1652,88 @@ def get_active_locations():
             "location_values": {}
         }
         
-        # Obtener todos los productos con ubicación
-        productos_con_ubicacion = Producto.query.filter(
+        # Verificar si hay productos con ubicación
+        hay_productos = Producto.query.filter(
             Producto.empresa_id == empresa_id,
             Producto.is_approved == True,
             Producto.ubicacion.isnot(None),
             Producto.ubicacion != ''
-        ).all()
+        ).first() is not None
         
-        if not productos_con_ubicacion:
+        if not hay_productos:
             return jsonify({"success": True, "active_locations": active_locations})
         
-        # Contar ubicaciones por categoría
-        ubicaciones_por_categoria = {}
-        for producto in productos_con_ubicacion:
-            if not producto.categoria:
-                continue
-                
-            if producto.categoria not in ubicaciones_por_categoria:
-                ubicaciones_por_categoria[producto.categoria] = {
-                    "count": 0,
-                    "ubicaciones": {}
-                }
-                
-            ubicaciones_por_categoria[producto.categoria]["count"] += 1
-            
-            if producto.ubicacion not in ubicaciones_por_categoria[producto.categoria]["ubicaciones"]:
-                ubicaciones_por_categoria[producto.categoria]["ubicaciones"][producto.ubicacion] = 0
-                
-            ubicaciones_por_categoria[producto.categoria]["ubicaciones"][producto.ubicacion] += 1
+        # PASO 1: Buscar ubicación global (tipo = 'global')
+        global_products = Producto.query.filter(
+            Producto.empresa_id == empresa_id,
+            Producto.is_approved == True,
+            Producto.ubicacion_tipo == 'global',
+            Producto.ubicacion.isnot(None),
+            Producto.ubicacion != ''
+        ).first()
         
-        # Contar ubicaciones por marca
-        ubicaciones_por_marca = {}
-        for producto in productos_con_ubicacion:
-            if not producto.marca:
-                continue
-                
-            if producto.marca not in ubicaciones_por_marca:
-                ubicaciones_por_marca[producto.marca] = {
-                    "count": 0,
-                    "ubicaciones": {}
-                }
-                
-            ubicaciones_por_marca[producto.marca]["count"] += 1
+        if global_products:
+            active_locations["global"] = True
+            active_locations["location_values"]["global"] = global_products.ubicacion
             
-            if producto.ubicacion not in ubicaciones_por_marca[producto.marca]["ubicaciones"]:
-                ubicaciones_por_marca[producto.marca]["ubicaciones"][producto.ubicacion] = 0
-                
-            ubicaciones_por_marca[producto.marca]["ubicaciones"][producto.ubicacion] += 1
+            # Si hay ubicación global, retornamos inmediatamente
+            return jsonify({
+                "success": True,
+                "active_locations": active_locations
+            })
         
-        # Determinar categorías con ubicación dominante
-        for categoria, datos in ubicaciones_por_categoria.items():
-            # Verificar si hay una ubicación dominante (más del 80% de los productos tienen la misma ubicación)
-            ubicacion_dominante = None
-            for ubicacion, count in datos["ubicaciones"].items():
-                if count / datos["count"] >= 0.8:
-                    ubicacion_dominante = ubicacion
-                    break
-                    
-            if ubicacion_dominante:
+        # PASO 2: Buscar ubicaciones por categoría
+        categorias_con_ubicacion = db.session.query(
+            Producto.ubicacion_grupo, Producto.ubicacion
+        ).filter(
+            Producto.empresa_id == empresa_id,
+            Producto.is_approved == True,
+            Producto.ubicacion_tipo == 'categoria',
+            Producto.ubicacion_grupo.isnot(None),
+            Producto.ubicacion.isnot(None),
+            Producto.ubicacion != ''
+        ).distinct().all()
+        
+        # Procesar categorías
+        for categoria_data in categorias_con_ubicacion:
+            categoria = categoria_data[0]
+            ubicacion = categoria_data[1]
+            
+            if categoria not in active_locations["categorias"]:
                 active_locations["categorias"].append(categoria)
-                active_locations["location_values"][categoria] = ubicacion_dominante
+                active_locations["location_values"][categoria] = ubicacion
         
-        # Determinar marcas con ubicación dominante
-        for marca, datos in ubicaciones_por_marca.items():
-            # Verificar si hay una ubicación dominante
-            ubicacion_dominante = None
-            for ubicacion, count in datos["ubicaciones"].items():
-                if count / datos["count"] >= 0.8:
-                    ubicacion_dominante = ubicacion
-                    break
-                    
-            if ubicacion_dominante:
-                active_locations["marcas"].append(marca)
-                active_locations["location_values"][marca] = ubicacion_dominante
+        # PASO 3: Buscar ubicaciones por marca
+        marcas_con_ubicacion = db.session.query(
+            Producto.ubicacion_grupo, Producto.ubicacion
+        ).filter(
+            Producto.empresa_id == empresa_id,
+            Producto.is_approved == True,
+            Producto.ubicacion_tipo == 'marca',
+            Producto.ubicacion_grupo.isnot(None),
+            Producto.ubicacion.isnot(None),
+            Producto.ubicacion != ''
+        ).distinct().all()
         
-        # Determinar si hay una ubicación global (más del 80% de TODOS los productos tienen la misma ubicación)
-        total_productos = len(productos_con_ubicacion)
-        ubicaciones_conteo = {}
-        
-        for producto in productos_con_ubicacion:
-            if producto.ubicacion not in ubicaciones_conteo:
-                ubicaciones_conteo[producto.ubicacion] = 0
-            ubicaciones_conteo[producto.ubicacion] += 1
-        
-        # Verificar ubicación global
-        for ubicacion, count in ubicaciones_conteo.items():
-            if count / total_productos >= 0.8:
-                active_locations["global"] = True
-                active_locations["location_values"]["global"] = ubicacion
-                break
-        
-        # Contar productos con ubicación individual (que no están en categorías o marcas dominantes)
-        productos_individuales = []
-        for producto in productos_con_ubicacion:
-            # Verificar si no está en categoría o marca con ubicación dominante
-            es_individual = True
+        # Procesar marcas
+        for marca_data in marcas_con_ubicacion:
+            marca = marca_data[0]
+            ubicacion = marca_data[1]
             
-            if producto.categoria and producto.categoria in active_locations["categorias"]:
-                es_individual = False
-                
-            if producto.marca and producto.marca in active_locations["marcas"]:
-                es_individual = False
-                
-            if es_individual:
-                productos_individuales.append(producto.id)
+            if marca not in active_locations["marcas"]:
+                active_locations["marcas"].append(marca)
+                active_locations["location_values"][marca] = ubicacion
         
-        active_locations["individuales"] = len(productos_individuales)
+        # PASO 4: Contar productos individuales
+        productos_individuales = Producto.query.filter(
+            Producto.empresa_id == empresa_id,
+            Producto.is_approved == True,
+            Producto.ubicacion_tipo == 'individual',
+            Producto.ubicacion.isnot(None),
+            Producto.ubicacion != ''
+        ).count()
+        
+        active_locations["individuales"] = productos_individuales
         
         return jsonify({
             "success": True,
@@ -1760,6 +1745,176 @@ def get_active_locations():
         import traceback
         traceback.print_exc()
         return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/ubicacion/migrar-datos-existentes', methods=['GET'])
+@login_requerido
+def migrar_datos_ubicacion():
+    """
+    Ruta para migrar datos existentes de ubicaciones al nuevo esquema con tipo y grupo.
+    Esta ruta debe ejecutarse una sola vez después de aplicar la migración de base de datos.
+    """
+    try:
+        empresa_id = session.get('user_id')
+        if not empresa_id:
+            return "Usuario no autenticado", 401
+        
+        # 1. Obtener todos los productos con ubicación
+        productos_con_ubicacion = Producto.query.filter(
+            Producto.empresa_id == empresa_id,
+            Producto.is_approved == True,
+            Producto.ubicacion.isnot(None),
+            Producto.ubicacion != ''
+        ).all()
+        
+        if not productos_con_ubicacion:
+            return "No hay productos con ubicación para migrar."
+        
+        # Contadores para el informe
+        migrados_global = 0
+        migrados_categoria = 0
+        migrados_marca = 0
+        migrados_individual = 0
+        
+        # Estructura para análisis
+        total_productos = len(productos_con_ubicacion)
+        ubicaciones_conteo = {}
+        
+        for producto in productos_con_ubicacion:
+            if producto.ubicacion not in ubicaciones_conteo:
+                ubicaciones_conteo[producto.ubicacion] = 0
+            ubicaciones_conteo[producto.ubicacion] += 1
+        
+        # 2. Verificar ubicación global
+        global_ubicacion = None
+        for ubicacion, count in ubicaciones_conteo.items():
+            if count / total_productos >= 0.8:
+                global_ubicacion = ubicacion
+                break
+        
+        # Si hay ubicación global, migrar todos los productos con esa ubicación
+        if global_ubicacion:
+            for producto in productos_con_ubicacion:
+                if producto.ubicacion == global_ubicacion:
+                    producto.ubicacion_tipo = 'global'
+                    producto.ubicacion_grupo = None
+                    migrados_global += 1
+            
+            # Guardar cambios y retornar resultado
+            db.session.commit()
+            return f"Migrados {migrados_global} productos a ubicación global."
+        
+        # Si no hay global, continuar con categorías y marcas
+        # Crear estructuras para análisis
+        productos_por_categoria = {}
+        productos_por_marca = {}
+        productos_asignados = set()
+        
+        # Agrupar por categoría y marca
+        for producto in productos_con_ubicacion:
+            # Por categoría
+            if producto.categoria:
+                if producto.categoria not in productos_por_categoria:
+                    productos_por_categoria[producto.categoria] = []
+                productos_por_categoria[producto.categoria].append(producto)
+            
+            # Por marca
+            if producto.marca:
+                if producto.marca not in productos_por_marca:
+                    productos_por_marca[producto.marca] = []
+                productos_por_marca[producto.marca].append(producto)
+        
+        # 3. Procesar categorías
+        for categoria, productos in productos_por_categoria.items():
+            # Contar ubicaciones por categoría
+            ubicaciones = {}
+            for producto in productos:
+                if producto.ubicacion not in ubicaciones:
+                    ubicaciones[producto.ubicacion] = 0
+                ubicaciones[producto.ubicacion] += 1
+            
+            # Verificar ubicación dominante
+            ubicacion_dominante = None
+            total_productos_categoria = len(productos)
+            
+            for ubicacion, count in ubicaciones.items():
+                if count / total_productos_categoria >= 0.8:
+                    ubicacion_dominante = ubicacion
+                    break
+            
+            # Si hay ubicación dominante, migrar
+            if ubicacion_dominante:
+                for producto in productos:
+                    if producto.ubicacion == ubicacion_dominante:
+                        producto.ubicacion_tipo = 'categoria'
+                        producto.ubicacion_grupo = categoria
+                        migrados_categoria += 1
+                        productos_asignados.add(producto.id)
+        
+        # 4. Procesar marcas
+        for marca, productos in productos_por_marca.items():
+            # Filtrar productos ya asignados
+            productos_no_asignados = [p for p in productos if p.id not in productos_asignados]
+            
+            if not productos_no_asignados:
+                continue
+            
+            # Contar ubicaciones por marca
+            ubicaciones = {}
+            for producto in productos_no_asignados:
+                if producto.ubicacion not in ubicaciones:
+                    ubicaciones[producto.ubicacion] = 0
+                ubicaciones[producto.ubicacion] += 1
+            
+            # Verificar ubicación dominante
+            ubicacion_dominante = None
+            total_productos_marca = len(productos_no_asignados)
+            
+            for ubicacion, count in ubicaciones.items():
+                if count / total_productos_marca >= 0.8:
+                    ubicacion_dominante = ubicacion
+                    break
+            
+            # Si hay ubicación dominante, migrar
+            if ubicacion_dominante:
+                for producto in productos_no_asignados:
+                    if producto.ubicacion == ubicacion_dominante:
+                        producto.ubicacion_tipo = 'marca'
+                        producto.ubicacion_grupo = marca
+                        migrados_marca += 1
+                        productos_asignados.add(producto.id)
+        
+        # 5. Productos individuales (los que quedan)
+        for producto in productos_con_ubicacion:
+            if producto.id not in productos_asignados:
+                producto.ubicacion_tipo = 'individual'
+                producto.ubicacion_grupo = None
+                migrados_individual += 1
+        
+        # Guardar cambios
+        db.session.commit()
+        
+        # Construir mensaje de resultado
+        mensaje = f"""
+        <h2>Migración de ubicaciones completada</h2>
+        <ul>
+            <li>Productos en ubicación global: {migrados_global}</li>
+            <li>Productos en ubicación por categoría: {migrados_categoria}</li>
+            <li>Productos en ubicación por marca: {migrados_marca}</li>
+            <li>Productos en ubicación individual: {migrados_individual}</li>
+            <li>Total de productos migrados: {migrados_global + migrados_categoria + migrados_marca + migrados_individual}</li>
+        </ul>
+        <p><a href="/ubicacion-productos">Volver a Ubicaciones</a></p>
+        """
+        
+        return mensaje
+        
+    except Exception as e:
+        db.session.rollback()
+        return f"""
+        <h2>Error en la migración de datos</h2>
+        <p>Se produjo un error: {str(e)}</p>
+        <p><a href="/ubicacion-productos">Volver a Ubicaciones</a></p>
+        """
 
 @app.route('/api/actualizar-ubicacion-masiva', methods=['POST'])
 @login_requerido
@@ -1776,50 +1931,105 @@ def actualizar_ubicacion_masiva():
         filtro_categoria = data.get('categoria')
         filtro_marca = data.get('marca')
         es_global = data.get('global', False)
+        es_remover = data.get('remove', False)
         
         empresa_id = session.get('user_id')
         
         # Validar datos
-        if not ubicacion and not data.get('remove', False):
+        if not ubicacion and not es_remover:
             return jsonify({"success": False, "message": "La ubicación no puede estar vacía al asignar"}), 400
         
         productos_actualizados = 0
         
+        # Si es una operación de remover, configuramos los valores
+        if es_remover:
+            ubicacion = ''
+            ubicacion_tipo = None
+            ubicacion_grupo = None
+        
         # Caso 1: Actualizar todos (global)
         if es_global:
             # Actualizar todos los productos de la empresa
+            data_update = {
+                "ubicacion": ubicacion
+            }
+            
+            # Si no es remover, establecer tipo de ubicación
+            if not es_remover:
+                data_update["ubicacion_tipo"] = "global"
+                data_update["ubicacion_grupo"] = None
+            else:
+                data_update["ubicacion_tipo"] = None
+                data_update["ubicacion_grupo"] = None
+            
             count = Producto.query.filter_by(
                 empresa_id=empresa_id,
                 is_approved=True
-            ).update({"ubicacion": ubicacion}, synchronize_session="fetch")
+            ).update(data_update, synchronize_session="fetch")
             
             productos_actualizados = count
         
-        # Caso 2: Actualizar por IDs específicos
+        # Caso 2: Actualizar por IDs específicos (individual)
         elif producto_ids and len(producto_ids) > 0:
             # Filtrar para asegurar que solo se actualicen productos de la empresa actual
+            data_update = {
+                "ubicacion": ubicacion
+            }
+            
+            # Si no es remover, establecer tipo individual
+            if not es_remover:
+                data_update["ubicacion_tipo"] = "individual"
+                data_update["ubicacion_grupo"] = None
+            else:
+                data_update["ubicacion_tipo"] = None
+                data_update["ubicacion_grupo"] = None
+            
             count = Producto.query.filter(
                 Producto.id.in_(producto_ids),
                 Producto.empresa_id == empresa_id
-            ).update({"ubicacion": ubicacion}, synchronize_session="fetch")
+            ).update(data_update, synchronize_session="fetch")
             
             productos_actualizados = count
         
         # Caso 3: Actualizar por categoría
         elif filtro_categoria:
+            data_update = {
+                "ubicacion": ubicacion
+            }
+            
+            # Si no es remover, establecer tipo categoría
+            if not es_remover:
+                data_update["ubicacion_tipo"] = "categoria"
+                data_update["ubicacion_grupo"] = filtro_categoria
+            else:
+                data_update["ubicacion_tipo"] = None
+                data_update["ubicacion_grupo"] = None
+            
             count = Producto.query.filter_by(
                 empresa_id=empresa_id,
                 categoria=filtro_categoria
-            ).update({"ubicacion": ubicacion}, synchronize_session="fetch")
+            ).update(data_update, synchronize_session="fetch")
             
             productos_actualizados = count
         
         # Caso 4: Actualizar por marca
         elif filtro_marca:
+            data_update = {
+                "ubicacion": ubicacion
+            }
+            
+            # Si no es remover, establecer tipo marca
+            if not es_remover:
+                data_update["ubicacion_tipo"] = "marca"
+                data_update["ubicacion_grupo"] = filtro_marca
+            else:
+                data_update["ubicacion_tipo"] = None
+                data_update["ubicacion_grupo"] = None
+            
             count = Producto.query.filter_by(
                 empresa_id=empresa_id,
                 marca=filtro_marca
-            ).update({"ubicacion": ubicacion}, synchronize_session="fetch")
+            ).update(data_update, synchronize_session="fetch")
             
             productos_actualizados = count
         

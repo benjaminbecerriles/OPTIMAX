@@ -1371,8 +1371,8 @@
   let activeLocations = {
     global: false,
     categories: new Set(),
-    products: new Set(),
     brands: new Set(),
+    products: new Set(),
     globalDetails: null,
     categoryDetails: {},
     brandDetails: {},
@@ -1383,14 +1383,36 @@
   let productosCache = null;
   
   // Inicialización
-  document.addEventListener('DOMContentLoaded', function() {
+  
+document.addEventListener('DOMContentLoaded', function() {
     productosCache = {{ productos|tojson }};
+    
+    // Asegurar que todos los productos tengan los nuevos campos incluso si faltan
+    productosCache.forEach(producto => {
+      // Si no existen los campos, inicializarlos
+      if (producto.ubicacion_tipo === undefined) {
+        producto.ubicacion_tipo = null;
+      }
+      if (producto.ubicacion_grupo === undefined) {
+        producto.ubicacion_grupo = null;
+      }
+    });
+    
     initializeLocationPanel();
     
     // Verificar ubicaciones existentes
     checkExistingLocations();
     
     initializeProductSearch();
+    
+    // Mostrar alerta si se detectan productos sin ubicacion_tipo
+    const productosSinTipo = productosCache.filter(p => 
+      p.ubicacion && !p.ubicacion_tipo
+    );
+    
+    if (productosSinTipo.length > 0) {
+      showToast(`Se detectaron ${productosSinTipo.length} productos con ubicación pero sin tipo asignado. Por favor visite /ubicacion/migrar-datos-existentes para corregir.`, 'warning');
+    }
   });
   
   // Configurar panel de ubicaciones
@@ -1783,6 +1805,18 @@
       .then(response => response.json())
       .then(data => {
         if (data.success) {
+          // Limpiar el estado actual
+          activeLocations = {
+            global: false,
+            categories: new Set(),
+            brands: new Set(),
+            products: new Set(),
+            globalDetails: null,
+            categoryDetails: {},
+            brandDetails: {},
+            locationValues: {}
+          };
+          
           const locations = data.active_locations;
           
           // Actualizar el estado global con los datos de la API
@@ -1799,10 +1833,21 @@
             activeLocations.brands.add(brand);
           });
           
+          // Identificar productos individuales basados en ubicacion_tipo
+          if (locations.individuales > 0) {
+            // Buscar productos con ubicación individual
+            productosCache.forEach(product => {
+              if (product.ubicacion && product.ubicacion_tipo === 'individual') {
+                activeLocations.products.add(product.id);
+              }
+            });
+          }
+          
           // Actualizar UI
           updateMyLocationsSection();
         } else {
           console.error('Error al obtener ubicaciones activas:', data.message);
+          // Fallback: si hay error, intentar detectar por cuenta propia
           detectLocationsByProducts();
         }
       })
@@ -1815,112 +1860,58 @@
   
   // FALLBACK: Detectar ubicaciones manualmente en caso de que la API falle
   function detectLocationsByProducts() {
-    // Agrupar productos por ubicación
-    const productosPorUbicacion = {};
-    const productosPorCategoriaUbicacion = {};
-    const productosPorMarcaUbicacion = {};
-
+    // Limpiamos el estado actual
+    activeLocations = {
+      global: false,
+      categories: new Set(),
+      brands: new Set(),
+      products: new Set(),
+      globalDetails: null,
+      categoryDetails: {},
+      brandDetails: {},
+      locationValues: {}
+    };
+    
+    // Ahora usamos los campos ubicacion_tipo y ubicacion_grupo
     productosCache.forEach(producto => {
-      if (producto.ubicacion) {
-        // Para ubicación global
-        if (!productosPorUbicacion[producto.ubicacion]) {
-          productosPorUbicacion[producto.ubicacion] = [];
+      if (!producto.ubicacion) return;
+      
+      // Si el producto tiene los campos, usarlos directamente
+      if (producto.ubicacion_tipo) {
+        switch (producto.ubicacion_tipo) {
+          case 'global':
+            activeLocations.global = true;
+            if (!activeLocations.locationValues['global']) {
+              activeLocations.locationValues['global'] = producto.ubicacion;
+            }
+            break;
+            
+          case 'categoria':
+            if (producto.ubicacion_grupo) {
+              activeLocations.categories.add(producto.ubicacion_grupo);
+              if (!activeLocations.locationValues[producto.ubicacion_grupo]) {
+                activeLocations.locationValues[producto.ubicacion_grupo] = producto.ubicacion;
+              }
+            }
+            break;
+            
+          case 'marca':
+            if (producto.ubicacion_grupo) {
+              activeLocations.brands.add(producto.ubicacion_grupo);
+              if (!activeLocations.locationValues[producto.ubicacion_grupo]) {
+                activeLocations.locationValues[producto.ubicacion_grupo] = producto.ubicacion;
+              }
+            }
+            break;
+            
+          case 'individual':
+            activeLocations.products.add(producto.id);
+            break;
         }
-        productosPorUbicacion[producto.ubicacion].push(producto);
-        
-        // Para categorías
-        if (producto.categoria) {
-          const key = `${producto.categoria}_${producto.ubicacion}`;
-          if (!productosPorCategoriaUbicacion[key]) {
-            productosPorCategoriaUbicacion[key] = [];
-          }
-          productosPorCategoriaUbicacion[key].push(producto);
-        }
-        
-        // Para marcas
-        if (producto.marca) {
-          const key = `${producto.marca}_${producto.ubicacion}`;
-          if (!productosPorMarcaUbicacion[key]) {
-            productosPorMarcaUbicacion[key] = [];
-          }
-          productosPorMarcaUbicacion[key].push(producto);
-        }
-      }
-    });
-    
-    // Detectar ubicación global (si más del 80% tienen la misma ubicación)
-    const totalProductos = productosCache.length;
-    let ubicacionGlobal = null;
-    let maxProductosGlobal = 0;
-    
-    for (const ubicacion in productosPorUbicacion) {
-      const count = productosPorUbicacion[ubicacion].length;
-      if (count > maxProductosGlobal) {
-        maxProductosGlobal = count;
-        ubicacionGlobal = ubicacion;
-      }
-    }
-    
-    // Si más del 80% tienen la misma ubicación, considerarla global
-    if (maxProductosGlobal > 0.8 * totalProductos) {
-      activeLocations.global = true;
-      activeLocations.globalDetails = productosPorUbicacion[ubicacionGlobal];
-      activeLocations.locationValues['global'] = ubicacionGlobal;
-    }
-    
-    // Detectar categorías con ubicación dominante
-    const categoriasProcesadas = new Set();
-    
-    for (const key in productosPorCategoriaUbicacion) {
-      const [categoria, ubicacion] = key.split('_');
-      
-      if (categoriasProcesadas.has(categoria)) continue;
-      
-      // Contar productos de esta categoría con esta ubicación
-      const productosCategoria = productosCache.filter(p => p.categoria === categoria);
-      const productosCategoriaUbicacion = productosPorCategoriaUbicacion[key];
-      
-      // Si más del 80% de productos de la categoría tienen la misma ubicación
-      if (productosCategoriaUbicacion.length >= 0.8 * productosCategoria.length) {
-        activeLocations.categories.add(categoria);
-        activeLocations.categoryDetails[categoria] = productosCategoriaUbicacion;
-        activeLocations.locationValues[categoria] = ubicacion;
-        categoriasProcesadas.add(categoria);
-      }
-    }
-    
-    // Detectar marcas con ubicación dominante
-    const marcasProcesadas = new Set();
-    
-    for (const key in productosPorMarcaUbicacion) {
-      const [marca, ubicacion] = key.split('_');
-      
-      if (marcasProcesadas.has(marca)) continue;
-      
-      // Contar productos de esta marca con esta ubicación
-      const productosMarca = productosCache.filter(p => p.marca === marca);
-      const productosMarcaUbicacion = productosPorMarcaUbicacion[key];
-      
-      // Si más del 80% de productos de la marca tienen la misma ubicación
-      if (productosMarcaUbicacion.length >= 0.8 * productosMarca.length) {
-        activeLocations.brands.add(marca);
-        activeLocations.brandDetails[marca] = productosMarcaUbicacion;
-        activeLocations.locationValues[marca] = ubicacion;
-        marcasProcesadas.add(marca);
-      }
-    }
-    
-    // Detectar productos con ubicación individual
-    productosCache.forEach(producto => {
-      if (producto.ubicacion) {
-        // Verificar si no está en un grupo de categoría o marca (o global)
-        const isInGlobal = activeLocations.global;
-        const isInCategory = producto.categoria && activeLocations.categories.has(producto.categoria);
-        const isInBrand = producto.marca && activeLocations.brands.has(producto.marca);
-        
-        if (!isInGlobal && !isInCategory && !isInBrand) {
-          activeLocations.products.add(producto.id);
-        }
+      } else {
+        // Si no tiene los campos, fallback a la lógica anterior
+        console.log('Fallback a lógica antigua: Producto sin ubicacion_tipo', producto.id);
+        activeLocations.products.add(producto.id);
       }
     });
     
@@ -2198,9 +2189,14 @@
     }
     
     // Filtrar solo productos con ubicación individual
-    const individualProducts = productosCache.filter(product => 
-      product.ubicacion && activeLocations.products.has(product.id)
-    );
+    let individualProducts = [];
+    
+    // Usamos ubicacion_tipo para identificar productos individuales
+    productosCache.forEach(product => {
+      if (product.ubicacion && product.ubicacion_tipo === 'individual') {
+        individualProducts.push(product);
+      }
+    });
     
     countElement.textContent = individualProducts.length;
     
@@ -2448,14 +2444,19 @@
           p.ubicacion = locationValue;
         });
         
-        // Actualizar el estado global
-        activeLocations.global = true;
-        activeLocations.locationValues['global'] = locationValue;
-        
-        // Limpiar otras categorías, marcas y productos individuales
-        activeLocations.categories.clear();
-        activeLocations.brands.clear();
-        activeLocations.products.clear();
+        // Limpiar el estado actual y establecer solo global
+        activeLocations = {
+          global: true,
+          categories: new Set(),
+          brands: new Set(),
+          products: new Set(),
+          globalDetails: productosCache.slice(), // Todos los productos
+          categoryDetails: {},
+          brandDetails: {},
+          locationValues: {
+            'global': locationValue
+          }
+        };
         
         // Actualizar UI
         updateMyLocationsSection();
@@ -2501,14 +2502,49 @@
     .then(response => response.json())
     .then(data => {
       if (data.success) {
-        // Actualizar estado local
+        // Actualizar estado local de los productos
         categoryProducts.forEach(p => {
           p.ubicacion = locationValue;
         });
         
-        // Actualizar estado global
+        // Si había ubicación global, quitarla primero
+        if (activeLocations.global) {
+          activeLocations.global = false;
+          activeLocations.globalDetails = null;
+          delete activeLocations.locationValues['global'];
+        }
+        
+        // Eliminar esta categoría y sus productos de otras ubicaciones (marcas/productos individuales)
+        if (activeLocations.brands.size > 0) {
+          categoryProducts.forEach(p => {
+            if (p.marca && activeLocations.brands.has(p.marca)) {
+              // Si tiene marca que estaba asignada, actualizar
+              const marcaProducts = productosCache.filter(prod => 
+                prod.marca === p.marca && 
+                prod.id !== p.id && // Excluir el producto actual
+                prod.ubicacion === activeLocations.locationValues[p.marca]
+              );
+              
+              // Si ya no hay productos suficientes en la marca para mantener la ubicación
+              if (marcaProducts.length < 3) { // Umbral arbitrario para mantener la marca
+                activeLocations.brands.delete(p.marca);
+                delete activeLocations.locationValues[p.marca];
+              }
+            }
+          });
+        }
+        
+        // Quitar estos productos de asignaciones individuales
+        categoryProducts.forEach(p => {
+          if (activeLocations.products.has(p.id)) {
+            activeLocations.products.delete(p.id);
+          }
+        });
+        
+        // Actualizar esta categoría como última asignación
         activeLocations.categories.add(category);
         activeLocations.locationValues[category] = locationValue;
+        activeLocations.categoryDetails[category] = categoryProducts.slice();
         
         // Actualizar UI
         updateMyLocationsSection();
@@ -2559,9 +2595,44 @@
           p.ubicacion = locationValue;
         });
         
-        // Actualizar estado global
+        // Si había ubicación global, quitarla primero
+        if (activeLocations.global) {
+          activeLocations.global = false;
+          activeLocations.globalDetails = null;
+          delete activeLocations.locationValues['global'];
+        }
+        
+        // Eliminar estos productos de categorías
+        if (activeLocations.categories.size > 0) {
+          brandProducts.forEach(p => {
+            if (p.categoria && activeLocations.categories.has(p.categoria)) {
+              // Si tiene categoría que estaba asignada, actualizar
+              const categoriaProducts = productosCache.filter(prod => 
+                prod.categoria === p.categoria && 
+                prod.id !== p.id && // Excluir el producto actual
+                prod.ubicacion === activeLocations.locationValues[p.categoria]
+              );
+              
+              // Si ya no hay productos suficientes en la categoría para mantener la ubicación
+              if (categoriaProducts.length < 3) { // Umbral arbitrario para mantener la categoría
+                activeLocations.categories.delete(p.categoria);
+                delete activeLocations.locationValues[p.categoria];
+              }
+            }
+          });
+        }
+        
+        // Quitar estos productos de asignaciones individuales
+        brandProducts.forEach(p => {
+          if (activeLocations.products.has(p.id)) {
+            activeLocations.products.delete(p.id);
+          }
+        });
+        
+        // Actualizar esta marca como última asignación
         activeLocations.brands.add(brand);
         activeLocations.locationValues[brand] = locationValue;
+        activeLocations.brandDetails[brand] = brandProducts.slice();
         
         // Actualizar UI
         updateMyLocationsSection();
@@ -2607,7 +2678,45 @@
         // Actualizar estado local
         product.ubicacion = locationValue;
         
-        // Actualizar estado global
+        // Si había ubicación global, quitarla primero
+        if (activeLocations.global) {
+          activeLocations.global = false;
+          activeLocations.globalDetails = null;
+          delete activeLocations.locationValues['global'];
+        }
+        
+        // Quitar este producto de categorías o marcas si pertenecía a alguna
+        if (product.categoria && activeLocations.categories.has(product.categoria)) {
+          // Verificar si quedan suficientes productos en la categoría
+          const categoriaProducts = productosCache.filter(p => 
+            p.categoria === product.categoria && 
+            p.id !== product.id && // Excluir el producto actual
+            p.ubicacion === activeLocations.locationValues[product.categoria]
+          );
+          
+          // Si ya no hay productos suficientes, eliminar la categoría
+          if (categoriaProducts.length < 3) { // Umbral arbitrario
+            activeLocations.categories.delete(product.categoria);
+            delete activeLocations.locationValues[product.categoria];
+          }
+        }
+        
+        if (product.marca && activeLocations.brands.has(product.marca)) {
+          // Verificar si quedan suficientes productos en la marca
+          const marcaProducts = productosCache.filter(p => 
+            p.marca === product.marca && 
+            p.id !== product.id && // Excluir el producto actual
+            p.ubicacion === activeLocations.locationValues[product.marca]
+          );
+          
+          // Si ya no hay productos suficientes, eliminar la marca
+          if (marcaProducts.length < 3) { // Umbral arbitrario
+            activeLocations.brands.delete(product.marca);
+            delete activeLocations.locationValues[product.marca];
+          }
+        }
+        
+        // Actualizar estado como producto individual
         activeLocations.products.add(parseInt(productId));
         
         // Actualizar UI
@@ -2660,6 +2769,7 @@
         
         // Actualizar estado global
         activeLocations.global = false;
+        activeLocations.globalDetails = null;
         delete activeLocations.locationValues['global'];
         
         // Actualizar UI
@@ -2702,7 +2812,7 @@
       if (data.success) {
         // Actualizar estado local
         productosCache.forEach(p => {
-          if (p.categoria === category) {
+          if (p.categoria === category && p.ubicacion === activeLocations.locationValues[category]) {
             p.ubicacion = '';
           }
         });
@@ -2710,6 +2820,7 @@
         // Actualizar estado global
         activeLocations.categories.delete(category);
         delete activeLocations.locationValues[category];
+        delete activeLocations.categoryDetails[category];
         
         // Actualizar UI
         updateMyLocationsSection();
@@ -2751,7 +2862,7 @@
       if (data.success) {
         // Actualizar estado local
         productosCache.forEach(p => {
-          if (p.marca === brand) {
+          if (p.marca === brand && p.ubicacion === activeLocations.locationValues[brand]) {
             p.ubicacion = '';
           }
         });
@@ -2759,6 +2870,7 @@
         // Actualizar estado global
         activeLocations.brands.delete(brand);
         delete activeLocations.locationValues[brand];
+        delete activeLocations.brandDetails[brand];
         
         // Actualizar UI
         updateMyLocationsSection();
@@ -2857,7 +2969,7 @@
         if (data.success) {
           // Actualizar estado local
           productosCache.forEach(p => {
-            if (p.categoria === categoria) {
+            if (p.categoria === categoria && p.ubicacion === activeLocations.locationValues[categoria]) {
               p.ubicacion = '';
             }
           });
@@ -2865,6 +2977,7 @@
           // Actualizar estado global
           activeLocations.categories.delete(categoria);
           delete activeLocations.locationValues[categoria];
+          delete activeLocations.categoryDetails[categoria];
           
           // Sumar al total
           totalProductosActualizados += data.count;
@@ -2934,7 +3047,7 @@
         if (data.success) {
           // Actualizar estado local
           productosCache.forEach(p => {
-            if (p.marca === marca) {
+            if (p.marca === marca && p.ubicacion === activeLocations.locationValues[marca]) {
               p.ubicacion = '';
             }
           });
@@ -2942,6 +3055,7 @@
           // Actualizar estado global
           activeLocations.brands.delete(marca);
           delete activeLocations.locationValues[marca];
+          delete activeLocations.brandDetails[marca];
           
           // Sumar al total
           totalProductosActualizados += data.count;
