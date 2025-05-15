@@ -520,19 +520,7 @@
   
   /* Ver Todos Link en el encabezado */
   .view-all-header-link {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 5px 10px;
-    background-color: var(--accent);
-    color: white;
-    border-radius: 4px;
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 500;
-    margin-left: 12px;
-    box-shadow: 0 2px 4px rgba(229, 46, 46, 0.3);
-    transition: all 0.2s ease;
+    display: none; /* Ocultar botones "Ver todos" */
   }
   
   /* Estilo especial para link de ubicación global */
@@ -1180,17 +1168,6 @@
       Aplicar ubicación
     </h3>
     
-    <!-- Botón de reseteo de ubicaciones -->
-    <div class="reset-locations-container" style="margin-top: 10px; margin-bottom: 20px;">
-      <button id="resetAllLocationsBtn" class="btn-fix-locations">
-        <i class="fas fa-exclamation-triangle"></i>
-        Resetear todas las ubicaciones
-      </button>
-      <div class="info-text" style="margin-top: 8px; font-size: 12px; color: #666;">
-        Utiliza este botón si experimentas problemas con ubicaciones duplicadas o inconsistentes.
-      </div>
-    </div>
-    
     <div class="location-controls">
       <div class="location-target-selector">
         <select id="locationTarget">
@@ -1240,7 +1217,7 @@
       </div>
       
       <div class="location-input-group">
-        <input type="text" class="location-input" id="globalLocationValue" placeholder="Ej: Estante A, Bodega 2" required>
+        <input type="text" class="location-input" id="globalLocationValue" placeholder="Ej: Estante B, Bodega 2" required>
       </div>
       
       <button class="location-action-btn btn-apply-location" id="applyGlobalLocationBtn" onclick="applyGlobalLocation()">
@@ -1264,7 +1241,7 @@
           <div class="location-title">
             Ubicación Global
             <span class="location-badge" id="globalLocationCount">0</span>
-            <span class="location-value-badge" id="globalLocationValue">Estante A</span>
+            <span class="location-value-badge" id="globalLocationValue"></span>
           </div>
           <span id="view-all-global-container"></span>
         </div>
@@ -1422,7 +1399,7 @@ document.addEventListener('DOMContentLoaded', function() {
     );
     
     if (productosSinTipo.length > 0) {
-      showToast(`Se detectaron ${productosSinTipo.length} productos con ubicación pero sin tipo asignado. Usa el botón "Resetear todas las ubicaciones" para corregir.`, 'warning');
+      showToast(`Se detectaron ${productosSinTipo.length} productos con ubicación pero sin tipo asignado.`, 'warning');
     }
   });
   
@@ -1996,7 +1973,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!activeLocations.global) {
       container.innerHTML = '<div class="empty-locations">No hay ubicación global</div>';
       countElement.textContent = '0';
-      valueElement.textContent = 'N/A';
+      valueElement.textContent = '';
       return;
     }
     
@@ -2043,15 +2020,6 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
       </a>
     `;
-    
-    // Añadir enlace "Ver todos" si hay muchos productos
-    if (productCount > 10 && viewAllContainer) {
-      const viewAllLink = document.createElement('a');
-      viewAllLink.href = url;
-      viewAllLink.className = 'view-all-header-link global';
-      viewAllLink.innerHTML = `Ver todos (${productCount})`;
-      viewAllContainer.appendChild(viewAllLink);
-    }
   }
   
   function updateCategoryLocationsList() {
@@ -2151,15 +2119,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }).join('');
     
     container.innerHTML = items;
-    
-    // Añadir enlace "Ver todos" si hay muchas categorías
-    if (activeLocations.categories.size > 10 && viewAllContainer) {
-      const viewAllLink = document.createElement('a');
-      viewAllLink.href = '/ubicacion-detalle/categoria/all';
-      viewAllLink.className = 'view-all-header-link';
-      viewAllLink.innerHTML = `Ver todas (${activeLocations.categories.size})`;
-      viewAllContainer.appendChild(viewAllLink);
-    }
   }
   
   function updateBrandLocationsList() {
@@ -2224,15 +2183,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }).join('');
     
     container.innerHTML = items;
-    
-    // Añadir enlace "Ver todos" si hay muchas marcas
-    if (activeLocations.brands.size > 10 && viewAllContainer) {
-      const viewAllLink = document.createElement('a');
-      viewAllLink.href = '/ubicacion-detalle/marca/all';
-      viewAllLink.className = 'view-all-header-link';
-      viewAllLink.innerHTML = `Ver todas (${activeLocations.brands.size})`;
-      viewAllContainer.appendChild(viewAllLink);
-    }
   }
   
   function updateProductLocationsList() {
@@ -2266,15 +2216,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('productLocations').style.display = 'block';
     const items = individualProducts.map(product => createProductCard(product, true)).join('');
     container.innerHTML = items;
-    
-    // Añadir enlace "Ver todos" si hay muchos productos
-    if (individualProducts.length > 10 && viewAllContainer) {
-      const viewAllLink = document.createElement('a');
-      viewAllLink.href = '/ubicacion-detalle/individual/all';
-      viewAllLink.className = 'view-all-header-link';
-      viewAllLink.innerHTML = `Ver todos (${individualProducts.length})`;
-      viewAllContainer.appendChild(viewAllLink);
-    }
   }
   
   // Crear tarjeta de producto
@@ -3305,41 +3246,5 @@ document.addEventListener('DOMContentLoaded', function() {
       }, 300);
     }, 3000);
   }
-  
-  // Inicializar botón de reseteo
-  document.getElementById('resetAllLocationsBtn').addEventListener('click', function() {
-    if (confirm('¿Estás seguro de que deseas eliminar TODAS las ubicaciones? Esta acción no se puede deshacer.')) {
-      // Mostrar indicador de carga
-      this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Reseteando...';
-      this.disabled = true;
-      
-      // Llamar a la API para resetear todas las ubicaciones
-      fetch('/api/reset-product-locations', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Requested-With': 'XMLHttpRequest'
-        }
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          showToast(`Se han reseteado ${data.count} ubicaciones correctamente`, 'success');
-          // Recargar la página después de 1 segundo
-          setTimeout(() => {
-            window.location.reload();
-          }, 1000);
-        } else {
-          throw new Error(data.message || 'Error al resetear ubicaciones');
-        }
-      })
-      .catch(error => {
-        showToast('Error: ' + error.message, 'error');
-        // Restaurar botón
-        this.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Resetear todas las ubicaciones';
-        this.disabled = false;
-      });
-    }
-  });
 </script>
 {% endblock %}

@@ -25,18 +25,16 @@
     --green: #2ecc71;
     --orange: #f39c12;
     --red: #e74c3c;
-
-    /* Colores adicionales de productos.html */
-    --gray-100: #f8f9fa;
-    --gray-200: #e9ecef;
-    --gray-300: #dee2e6;
-    --gray-400: #ced4da;
+    --blue: #1a237e;
     --gray-500: #adb5bd;
     --gray-600: #6c757d;
+    --gray-300: #dee2e6;
+    --gray-200: #e9ecef;
+    --gray-400: #ced4da;
+    --gray-100: #f8f9fa;
     --gray-700: #495057;
     --gray-800: #343a40;
     --gray-900: #212529;
-    --blue: #1a237e;
     --excel-green: #217346;
     --excel-green-hover: #1a5c38;
   }
@@ -129,27 +127,18 @@
     margin-bottom: 24px;
   }
   
-  .search-box {
+  /* Barra de búsqueda adaptada de ajuste_stock.html */
+  .search-container {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
     position: relative;
+    align-items: center;
   }
   
-  .search-box input {
-    padding: 0.75rem 1rem 0.75rem 3rem;
-    border-radius: 8px;
-    border: 1px solid var(--gray-300);
-    font-size: 1rem;
-    height: 48px;
-    width: 100%;
-    transition: all 0.2s ease;
-    font-weight: 400;
-    background-color: var(--light-background);
-  }
-  
-  .search-box input:focus {
-    box-shadow: 0 0 0 3px rgba(229, 46, 46, 0.15);
-    border-color: var(--accent);
-    outline: none;
-    background-color: white;
+  .search-box {
+    flex: 1;
+    position: relative;
   }
   
   .search-box i {
@@ -159,8 +148,117 @@
     transform: translateY(-50%);
     color: var(--gray-600);
     font-size: 1.1rem;
+    z-index: 5;
+    pointer-events: none;
   }
   
+  .search-box input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 3rem;
+    border-radius: 8px;
+    border: 1px solid var(--gray-300);
+    font-size: 1rem;
+    height: 48px;
+    transition: all 0.2s ease;
+    font-weight: 400;
+    background-color: var(--light-background);
+  }
+  
+  .search-box input:focus {
+    background-color: white;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(229, 46, 46, 0.15);
+    outline: none;
+  }
+  
+  .search-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .icon-btn {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--light-background);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+  }
+  
+  .icon-btn:hover {
+    background-color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .icon-btn.scan-active {
+    background-color: rgba(229, 46, 46, 0.1);
+    border-color: var(--accent);
+    animation: blink 1s infinite;
+  }
+  
+  @keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0.6; }
+    100% { opacity: 1; }
+  }
+  
+  /* Estilos para el corazón de favoritos */
+  .heart-icon {
+    font-size: 24px;
+    cursor: pointer;
+    display: inline-block;
+    transition: transform 0.2s ease, color 0.2s ease;
+  }
+  
+  .heart-icon:hover {
+    transform: scale(1.1);
+  }
+  
+  .heart-icon.active {
+    color: var(--red);
+  }
+  
+  .heart-icon:not(.active) {
+    color: var(--gray-500);
+  }
+  
+  /* Contenedor para el checkbox de favoritos - ADAPTADO DE AJUSTE STOCK */
+  .form-heart-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    background-color: var(--light-background);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 0 16px;
+    height: 48px;
+    transition: all 0.2s ease;
+    user-select: none;
+  }
+  
+  .form-heart-container:hover {
+    background-color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .form-heart-container.active {
+    background-color: rgba(231, 76, 60, 0.1);
+    border-color: var(--red);
+  }
+  
+  .form-heart-check-input {
+    display: none;
+  }
+
   .filter-select {
     padding: 0.75rem 1rem;
     border-radius: 8px;
@@ -213,7 +311,7 @@
     transform: translateY(-2px);
   }
   
-  /* Estilos para botones de acción - copiados de ajuste_stock.html */
+  /* Estilos para botones de acción */
   .btn-action {
     display: flex;
     align-items: center;
@@ -271,6 +369,7 @@
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
+    table-layout: fixed; /* Agregado para fijar anchos de columnas */
   }
   
   .products-table thead th {
@@ -286,6 +385,7 @@
     line-height: 1.2;
     vertical-align: middle;
     height: 60px;
+    white-space: nowrap; /* Evitar saltos de línea en encabezados */
   }
   
   .products-table tbody td {
@@ -352,12 +452,13 @@
     font-size: 1.5rem;
   }
 
-  /* Información de producto */
+  /* Información de producto - MODIFICADO PARA EVITAR DESBORDAMIENTO */
   .product-info {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
     text-align: left;
+    max-width: 100%; /* Limitar ancho */
   }
   
   .product-name {
@@ -365,6 +466,10 @@
     color: var(--text-color);
     font-size: 1rem;
     margin-bottom: 0.25rem;
+    max-width: 280px; /* Ancho máximo */
+    white-space: nowrap; /* Evitar saltos de línea */
+    overflow: hidden; /* Ocultar contenido desbordado */
+    text-overflow: ellipsis; /* Mostrar puntos suspensivos */
   }
   
   .product-meta {
@@ -373,18 +478,24 @@
     gap: 0.35rem;
     font-size: 0.9rem;
     color: var(--text-secondary);
+    max-width: 280px; /* Ancho máximo */
   }
   
   .product-sku, .product-brand {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   
   .meta-label {
     font-weight: 500;
     color: var(--text-secondary);
     min-width: 50px;
+    flex-shrink: 0;
   }
 
   /* Categoría con tooltip */
@@ -503,26 +614,6 @@
   
   .eye-icon.hidden {
     color: #9E9E9E;
-  }
-
-  /* Iconos de favorito */
-  .heart-icon {
-    font-size: 24px;
-    cursor: pointer;
-    display: inline-block;
-    transition: transform 0.2s ease, color 0.2s ease;
-  }
-  
-  .heart-icon:hover {
-    transform: scale(1.1);
-  }
-  
-  .heart-icon.active {
-    color: var(--red);
-  }
-  
-  .heart-icon:not(.active) {
-    color: var(--gray-500);
   }
 
   /* Menú de acciones */
@@ -661,7 +752,7 @@
     font-size: 0.95rem;
   }
 
-  /* Dropdown menus - CORREGIDO con mejor posicionamiento */
+  /* Dropdown menus */
   #columnDropdown {
     position: absolute;
     top: 100%;
@@ -715,7 +806,7 @@
     }
   }
   
-  /* Dropdown para acciones masivas - mantener estilo general */
+  /* Dropdown para acciones masivas */
   #actionsDropdown {
     position: absolute;
     top: 100%;
@@ -740,23 +831,6 @@
     height: 52px; /* Aumentar altura */
     width: 100%; /* Asegurar que tome el ancho completo */
     padding: 10px 35px 10px 15px; /* Aumentar padding interno */
-  }
-  
-  /* Estilos básicos para selectores */
-  .filter-select {
-    border-radius: 8px;
-    border: 1px solid var(--gray-300);
-    transition: all 0.2s ease;
-    font-weight: 400;
-    background-color: var(--light-background);
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236c757d' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 10px center;
-    background-size: 12px;
-    padding-right: 30px;
   }
   
   .dropdown-item {
@@ -935,12 +1009,13 @@
     line-height: 1.4;
   }
 
-  /* Card de productos vacío */
+  /* Card de productos vacío - ADAPTADO DE AJUSTE STOCK */
   .empty-state {
     padding: 64px 0;
     text-align: center;
     background-color: var(--light-background);
     border-radius: 12px;
+    margin-top: 2rem;
   }
   
   .empty-icon {
@@ -1065,6 +1140,65 @@
   .expiry-days.far {
     color: var(--green);
   }
+  
+  /* Mensaje de no resultados - ADAPTADO DE AJUSTE STOCK */
+  #noResultsMessage {
+    display: none;
+    text-align: center;
+    padding: 3rem 2rem;
+    background-color: var(--light-background);
+    border-radius: 12px;
+    margin: 2rem 0;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+  
+  #noResultsMessage.visible {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  #noResultsMessage i {
+    font-size: 3rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+  }
+  
+  #noResultsMessage h4 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: var(--text-color);
+  }
+  
+  #noResultsMessage p {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+  }
+  
+  #resetFilters {
+    display: inline-block;
+    padding: 0.5rem 0.9rem;
+    border-radius: 980px;
+    font-weight: 500;
+    font-size: 0.85rem;
+    background-color: white;
+    color: var(--text-color);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+  }
+  
+  #resetFilters:hover {
+    background-color: #f0f0f0;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
 
   /* Responsive adjustments */
   @media (max-width: 991px) {
@@ -1143,8 +1277,8 @@
       <p class="page-description">Revisa, modifica y controla tu inventario completo desde un solo lugar.</p>
     </div>
     <div class="header-actions" style="display: flex; gap: 1rem; padding-top: 8px;">
-      <a href="{{ url_for('dashboard_inventario') }}" style="display: flex; align-items: center; justify-content: center; gap: 0.75rem; padding: 0.75rem 1.25rem; border-radius: 980px; font-weight: 500; font-size: 0.95rem; transition: all 0.2s ease; text-decoration: none; cursor: pointer; background-color: #1a237e; color: white; box-shadow: 0 2px 4px rgba(26, 35, 126, 0.3); border: none; height: 44px; white-space: nowrap;">
-        <i class="fas fa-arrow-left" style="color: white;"></i>
+      <a href="{{ url_for('dashboard_inventario') }}" class="btn-action btn-volver">
+        <i class="fas fa-arrow-left"></i>
         <span>Volver</span>
       </a>
       <button class="btn-excel">
@@ -1154,145 +1288,153 @@
     </div>
   </div>
   
-  <div class="row filter-controls g-3">
-    <!-- Barra de búsqueda -->
-    <div class="col-md-4">
-      <div class="search-container" style="display: flex; gap: 0.75rem; margin-bottom: 0.5rem; position: relative; align-items: center;">
-        <div class="search-box" style="flex: 1; position: relative;">
-          <i class="fas fa-search" style="position: absolute; left: 1.25rem; top: 50%; transform: translateY(-50%); color: #6c757d; font-size: 1.1rem; z-index: 5; pointer-events: none;"></i>
-          <input type="text" id="searchInput" placeholder="Buscar por nombre, SKU o marca..." value="{{ termino_busqueda if termino_busqueda else '' }}" class="form-control" style="width: 100%; padding: 0.75rem 1rem 0.75rem 3rem; border-radius: 8px; border: 1px solid #dee2e6; font-size: 1rem; height: 48px; transition: all 0.2s ease; font-weight: 400; background-color: #f5f5f7;">
-        </div>
-        <div class="search-actions" style="display: flex; gap: 0.5rem;">
-          <!-- Botón de escaneo con pistola de código de barras -->
-          <button class="icon-btn" id="scanButton" title="Escanear con pistola" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; background-color: #f5f5f7; border: 1px solid rgba(0, 0, 0, 0.1); border-radius: 8px; cursor: pointer; transition: all 0.2s ease; padding: 0;">
-            <img src="{{ url_for('static', filename='img/3.png') }}" alt="Escanear con Lector" style="width: 24px; height: 24px;">
+  <div class="filters-container">
+    <!-- Primera fila de filtros -->
+    <div class="row mb-3">
+      <!-- Filtro por categoría -->
+      <div class="col-lg-4 col-md-6 mb-3">
+        <select id="categoryFilter" class="filter-select w-100">
+          <option value="">Todas las categorías</option>
+          {% for cat_name, cat_color in [
+              ("abarrotes secos", "#FFA500"),
+              ("enlatados y conservas", "#DAA520"),
+              ("botanas, dulces y snacks", "#FF69B4"),
+              ("bebidas no alcohólicas", "#1E90FF"),
+              ("bebidas alcohólicas", "#800080"),
+              ("panadería y repostería", "#D2B48C"),
+              ("lácteos y huevos", "#F5DEB3"),
+              ("carnes frías y embutidos", "#B22222"),
+              ("congelados y refrigerados", "#00CED1"),
+              ("frutas y verduras frescas", "#32CD32"),
+              ("productos de limpieza y hogar", "#87CEFA"),
+              ("cuidado personal e higiene", "#FFC0CB"),
+              ("medicamentos de mostrador (otc)", "#FF6347"),
+              ("productos para bebés", "#FFB6C1"),
+              ("productos para mascotas", "#8FBC8F"),
+              ("artículos de papelería", "#9370DB"),
+              ("ferretería básica", "#708090"),
+              ("artesanías y manualidades", "#DDA0DD"),
+              ("productos a granel", "#BDB76B"),
+              ("productos orgánicos", "#6B8E23"),
+              ("productos gourmet", "#CD853F"),
+              ("suplementos alimenticios", "#DA70D6"),
+              ("otros (miscelánea)", "#A9A9A9")
+          ] %}
+            <option value="{{ cat_name }}" data-color="{{ cat_color }}">
+              {{ cat_name|title }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      
+      <!-- Control de columnas -->
+      <div class="col-lg-4 col-md-6 mb-3">
+        <div class="btn-columns position-relative w-100">
+          <button class="action-button w-100" id="columnToggleBtn">
+            <i class="fas fa-columns"></i>
+            Columnas
           </button>
-          <!-- Botón de escaneo con cámara -->
-          <button class="icon-btn" id="cameraButton" title="Escanear con cámara" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; background-color: #f5f5f7; border: 1px solid rgba(0, 0, 0, 0.1); border-radius: 8px; cursor: pointer; transition: all 0.2s ease; padding: 0;">
-            <img src="{{ url_for('static', filename='img/4.png') }}" alt="Escanear con Cámara" style="width: 24px; height: 24px;">
-          </button>
+          <div class="dropdown-menu" id="columnDropdown">
+            <div class="px-3 py-2">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="colImage" checked>
+                <label class="form-check-label" for="colImage">Foto</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="colProduct" checked>
+                <label class="form-check-label" for="colProduct">Producto</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="colCategory" checked>
+                <label class="form-check-label" for="colCategory">Categoría</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="colStock" checked>
+                <label class="form-check-label" for="colStock">Stock</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="colPrice" checked>
+                <label class="form-check-label" for="colPrice">Precio</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="colCost" checked>
+                <label class="form-check-label" for="colCost">Último Costo</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="colExpiry" checked>
+                <label class="form-check-label" for="colExpiry">Caducidad</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="colFav" checked>
+                <label class="form-check-label" for="colFav">Favorito</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="colVis" checked>
+                <label class="form-check-label" for="colVis">Visibilidad</label>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      <!-- Contador de productos -->
-      <div class="products-info">
-        Mostrando <span id="visibleCount">{{ productos|length }}</span> de <span id="totalCount">{{ total_productos if total_productos is defined else productos|length }}</span> productos
-      </div>
-    </div>
-
-    <!-- Filtro por categoría -->
-    <div class="col-md-2">
-      <select id="categoryFilter" class="filter-select w-100" style="font-size: 1rem; height: 52px; padding: 12px 30px 12px 15px;">
-        <option value="">Todas las categorías</option>
-        {% for cat_name, cat_color in [
-            ("abarrotes secos", "#FFA500"),
-            ("enlatados y conservas", "#DAA520"),
-            ("botanas, dulces y snacks", "#FF69B4"),
-            ("bebidas no alcohólicas", "#1E90FF"),
-            ("bebidas alcohólicas", "#800080"),
-            ("panadería y repostería", "#D2B48C"),
-            ("lácteos y huevos", "#F5DEB3"),
-            ("carnes frías y embutidos", "#B22222"),
-            ("congelados y refrigerados", "#00CED1"),
-            ("frutas y verduras frescas", "#32CD32"),
-            ("productos de limpieza y hogar", "#87CEFA"),
-            ("cuidado personal e higiene", "#FFC0CB"),
-            ("medicamentos de mostrador (otc)", "#FF6347"),
-            ("productos para bebés", "#FFB6C1"),
-            ("productos para mascotas", "#8FBC8F"),
-            ("artículos de papelería", "#9370DB"),
-            ("ferretería básica", "#708090"),
-            ("artesanías y manualidades", "#DDA0DD"),
-            ("productos a granel", "#BDB76B"),
-            ("productos orgánicos", "#6B8E23"),
-            ("productos gourmet", "#CD853F"),
-            ("suplementos alimenticios", "#DA70D6"),
-            ("otros (miscelánea)", "#A9A9A9")
-        ] %}
-          <option value="{{ cat_name }}" data-color="{{ cat_color }}">
-            {{ cat_name|title }}
-          </option>
-        {% endfor %}
-      </select>
-    </div>
-    
-    <!-- Espaciador -->
-    <div class="col-md-1"></div>
-    
-    <!-- Control de columnas -->
-    <div class="col-md-2">
-      <div class="btn-columns position-relative w-100">
-        <button class="action-button w-100" id="columnToggleBtn">
-          <i class="fas fa-columns"></i>
-          Columnas
-        </button>
-        <div class="dropdown-menu" id="columnDropdown" style="position: absolute; top: 100%; right: 0; width: 250px; background: white; border: 1px solid #dee2e6; border-radius: 8px; box-shadow: 0 3px 10px rgba(0,0,0,0.1); padding: 10px; z-index: 1000; display: none;">
-          <div class="px-3 py-2">
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" id="colImage" checked>
-              <label class="form-check-label" for="colImage">Foto</label>
-            </div>
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" id="colProduct" checked>
-              <label class="form-check-label" for="colProduct">Producto</label>
-            </div>
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" id="colCategory" checked>
-              <label class="form-check-label" for="colCategory">Categoría</label>
-            </div>
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" id="colStock" checked>
-              <label class="form-check-label" for="colStock">Stock</label>
-            </div>
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" id="colPrice" checked>
-              <label class="form-check-label" for="colPrice">Precio</label>
-            </div>
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" id="colCost" checked>
-              <label class="form-check-label" for="colCost">Último Costo</label>
-            </div>
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" id="colExpiry" checked>
-              <label class="form-check-label" for="colExpiry">Caducidad</label>
-            </div>
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" id="colFav" checked>
-              <label class="form-check-label" for="colFav">Favorito</label>
-            </div>
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" id="colVis" checked>
-              <label class="form-check-label" for="colVis">Visibilidad</label>
-            </div>
+      
+      <!-- Acciones masivas -->
+      <div class="col-lg-4 col-md-12 mb-3">
+        <div class="btn-actions position-relative w-100">
+          <button class="action-button w-100" id="bulkActionsBtn">
+            <i class="fas fa-cogs"></i>
+            Acciones masivas
+          </button>
+          <div class="dropdown-menu" id="actionsDropdown">
+            <a class="dropdown-item" href="#" id="bulkChangeCategory">
+              <i class="fas fa-tag"></i> Cambiar categoría
+            </a>
+            <a class="dropdown-item" href="#" id="bulkUpdatePrices">
+              <i class="fas fa-dollar-sign"></i> Modificar precios
+            </a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="#" id="bulkToggleVisibility">
+              <i class="fas fa-eye"></i> Cambiar visibilidad
+            </a>
+            <a class="dropdown-item" href="#" id="bulkAddToFavorites">
+              <i class="fas fa-heart"></i> Marcar como favoritos
+            </a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="#" id="bulkPrintLabels">
+              <i class="fas fa-print"></i> Imprimir etiquetas
+            </a>
           </div>
         </div>
       </div>
     </div>
     
-    <!-- Acciones masivas -->
-    <div class="col-md-3">
-      <div class="btn-actions position-relative w-100">
-        <button class="action-button w-100" id="bulkActionsBtn">
-          <i class="fas fa-cogs"></i>
-          Acciones masivas
-        </button>
-        <div class="dropdown-menu" id="actionsDropdown" style="position: absolute; top: 100%; right: 0; width: 250px; background: white; border: 1px solid #dee2e6; border-radius: 8px; box-shadow: 0 3px 10px rgba(0,0,0,0.1); padding: 10px; z-index: 1000; display: none;">
-          <a class="dropdown-item" href="#" id="bulkChangeCategory">
-            <i class="fas fa-tag"></i> Cambiar categoría
-          </a>
-          <a class="dropdown-item" href="#" id="bulkUpdatePrices">
-            <i class="fas fa-dollar-sign"></i> Modificar precios
-          </a>
-          <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="#" id="bulkToggleVisibility">
-            <i class="fas fa-eye"></i> Cambiar visibilidad
-          </a>
-          <a class="dropdown-item" href="#" id="bulkAddToFavorites">
-            <i class="fas fa-heart"></i> Marcar como favoritos
-          </a>
-          <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="#" id="bulkPrintLabels">
-            <i class="fas fa-print"></i> Imprimir etiquetas
-          </a>
+    <!-- Barra de búsqueda - ADAPTADA DE AJUSTE_STOCK -->
+    <div class="row">
+      <div class="col-12">
+        <div class="search-container">
+          <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Buscar por nombre, código o categoría..." value="{{ termino_busqueda if termino_busqueda else '' }}">
+          </div>
+          <div class="search-actions">
+            <!-- Filtro solo favoritos -->
+            <div class="form-heart-container" id="favoritosContainer">
+              <input class="form-heart-check-input" type="checkbox" id="favoritosCheck">
+              <span class="heart-icon" id="heartIcon">&#9825;</span>
+              <span style="font-size: 0.95rem; font-weight: 500;">Solo favoritos</span>
+            </div>
+            <!-- Botón de escaneo con pistola de código de barras -->
+            <button class="icon-btn" id="scanButton" title="Escanear con pistola">
+              <img src="{{ url_for('static', filename='img/3.png') }}" alt="Escanear con Lector" style="width: 24px; height: 24px;">
+            </button>
+            <!-- Botón de escaneo con cámara -->
+            <button class="icon-btn" id="cameraButton" title="Escanear con cámara">
+              <img src="{{ url_for('static', filename='img/4.png') }}" alt="Escanear con Cámara" style="width: 24px; height: 24px;">
+            </button>
+          </div>
+        </div>
+        <!-- Contador de productos -->
+        <div class="products-info">
+          Mostrando <span id="visibleCount">{{ productos|length }}</span> de <span id="totalCount">{{ total_productos if total_productos is defined else productos|length }}</span> productos
         </div>
       </div>
     </div>
@@ -1304,7 +1446,7 @@
       <thead>
         <tr>
           <th style="width: 90px;" class="column-image">FOTO</th>
-          <th class="text-start column-product">PRODUCTO</th>
+          <th class="text-start column-product" style="width: 300px;">PRODUCTO</th>
           <th style="width: 80px;" class="column-category">CAT</th>
           <th style="width: 110px;" class="column-stock">STOCK<br>UNIDADES</th>
           <th style="width: 110px;" class="column-price">PRECIO<br>POR UNIDAD</th>
@@ -1346,10 +1488,10 @@
             </div>
           </td>
           
-          <!-- Información del producto -->
+          <!-- Información del producto - MODIFICADO PARA EVITAR DESBORDAMIENTO -->
           <td class="text-start column-product">
             <div class="product-info">
-              <div class="product-name">{{ p.nombre }}</div>
+              <div class="product-name" title="{{ p.nombre }}">{{ p.nombre }}</div>
               <div class="product-meta">
                 <div class="product-sku">
                   <span class="meta-label">SKU:</span>
@@ -1455,6 +1597,16 @@
         {% endfor %}
       </tbody>
     </table>
+    
+    <!-- Mensaje de no resultados ADAPTADO DE AJUSTE STOCK - AHORA DENTRO DEL CONTENEDOR DE LA TABLA -->
+    <div id="noResultsMessage">
+      <i class="fas fa-search mb-3"></i>
+      <h4>No se encontraron productos</h4>
+      <p>Intenta modificar los filtros o la búsqueda</p>
+      <button id="resetFilters">
+        Restablecer
+      </button>
+    </div>
   </div>
   
   <!-- Paginación -->
@@ -1475,8 +1627,8 @@
       <i class="fas fa-box-open"></i>
     </div>
     <p class="empty-message">No hay productos que coincidan con los criterios seleccionados.</p>
-    <a href="{{ url_for('nuevo_producto') }}" class="button-link">
-      Agregar producto
+    <a href="{{ url_for('reabastecer_listado') }}" class="button-link">
+      Reabastecer Productos
     </a>
   </div>
   {% endif %}
@@ -1568,6 +1720,12 @@
   </div>
 </div>
 
+<!-- Modal para escáner de cámara -->
+<div id="modalEscaneoCamara" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 9999;">
+  <button id="closeScanner" style="position: absolute; top: 20px; right: 20px; width: 40px; height: 40px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #333; border: none; cursor: pointer; z-index: 10000;">&times;</button>
+  <div id="videoContainer" style="width: 100%; max-width: 640px; height: 480px; margin: 50px auto; position: relative; border: 3px solid var(--accent); border-radius: 12px; overflow: hidden;"></div>
+</div>
+
 <!-- Contenedor para toasts de notificación -->
 <div class="toast-container" id="toastContainer"></div>
 
@@ -1608,6 +1766,14 @@
           newState === '1' ? 'Producto marcado como favorito' : 'Producto desmarcado como favorito',
           newState === '1' ? 'success' : 'info'
         );
+        
+        // Si el filtro de favoritos está activo, actualizar visualización
+        if (document.getElementById('favoritosCheck') && 
+            document.getElementById('favoritosCheck').checked && 
+            newState === '0') {
+          // Volver a aplicar los filtros para ocultar el producto si ya no es favorito
+          applyFiltersAndPagination();
+        }
       } else {
         // Si hay error, revertir cambios en UI
         const originalState = isFavorite ? '1' : '0';
@@ -1788,8 +1954,8 @@
     
     // Actualizar valores mostrados
     costValues.forEach(value => {
-      const lastCost = parseFloat(value.getAttribute('data-last-cost'));
-      const avgCost = parseFloat(value.getAttribute('data-avg-cost'));
+      const lastCost = parseFloat(value.getAttribute('data-last-cost') || 0);
+      const avgCost = parseFloat(value.getAttribute('data-avg-cost') || 0);
       const showCost = type === 'last' ? lastCost : avgCost;
       
       // Formatear siempre con 2 decimales
@@ -1970,61 +2136,37 @@
       });
     });
     
-    // Búsqueda en tiempo real
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput) {
-      searchInput.addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase().trim();
-        const tableRows = document.querySelectorAll('#productsTable tbody tr');
-        
-        tableRows.forEach(row => {
-          const productName = row.querySelector('.product-name')?.innerText.toLowerCase() || '';
-          const productSku = row.querySelector('.product-sku')?.innerText.toLowerCase() || '';
-          const productBrand = row.querySelector('.product-brand')?.innerText.toLowerCase() || '';
-          
-          if (productName.includes(searchTerm) || productSku.includes(searchTerm) || productBrand.includes(searchTerm)) {
-            row.style.display = '';
-          } else {
-            row.style.display = 'none';
-          }
-        });
-        
-        // Actualizar contador de productos visibles
-        updateProductCounter();
-      });
-    }
+    // Inicializar el filtro de favoritos
+    const heartIcon = document.getElementById('heartIcon');
+    const favoritosContainer = document.getElementById('favoritosContainer');
+    const favoritosCheck = document.getElementById('favoritosCheck');
     
-    // Filtro por categoría
-    const categoryFilter = document.getElementById('categoryFilter');
-    if (categoryFilter) {
-      categoryFilter.addEventListener('change', function() {
-        const selectedCategory = this.value.toLowerCase();
-        const tableRows = document.querySelectorAll('#productsTable tbody tr');
-        
-        tableRows.forEach(row => {
-          const rowCategory = row.getAttribute('data-category') || '';
-          
-          if (!selectedCategory || rowCategory === selectedCategory) {
-            row.style.display = '';
-          } else {
-            row.style.display = 'none';
-          }
-        });
-        
-        // Actualizar contador de productos visibles
-        updateProductCounter();
-      });
-    }
-    
-    // Actualizar contador de productos
-    function updateProductCounter() {
-      const visibleRows = document.querySelectorAll('#productsTable tbody tr:not([style*="display: none"])');
-      const totalProducts = {{ total_productos if total_productos is defined else 'document.querySelectorAll("#productsTable tbody tr").length' }};
-      const productsInfo = document.querySelector('.products-info');
-      
-      if (productsInfo) {
-        productsInfo.textContent = `Mostrando ${visibleRows.length} de ${totalProducts} productos`;
+    if (favoritosCheck && heartIcon && favoritosContainer) {
+      // Función para actualizar el estado visual del botón
+      function updateFavoritosButtonState() {
+        if (favoritosCheck.checked) {
+          heartIcon.innerHTML = '&#9829;'; // Corazón lleno
+          heartIcon.classList.add('active');
+          favoritosContainer.classList.add('active');
+        } else {
+          heartIcon.innerHTML = '&#9825;'; // Corazón vacío
+          heartIcon.classList.remove('active');
+          favoritosContainer.classList.remove('active');
+        }
       }
+      
+      // Evento de clic en el contenedor completo
+      favoritosContainer.addEventListener('click', function() {
+        favoritosCheck.checked = !favoritosCheck.checked;
+        updateFavoritosButtonState();
+        // Aplicar filtro cuando cambie
+        applyFiltersAndPagination();
+      });
+      
+      // Evento de cambio en el checkbox
+      favoritosCheck.addEventListener('change', function() {
+        updateFavoritosButtonState();
+      });
     }
     
     // Inicializar modal de confirmación si existe
@@ -2038,28 +2180,390 @@
     }
     
     // Añadir colores a las opciones del selector de categorías
-    const options = Array.from(categoryFilter.options);
-    categoryFilter.innerHTML = '';
-    
-    options.forEach(option => {
-      const color = option.getAttribute('data-color');
-      const newOption = document.createElement('option');
-      newOption.value = option.value;
-      newOption.setAttribute('data-color', color);
+    const categoryFilter = document.getElementById('categoryFilter');
+    if (categoryFilter) {
+      const options = Array.from(categoryFilter.options);
+      categoryFilter.innerHTML = '';
       
-      if (!option.value) {
+      options.forEach(option => {
+        const color = option.getAttribute('data-color');
+        const newOption = document.createElement('option');
+        newOption.value = option.value;
+        newOption.setAttribute('data-color', color);
+        
+        if (!option.value) {
+          newOption.textContent = option.textContent;
+          categoryFilter.appendChild(newOption);
+          return;
+        }
+        
+        newOption.style.backgroundColor = color ? color + '10' : '';
+        newOption.style.borderLeft = color ? '8px solid ' + color : '';
+        newOption.style.paddingLeft = color ? '8px' : '';
         newOption.textContent = option.textContent;
+        
         categoryFilter.appendChild(newOption);
+      });
+      
+      // Evento de cambio en el filtro de categoría
+      categoryFilter.addEventListener('change', function() {
+        currentPage = 1; // Asegurarse de volver a la primera página
+        selectedCategory = this.value;
+        applyFiltersAndPagination();
+      });
+    }
+    
+    // Búsqueda en tiempo real
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+      searchInput.addEventListener('input', function() {
+        currentPage = 1; // Resetear a la primera página al cambiar el filtro
+        applyFiltersAndPagination();
+      });
+    }
+    
+    // Botón para resetear filtros
+    const resetFiltersBtn = document.getElementById('resetFilters');
+    if (resetFiltersBtn) {
+      resetFiltersBtn.addEventListener('click', function() {
+        if (searchInput) searchInput.value = '';
+        if (categoryFilter) categoryFilter.value = '';
+        if (favoritosCheck) {
+          favoritosCheck.checked = false;
+          updateFavoritosButtonState();
+        }
+        currentPage = 1;
+        selectedCategory = '';
+        applyFiltersAndPagination();
+      });
+    }
+    
+    // Inicializar escáner de cámara
+    function iniciarEscaneoQuagga() {
+      const modal = document.getElementById("modalEscaneoCamara");
+      if (!modal) {
+        console.error("No se encontró el elemento con id='modalEscaneoCamara'.");
+        return;
+      }
+      modal.style.display = "block";
+      
+      const videoContainer = document.getElementById("videoContainer");
+      if (!videoContainer) {
+        console.error("No se encontró el elemento con id='videoContainer'.");
         return;
       }
       
-      newOption.style.backgroundColor = color ? color + '10' : '';
-      newOption.style.borderLeft = color ? '8px solid ' + color : '';
-      newOption.style.paddingLeft = color ? '8px' : '';
-      newOption.textContent = option.textContent;
+      // Limpiar el contenedor para evitar problemas con inicializaciones previas
+      videoContainer.innerHTML = '';
       
-      categoryFilter.appendChild(newOption);
-    });
+      // Asegurarse de que Quagga está definido
+      if (typeof Quagga === 'undefined') {
+        videoContainer.innerHTML = `
+          <div style="color: white; text-align: center; padding: 20px;">
+            <p>Error: La biblioteca de escáner no está disponible.</p>
+            <p>Intente recargar la página.</p>
+          </div>
+        `;
+        return;
+      }
+      
+      Quagga.init({
+        inputStream: {
+          name: "Live",
+          type: "LiveStream",
+          target: videoContainer,
+          constraints: {
+            width: {min: 640},
+            height: {min: 480},
+            facingMode: "environment", // cámara trasera en móviles
+            aspectRatio: {min: 1, max: 2}
+          }
+        },
+        locator: {
+          patchSize: "medium",
+          halfSample: true
+        },
+        numOfWorkers: 2,
+        frequency: 10,
+        decoder: {
+          readers: [
+            "code_128_reader",
+            "ean_reader",
+            "ean_8_reader",
+            "code_39_reader",
+            "code_39_vin_reader",
+            "upc_reader",
+            "upc_e_reader"
+          ]
+        }
+      }, function(err) {
+        if (err) {
+          console.error("Error al iniciar Quagga:", err);
+          videoContainer.innerHTML = `
+            <div style="color: white; text-align: center; padding: 20px;">
+              <p>Error al acceder a la cámara: ${err.message || "Desconocido"}</p>
+              <p>Verifica que has dado permisos de cámara y refresca la página.</p>
+            </div>
+          `;
+          return;
+        }
+        Quagga.start();
+      });
+      
+      // Callback cuando Quagga detecta un código de barras
+      Quagga.onDetected(function(result) {
+        if (!result || !result.codeResult) return;
+        
+        const codigoDetectado = result.codeResult.code;
+        console.log("Código detectado:", codigoDetectado);
+        
+        // Detén Quagga y cierra el modal
+        Quagga.stop();
+        modal.style.display = "none";
+        
+        // Asigna el código detectado a la búsqueda y activa la búsqueda
+        if (searchInput) {
+          searchInput.value = codigoDetectado;
+          
+          // Disparar el evento de input para activar la búsqueda
+          const inputEvent = new Event('input', { bubbles: true });
+          searchInput.dispatchEvent(inputEvent);
+        }
+      });
+      
+      // Cerrar el modal con el botón
+      const closeScanner = document.getElementById("closeScanner");
+      if (closeScanner) {
+        closeScanner.addEventListener('click', function() {
+          Quagga.stop();
+          modal.style.display = "none";
+        });
+      }
+    }
+    
+    // Enlazar botón de cámara
+    const cameraButton = document.getElementById('cameraButton');
+    if (cameraButton) {
+      cameraButton.addEventListener('click', iniciarEscaneoQuagga);
+    }
+    
+    // Variables globales para paginación
+    const PRODUCTS_PER_PAGE = 30; // Cambiado a 30 productos por página
+    const productRows = document.querySelectorAll('#productsTable tbody tr');
+    const totalProducts = productRows.length;
+    let currentPage = 1;
+    let selectedCategory = '';
+    let filteredProducts = Array.from(productRows);
+    
+    // Función principal para aplicar filtros y paginación
+    window.applyFiltersAndPagination = function() {
+      const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+      const categoryFilterValue = categoryFilter ? categoryFilter.value.toLowerCase() : '';
+      const onlyFavorites = favoritosCheck ? favoritosCheck.checked : false;
+      
+      // Filtrar productos según el término de búsqueda y otros filtros
+      filteredProducts = Array.from(productRows).filter(row => {
+        // Filtrar por texto de búsqueda
+        const productName = row.querySelector('.product-name')?.innerText.toLowerCase() || '';
+        const productSku = row.querySelector('.product-sku')?.innerText.toLowerCase() || '';
+        const productBrand = row.querySelector('.product-brand')?.innerText.toLowerCase() || '';
+        const matchesSearch = !searchTerm || 
+                             productName.includes(searchTerm) || 
+                             productSku.includes(searchTerm) || 
+                             productBrand.includes(searchTerm);
+        
+        // Filtrar por categoría
+        const productCategory = row.getAttribute('data-category') || '';
+        const matchesCategory = !categoryFilterValue || productCategory === categoryFilterValue;
+        
+        // Filtrar por favoritos
+        const isFavorite = row.querySelector('.heart-icon')?.classList.contains('active') || false;
+        const matchesFavorites = !onlyFavorites || isFavorite;
+        
+        return matchesSearch && matchesCategory && matchesFavorites;
+      });
+      
+      // Actualizar contador de productos visibles
+      const visibleCountSpan = document.getElementById('visibleCount');
+      if (visibleCountSpan) {
+        visibleCountSpan.textContent = filteredProducts.length;
+      }
+      
+      // Mostrar u ocultar mensaje de no resultados
+      const noResultsMessage = document.getElementById('noResultsMessage');
+      if (noResultsMessage) {
+        if (filteredProducts.length === 0) {
+          noResultsMessage.classList.add('visible');
+          // Ocultar tabla cuando no hay resultados
+          const productsTable = document.querySelector('#productsTable');
+          if (productsTable) {
+            productsTable.style.display = 'none';
+          }
+        } else {
+          noResultsMessage.classList.remove('visible');
+          // Mostrar tabla cuando hay resultados
+          const productsTable = document.querySelector('#productsTable');
+          if (productsTable) {
+            productsTable.style.display = '';
+          }
+        }
+      }
+      
+      // Actualizar paginación
+      updatePagination();
+      
+      // Mostrar productos de la página actual
+      showCurrentPage();
+    };
+    
+    // Función para actualizar la paginación
+    function updatePagination() {
+      const totalFilteredProducts = filteredProducts.length;
+      const totalPages = Math.ceil(totalFilteredProducts / PRODUCTS_PER_PAGE);
+      
+      // Asegurar que la página actual es válida
+      if (currentPage > totalPages) {
+        currentPage = totalPages > 0 ? totalPages : 1;
+      }
+      
+      // Actualizar controles de paginación
+      const paginationControl = document.getElementById('paginationControl');
+      if (paginationControl) {
+        paginationControl.innerHTML = '';
+        
+        // Botón "Anterior"
+        const prevLi = document.createElement('li');
+        prevLi.className = 'page-item' + (currentPage === 1 ? ' disabled' : '');
+        const prevLink = document.createElement('a');
+        prevLink.className = 'page-link';
+        prevLink.href = '#';
+        prevLink.textContent = 'Anterior';
+        prevLink.style.display = 'flex';
+        prevLink.style.alignItems = 'center';
+        prevLink.style.justifyContent = 'center';
+        prevLink.style.padding = '0.5rem 1rem';
+        prevLink.style.borderRadius = '980px';
+        prevLink.style.border = '1px solid rgba(0, 0, 0, 0.1)';
+        prevLink.style.color = '#1d1d1f';
+        prevLink.style.textDecoration = 'none';
+        prevLink.style.transition = 'all 0.2s ease';
+        prevLink.style.minWidth = '40px';
+        prevLink.style.height = '40px';
+        prevLink.style.fontSize = '0.95rem';
+        
+        if (currentPage > 1) {
+          prevLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            currentPage--;
+            applyFiltersAndPagination();
+          });
+        }
+        prevLi.appendChild(prevLink);
+        paginationControl.appendChild(prevLi);
+        
+        // Números de página
+        let startPage = Math.max(1, currentPage - 2);
+        let endPage = Math.min(totalPages, startPage + 4);
+        if (endPage - startPage < 4 && startPage > 1) {
+          startPage = Math.max(1, endPage - 4);
+        }
+        
+        for (let i = startPage; i <= endPage; i++) {
+          const pageLi = document.createElement('li');
+          pageLi.className = 'page-item' + (i === currentPage ? ' active' : '');
+          const pageLink = document.createElement('a');
+          pageLink.className = 'page-link';
+          pageLink.href = '#';
+          pageLink.textContent = i;
+          pageLink.style.display = 'flex';
+          pageLink.style.alignItems = 'center';
+          pageLink.style.justifyContent = 'center';
+          pageLink.style.padding = '0.5rem 1rem';
+          pageLink.style.borderRadius = '980px';
+          pageLink.style.border = '1px solid rgba(0, 0, 0, 0.1)';
+          pageLink.style.color = i === currentPage ? 'white' : '#1d1d1f';
+          pageLink.style.backgroundColor = i === currentPage ? '#e52e2e' : '';
+          pageLink.style.borderColor = i === currentPage ? '#e52e2e' : '';
+          pageLink.style.textDecoration = 'none';
+          pageLink.style.transition = 'all 0.2s ease';
+          pageLink.style.minWidth = '40px';
+          pageLink.style.height = '40px';
+          pageLink.style.fontSize = '0.95rem';
+          
+          pageLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            currentPage = i;
+            applyFiltersAndPagination();
+          });
+          pageLi.appendChild(pageLink);
+          paginationControl.appendChild(pageLi);
+        }
+        
+        // Botón "Siguiente"
+        const nextLi = document.createElement('li');
+        nextLi.className = 'page-item' + (currentPage === totalPages || totalPages === 0 ? ' disabled' : '');
+        const nextLink = document.createElement('a');
+        nextLink.className = 'page-link';
+        nextLink.href = '#';
+        nextLink.textContent = 'Siguiente';
+        nextLink.style.display = 'flex';
+        nextLink.style.alignItems = 'center';
+        nextLink.style.justifyContent = 'center';
+        nextLink.style.padding = '0.5rem 1rem';
+        nextLink.style.borderRadius = '980px';
+        nextLink.style.border = '1px solid rgba(0, 0, 0, 0.1)';
+        nextLink.style.color = '#1d1d1f';
+        nextLink.style.textDecoration = 'none';
+        nextLink.style.transition = 'all 0.2s ease';
+        nextLink.style.minWidth = '40px';
+        nextLink.style.height = '40px';
+        nextLink.style.fontSize = '0.95rem';
+        
+        if (currentPage < totalPages) {
+          nextLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            currentPage++;
+            applyFiltersAndPagination();
+          });
+        }
+        nextLi.appendChild(nextLink);
+        paginationControl.appendChild(nextLi);
+        
+        // Actualizar información de paginación
+        const paginationInfo = document.getElementById('paginationInfo');
+        if (paginationInfo) {
+          if (totalPages <= 1) {
+            paginationInfo.textContent = `Mostrando ${totalFilteredProducts} productos`;
+          } else {
+            const productsOnThisPage = Math.min(PRODUCTS_PER_PAGE, 
+              (currentPage < totalPages) ? PRODUCTS_PER_PAGE : totalFilteredProducts - ((totalPages - 1) * PRODUCTS_PER_PAGE));
+            paginationInfo.textContent = `Mostrando ${productsOnThisPage} productos por página`;
+          }
+        }
+        
+        // Ocultar paginación si no hay productos o solo hay una página
+        paginationControl.style.display = totalPages <= 1 ? 'none' : 'flex';
+      }
+    }
+    
+    // Función para mostrar los productos de la página actual
+    function showCurrentPage() {
+      const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
+      const endIndex = Math.min(startIndex + PRODUCTS_PER_PAGE, filteredProducts.length);
+      
+      // Ocultar todos los productos
+      productRows.forEach(row => {
+        row.style.display = 'none';
+      });
+      
+      // Mostrar solo los productos de la página actual
+      for (let i = startIndex; i < endIndex; i++) {
+        filteredProducts[i].style.display = '';
+      }
+    }
+    
+    // Inicializar visualización
+    applyFiltersAndPagination();
   });
   
   // Función para confirmar eliminación
@@ -2152,413 +2656,6 @@
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
       closeActionsModal();
-    }
-  });
-</script>
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // Variables globales para paginación
-    const PRODUCTS_PER_PAGE = 30; // Cambiado a 30 productos por página
-    const productRows = document.querySelectorAll('#productsTable tbody tr');
-    const totalProducts = productRows.length;
-    let currentPage = 1;
-    let filteredProducts = Array.from(productRows);
-    
-    // Referencias a elementos DOM
-    const searchInput = document.getElementById('searchInput');
-    const paginationControl = document.getElementById('paginationControl');
-    const paginationInfo = document.getElementById('paginationInfo');
-    const visibleCountSpan = document.getElementById('visibleCount');
-    const totalCountSpan = document.getElementById('totalCount');
-    const scanButton = document.getElementById('scanButton');
-    const cameraButton = document.getElementById('cameraButton');
-    
-    // Inicializar el escáner de códigos de barras con pistola
-    if (window.initBarcodeScanner) {
-      window.initBarcodeScanner('#scanButton', '#searchInput', {
-        threshold: 150,
-        timeoutDuration: 2000
-      });
-    }
-    
-    // Observador del valor de searchInput para activar búsqueda automáticamente al escanear
-    let prevInputValue = '';
-    const checkForScannerInput = setInterval(() => {
-      if (searchInput && searchInput.value !== prevInputValue) {
-        prevInputValue = searchInput.value;
-        // Disparar evento de input para activar la búsqueda
-        const inputEvent = new Event('input', { bubbles: true });
-        searchInput.dispatchEvent(inputEvent);
-      }
-    }, 100);  // revisar cada 100ms
-    
-    // Añadir evento de clic al botón de cámara
-    if (cameraButton) {
-      cameraButton.addEventListener('click', function() {
-        iniciarEscaneoQuagga();
-      });
-    }
-
-    // Implementación específica para la página de productos
-    function iniciarEscaneoQuaggaProductos() {
-      const modal = document.getElementById("modalEscaneoCamara");
-      if (!modal) {
-        console.error("No se encontró el elemento con id='modalEscaneoCamara'.");
-        return;
-      }
-      modal.style.display = "block";
-
-      const videoContainer = document.getElementById("videoContainer");
-      if (!videoContainer) {
-        console.error("No se encontró el elemento con id='videoContainer'.");
-        return;
-      }
-
-      // Limpiar el contenedor para evitar problemas con inicializaciones previas
-      videoContainer.innerHTML = '';
-
-      console.log("Iniciando configuración de Quagga para productos...");
-
-      Quagga.init(
-        {
-          inputStream: {
-            name: "Live",
-            type: "LiveStream",
-            target: videoContainer,
-            constraints: {
-              width: {min: 640},
-              height: {min: 480},
-              facingMode: "environment", // cámara trasera en móviles
-              aspectRatio: {min: 1, max: 2}
-            }
-          },
-          locator: {
-            patchSize: "medium",
-            halfSample: true
-          },
-          numOfWorkers: 2,
-          frequency: 10,
-          decoder: {
-            readers: [
-              "code_128_reader",
-              "ean_reader",
-              "ean_8_reader",
-              "code_39_reader",
-              "code_39_vin_reader",
-              "upc_reader",
-              "upc_e_reader"
-            ]
-          }
-        },
-        function (err) {
-          if (err) {
-            console.error("Error al iniciar Quagga:", err);
-            videoContainer.innerHTML = `<div style="color: white; text-align: center; padding: 20px;">
-              <p>Error al acceder a la cámara: ${err.message || "Desconocido"}</p>
-              <p>Verifica que has dado permisos de cámara y refresca la página.</p>
-            </div>`;
-            return;
-          }
-          console.log("Quagga inicializado correctamente para productos");
-          Quagga.start();
-        }
-      );
-
-      // Callback cuando Quagga detecta un código de barras
-      Quagga.onDetected(function (result) {
-        if (!result || !result.codeResult) {
-          return;
-        }
-        const codigoDetectado = result.codeResult.code;
-        console.log("Código detectado en productos:", codigoDetectado);
-
-        // Detén Quagga y cierra el modal
-        Quagga.stop();
-        modal.style.display = "none";
-
-        // Asigna el código detectado a la búsqueda y activa la búsqueda
-        const searchInput = document.getElementById("searchInput");
-    if (searchInput) {
-      searchInput.value = codigoDetectado;
-      
-      // IMPORTANTE: Disparar el evento de input para activar la búsqueda
-      const inputEvent = new Event('input', { bubbles: true });
-      searchInput.dispatchEvent(inputEvent);
-      
-      console.log("Búsqueda activada con código:", codigoDetectado);
-    }
-  });
-
-  // Cerrar el modal con el botón
-  const closeScanner = document.getElementById("closeScanner");
-  if (closeScanner) {
-    closeScanner.addEventListener('click', function() {
-      Quagga.stop();
-      modal.style.display = "none";
-    });
-  }
-}
-    
-    // Función principal para aplicar filtros y paginación
-    function applyFiltersAndPagination() {
-      const searchTerm = searchInput.value.toLowerCase();
-      
-      // Filtrar productos según el término de búsqueda
-      filteredProducts = Array.from(productRows).filter(row => {
-        const productName = row.querySelector('.product-name')?.innerText.toLowerCase() || '';
-        const productSku = row.querySelector('.product-sku')?.innerText.toLowerCase() || '';
-        const productBrand = row.querySelector('.product-brand')?.innerText.toLowerCase() || '';
-        
-        return productName.includes(searchTerm) || 
-               productSku.includes(searchTerm) || 
-               productBrand.includes(searchTerm);
-      });
-      
-      // Actualizar contador de productos visibles
-      if (visibleCountSpan) {
-        visibleCountSpan.textContent = filteredProducts.length;
-      }
-      
-      // Actualizar paginación
-      updatePagination();
-      
-      // Mostrar productos de la página actual
-      showCurrentPage();
-    }
-    
-    // Función para actualizar la paginación
-    function updatePagination() {
-      const totalFilteredProducts = filteredProducts.length;
-      const totalPages = Math.ceil(totalFilteredProducts / PRODUCTS_PER_PAGE);
-      
-      // Asegurar que la página actual es válida
-      if (currentPage > totalPages) {
-        currentPage = totalPages > 0 ? totalPages : 1;
-      }
-      
-      // Actualizar controles de paginación
-      paginationControl.innerHTML = '';
-      
-      // Botón "Anterior"
-      const prevLi = document.createElement('li');
-      prevLi.className = 'page-item' + (currentPage === 1 ? ' disabled' : '');
-      const prevLink = document.createElement('a');
-      prevLink.className = 'page-link';
-      prevLink.href = '#';
-      prevLink.textContent = 'Anterior';
-      prevLink.style.display = 'flex';
-      prevLink.style.alignItems = 'center';
-      prevLink.style.justifyContent = 'center';
-      prevLink.style.padding = '0.5rem 1rem';
-      prevLink.style.borderRadius = '980px';
-      prevLink.style.border = '1px solid rgba(0, 0, 0, 0.1)';
-      prevLink.style.color = '#1d1d1f';
-      prevLink.style.textDecoration = 'none';
-      prevLink.style.transition = 'all 0.2s ease';
-      prevLink.style.minWidth = '40px';
-      prevLink.style.height = '40px';
-      prevLink.style.fontSize = '0.95rem';
-      
-      if (currentPage > 1) {
-        prevLink.addEventListener('click', (e) => {
-          e.preventDefault();
-          currentPage--;
-          applyFiltersAndPagination();
-        });
-      }
-      prevLi.appendChild(prevLink);
-      paginationControl.appendChild(prevLi);
-      
-      // Números de página
-      let startPage = Math.max(1, currentPage - 2);
-      let endPage = Math.min(totalPages, startPage + 4);
-      if (endPage - startPage < 4 && startPage > 1) {
-        startPage = Math.max(1, endPage - 4);
-      }
-      
-      for (let i = startPage; i <= endPage; i++) {
-        const pageLi = document.createElement('li');
-        pageLi.className = 'page-item' + (i === currentPage ? ' active' : '');
-        const pageLink = document.createElement('a');
-        pageLink.className = 'page-link';
-        pageLink.href = '#';
-        pageLink.textContent = i;
-        pageLink.style.display = 'flex';
-        pageLink.style.alignItems = 'center';
-        pageLink.style.justifyContent = 'center';
-        pageLink.style.padding = '0.5rem 1rem';
-        pageLink.style.borderRadius = '980px';
-        pageLink.style.border = '1px solid rgba(0, 0, 0, 0.1)';
-        pageLink.style.color = i === currentPage ? 'white' : '#1d1d1f';
-        pageLink.style.backgroundColor = i === currentPage ? '#e52e2e' : '';
-        pageLink.style.borderColor = i === currentPage ? '#e52e2e' : '';
-        pageLink.style.textDecoration = 'none';
-        pageLink.style.transition = 'all 0.2s ease';
-        pageLink.style.minWidth = '40px';
-        pageLink.style.height = '40px';
-        pageLink.style.fontSize = '0.95rem';
-        
-        pageLink.addEventListener('click', (e) => {
-          e.preventDefault();
-          currentPage = i;
-          applyFiltersAndPagination();
-        });
-        pageLi.appendChild(pageLink);
-        paginationControl.appendChild(pageLi);
-      }
-      
-      // Botón "Siguiente"
-      const nextLi = document.createElement('li');
-      nextLi.className = 'page-item' + (currentPage === totalPages || totalPages === 0 ? ' disabled' : '');
-      const nextLink = document.createElement('a');
-      nextLink.className = 'page-link';
-      nextLink.href = '#';
-      nextLink.textContent = 'Siguiente';
-      nextLink.style.display = 'flex';
-      nextLink.style.alignItems = 'center';
-      nextLink.style.justifyContent = 'center';
-      nextLink.style.padding = '0.5rem 1rem';
-      nextLink.style.borderRadius = '980px';
-      nextLink.style.border = '1px solid rgba(0, 0, 0, 0.1)';
-      nextLink.style.color = '#1d1d1f';
-      nextLink.style.textDecoration = 'none';
-      nextLink.style.transition = 'all 0.2s ease';
-      nextLink.style.minWidth = '40px';
-      nextLink.style.height = '40px';
-      nextLink.style.fontSize = '0.95rem';
-      
-      if (currentPage < totalPages) {
-        nextLink.addEventListener('click', (e) => {
-          e.preventDefault();
-          currentPage++;
-          applyFiltersAndPagination();
-        });
-      }
-      nextLi.appendChild(nextLink);
-      paginationControl.appendChild(nextLi);
-      
-      // Actualizar información de paginación
-      if (totalPages <= 1) {
-        paginationInfo.textContent = `Mostrando ${totalFilteredProducts} productos`;
-      } else {
-        const productsOnThisPage = Math.min(PRODUCTS_PER_PAGE, 
-          (currentPage < totalPages) ? PRODUCTS_PER_PAGE : totalFilteredProducts - ((totalPages - 1) * PRODUCTS_PER_PAGE));
-        paginationInfo.textContent = `Mostrando ${productsOnThisPage} productos por página`;
-      }
-      
-      // Ocultar paginación si no hay productos o solo hay una página
-      paginationControl.style.display = totalPages <= 1 ? 'none' : 'flex';
-    }
-    
-    // Función para mostrar los productos de la página actual
-    function showCurrentPage() {
-      const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
-      const endIndex = Math.min(startIndex + PRODUCTS_PER_PAGE, filteredProducts.length);
-      
-      // Ocultar todos los productos
-      productRows.forEach(row => {
-        row.style.display = 'none';
-      });
-      
-      // Mostrar solo los productos de la página actual
-      for (let i = startIndex; i < endIndex; i++) {
-        filteredProducts[i].style.display = '';
-      }
-    }
-    
-    // Eventos de filtros
-    if (searchInput) {
-      searchInput.addEventListener('input', function() {
-        currentPage = 1; // Resetear a la primera página
-        applyFiltersAndPagination();
-      });
-    }
-    
-    // Inicializar visualización
-    applyFiltersAndPagination();
-  });
-</script>
-<!-- Asegurarse de que existe un elemento closeScanner -->
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const modal = document.getElementById("modalEscaneoCamara");
-    if (modal && !document.getElementById("closeScanner")) {
-      const closeBtn = document.createElement("button");
-      closeBtn.id = "closeScanner";
-      closeBtn.innerHTML = "&times;";
-      closeBtn.className = "scanner-close-btn";
-      closeBtn.onclick = function() {
-        if (window.Quagga) {
-          Quagga.stop();
-        }
-        modal.style.display = "none";
-      };
-      modal.appendChild(closeBtn);
-    }
-  });
-</script>
-<!-- Script para conectar el escáner Quagga con la búsqueda de productos -->
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // 1. Crear un input oculto con id código_barras_externo que el escáner busca por defecto
-    if (!document.getElementById('codigo_barras_externo')) {
-      const hiddenInput = document.createElement('input');
-      hiddenInput.type = 'hidden';
-      hiddenInput.id = 'codigo_barras_externo';
-      document.body.appendChild(hiddenInput);
-      
-      // 2. Observar cambios en el input oculto (que recibe el código del escáner)
-      const observer = new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
-          if (mutation.type === 'attributes' && mutation.attributeName === 'value') {
-            // 3. Cuando cambia, transferir el valor al searchInput y disparar búsqueda
-            const scannedCode = hiddenInput.value;
-            if (scannedCode && scannedCode.trim() !== '') {
-              console.log('Código escaneado detectado:', scannedCode);
-              const searchInput = document.getElementById('searchInput');
-              if (searchInput) {
-                searchInput.value = scannedCode;
-                // 4. Disparar evento para activar búsqueda
-                const event = new Event('input', { bubbles: true });
-                searchInput.dispatchEvent(event);
-                console.log('Búsqueda activada con código:', scannedCode);
-              }
-            }
-          }
-        });
-      });
-      
-      // 5. Configurar el observer para detectar cambios en valor
-      observer.observe(hiddenInput, { 
-        attributes: true, 
-        attributeFilter: ['value'] 
-      });
-      
-      // 6. Sobrescribir comportamiento original del Quagga existente
-      window.originalOnScannedBarcode = window.onScannedBarcode;
-      window.onScannedBarcode = function(code) {
-        // Asignar el código al input oculto
-        hiddenInput.value = code;
-        // Disparar evento de cambio de atributo manualmente
-        hiddenInput.setAttribute('value', code);
-        
-        // También llamar al handler original si existe
-        if (window.originalOnScannedBarcode) {
-          window.originalOnScannedBarcode(code);
-        }
-      };
-    }
-    
-    // 7. Conectar el botón de cámara con la función existente en base.html
-    const cameraButton = document.getElementById('cameraButton');
-    if (cameraButton) {
-      cameraButton.addEventListener('click', function() {
-        if (typeof iniciarEscaneoQuagga === 'function') {
-          iniciarEscaneoQuagga();
-        } else {
-          console.error('La función iniciarEscaneoQuagga no está disponible');
-        }
-      });
     }
   });
 </script>

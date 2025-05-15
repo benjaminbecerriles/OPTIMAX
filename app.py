@@ -51,6 +51,7 @@ SERPAPI_API_KEY = "84d269bfa51876a1a092ace371d89f7dc2500d8c5a61b420c08d96e5351f5
 from sqlalchemy import or_
 from datetime import datetime, date, timedelta
 
+
 # =========================================
 # NUEVO: Conjunto de Categorías con Emojis
 # =========================================
