@@ -18,6 +18,9 @@ from models.modelos_inventario import MovimientoInventario, LoteInventario, Lote
 # Crear un blueprint para las rutas de ajuste de stock
 ajuste_stock_bp = Blueprint('ajuste_stock', __name__)
 
+# Crear un blueprint adicional para las nuevas rutas
+new_ajuste_stock_bp = Blueprint('new_ajuste_stock', __name__)
+
 # Constantes
 UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 
                            'static', 'uploads')
@@ -151,9 +154,44 @@ def aplicar_salida_lotes(producto_id, cantidad, metodo='auto'):
     
     return lotes_afectados
 
+# Ruta de prueba para verificar que el blueprint nuevo funciona
+@new_ajuste_stock_bp.route('/test', methods=['GET'])
+def test_route():
+    """Ruta de prueba simple para verificar que el blueprint funciona."""
+    return "Esta es una ruta de prueba del nuevo blueprint. Si puedes ver este mensaje, el blueprint está funcionando."
+
 # Rutas
 @ajuste_stock_bp.route('/ajuste-inventario', methods=['GET'])
 def ajuste_stock():
+    """Vista principal de ajuste de inventario."""
+    # Verificar si el usuario está logueado
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    
+    empresa_id = session.get('user_id')
+    
+    # Obtener todos los productos aprobados de la empresa
+    productos = Producto.query.filter_by(
+        empresa_id=empresa_id, 
+        is_approved=True
+    ).order_by(desc(Producto.id)).all()
+    
+    # Obtener categorías únicas para el filtro
+    categorias = db.session.query(Producto.categoria).filter_by(
+        empresa_id=empresa_id,
+        is_approved=True
+    ).filter(Producto.categoria.isnot(None)).distinct().all()
+    
+    categorias_lista = [cat[0] for cat in categorias if cat[0]]
+    
+    return render_template(
+        'ajuste_stock.html',
+        productos=productos,
+        categorias=categorias_lista
+    )
+
+@new_ajuste_stock_bp.route('/new-ajuste-inventario', methods=['GET'])
+def new_ajuste_stock():
     """Vista principal de ajuste de inventario."""
     # Verificar si el usuario está logueado
     if not session.get('logged_in'):
@@ -452,6 +490,207 @@ def ajuste_entrada(producto_id):
         historial=historial
     )
 
+@new_ajuste_stock_bp.route('/new-ajuste-entrada/<int:producto_id>', methods=['GET', 'POST'])
+def new_ajuste_entrada(producto_id):
+    """Gestiona la entrada de mercancía de un producto."""
+    # Verificar si el usuario está logueado
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    
+    empresa_id = session.get('user_id')
+    
+    # Obtener el producto
+    producto = Producto.query.filter_by(
+        id=producto_id, 
+        empresa_id=empresa_id,
+        is_approved=True
+    ).first_or_404()
+    
+    # Buscar el lote de registro para este producto
+    lote_registro = LoteInventario.query.filter_by(
+        producto_id=producto_id,
+        numero_lote="Lote de Registro"
+    ).first()
+    
+    # Si no existe lote de registro, crearlo
+    if not lote_registro and producto.stock > 0:
+        # Crear lote de registro y movimiento inicial
+        try:
+            movimiento, lote = crear_lote_registro(
+                producto=producto,
+                cantidad=producto.stock,
+                costo=producto.costo,
+                fecha_caducidad=producto.fecha_caducidad if producto.has_caducidad else None,
+                usuario_id=empresa_id
+            )
+            db.session.commit()
+            lote_registro = lote
+            print(f"Lote de registro creado para producto {producto_id}")
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error al crear lote de registro: {str(e)}")
+    
+    # Obtener información de lotes y último movimiento
+    proximo_lote = obtener_proximo_numero_lote(producto_id)
+    
+    # Obtener el último lote (que podría ser el lote de registro si no hay otros)
+    ultimo_lote = LoteInventario.query.filter_by(
+        producto_id=producto_id
+    ).order_by(desc(LoteInventario.fecha_entrada)).first()
+    
+    # Obtener la última entrada (incluido el lote de registro)
+    ultima_entrada = MovimientoInventario.query.filter_by(
+        producto_id=producto_id,
+        tipo_movimiento='ENTRADA'
+    ).order_by(desc(MovimientoInventario.fecha_movimiento)).first()
+    
+    # Historial de movimientos recientes
+    historial = MovimientoInventario.query.filter_by(
+        producto_id=producto_id
+    ).order_by(desc(MovimientoInventario.fecha_movimiento)).limit(10).all()
+    
+    if request.method == 'POST':
+        try:
+            # Obtener datos del formulario
+            cantidad = float(request.form.get('cantidad', 1))
+            motivo = request.form.get('motivo', 'compra')
+            mantener_costo_anterior = request.form.get('mantener_costo_anterior') == 'on'
+            
+            # Determinar el costo unitario
+            if mantener_costo_anterior and ultima_entrada and ultima_entrada.costo_unitario:
+                costo_unitario = ultima_entrada.costo_unitario
+            else:
+                # MODIFICADO: Intenta obtener el valor del campo oculto primero
+                costo_unitario_real = request.form.get('costo_unitario_real')
+                if costo_unitario_real:
+                    costo_unitario = float(costo_unitario_real)
+                else:
+                    # Fallback al campo original
+                    costo_unitario = float(request.form.get('costo_unitario', producto.costo))
+            
+            actualizar_costo = request.form.get('actualizar_costo') == 'on'
+            notas = request.form.get('notas', '')
+            
+            # Procesar fecha de caducidad
+            fecha_caducidad = None
+            caducidad_activada = request.form.get('toggle_caducidad_estado') == 'ACTIVADO'
+            
+            if caducidad_activada:
+                caducidad_lapso = request.form.get('caducidad_lapso')
+                if caducidad_lapso:
+                    fecha_actual = datetime.now()
+                    if caducidad_lapso == '1 día':
+                        fecha_caducidad = fecha_actual + timedelta(days=1)
+                    elif caducidad_lapso == '3 días':
+                        fecha_caducidad = fecha_actual + timedelta(days=3)
+                    elif caducidad_lapso == '1 semana':
+                        fecha_caducidad = fecha_actual + timedelta(days=7)
+                    elif caducidad_lapso == '2 semanas':
+                        fecha_caducidad = fecha_actual + timedelta(days=14)
+                    elif caducidad_lapso == '1 mes':
+                        fecha_caducidad = fecha_actual + timedelta(days=30)
+                    elif caducidad_lapso == '3 meses':
+                        fecha_caducidad = fecha_actual + timedelta(days=90)
+                    elif caducidad_lapso == '6 meses':
+                        fecha_caducidad = fecha_actual + timedelta(days=180)
+                    elif caducidad_lapso == '1 año':
+                        fecha_caducidad = fecha_actual + timedelta(days=365)
+                    elif caducidad_lapso == '2 años':
+                        fecha_caducidad = fecha_actual + timedelta(days=730)
+                    elif caducidad_lapso == '3 años':
+                        fecha_caducidad = fecha_actual + timedelta(days=1460)  # 4 años (considerados como +3 años)
+                         
+                    # Extraer solo la fecha (sin hora) para evitar problemas de comparación
+                    fecha_caducidad = fecha_caducidad.date()
+                    print(f"DEBUG: Fecha de caducidad calculada: {fecha_caducidad} (tipo: {type(fecha_caducidad)})")
+                elif request.form.get('fecha_caducidad'):
+                    try:
+                        fecha_caducidad = datetime.strptime(
+                            request.form.get('fecha_caducidad'), '%Y-%m-%d'
+                        ).date() # Convertir a tipo date
+                        print(f"DEBUG: Fecha de caducidad manual: {fecha_caducidad}")
+                    except Exception as e:
+                        print(f"ERROR: No se pudo procesar la fecha manual: {e}")
+                        pass
+            
+            # Guardar comprobante si existe y si está activado
+            comprobante_filename = None
+            if request.form.get('toggle_comprobante_estado') == 'ACTIVADO' and 'comprobante' in request.files and request.files['comprobante'].filename:
+                file = request.files['comprobante']
+                if allowed_file(file.filename):
+                    filename = secure_filename(f"{uuid.uuid4().hex}_{file.filename}")
+                    if not os.path.exists(UPLOAD_FOLDER):
+                        os.makedirs(UPLOAD_FOLDER)
+                    file.save(os.path.join(UPLOAD_FOLDER, filename))
+                    comprobante_filename = filename
+            
+            # Validar datos
+            if cantidad <= 0:
+                flash('La cantidad debe ser mayor que cero.', 'danger')
+                return redirect(url_for('new_ajuste_stock.new_ajuste_entrada', producto_id=producto_id))
+            
+            # 1. Crear el movimiento de inventario
+            nuevo_movimiento = MovimientoInventario(
+                producto_id=producto_id,
+                tipo_movimiento='ENTRADA',
+                cantidad=cantidad,
+                motivo=motivo,
+                fecha_movimiento=datetime.now(),
+                costo_unitario=costo_unitario,
+                numero_lote=proximo_lote,
+                fecha_caducidad=fecha_caducidad,
+                notas=notas if request.form.get('toggle_notas_estado') == 'ACTIVADO' else None,
+                comprobante=comprobante_filename,
+                usuario_id=empresa_id
+            )
+            db.session.add(nuevo_movimiento)
+            
+            # 2. Crear o actualizar el lote
+            nuevo_lote = LoteInventario(
+                producto_id=producto_id,
+                numero_lote=proximo_lote,
+                costo_unitario=costo_unitario,
+                stock=cantidad,
+                fecha_entrada=datetime.now(),
+                fecha_caducidad=fecha_caducidad,
+                esta_activo=True
+            )
+            db.session.add(nuevo_lote)
+            
+            # 3. Actualizar stock del producto
+            stock_anterior = producto.stock
+            producto.stock += cantidad
+            
+            # 4. Actualizar costo general si se marcó la opción
+            if actualizar_costo:
+                producto.costo = costo_unitario
+            
+            # Guardar todos los cambios
+            db.session.commit()
+            
+            # Redireccionar a la página de confirmación
+            return redirect(url_for(
+                'new_ajuste_stock.new_ajuste_confirmacion',
+                movimiento_id=nuevo_movimiento.id,
+                tipo='entrada'
+            ))
+            
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al procesar la entrada: {str(e)}', 'danger')
+            return redirect(url_for('new_ajuste_stock.new_ajuste_entrada', producto_id=producto_id))
+    
+    # Renderizar la plantilla para GET
+    return render_template(
+        'new_ajuste_entrada.html',
+        producto=producto,
+        proximo_lote=proximo_lote,
+        ultimo_lote=ultimo_lote.numero_lote if ultimo_lote else None,
+        ultima_entrada=ultima_entrada,
+        costo_anterior=ultima_entrada.costo_unitario if ultima_entrada else producto.costo,
+        historial=historial
+    )
+
 @ajuste_stock_bp.route('/ajuste-salida/<int:producto_id>', methods=['GET', 'POST'])
 def ajuste_salida(producto_id):
     """Gestiona la salida de mercancía de un producto."""
@@ -577,6 +816,131 @@ def ajuste_salida(producto_id):
         historial=historial
     )
 
+@new_ajuste_stock_bp.route('/new-ajuste-salida/<int:producto_id>', methods=['GET', 'POST'])
+def new_ajuste_salida(producto_id):
+    """Gestiona la salida de mercancía de un producto."""
+    # Verificar si el usuario está logueado
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    
+    empresa_id = session.get('user_id')
+    
+    # Obtener el producto
+    producto = Producto.query.filter_by(
+        id=producto_id, 
+        empresa_id=empresa_id,
+        is_approved=True
+    ).first_or_404()
+    
+    # Verificar y crear lote de registro si no existe y hay stock
+    lote_registro = LoteInventario.query.filter_by(
+        producto_id=producto_id,
+        numero_lote="Lote de Registro"
+    ).first()
+    
+    if not lote_registro and producto.stock > 0:
+        # Crear lote de registro y movimiento inicial
+        try:
+            movimiento, lote = crear_lote_registro(
+                producto=producto,
+                cantidad=producto.stock,
+                costo=producto.costo,
+                fecha_caducidad=producto.fecha_caducidad if producto.has_caducidad else None,
+                usuario_id=empresa_id
+            )
+            db.session.commit()
+            print(f"Lote de registro creado para producto {producto_id}")
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error al crear lote de registro: {str(e)}")
+    
+    # Obtener lotes activos y último movimiento
+    lotes_activos = obtener_lotes_activos(producto_id)
+    
+    ultima_salida = MovimientoInventario.query.filter_by(
+        producto_id=producto_id,
+        tipo_movimiento='SALIDA'
+    ).order_by(desc(MovimientoInventario.fecha_movimiento)).first()
+    
+    # Historial de movimientos recientes
+    historial = MovimientoInventario.query.filter_by(
+        producto_id=producto_id
+    ).order_by(desc(MovimientoInventario.fecha_movimiento)).limit(10).all()
+    
+    if request.method == 'POST':
+        try:
+            # Obtener datos del formulario
+            # MODIFICADO: Cambiado de int a float
+            cantidad = float(request.form.get('cantidad', 1))
+            motivo = request.form.get('motivo', 'ajuste')
+            # Usar método auto por defecto (ya no depende del formulario)
+            metodo_descuento = 'auto'
+            impacto_financiero = request.form.get('impacto_financiero') == '1'
+            notas = request.form.get('notas', '')
+            
+            # Validar datos
+            if cantidad <= 0:
+                flash('La cantidad debe ser mayor que cero.', 'danger')
+                return redirect(url_for('new_ajuste_stock.new_ajuste_salida', producto_id=producto_id))
+            
+            if cantidad > producto.stock:
+                flash(f'No hay suficiente stock disponible. Stock actual: {producto.stock}', 'danger')
+                return redirect(url_for('new_ajuste_stock.new_ajuste_salida', producto_id=producto_id))
+            
+            # 1. Aplicar la salida a los lotes correspondientes usando el método inteligente
+            lotes_afectados = aplicar_salida_lotes(producto_id, cantidad, metodo_descuento)
+            
+            # 2. Crear el movimiento de inventario
+            nuevo_movimiento = MovimientoInventario(
+                producto_id=producto_id,
+                tipo_movimiento='SALIDA',
+                cantidad=cantidad,
+                motivo=motivo,
+                fecha_movimiento=datetime.now(),
+                metodo_descuento=metodo_descuento,
+                impacto_financiero=impacto_financiero,
+                notas=notas if request.form.get('toggle_notas_estado') == 'ACTIVADO' else None,
+                usuario_id=empresa_id
+            )
+            db.session.add(nuevo_movimiento)
+            
+            # 3. Actualizar stock del producto
+            stock_anterior = producto.stock
+            producto.stock -= cantidad
+            
+            # 4. Registrar la relación entre el movimiento y los lotes afectados
+            for lote_info in lotes_afectados:
+                relacion = LoteMovimientoRelacion(
+                    movimiento_id=nuevo_movimiento.id,
+                    lote_id=lote_info['id'],
+                    cantidad=lote_info['cantidad_afectada']
+                )
+                db.session.add(relacion)
+            
+            # Guardar todos los cambios
+            db.session.commit()
+            
+            # Redireccionar a la página de confirmación
+            return redirect(url_for(
+                'new_ajuste_stock.new_ajuste_confirmacion',
+                movimiento_id=nuevo_movimiento.id,
+                tipo='salida'
+            ))
+            
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al procesar la salida: {str(e)}', 'danger')
+            return redirect(url_for('new_ajuste_stock.new_ajuste_salida', producto_id=producto_id))
+    
+    # Renderizar la plantilla para GET
+    return render_template(
+        'new_ajuste_salida.html',
+        producto=producto,
+        lotes_activos=lotes_activos,
+        ultima_salida=ultima_salida.fecha_movimiento.strftime('%d/%m/%Y') if ultima_salida else None,
+        historial=historial
+    )
+
 @ajuste_stock_bp.route('/ajuste-confirmacion/<int:movimiento_id>', methods=['GET'])
 def ajuste_confirmacion(movimiento_id):
     """Muestra la confirmación de un ajuste de inventario."""
@@ -661,6 +1025,151 @@ def ajuste_confirmacion(movimiento_id):
         stock_anterior=stock_anterior
     )
 
+@new_ajuste_stock_bp.route('/new-ajuste-confirmacion/<int:movimiento_id>', methods=['GET'])
+def new_ajuste_confirmacion(movimiento_id):
+    """Muestra la confirmación de un ajuste de inventario."""
+    # Verificar si el usuario está logueado
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    
+    empresa_id = session.get('user_id')
+    
+    # Obtener el movimiento
+    movimiento = MovimientoInventario.query.get_or_404(movimiento_id)
+    
+    # Verificar que el movimiento pertenezca a un producto de la empresa
+    producto = Producto.query.filter_by(
+        id=movimiento.producto_id, 
+        empresa_id=empresa_id
+    ).first_or_404()
+    
+    # Obtener datos adicionales según el tipo de movimiento
+    if movimiento.tipo_movimiento == 'ENTRADA':
+        # Calcular el costo total
+        costo_total = movimiento.cantidad * movimiento.costo_unitario
+        
+        # Obtener el lote creado
+        lotes_afectados = [
+            LoteInventario.query.filter_by(
+                producto_id=producto.id,
+                numero_lote=movimiento.numero_lote
+            ).first()
+        ]
+        
+        # Stock anterior
+        stock_anterior = producto.stock - movimiento.cantidad
+        
+    else:  # SALIDA
+        costo_total = None
+        
+        # Obtener lotes afectados desde la tabla de relación
+        relaciones = LoteMovimientoRelacion.query.filter_by(
+            movimiento_id=movimiento.id
+        ).all()
+        
+        lotes_afectados = []
+        for rel in relaciones:
+            lote = LoteInventario.query.get(rel.lote_id)
+            if lote:
+                lotes_afectados.append({
+                    'id': lote.id,
+                    'numero_lote': lote.numero_lote,
+                    'cantidad_afectada': rel.cantidad,
+                    'stock_actual': lote.stock,
+                    'costo_unitario': lote.costo_unitario,
+                    'fecha_caducidad': lote.fecha_caducidad
+                })
+        
+        if not lotes_afectados:
+            # Fallback si no hay relaciones guardadas
+            lotes_activos = LoteInventario.query.filter_by(
+                producto_id=producto.id,
+                esta_activo=True
+            ).all()
+            
+            for lote in lotes_activos:
+                lotes_afectados.append({
+                    'id': lote.id,
+                    'numero_lote': lote.numero_lote,
+                    'cantidad_afectada': 0,  # Valor desconocido
+                    'stock_actual': lote.stock,
+                    'costo_unitario': lote.costo_unitario,
+                    'fecha_caducidad': lote.fecha_caducidad
+                })
+        
+        # Stock anterior
+        stock_anterior = producto.stock + movimiento.cantidad
+    
+    return render_template(
+        'new_ajuste_confirmacion.html',
+        movimiento=movimiento,
+        producto=producto,
+        costo_total=costo_total,
+        lotes_afectados=lotes_afectados,
+        stock_anterior=stock_anterior
+    )
+
+@ajuste_stock_bp.route('/descargar-comprobante/<int:movimiento_id>')
+def descargar_comprobante(movimiento_id):
+    """Permite descargar el comprobante adjunto a un movimiento de inventario."""
+    # Verificar si el usuario está logueado
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    
+    # Obtener el usuario actual
+    empresa_id = session.get('user_id')
+    
+    # Buscar el movimiento
+    movimiento = MovimientoInventario.query.get_or_404(movimiento_id)
+    
+    # Verificar que el movimiento pertenece a un producto de la empresa
+    producto = Producto.query.filter_by(
+        id=movimiento.producto_id, 
+        empresa_id=empresa_id
+    ).first_or_404()
+    
+    # Verificar que el movimiento tiene un comprobante
+    if not movimiento.comprobante:
+        flash('Este movimiento no tiene comprobante adjunto.', 'warning')
+        return redirect(url_for('historial_movimientos'))
+    
+    # Ruta completa al archivo
+    filepath = os.path.join(UPLOAD_FOLDER, movimiento.comprobante)
+    
+    # Verificar que el archivo existe
+    if not os.path.exists(filepath):
+        flash('El archivo no se encuentra en el servidor.', 'danger')
+        return redirect(url_for('historial_movimientos'))
+    
+    # Obtener el nombre original del archivo (sin el prefijo UUID)
+    filename_parts = movimiento.comprobante.split('_', 1)
+    original_filename = filename_parts[1] if len(filename_parts) > 1 else movimiento.comprobante
+    
+    # Devolver el archivo como descarga
+    return send_file(
+        filepath,
+        as_attachment=True,
+        download_name=original_filename,
+        mimetype='application/octet-stream'
+    )
+
+def init_app(app):
+    """Inicializa la aplicación con este blueprint."""
+    # Registrar el blueprint original
+    app.register_blueprint(ajuste_stock_bp, url_prefix='')
+    
+    # Registrar el nuevo blueprint con su propio prefijo
+    app.register_blueprint(new_ajuste_stock_bp, url_prefix='/new')
+    
+    # Registrar las rutas principales para el blueprint original
+    app.add_url_rule('/ajuste-inventario', 'ajuste_stock', ajuste_stock)
+    app.add_url_rule('/ajuste-entrada/<int:producto_id>', 'ajuste_entrada', ajuste_entrada, methods=['GET', 'POST'])
+    app.add_url_rule('/ajuste-salida/<int:producto_id>', 'ajuste_salida', ajuste_salida, methods=['GET', 'POST'])
+    app.add_url_rule('/ajuste-confirmacion/<int:movimiento_id>', 'ajuste_confirmacion', ajuste_confirmacion)
+    app.add_url_rule('/descargar-comprobante/<int:movimiento_id>', 'descargar_comprobante', descargar_comprobante)
+    
+    # No es necesario registrar las rutas del nuevo blueprint ya que tiene su propio prefijo URL '/new'
+
 # Método para crear el lote inicial (Lote de Registro) al crear un producto
 def crear_lote_registro(producto, cantidad, costo, fecha_caducidad=None, usuario_id=None):
     """
@@ -740,58 +1249,3 @@ def crear_lote_registro(producto, cantidad, costo, fecha_caducidad=None, usuario
         db.session.rollback()
         print(f"ERROR al crear lote de registro: {str(e)}")
         raise e
-
-@ajuste_stock_bp.route('/descargar-comprobante/<int:movimiento_id>')
-def descargar_comprobante(movimiento_id):
-    """Permite descargar el comprobante adjunto a un movimiento de inventario."""
-    # Verificar si el usuario está logueado
-    if not session.get('logged_in'):
-        return redirect(url_for('login'))
-    
-    # Obtener el usuario actual
-    empresa_id = session.get('user_id')
-    
-    # Buscar el movimiento
-    movimiento = MovimientoInventario.query.get_or_404(movimiento_id)
-    
-    # Verificar que el movimiento pertenece a un producto de la empresa
-    producto = Producto.query.filter_by(
-        id=movimiento.producto_id, 
-        empresa_id=empresa_id
-    ).first_or_404()
-    
-    # Verificar que el movimiento tiene un comprobante
-    if not movimiento.comprobante:
-        flash('Este movimiento no tiene comprobante adjunto.', 'warning')
-        return redirect(url_for('historial_movimientos'))
-    
-    # Ruta completa al archivo
-    filepath = os.path.join(UPLOAD_FOLDER, movimiento.comprobante)
-    
-    # Verificar que el archivo existe
-    if not os.path.exists(filepath):
-        flash('El archivo no se encuentra en el servidor.', 'danger')
-        return redirect(url_for('historial_movimientos'))
-    
-    # Obtener el nombre original del archivo (sin el prefijo UUID)
-    filename_parts = movimiento.comprobante.split('_', 1)
-    original_filename = filename_parts[1] if len(filename_parts) > 1 else movimiento.comprobante
-    
-    # Devolver el archivo como descarga
-    return send_file(
-        filepath,
-        as_attachment=True,
-        download_name=original_filename,
-        mimetype='application/octet-stream'
-    )
-
-def init_app(app):
-    """Inicializa la aplicación con este blueprint."""
-    app.register_blueprint(ajuste_stock_bp, url_prefix='')
-    
-    # Registrar las rutas principales
-    app.add_url_rule('/ajuste-inventario', 'ajuste_stock', ajuste_stock)
-    app.add_url_rule('/ajuste-entrada/<int:producto_id>', 'ajuste_entrada', ajuste_entrada, methods=['GET', 'POST'])
-    app.add_url_rule('/ajuste-salida/<int:producto_id>', 'ajuste_salida', ajuste_salida, methods=['GET', 'POST'])
-    app.add_url_rule('/ajuste-confirmacion/<int:movimiento_id>', 'ajuste_confirmacion', ajuste_confirmacion)
-    app.add_url_rule('/descargar-comprobante/<int:movimiento_id>', 'descargar_comprobante', descargar_comprobante)
