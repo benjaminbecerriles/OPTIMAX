@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Costos</title>
+    <style>
+        :root {
+            --primary-color: #0071e3;
+            --background-color: #ffffff;
+            --text-color: #1d1d1f;
+            --light-gray: #f5f5f7;
+            --medium-gray: #86868b;
+            --success-color: #34c759;
+            --error-color: #ff3b30;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            padding: 0 0 30px 0;
+            border-bottom: 1px solid var(--light-gray);
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            font-size: 24px;
+            font-weight: 500;
+            letter-spacing: -0.5px;
+            margin-bottom: 30px;
+        }
+
+        p.subtitle {
+            color: var(--medium-gray);
+            font-size: 17px;
+            font-weight: 400;
+        }
+
+        /* Product list styles */
+        .products-list {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 50px;
+        }
+
+        .products-list th {
+            text-align: left;
+            padding: 12px 20px;
+            color: var(--medium-gray);
+            font-weight: 500;
+            font-size: 14px;
+            border: none;
+        }
+
+        .products-list td {
+            padding: 16px 20px;
+            border: none;
+        }
+
+        .products-list tr {
+            border-radius: 10px;
+            transition: background-color 0.2s;
+        }
+
+        .products-list tr:hover {
+            background-color: var(--light-gray);
+        }
+
+        .product-name {
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .product-detail {
+            color: var(--medium-gray);
+            font-size: 14px;
+            margin-top: 3px;
+        }
+
+        .cost {
+            font-size: 17px;
+            font-weight: 500;
+        }
+
+        .cost-cell {
+            position: relative;
+        }
+
+        .edit-cost-input {
+            width: 120px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: none;
+            background-color: var(--light-gray);
+            font-size: 17px;
+            outline: none;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .action-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .action-button:hover {
+            background-color: #0077ED;
+        }
+
+        .edit-button {
+            opacity: 0;
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            cursor: pointer;
+            font-size: 14px;
+            padding: 0;
+            margin-left: 8px;
+            transition: opacity 0.2s;
+        }
+
+        .cost-cell:hover .edit-button {
+            opacity: 1;
+        }
+
+        .trend {
+            font-size: 14px;
+            margin-top: 4px;
+            color: var(--medium-gray);
+        }
+
+        .trend.down {
+            color: var(--success-color);
+        }
+
+        .trend.up {
+            color: var(--error-color);
+        }
+
+        .history-link {
+            color: var(--primary-color);
+            font-size: 14px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* History modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(5px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: var(--background-color);
+            border-radius: 12px;
+            width: 700px;
+            max-width: 90%;
+            max-height: 90vh;
+            overflow: auto;
+            padding: 30px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .close-button {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--medium-gray);
+        }
+
+        .history-chart {
+            height: 240px;
+            margin-bottom: 40px;
+            background-color: var(--light-gray);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--medium-gray);
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .history-table th {
+            text-align: left;
+            padding: 10px 0;
+            color: var(--medium-gray);
+            font-weight: 500;
+            font-size: 14px;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .history-table td {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        /* Show modal */
+        .show-modal {
+            display: flex;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Costos de productos</h1>
+            <p class="subtitle">Actualiza los costos e históricos de los productos en un solo lugar</p>
+        </header>
+
+        <table class="products-list">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Costo</th>
+                    <th>Tendencia</th>
+                    <th>Histórico</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <div class="product-name">iPhone 15 Pro</div>
+                        <div class="product-detail">512GB, Titanio Natural</div>
+                    </td>
+                    <td class="cost-cell">
+                        <span class="cost">$899.00</span>
+                        <button class="edit-button">Editar</button>
+                    </td>
+                    <td>
+                        <div class="trend down">↓ 5.3% desde abril</div>
+                    </td>
+                    <td>
+                        <a href="#" class="history-link">Ver historial</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="product-name">MacBook Air</div>
+                        <div class="product-detail">M3, 16GB RAM, 512GB SSD</div>
+                    </td>
+                    <td class="cost-cell">
+                        <span class="cost">$1,299.00</span>
+                        <button class="edit-button">Editar</button>
+                    </td>
+                    <td>
+                        <div class="trend up">↑ 2.1% desde marzo</div>
+                    </td>
+                    <td>
+                        <a href="#" class="history-link">Ver historial</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="product-name">AirPods Pro</div>
+                        <div class="product-detail">2a Generación con Estuche MagSafe</div>
+                    </td>
+                    <td class="cost-cell">
+                        <div>
+                            <input type="text" class="edit-cost-input" value="189.00">
+                            <div>
+                                <button class="action-button">Guardar</button>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="trend down">↓ 10.0% desde enero</div>
+                    </td>
+                    <td>
+                        <a href="#" class="history-link">Ver historial</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="product-name">Apple Watch Series 9</div>
+                        <div class="product-detail">GPS + Cellular, 45mm, Aluminio</div>
+                    </td>
+                    <td class="cost-cell">
+                        <span class="cost">$499.00</span>
+                        <button class="edit-button">Editar</button>
+                    </td>
+                    <td>
+                        <div class="trend down">↓ 3.8% desde febrero</div>
+                    </td>
+                    <td>
+                        <a href="#" class="history-link">Ver historial</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="product-name">iMac</div>
+                        <div class="product-detail">M3, 24", 16GB RAM, 1TB SSD</div>
+                    </td>
+                    <td class="cost-cell">
+                        <span class="cost">$1,899.00</span>
+                        <button class="edit-button">Editar</button>
+                    </td>
+                    <td>
+                        <div class="trend up">↑ 1.5% desde abril</div>
+                    </td>
+                    <td>
+                        <a href="#" class="history-link">Ver historial</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- History Modal (normally hidden) -->
+    <div class="modal" id="historyModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Historial de costos: iPhone 15 Pro</h2>
+                <button class="close-button">×</button>
+            </div>
+            <div class="history-chart">
+                [Gráfico de tendencia de costos]
+            </div>
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Costo</th>
+                        <th>Cambio</th>
+                        <th>Usuario</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>15 Mayo 2025</td>
+                        <td>$899.00</td>
+                        <td style="color: var(--success-color);">-$50.00</td>
+                        <td>María L.</td>
+                    </tr>
+                    <tr>
+                        <td>1 Abril 2025</td>
+                        <td>$949.00</td>
+                        <td style="color: var(--success-color);">-$20.00</td>
+                        <td>Carlos R.</td>
+                    </tr>
+                    <tr>
+                        <td>15 Febrero 2025</td>
+                        <td>$969.00</td>
+                        <td style="color: var(--error-color);">+$20.00</td>
+                        <td>Laura T.</td>
+                    </tr>
+                    <tr>
+                        <td>1 Enero 2025</td>
+                        <td>$949.00</td>
+                        <td style="color: var(--success-color);">-$30.00</td>
+                        <td>Juan P.</td>
+                    </tr>
+                    <tr>
+                        <td>1 Noviembre 2024</td>
+                        <td>$979.00</td>
+                        <td style="color: var(--error-color);">+$30.00</td>
+                        <td>Roberto G.</td>
+                    </tr>
+                    <tr>
+                        <td>1 Octubre 2024</td>
+                        <td>$949.00</td>
+                        <td>Precio inicial</td>
+                        <td>Sistema</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
