@@ -356,40 +356,42 @@
     font-size: 1rem;
   }
 
-  /* Tabla estilizada */
+  /* Tabla estilizada - MEJORADA PARA AJUSTARSE MEJOR */
   .products-table-container {
     margin-top: 1.5rem;
     border-radius: 12px;
     overflow: hidden;
     border: 3px solid var(--gray-300);
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    overflow-x: auto; /* Para permitir scroll horizontal si es necesario */
   }
   
   .products-table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
-    table-layout: fixed; /* Agregado para fijar anchos de columnas */
+    table-layout: fixed; /* Fija anchos de columnas */
+    min-width: 900px; /* Ancho mínimo para evitar compresión excesiva */
   }
   
   .products-table thead th {
     text-align: center;
-    padding: 16px 8px;
-    font-size: 12px;
+    padding: 8px 4px;
+    font-size: 10px;
     font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.03em;
     color: #333333;
     background-color: #e0e0e0;
     border-bottom: 2px solid var(--gray-300);
-    line-height: 1.2;
+    line-height: 1.1;
     vertical-align: middle;
-    height: 60px;
+    height: 40px; /* Altura reducida */
     white-space: nowrap; /* Evitar saltos de línea en encabezados */
   }
   
   .products-table tbody td {
-    padding: 1rem;
+    padding: 0.7rem 0.4rem;
     vertical-align: middle;
     border-bottom: 1px solid var(--gray-200);
     text-align: center;
@@ -417,13 +419,12 @@
     text-align: left;
   }
 
-  /* Columna con foto de producto */
   .product-img-container {
-    width: 80px;
-    height: 80px;
+    width: 60px; /* Tamaño reducido */
+    height: 60px; /* Tamaño reducido */
     margin: 0 auto;
     position: relative;
-    border-radius: 8px;
+    border-radius: 6px; /* Radio reducido */
     overflow: hidden;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     border: 1px solid var(--gray-200);
@@ -449,14 +450,14 @@
     justify-content: center;
     background-color: var(--light-background);
     color: var(--text-secondary);
-    font-size: 1.5rem;
+    font-size: 1.3rem;
   }
 
   /* Información de producto - MODIFICADO PARA EVITAR DESBORDAMIENTO */
   .product-info {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.25rem;
     text-align: left;
     max-width: 100%; /* Limitar ancho */
   }
@@ -464,9 +465,9 @@
   .product-name {
     font-weight: 600;
     color: var(--text-color);
-    font-size: 1rem;
-    margin-bottom: 0.25rem;
-    max-width: 280px; /* Ancho máximo */
+    font-size: 0.85rem; /* Tamaño más reducido */
+    margin-bottom: 0.1rem;
+    max-width: 180px; /* Ancho máximo reducido */
     white-space: nowrap; /* Evitar saltos de línea */
     overflow: hidden; /* Ocultar contenido desbordado */
     text-overflow: ellipsis; /* Mostrar puntos suspensivos */
@@ -475,16 +476,16 @@
   .product-meta {
     display: flex;
     flex-direction: column;
-    gap: 0.35rem;
-    font-size: 0.9rem;
+    gap: 0.2rem;
+    font-size: 0.75rem; /* Tamaño más reducido */
     color: var(--text-secondary);
-    max-width: 280px; /* Ancho máximo */
+    max-width: 180px; /* Ancho máximo reducido */
   }
   
   .product-sku, .product-brand {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.3rem;
     max-width: 100%;
     white-space: nowrap;
     overflow: hidden;
@@ -494,7 +495,7 @@
   .meta-label {
     font-weight: 500;
     color: var(--text-secondary);
-    min-width: 50px;
+    min-width: 35px; /* Ancho mínimo reducido */
     flex-shrink: 0;
   }
 
@@ -524,7 +525,7 @@
     color: white;
     text-align: center;
     border-radius: 8px;
-    padding: 0.5rem 1rem;
+    padding: 0.4rem 0.8rem;
     position: absolute;
     z-index: 100;
     bottom: 125%;
@@ -534,9 +535,9 @@
     transition: opacity 0.3s, visibility 0.3s;
     white-space: nowrap;
     font-weight: 500;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    min-width: 120px;
+    min-width: 80px;
   }
   
   .category-tooltip-text::after {
@@ -558,7 +559,7 @@
   /* Stock */
   .stock-value {
     font-weight: 600;
-    font-size: 1rem;
+    font-size: 0.85rem; /* Tamaño más reducido */
     color: var(--text-color);
   }
   
@@ -573,14 +574,14 @@
   /* Precio y costo */
   .price-value, .cost-value {
     font-weight: 600;
-    font-size: 1rem;
+    font-size: 0.85rem; /* Tamaño más reducido */
     color: var(--text-color);
   }
 
   /* Fecha de caducidad */
   .expiry-value {
     font-weight: 500;
-    font-size: 0.95rem;
+    font-size: 0.8rem; /* Tamaño más reducido */
     color: var(--text-color);
   }
   
@@ -601,7 +602,7 @@
     display: inline-block;
     cursor: pointer;
     transition: transform 0.2s ease;
-    font-size: 1.5rem;
+    font-size: 1.1rem; /* Tamaño más reducido */
   }
   
   .eye-icon:hover {
@@ -624,15 +625,15 @@
   
   .actions-dot {
     cursor: pointer;
-    width: 36px;
-    height: 36px;
+    width: 28px; /* Tamaño más reducido */
+    height: 28px; /* Tamaño más reducido */
     background-color: var(--light-background);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: bold;
-    font-size: 18px;
+    font-size: 14px; /* Tamaño más reducido */
     transition: all 0.2s;
     color: var(--text-color);
     margin: 0 auto;
@@ -1120,9 +1121,10 @@
     text-align: center;
   }
   
-  /* Estilo para días hasta caducidad */
+  /* Estilo para días hasta caducidad - REDUCIDO */
   .expiry-days {
     font-weight: 600;
+    font-size: 0.75rem; /* Tamaño mucho más reducido */
   }
   
   .expiry-days.expired {
@@ -1203,25 +1205,31 @@
   /* Responsive adjustments */
   @media (max-width: 991px) {
     .product-img-container {
-      width: 70px;
-      height: 70px;
+      width: 50px; /* Reducido más */
+      height: 50px; /* Reducido más */
     }
     
     .products-table thead th,
     .products-table tbody td {
-      padding: 12px 8px;
+      padding: 6px 4px; /* Reducido más */
     }
     
     .product-name {
-      font-size: 0.95rem;
+      font-size: 0.8rem; /* Reducido más */
+      max-width: 150px; /* Reducido más */
     }
     
     .product-meta {
-      font-size: 0.85rem;
+      font-size: 0.7rem; /* Reducido más */
+      max-width: 150px; /* Reducido más */
     }
     
     .price-value, .cost-value, .stock-value {
-      font-size: 0.95rem;
+      font-size: 0.8rem; /* Reducido más */
+    }
+    
+    .expiry-days {
+      font-size: 0.7rem; /* Reducido más */
     }
     
     .actions-modal-body {
@@ -1231,39 +1239,39 @@
   
   @media (max-width: 767px) {
     .apple-container {
-      padding: 24px 16px;
+      padding: 20px 12px; /* Reducido */
     }
     
     h1 {
-      font-size: 28px;
+      font-size: 24px; /* Reducido */
     }
     
     .section-title {
-      font-size: 20px;
+      font-size: 18px; /* Reducido */
     }
     
     .products-table thead th {
-      font-size: 10px;
-      padding: 10px 5px;
+      font-size: 9px; /* Reducido */
+      padding: 8px 4px; /* Reducido */
     }
     
     .products-table tbody td {
-      padding: 8px 5px;
+      padding: 6px 4px; /* Reducido */
     }
     
     .product-img-container {
-      width: 60px;
-      height: 60px;
+      width: 50px; /* Reducido aún más */
+      height: 50px; /* Reducido aún más */
     }
     
     .btn-excel {
-      padding: 0.5rem 1rem;
-      font-size: 0.85rem;
+      padding: 0.4rem 0.8rem; /* Reducido */
+      font-size: 0.8rem; /* Reducido */
     }
     
     .action-button {
-      font-size: 0.85rem;
-      padding: 0.5rem 1rem;
+      font-size: 0.8rem; /* Reducido */
+      padding: 0.4rem 0.8rem; /* Reducido */
     }
   }
 </style>
@@ -1445,15 +1453,15 @@
     <table class="products-table" id="productsTable">
       <thead>
         <tr>
-          <th style="width: 90px;" class="column-image">FOTO</th>
-          <th class="text-start column-product" style="width: 300px;">PRODUCTO</th>
-          <th style="width: 80px;" class="column-category">CAT</th>
-          <th style="width: 110px;" class="column-stock">STOCK<br>UNIDADES</th>
-          <th style="width: 110px;" class="column-price">PRECIO<br>POR UNIDAD</th>
+          <th style="width: 70px;" class="column-image">FOTO</th>
+          <th class="text-start column-product" style="width: 200px;">PRODUCTO</th>
+          <th style="width: 75px;" class="column-category">CATEGORÍA</th>
+          <th style="width: 90px;" class="column-stock">STOCK</th>
+          <th style="width: 90px;" class="column-price">PRECIO</th>
           <!-- NUEVO: Cambiamos el encabezado de costo y añadimos botón de despliegue -->
-          <th style="width: 110px;" class="column-cost">
+          <th style="width: 90px;" class="column-cost">
             <div class="cost-type-dropdown">
-              <span id="costTypeTitle">ÚLTIMO COSTO REG.<br>POR UNIDAD</span>
+              <span id="costTypeTitle">ÚLTIMO COSTO</span>
               <button type="button" class="cost-toggle-btn" id="costToggleBtn">▼</button>
               <div class="cost-type-menu" id="costTypeMenu">
                 <div class="cost-type-item active" data-type="last">
@@ -1466,10 +1474,10 @@
             </div>
           </th>
           <!-- NUEVO: Cambiamos el encabezado de caducidad -->
-          <th style="width: 110px;" class="column-expiry">PRÓXIMO LOTE<br>CADUCA EN</th>
-          <th style="width: 70px;" class="column-fav">FAV</th>
-          <th style="width: 70px;" class="column-vis">VISIBLE</th>
-          <th style="width: 70px;" class="column-actions">ACCIONES</th>
+          <th style="width: 90px;" class="column-expiry">PRÓX LOTE<br>CADUCA</th>
+          <th style="width: 50px;" class="column-fav">FAV</th>
+          <th style="width: 70px;" class="column-vis">¿A LA<br>VENTA?</th>
+          <th style="width: 45px;" class="column-actions">ACCIÓN</th>
         </tr>
       </thead>
       <tbody>
@@ -1526,13 +1534,15 @@
               {% if p.stock == p.stock|int %}
                 {{ '{:,}'.format(p.stock|int) }}
               {% else %}
-                {{ '{:,.3f}'.format(p.stock) }}
+                {{ '{:,.2f}'.format(p.stock) }}
               {% endif %}
+              <small>
               {% if p.unidad and p.unidad != 'NONE' %}
                 {{ p.unidad }}
               {% else %}
-                {% if p.stock == 1 %}pieza{% else %}piezas{% endif %}
+                {% if p.stock == 1 %}u{% else %}u{% endif %}
               {% endif %}
+              </small>
             </span>
           </td>
           
@@ -1555,7 +1565,7 @@
             {% if p.proximo_lote_dias is none %}
               <span class="expiry-value">N/A</span>
             {% elif p.proximo_lote_dias < 0 %}
-              <span class="expiry-days expired">Caducado ({{ p.proximo_lote_dias|abs }} días)</span>
+              <span class="expiry-days expired">{{ p.proximo_lote_dias|abs }} días</span>
             {% elif p.proximo_lote_dias == 0 %}
               <span class="expiry-days expired">Hoy</span>
             {% elif p.proximo_lote_dias <= 7 %}
@@ -1650,9 +1660,9 @@
       </a>
       <a href="#" class="action-item" id="actionChangePrice">
         <div class="action-icon">
-          <i class="fas fa-dollar-sign"></i>
+          <i class="fas fa-minus"></i>
         </div>
-        <span class="action-text">Cambiar precio</span>
+        <span class="action-text">Restar existencias</span>
       </a>
       <a href="#" class="action-item" id="actionChangeCost">
         <div class="action-icon">
@@ -1662,21 +1672,21 @@
       </a>
       <a href="#" class="action-item" id="actionEdit">
         <div class="action-icon">
-          <i class="fas fa-edit"></i>
+          <i class="fas fa-dollar-sign"></i>
         </div>
-        <span class="action-text">Editar producto</span>
+        <span class="action-text">Cambiar precios</span>
       </a>
       <a href="#" class="action-item" id="actionToggleVisibility">
         <div class="action-icon">
-          <i class="fas fa-eye"></i>
+          <i class="fas fa-edit"></i>
         </div>
-        <span class="action-text" id="visibilityActionText">Mostrar/Ocultar</span>
+        <span class="action-text" id="visibilityActionText">Editar producto</span>
       </a>
       <a href="#" class="action-item" id="actionToggleFavorite">
         <div class="action-icon">
-          <i class="fas fa-heart"></i>
+          <i class="fas fa-percent"></i>
         </div>
-        <span class="action-text" id="favoriteActionText">Favorito</span>
+        <span class="action-text" id="favoriteActionText">Definir descuento</span>
       </a>
       <a href="#" class="action-item" id="actionSetLocation">
         <div class="action-icon">
@@ -1688,7 +1698,7 @@
         <div class="action-icon">
           <i class="fas fa-print"></i>
         </div>
-        <span class="action-text">Imprimir etiquetas</span>
+        <span class="action-text">Imprimir etiqueta</span>
       </a>
       <a href="#" class="action-item" id="actionDelete" style="grid-column: span 2; background-color: rgba(231, 76, 60, 0.1); color: var(--red); border-color: rgba(231, 76, 60, 0.2);">
         <div class="action-icon" style="color: var(--red);">
@@ -1952,7 +1962,7 @@
     
     // Actualizar título de la columna
     if (type === 'last') {
-      costTitle.innerHTML = 'ÚLTIMO COSTO REG.<br>POR UNIDAD';
+      costTitle.innerHTML = 'ÚLTIMO COSTO<br>POR UNIDAD';
     } else {
       costTitle.innerHTML = 'COSTO PROMEDIO<br>POR UNIDAD';
     }
@@ -2633,6 +2643,7 @@
     const actionEdit = document.getElementById('actionEdit');
     const actionDelete = document.getElementById('actionDelete');
     const actionAddStock = document.getElementById('actionAddStock');
+    const actionChangePrice = document.getElementById('actionChangePrice');
     
     if (productNameEl) {
       productNameEl.textContent = productName;
@@ -2651,7 +2662,11 @@
     }
     
     if (actionAddStock) {
-      actionAddStock.href = `/reabastecer-producto/${productId}`;
+      actionAddStock.href = `/ajuste-entrada/${productId}`;
+    }
+    
+    if (actionChangePrice) {
+      actionChangePrice.href = `/ajuste-salida/${productId}`;
     }
     
     if (modal) {
