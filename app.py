@@ -1078,76 +1078,63 @@ def cambiar_precios():
 
 @app.route('/cambiar-costos')
 @login_requerido
-def cambiar_costos():
+def cambiar_costos_general():
     """
-    Vista para ver y cambiar los costos de productos incluyendo historial de lotes.
+    Vista general para cambiar precios de productos
     """
-    # Obtener información del usuario y datos para el dashboard
-    empresa_id = session['user_id']
-    page = request.args.get('page', 1, type=int)
-    per_page = 20  # Productos por página
+    # Redirigir a la lista de productos para seleccionar uno
+    flash('Seleccione un producto para ver y gestionar sus costos', 'info')
+    return redirect(url_for('ver_productos'))
+
+@app.route('/cambiar-costos/<int:producto_id>')
+@login_requerido
+def cambiar_costos(producto_id):
+    """
+    Vista para ver y cambiar los costos de un producto específico.
+    Muestra el costo actual y el historial de lotes.
+    """
+    # Obtener información del usuario
+    empresa_id = session.get('user_id')
     
-    # Obtener lista de productos aprobados con paginación
-    productos_paginados = Producto.query.filter_by(
+    # Obtener el producto específico
+    producto = Producto.query.filter_by(
+        id=producto_id,
         empresa_id=empresa_id,
         is_approved=True
-    ).order_by(Producto.nombre).paginate(page=page, per_page=per_page, error_out=False)
+    ).first_or_404()
     
-    # Obtener lotes activos para calcular costos promedio
-    productos = productos_paginados.items
-    total_pages = productos_paginados.pages
+    # Calcular costo promedio
+    lotes_activos = LoteInventario.query.filter(
+        LoteInventario.producto_id == producto_id,
+        LoteInventario.esta_activo == True,
+        LoteInventario.stock > 0
+    ).all()
     
-    # Calcular costo promedio para cada producto
-    for producto in productos:
-        # Buscar lotes activos con stock positivo
-        lotes_activos = LoteInventario.query.filter(
-            LoteInventario.producto_id == producto.id,
-            LoteInventario.esta_activo == True,
-            LoteInventario.stock > 0
-        ).all()
+    # Calcular costo promedio ponderado por cantidad en stock
+    if lotes_activos:
+        costo_total = 0
+        stock_total = 0
         
-        # Calcular costo promedio ponderado por cantidad en stock
-        if lotes_activos:
-            costo_total = 0
-            stock_total = 0
-            
-            for lote in lotes_activos:
-                costo_total += lote.costo_unitario * lote.stock
-                stock_total += lote.stock
-            
-            if stock_total > 0:
-                producto.costo_promedio = costo_total / stock_total
-            else:
-                producto.costo_promedio = producto.costo
+        for lote in lotes_activos:
+            costo_total += lote.costo_unitario * lote.stock
+            stock_total += lote.stock
+        
+        if stock_total > 0:
+            producto.costo_promedio = costo_total / stock_total
         else:
             producto.costo_promedio = producto.costo
+    else:
+        producto.costo_promedio = producto.costo
     
-    # Obtener categorías únicas para filtros
-    categorias = db.session.query(Producto.categoria, Producto.categoria_color).filter_by(
-        empresa_id=empresa_id,
-        is_approved=True
-    ).filter(Producto.categoria.isnot(None)).distinct().all()
-    
-    categorias_lista = []
-    categorias_set = set()
-    
-    for cat in categorias:
-        if cat[0] and cat[0] not in categorias_set:
-            categorias_set.add(cat[0])
-            categorias_lista.append({
-                "nombre": cat[0], 
-                "color": cat[1] if cat[1] else "#6B7280"
-            })
-    
-    # Ordenar categorías alfabéticamente
-    categorias_lista.sort(key=lambda x: x['nombre'])
+    # Obtener todos los lotes del producto ordenados por fecha (más reciente primero)
+    lotes = LoteInventario.query.filter_by(
+        producto_id=producto_id
+    ).order_by(LoteInventario.fecha_entrada.desc()).all()
     
     return render_template(
         'cambiar_costos.html',
-        productos=productos,
-        categorias=categorias_lista,
-        page=page,
-        total_pages=total_pages
+        producto=producto,
+        lotes=lotes
     )
 
 ##############################
@@ -2300,13 +2287,17 @@ def api_lotes(producto_id):
 @login_requerido
 def api_actualizar_costo():
     """
-    API para actualizar el costo de un producto y crear un nuevo lote.
+    API para actualizar el costo del último lote activo, manteniendo trazabilidad.
     """
+    # Importar módulos necesarios al inicio de la función
+    from datetime import datetime
+    
     try:
         # Obtener datos del request
         data = request.get_json()
         producto_id = data.get('producto_id')
         costo = float(data.get('costo', 0))
+        afectar_precio = data.get('afectar_precio', False)
         
         # Validar datos
         if not producto_id or costo < 0:
@@ -2328,73 +2319,55 @@ def api_actualizar_costo():
                 "message": "Producto no encontrado o sin permisos"
             }), 404
         
-        # Actualizar el costo del producto
+        # Buscar el último lote activo con stock > 0
+        ultimo_lote = LoteInventario.query.filter(
+            LoteInventario.producto_id == producto_id,
+            LoteInventario.esta_activo == True,
+            LoteInventario.stock > 0
+        ).order_by(LoteInventario.fecha_entrada.desc()).first()
+        
+        if not ultimo_lote:
+            return jsonify({
+                "success": False,
+                "message": "No se encontró un lote activo para actualizar"
+            }), 400
+        
+        # Guardar valores antiguos para registro
+        costo_anterior_lote = ultimo_lote.costo_unitario
+        costo_anterior_producto = producto.costo
+        
+        # Actualizar el costo del lote 
+        ultimo_lote.costo_unitario = costo
+        
+        # Actualizar el costo base del producto
         producto.costo = costo
         
-        # Crear un nuevo lote con el nuevo costo
-        proximo_lote = obtener_proximo_numero_lote(producto_id)
+        # Calcular proporciones antes de la actualización si se solicita
+        if afectar_precio and costo_anterior_producto > 0:
+            proporcion = producto.precio_venta / costo_anterior_producto
+            # Actualizar el precio proporcionalmente
+            nuevo_precio = costo * proporcion
+            producto.precio_venta = nuevo_precio
         
-        # Determinar fecha de caducidad si aplica
-        fecha_caducidad = None
-        if producto.has_caducidad and producto.metodo_caducidad:
-            fecha_actual = datetime.now()
-            
-            if producto.metodo_caducidad == '1 día':
-                fecha_caducidad = fecha_actual + timedelta(days=1)
-            elif producto.metodo_caducidad == '3 días':
-                fecha_caducidad = fecha_actual + timedelta(days=3)
-            elif producto.metodo_caducidad == '1 semana':
-                fecha_caducidad = fecha_actual + timedelta(days=7)
-            elif producto.metodo_caducidad == '2 semanas':
-                fecha_caducidad = fecha_actual + timedelta(days=14)
-            elif producto.metodo_caducidad == '1 mes':
-                fecha_caducidad = fecha_actual + timedelta(days=30)
-            elif producto.metodo_caducidad == '3 meses':
-                fecha_caducidad = fecha_actual + timedelta(days=90)
-            elif producto.metodo_caducidad == '6 meses':
-                fecha_caducidad = fecha_actual + timedelta(days=180)
-            elif producto.metodo_caducidad == '1 año':
-                fecha_caducidad = fecha_actual + timedelta(days=365)
-            elif producto.metodo_caducidad == '2 años':
-                fecha_caducidad = fecha_actual + timedelta(days=730)
-            elif producto.metodo_caducidad == '3 años':
-                fecha_caducidad = fecha_actual + timedelta(days=1460)
-                
-            # Convertir a date
-            if fecha_caducidad:
-                fecha_caducidad = fecha_caducidad.date()
-        
-        # 1. Crear el movimiento de inventario
+        # Registrar el cambio en el historial (Movimiento de Inventario) como CORRECCIÓN
+        from models.modelos_inventario import MovimientoInventario
         nuevo_movimiento = MovimientoInventario(
             producto_id=producto_id,
             tipo_movimiento='ENTRADA',
             cantidad=0,  # No cambiamos stock, solo el costo
-            motivo='actualización de costo',
+            motivo='corrección de costo',
             fecha_movimiento=datetime.now(),
             costo_unitario=costo,
-            numero_lote=proximo_lote,
-            fecha_caducidad=fecha_caducidad,
-            notas="Actualización de costo sin modificar stock",
+            numero_lote=ultimo_lote.numero_lote,
+            notas=f"Corrección de costo en lote '{ultimo_lote.numero_lote}': de ${costo_anterior_lote} a ${costo}",
             usuario_id=empresa_id
         )
         db.session.add(nuevo_movimiento)
         
-        # 2. Crear un nuevo lote con stock cero para registro histórico
-        nuevo_lote = LoteInventario(
-            producto_id=producto_id,
-            numero_lote=proximo_lote,
-            costo_unitario=costo,
-            stock=0,  # Lote con stock cero para registro histórico
-            fecha_entrada=datetime.now(),
-            fecha_caducidad=fecha_caducidad,
-            esta_activo=True  # Mantener activo para referencia
-        )
-        db.session.add(nuevo_lote)
-        
         # Guardar cambios
         db.session.commit()
         
-        # Calcular costo promedio actualizado
+        # Recalcular costo promedio
         lotes_activos = LoteInventario.query.filter(
             LoteInventario.producto_id == producto_id,
             LoteInventario.esta_activo == True,
@@ -2416,9 +2389,11 @@ def api_actualizar_costo():
         
         return jsonify({
             "success": True,
-            "message": "Costo actualizado correctamente",
+            "message": f"Costo corregido en lote {ultimo_lote.numero_lote}",
             "costo": costo,
-            "costo_promedio": costo_promedio
+            "costo_promedio": costo_promedio,
+            "precio_actualizado": afectar_precio,
+            "lote_actualizado": ultimo_lote.numero_lote
         })
     
     except Exception as e:
@@ -3285,9 +3260,11 @@ def historial_movimientos():
     fecha_limite = datetime.now() - timedelta(days=periodo)
     
     # Consulta base CON FILTRO POR EMPRESA_ID
+    # Modificación aquí: Excluir movimientos de corrección de costo
     query = MovimientoInventario.query.join(Producto).filter(
         MovimientoInventario.fecha_movimiento >= fecha_limite,
-        Producto.empresa_id == empresa_id  # Filtro importante por empresa_id
+        Producto.empresa_id == empresa_id,  # Filtro importante por empresa_id
+        MovimientoInventario.motivo != 'corrección de costo'  # NUEVA LÍNEA: filtrar correcciones de costo
     )
     
     # Aplicar filtro de tipo

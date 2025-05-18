@@ -1,421 +1,808 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Costos</title>
-    <style>
-        :root {
-            --primary-color: #0071e3;
-            --background-color: #ffffff;
-            --text-color: #1d1d1f;
-            --light-gray: #f5f5f7;
-            --medium-gray: #86868b;
-            --success-color: #34c759;
-            --error-color: #ff3b30;
-        }
+{% extends "base.html" %}
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, sans-serif;
-            -webkit-font-smoothing: antialiased;
-        }
+{% block title %}Actualizar Costo{% endblock %}
 
-        body {
-            background-color: var(--background-color);
-            color: var(--text-color);
-            line-height: 1.5;
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 40px 20px;
-        }
-
-        header {
-            padding: 0 0 30px 0;
-            border-bottom: 1px solid var(--light-gray);
-            margin-bottom: 40px;
-        }
-
-        h1 {
-            font-size: 28px;
-            font-weight: 600;
-            letter-spacing: -0.5px;
-            margin-bottom: 10px;
-        }
-
-        h2 {
-            font-size: 24px;
-            font-weight: 500;
-            letter-spacing: -0.5px;
-            margin-bottom: 30px;
-        }
-
-        p.subtitle {
-            color: var(--medium-gray);
-            font-size: 17px;
-            font-weight: 400;
-        }
-
-        /* Product list styles */
-        .products-list {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 50px;
-        }
-
-        .products-list th {
-            text-align: left;
-            padding: 12px 20px;
-            color: var(--medium-gray);
-            font-weight: 500;
-            font-size: 14px;
-            border: none;
-        }
-
-        .products-list td {
-            padding: 16px 20px;
-            border: none;
-        }
-
-        .products-list tr {
-            border-radius: 10px;
-            transition: background-color 0.2s;
-        }
-
-        .products-list tr:hover {
-            background-color: var(--light-gray);
-        }
-
-        .product-name {
-            font-size: 16px;
-            font-weight: 500;
-        }
-
-        .product-detail {
-            color: var(--medium-gray);
-            font-size: 14px;
-            margin-top: 3px;
-        }
-
-        .cost {
-            font-size: 17px;
-            font-weight: 500;
-        }
-
-        .cost-cell {
-            position: relative;
-        }
-
-        .edit-cost-input {
-            width: 120px;
-            padding: 8px 12px;
-            border-radius: 8px;
-            border: none;
-            background-color: var(--light-gray);
-            font-size: 17px;
-            outline: none;
-            font-weight: 500;
-            margin-bottom: 8px;
-        }
-
-        .action-button {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 8px 14px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        .action-button:hover {
-            background-color: #0077ED;
-        }
-
-        .edit-button {
-            opacity: 0;
-            background: none;
-            border: none;
-            color: var(--primary-color);
-            cursor: pointer;
-            font-size: 14px;
-            padding: 0;
-            margin-left: 8px;
-            transition: opacity 0.2s;
-        }
-
-        .cost-cell:hover .edit-button {
-            opacity: 1;
-        }
-
-        .trend {
-            font-size: 14px;
-            margin-top: 4px;
-            color: var(--medium-gray);
-        }
-
-        .trend.down {
-            color: var(--success-color);
-        }
-
-        .trend.up {
-            color: var(--error-color);
-        }
-
-        .history-link {
-            color: var(--primary-color);
-            font-size: 14px;
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        /* History modal */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(5px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-
-        .modal-content {
-            background-color: var(--background-color);
-            border-radius: 12px;
-            width: 700px;
-            max-width: 90%;
-            max-height: 90vh;
-            overflow: auto;
-            padding: 30px;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-
-        .close-button {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: var(--medium-gray);
-        }
-
-        .history-chart {
-            height: 240px;
-            margin-bottom: 40px;
-            background-color: var(--light-gray);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--medium-gray);
-        }
-
-        .history-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .history-table th {
-            text-align: left;
-            padding: 10px 0;
-            color: var(--medium-gray);
-            font-weight: 500;
-            font-size: 14px;
-            border-bottom: 1px solid var(--light-gray);
-        }
-
-        .history-table td {
-            padding: 12px 0;
-            border-bottom: 1px solid var(--light-gray);
-        }
-
-        /* Show modal */
-        .show-modal {
-            display: flex;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <header>
-            <h1>Costos de productos</h1>
-            <p class="subtitle">Actualiza los costos e históricos de los productos en un solo lugar</p>
-        </header>
-
-        <table class="products-list">
-            <thead>
-                <tr>
-                    <th>Producto</th>
-                    <th>Costo</th>
-                    <th>Tendencia</th>
-                    <th>Histórico</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>
-                        <div class="product-name">iPhone 15 Pro</div>
-                        <div class="product-detail">512GB, Titanio Natural</div>
-                    </td>
-                    <td class="cost-cell">
-                        <span class="cost">$899.00</span>
-                        <button class="edit-button">Editar</button>
-                    </td>
-                    <td>
-                        <div class="trend down">↓ 5.3% desde abril</div>
-                    </td>
-                    <td>
-                        <a href="#" class="history-link">Ver historial</a>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <div class="product-name">MacBook Air</div>
-                        <div class="product-detail">M3, 16GB RAM, 512GB SSD</div>
-                    </td>
-                    <td class="cost-cell">
-                        <span class="cost">$1,299.00</span>
-                        <button class="edit-button">Editar</button>
-                    </td>
-                    <td>
-                        <div class="trend up">↑ 2.1% desde marzo</div>
-                    </td>
-                    <td>
-                        <a href="#" class="history-link">Ver historial</a>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <div class="product-name">AirPods Pro</div>
-                        <div class="product-detail">2a Generación con Estuche MagSafe</div>
-                    </td>
-                    <td class="cost-cell">
-                        <div>
-                            <input type="text" class="edit-cost-input" value="189.00">
-                            <div>
-                                <button class="action-button">Guardar</button>
-                            </div>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="trend down">↓ 10.0% desde enero</div>
-                    </td>
-                    <td>
-                        <a href="#" class="history-link">Ver historial</a>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <div class="product-name">Apple Watch Series 9</div>
-                        <div class="product-detail">GPS + Cellular, 45mm, Aluminio</div>
-                    </td>
-                    <td class="cost-cell">
-                        <span class="cost">$499.00</span>
-                        <button class="edit-button">Editar</button>
-                    </td>
-                    <td>
-                        <div class="trend down">↓ 3.8% desde febrero</div>
-                    </td>
-                    <td>
-                        <a href="#" class="history-link">Ver historial</a>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <div class="product-name">iMac</div>
-                        <div class="product-detail">M3, 24", 16GB RAM, 1TB SSD</div>
-                    </td>
-                    <td class="cost-cell">
-                        <span class="cost">$1,899.00</span>
-                        <button class="edit-button">Editar</button>
-                    </td>
-                    <td>
-                        <div class="trend up">↑ 1.5% desde abril</div>
-                    </td>
-                    <td>
-                        <a href="#" class="history-link">Ver historial</a>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-
-    <!-- History Modal (normally hidden) -->
-    <div class="modal" id="historyModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Historial de costos: iPhone 15 Pro</h2>
-                <button class="close-button">×</button>
-            </div>
-            <div class="history-chart">
-                [Gráfico de tendencia de costos]
-            </div>
-            <table class="history-table">
-                <thead>
-                    <tr>
-                        <th>Fecha</th>
-                        <th>Costo</th>
-                        <th>Cambio</th>
-                        <th>Usuario</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>15 Mayo 2025</td>
-                        <td>$899.00</td>
-                        <td style="color: var(--success-color);">-$50.00</td>
-                        <td>María L.</td>
-                    </tr>
-                    <tr>
-                        <td>1 Abril 2025</td>
-                        <td>$949.00</td>
-                        <td style="color: var(--success-color);">-$20.00</td>
-                        <td>Carlos R.</td>
-                    </tr>
-                    <tr>
-                        <td>15 Febrero 2025</td>
-                        <td>$969.00</td>
-                        <td style="color: var(--error-color);">+$20.00</td>
-                        <td>Laura T.</td>
-                    </tr>
-                    <tr>
-                        <td>1 Enero 2025</td>
-                        <td>$949.00</td>
-                        <td style="color: var(--success-color);">-$30.00</td>
-                        <td>Juan P.</td>
-                    </tr>
-                    <tr>
-                        <td>1 Noviembre 2024</td>
-                        <td>$979.00</td>
-                        <td style="color: var(--error-color);">+$30.00</td>
-                        <td>Roberto G.</td>
-                    </tr>
-                    <tr>
-                        <td>1 Octubre 2024</td>
-                        <td>$949.00</td>
-                        <td>Precio inicial</td>
-                        <td>Sistema</td>
-                    </tr>
-                </tbody>
-            </table>
+{% block content %}
+<div class="container py-5">
+    <!-- Notificación de éxito (inicialmente oculta) -->
+    <div id="success-notification" class="notification-toast" style="display: none;">
+        <div class="notification-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="notification-content">
+            <h6 class="notification-title">Éxito</h6>
+            <p id="notification-message">Costo actualizado correctamente</p>
         </div>
     </div>
-</body>
-</html>
+    
+    <!-- Encabezado -->
+    <header class="page-header mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="page-title">Actualizar Costo</h1>
+            </div>
+            <a href="{{ url_for('ver_productos') }}" class="back-link">
+                <i class="fas fa-arrow-left"></i>
+                <span>Volver</span>
+            </a>
+        </div>
+    </header>
+    
+    <!-- Tarjeta de información del producto y costo actual -->
+    <section class="content-card product-info-card animate-in mb-4">
+        <div class="d-flex align-items-center flex-wrap">
+            <div class="product-image-wrapper">
+                <img src="{{ url_for('static', filename='uploads/' + producto.foto) }}" 
+                     alt="{{ producto.nombre }}" 
+                     class="product-image"
+                     onerror="this.src='{{ url_for('static', filename='img/default_product.jpg') }}'">
+            </div>
+            <div class="product-details">
+                <h2 class="product-name">{{ producto.nombre }}</h2>
+                <div class="product-meta">
+                    <span class="product-sku">{{ producto.codigo_barras_externo }}</span>
+                    <span class="product-category">{{ producto.categoria }}</span>
+                </div>
+                <div class="product-stock">
+                    <span class="stock-value">Stock: {{ producto.stock }}</span>
+                </div>
+            </div>
+            <div class="current-cost-container">
+                <div class="cost-label">Costo actual</div>
+                <div class="cost-value">${{ lotes[0].costo_unitario|round(2) if lotes|length > 0 else producto.costo|round(2) }}</div>
+                <div class="cost-avg-label">Costo promedio: ${{ producto.costo_promedio|round(2) }}</div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Tarjeta de actualización de costo (DESTACADA y MOVIDA AL MEDIO) -->
+    <section class="content-card update-cost-card animate-in highlight-card mb-4" style="animation-delay: 0.1s;">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i class="fas fa-edit"></i>
+                Actualizar Costo del Último Lote
+            </h3>
+        </div>
+        <div class="card-content">
+            <div class="update-message">
+                <i class="fas fa-info-circle info-icon-red"></i>
+                <p>Esta acción modificará el costo del último lote ({{ lotes[0].numero_lote if lotes|length > 0 else 'N/A' }}).</p>
+            </div>
+            
+            <div class="update-form">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label for="nuevo_costo" class="form-label">Nuevo costo ($)</label>
+                            <input type="number" class="form-control form-control-lg" id="nuevo_costo" 
+                                   value="{{ producto.costo }}" step="0.01" min="0">
+                        </div>
+                    </div>
+                    <div class="col-lg-6 d-flex align-items-end">
+                        <input type="hidden" id="afectar_precio" value="0">
+                        <button type="button" id="btnActualizarCosto" class="btn btn-primary btn-update">
+                            Guardar nuevo costo
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Fila con gráfica e historial -->
+    <div class="row mb-4">
+        <!-- Tarjeta de gráfica de evolución de costos -->
+        <div class="col-md-6">
+            <section class="content-card chart-card animate-in h-100" style="animation-delay: 0.2s;">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-chart-line"></i>
+                        Evolución de Costos
+                    </h3>
+                </div>
+                <div class="card-content">
+                    <div class="chart-container">
+                        <canvas id="costHistoryChart"></canvas>
+                    </div>
+                </div>
+            </section>
+        </div>
+        
+        <!-- Tarjeta de historial de lotes -->
+        <div class="col-md-6">
+            <section class="content-card history-card animate-in h-100" style="animation-delay: 0.2s;">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-history"></i>
+                        Historial de Lotes
+                    </h3>
+                </div>
+                <div class="card-content">
+                    <div class="table-scroll">
+                        <table class="table custom-table">
+                            <thead>
+                                <tr>
+                                    <th>Lote</th>
+                                    <th>Fecha</th>
+                                    <th>Costo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for lote in lotes %}
+                                <tr class="{% if loop.first %}highlight-row{% endif %}">
+                                    <td class="lote-cell">
+                                        {{ lote.numero_lote }}
+                                        {% if loop.first %}<span class="latest-badge">Último</span>{% endif %}
+                                    </td>
+                                    <td>{{ lote.fecha_entrada_formateada() }}</td>
+                                    <td class="cost-cell">${{ lote.costo_unitario|round(2) }}</td>
+                                </tr>
+                                {% endfor %}
+                                
+                                {% if not lotes %}
+                                <tr>
+                                    <td colspan="3" class="text-center py-4 empty-message">
+                                        No hay lotes registrados para este producto
+                                    </td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Estilos globales */
+:root {
+    --primary-color: #0071e3;
+    --primary-hover: #0077ED;
+    --secondary-color: #86868b;
+    --success-color: #34c759;
+    --danger-color: #ff3b30;
+    --light-bg: #f5f5f7;
+    --card-bg: #ffffff;
+    --text-primary: #1d1d1f;
+    --text-secondary: #86868b;
+    --border-radius: 12px;
+    --transition-normal: all 0.3s ease;
+    --box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+    --hover-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
+    --chart-color: #8a2be2; /* Color morado para la gráfica */
+    --info-icon-red: #ff6b6b; /* Color rojo claro para el icono de información */
+}
+
+body {
+    background-color: var(--light-bg);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Encabezado de página */
+.page-header {
+    margin-bottom: 2rem;
+}
+
+.page-title {
+    font-size: 2.2rem;
+    font-weight: 600;
+    margin-bottom: 0;
+    letter-spacing: -0.5px;
+}
+
+.back-link {
+    display: flex;
+    align-items: center;
+    color: var(--primary-color);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: var(--transition-normal);
+}
+
+.back-link i {
+    margin-right: 0.5rem;
+}
+
+.back-link:hover {
+    opacity: 0.8;
+}
+
+/* Tarjetas de contenido */
+.content-card {
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--box-shadow);
+    transition: var(--transition-normal);
+}
+
+.content-card:hover {
+    box-shadow: var(--hover-shadow);
+}
+
+.highlight-card {
+    box-shadow: 0 6px 22px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.highlight-card:hover {
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.1);
+}
+
+.highlight-card .card-header {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.card-header {
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.card-title {
+    font-size: 1.3rem;
+    font-weight: 500;
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+
+.card-title i {
+    margin-right: 0.75rem;
+    color: var(--text-primary);
+    opacity: 0.7;
+}
+
+.card-content {
+    padding: 1.5rem;
+}
+
+/* Tarjeta de producto e información */
+.product-info-card {
+    padding: 1.5rem;
+}
+
+.product-image-wrapper {
+    width: 70px;
+    height: 70px;
+    flex-shrink: 0;
+    margin-right: 1.5rem;
+}
+
+.product-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.product-details {
+    flex-grow: 1;
+    margin-right: 2rem;
+}
+
+.product-name {
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin: 0 0 0.5rem 0;
+}
+
+.product-meta {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.product-sku {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-right: 1rem;
+}
+
+.product-category {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.product-stock {
+    margin-top: 0.5rem;
+}
+
+.stock-value {
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+/* Contenedor de costo actual */
+.current-cost-container {
+    padding: 0.75rem 1.5rem;
+    background-color: rgba(0, 0, 0, 0.02);
+    border-radius: 12px;
+    text-align: center;
+    min-width: 200px;
+    margin-left: auto;
+}
+
+.cost-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+}
+
+.cost-value {
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.cost-avg-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+/* Tarjeta de gráfica */
+.chart-card .card-content {
+    padding: 1rem;
+}
+
+.chart-container {
+    height: 250px;
+    position: relative;
+}
+
+/* Tarjeta de historial */
+.table-scroll {
+    max-height: 250px;
+    overflow-y: auto;
+    /* Personalizar scrollbar */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+.table-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+
+.table-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.table-scroll::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+}
+
+/* Tabla personalizada */
+.custom-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.custom-table th {
+    position: sticky;
+    top: 0;
+    background-color: var(--card-bg);
+    z-index: 10;
+    padding: 0.75rem 1rem;
+    font-weight: 500;
+    text-align: left;
+    color: var(--text-secondary);
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.custom-table td {
+    padding: 0.75rem 1rem;
+    vertical-align: middle;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.custom-table tr:last-child td {
+    border-bottom: none;
+}
+
+.highlight-row {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.lote-cell {
+    font-weight: 500;
+}
+
+.cost-cell {
+    font-weight: 600;
+}
+
+.latest-badge {
+    display: inline-block;
+    margin-left: 0.5rem;
+    padding: 0.2rem 0.5rem;
+    background-color: var(--text-secondary);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 400;
+    border-radius: 4px;
+}
+
+/* Tarjeta de actualización */
+.update-cost-card {
+    margin-bottom: 2rem;
+}
+
+.update-message {
+    display: flex;
+    align-items: flex-start;
+    padding: 1rem;
+    background-color: rgba(0, 0, 0, 0.02);
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+/* Ícono de información en color rojo claro */
+.info-icon-red {
+    color: var(--info-icon-red);
+    margin-right: 0.75rem;
+    margin-top: 0.25rem;
+}
+
+.update-message p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.update-form {
+    padding: 0 0.5rem;
+}
+
+.form-group {
+    margin-bottom: 0;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.form-control {
+    display: block;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 8px;
+    background-color: var(--card-bg);
+    transition: var(--transition-normal);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(0, 113, 227, 0.2);
+}
+
+.btn-update {
+    display: block;
+    width: 100%;
+    padding: 0.875rem 1.5rem;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition-normal);
+}
+
+.btn-update:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-1px);
+}
+
+/* Notificación toast */
+.notification-toast {
+    position: fixed;
+    top: 2rem;
+    right: 2rem;
+    display: flex;
+    align-items: flex-start;
+    width: 320px;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    z-index: 1000;
+    animation: slideIn 0.3s forwards, slideOut 0.3s forwards 5s;
+}
+
+.notification-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    background-color: var(--success-color);
+    color: white;
+    padding: 1.5rem 0;
+}
+
+.notification-icon i {
+    font-size: 1.5rem;
+}
+
+.notification-content {
+    flex-grow: 1;
+    padding: 1rem 1.25rem;
+}
+
+.notification-title {
+    margin: 0 0 0.25rem 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.notification-toast.error .notification-icon {
+    background-color: var(--danger-color);
+}
+
+/* Animaciones */
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+.animate-in {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeIn 0.6s forwards;
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.empty-message {
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+/* Ajustes responsive */
+@media (max-width: 767.98px) {
+    .current-cost-container {
+        margin: 1rem 0 0 0;
+        width: 100%;
+    }
+    
+    .product-image-wrapper {
+        width: 60px;
+        height: 60px;
+    }
+}
+</style>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Referencias a elementos del DOM
+    const btnActualizarCosto = document.getElementById('btnActualizarCosto');
+    const nuevoCostoInput = document.getElementById('nuevo_costo');
+    const afectarPrecioInput = document.getElementById('afectar_precio');
+    const notificationEl = document.getElementById('success-notification');
+    const notificationMsg = document.getElementById('notification-message');
+    
+    // Datos históricos de lotes para la gráfica
+    const lotesData = [
+        {% for lote in lotes|reverse %}
+            {
+                fecha: "{{ lote.fecha_entrada_formateada() }}",
+                costo: {{ lote.costo_unitario|round(2) }}
+            }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ];
+    
+    // Inicializar gráfica de costos históricos
+    initCostHistoryChart(lotesData);
+    
+    // Evento para actualizar costo
+    if (btnActualizarCosto && nuevoCostoInput) {
+        btnActualizarCosto.addEventListener('click', function() {
+            // Obtener valores
+            const nuevoCosto = parseFloat(nuevoCostoInput.value);
+            const productoId = {{ producto.id }};
+            
+            // Validaciones básicas
+            if (isNaN(nuevoCosto) || nuevoCosto < 0) {
+                showNotification('Por favor ingresa un costo válido', 'error');
+                return;
+            }
+            
+            // Mostrar indicador de carga
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Actualizando...';
+            this.disabled = true;
+            
+            // Llamar a la API
+            fetch('/api/actualizar-costo', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    producto_id: productoId,
+                    costo: nuevoCosto,
+                    afectar_precio: false // Siempre false
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Mostrar notificación de éxito
+                    showNotification(data.message);
+                    
+                    // Recargar la página después de un breve momento
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1500);
+                } else {
+                    showNotification('Error: ' + data.message, 'error');
+                    resetButton();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Ocurrió un error al actualizar el costo', 'error');
+                resetButton();
+            });
+            
+            function resetButton() {
+                btnActualizarCosto.innerHTML = 'Guardar nuevo costo';
+                btnActualizarCosto.disabled = false;
+            }
+        });
+    }
+    
+    // Función para mostrar notificaciones
+    function showNotification(message, type = 'success') {
+        if (!notificationEl || !notificationMsg) return;
+        
+        // Actualizar contenido y estilo
+        notificationMsg.textContent = message;
+        
+        if (type === 'error') {
+            notificationEl.classList.add('error');
+            document.querySelector('.notification-title').textContent = 'Error';
+        } else {
+            notificationEl.classList.remove('error');
+            document.querySelector('.notification-title').textContent = 'Éxito';
+        }
+        
+        // Mostrar notificación
+        notificationEl.style.display = 'flex';
+        
+        // Reiniciar animación
+        notificationEl.style.animation = 'none';
+        setTimeout(() => {
+            notificationEl.style.animation = 'slideIn 0.3s forwards, slideOut 0.3s forwards 5s';
+        }, 10);
+    }
+    
+    // Función para inicializar gráfica de costos históricos
+    function initCostHistoryChart(data) {
+        // Si no hay suficientes datos, no mostrar gráfica
+        if (!data || data.length < 1) {
+            document.querySelector('.chart-container').innerHTML = 
+                '<div class="empty-chart">No hay suficientes datos históricos para mostrar una gráfica</div>';
+            document.querySelector('.empty-chart').style.cssText = 
+                'display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-secondary);';
+            return;
+        }
+        
+        const ctx = document.getElementById('costHistoryChart');
+        if (!ctx) return;
+        
+        // Preparar datos para la gráfica
+        const labels = data.map(item => item.fecha);
+        const costos = data.map(item => item.costo);
+        
+        // Crear gráfica con color morado
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Costo Unitario',
+                    data: costos,
+                    borderColor: '#8a2be2', // Color morado para la línea
+                    backgroundColor: 'rgba(138, 43, 226, 0.1)', // Color morado con transparencia para el área
+                    borderWidth: 2,
+                    pointBackgroundColor: '#ffffff',
+                    pointBorderColor: '#8a2be2',
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    tension: 0.2,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        titleColor: '#1d1d1f',
+                        bodyColor: '#1d1d1f',
+                        borderColor: 'rgba(0, 0, 0, 0.1)',
+                        borderWidth: 1,
+                        padding: 12,
+                        boxPadding: 6,
+                        usePointStyle: true,
+                        callbacks: {
+                            label: function(context) {
+                                return `Costo: $${context.parsed.y.toFixed(2)}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#86868b'
+                        }
+                    },
+                    y: {
+                        beginAtZero: false,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.03)'
+                        },
+                        ticks: {
+                            color: '#86868b',
+                            callback: function(value) {
+                                return '$' + value;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
