@@ -3,178 +3,155 @@
 {% block title %}Actualizar Costo{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <!-- Notificación de éxito (inicialmente oculta) -->
-    <div id="success-notification" class="notification-toast" style="display: none;">
-        <div class="notification-icon">
-            <i class="fas fa-check-circle"></i>
-        </div>
-        <div class="notification-content">
-            <h6 class="notification-title">Éxito</h6>
-            <p id="notification-message">Costo actualizado correctamente</p>
-        </div>
-    </div>
-    
-    <!-- Encabezado -->
-    <header class="page-header mb-4">
-        <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <h1 class="page-title">Actualizar Costo</h1>
-            </div>
-            <a href="{{ url_for('ver_productos') }}" class="back-link">
-                <i class="fas fa-arrow-left"></i>
-                <span>Volver</span>
-            </a>
-        </div>
-    </header>
-    
-    <!-- Tarjeta de información del producto y costo actual -->
-    <section class="content-card product-info-card animate-in mb-4">
-        <div class="d-flex align-items-center flex-wrap">
-            <div class="product-image-wrapper">
-                <img src="{{ url_for('static', filename='uploads/' + producto.foto) }}" 
-                     alt="{{ producto.nombre }}" 
-                     class="product-image"
-                     onerror="this.src='{{ url_for('static', filename='img/default_product.jpg') }}'">
-            </div>
-            <div class="product-details">
-                <h2 class="product-name">{{ producto.nombre }}</h2>
-                <div class="product-meta">
-                    <span class="product-sku">{{ producto.codigo_barras_externo }}</span>
-                    <span class="product-category">{{ producto.categoria }}</span>
-                </div>
-                <div class="product-stock">
-                    <span class="stock-value">Stock: {{ producto.stock }}</span>
-                </div>
-            </div>
-            <div class="current-cost-container">
-                <div class="cost-label">Costo actual</div>
-                <div class="cost-value">${{ lotes[0].costo_unitario|round(2) if lotes|length > 0 else producto.costo|round(2) }}</div>
-                <div class="cost-avg-label">Costo promedio: ${{ producto.costo_promedio|round(2) }}</div>
-            </div>
-        </div>
-    </section>
-    
-    <!-- Tarjeta de actualización de costo (DESTACADA y MOVIDA AL MEDIO) -->
-    <section class="content-card update-cost-card animate-in highlight-card mb-4" style="animation-delay: 0.1s;">
-        <div class="card-header">
-            <h3 class="card-title">
-                <i class="fas fa-edit"></i>
-                Actualizar Costo del Último Lote
-            </h3>
-        </div>
-        <div class="card-content">
-            <div class="update-message">
-                <i class="fas fa-info-circle info-icon-red"></i>
-                <p>Esta acción modificará el costo del último lote ({{ lotes[0].numero_lote if lotes|length > 0 else 'N/A' }}).</p>
-            </div>
-            
-            <div class="update-form">
-                <div class="row">
-                    <div class="col-lg-6">
-                        <div class="form-group">
-                            <label for="nuevo_costo" class="form-label">Nuevo costo ($)</label>
-                            <input type="number" class="form-control form-control-lg" id="nuevo_costo" 
-                                   value="{{ producto.costo }}" step="0.01" min="0">
-                        </div>
-                    </div>
-                    <div class="col-lg-6 d-flex align-items-end">
-                        <input type="hidden" id="afectar_precio" value="0">
-                        <button type="button" id="btnActualizarCosto" class="btn btn-primary btn-update">
-                            Guardar nuevo costo
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    
-    <!-- Fila con gráfica e historial -->
-    <div class="row mb-4">
-        <!-- Tarjeta de gráfica de evolución de costos -->
-        <div class="col-md-6">
-            <section class="content-card chart-card animate-in h-100" style="animation-delay: 0.2s;">
-                <div class="card-header">
-                    <h3 class="card-title">
-                        <i class="fas fa-chart-line"></i>
-                        Evolución de Costos
-                    </h3>
-                </div>
-                <div class="card-content">
-                    <div class="chart-container">
-                        <canvas id="costHistoryChart"></canvas>
-                    </div>
-                </div>
-            </section>
-        </div>
-        
-        <!-- Tarjeta de historial de lotes -->
-        <div class="col-md-6">
-            <section class="content-card history-card animate-in h-100" style="animation-delay: 0.2s;">
-                <div class="card-header">
-                    <h3 class="card-title">
-                        <i class="fas fa-history"></i>
-                        Historial de Lotes
-                    </h3>
-                </div>
-                <div class="card-content">
-                    <div class="table-scroll">
-                        <table class="table custom-table">
-                            <thead>
-                                <tr>
-                                    <th>Lote</th>
-                                    <th>Fecha</th>
-                                    <th>Costo</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for lote in lotes %}
-                                <tr class="{% if loop.first %}highlight-row{% endif %}">
-                                    <td class="lote-cell">
-                                        {{ lote.numero_lote }}
-                                        {% if loop.first %}<span class="latest-badge">Último</span>{% endif %}
-                                    </td>
-                                    <td>{{ lote.fecha_entrada_formateada() }}</td>
-                                    <td class="cost-cell">${{ lote.costo_unitario|round(2) }}</td>
-                                </tr>
-                                {% endfor %}
-                                
-                                {% if not lotes %}
-                                <tr>
-                                    <td colspan="3" class="text-center py-4 empty-message">
-                                        No hay lotes registrados para este producto
-                                    </td>
-                                </tr>
-                                {% endif %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-        </div>
-    </div>
-</div>
-
 <style>
-/* Estilos globales */
+/* Sistema de Diseño Apple - Adaptado del ajuste_stock.html */
 :root {
-    --primary-color: #0071e3;
-    --primary-hover: #0077ED;
-    --secondary-color: #86868b;
-    --success-color: #34c759;
-    --danger-color: #ff3b30;
-    --light-bg: #f5f5f7;
-    --card-bg: #ffffff;
-    --text-primary: #1d1d1f;
-    --text-secondary: #86868b;
-    --border-radius: 12px;
-    --transition-normal: all 0.3s ease;
-    --box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
-    --hover-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
-    --chart-color: #8a2be2; /* Color morado para la gráfica */
-    --info-icon-red: #ff6b6b; /* Color rojo claro para el icono de información */
+  --font-apple: -apple-system, BlinkMacSystemFont, 'SF Pro Text', Helvetica, Arial, sans-serif;
+  
+  /* Colores esenciales */
+  --text-color: #1d1d1f;
+  --text-secondary: #555555; /* Cambiado a color más oscuro para mejor legibilidad */
+  --background: #ffffff;
+  --light-background: #f5f5f7;
+  --separator: rgba(0, 0, 0, 0.1);
+  --accent: #e52e2e;
+  --accent-hover: #c51818;
+  --accent-light: rgba(229, 46, 46, 0.1);
+  
+  /* Colores de estado */
+  --green: #2ecc71;
+  --orange: #f39c12;
+  --red: #e74c3c;
+  --blue: #1a237e;
+  --light-blue: #4285f4; /* Azul más claro para el ícono */
+  --gray-500: #777777; /* Cambiado a color más oscuro para mejor legibilidad */
+  --gray-600: #86868b;
+  --gray-300: #d1d1d6;
+  --light-red: #ff6b6b; /* Color rojo claro para mensaje */
 }
 
+/* Estilos adaptados de ajuste_stock.html para encabezado y botón volver */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+}
+
+.header-title-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.page-title {
+  font-size: 32px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 0;
+  margin-bottom: 8px;
+  color: var(--text-color);
+}
+
+.page-description {
+  font-size: 17px;
+  color: #86868b;
+  margin-bottom: 28px;
+  max-width: 600px;
+  font-weight: 400;
+}
+
+.header-actions {
+  display: flex;
+  gap: 1rem;
+  padding-top: 8px;
+  align-items: center;
+}
+
+.btn-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 980px;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  height: 44px;
+  white-space: nowrap;
+}
+
+.btn-action i, 
+.btn-action span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  line-height: 1;
+}
+
+.btn-volver {
+  background-color: var(--blue);
+  color: #ffffff;
+  box-shadow: 0 2px 4px rgba(26, 35, 126, 0.3);
+}
+
+.btn-volver:hover {
+  background-color: #151c64;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(26, 35, 126, 0.4);
+  color: #ffffff;
+}
+
+/* Estilo para el botón de guardar en el header */
+.btn-guardar {
+  background-color: var(--accent);
+  color: #ffffff;
+  box-shadow: 0 2px 4px rgba(229, 46, 46, 0.3);
+}
+
+.btn-guardar:hover {
+  background-color: var(--accent-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(229, 46, 46, 0.4);
+  color: #ffffff;
+}
+
+/* Estilo para el mensaje de información en rojo claro */
+.update-message {
+  display: flex;
+  align-items: flex-start;
+  padding: 1rem;
+  background-color: rgba(255, 107, 107, 0.1);
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  border: 1px solid rgba(255, 107, 107, 0.2);
+}
+
+.info-icon-red {
+  color: var(--light-red);
+  margin-right: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.update-message p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--light-red);
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+/* Estilo para el ícono azul claro */
+.edit-icon-blue {
+  color: var(--light-blue);
+}
+
+/* Resto de los estilos originales */
 body {
     background-color: var(--light-bg);
     color: var(--text-primary);
@@ -182,36 +159,6 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
-/* Encabezado de página */
-.page-header {
-    margin-bottom: 2rem;
-}
-
-.page-title {
-    font-size: 2.2rem;
-    font-weight: 600;
-    margin-bottom: 0;
-    letter-spacing: -0.5px;
-}
-
-.back-link {
-    display: flex;
-    align-items: center;
-    color: var(--primary-color);
-    text-decoration: none;
-    font-size: 0.9rem;
-    transition: var(--transition-normal);
-}
-
-.back-link i {
-    margin-right: 0.5rem;
-}
-
-.back-link:hover {
-    opacity: 0.8;
-}
-
-/* Tarjetas de contenido */
 .content-card {
     background-color: var(--card-bg);
     border-radius: var(--border-radius);
@@ -348,116 +295,9 @@ body {
     color: var(--text-secondary);
 }
 
-/* Tarjeta de gráfica */
-.chart-card .card-content {
-    padding: 1rem;
-}
-
-.chart-container {
-    height: 250px;
-    position: relative;
-}
-
-/* Tarjeta de historial */
-.table-scroll {
-    max-height: 250px;
-    overflow-y: auto;
-    /* Personalizar scrollbar */
-    scrollbar-width: thin;
-    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
-}
-
-.table-scroll::-webkit-scrollbar {
-    width: 6px;
-}
-
-.table-scroll::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.table-scroll::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, 0.2);
-    border-radius: 6px;
-}
-
-/* Tabla personalizada */
-.custom-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-}
-
-.custom-table th {
-    position: sticky;
-    top: 0;
-    background-color: var(--card-bg);
-    z-index: 10;
-    padding: 0.75rem 1rem;
-    font-weight: 500;
-    text-align: left;
-    color: var(--text-secondary);
-    border-bottom: 1px solid rgba(0,0,0,0.1);
-}
-
-.custom-table td {
-    padding: 0.75rem 1rem;
-    vertical-align: middle;
-    border-bottom: 1px solid rgba(0,0,0,0.05);
-}
-
-.custom-table tr:last-child td {
-    border-bottom: none;
-}
-
-.highlight-row {
-    background-color: rgba(0, 0, 0, 0.02);
-}
-
-.lote-cell {
-    font-weight: 500;
-}
-
-.cost-cell {
-    font-weight: 600;
-}
-
-.latest-badge {
-    display: inline-block;
-    margin-left: 0.5rem;
-    padding: 0.2rem 0.5rem;
-    background-color: var(--text-secondary);
-    color: white;
-    font-size: 0.7rem;
-    font-weight: 400;
-    border-radius: 4px;
-}
-
 /* Tarjeta de actualización */
 .update-cost-card {
     margin-bottom: 2rem;
-}
-
-.update-message {
-    display: flex;
-    align-items: flex-start;
-    padding: 1rem;
-    background-color: rgba(0, 0, 0, 0.02);
-    border-radius: 8px;
-    margin-bottom: 1.5rem;
-}
-
-/* Ícono de información en color rojo claro */
-.info-icon-red {
-    color: var(--info-icon-red);
-    margin-right: 0.75rem;
-    margin-top: 0.25rem;
-}
-
-.update-message p {
-    margin: 0;
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-    line-height: 1.5;
 }
 
 .update-form {
@@ -489,26 +329,6 @@ body {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 2px rgba(0, 113, 227, 0.2);
-}
-
-.btn-update {
-    display: block;
-    width: 100%;
-    padding: 0.875rem 1.5rem;
-    background-color: var(--primary-color);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-weight: 500;
-    text-align: center;
-    cursor: pointer;
-    transition: var(--transition-normal);
-}
-
-.btn-update:hover {
-    background-color: var(--primary-hover);
-    transform: translateY(-1px);
 }
 
 /* Notificación toast */
@@ -597,6 +417,14 @@ body {
     font-style: italic;
 }
 
+/* Unidad de costo */
+.unit-label {
+    display: inline-block;
+    margin-left: 5px;
+    font-weight: normal;
+    color: var(--text-secondary);
+}
+
 /* Ajustes responsive */
 @media (max-width: 767.98px) {
     .current-cost-container {
@@ -608,88 +436,448 @@ body {
         width: 60px;
         height: 60px;
     }
+    
+    .header-actions {
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+    }
+    
+    .btn-action {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Notificación centrada - para formato inválido */
+.notification-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.notification-container {
+    background-color: white;
+    border-radius: 14px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    width: 350px;
+    max-width: 90%;
+    padding: 24px;
+    text-align: center;
+    transform: translateY(20px);
+    transition: transform 0.3s ease;
+}
+
+.notification-icon {
+    color: var(--light-red);
+    font-size: 32px;
+    margin-bottom: 16px;
+}
+
+.notification-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.notification-message {
+    font-size: 15px;
+    margin-bottom: 16px;
+    color: var(--text-secondary);
+}
+
+.notification-example {
+    background-color: #f5f5f7;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.notification-button {
+    background-color: var(--light-blue);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 20px;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.notification-button:hover {
+    background-color: #0055b3;
+}
+
+.notification-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.notification-overlay.active .notification-container {
+    transform: translateY(0);
 }
 </style>
 
+<div class="container py-5">
+    <!-- Notificación de éxito (inicialmente oculta) -->
+    <div id="success-notification" class="notification-toast" style="display: none;">
+        <div class="notification-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="notification-content">
+            <h6 class="notification-title">Éxito</h6>
+            <p id="notification-message">Costo actualizado correctamente</p>
+        </div>
+    </div>
+    
+    <!-- Notificación centrada - Añadido para formato inválido -->
+    <div class="notification-overlay" id="notificationOverlay">
+        <div class="notification-container">
+            <div class="notification-icon">
+                <i class="fas fa-exclamation-circle"></i>
+            </div>
+            <div class="notification-title">Formato incorrecto</div>
+            <div class="notification-message">Debe incluir un dígito antes del punto decimal.</div>
+            <div class="notification-example">
+                <span style="font-weight: 600;">Ejemplo:</span> 0.123 <span style="color: #4CAF50;">✓</span>
+                &nbsp;&nbsp;&nbsp;
+                <span style="text-decoration: line-through;">.123</span> <span style="color: #FF5252;">✗</span>
+            </div>
+            <button id="notificationButton" class="notification-button">Entendido</button>
+        </div>
+    </div>
+    
+    <!-- Encabezado - MODIFICADO PARA COINCIDIR CON AJUSTE_STOCK.HTML -->
+    <div class="page-header">
+        <div class="header-title-container">
+            <h1 class="page-title">Cambiar Costos</h1>
+            <p class="page-description">Gestiona el costo actual de tu producto</p>
+        </div>
+        <div class="header-actions">
+            <!-- Botón Volver con icono de flecha -->
+            <a href="{{ url_for('ver_productos') }}" class="btn-action btn-volver">
+                <i class="fas fa-arrow-left"></i>
+                <span>Volver</span>
+            </a>
+            <!-- Botón de Guardar movido al encabezado -->
+            <button type="button" id="btnActualizarCosto" class="btn-action btn-guardar">
+                <span>Guardar</span>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Tarjeta de información del producto y costo actual -->
+    <section class="content-card product-info-card animate-in mb-4">
+        <div class="d-flex align-items-center flex-wrap">
+            <div class="product-image-wrapper">
+                <img src="{{ url_for('static', filename='uploads/' + producto.foto) }}" 
+                     alt="{{ producto.nombre }}" 
+                     class="product-image"
+                     onerror="this.src='{{ url_for('static', filename='img/default_product.jpg') }}'">
+            </div>
+            <div class="product-details">
+                <h2 class="product-name">{{ producto.nombre }}</h2>
+                <div class="product-meta">
+                    <span class="product-sku">{{ producto.codigo_barras_externo }}</span>
+                    <span class="product-category">{{ producto.categoria }}</span>
+                </div>
+                <div class="product-stock">
+                    <span class="stock-value">Stock: <span id="stockValue">{{ producto.stock }}</span></span>
+                </div>
+            </div>
+            <div class="current-cost-container">
+                <div class="cost-label">Costo actual</div>
+                <div class="cost-value" id="costoActualValue">${{ lotes[0].costo_unitario|round(2) if lotes|length > 0 else producto.costo|round(2) }}</div>
+                <div class="cost-avg-label">Costo promedio: <span id="costoPromedioValue">${{ producto.costo_promedio|round(2) }}</span></div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Tarjeta de actualización de costo - MODIFICADA PARA MENSAJE EN ROJO CLARO -->
+    <section class="content-card update-cost-card animate-in highlight-card mb-4" style="animation-delay: 0.1s;">
+        <div class="card-header">
+            <h3 class="card-title">
+                <!-- Ícono con color azul claro -->
+                <i class="fas fa-edit edit-icon-blue"></i>
+                Actualizar Costo del Último Lote
+            </h3>
+        </div>
+        <div class="card-content">
+            <!-- Mensaje con estilo rojo claro -->
+            <div class="update-message">
+                <i class="fas fa-info-circle info-icon-red"></i>
+                <p>Esta acción modificará el costo del último lote ({{ lotes[0].numero_lote if lotes|length > 0 else 'N/A' }}).</p>
+            </div>
+            
+            <div class="update-form">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label for="nuevo_costo" class="form-label">
+                                Nuevo costo (por 
+                                {% if producto.unidad and producto.unidad != 'NONE' %}
+                                    {{ producto.unidad }}
+                                {% else %}
+                                    pieza
+                                {% endif %})
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="text" class="form-control form-control-lg" id="nuevo_costo" 
+                                       value="{{ producto.costo|round(2) }}" 
+                                       oninput="formatCostRealtime(this)">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 d-flex align-items-end">
+                        <input type="hidden" id="afectar_precio" value="0">
+                        <input type="hidden" id="costo_real" name="costo_real" value="{{ producto.costo|round(2) }}">
+                        <!-- El botón original está oculto pero mantenemos por compatibilidad -->
+                        <button type="button" id="btnActualizarCostoOriginal" class="btn btn-primary" style="display:none;">
+                            Guardar nuevo costo
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- NOTA: Eliminadas las secciones de Evolución de costos y Historial como solicitado -->
+</div>
+
 <!-- Scripts -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Referencias a elementos del DOM
     const btnActualizarCosto = document.getElementById('btnActualizarCosto');
+    const btnActualizarCostoOriginal = document.getElementById('btnActualizarCostoOriginal');
     const nuevoCostoInput = document.getElementById('nuevo_costo');
+    const costoReal = document.getElementById('costo_real');
     const afectarPrecioInput = document.getElementById('afectar_precio');
     const notificationEl = document.getElementById('success-notification');
     const notificationMsg = document.getElementById('notification-message');
+    const notificationOverlay = document.getElementById('notificationOverlay');
+    const notificationButton = document.getElementById('notificationButton');
     
-    // Datos históricos de lotes para la gráfica
-    const lotesData = [
-        {% for lote in lotes|reverse %}
-            {
-                fecha: "{{ lote.fecha_entrada_formateada() }}",
-                costo: {{ lote.costo_unitario|round(2) }}
-            }{% if not loop.last %},{% endif %}
-        {% endfor %}
-    ];
+    // =========================================
+    // Formateo de valores numéricos con comas
+    // =========================================
     
-    // Inicializar gráfica de costos históricos
-    initCostHistoryChart(lotesData);
-    
-    // Evento para actualizar costo
-    if (btnActualizarCosto && nuevoCostoInput) {
-        btnActualizarCosto.addEventListener('click', function() {
-            // Obtener valores
-            const nuevoCosto = parseFloat(nuevoCostoInput.value);
-            const productoId = {{ producto.id }};
-            
-            // Validaciones básicas
-            if (isNaN(nuevoCosto) || nuevoCosto < 0) {
-                showNotification('Por favor ingresa un costo válido', 'error');
-                return;
-            }
-            
-            // Mostrar indicador de carga
-            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Actualizando...';
-            this.disabled = true;
-            
-            // Llamar a la API
-            fetch('/api/actualizar-costo', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    producto_id: productoId,
-                    costo: nuevoCosto,
-                    afectar_precio: false // Siempre false
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Mostrar notificación de éxito
-                    showNotification(data.message);
-                    
-                    // Recargar la página después de un breve momento
-                    setTimeout(() => {
-                        location.reload();
-                    }, 1500);
-                } else {
-                    showNotification('Error: ' + data.message, 'error');
-                    resetButton();
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showNotification('Ocurrió un error al actualizar el costo', 'error');
-                resetButton();
-            });
-            
-            function resetButton() {
-                btnActualizarCosto.innerHTML = 'Guardar nuevo costo';
-                btnActualizarCosto.disabled = false;
-            }
+    // Función simple para formatear dinero con comas
+    function formatMoney(number) {
+        if (typeof number === 'string') {
+            number = parseFloat(number.replace(/[^\d.-]/g, ''));
+        }
+        
+        if (isNaN(number)) {
+            return '$0.00';
+        }
+        
+        // Usar toLocaleString para formatear con comas
+        return '$' + number.toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
         });
+    }
+    
+    // Formatear los valores iniciales
+    const costoActualEl = document.getElementById('costoActualValue');
+    if (costoActualEl) {
+        const valor = parseFloat(costoActualEl.textContent.replace('$', ''));
+        costoActualEl.textContent = formatMoney(valor);
+    }
+    
+    const costoPromedioEl = document.getElementById('costoPromedioValue');
+    if (costoPromedioEl) {
+        const valor = parseFloat(costoPromedioEl.textContent.replace('$', ''));
+        costoPromedioEl.textContent = formatMoney(valor);
+    }
+    
+    // Formatear stock con comas para números grandes
+    const stockValueEl = document.getElementById('stockValue');
+    if (stockValueEl) {
+        const stockValue = parseFloat(stockValueEl.textContent);
+        if (!isNaN(stockValue)) {
+            // Si es un número entero, formatear con comas para los miles
+            if (Number.isInteger(stockValue)) {
+                stockValueEl.textContent = stockValue.toLocaleString('en-US');
+            } else {
+                // Si tiene decimales, mantener máximo 3 decimales
+                stockValueEl.textContent = stockValue.toLocaleString('en-US', {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 3
+                });
+            }
+        }
+    }
+    
+    // Función para mostrar notificación formato inválido
+    window.showFormatNotification = function() {
+        if (notificationOverlay) {
+            notificationOverlay.classList.add('active');
+            
+            // Auto-cerrar después de 5 segundos
+            setTimeout(() => {
+                hideFormatNotification();
+            }, 5000);
+        }
+    };
+    
+    // Función para ocultar notificación
+    window.hideFormatNotification = function() {
+        if (notificationOverlay) {
+            notificationOverlay.classList.remove('active');
+        }
+    };
+    
+    // Cerrar notificación al hacer clic en el botón
+    if (notificationButton) {
+        notificationButton.addEventListener('click', hideFormatNotification);
+    }
+    
+    // =========================================
+    // FORMATEO DE COSTO
+    // =========================================
+    // Función para formatear costo en tiempo real
+    window.formatCostRealtime = function(input) {
+        let value = input.value;
+        
+        // Si está vacío, permitir temporalmente
+        if (value === '') {
+            return;
+        }
+        
+        // Verificar si comienza con punto decimal
+        if (value.startsWith('.')) {
+            // Cancelar el cambio y mostrar notificación
+            input.value = input.defaultValue || '';
+            // Mostrar notificación de formato
+            showFormatNotification();
+            return;
+        }
+        
+        // Eliminar comas y caracteres no numéricos (excepto punto)
+        value = value.replace(/,/g, "").replace(/[^\d.]/g, "");
+        
+        // Limitar a 2 decimales
+        const patronMoneda = /^(\d*)(\.?)(\d{0,2})/;
+        const match = value.match(patronMoneda);
+        
+        if (match) {
+            let intPart = match[1] || '0'; // Parte entera (por defecto '0')
+            let dot = match[2];           // Punto decimal
+            let decPart = match[3];       // Parte decimal
+            
+            // Formatear con separador de miles
+            let formattedInt = intPart ? Number(intPart).toLocaleString("en-US") : "0";
+            
+            // Construir el resultado final
+            let result = formattedInt;
+            if (dot) {
+                result += ".";
+            }
+            result += decPart;
+            
+            // Actualizar el valor del input
+            input.value = result;
+            
+            // Actualizar campo oculto con el valor numérico real (sin comas)
+            if (costoReal) {
+                // Convertir a valor numérico sin formato
+                let numericValue = parseFloat((intPart || "0") + "." + (decPart || "0"));
+                costoReal.value = numericValue.toFixed(2);
+            }
+            
+            // Actualizar defaultValue para comparaciones futuras
+            input.defaultValue = result;
+        }
+    }
+    
+    // Inicializar formato del campo de costo
+    if (nuevoCostoInput) {
+        formatCostRealtime(nuevoCostoInput);
+    }
+    
+    // Función para actualizar costo
+    function actualizarCosto() {
+        // Obtener valores
+        const nuevoCosto = parseFloat(costoReal.value || nuevoCostoInput.value.replace(/,/g, ''));
+        const productoId = {{ producto.id }};
+        
+        // Validaciones básicas
+        if (isNaN(nuevoCosto) || nuevoCosto < 0) {
+            showNotification('Por favor ingresa un costo válido', 'error');
+            return;
+        }
+        
+        // Verificar si comienza con punto decimal
+        if (nuevoCostoInput.value.startsWith('.')) {
+            showFormatNotification();
+            return;
+        }
+        
+        // Mostrar indicador de carga
+        btnActualizarCosto.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        btnActualizarCosto.disabled = true;
+        
+        // Llamar a la API
+        fetch('/api/actualizar-costo', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                producto_id: productoId,
+                costo: nuevoCosto,
+                afectar_precio: false // Siempre false
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Mostrar notificación de éxito
+                showNotification(data.message);
+                
+                // Recargar la página después de un breve momento
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
+            } else {
+                showNotification('Error: ' + data.message, 'error');
+                resetButton();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Ocurrió un error al actualizar el costo', 'error');
+            resetButton();
+        });
+    }
+    
+    function resetButton() {
+        btnActualizarCosto.innerHTML = '<span>Guardar</span>';
+        btnActualizarCosto.disabled = false;
+    }
+    
+    // Asignar eventos a ambos botones (el visible y el oculto por compatibilidad)
+    if (btnActualizarCosto) {
+        btnActualizarCosto.addEventListener('click', actualizarCosto);
+    }
+    
+    if (btnActualizarCostoOriginal) {
+        btnActualizarCostoOriginal.addEventListener('click', actualizarCosto);
     }
     
     // Función para mostrar notificaciones
@@ -715,93 +903,6 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => {
             notificationEl.style.animation = 'slideIn 0.3s forwards, slideOut 0.3s forwards 5s';
         }, 10);
-    }
-    
-    // Función para inicializar gráfica de costos históricos
-    function initCostHistoryChart(data) {
-        // Si no hay suficientes datos, no mostrar gráfica
-        if (!data || data.length < 1) {
-            document.querySelector('.chart-container').innerHTML = 
-                '<div class="empty-chart">No hay suficientes datos históricos para mostrar una gráfica</div>';
-            document.querySelector('.empty-chart').style.cssText = 
-                'display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-secondary);';
-            return;
-        }
-        
-        const ctx = document.getElementById('costHistoryChart');
-        if (!ctx) return;
-        
-        // Preparar datos para la gráfica
-        const labels = data.map(item => item.fecha);
-        const costos = data.map(item => item.costo);
-        
-        // Crear gráfica con color morado
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Costo Unitario',
-                    data: costos,
-                    borderColor: '#8a2be2', // Color morado para la línea
-                    backgroundColor: 'rgba(138, 43, 226, 0.1)', // Color morado con transparencia para el área
-                    borderWidth: 2,
-                    pointBackgroundColor: '#ffffff',
-                    pointBorderColor: '#8a2be2',
-                    pointBorderWidth: 2,
-                    pointRadius: 4,
-                    pointHoverRadius: 6,
-                    tension: 0.2,
-                    fill: true
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                        titleColor: '#1d1d1f',
-                        bodyColor: '#1d1d1f',
-                        borderColor: 'rgba(0, 0, 0, 0.1)',
-                        borderWidth: 1,
-                        padding: 12,
-                        boxPadding: 6,
-                        usePointStyle: true,
-                        callbacks: {
-                            label: function(context) {
-                                return `Costo: $${context.parsed.y.toFixed(2)}`;
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    x: {
-                        grid: {
-                            display: false
-                        },
-                        ticks: {
-                            color: '#86868b'
-                        }
-                    },
-                    y: {
-                        beginAtZero: false,
-                        grid: {
-                            color: 'rgba(0, 0, 0, 0.03)'
-                        },
-                        ticks: {
-                            color: '#86868b',
-                            callback: function(value) {
-                                return '$' + value;
-                            }
-                        }
-                    }
-                }
-            }
-        });
     }
 });
 </script>
