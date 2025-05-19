@@ -5,511 +5,1038 @@
 {% endblock %}
 
 {% block content %}
+<style>
+  /* Estilos para la foto */
+  .foto-container {
+    text-align: left;
+    margin-bottom: 1rem;
+    position: relative;
+  }
+
+  .foto-placeholder {
+    width: 100%;
+    height: 400px;
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    margin: 0 auto 1rem auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #999;
+    font-weight: 600;
+    position: relative;
+    background-color: #fff;
+    transition: all 0.3s ease;
+  }
+  
+  /* Drag & drop */
+  .foto-placeholder.dragover {
+    background-color: #f1f8ff;
+    border-color: #3498db;
+    border-style: solid;
+  }
+  
+  .drop-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.2rem;
+    color: #3498db;
+    font-weight: bold;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .foto-placeholder.dragover .drop-message {
+    opacity: 1;
+  }
+  
+  .foto-placeholder img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+  
+  .remove-image {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: rgba(255,255,255,0.8);
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    line-height: 28px;
+    text-align: center;
+    padding: 0;
+    display: none;
+  }
+  
+  .foto-placeholder.has-image .remove-image {
+    display: block;
+  }
+
+  /* Menu (3 dots) */
+  .no-image-icon {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #777;
+    color: #fff;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+
+  .foto-dropdown {
+    position: absolute;
+    top: 40px;
+    right: 5px;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    z-index: 100;
+    display: none;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+  }
+  
+  .foto-dropdown .dropdown-item {
+    display: block;
+    width: 100%;
+    border: none;
+    background: transparent;
+    padding: 0.5rem 1rem;
+    text-align: left;
+    cursor: pointer;
+  }
+  
+  .foto-dropdown .dropdown-item:hover {
+    background-color: #f0f0f0;
+  }
+
+  /* Form Controls */
+  .form-group {
+    margin-bottom: 1.5rem;
+    position: relative;
+  }
+
+  .form-control {
+    padding: 0.75rem;
+    font-size: 1rem;
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-weight: 600;
+  }
+
+  /* Progress bar */
+  .image-upload-progress {
+    width: 100%;
+    height: 4px;
+    background-color: #f3f3f3;
+    position: relative;
+    margin-top: 10px;
+    border-radius: 2px;
+    overflow: hidden;
+    display: none;
+  }
+  
+  .image-upload-progress-bar {
+    height: 100%;
+    background-color: #4CAF50;
+    width: 0%;
+    border-radius: 2px;
+    transition: width 0.3s;
+  }
+
+  /* Floating labels */
+  .form-group {
+    margin-bottom: 1rem;
+    position: relative;
+    padding-top: 1.2rem;
+  }
+  
+  ::placeholder {
+    text-transform: uppercase;
+    font-weight: normal;
+    color: #888;
+    font-size: 0.8rem;
+  }
+  
+  .form-control {
+    text-transform: uppercase;
+    font-weight: bold;
+    padding: 0.5rem;
+    line-height: 1.5;
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.85rem;
+  }
+
+  .floating-label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: 0.85rem;
+    color: #888;
+    text-transform: capitalize;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+</style>
+
 <h1>Editar Producto</h1>
 
-<form method="POST" action="">
-  <!-- 1. Nombre -->
+<form method="POST" action="" enctype="multipart/form-data">
+  <!-- CAMPOS OCULTOS PARA PRESERVAR VALORES -->
+  <input type="hidden" name="stock" value="{{ producto.stock }}">
+  <input type="hidden" name="costo" value="{{ producto.costo }}">
+  <input type="hidden" name="viene_en_lotes" value="{{ '1' if producto.viene_en_lotes else '0' }}">
+  <input type="hidden" name="num_lotes" value="{{ producto.num_lotes or 1 }}">
+  <input type="hidden" name="mismo_stock_lotes" value="{{ '1' if producto.mismo_stock_lotes else '0' }}">
+  <input type="hidden" name="usa_codigo_barras" value="{{ '1' if producto.usa_codigo_barras else '0' }}">
+  <input type="hidden" name="codigo_interno" value="{{ producto.codigo_interno or '' }}">
+  <input type="hidden" name="unidad" value="{{ producto.unidad or 'pieza' }}">
+  <input type="hidden" name="es_favorito" value="{{ '1' if producto.es_favorito else '0' }}">
+  <input type="hidden" name="esta_a_la_venta" value="{{ '1' if producto.esta_a_la_venta else '0' }}">
+  <input type="hidden" name="has_caducidad" value="{{ '1' if producto.has_caducidad else '0' }}">
+  <input type="hidden" name="metodo_caducidad" value="{{ producto.metodo_caducidad or '' }}">
+  
+  <!-- Foto del Producto -->
   <div class="mb-3">
-    <label for="nombre" class="form-label fw-bold">Nombre <span style="color:red;">*</span></label>
+    <label class="form-label">Imagen del Producto</label>
+    <div class="foto-container">
+      <div class="foto-placeholder" id="fotoPlaceholder">
+        {% if producto.foto %}
+          <img src="{{ url_for('static', filename='uploads/' + producto.foto) }}" alt="Imagen del Producto">
+          <button type="button" class="remove-image" id="removeImageBtn">&times;</button>
+        {% else %}
+          <div class="drop-message">Suelta tu imagen aquí</div>
+          <button type="button" class="no-image-icon" id="btnCargarFoto">&#8942;</button>
+          <div class="foto-dropdown" id="fotoDropdown" style="display:none;">
+            <button type="button" class="dropdown-item btn btn-secondary" id="dropdownCargarFoto">Cargar imagen</button>
+            <button type="button" class="dropdown-item btn btn-secondary" id="dropdownGenerarIA">Generar con IA</button>
+          </div>
+        {% endif %}
+      </div>
+      <input type="file" id="fotoInput" name="foto" style="display:none;" accept="image/*">
+      <input type="hidden" name="ia_foto_filename" id="ia_foto_filename" value="">
+      <input type="hidden" name="displayed_image_url" id="displayed_image_url" value="{% if producto.foto %}{{ url_for('static', filename='uploads/' + producto.foto) }}{% endif %}">
+      <div class="image-upload-progress">
+        <div class="image-upload-progress-bar" id="imageProgressBar"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Nombre -->
+  <div class="form-group">
+    <div class="floating-label" style="display: {% if producto.nombre %}block{% else %}none{% endif %};" id="nombreFloatingLabel">Nombre del producto</div>
     <input
       type="text"
       class="form-control"
       id="nombre"
       name="nombre"
       value="{{ producto.nombre }}"
+      placeholder="NOMBRE DEL PRODUCTO"
       required
     >
-    <small class="text-muted">Nombre comercial o descriptivo.</small>
   </div>
 
-  <!-- 2. ¿Viene en Lotes? -->
-  <div class="form-check form-switch mb-3">
+  <!-- Código de Barras -->
+  <div class="form-group">
+    <div class="floating-label" style="display: {% if producto.codigo_barras_externo %}block{% else %}none{% endif %};" id="codigo_barras_externoFloatingLabel">Código de barras (SKU)</div>
     <input
-      class="form-check-input"
-      type="checkbox"
-      id="vieneEnLotes"
-      name="vieneEnLotes"
-      {% if producto.viene_en_lotes %}checked{% endif %}
-    >
-    <label class="form-check-label fw-bold" for="vieneEnLotes">
-      ¿Este producto viene en lotes?
-    </label>
-    <small class="text-muted d-block">
-      Activa si este producto se maneja con múltiples lotes.
-    </small>
-  </div>
-
-  <!-- BLOQUE LOTES (si “vieneEnLotes” = true) -->
-  <div id="bloqueLotes" style="display:none; border:1px solid #ddd; padding:10px; margin-bottom:1rem;">
-    <div class="row g-3 align-items-end mb-3">
-      <div class="col-md-4">
-        <label for="numLotes" class="form-label fw-bold">
-          Número de Lotes <span style="color:red;">*</span>
-        </label>
-        <input
-          type="number"
-          class="form-control"
-          id="numLotes"
-          name="numLotes"
-          min="1"
-          value="{{ producto.num_lotes or 1 }}"
-        >
-      </div>
-      <div class="col-md-8">
-        <div class="form-check form-switch">
-          <input
-            class="form-check-input"
-            type="checkbox"
-            id="mismoStockParaTodos"
-            name="mismoStockParaTodos"
-            {% if producto.mismo_stock_lotes %}checked{% endif %}
-          >
-          <label class="form-check-label fw-bold" for="mismoStockParaTodos">
-            ¿Todos los lotes traen la misma cantidad?
-          </label>
-          <small class="text-muted d-block">
-            Si activas, hay un solo “stock por lote.”  
-            Si no, cada lote tendrá su propio stock y unidad.
-          </small>
-        </div>
-      </div>
-    </div>
-
-    <!-- OPCIÓN A: Stock/Unidad Único -->
-    <div id="stockUnico" style="display:none;">
-      <div class="row g-3 align-items-end">
-        <div class="col-md-4">
-          <label for="stockPorLote" class="form-label fw-bold">
-            Stock Inicial (por Lote)
-          </label>
-          <input
-            type="number"
-            class="form-control"
-            id="stockPorLote"
-            name="stockPorLote"
-            min="0"
-            value="{{ producto.stock_por_lote or 0 }}"
-          >
-        </div>
-        <div class="col-md-4">
-          <label for="unidadMedidaLote" class="form-label fw-bold">Unidades</label>
-          <select
-            class="form-select"
-            id="unidadMedidaLote"
-            name="unidadMedidaLote"
-          >
-            <option value="piezas" {% if producto.unidad_lote == 'piezas' %}selected{% endif %}>Piezas</option>
-            <option value="kilos" {% if producto.unidad_lote == 'kilos' %}selected{% endif %}>Kilos</option>
-            <!-- etc. -->
-          </select>
-        </div>
-      </div>
-    </div>
-
-    <!-- OPCIÓN B: Distinto stock por lote -->
-    <div id="stockPorCadaLote" style="display:none;">
-      <p class="fw-bold mb-2">Editar cada lote:</p>
-      <div id="contenedorLotes">
-        <!-- Si deseas mostrar la info de lotes existentes, 
-             haz algo como:
-             {% for lote in producto.lotes %}
-               <p>Lote #{{ loop.index }} => Stock: {{ lote.stock }} / Unidad: {{ lote.unidad }}</p>
-             {% endfor %}
-        -->
-      </div>
-    </div>
-  </div>
-
-  <!-- STOCK NORMAL (si “vieneEnLotes”=false) -->
-  <div id="stockNormal">
-    <div class="mb-3">
-      <label for="stock" class="form-label fw-bold">Stock</label>
-      <input 
-        type="number"
-        class="form-control"
-        id="stock"
-        name="stock"
-        value="{{ producto.stock or 0 }}"
-      >
-    </div>
-    <div class="mb-3">
-      <label for="unidadMedida" class="form-label fw-bold">Unidad</label>
-      <select
-        class="form-select"
-        id="unidadMedida"
-        name="unidadMedida"
-      >
-        <option value="piezas" {% if producto.unidad == 'piezas' %}selected{% endif %}>Piezas</option>
-        <option value="kilos" {% if producto.unidad == 'kilos' %}selected{% endif %}>Kilos</option>
-        <!-- etc. -->
-      </select>
-    </div>
-  </div>
-
-  <!-- COSTO y PRECIO (por X) -->
-  <div class="mb-3">
-    <label class="form-label fw-bold" id="costoLabel">
-      Costo (por <span id="costoLabelUnit">pieza</span>)
-    </label>
-    <input
-      type="number"
-      step="0.01"
+      type="text"
       class="form-control"
-      id="costo"
-      name="costo"
-      value="{{ producto.costo or 0.0 }}"
+      id="codigo_barras_externo"
+      name="codigo_barras_externo"
+      value="{{ producto.codigo_barras_externo }}"
+      placeholder="CÓDIGO DE BARRAS / SKU"
     >
+    <div class="invalid-feedback" id="skuFeedback" style="display: none;">
+      Este código de barras ya existe. Por favor, usa uno diferente.
+    </div>
   </div>
-  <div class="mb-3">
-    <label class="form-label fw-bold" id="precioLabel">
-      Precio de Venta (por <span id="precioLabelUnit">pieza</span>)
-    </label>
+
+  <!-- Marca -->
+  <div class="form-group">
+    <div class="floating-label" style="display: {% if producto.marca %}block{% else %}none{% endif %};" id="marcaFloatingLabel">Marca</div>
     <input
-      type="number"
-      step="0.01"
+      type="text"
       class="form-control"
-      id="precio_venta"
-      name="precio_venta"
-      value="{{ producto.precio_venta or 0.0 }}"
+      id="marca"
+      name="marca"
+      value="{{ producto.marca }}"
+      placeholder="MARCA DEL PRODUCTO"
     >
   </div>
 
   <!-- Categoría -->
   <div class="mb-3">
-    <label for="categoria" class="form-label fw-bold">Categoría (opcional)</label>
+    <label for="categoria_existente" class="form-label mb-2">Categoría</label>
+    <select class="form-select" name="categoria_existente" id="categoria_existente" required>
+      <option value="" disabled{% if not producto.categoria %} selected{% endif %} hidden>-SELECCIONA UNA CATEGORÍA-</option>
+      {% for category in categories %}
+        <option value="{{ category.nombre }}" 
+                data-custom-properties='{"color": "{{ category.color }}"}'
+                {% if category.nombre == producto.categoria %}selected{% endif %}>
+          {{ category.nombre|capitalize }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <!-- Precio -->
+  <div class="form-group">
+    <div class="floating-label" style="display: {% if producto.precio_venta %}block{% else %}none{% endif %};" id="precio_ventaFloatingLabel">Precio de venta</div>
     <input
       type="text"
       class="form-control"
-      id="categoria"
-      name="categoria"
-      value="{{ producto.categoria or '' }}"
+      id="precio_venta"
+      name="precio_venta"
+      value="{% if producto.precio_venta %}${{ "%.2f"|format(producto.precio_venta) }}{% endif %}"
+      placeholder="PRECIO DE VENTA"
+      oninput="formatCostRealtime(this)"
+      required
     >
   </div>
 
-  <!-- ¿Código de Barras? -->
-  <div class="form-check form-switch mb-3">
-    <input
-      class="form-check-input"
-      type="checkbox"
-      id="usaCodigoBarras"
-      name="usaCodigoBarras"
-      {% if producto.usa_codigo_barras %}checked{% endif %}
-    >
-    <label class="form-check-label fw-bold" for="usaCodigoBarras">
-      ¿Este producto maneja código de barras?
-    </label>
-  </div>
-
-  <!-- Opciones CB -->
-  <div id="opcionesCodigo" style="display:none;">
-    <!-- Campo externo -->
-    <div class="mb-3" id="campoCodigoExterno">
-      <label for="codigo_barras_externo" class="form-label fw-bold">
-        Código de Barras (externo)
-      </label>
-      <input
-        type="text"
-        class="form-control"
-        id="codigo_barras_externo"
-        name="codigo_barras_externo"
-        value="{{ producto.codigo_barras_externo or '' }}"
-      >
-    </div>
-
-    <div class="form-check form-switch mb-3">
-      <input
-        class="form-check-input"
-        type="checkbox"
-        id="crearInterno"
-        name="crearInterno"
-        {% if producto.codigo_interno %}checked{% endif %}
-      >
-      <label class="form-check-label fw-bold" for="crearInterno">
-        ¿Crear/usar un código de barras interno?
-      </label>
-    </div>
-
-    <div id="bloqueGenerar" style="display:none;">
-      <button type="button" class="btn btn-outline-secondary" id="btnGenerarCodigo">
-        Generar Código Interno
-      </button>
-      <div class="mt-2">
-        <label for="codigo_interno" class="form-label fw-bold">
-          Código Interno Generado:
-        </label>
-        <input
-          type="text"
-          class="form-control"
-          id="codigo_interno"
-          name="codigo_interno"
-          readonly
-          value="{{ producto.codigo_interno or '' }}"
-        >
-      </div>
-    </div>
-  </div>
-
-  <!-- Config Avanzada -->
-  <div class="mt-3">
-    <button type="button" class="btn btn-light" id="toggleAvanzado">
-      Mostrar Configuración Avanzada
-    </button>
-  </div>
-  <div id="configAvanzada" style="display:none; border:1px solid #ddd; padding:10px;">
-    <h5 class="mb-3">Configuración Avanzada</h5>
-
-    <!-- Proveedor -->
-    <div class="mb-3">
-      <label for="proveedor" class="form-label fw-bold">
-        Proveedor (opcional)
-      </label>
-      <input
-        type="text"
-        class="form-control"
-        id="proveedor"
-        name="proveedor"
-        value="{{ producto.proveedor or '' }}"
-      >
-    </div>
-
-    <!-- Ubicación -->
-    <div class="mb-3">
-      <label for="ubicacion" class="form-label fw-bold">
-        Ubicación (opcional)
-      </label>
-      <input
-        type="text"
-        class="form-control"
-        id="ubicacion"
-        name="ubicacion"
-        value="{{ producto.ubicacion or '' }}"
-      >
-    </div>
-
-    <!-- Fecha de Caducidad -->
-    <div class="mb-3">
-      <label for="fecha_caducidad" class="form-label fw-bold">
-        Fecha de Caducidad (opcional)
-      </label>
-      <input
-        type="date"
-        class="form-control"
-        id="fecha_caducidad"
-        name="fecha_caducidad"
-        value="{{ producto.fecha_caducidad|format_date('YYYY-MM-DD') if producto.fecha_caducidad else '' }}"
-      >
-    </div>
-
-    <!-- Impuesto -->
-    <div class="mb-3">
-      <label for="tasa_impuesto" class="form-label fw-bold">
-        Tasa de Impuesto (opcional)
-      </label>
-      <input
-        type="number"
-        step="0.01"
-        class="form-control"
-        id="tasa_impuesto"
-        name="tasa_impuesto"
-        value="{{ producto.tasa_impuesto or 0.0 }}"
-      >
-    </div>
-
-    <!-- Descuento -->
-    <div class="mb-3">
-      <label for="descuento" class="form-label fw-bold">
-        Descuento Promocional % (opcional)
-      </label>
-      <input
-        type="number"
-        step="0.01"
-        class="form-control"
-        id="descuento"
-        name="descuento"
-        value="{{ producto.descuento or 0.0 }}"
-      >
-    </div>
-  </div>
-
-  <!-- Botón final (aprobar vs. guardar) -->
-  {% if not producto.is_approved %}
-    <button type="submit" class="btn btn-success">Aprobar</button>
-  {% else %}
-    <button type="submit" class="btn btn-primary">Guardar</button>
-  {% endif %}
+  <!-- Botones -->
+  <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+  <a href="{{ url_for('ver_productos') }}" class="btn btn-secondary">Cancelar</a>
 </form>
 
-<p class="mt-3">
-  <a href="{{ url_for('ver_productos') }}" class="btn btn-link">
-    Volver a Productos
-  </a>
-</p>
-
-<!-- Scripts similares a “agregar_producto.html” -->
 <script>
-/** 1) Manejo de singular/plural */
-const unidadMedida = document.getElementById("unidadMedida");
-const costoLabelUnit = document.getElementById("costoLabelUnit");
-const precioLabelUnit = document.getElementById("precioLabelUnit");
-if (unidadMedida) {
-  const singularMap = {
-    "piezas": "pieza",
-    "kilos": "kilo",
-    "litros": "litro",
-    "gramos": "gramo",
-    "metros": "metro"
-  };
-
-  function updateUnidad() {
-    const selected = unidadMedida.value;
-    const singular = singularMap[selected] || selected;
-    if (costoLabelUnit) costoLabelUnit.textContent = singular;
-    if (precioLabelUnit) precioLabelUnit.textContent = singular;
+  /* ===========================================================
+   * 1) Formateo de precio con separadores de miles y reglas decimales
+   * ===========================================================
+   */
+  function formatCostRealtime(input) {
+    let value = input.value;
+    if (value.startsWith("$")) {
+      value = value.substring(1);
+    }
+    value = value.replace(/,/g, "").replace(/[^\d.]/g, "");
+    
+    // Verificar si comienza con punto decimal
+    if (value.startsWith('.')) {
+      showCenteredNotification("No puedes iniciar el monto con punto decimal. Usa formato como 0.25, 1.50, etc.");
+      value = ''; 
+      input.value = '';
+      return;
+    }
+    
+    // Verificar que solo haya un punto decimal
+    const pointCount = (value.match(/\./g) || []).length;
+    if (pointCount > 1) {
+      const firstPointIndex = value.indexOf('.');
+      value = value.substring(0, firstPointIndex + 1) + 
+              value.substring(firstPointIndex + 1).replace(/\./g, '');
+    }
+    
+    // Limitar a 2 decimales
+    if (value.includes('.')) {
+      const parts = value.split('.');
+      if (parts[1] && parts[1].length > 2) {
+        parts[1] = parts[1].substring(0, 2);
+        value = parts.join('.');
+      }
+    }
+    
+    // Aplicar formato con comas para miles
+    if (value) {
+      // Separar parte entera y decimal
+      const parts = value.split('.');
+      
+      // Formatear parte entera con comas
+      let formattedInt = "";
+      if (parts[0]) {
+        formattedInt = parseInt(parts[0]).toLocaleString('en-US');
+        // Si la parte entera es 0 o está vacía, mantener el 0
+        if (formattedInt === '0' || !parts[0]) {
+          formattedInt = '0';
+        }
+      } else {
+        formattedInt = "0";
+      }
+      
+      // Agregar parte decimal si existe
+      let formattedValue = formattedInt;
+      if (parts.length > 1) {
+        formattedValue += '.' + parts[1];
+      }
+      
+      // Agregar el símbolo $ al principio
+      formattedValue = '$' + formattedValue;
+      input.value = formattedValue;
+    } else {
+      input.value = "";
+    }
   }
-  unidadMedida.addEventListener("change", updateUnidad);
-  updateUnidad();
-}
 
-/** 2) Lógica “¿Viene en Lotes?” */
-const vieneEnLotes = document.getElementById("vieneEnLotes");
-const bloqueLotes = document.getElementById("bloqueLotes");
-const numLotes = document.getElementById("numLotes");
-const mismoStockParaTodos = document.getElementById("mismoStockParaTodos");
-const stockUnico = document.getElementById("stockUnico");
-const stockPorCadaLote = document.getElementById("stockPorCadaLote");
-const contenedorLotes = document.getElementById("contenedorLotes");
-const stockNormal = document.getElementById("stockNormal");
+  /* ===========================================================
+   * 2) Notificación centrada para errores
+   * ===========================================================
+   */
+  let activeNotification = null;
+  let notifTimeout = null;
 
-function toggleLotes() {
-  if (!vieneEnLotes) return;
-  if (vieneEnLotes.checked) {
-    stockNormal.style.display = "none";
-    bloqueLotes.style.display = "block";
-  } else {
-    stockNormal.style.display = "block";
-    bloqueLotes.style.display = "none";
-    numLotes.value = 1;
-    mismoStockParaTodos.checked = false;
+  function showCenteredNotification(message, duration = 3000) {
+    // Limpiar notificación anterior
+    if (activeNotification) {
+      document.body.removeChild(activeNotification);
+      clearTimeout(notifTimeout);
+    }
+    
+    // Crear nueva notificación
+    const notif = document.createElement("div");
+    notif.textContent = message;
+    notif.style.position = "fixed";
+    notif.style.top = "50%";
+    notif.style.left = "50%";
+    notif.style.transform = "translate(-50%, -50%)";
+    notif.style.backgroundColor = "#ffcccc";
+    notif.style.color = "#900";
+    notif.style.padding = "20px";
+    notif.style.border = "1px solid #900";
+    notif.style.borderRadius = "4px";
+    notif.style.textAlign = "center";
+    notif.style.zIndex = "9999";
+    notif.style.fontSize = "1rem";
+    document.body.appendChild(notif);
+    
+    activeNotification = notif;
+    notifTimeout = setTimeout(() => { 
+      if (notif.parentNode) {
+        document.body.removeChild(notif);
+      }
+      activeNotification = null;
+    }, duration);
   }
-  toggleMismoStock();
-}
 
-function toggleMismoStock() {
-  if (!vieneEnLotes || !vieneEnLotes.checked) {
-    if (stockUnico) stockUnico.style.display = "none";
-    if (stockPorCadaLote) stockPorCadaLote.style.display = "none";
-    return;
+  /* ===========================================================
+   * 3) Etiquetas flotantes
+   * ===========================================================
+   */
+  function updateFloatingLabel(input) {
+    if (!input) return;
+    
+    const floatingLabelId = input.id + 'FloatingLabel';
+    const floatingLabel = document.getElementById(floatingLabelId);
+    
+    if (!floatingLabel) return;
+    
+    if (input.value.trim() !== "") {
+      floatingLabel.textContent = input.placeholder;
+      floatingLabel.style.display = "block";
+    } else {
+      floatingLabel.style.display = "none";
+    }
   }
-  if (mismoStockParaTodos.checked) {
-    stockUnico.style.display = "block";
-    stockPorCadaLote.style.display = "none";
-  } else {
-    stockUnico.style.display = "none";
-    stockPorCadaLote.style.display = "block";
-    generarCamposLotes();
-  }
-}
 
-function generarCamposLotes() {
-  if (!contenedorLotes) return;
-  const lotes = parseInt(numLotes.value) || 1;
-  contenedorLotes.innerHTML = "";
-  
-  // Campos vacíos si deseas permitir edición lote por lote
-  for (let i = 1; i <= lotes; i++) {
-    const div = document.createElement("div");
-    div.classList.add("mb-3");
-    div.innerHTML = `
-      <label class="form-label fw-bold">
-        Stock Inicial Lote #${i}
-      </label>
-      <div class="row g-2">
-        <div class="col-6">
-          <input type="number" min="0" value="0" class="form-control"
-            name="stock_lote_${i}" id="stock_lote_${i}">
-        </div>
-        <div class="col-6">
-          <select class="form-select" name="unidad_lote_${i}" id="unidad_lote_${i}">
-            <option value="piezas">Piezas</option>
-            <option value="kilos">Kilos</option>
-            <option value="litros">Litros</option>
-            <option value="gramos">Gramos</option>
-            <option value="metros">Metros</option>
-          </select>
+  /* ===========================================================
+   * 4) Lógica de fotos
+   * ===========================================================
+   */
+  function attachRemoveImageListener() {
+    const fotoPlaceholder = document.getElementById("fotoPlaceholder");
+    const btnRemove = fotoPlaceholder.querySelector(".remove-image");
+    
+    if (btnRemove) {
+      btnRemove.addEventListener("click", function (e) {
+        e.stopPropagation();
+        
+        // Recrear menú con estructura correcta
+        fotoPlaceholder.innerHTML = `
+          <div class="drop-message">Suelta tu imagen aquí</div>
+          <button type="button" class="no-image-icon" id="btnCargarFoto">&#8942;</button>
+          <div class="foto-dropdown" id="fotoDropdown" style="display:none;">
+            <button type="button" class="dropdown-item btn btn-secondary" id="dropdownCargarFoto">Cargar imagen</button>
+            <button type="button" class="dropdown-item btn btn-secondary" id="dropdownGenerarIA">Generar con IA</button>
+          </div>`;
+        
+        fotoPlaceholder.classList.remove("has-image");
+        document.getElementById("ia_foto_filename").value = "";
+        document.getElementById("fotoInput").value = "";
+        document.getElementById("displayed_image_url").value = "";
+        
+        // Importante: vincular eventos al menú recién creado
+        setTimeout(bindPhotoEvents, 0);
+      });
+    }
+  }
+
+  function bindPhotoEvents() {
+    // Obtener referencias a todos los elementos necesarios
+    const fotoPlaceholder = document.getElementById("fotoPlaceholder");
+    const btnCargarFoto = document.getElementById("btnCargarFoto");
+    const fotoDropdown = document.getElementById("fotoDropdown");
+    const dropdownCargarFoto = document.getElementById("dropdownCargarFoto");
+    const dropdownGenerarIA = document.getElementById("dropdownGenerarIA");
+    const fotoInput = document.getElementById("fotoInput");
+
+    // Verificar que todos los elementos existan
+    if (!fotoPlaceholder || !btnCargarFoto || !fotoDropdown || 
+        !dropdownCargarFoto || !dropdownGenerarIA || !fotoInput) {
+      console.error("No se encontraron todos los elementos necesarios para el menú de fotos");
+      return;
+    }
+
+    // Limpiar todos los listeners anteriores para evitar duplicados
+    const newBtnCargarFoto = btnCargarFoto.cloneNode(true);
+    btnCargarFoto.parentNode.replaceChild(newBtnCargarFoto, btnCargarFoto);
+    
+    const newDropdownCargarFoto = dropdownCargarFoto.cloneNode(true);
+    dropdownCargarFoto.parentNode.replaceChild(newDropdownCargarFoto, dropdownCargarFoto);
+    
+    const newDropdownGenerarIA = dropdownGenerarIA.cloneNode(true);
+    dropdownGenerarIA.parentNode.replaceChild(newDropdownGenerarIA, dropdownGenerarIA);
+
+    // Asignar nuevos event listeners
+    // 1. Mostrar/ocultar el menú cuando se hace clic en los tres puntos
+    newBtnCargarFoto.addEventListener("click", function(e) {
+      e.stopPropagation();
+      const isVisible = fotoDropdown.style.display === "block";
+      fotoDropdown.style.display = isVisible ? "none" : "block";
+    });
+
+    // 2. Abrir selector de archivos cuando se hace clic en "Cargar imagen"
+    newDropdownCargarFoto.addEventListener("click", function(e) {
+      e.stopPropagation();
+      fotoInput.click();
+      fotoDropdown.style.display = "none";
+    });
+
+    // 3. Generar imagen con IA cuando se hace clic en "Generar con IA"
+    newDropdownGenerarIA.addEventListener("click", function(e) {
+      e.stopPropagation();
+      generatePhotoWithIA();
+      fotoDropdown.style.display = "none";
+    });
+
+    // 4. Cerrar el menú al hacer clic fuera
+    document.addEventListener("click", function(e) {
+      if (!e.target.closest("#btnCargarFoto") && 
+          !e.target.closest("#fotoDropdown") && 
+          fotoDropdown.style.display === "block") {
+        fotoDropdown.style.display = "none";
+      }
+    });
+    
+    // Configurar eventos para Drag & Drop
+    setupDragAndDrop(fotoPlaceholder);
+
+    // Observador para detectar cambios en el DOM y volver a vincular si es necesario
+    const observer = new MutationObserver(function(mutations) {
+      mutations.forEach(function(mutation) {
+        if (mutation.type === 'childList' && 
+            (mutation.target === fotoPlaceholder || 
+             mutation.target.closest("#fotoPlaceholder"))) {
+          // Si el placeholder cambió, revincular eventos
+          setTimeout(bindPhotoEvents, 0);
+          observer.disconnect();
+        }
+      });
+    });
+
+    // Configurar el observador para observar cambios en los hijos
+    observer.observe(fotoPlaceholder, { childList: true, subtree: true });
+  }
+
+  /* ===========================================================
+   * 5) Drag & Drop
+   * ===========================================================
+   */
+  function setupDragAndDrop(dropZone) {
+    if (!dropZone) return;
+    
+    // Prevenir comportamiento predeterminado para estos eventos
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      dropZone.addEventListener(eventName, preventDefaults, false);
+      document.body.addEventListener(eventName, preventDefaults, false);
+    });
+    
+    // Destacar la zona al arrastrar sobre ella
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropZone.addEventListener(eventName, highlight, false);
+    });
+    
+    // Quitar el destacado al salir o al soltar
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropZone.addEventListener(eventName, unhighlight, false);
+    });
+    
+    // Manejar el evento de soltar
+    dropZone.addEventListener('drop', handleDrop, false);
+    
+    function preventDefaults(e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    function highlight() {
+      dropZone.classList.add('dragover');
+    }
+    
+    function unhighlight() {
+      dropZone.classList.remove('dragover');
+    }
+    
+    function handleDrop(e) {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      
+      if (files && files.length) {
+        const file = files[0];
+        
+        // Verificar que sea una imagen
+        if (!file.type.match('image.*')) {
+          showCenteredNotification("El archivo debe ser una imagen (jpg, png, etc.)");
+          return;
+        }
+        
+        // Verificar tamaño (5MB max)
+        if (file.size > 5 * 1024 * 1024) {
+          showCenteredNotification("La imagen es demasiado grande (máximo 5MB)");
+          return;
+        }
+        
+        // Mostrar progreso para archivos grandes
+        const imageProgressContainer = document.querySelector(".image-upload-progress");
+        const imageProgressBar = document.getElementById("imageProgressBar");
+        
+        if (file.size > 1 * 1024 * 1024) { // 1MB
+          imageProgressContainer.style.display = "block";
+          
+          // Simulación de progreso
+          let progress = 0;
+          const interval = setInterval(() => {
+            progress += 5;
+            if (progress > 100) {
+              clearInterval(interval);
+              imageProgressContainer.style.display = "none";
+            } else {
+              imageProgressBar.style.width = `${progress}%`;
+            }
+          }, 50);
+        }
+        
+        // Crear blob URL para vista previa
+        const objectURL = URL.createObjectURL(file);
+        
+        // Actualizar vista previa
+        dropZone.innerHTML = `
+          <img src="${objectURL}" alt="Imagen subida">
+          <button type="button" class="remove-image" id="removeImageBtn">&times;</button>
+        `;
+        dropZone.classList.add("has-image");
+        
+        // Asignar el archivo al input file oculto
+        const fileList = new DataTransfer();
+        fileList.items.add(file);
+        document.getElementById("fotoInput").files = fileList.files;
+        
+        // NO guardar objectURL como displayed_image_url para archivos locales
+        document.getElementById("displayed_image_url").value = "";
+        
+        attachRemoveImageListener();
+      }
+    }
+  }
+
+  /* ===========================================================
+   * 6) Generar foto con IA
+   * ===========================================================
+   */
+  function generatePhotoWithIA() {
+    const nombreInput = document.getElementById("nombre");
+    const fotoDropdown = document.getElementById("fotoDropdown");
+    const imageProgressContainer = document.querySelector(".image-upload-progress");
+    const imageProgressBar = document.getElementById("imageProgressBar");
+    
+    if (fotoDropdown) {
+      fotoDropdown.style.display = "none";
+    }
+
+    if (!nombreInput.value) {
+      showCenteredNotification("Debes ingresar al menos el NOMBRE DEL PRODUCTO para generar una imagen con IA.");
+      return;
+    }
+    
+    // Mostrar un indicador de carga
+    const fotoPlaceholder = document.getElementById("fotoPlaceholder");
+    fotoPlaceholder.innerHTML = `
+      <div style="text-align: center; padding: 20px;">
+        <p>Buscando imagen...</p>
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Cargando...</span>
         </div>
       </div>
     `;
-    contenedorLotes.appendChild(div);
-  }
-}
+    
+    // Mostrar barra de progreso
+    imageProgressContainer.style.display = "block";
+    imageProgressBar.style.width = "0%";
+    
+    // Simulación de progreso para feedback visual
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += 3;
+      if (progress > 95) {
+        progress = 95; // Mantener en 95% hasta que termine
+      }
+      imageProgressBar.style.width = `${progress}%`;
+    }, 100);
+    
+    // Llamada a la API con parámetro adicional para forzar búsqueda nueva
+    const queryParams = {
+      nombre: nombreInput.value.trim(),
+      forceSearch: true,
+      cacheBuster: Date.now()
+    };
+    
+    // Usar el caché de navegador para peticiones idénticas
+    fetch("/api/buscar-imagen", {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json",
+        "Cache-Control": "max-age=3600"
+      },
+      body: JSON.stringify(queryParams)
+    })
+    .then(res => {
+      if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
+      return res.json();
+    })
+    .then(data => {
+      // Limpiar intervalo y completar barra
+      clearInterval(interval);
+      imageProgressBar.style.width = "100%";
+      
+      // Ocultar barra después de 500ms
+      setTimeout(() => {
+        imageProgressContainer.style.display = "none";
+      }, 500);
+      
+      if (data.status === "success" && data.image_url) {
+        // Pre-cargar imagen para verificar
+        const testImg = new Image();
+        testImg.onload = function() {
+          fotoPlaceholder.innerHTML = `
+            <img src="${data.image_url}" alt="Imagen IA">
+            <button type="button" class="remove-image" id="removeImageBtn">&times;</button>
+          `;
+          fotoPlaceholder.classList.add("has-image");
 
-// Listeners
-if (vieneEnLotes) {
-  vieneEnLotes.addEventListener("change", toggleLotes);
-  mismoStockParaTodos.addEventListener("change", toggleMismoStock);
-  numLotes.addEventListener("change", () => {
-    if (vieneEnLotes.checked && !mismoStockParaTodos.checked) {
-      generarCamposLotes();
+          // Guardar el nombre del archivo y la URL
+          document.getElementById("ia_foto_filename").value = data.filename || "";
+          document.getElementById("displayed_image_url").value = data.image_url;
+
+          attachRemoveImageListener();
+        };
+        
+        testImg.onerror = function() {
+          console.error("No se pudo cargar la imagen:", data.image_url);
+          fotoPlaceholder.innerHTML = `
+            <div class="drop-message">Suelta tu imagen aquí</div>
+            <button type="button" class="no-image-icon" id="btnCargarFoto">&#8942;</button>
+            <div class="foto-dropdown" id="fotoDropdown" style="display:none;">
+              <button type="button" class="dropdown-item btn btn-secondary" id="dropdownCargarFoto">Cargar imagen</button>
+              <button type="button" class="dropdown-item btn btn-secondary" id="dropdownGenerarIA">Generar con IA</button>
+            </div>
+          `;
+          showCenteredNotification("La imagen no pudo cargarse. Intenta de nuevo o carga una imagen manualmente.");
+          setTimeout(bindPhotoEvents, 0);
+        };
+        
+        // Iniciar la carga de la imagen
+        testImg.src = data.image_url;
+      } else {
+        // Reconstruir menú con estructura correcta en caso de error
+        fotoPlaceholder.innerHTML = `
+          <div class="drop-message">Suelta tu imagen aquí</div>
+          <button type="button" class="no-image-icon" id="btnCargarFoto">&#8942;</button>
+          <div class="foto-dropdown" id="fotoDropdown" style="display:none;">
+            <button type="button" class="dropdown-item btn btn-secondary" id="dropdownCargarFoto">Cargar imagen</button>
+            <button type="button" class="dropdown-item btn btn-secondary" id="dropdownGenerarIA">Generar con IA</button>
+          </div>
+        `;
+        showCenteredNotification(data.message || "No se pudo obtener la imagen");
+        setTimeout(bindPhotoEvents, 0);
+      }
+    })
+    .catch(error => {
+      // Limpiar intervalo y ocultar barra
+      clearInterval(interval);
+      imageProgressContainer.style.display = "none";
+      
+      console.error("Error al buscar la imagen:", error);
+      // Reconstruir menú con estructura correcta en caso de error
+      fotoPlaceholder.innerHTML = `
+        <div class="drop-message">Suelta tu imagen aquí</div>
+        <button type="button" class="no-image-icon" id="btnCargarFoto">&#8942;</button>
+        <div class="foto-dropdown" id="fotoDropdown" style="display:none;">
+          <button type="button" class="dropdown-item btn btn-secondary" id="dropdownCargarFoto">Cargar imagen</button>
+          <button type="button" class="dropdown-item btn btn-secondary" id="dropdownGenerarIA">Generar con IA</button>
+        </div>
+      `;
+      showCenteredNotification("Ocurrió un error al buscar la imagen: " + error.message);
+      setTimeout(bindPhotoEvents, 0);
+    });
+  }
+
+  /* ===========================================================
+   * 7) Manejo de input de archivos
+   * ===========================================================
+   */
+  const fotoInput = document.getElementById("fotoInput");
+  if (fotoInput) {
+    fotoInput.addEventListener("change", function(e) {
+      if (this.files && this.files[0]) {
+        const file = this.files[0];
+        if (file.size > 5 * 1024 * 1024) { // 5MB
+          showCenteredNotification("La imagen es demasiado grande (máximo 5MB).");
+          return;
+        }
+        
+        // Mostrar progreso para archivos grandes
+        const imageProgressContainer = document.querySelector(".image-upload-progress");
+        const imageProgressBar = document.getElementById("imageProgressBar");
+        
+        if (file.size > 1 * 1024 * 1024) { // 1MB
+          imageProgressContainer.style.display = "block";
+          
+          // Simulación de progreso (ya que no hay evento real)
+          let progress = 0;
+          const interval = setInterval(() => {
+            progress += 5;
+            if (progress > 100) {
+              clearInterval(interval);
+              imageProgressContainer.style.display = "none";
+            } else {
+              imageProgressBar.style.width = `${progress}%`;
+            }
+          }, 50);
+        }
+        
+        // Crear blob URL para vista previa inmediata
+        const objectURL = URL.createObjectURL(file);
+        const fotoPlaceholder = document.getElementById("fotoPlaceholder");
+        
+        fotoPlaceholder.innerHTML = `
+          <img src="${objectURL}" alt="Foto Local Seleccionada">
+          <button type="button" class="remove-image" id="removeImageBtn">&times;</button>
+        `;
+        fotoPlaceholder.classList.add("has-image");
+        
+        // NO guardar objectURL como displayed_image_url para archivos locales
+        document.getElementById("displayed_image_url").value = "";
+        
+        attachRemoveImageListener();
+      }
+    });
+  }
+
+  /* ===========================================================
+   * 8) Inicializar Choices.js para selector de categoría
+   * ===========================================================
+   */
+  let categoryChoices;
+  if (document.getElementById("categoria_existente")) {
+    const categoriaElement = document.getElementById("categoria_existente");
+    
+    // Función para inicializar Choices.js si está cargado
+    function initializeChoices() {
+      if (typeof Choices !== 'undefined') {
+        // Inicializar Choices.js
+        categoryChoices = new Choices("#categoria_existente", {
+          searchEnabled: false,
+          placeholder: false,
+          callbackOnCreateTemplates: function(template) {
+            return {
+              item: (classNames, data) => {
+                if (data.value === "") {
+                  return template(`
+                    <div
+                      class="${classNames.item} ${classNames.itemSelectable}"
+                      data-item data-id="${data.id}" data-value="${data.value}"
+                      ${data.active ? 'aria-selected="true"' : ''}
+                      ${data.disabled ? 'aria-disabled="true"' : ''}>
+                      -SELECCIONA UNA CATEGORÍA-
+                    </div>
+                  `);
+                }
+                let color = "#000000";
+                if (data.customProperties && data.customProperties.color) {
+                  color = data.customProperties.color;
+                }
+                return template(`
+                  <div
+                    class="${classNames.item} ${classNames.itemSelectable}"
+                    data-item data-id="${data.id}" data-value="${data.value}"
+                    ${data.active ? 'aria-selected="true"' : ''}
+                    ${data.disabled ? 'aria-disabled="true"' : ''}>
+                    <span style="display:inline-block; width:12px; height:12px; background-color:${color}; border-radius:50%; margin-right:6px;"></span>
+                    ${data.label}
+                  </div>
+                `);
+              },
+              choice: (classNames, data) => {
+                if (data.value === "") {
+                  return template(`
+                    <div
+                      class="${classNames.item} ${classNames.itemChoice}"
+                      data-choice
+                      style="display:none;"
+                      ${data.disabled ? 'data-choice-disabled aria-disabled="true"' : 'data-choice-selectable'}
+                      data-id="${data.id}" data-value="${data.value}">
+                      -SELECCIONA UNA CATEGORÍA-
+                    </div>
+                  `);
+                }
+                let color = "#000000";
+                if (data.customProperties && data.customProperties.color) {
+                  color = data.customProperties.color;
+                }
+                return template(`
+                  <div
+                    class="${classNames.item} ${classNames.itemChoice}"
+                    data-choice
+                    ${data.disabled ? 'data-choice-disabled aria-disabled="true"' : 'data-choice-selectable'}
+                    data-id="${data.id}" data-value="${data.value}">
+                    <span style="display:inline-block; width:12px; height:12px; background-color:${color}; border-radius:50%; margin-right:6px;"></span>
+                    ${data.label}
+                  </div>
+                `);
+              }
+            };
+          }
+        });
+      } else {
+        console.error("Choices.js no está cargado, usando select normal");
+      }
+    }
+    
+    // Intentar inicializar Choices o esperar a que se cargue
+    if (typeof Choices !== 'undefined') {
+      initializeChoices();
+    } else {
+      // Agregar script dinámicamente si no está presente
+      const script = document.createElement('script');
+      script.src = "https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js";
+      script.onload = initializeChoices;
+      document.head.appendChild(script);
+      
+      // Agregar CSS
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css';
+      document.head.appendChild(link);
+    }
+  }
+
+  /* ===========================================================
+   * 9) Verificar si el código de barras ya existe
+   * ===========================================================
+   */
+  const codigoBarrasInput = document.getElementById("codigo_barras_externo");
+  const skuFeedback = document.getElementById("skuFeedback");
+  let existingBarcode = "{{ producto.codigo_barras_externo }}"; // Guardar valor original
+  
+  if (codigoBarrasInput) {
+    let timeout;
+    codigoBarrasInput.addEventListener("input", function() {
+      updateFloatingLabel(this);
+      
+      // Limpiar cualquier timeout existente para evitar múltiples llamadas
+      clearTimeout(timeout);
+      
+      // Saltear verificación si el valor es el mismo que el original
+      if (this.value === existingBarcode) {
+        if (skuFeedback) skuFeedback.style.display = "none";
+        return;
+      }
+      
+      // Establecer un pequeño delay para esperar a que el usuario termine de escribir
+      timeout = setTimeout(() => {
+        if (this.value && this.value.trim() !== "") {
+          // Verificar si el código de barras existe en la base de datos
+          fetch(`/api/check_barcode_exists?codigo=${encodeURIComponent(this.value.trim())}&t=${Date.now()}`)
+            .then(response => response.json())
+            .then(data => {
+              if (data.exists) {
+                if (skuFeedback) {
+                  skuFeedback.style.display = "block";
+                  this.classList.add("is-invalid");
+                }
+              } else {
+                if (skuFeedback) {
+                  skuFeedback.style.display = "none";
+                  this.classList.remove("is-invalid");
+                }
+              }
+            })
+            .catch(error => {
+              console.error("Error verificando código de barras:", error);
+            });
+        } else {
+          if (skuFeedback) {
+            skuFeedback.style.display = "none";
+            this.classList.remove("is-invalid");
+          }
+        }
+      }, 300);
+    });
+  }
+
+  /* ===========================================================
+   * 10) Inicializar al cargar el documento
+   * ===========================================================
+   */
+  document.addEventListener("DOMContentLoaded", function() {
+    // Inicializar eventos de foto
+    const fotoPlaceholder = document.getElementById("fotoPlaceholder");
+    if (fotoPlaceholder) {
+      // Si hay una imagen, agregar la clase has-image
+      if (fotoPlaceholder.querySelector("img")) {
+        fotoPlaceholder.classList.add("has-image");
+      }
+      
+      // Vincular eventos al placeholder de foto
+      bindPhotoEvents();
+      attachRemoveImageListener();
+    }
+    
+    // Inicializar etiquetas flotantes para campos no vacíos
+    const inputs = document.querySelectorAll(".form-control");
+    inputs.forEach(input => {
+      updateFloatingLabel(input);
+      
+      // Agregar listener de evento input para actualizar etiqueta flotante
+      input.addEventListener("input", function() {
+        updateFloatingLabel(this);
+      });
+    });
+    
+    // Inicializar valor original del código de barras para comparación
+    const codigoBarrasInput = document.getElementById("codigo_barras_externo");
+    if (codigoBarrasInput) {
+      existingBarcode = codigoBarrasInput.value;
     }
   });
-  toggleLotes();
-}
-
-/** 3) Manejo de “¿Maneja código de barras?” */
-const usaCB = document.getElementById("usaCodigoBarras");
-const opcionesCB = document.getElementById("opcionesCodigo");
-const crearInt = document.getElementById("crearInterno");
-const bloqueGenerar = document.getElementById("bloqueGenerar");
-const btnGenerar = document.getElementById("btnGenerarCodigo");
-const campoInterno = document.getElementById("codigo_interno");
-const campoExterno = document.getElementById("campoCodigoExterno");
-
-function toggleCB() {
-  if (!opcionesCB) return;
-  opcionesCB.style.display = usaCB && usaCB.checked ? "block" : "none";
-  if (usaCB && !usaCB.checked) {
-    crearInt.checked = false;
-  }
-  toggleCrearInterno();
-}
-function toggleCrearInterno() {
-  if (!crearInt || !campoExterno || !bloqueGenerar) return;
-  
-  campoExterno.style.display = crearInt.checked ? "none" : "block";
-  bloqueGenerar.style.display = (crearInt.checked && usaCB.checked) ? "block" : "none";
-}
-function generarCodigoInterno() {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  let randomCode = "";
-  for (let i = 0; i < 8; i++) {
-    randomCode += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  if (campoInterno) {
-    campoInterno.value = "INT-" + randomCode;
-  }
-}
-
-// Listeners
-if (usaCB) {
-  usaCB.addEventListener("change", toggleCB);
-  if (crearInt) crearInt.addEventListener("change", toggleCrearInterno);
-  if (btnGenerar) btnGenerar.addEventListener("click", generarCodigoInterno);
-  toggleCB();
-}
-
-/** 4) Config Avanzada (proveedor, ubicación, etc.) */
-const toggleAvanzado = document.getElementById("toggleAvanzado");
-const configAvanzada = document.getElementById("configAvanzada");
-let avanzadoVisible = false;
-
-if (toggleAvanzado && configAvanzada) {
-  toggleAvanzado.addEventListener("click", () => {
-    avanzadoVisible = !avanzadoVisible;
-    configAvanzada.style.display = avanzadoVisible ? "block" : "none";
-    toggleAvanzado.textContent = avanzadoVisible
-      ? "Ocultar Configuración Avanzada"
-      : "Mostrar Configuración Avanzada";
-  });
-}
 </script>
 {% endblock %}

@@ -1137,6 +1137,120 @@ def cambiar_costos(producto_id):
         lotes=lotes
     )
 
+@app.route('/costo-confirmacion/<int:producto_id>')
+@login_requerido
+def costo_confirmacion(producto_id):
+    """Muestra la confirmación después de actualizar el costo de un producto."""
+    # Verificar si el usuario está logueado
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    
+    empresa_id = session.get('user_id')
+    
+    # Obtener el producto
+    producto = Producto.query.get_or_404(producto_id)
+    
+    # Verificar que el producto pertenezca a la empresa del usuario actual
+    if producto.empresa_id != empresa_id:
+        flash('No tienes permiso para ver este producto.', 'danger')
+        return redirect(url_for('ver_productos'))
+    
+    # Obtener el ID del movimiento de la URL
+    movimiento_id = request.args.get('movimiento_id')
+    
+    # Obtener el movimiento
+    movimiento = MovimientoInventario.query.get_or_404(movimiento_id)
+    
+    # Obtener el costo anterior de la URL 
+    costo_anterior = float(request.args.get('costo_anterior', 0))
+    costo_nuevo = float(movimiento.costo_unitario)
+    
+    # Calcular costo promedio
+    lotes_activos = LoteInventario.query.filter(
+        LoteInventario.producto_id == producto_id,
+        LoteInventario.esta_activo == True,
+        LoteInventario.stock > 0
+    ).all()
+    
+    costo_promedio = costo_nuevo  # Valor por defecto
+    
+    if lotes_activos:
+        costo_total = 0
+        stock_total = 0
+        
+        for lote in lotes_activos:
+            costo_total += lote.costo_unitario * lote.stock
+            stock_total += lote.stock
+        
+        if stock_total > 0:
+            costo_promedio = costo_total / stock_total
+    
+    return render_template(
+        'cambiar_costo_confirmacion.html',
+        producto=producto,
+        movimiento=movimiento,
+        costo_anterior=costo_anterior,
+        costo_nuevo=costo_nuevo,
+        costo_promedio=costo_promedio
+    )
+
+@app.route('/costo-confirmacion/<int:producto_id>')
+@login_requerido
+def mostrar_costo_confirmacion(producto_id):  # Nombre cambiado para evitar conflictos
+    """Muestra la confirmación después de actualizar el costo de un producto."""
+    # Verificar si el usuario está logueado
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    
+    empresa_id = session.get('user_id')
+    
+    # Obtener el producto
+    producto = Producto.query.get_or_404(producto_id)
+    
+    # Verificar que el producto pertenezca a la empresa del usuario actual
+    if producto.empresa_id != empresa_id:
+        flash('No tienes permiso para ver este producto.', 'danger')
+        return redirect(url_for('ver_productos'))
+    
+    # Obtener el ID del movimiento de la URL
+    movimiento_id = request.args.get('movimiento_id')
+    
+    # Obtener el movimiento
+    movimiento = MovimientoInventario.query.get_or_404(movimiento_id)
+    
+    # Obtener el costo anterior de la URL 
+    costo_anterior = float(request.args.get('costo_anterior', 0))
+    costo_nuevo = float(movimiento.costo_unitario)
+    
+    # Calcular costo promedio
+    lotes_activos = LoteInventario.query.filter(
+        LoteInventario.producto_id == producto_id,
+        LoteInventario.esta_activo == True,
+        LoteInventario.stock > 0
+    ).all()
+    
+    costo_promedio = costo_nuevo  # Valor por defecto
+    
+    if lotes_activos:
+        costo_total = 0
+        stock_total = 0
+        
+        for lote in lotes_activos:
+            costo_total += lote.costo_unitario * lote.stock
+            stock_total += lote.stock
+        
+        if stock_total > 0:
+            costo_promedio = costo_total / stock_total
+    
+    return render_template(
+        'cambiar_costo_confirmacion.html',
+        producto=producto,
+        movimiento=movimiento,
+        costo_anterior=costo_anterior,
+        costo_nuevo=costo_nuevo,
+        costo_promedio=costo_promedio
+    )
+
 ##############################
 # ADMIN
 ##############################
@@ -2299,7 +2413,7 @@ def api_actualizar_costo():
         costo = float(data.get('costo', 0))
         afectar_precio = data.get('afectar_precio', False)
         
-        # Validar datos
+        # Validaciones básicas
         if not producto_id or costo < 0:
             return jsonify({
                 "success": False,
@@ -2393,7 +2507,9 @@ def api_actualizar_costo():
             "costo": costo,
             "costo_promedio": costo_promedio,
             "precio_actualizado": afectar_precio,
-            "lote_actualizado": ultimo_lote.numero_lote
+            "lote_actualizado": ultimo_lote.numero_lote,
+            "movimiento_id": nuevo_movimiento.id,
+            "costo_anterior": costo_anterior_lote
         })
     
     except Exception as e:
@@ -3051,52 +3167,29 @@ def editar_producto(prod_id):
     
     if request.method == 'POST':
         try:
-            # Recoger datos del formulario
+            # Recoger SOLO los datos que vamos a modificar
             nombre = request.form.get("nombre", "").strip()
-            stock_str = request.form.get("stock", "0").strip() 
-            costo_str = request.form.get("costo", "$0").strip()
             precio_str = request.form.get("precio_venta", "$0").strip()
             marca = request.form.get("marca", "").strip()
+            codigo_barras = request.form.get("codigo_barras_externo", "").strip()
             
             # Categoría
-            cat_option = request.form.get('categoria_option', 'existente')
-            if cat_option == 'existente':
-                categoria = request.form.get('categoria_existente', '').strip()
-            else:
-                categoria = request.form.get('categoria_nueva', '').strip()
-                
-            # MODIFICADO: Usar la nueva función de normalización
+            categoria = request.form.get('categoria_existente', '').strip()
             categoria_normalizada = normalize_category(categoria)
             
-            # Favorito y a la venta
-            es_favorito_bool = (request.form.get("es_favorito", "0") == "1")
-            esta_a_la_venta_bool = (request.form.get("esta_a_la_venta", "1") == "1")
-            
-            # Caducidad
-            has_caducidad = (request.form.get("toggle_caducidad_estado", "DESACTIVADO") == "ACTIVADO")
-            caducidad_lapso = request.form.get("caducidad_lapso", None) if has_caducidad else None
-            
-            # Parse numéricos
-            try:
-                stock_int = int(stock_str)
-            except:
-                stock_int = 0
-            
-            costo_val = parse_money(costo_str)
+            # Procesar precio
             precio_val = parse_money(precio_str)
             
-            # ===== MANEJO SIMPLIFICADO DE IMÁGENES =====
+            # Manejo de imagen
             nueva_foto = None
             
             # 1. Intentar usar el archivo subido
             if request.files.get('foto') and request.files['foto'].filename:
                 file = request.files['foto']
                 if allowed_file(file.filename):
-                    # Generar nombre único
                     ext = file.filename.rsplit('.', 1)[1].lower()
                     filename = f"{uuid.uuid4().hex}.{ext}"
                     
-                    # Guardar archivo
                     if not os.path.exists(UPLOAD_FOLDER):
                         os.makedirs(UPLOAD_FOLDER)
                     
@@ -3109,21 +3202,16 @@ def editar_producto(prod_id):
                 ia_filename = request.form.get("ia_foto_filename", "").strip()
                 
                 if ia_filename and os.path.exists(os.path.join(UPLOAD_FOLDER, ia_filename)):
-                    # Usar el archivo IA que ya existe
                     nueva_foto = ia_filename
                 elif displayed_url:
-                    # Es una URL - intentar descargar o usar nombre de archivo
                     if "/uploads/" in displayed_url:
-                        # Es local, extraer nombre
                         nueva_foto = displayed_url.split("/uploads/")[-1]
                     elif displayed_url.startswith(("http://", "https://")):
-                        # Es externa, descargar
                         try:
                             ext = "jpg"  # Default
                             filename = f"{uuid.uuid4().hex}.{ext}"
                             filepath = os.path.join(UPLOAD_FOLDER, filename)
                             
-                            # Descarga síncrona para asegurar que se complete
                             response = requests.get(displayed_url, timeout=10)
                             if response.status_code == 200:
                                 if not os.path.exists(os.path.dirname(filepath)):
@@ -3136,34 +3224,20 @@ def editar_producto(prod_id):
                         except Exception as e:
                             print(f"Error descargando imagen: {e}")
             
-            # Usar la nueva función para truncar la URL para asegurar que quepa en la columna
             url_imagen_truncada = truncar_url(request.form.get("displayed_image_url", "").strip(), 95)
             
-            # Actualizar el producto con los nuevos datos
+            # Actualizar SOLO los campos que queremos modificar
             producto.nombre = nombre
-            producto.stock = stock_int
-            producto.costo = costo_val
             producto.precio_venta = precio_val
             producto.categoria = categoria_normalizada
-            # MODIFICADO: Usar la nueva función de color de categoría
             producto.categoria_color = get_category_color(categoria_normalizada)
+            producto.codigo_barras_externo = codigo_barras
+            producto.marca = marca
             
             # Actualizar foto solo si hay una nueva
             if nueva_foto:
                 producto.foto = nueva_foto
-                producto.url_imagen = url_imagen_truncada  # Usando la URL truncada
-            
-            # Actualizar otros campos
-            producto.codigo_barras_externo = request.form.get("codigo_barras_externo", "").strip()
-            producto.marca = marca
-            producto.es_favorito = es_favorito_bool
-            producto.esta_a_la_venta = esta_a_la_venta_bool
-            producto.has_caducidad = has_caducidad
-            producto.metodo_caducidad = caducidad_lapso
-            
-            # Actualizar campos específicos si existen
-            if request.form.get("unidad_medida"):
-                producto.unidad = request.form.get("unidad_medida")
+                producto.url_imagen = url_imagen_truncada
             
             # Guardar en la base de datos
             db.session.commit()

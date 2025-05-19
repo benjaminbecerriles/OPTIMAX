@@ -23,7 +23,7 @@
   --orange: #f39c12;
   --red: #e74c3c;
   --blue: #1a237e;
-  --light-blue: #4285f4; /* Azul más claro para el ícono */
+  --light-blue: #64B5F6; /* Azul más claro para el ícono - MODIFICADO */
   --gray-500: #777777; /* Cambiado a color más oscuro para mejor legibilidad */
   --gray-600: #86868b;
   --gray-300: #d1d1d6;
@@ -610,7 +610,7 @@ body {
         <div class="card-header">
             <h3 class="card-title">
                 <!-- Ícono con color azul claro -->
-                <i class="fas fa-edit edit-icon-blue"></i>
+                <i class="fas fa-edit edit-icon-blue" style="color: #64B5F6 !important;"></i>
                 Actualizar Costo del Último Lote
             </h3>
         </div>
@@ -850,10 +850,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Mostrar notificación de éxito
                 showNotification(data.message);
                 
-                // Recargar la página después de un breve momento
-                setTimeout(() => {
-                    location.reload();
-                }, 1500);
+                // Redirigir a la página de confirmación
+                window.location.href = `/costo-confirmacion/${productoId}?movimiento_id=${data.movimiento_id}&costo_anterior=${data.costo_anterior}`;
             } else {
                 showNotification('Error: ' + data.message, 'error');
                 resetButton();

@@ -1682,18 +1682,6 @@
         </div>
         <span class="action-text" id="visibilityActionText">Editar producto</span>
       </a>
-      <a href="#" class="action-item" id="actionToggleFavorite">
-        <div class="action-icon">
-          <i class="fas fa-percent"></i>
-        </div>
-        <span class="action-text" id="favoriteActionText">Definir descuento</span>
-      </a>
-      <a href="#" class="action-item" id="actionSetLocation">
-        <div class="action-icon">
-          <i class="fas fa-map-marker-alt"></i>
-        </div>
-        <span class="action-text">Definir ubicación</span>
-      </a>
       <a href="#" class="action-item" id="actionPrintLabels">
         <div class="action-icon">
           <i class="fas fa-print"></i>
@@ -2644,6 +2632,7 @@
     const actionDelete = document.getElementById('actionDelete');
     const actionAddStock = document.getElementById('actionAddStock');
     const actionChangePrice = document.getElementById('actionChangePrice');
+    const actionChangeCost = document.getElementById('actionChangeCost');
     
     if (productNameEl) {
       productNameEl.textContent = productName;
@@ -2667,6 +2656,11 @@
     
     if (actionChangePrice) {
       actionChangePrice.href = `/new/new-ajuste-salida/${productId}`;
+    }
+    
+    // Modificar el enlace de cambiar costo
+    if (actionChangeCost) {
+      actionChangeCost.href = `/cambiar-costos/${productId}`;
     }
     
     if (modal) {
