@@ -6,7 +6,44 @@
 
 {% block content %}
 <style>
-  /* Estilos para la foto */
+  /*******************************************************************************
+   * ESTILOS GLOBALES Y DISEÑO BÁSICO
+   ******************************************************************************/
+  html, body {
+    margin: 0;
+    padding: 0;
+    background-color: #fff;
+    font-family: 'Open Sans', sans-serif;
+  }
+
+  .card-form {
+    background-color: #fff;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 1.5rem;
+    margin: 0;
+  }
+
+  /* 2) Mantener DOS columnas: Izquierda (foto) y Derecha (form) */
+  .row-form {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  .col-left {
+    flex: 0 0 auto;
+    width: 570px;
+    border-right: 1px solid #ddd;
+    padding-right: 1rem;
+  }
+  .col-right {
+    flex: 1;
+    min-width: 300px;
+    padding-left: 1rem;
+    position: relative;
+  }
+
+  /* FOTO Container */
   .foto-container {
     text-align: left;
     margin-bottom: 1rem;
@@ -15,7 +52,7 @@
 
   .foto-placeholder {
     width: 100%;
-    height: 400px;
+    height: 570px;
     border: 2px dashed #ccc;
     border-radius: 8px;
     margin: 0 auto 1rem auto;
@@ -27,6 +64,240 @@
     position: relative;
     background-color: #fff;
     transition: all 0.3s ease;
+  }
+  .foto-placeholder img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+  .remove-image {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: rgba(255,255,255,0.8);
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    line-height: 28px;
+    text-align: center;
+    padding: 0;
+    display: none;
+  }
+  .foto-placeholder.has-image .remove-image {
+    display: block;
+  }
+
+  /* Menú (3 puntitos) */
+  .no-image-icon {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #777;
+    color: #fff;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .foto-dropdown {
+    position: absolute;
+    top: 40px;
+    right: 5px;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    z-index: 100;
+    display: none;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+  }
+  .foto-dropdown .dropdown-item {
+    display: block;
+    width: 100%;
+    border: none;
+    background: transparent;
+    padding: 0.5rem 1rem;
+    text-align: left;
+    cursor: pointer;
+  }
+  .foto-dropdown .dropdown-item:hover {
+    background-color: #f0f0f0;
+  }
+
+  /* Paso a paso */
+  .step-container {
+    background-color: #fff;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    padding: 1.2rem;
+    margin-bottom: 1rem;
+    position: relative;
+  }
+
+  .step-number {
+    position: absolute;
+    top: -15px;
+    left: 15px;
+    background-color: #e52e2e;
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 16px;
+  }
+
+  /* Form Controls */
+  .form-group {
+    margin-bottom: 0.8rem;
+    position: relative;
+  }
+
+  .form-control {
+    padding: 0.75rem;
+    font-size: 1rem;
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-weight: 600;
+  }
+
+  /* NUEVOS ESTILOS PARA ETIQUETAS FLOTANTES */
+  .floating-label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: 0.85rem;
+    color: #888;
+    text-transform: capitalize;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .form-group {
+    margin-bottom: 0.8rem;
+    position: relative;
+    padding-top: 1.2rem; /* espacio para la etiqueta flotante */
+  }
+  
+  ::placeholder {
+    text-transform: uppercase;
+    font-weight: normal;
+    color: #888;
+    font-size: 0.8rem;
+  }
+
+  /* NUEVOS ESTILOS PARA ENCABEZADO Y BOTONES */
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+  }
+  
+  .header-title-container {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .header-actions {
+    display: flex;
+    gap: 1rem;
+    padding-top: 8px; /* Ajuste para alinear con la primera línea del título */
+    align-items: center;
+  }
+  
+  .page-title {
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+    color: #1d1d1f;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', Helvetica, Arial, sans-serif;
+  }
+  
+  .btn-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.25rem;
+    border-radius: 980px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    height: 44px; /* Altura fija para todos los botones */
+    white-space: nowrap; /* Evita que el texto se rompa */
+  }
+  
+  .btn-volver {
+    background-color: #1a237e;
+    color: #ffffff;
+    box-shadow: 0 2px 4px rgba(26, 35, 126, 0.3);
+  }
+  
+  .btn-volver:hover {
+    background-color: #151c64;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(26, 35, 126, 0.4);
+    color: #ffffff;
+  }
+  
+  .btn-guardar {
+    background-color: #e52e2e;
+    color: white;
+    box-shadow: 0 2px 4px rgba(229, 46, 46, 0.3);
+    height: 44px;
+    border-radius: 980px;
+    padding: 0.75rem 1.25rem;
+    font-weight: 500;
+    font-size: 0.95rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .btn-guardar:hover {
+    background-color: #c72323;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(229, 46, 46, 0.4);
+  }
+
+  /* Barra de progreso para imagen */
+  .image-upload-progress {
+    width: 100%;
+    height: 4px;
+    background-color: #f3f3f3;
+    position: relative;
+    margin-top: 10px;
+    border-radius: 2px;
+    overflow: hidden;
+    display: none;
+  }
+  
+  .image-upload-progress-bar {
+    height: 100%;
+    background-color: #4CAF50;
+    width: 0%;
+    border-radius: 2px;
+    transition: width 0.3s;
   }
   
   /* Drag & drop */
@@ -52,273 +323,184 @@
   .foto-placeholder.dragover .drop-message {
     opacity: 1;
   }
-  
-  .foto-placeholder img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-  }
-  
-  .remove-image {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    background: rgba(255,255,255,0.8);
-    border: none;
-    font-size: 18px;
-    cursor: pointer;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    line-height: 28px;
-    text-align: center;
-    padding: 0;
+
+  /* Estilos adicionales para validaciones */
+  .invalid-feedback {
     display: none;
-  }
-  
-  .foto-placeholder.has-image .remove-image {
-    display: block;
-  }
-
-  /* Menu (3 dots) */
-  .no-image-icon {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    background-color: #777;
-    color: #fff;
-    border: none;
-    font-size: 18px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-  }
-
-  .foto-dropdown {
-    position: absolute;
-    top: 40px;
-    right: 5px;
-    background: #fff;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    z-index: 100;
-    display: none;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
-  }
-  
-  .foto-dropdown .dropdown-item {
-    display: block;
-    width: 100%;
-    border: none;
-    background: transparent;
-    padding: 0.5rem 1rem;
-    text-align: left;
-    cursor: pointer;
-  }
-  
-  .foto-dropdown .dropdown-item:hover {
-    background-color: #f0f0f0;
-  }
-
-  /* Form Controls */
-  .form-group {
-    margin-bottom: 1.5rem;
-    position: relative;
-  }
-
-  .form-control {
-    padding: 0.75rem;
-    font-size: 1rem;
-    width: 100%;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    font-weight: 600;
-  }
-
-  /* Progress bar */
-  .image-upload-progress {
-    width: 100%;
-    height: 4px;
-    background-color: #f3f3f3;
-    position: relative;
-    margin-top: 10px;
-    border-radius: 2px;
-    overflow: hidden;
-    display: none;
-  }
-  
-  .image-upload-progress-bar {
-    height: 100%;
-    background-color: #4CAF50;
-    width: 0%;
-    border-radius: 2px;
-    transition: width 0.3s;
-  }
-
-  /* Floating labels */
-  .form-group {
-    margin-bottom: 1rem;
-    position: relative;
-    padding-top: 1.2rem;
-  }
-  
-  ::placeholder {
-    text-transform: uppercase;
-    font-weight: normal;
-    color: #888;
-    font-size: 0.8rem;
-  }
-  
-  .form-control {
-    text-transform: uppercase;
-    font-weight: bold;
-    padding: 0.5rem;
-    line-height: 1.5;
-    width: 100%;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 0.85rem;
-  }
-
-  .floating-label {
-    position: absolute;
-    top: 0;
-    left: 0;
-    font-size: 0.85rem;
-    color: #888;
-    text-transform: capitalize;
-    width: 100%;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    color: #e74c3c;
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
   }
 </style>
 
-<h1>Editar Producto</h1>
+<div class="card-form">
+  <!-- NUEVO: Encabezado con estilo de agregar_producto.html -->
+  <div class="page-header">
+    <div class="header-title-container">
+      <h1 class="page-title">Editar Producto</h1>
+    </div>
+    <div class="header-actions">
+      <a href="{{ url_for('ver_productos') }}" class="btn-action btn-volver">
+        <i class="fas fa-arrow-left"></i>
+        <span>Volver</span>
+      </a>
+      <button type="submit" form="productForm" id="submitBtn" class="btn-guardar">Guardar Cambios</button>
+    </div>
+  </div>
 
-<form method="POST" action="" enctype="multipart/form-data">
-  <!-- CAMPOS OCULTOS PARA PRESERVAR VALORES -->
-  <input type="hidden" name="stock" value="{{ producto.stock }}">
-  <input type="hidden" name="costo" value="{{ producto.costo }}">
-  <input type="hidden" name="viene_en_lotes" value="{{ '1' if producto.viene_en_lotes else '0' }}">
-  <input type="hidden" name="num_lotes" value="{{ producto.num_lotes or 1 }}">
-  <input type="hidden" name="mismo_stock_lotes" value="{{ '1' if producto.mismo_stock_lotes else '0' }}">
-  <input type="hidden" name="usa_codigo_barras" value="{{ '1' if producto.usa_codigo_barras else '0' }}">
-  <input type="hidden" name="codigo_interno" value="{{ producto.codigo_interno or '' }}">
-  <input type="hidden" name="unidad" value="{{ producto.unidad or 'pieza' }}">
-  <input type="hidden" name="es_favorito" value="{{ '1' if producto.es_favorito else '0' }}">
-  <input type="hidden" name="esta_a_la_venta" value="{{ '1' if producto.esta_a_la_venta else '0' }}">
-  <input type="hidden" name="has_caducidad" value="{{ '1' if producto.has_caducidad else '0' }}">
-  <input type="hidden" name="metodo_caducidad" value="{{ producto.metodo_caducidad or '' }}">
-  
-  <!-- Foto del Producto -->
-  <div class="mb-3">
-    <label class="form-label">Imagen del Producto</label>
-    <div class="foto-container">
-      <div class="foto-placeholder" id="fotoPlaceholder">
-        {% if producto.foto %}
-          <img src="{{ url_for('static', filename='uploads/' + producto.foto) }}" alt="Imagen del Producto">
-          <button type="button" class="remove-image" id="removeImageBtn">&times;</button>
-        {% else %}
-          <div class="drop-message">Suelta tu imagen aquí</div>
-          <button type="button" class="no-image-icon" id="btnCargarFoto">&#8942;</button>
-          <div class="foto-dropdown" id="fotoDropdown" style="display:none;">
-            <button type="button" class="dropdown-item btn btn-secondary" id="dropdownCargarFoto">Cargar imagen</button>
-            <button type="button" class="dropdown-item btn btn-secondary" id="dropdownGenerarIA">Generar con IA</button>
+  <!-- FORMULARIO QUE ABARCA TODO EL CONTENIDO -->
+  <form method="POST" action="" enctype="multipart/form-data" id="productForm">
+    <!-- CAMPOS OCULTOS PARA PRESERVAR VALORES -->
+    <input type="hidden" name="stock" value="{{ producto.stock }}">
+    <input type="hidden" name="costo" value="{{ producto.costo }}">
+    <input type="hidden" name="viene_en_lotes" value="{{ '1' if producto.viene_en_lotes else '0' }}">
+    <input type="hidden" name="num_lotes" value="{{ producto.num_lotes or 1 }}">
+    <input type="hidden" name="mismo_stock_lotes" value="{{ '1' if producto.mismo_stock_lotes else '0' }}">
+    <input type="hidden" name="usa_codigo_barras" value="{{ '1' if producto.usa_codigo_barras else '0' }}">
+    <input type="hidden" name="codigo_interno" value="{{ producto.codigo_interno or '' }}">
+    <input type="hidden" name="unidad" value="{{ producto.unidad or 'pieza' }}">
+    <input type="hidden" name="es_favorito" value="{{ '1' if producto.es_favorito else '0' }}">
+    <input type="hidden" name="esta_a_la_venta" value="{{ '1' if producto.esta_a_la_venta else '0' }}">
+    <input type="hidden" name="has_caducidad" value="{{ '1' if producto.has_caducidad else '0' }}">
+    <input type="hidden" name="metodo_caducidad" value="{{ producto.metodo_caducidad or '' }}">
+
+    <div class="row-form">
+      <!-- Col Izquierda: Foto -->
+      <div class="col-left">
+        <div class="foto-container">
+          <div class="foto-placeholder" id="fotoPlaceholder">
+            {% if producto.foto %}
+              <img src="{{ url_for('static', filename='uploads/' + producto.foto) }}" alt="Imagen del Producto">
+              <button type="button" class="remove-image" id="removeImageBtn">&times;</button>
+            {% else %}
+              <div class="drop-message">Suelta tu imagen aquí</div>
+              <button type="button" class="no-image-icon" id="btnCargarFoto">&#8942;</button>
+              <div class="foto-dropdown" id="fotoDropdown" style="display:none;">
+                <button type="button" class="dropdown-item btn btn-secondary" id="dropdownCargarFoto">Cargar imagen</button>
+                <button type="button" class="dropdown-item btn btn-secondary" id="dropdownGenerarIA">Generar con IA</button>
+              </div>
+            {% endif %}
           </div>
-        {% endif %}
+          <input type="file" id="fotoInput" name="foto" style="display:none;" accept="image/*">
+          <input type="hidden" name="ia_foto_filename" id="ia_foto_filename" value="">
+          <input type="hidden" name="displayed_image_url" id="displayed_image_url" value="{% if producto.foto %}{{ url_for('static', filename='uploads/' + producto.foto) }}{% endif %}">
+          <!-- Barra de progreso para imágenes -->
+          <div class="image-upload-progress">
+            <div class="image-upload-progress-bar" id="imageProgressBar"></div>
+          </div>
+        </div>
       </div>
-      <input type="file" id="fotoInput" name="foto" style="display:none;" accept="image/*">
-      <input type="hidden" name="ia_foto_filename" id="ia_foto_filename" value="">
-      <input type="hidden" name="displayed_image_url" id="displayed_image_url" value="{% if producto.foto %}{{ url_for('static', filename='uploads/' + producto.foto) }}{% endif %}">
-      <div class="image-upload-progress">
-        <div class="image-upload-progress-bar" id="imageProgressBar"></div>
+
+      <!-- Col Derecha: Pasos del formulario -->
+      <div class="col-right">
+        <!-- PASO 1: CÓDIGO DE BARRAS -->
+        <div class="step-container">
+          <div class="step-number">1</div>
+          
+          <!-- Código de Barras -->
+          <div class="form-group">
+            <div class="floating-label" style="display: {% if producto.codigo_barras_externo %}block{% else %}none{% endif %};" id="codigo_barras_externoFloatingLabel">Código de barras</div>
+            <input 
+              type="text"
+              class="form-control"
+              id="codigo_barras_externo"
+              name="codigo_barras_externo"
+              value="{{ producto.codigo_barras_externo }}"
+              placeholder="CÓDIGO DE BARRAS / SKU"
+            >
+            <div class="invalid-feedback" id="skuFeedback" style="display: none;">
+              Este código de barras ya existe. Por favor, usa uno diferente.
+            </div>
+          </div>
+        </div>
+
+        <!-- PASO 2: INFORMACIÓN BÁSICA -->
+        <div class="step-container">
+          <div class="step-number">2</div>
+
+          <!-- Nombre -->
+          <div class="form-group">
+            <div class="floating-label" style="display: {% if producto.nombre %}block{% else %}none{% endif %};" id="nombreFloatingLabel">Nombre del producto</div>
+            <input 
+              type="text"
+              class="form-control"
+              id="nombre"
+              name="nombre"
+              value="{{ producto.nombre }}"
+              placeholder="NOMBRE DEL PRODUCTO"
+              required
+            >
+          </div>
+
+          <!-- Marca -->
+          <div class="form-group" style="margin-bottom: 0;">
+            <div class="floating-label" style="display: {% if producto.marca %}block{% else %}none{% endif %};" id="marcaFloatingLabel">Marca</div>
+            <input
+              type="text"
+              class="form-control"
+              id="marca"
+              name="marca"
+              value="{{ producto.marca }}"
+              placeholder="MARCA"
+            >
+          </div>
+        </div>
+
+        <!-- PASO 3: PRECIO -->
+        <div class="step-container">
+          <div class="step-number">3</div>
+
+          <!-- Precio de Venta -->
+          <div class="form-group" style="margin-bottom: 0;">
+            <div class="floating-label" style="display: {% if producto.precio_venta %}block{% else %}none{% endif %};" id="precio_ventaFloatingLabel">Precio de venta</div>
+            <input
+              type="text"
+              class="form-control"
+              id="precio_venta"
+              name="precio_venta"
+              value="{% if producto.precio_venta %}${{ "%.2f"|format(producto.precio_venta) }}{% endif %}"
+              placeholder="PRECIO DE VENTA"
+              oninput="formatCostRealtime(this)"
+              required
+            >
+          </div>
+        </div>
+
+        <!-- PASO 4: CATEGORÍA -->
+        <div class="step-container">
+          <div class="step-number">4</div>
+
+          <!-- Categoría -->
+          <div class="form-group" style="margin-bottom: 0;">
+            <select class="form-select" name="categoria_existente" id="categoria_existente" required>
+              <option value="" disabled{% if not producto.categoria %} selected{% endif %} hidden>-SELECCIONA UNA CATEGORÍA-</option>
+              <option value="abarrotes secos" data-custom-properties='{"color": "#FFA500"}'{% if producto.categoria == "abarrotes secos" %} selected{% endif %}>Abarrotes secos</option>
+              <option value="enlatados y conservas" data-custom-properties='{"color": "#DAA520"}'{% if producto.categoria == "enlatados y conservas" %} selected{% endif %}>Enlatados y conservas</option>
+              <option value="botanas, dulces y snacks" data-custom-properties='{"color": "#FF69B4"}'{% if producto.categoria == "botanas, dulces y snacks" %} selected{% endif %}>Botanas, dulces y snacks</option>
+              <option value="bebidas no alcohólicas" data-custom-properties='{"color": "#1E90FF"}'{% if producto.categoria == "bebidas no alcohólicas" %} selected{% endif %}>Bebidas no alcohólicas</option>
+              <option value="bebidas alcohólicas" data-custom-properties='{"color": "#800080"}'{% if producto.categoria == "bebidas alcohólicas" %} selected{% endif %}>Bebidas alcohólicas</option>
+              <option value="panadería y repostería" data-custom-properties='{"color": "#D2B48C"}'{% if producto.categoria == "panadería y repostería" %} selected{% endif %}>Panadería y repostería</option>
+              <option value="lácteos y huevos" data-custom-properties='{"color": "#F5DEB3"}'{% if producto.categoria == "lácteos y huevos" %} selected{% endif %}>Lácteos y huevos</option>
+              <option value="carnes frías y embutidos" data-custom-properties='{"color": "#B22222"}'{% if producto.categoria == "carnes frías y embutidos" %} selected{% endif %}>Carnes frías y embutidos</option>
+              <option value="congelados y refrigerados" data-custom-properties='{"color": "#00CED1"}'{% if producto.categoria == "congelados y refrigerados" %} selected{% endif %}>Congelados y refrigerados</option>
+              <option value="frutas y verduras frescas" data-custom-properties='{"color": "#32CD32"}'{% if producto.categoria == "frutas y verduras frescas" %} selected{% endif %}>Frutas y verduras frescas</option>
+              <option value="productos de limpieza y hogar" data-custom-properties='{"color": "#87CEFA"}'{% if producto.categoria == "productos de limpieza y hogar" %} selected{% endif %}>Productos de limpieza y hogar</option>
+              <option value="cuidado personal e higiene" data-custom-properties='{"color": "#FFC0CB"}'{% if producto.categoria == "cuidado personal e higiene" %} selected{% endif %}>Cuidado personal e higiene</option>
+              <option value="medicamentos de mostrador (otc)" data-custom-properties='{"color": "#FF6347"}'{% if producto.categoria == "medicamentos de mostrador (otc)" %} selected{% endif %}>Medicamentos de mostrador (OTC)</option>
+              <option value="productos para bebés" data-custom-properties='{"color": "#FFB6C1"}'{% if producto.categoria == "productos para bebés" %} selected{% endif %}>Productos para bebés</option>
+              <option value="productos para mascotas" data-custom-properties='{"color": "#8FBC8F"}'{% if producto.categoria == "productos para mascotas" %} selected{% endif %}>Productos para mascotas</option>
+              <option value="artículos de papelería" data-custom-properties='{"color": "#9370DB"}'{% if producto.categoria == "artículos de papelería" %} selected{% endif %}>Artículos de papelería</option>
+              <option value="ferretería básica" data-custom-properties='{"color": "#708090"}'{% if producto.categoria == "ferretería básica" %} selected{% endif %}>Ferretería básica</option>
+              <option value="otros (miscelánea)" data-custom-properties='{"color": "#A9A9A9"}'{% if producto.categoria == "otros (miscelánea)" %} selected{% endif %}>Otros (miscelánea)</option>
+            </select>
+          </div>
+        </div>
       </div>
+      <!-- FIN col-right -->
     </div>
-  </div>
-
-  <!-- Nombre -->
-  <div class="form-group">
-    <div class="floating-label" style="display: {% if producto.nombre %}block{% else %}none{% endif %};" id="nombreFloatingLabel">Nombre del producto</div>
-    <input
-      type="text"
-      class="form-control"
-      id="nombre"
-      name="nombre"
-      value="{{ producto.nombre }}"
-      placeholder="NOMBRE DEL PRODUCTO"
-      required
-    >
-  </div>
-
-  <!-- Código de Barras -->
-  <div class="form-group">
-    <div class="floating-label" style="display: {% if producto.codigo_barras_externo %}block{% else %}none{% endif %};" id="codigo_barras_externoFloatingLabel">Código de barras (SKU)</div>
-    <input
-      type="text"
-      class="form-control"
-      id="codigo_barras_externo"
-      name="codigo_barras_externo"
-      value="{{ producto.codigo_barras_externo }}"
-      placeholder="CÓDIGO DE BARRAS / SKU"
-    >
-    <div class="invalid-feedback" id="skuFeedback" style="display: none;">
-      Este código de barras ya existe. Por favor, usa uno diferente.
-    </div>
-  </div>
-
-  <!-- Marca -->
-  <div class="form-group">
-    <div class="floating-label" style="display: {% if producto.marca %}block{% else %}none{% endif %};" id="marcaFloatingLabel">Marca</div>
-    <input
-      type="text"
-      class="form-control"
-      id="marca"
-      name="marca"
-      value="{{ producto.marca }}"
-      placeholder="MARCA DEL PRODUCTO"
-    >
-  </div>
-
-  <!-- Categoría -->
-  <div class="mb-3">
-    <label for="categoria_existente" class="form-label mb-2">Categoría</label>
-    <select class="form-select" name="categoria_existente" id="categoria_existente" required>
-      <option value="" disabled{% if not producto.categoria %} selected{% endif %} hidden>-SELECCIONA UNA CATEGORÍA-</option>
-      {% for category in categories %}
-        <option value="{{ category.nombre }}" 
-                data-custom-properties='{"color": "{{ category.color }}"}'
-                {% if category.nombre == producto.categoria %}selected{% endif %}>
-          {{ category.nombre|capitalize }}
-        </option>
-      {% endfor %}
-    </select>
-  </div>
-
-  <!-- Precio -->
-  <div class="form-group">
-    <div class="floating-label" style="display: {% if producto.precio_venta %}block{% else %}none{% endif %};" id="precio_ventaFloatingLabel">Precio de venta</div>
-    <input
-      type="text"
-      class="form-control"
-      id="precio_venta"
-      name="precio_venta"
-      value="{% if producto.precio_venta %}${{ "%.2f"|format(producto.precio_venta) }}{% endif %}"
-      placeholder="PRECIO DE VENTA"
-      oninput="formatCostRealtime(this)"
-      required
-    >
-  </div>
-
-  <!-- Botones -->
-  <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-  <a href="{{ url_for('ver_productos') }}" class="btn btn-secondary">Cancelar</a>
-</form>
+    <!-- FIN row-form -->
+  </form>
+</div>
 
 <script>
   /* ===========================================================

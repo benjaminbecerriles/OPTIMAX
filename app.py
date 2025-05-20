@@ -3681,6 +3681,67 @@ def producto_confirmacion(producto_id):
         pagina_origen=pagina_origen
     )
 
+@app.route('/etiquetas-producto/<int:producto_id>', methods=['GET'])
+@login_requerido
+def etiquetas_producto(producto_id):
+    """
+    Vista para generar etiquetas para un producto específico.
+    Permite imprimir etiquetas con códigos de barras según el stock o cantidad personalizada.
+    """
+    # Verificar si el usuario está logueado
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    
+    empresa_id = session.get('user_id')
+    
+    # Obtener el producto
+    producto = Producto.query.filter_by(
+        id=producto_id, 
+        empresa_id=empresa_id
+    ).first_or_404()
+    
+    # Calcular precio con descuento si tiene
+    try:
+        precio_final = producto.precio_venta or 0
+        if hasattr(producto, 'tiene_descuento') and producto.tiene_descuento:
+            if producto.tipo_descuento == 'percentage':
+                precio_final = producto.precio_venta * (1 - producto.valor_descuento / 100)
+            else:  # fixed amount
+                precio_final = max(0, producto.precio_venta - producto.valor_descuento)
+    except:
+        precio_final = producto.precio_venta or 0
+    
+    # Verificar que el producto tenga un código de barras válido
+    if not producto.codigo_barras_externo or producto.codigo_barras_externo.strip() == "":
+        flash('Este producto no tiene un código de barras válido para generar etiquetas.', 'warning')
+        return redirect(url_for('ver_productos'))
+    
+    # Definir formatos comunes de etiquetas en México
+    formatos_etiquetas = [
+        {"id": "avery5160", "nombre": "Avery 5160 (3 x 10)", "por_pagina": 30, "ancho": 63.5, "alto": 26.9, "columnas": 3, "filas": 10},
+        {"id": "avery5161", "nombre": "Avery 5161 (2 x 10)", "por_pagina": 20, "ancho": 101.6, "alto": 26.9, "columnas": 2, "filas": 10},
+        {"id": "avery5163", "nombre": "Avery 5163 (2 x 5)", "por_pagina": 10, "ancho": 101.6, "alto": 50.8, "columnas": 2, "filas": 5},
+        {"id": "zebra_2x1", "nombre": "Zebra 2\" x 1\"", "por_pagina": 1, "ancho": 50.8, "alto": 25.4, "columnas": 1, "filas": 1},
+        {"id": "dymo_11352", "nombre": "DYMO 11352 (54mm x 25mm)", "por_pagina": 1, "ancho": 54, "alto": 25, "columnas": 1, "filas": 1},
+        {"id": "termica_40x25", "nombre": "Térmica 40mm x 25mm", "por_pagina": 1, "ancho": 40, "alto": 25, "columnas": 1, "filas": 1}
+    ]
+    
+    # Definir impresoras compatibles comunes en México
+    impresoras_compatibles = [
+        {"id": "normal", "nombre": "Impresora normal (láser/tinta)", "descripcion": "Compatible con hojas de etiquetas Avery"},
+        {"id": "zebra", "nombre": "Zebra GK420d/GX420d", "descripcion": "Impresora térmica para etiquetas adhesivas"},
+        {"id": "dymo", "nombre": "DYMO LabelWriter 450", "descripcion": "Impresora térmica para etiquetas pequeñas"},
+        {"id": "termica", "nombre": "Xprinter XP-235B/XP-420B", "descripcion": "Impresora térmica económica para tickets/etiquetas"}
+    ]
+    
+    return render_template(
+        'etiquetas_producto.html',
+        producto=producto,
+        precio_final=precio_final,
+        formatos_etiquetas=formatos_etiquetas,
+        impresoras_compatibles=impresoras_compatibles
+    )
+
 ##############################
 # DESCUENTOS
 ##############################

@@ -46,20 +46,31 @@ def obtener_proximo_numero_lote(producto_id):
     if not lote_registro:
         return "Lote de Registro"
     
-    # Si ya existe lote de registro, buscar el último lote numerado
-    ultimo_lote = LoteInventario.query.filter_by(
+    # Si ya existe lote de registro, obtener todos los lotes numerados
+    lotes_numerados = LoteInventario.query.filter_by(
         producto_id=producto_id
     ).filter(
         LoteInventario.numero_lote != "Lote de Registro"
-    ).order_by(desc(LoteInventario.numero_lote)).first()
+    ).all()
     
-    if ultimo_lote:
-        # Extraer el número del formato "Lote #X"
-        try:
-            numero = int(ultimo_lote.numero_lote.split('#')[1])
-            return f"Lote #{numero + 1}"
-        except:
-            return "Lote #2"  # Si hay error, empezar con Lote #2
+    if lotes_numerados:
+        # Extraer número de cada lote y encontrar el máximo
+        numeros_lotes = []
+        for lote in lotes_numerados:
+            try:
+                # Extraer el número después de '#'
+                if '#' in lote.numero_lote:
+                    numero = int(lote.numero_lote.split('#')[1])
+                    numeros_lotes.append(numero)
+            except (ValueError, IndexError):
+                continue
+        
+        # Si encontramos números de lotes válidos, obtener el máximo
+        if numeros_lotes:
+            proximo_numero = max(numeros_lotes) + 1
+            return f"Lote #{proximo_numero}"
+        else:
+            return "Lote #2"  # Si no hay números válidos
     
     # Si solo existe lote de registro, el siguiente es Lote #2
     return "Lote #2"
