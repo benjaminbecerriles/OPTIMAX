@@ -163,6 +163,11 @@
     <div class="scanner-target-box"></div>
   </div>
 
+  <!-- Bibliotecas para códigos de barras y PDF -->
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  
   <!-- Scripts fundamentales primero -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
@@ -313,6 +318,11 @@
 
   <!-- Script original de mi_scanner_quagga.js como backup -->
   <script src="{{ url_for('static', filename='js/mi_scanner_quagga.js') }}"></script>
+
+  <!-- Script para la página de etiquetas -->
+  {% if request.path.startswith('/etiquetas-producto/') %}
+  <script src="{{ url_for('static', filename='js/etiquetas.js') }}"></script>
+  {% endif %}
 
   <script>
     // Recarga si se usa BFCache
