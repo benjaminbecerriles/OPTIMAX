@@ -2,337 +2,394 @@
 
 {% block title %}Etiquetas de {{ producto.nombre }}{% endblock %}
 
+{% block head %}
+<!-- Asegurar que tenemos la tipografía adecuada -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<!-- Para efectos visuales avanzados -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+{% endblock %}
+
 {% block content %}
 <style>
-  /* Estilos generales */
+  /* Estilos premium para un diseño de nivel empresarial */
+  :root {
+    --primary-color: #e52e2e;
+    --primary-light: #fff0f0;
+    --primary-dark: #c01e1e;
+    --neutral-900: #111827;
+    --neutral-800: #1f2937;
+    --neutral-700: #374151;
+    --neutral-600: #4b5563;
+    --neutral-500: #6b7280;
+    --neutral-400: #9ca3af;
+    --neutral-300: #d1d5db;
+    --neutral-200: #e5e7eb;
+    --neutral-100: #f3f4f6;
+    --neutral-50: #f9fafb;
+    --success-color: #10b981;
+    --warning-color: #f59e0b;
+    --info-color: #3b82f6;
+    --danger-color: #ef4444;
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --transition-all: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  /* Reset y estilos generales */
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  body {
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    color: var(--neutral-800);
+    background-color: var(--neutral-50);
+    line-height: 1.5;
+  }
+  
+  /* Contenedor principal */
   .etiquetas-container {
-    max-width: 1200px;
+    max-width: 1280px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 2rem;
+  }
+  
+  /* Encabezado */
+  .page-header {
+    margin-bottom: 2rem;
   }
   
   .page-title {
-    color: #333;
-    margin-bottom: 5px;
-    font-size: 28px;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--neutral-900);
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.025em;
   }
   
   .page-subtitle {
-    color: #666;
-    margin-bottom: 20px;
-    font-size: 16px;
+    font-size: 1rem;
+    color: var(--neutral-600);
+    max-width: 650px;
   }
   
-  /* Tarjeta de producto */
+  /* Tarjeta de producto premium */
   .product-card {
     display: flex;
-    gap: 20px;
-    padding: 20px;
-    background-color: #f8f9fa;
-    border-radius: 10px;
-    margin-bottom: 30px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    padding: 1.5rem;
+    background-color: white;
+    border-radius: var(--radius-lg);
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--neutral-200);
+    transition: var(--transition-all);
+    gap: 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .product-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-color), var(--primary-dark));
+  }
+  
+  .product-card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+  }
+  
+  .product-image-container {
+    width: 140px;
+    height: 140px;
+    background-color: white;
+    border-radius: var(--radius-md);
+    padding: 0.5rem;
+    border: 1px solid var(--neutral-200);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
   }
   
   .product-image {
-    width: 120px;
-    height: 120px;
+    max-width: 100%;
+    max-height: 100%;
     object-fit: contain;
-    border-radius: 8px;
-    background-color: white;
-    padding: 5px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   }
   
   .product-details {
     flex: 1;
+    display: flex;
+    flex-direction: column;
   }
   
   .product-name {
-    font-size: 22px;
-    margin-bottom: 8px;
-    color: #333;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    color: var(--neutral-900);
+    line-height: 1.3;
   }
   
   .product-meta {
     display: flex;
     flex-wrap: wrap;
-    gap: 15px;
-    margin-bottom: 10px;
+    gap: 1.25rem;
+    margin-bottom: 1rem;
   }
   
   .meta-item {
     display: flex;
     align-items: center;
-    font-size: 14px;
-    color: #555;
-    gap: 5px;
+    font-size: 0.9375rem;
+    color: var(--neutral-700);
+    gap: 0.5rem;
   }
   
-  .meta-item i {
-    color: #e52e2e;
-    width: 16px;
-    text-align: center;
+  .meta-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-md);
+    background-color: var(--primary-light);
+    color: var(--primary-color);
+  }
+  
+  .meta-value {
+    font-weight: 500;
+  }
+  
+  .meta-label {
+    font-size: 0.75rem;
+    color: var(--neutral-500);
+    display: block;
   }
   
   .product-stock {
-    font-weight: bold;
-    color: #28a745;
+    font-weight: 600;
+    color: var(--success-color);
   }
   
   .category-pill {
-    display: inline-block;
-    padding: 5px 10px;
-    border-radius: 20px;
-    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.375rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.8125rem;
+    font-weight: 500;
     color: white;
-    background-color: #6c757d;
   }
   
-  /* Sección de configuración */
+  /* Pestañas de configuración */
+  .tabs-container {
+    margin-bottom: 2rem;
+  }
+  
+  .tabs-header {
+    display: flex;
+    border-bottom: 1px solid var(--neutral-200);
+    margin-bottom: 1.5rem;
+  }
+  
+  .tab-button {
+    padding: 0.75rem 1.25rem;
+    border: none;
+    background: none;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--neutral-500);
+    cursor: pointer;
+    transition: var(--transition-all);
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .tab-button:hover {
+    color: var(--neutral-900);
+  }
+  
+  .tab-button.active {
+    color: var(--primary-color);
+  }
+  
+  .tab-button.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: var(--primary-color);
+  }
+  
+  .tab-icon {
+    font-size: 1.25rem;
+  }
+  
+  .tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease-in-out;
+  }
+  
+  .tab-content.active {
+    display: block;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  /* Sección de configuración premium */
   .config-section {
     background-color: white;
-    border-radius: 10px;
-    padding: 25px;
-    margin-bottom: 30px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    border-radius: var(--radius-lg);
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--neutral-200);
+    overflow: hidden;
   }
   
-  .section-title {
-    font-size: 18px;
-    color: #333;
-    margin-bottom: 20px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #eee;
+  .config-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--neutral-200);
+    background-color: var(--neutral-50);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .config-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--neutral-900);
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+  }
+  
+  .config-title-icon {
+    color: var(--primary-color);
+  }
+  
+  .config-body {
+    padding: 1.5rem;
+  }
+  
+  .config-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .config-row:last-child {
+    margin-bottom: 0;
+  }
+  
+  .config-col {
+    flex: 1;
+    min-width: 280px;
   }
   
   .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 1.5rem;
+  }
+  
+  .form-group:last-child {
+    margin-bottom: 0;
   }
   
   .form-label {
     display: block;
-    margin-bottom: 8px;
+    margin-bottom: 0.5rem;
     font-weight: 500;
-    color: #333;
+    color: var(--neutral-700);
+    font-size: 0.9375rem;
   }
   
   .form-control {
     width: 100%;
-    padding: 10px 12px;
-    border: 1px solid #ced4da;
-    border-radius: 5px;
-    font-size: 16px;
-    color: #333;
+    padding: 0.625rem 0.875rem;
+    border: 1px solid var(--neutral-300);
+    border-radius: var(--radius-md);
+    font-size: 0.9375rem;
+    color: var(--neutral-800);
+    transition: var(--transition-all);
+    background-color: white;
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .form-control:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(229, 46, 46, 0.15);
+  }
+  
+  .form-control:disabled {
+    background-color: var(--neutral-100);
+    opacity: 0.6;
   }
   
   .form-select {
     width: 100%;
-    padding: 10px 12px;
-    border: 1px solid #ced4da;
-    border-radius: 5px;
-    font-size: 16px;
-    color: #333;
+    padding: 0.625rem 0.875rem;
+    border: 1px solid var(--neutral-300);
+    border-radius: var(--radius-md);
+    font-size: 0.9375rem;
+    color: var(--neutral-800);
+    transition: var(--transition-all);
     background-color: white;
+    box-shadow: var(--shadow-sm);
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.875rem center;
+    background-size: 1rem;
+    padding-right: 2.5rem;
   }
   
-  .form-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    margin-bottom: 10px;
+  .form-select:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(229, 46, 46, 0.15);
   }
   
-  .form-col {
-    flex: 1;
-    min-width: 200px;
-  }
-  
-  /* Botones */
-  .btn-container {
-    display: flex;
-    gap: 15px;
-    margin-top: 30px;
-  }
-  
-  .btn {
-    padding: 12px 20px;
-    border-radius: 5px;
-    font-size: 16px;
-    font-weight: 500;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    transition: all 0.2s;
-    border: none;
-  }
-  
-  .btn-primary {
-    background-color: #e52e2e;
-    color: white;
-  }
-  
-  .btn-secondary {
-    background-color: #6c757d;
-    color: white;
-  }
-  
-  .btn-outline {
-    background-color: transparent;
-    border: 1px solid #ced4da;
-    color: #333;
-  }
-  
-  .btn:hover {
-    opacity: 0.9;
-    transform: translateY(-2px);
-  }
-  
-  /* Previsualización de etiquetas */
-  .preview-section {
-    margin-top: 30px;
-  }
-  
-  .preview-title {
-    font-size: 18px;
-    color: #333;
-    margin-bottom: 15px;
-  }
-  
-  .preview-container {
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    padding: 20px;
-    background-color: #f8f9fa;
-    margin-bottom: 20px;
-    min-height: 200px;
-    overflow-x: auto;
-  }
-  
-  .etiqueta-preview {
-    display: inline-block;
-    border: 1px dashed #ccc;
-    margin: 5px;
-    padding: 10px;
-    background-color: white;
-    position: relative;
-  }
-  
-  .preview-sheet {
-    border: 1px solid #aaa;
-    background: white;
-    margin: 0 auto 20px;
-    position: relative;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-  }
-  
-  .etiqueta {
-    position: absolute;
-    border: 1px dashed #ddd;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-    background: white;
-    font-family: Arial, sans-serif;
-  }
-  
-  .etiqueta-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-    padding: 5px;
-    text-align: center;
-  }
-  
-  .etiqueta-nombre {
-    font-weight: bold;
-    font-size: 10px;
-    margin-bottom: 2px;
-    line-height: 1.1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    word-break: break-word;
-  }
-  
-  .etiqueta-precio {
-    font-weight: bold;
-    font-size: 12px;
-    margin-bottom: 2px;
-  }
-  
-  .etiqueta-codigo {
-    font-size: 8px;
-    margin-bottom: 3px;
-  }
-  
-  .etiqueta-barcode {
-    max-width: 95%;
-    margin-bottom: 2px;
-  }
-  
-  /* Estilos para impresoras */
-  .printer-options {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    margin-top: 15px;
-  }
-  
-  .printer-option {
-    flex: 1;
-    min-width: 200px;
-    padding: 15px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    background-color: white;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  
-  .printer-option:hover {
-    border-color: #e52e2e;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  }
-  
-  .printer-option.selected {
-    border-color: #e52e2e;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    background-color: #fff8f8;
-  }
-  
-  .printer-name {
-    font-weight: bold;
-    margin-bottom: 5px;
-    color: #333;
-  }
-  
-  .printer-description {
-    font-size: 12px;
-    color: #666;
-  }
-  
-  /* Configuración adicional */
+  /* Toggles estilizados */
   .toggle-container {
-    margin-top: 10px;
-    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  
+  .toggle-container:last-child {
+    margin-bottom: 0;
   }
   
   .toggle-switch {
     position: relative;
     display: inline-block;
-    width: 50px;
-    height: 24px;
-    margin-right: 10px;
-    vertical-align: middle;
+    width: 52px;
+    height: 28px;
+    margin-right: 0.75rem;
   }
   
   .toggle-switch input {
@@ -348,136 +405,654 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #ccc;
-    transition: .4s;
+    background-color: var(--neutral-300);
+    transition: var(--transition-all);
     border-radius: 34px;
   }
   
   .toggle-slider:before {
     position: absolute;
     content: "";
-    height: 16px;
-    width: 16px;
+    height: 20px;
+    width: 20px;
     left: 4px;
     bottom: 4px;
     background-color: white;
-    transition: .4s;
+    transition: var(--transition-all);
     border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
   
   input:checked + .toggle-slider {
-    background-color: #e52e2e;
+    background-color: var(--primary-color);
+  }
+  
+  input:focus + .toggle-slider {
+    box-shadow: 0 0 0 3px rgba(229, 46, 46, 0.15);
   }
   
   input:checked + .toggle-slider:before {
-    transform: translateX(26px);
+    transform: translateX(24px);
   }
   
   .toggle-label {
-    display: inline-block;
-    vertical-align: middle;
-    font-size: 14px;
-    color: #333;
+    font-size: 0.9375rem;
+    color: var(--neutral-700);
+    user-select: none;
   }
   
-  /* Área para exportar a PDF */
-  #pdf-container {
-    position: fixed;
-    left: -9999px;
-    top: -9999px;
+  /* Opciones de impresora premium con placeholders */
+  .printer-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1rem;
   }
   
-  /* Mensaje de error de dependencias */
+  .printer-option {
+    flex: 1;
+    min-width: 240px;
+    max-width: 320px;
+    padding: 1.5rem;
+    border: 1px solid var(--neutral-200);
+    border-radius: var(--radius-md);
+    background-color: white;
+    cursor: pointer;
+    transition: var(--transition-all);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .printer-option:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transform: translateY(-2px);
+  }
+  
+  .printer-option.selected {
+    border-color: var(--primary-color);
+    background-color: var(--primary-light);
+    box-shadow: 0 4px 12px rgba(229, 46, 46, 0.12);
+  }
+  
+  .printer-option.selected::after {
+    content: '\f00c';
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: white;
+    background-color: var(--primary-color);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  .printer-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    background-color: var(--info-color);
+    color: white;
+  }
+  
+  .printer-icon {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: var(--neutral-100);
+    color: var(--neutral-600);
+    font-size: 1.75rem;
+    transition: var(--transition-all);
+  }
+  
+  .printer-option:hover .printer-icon,
+  .printer-option.selected .printer-icon {
+    background-color: var(--primary-light);
+    color: var(--primary-color);
+  }
+  
+  .printer-placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--neutral-100);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 2;
+    pointer-events: none;
+  }
+  
+  .printer-option:hover .printer-placeholder {
+    opacity: 0.85;
+  }
+  
+  .printer-placeholder-icon {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+  }
+  
+  .printer-placeholder-text {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--neutral-800);
+  }
+  
+  .printer-name {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--neutral-800);
+    font-size: 1rem;
+  }
+  
+  .printer-description {
+    font-size: 0.875rem;
+    color: var(--neutral-600);
+    line-height: 1.4;
+  }
+  
+  .printer-meta {
+    margin-top: 0.75rem;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    font-size: 0.8125rem;
+  }
+  
+  .printer-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    color: var(--neutral-600);
+  }
+  
+  .printer-meta-item i {
+    color: var(--primary-color);
+  }
+  
+  /* Vista previa premium - más compacta y profesional */
+  .preview-section {
+    background-color: white;
+    border-radius: var(--radius-lg);
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--neutral-200);
+    overflow: hidden;
+  }
+  
+  .preview-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--neutral-200);
+    background-color: var(--neutral-50);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .preview-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--neutral-900);
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+  }
+  
+  .preview-actions {
+    display: flex;
+    gap: 0.75rem;
+  }
+  
+  .preview-action-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--neutral-500);
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-md);
+    transition: var(--transition-all);
+  }
+  
+  .preview-action-btn:hover {
+    background-color: var(--neutral-100);
+    color: var(--neutral-700);
+  }
+  
+  .preview-container {
+    height: 360px;
+    max-height: 360px;
+    overflow: auto;
+    position: relative;
+    padding: 1.5rem;
+    background-color: var(--neutral-50);
+    border-bottom: 1px solid var(--neutral-200);
+  }
+  
+  /* Scrollbar estilizada para el contenedor de vista previa */
+  .preview-container::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  .preview-container::-webkit-scrollbar-track {
+    background: var(--neutral-100);
+    border-radius: 4px;
+  }
+  
+  .preview-container::-webkit-scrollbar-thumb {
+    background: var(--neutral-300);
+    border-radius: 4px;
+  }
+  
+  .preview-container::-webkit-scrollbar-thumb:hover {
+    background: var(--neutral-400);
+  }
+  
+  .preview-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .preview-footer {
+    padding: 1rem 1.5rem;
+    background-color: var(--neutral-50);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .preview-info {
+    font-size: 0.875rem;
+    color: var(--neutral-600);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .preview-info-icon {
+    color: var(--info-color);
+  }
+  
+  .preview-zoom {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .zoom-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    color: var(--neutral-600);
+    transition: var(--transition-all);
+  }
+  
+  .zoom-btn:hover {
+    background-color: var(--neutral-200);
+    color: var(--neutral-800);
+  }
+  
+  .zoom-value {
+    font-size: 0.875rem;
+    color: var(--neutral-700);
+    font-weight: 500;
+    width: 40px;
+    text-align: center;
+  }
+  
+  /* Contenido de la previsualización */
+  .preview-sheet {
+    border: 1px solid var(--neutral-300);
+    background: white;
+    margin: 0 auto 1.5rem;
+    position: relative;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    max-width: 100%;
+    transform-origin: top center;
+  }
+  
+  .etiqueta {
+    position: absolute;
+    border: 1px dashed var(--neutral-300);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: white;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+  
+  .etiqueta-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    padding: 5px;
+    text-align: center;
+  }
+  
+  .etiqueta-nombre {
+    font-weight: 600;
+    font-size: 10px;
+    margin-bottom: 2px;
+    line-height: 1.1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    word-break: break-word;
+  }
+  
+  .etiqueta-precio {
+    font-weight: 700;
+    font-size: 12px;
+    margin-bottom: 2px;
+    color: var(--primary-color);
+  }
+  
+  .etiqueta-codigo {
+    font-size: 8px;
+    margin-bottom: 3px;
+    color: var(--neutral-600);
+  }
+  
+  .etiqueta-barcode {
+    max-width: 95%;
+    margin-bottom: 2px;
+  }
+  
+  /* Botones de acción */
+  .actions-section {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+  
+  .btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-md);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.625rem;
+    transition: var(--transition-all);
+    border: none;
+    box-shadow: var(--shadow-sm);
+    min-width: 120px;
+  }
+  
+  .btn-icon {
+    font-size: 1rem;
+  }
+  
+  .btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+  }
+  
+  .btn-primary:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+  
+  .btn-secondary {
+    background-color: var(--neutral-700);
+    color: white;
+  }
+  
+  .btn-secondary:hover {
+    background-color: var(--neutral-800);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+  
+  .btn-outline {
+    background-color: white;
+    border: 1px solid var(--neutral-300);
+    color: var(--neutral-700);
+  }
+  
+  .btn-outline:hover {
+    background-color: var(--neutral-50);
+    border-color: var(--neutral-400);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    color: var(--neutral-900);
+  }
+  
+  /* Mensaje de error de dependencias con estilo moderno */
   .dependency-error {
-    background-color: #fff3cd;
-    color: #856404;
-    padding: 15px;
-    border-radius: 5px;
-    margin-bottom: 20px;
-    border: 1px solid #ffeeba;
+    background-color: var(--primary-light);
+    color: var(--primary-dark);
+    padding: 1rem 1.25rem;
+    border-radius: var(--radius-md);
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(229, 46, 46, 0.2);
     display: none;
+    box-shadow: var(--shadow-sm);
   }
   
-  /* Estilos de impresión */
-  @media print {
-    body * {
-      visibility: hidden;
-    }
-    
-    #print-content, #print-content * {
-      visibility: visible;
-    }
-    
-    #print-content {
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 100%;
-    }
-    
-    .no-print {
-      display: none !important;
-    }
+  /* Indicador de carga con estilo premium */
+  .loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.92);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border-radius: inherit;
+  }
+  
+  .loading-spinner {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    position: relative;
+    margin-bottom: 1.25rem;
+  }
+  
+  .loading-spinner::before,
+  .loading-spinner::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    border-top-color: var(--primary-color);
+  }
+  
+  .loading-spinner::before {
+    animation: spin 0.8s linear infinite;
+    z-index: 2;
+  }
+  
+  .loading-spinner::after {
+    border: 3px solid var(--neutral-200);
+    z-index: 1;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .loading-text {
+    color: var(--neutral-700);
+    font-size: 0.9375rem;
+    text-align: center;
+    font-weight: 500;
+  }
+  
+  .loading-subtext {
+    color: var(--neutral-500);
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    text-align: center;
   }
   
   /* Media queries */
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) {
+    .etiquetas-container {
+      padding: 1.5rem;
+    }
+    
     .product-card {
       flex-direction: column;
       align-items: center;
     }
     
-    .form-row {
-      flex-direction: column;
-      gap: 10px;
+    .product-image-container {
+      margin-bottom: 1rem;
     }
     
-    .btn-container {
+    .product-meta {
+      justify-content: center;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .etiquetas-container {
+      padding: 1rem;
+    }
+    
+    .config-row {
+      flex-direction: column;
+    }
+    
+    .actions-section {
       flex-direction: column;
     }
     
     .btn {
       width: 100%;
     }
+    
+    .tabs-header {
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+    }
+    
+    .tab-button {
+      white-space: nowrap;
+    }
   }
 </style>
 
 <div class="etiquetas-container">
-  <h1 class="page-title">Generar etiquetas</h1>
-  <p class="page-subtitle">Personaliza e imprime etiquetas para el producto</p>
-  
   <!-- Mensaje de error para dependencias -->
   <div id="dependency-error" class="dependency-error">
-    <strong>Error:</strong> No se han podido cargar todas las bibliotecas necesarias. Por favor, recarga la página o verifica tu conexión a Internet.
+    <div class="flex items-center">
+      <i class="fas fa-exclamation-circle mr-2"></i>
+      <strong>Error:</strong> No se han podido cargar todas las bibliotecas necesarias. Por favor, recarga la página o verifica tu conexión a Internet.
+    </div>
+  </div>
+
+  <!-- Encabezado -->
+  <div class="page-header">
+    <h1 class="page-title">Generador de etiquetas</h1>
+    <p class="page-subtitle">Personaliza y genera etiquetas profesionales para tus productos con códigos de barras y precios.</p>
   </div>
   
-  <!-- Información del producto -->
+  <!-- Información del producto - Diseño premium -->
   <div class="product-card" data-producto='{"id": {{ producto.id }}, "nombre": "{{ producto.nombre|replace('"', '\\"')|replace('\n', ' ')|replace('\r', '') }}", "codigo": "{{ producto.codigo_barras_externo }}", "precio": {{ precio_final }}, "stock": {{ producto.stock }}}'>
-    <img src="{{ url_for('static', filename='uploads/' + producto.foto) }}" alt="{{ producto.nombre }}" class="product-image" onerror="this.src='{{ url_for('static', filename='img/default_product.jpg') }}'">
+    <div class="product-image-container">
+      <img src="{{ url_for('static', filename='uploads/' + producto.foto) }}" alt="{{ producto.nombre }}" class="product-image" onerror="this.src='{{ url_for('static', filename='img/default_product.jpg') }}'">
+    </div>
     
     <div class="product-details">
       <h2 class="product-name">{{ producto.nombre }}</h2>
       
       <div class="product-meta">
         <div class="meta-item">
-          <i class="fas fa-barcode"></i>
-          <span>{{ producto.codigo_barras_externo }}</span>
+          <div class="meta-icon">
+            <i class="fas fa-barcode"></i>
+          </div>
+          <div>
+            <span class="meta-label">Código</span>
+            <span class="meta-value">{{ producto.codigo_barras_externo }}</span>
+          </div>
         </div>
         
         <div class="meta-item">
-          <i class="fas fa-tags"></i>
-          <span>${{ "%.2f"|format(precio_final) }}</span>
+          <div class="meta-icon">
+            <i class="fas fa-tag"></i>
+          </div>
+          <div>
+            <span class="meta-label">Precio</span>
+            <span class="meta-value">${{ "%.2f"|format(precio_final) }}</span>
+          </div>
         </div>
         
         <div class="meta-item">
-          <i class="fas fa-box"></i>
-          <span class="product-stock">Stock: {{ producto.stock }}</span>
+          <div class="meta-icon">
+            <i class="fas fa-box"></i>
+          </div>
+          <div>
+            <span class="meta-label">Inventario</span>
+            <span class="meta-value product-stock">{{ producto.stock }} unidades</span>
+          </div>
         </div>
         
         {% if producto.categoria %}
         <div class="meta-item">
           <span class="category-pill" style="background-color: {{ producto.categoria_color or '#6c757d' }}">
-            {{ producto.categoria }}
+            <i class="fas fa-layer-group mr-1"></i> {{ producto.categoria }}
           </span>
         </div>
         {% endif %}
@@ -485,129 +1060,279 @@
     </div>
   </div>
   
-  <!-- Sección de configuración -->
-  <div class="config-section">
-    <h3 class="section-title">Configuración de etiquetas</h3>
-    
-    <div class="form-row">
-      <div class="form-col">
-        <div class="form-group">
-          <label class="form-label" for="cantidad">Cantidad de etiquetas</label>
-          <div class="toggle-container">
-            <label class="toggle-switch">
-              <input type="checkbox" id="usar_stock" checked>
-              <span class="toggle-slider"></span>
-            </label>
-            <span class="toggle-label">Usar stock actual ({{ producto.stock }})</span>
-          </div>
-          <input type="number" id="cantidad" class="form-control" min="1" value="{{ producto.stock }}" disabled>
-        </div>
-      </div>
-      
-      <div class="form-col">
-        <div class="form-group">
-          <label class="form-label" for="formato_etiqueta">Formato de etiqueta</label>
-          <select id="formato_etiqueta" class="form-select">
-            {% for formato in formatos_etiquetas %}
-            <option value="{{ formato.id }}" 
-                    data-width="{{ formato.ancho }}" 
-                    data-height="{{ formato.alto }}" 
-                    data-cols="{{ formato.columnas }}" 
-                    data-rows="{{ formato.filas }}" 
-                    data-per-page="{{ formato.por_pagina }}">
-              {{ formato.nombre }}
-            </option>
-            {% endfor %}
-          </select>
-        </div>
-      </div>
+  <!-- Sistema de pestañas para configuración -->
+  <div class="tabs-container">
+    <div class="tabs-header">
+      <button class="tab-button active" data-tab="general">
+        <i class="fas fa-cog tab-icon"></i> General
+      </button>
+      <button class="tab-button" data-tab="printer">
+        <i class="fas fa-print tab-icon"></i> Impresora
+      </button>
+      <button class="tab-button" data-tab="content">
+        <i class="fas fa-list-alt tab-icon"></i> Contenido
+      </button>
+      <button class="tab-button" data-tab="barcode">
+        <i class="fas fa-barcode tab-icon"></i> Código de barras
+      </button>
     </div>
     
-    <div class="form-group">
-      <label class="form-label">Impresora compatible</label>
-      <div class="printer-options">
-        {% for impresora in impresoras_compatibles %}
-        <div class="printer-option {% if loop.first %}selected{% endif %}" data-printer="{{ impresora.id }}">
-          <div class="printer-name">{{ impresora.nombre }}</div>
-          <div class="printer-description">{{ impresora.descripcion }}</div>
+    <!-- Pestaña: Configuración General -->
+    <div id="tab-general" class="tab-content active">
+      <div class="config-section">
+        <div class="config-header">
+          <h3 class="config-title">
+            <i class="fas fa-cog config-title-icon"></i> Configuración general
+          </h3>
         </div>
-        {% endfor %}
-      </div>
-    </div>
-    
-    <div class="form-group">
-      <label class="form-label">Contenido de la etiqueta</label>
-      <div class="form-row">
-        <div class="form-col">
-          <div class="toggle-container">
-            <label class="toggle-switch">
-              <input type="checkbox" id="mostrar_nombre" checked>
-              <span class="toggle-slider"></span>
-            </label>
-            <span class="toggle-label">Mostrar nombre del producto</span>
-          </div>
-        </div>
-        
-        <div class="form-col">
-          <div class="toggle-container">
-            <label class="toggle-switch">
-              <input type="checkbox" id="mostrar_precio" checked>
-              <span class="toggle-slider"></span>
-            </label>
-            <span class="toggle-label">Mostrar precio</span>
-          </div>
-        </div>
-      </div>
-      
-      <div class="form-row">
-        <div class="form-col">
-          <div class="toggle-container">
-            <label class="toggle-switch">
-              <input type="checkbox" id="mostrar_codigo" checked>
-              <span class="toggle-slider"></span>
-            </label>
-            <span class="toggle-label">Mostrar código de texto</span>
-          </div>
-        </div>
-        
-        <div class="form-col">
-          <div class="toggle-container">
-            <label class="toggle-switch">
-              <input type="checkbox" id="mostrar_codigo_barras" checked>
-              <span class="toggle-slider"></span>
-            </label>
-            <span class="toggle-label">Mostrar código de barras</span>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Opciones avanzadas para códigos de barras -->
-      <div id="codigo_barras_opciones" style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed #eee;">
-        <div class="form-row">
-          <div class="form-col">
-            <div class="form-group">
-              <label class="form-label">Formato de código de barras</label>
-              <select id="formato_codigo" class="form-select">
-                <option value="auto">Automático (recomendado)</option>
-                <option value="CODE128">CODE128 (alfanumérico - cualquier longitud)</option>
-                <option value="CODE39">CODE39 (alfanumérico)</option>
-                <option value="EAN13">EAN-13 (13 dígitos)</option>
-                <option value="EAN8">EAN-8 (8 dígitos)</option>
-                <option value="UPC">UPC-A (12 dígitos)</option>
-                <option value="ITF14">ITF-14 (14 dígitos)</option>
-                <option value="CODE128B">CODE128B (códigos personalizados)</option>
-              </select>
+        <div class="config-body">
+          <div class="config-row">
+            <div class="config-col">
+              <div class="form-group">
+                <label class="form-label" for="cantidad">
+                  <i class="fas fa-hashtag mr-1"></i> Cantidad de etiquetas
+                </label>
+                <div class="toggle-container">
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="usar_stock" checked>
+                    <span class="toggle-slider"></span>
+                  </label>
+                  <span class="toggle-label">Usar stock actual ({{ producto.stock }} unidades)</span>
+                </div>
+                <input type="number" id="cantidad" class="form-control" min="1" value="{{ producto.stock }}" disabled placeholder="Ingrese la cantidad de etiquetas">
+              </div>
+            </div>
+            
+            <div class="config-col">
+              <div class="form-group">
+                <label class="form-label" for="formato_etiqueta">
+                  <i class="fas fa-th mr-1"></i> Formato de etiqueta
+                </label>
+                <select id="formato_etiqueta" class="form-select">
+                  {% for formato in formatos_etiquetas %}
+                  <option value="{{ formato.id }}" 
+                          data-width="{{ formato.ancho }}" 
+                          data-height="{{ formato.alto }}" 
+                          data-cols="{{ formato.columnas }}" 
+                          data-rows="{{ formato.filas }}" 
+                          data-per-page="{{ formato.por_pagina }}">
+                    {{ formato.nombre }} ({{ formato.ancho }}mm x {{ formato.alto }}mm)
+                  </option>
+                  {% endfor %}
+                </select>
+              </div>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Pestaña: Impresoras -->
+    <div id="tab-printer" class="tab-content">
+      <div class="config-section">
+        <div class="config-header">
+          <h3 class="config-title">
+            <i class="fas fa-print config-title-icon"></i> Selección de impresora
+          </h3>
+        </div>
+        <div class="config-body">
+          <p class="mb-4 text-neutral-600">Seleccione el tipo de impresora que utilizará para imprimir las etiquetas.</p>
           
-          <div class="form-col">
-            <div class="form-group">
-              <label class="form-label">Tamaño del código</label>
-              <select id="tamano_codigo" class="form-select">
-                <option value="normal">Normal</option>
-                <option value="grande" selected>Grande (mejor para escanear)</option>
-                <option value="pequeno">Pequeño</option>
-              </select>
+          <div class="printer-options">
+            <!-- Impresora Normal -->
+            <div class="printer-option selected" data-printer="normal">
+              <div class="printer-badge">Recomendado</div>
+              <div class="printer-icon">
+                <i class="fas fa-print"></i>
+              </div>
+              <div class="printer-name">Impresora normal</div>
+              <div class="printer-description">Compatible con hojas de etiquetas estándar tipo Avery para impresoras láser o de inyección.</div>
+              <div class="printer-meta">
+                <div class="printer-meta-item">
+                  <i class="fas fa-file-pdf"></i> PDF
+                </div>
+                <div class="printer-meta-item">
+                  <i class="fas fa-check"></i> Compatible
+                </div>
+              </div>
+              
+              <!-- Placeholder que aparece al pasar el mouse -->
+              <div class="printer-placeholder">
+                <div class="printer-placeholder-icon">
+                  <i class="fas fa-mouse-pointer"></i>
+                </div>
+                <div class="printer-placeholder-text">Haga clic para seleccionar</div>
+              </div>
+            </div>
+            
+            <!-- Impresora Zebra -->
+            <div class="printer-option" data-printer="zebra">
+              <div class="printer-icon">
+                <i class="fas fa-tag"></i>
+              </div>
+              <div class="printer-name">Zebra GK420d/GX420d</div>
+              <div class="printer-description">Impresora térmica industrial para etiquetas adhesivas de alta calidad.</div>
+              <div class="printer-meta">
+                <div class="printer-meta-item">
+                  <i class="fas fa-tachometer-alt"></i> Rápida
+                </div>
+                <div class="printer-meta-item">
+                  <i class="fas fa-industry"></i> Profesional
+                </div>
+              </div>
+              
+              <!-- Placeholder que aparece al pasar el mouse -->
+              <div class="printer-placeholder">
+                <div class="printer-placeholder-icon">
+                  <i class="fas fa-mouse-pointer"></i>
+                </div>
+                <div class="printer-placeholder-text">Haga clic para seleccionar</div>
+              </div>
+            </div>
+            
+            <!-- Impresora DYMO -->
+            <div class="printer-option" data-printer="dymo">
+              <div class="printer-icon">
+                <i class="fas fa-ticket-alt"></i>
+              </div>
+              <div class="printer-name">DYMO LabelWriter</div>
+              <div class="printer-description">Impresora térmica compacta para etiquetas pequeñas y códigos de barras.</div>
+              <div class="printer-meta">
+                <div class="printer-meta-item">
+                  <i class="fas fa-desktop"></i> Escritorio
+                </div>
+                <div class="printer-meta-item">
+                  <i class="fas fa-compact-disc"></i> Compacta
+                </div>
+              </div>
+              
+              <!-- Placeholder que aparece al pasar el mouse -->
+              <div class="printer-placeholder">
+                <div class="printer-placeholder-icon">
+                  <i class="fas fa-mouse-pointer"></i>
+                </div>
+                <div class="printer-placeholder-text">Haga clic para seleccionar</div>
+              </div>
+            </div>
+            
+            <!-- Impresora Térmica -->
+            <div class="printer-option" data-printer="termica">
+              <div class="printer-icon">
+                <i class="fas fa-receipt"></i>
+              </div>
+              <div class="printer-name">Térmica estándar</div>
+              <div class="printer-description">Impresora térmica económica para tickets y etiquetas de precio.</div>
+              <div class="printer-meta">
+                <div class="printer-meta-item">
+                  <i class="fas fa-dollar-sign"></i> Económica
+                </div>
+                <div class="printer-meta-item">
+                  <i class="fas fa-store"></i> POS
+                </div>
+              </div>
+              
+              <!-- Placeholder que aparece al pasar el mouse -->
+              <div class="printer-placeholder">
+                <div class="printer-placeholder-icon">
+                  <i class="fas fa-mouse-pointer"></i>
+                </div>
+                <div class="printer-placeholder-text">Haga clic para seleccionar</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Pestaña: Contenido -->
+    <div id="tab-content" class="tab-content">
+      <div class="config-section">
+        <div class="config-header">
+          <h3 class="config-title">
+            <i class="fas fa-list-alt config-title-icon"></i> Contenido de la etiqueta
+          </h3>
+        </div>
+        <div class="config-body">
+          <div class="config-row">
+            <div class="config-col">
+              <div class="toggle-container">
+                <label class="toggle-switch">
+                  <input type="checkbox" id="mostrar_nombre" checked>
+                  <span class="toggle-slider"></span>
+                </label>
+                <span class="toggle-label">Mostrar nombre del producto</span>
+              </div>
+              
+              <div class="toggle-container">
+                <label class="toggle-switch">
+                  <input type="checkbox" id="mostrar_precio" checked>
+                  <span class="toggle-slider"></span>
+                </label>
+                <span class="toggle-label">Mostrar precio</span>
+              </div>
+            </div>
+            
+            <div class="config-col">
+              <div class="toggle-container">
+                <label class="toggle-switch">
+                  <input type="checkbox" id="mostrar_codigo" checked>
+                  <span class="toggle-slider"></span>
+                </label>
+                <span class="toggle-label">Mostrar código en texto</span>
+              </div>
+              
+              <div class="toggle-container">
+                <label class="toggle-switch">
+                  <input type="checkbox" id="mostrar_codigo_barras" checked>
+                  <span class="toggle-slider"></span>
+                </label>
+                <span class="toggle-label">Mostrar código de barras</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Pestaña: Código de barras -->
+    <div id="tab-barcode" class="tab-content">
+      <div class="config-section">
+        <div class="config-header">
+          <h3 class="config-title">
+            <i class="fas fa-barcode config-title-icon"></i> Opciones de código de barras
+          </h3>
+        </div>
+        <div class="config-body">
+          <div class="config-row">
+            <div class="config-col">
+              <div class="form-group">
+                <label class="form-label">
+                  <i class="fas fa-qrcode mr-1"></i> Formato de código de barras
+                </label>
+                <select id="formato_codigo" class="form-select">
+                  <option value="auto">Automático (recomendado)</option>
+                  <option value="CODE128">CODE128 (alfanumérico - cualquier longitud)</option>
+                  <option value="CODE39">CODE39 (alfanumérico)</option>
+                  <option value="EAN13">EAN-13 (13 dígitos)</option>
+                  <option value="EAN8">EAN-8 (8 dígitos)</option>
+                  <option value="UPC">UPC-A (12 dígitos)</option>
+                  <option value="ITF14">ITF-14 (14 dígitos)</option>
+                  <option value="CODE128B">CODE128B (códigos personalizados)</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="config-col">
+              <div class="form-group">
+                <label class="form-label">
+                  <i class="fas fa-text-height mr-1"></i> Tamaño del código
+                </label>
+                <select id="tamano_codigo" class="form-select">
+                  <option value="normal">Normal</option>
+                  <option value="grande" selected>Grande (mejor para escanear)</option>
+                  <option value="pequeno">Pequeño (ahorra espacio)</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>
@@ -615,39 +1340,133 @@
     </div>
   </div>
   
-  <!-- Sección de previsualización -->
+  <!-- Sección de previsualización premium -->
   <div class="preview-section">
-    <h3 class="preview-title">Previsualización</h3>
+    <div class="preview-header">
+      <h3 class="preview-title">
+        <i class="fas fa-eye"></i> Vista previa
+      </h3>
+      <div class="preview-actions">
+        <button class="preview-action-btn" id="btn-refresh-preview" title="Actualizar vista previa">
+          <i class="fas fa-sync-alt"></i>
+        </button>
+      </div>
+    </div>
+    
     <div id="preview-container" class="preview-container">
-      <div id="preview-content">
+      <div id="preview-content" class="preview-content">
         <!-- La previsualización se generará con JavaScript -->
         <div style="text-align: center; padding: 50px 0;">
-          <i class="fas fa-sync fa-spin" style="font-size: 30px; color: #aaa;"></i>
+          <div class="loading-spinner"></div>
           <p style="margin-top: 10px; color: #666;">Cargando vista previa...</p>
         </div>
+      </div>
+    </div>
+    
+    <div class="preview-footer">
+      <div class="preview-info">
+        <i class="fas fa-info-circle preview-info-icon"></i>
+        <span>La vista previa muestra un ejemplo de la disposición de las etiquetas.</span>
+      </div>
+      
+      <div class="preview-zoom">
+        <button class="zoom-btn" id="zoom-out">
+          <i class="fas fa-search-minus"></i>
+        </button>
+        <span class="zoom-value" id="zoom-value">100%</span>
+        <button class="zoom-btn" id="zoom-in">
+          <i class="fas fa-search-plus"></i>
+        </button>
       </div>
     </div>
   </div>
   
   <!-- Botones de acción -->
-  <div class="btn-container">
+  <div class="actions-section">
     <button id="btn-preview" class="btn btn-outline">
-      <i class="fas fa-sync-alt"></i> Actualizar vista previa
+      <i class="fas fa-sync-alt btn-icon"></i> Actualizar vista previa
     </button>
     
     <button id="btn-print" class="btn btn-secondary">
-      <i class="fas fa-print"></i> Imprimir directamente
+      <i class="fas fa-print btn-icon"></i> Imprimir directamente
     </button>
     
     <button id="btn-pdf" class="btn btn-primary">
-      <i class="fas fa-file-pdf"></i> Descargar como PDF
+      <i class="fas fa-file-pdf btn-icon"></i> Descargar como PDF
     </button>
   </div>
   
-  <!-- Área oculta para impresión -->
+  <!-- Áreas ocultas -->
   <div id="print-content" style="display: none;"></div>
-  
-  <!-- Contenedor oculto para PDF -->
   <div id="pdf-container" style="display: none;"></div>
 </div>
+
+<!-- Cargar bibliotecas necesarias -->
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<!-- JavaScript para control de pestañas -->
+<script>
+  // Controlador de pestañas
+  document.addEventListener('DOMContentLoaded', function() {
+    const tabButtons = document.querySelectorAll('.tab-button');
+    
+    tabButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        // Desactivar todas las pestañas
+        tabButtons.forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        
+        // Activar la pestaña seleccionada
+        this.classList.add('active');
+        const tabId = `tab-${this.dataset.tab}`;
+        document.getElementById(tabId).classList.add('active');
+      });
+    });
+    
+    // Control de zoom
+    const zoomIn = document.getElementById('zoom-in');
+    const zoomOut = document.getElementById('zoom-out');
+    const zoomValue = document.getElementById('zoom-value');
+    const previewContent = document.getElementById('preview-content');
+    
+    let zoomLevel = 100;
+    
+    zoomIn.addEventListener('click', function() {
+      if (zoomLevel < 200) {
+        zoomLevel += 10;
+        updateZoom();
+      }
+    });
+    
+    zoomOut.addEventListener('click', function() {
+      if (zoomLevel > 50) {
+        zoomLevel -= 10;
+        updateZoom();
+      }
+    });
+    
+    function updateZoom() {
+      zoomValue.textContent = `${zoomLevel}%`;
+      if (previewContent) {
+        previewContent.style.transform = `scale(${zoomLevel/100})`;
+        previewContent.style.transformOrigin = 'top center';
+      }
+    }
+    
+    // Sincronizar botón de actualizar vista previa
+    const btnRefreshPreview = document.getElementById('btn-refresh-preview');
+    const btnPreview = document.getElementById('btn-preview');
+    
+    if (btnRefreshPreview && btnPreview) {
+      btnRefreshPreview.addEventListener('click', function() {
+        btnPreview.click();
+      });
+    }
+  });
+</script>
+
+<!-- Cargar el JavaScript principal -->
+<script src="{{ url_for('static', filename='js/etiquetas.js') }}"></script>
 {% endblock %}
