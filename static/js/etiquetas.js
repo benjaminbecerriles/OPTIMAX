@@ -1,6 +1,6 @@
 /**
  * Etiquetas.js - Sistema profesional de generación de etiquetas con códigos de barras
- * Versión Enterprise: Optimizada para aplicaciones de nivel empresarial
+ * Versión mejorada: Diseño limpio y solución de problemas
  */
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
       errorDiv.style.display = 'block';
       errorDiv.innerHTML = `
         <div style="display: flex; align-items: center;">
-          <i class="fas fa-exclamation-circle" style="margin-right: 0.5rem; color: #c01e1e;"></i>
+          <i class="fas fa-exclamation-circle" style="margin-right: 0.5rem; color: #0071e3;"></i>
           <div>
             <strong>Error:</strong> No se pudieron cargar algunas bibliotecas necesarias (${dependencias}).
             <br>
@@ -92,7 +92,8 @@ document.addEventListener('DOMContentLoaded', function() {
         barcodesToGenerate: [],   // Códigos de barras pendientes
         isProcessing: false,      // Bloqueo de operaciones simultáneas
         zoomLevel: 100,           // Nivel de zoom para vista previa
-        renderTimeout: null       // Control de refresco
+        renderTimeout: null,      // Control de refresco
+        pdfGenerating: false      // Flag para evitar duplicación de PDF
       };
       
       // Referencias a elementos del DOM
@@ -269,7 +270,10 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (elements.btnPDF) {
           elements.btnPDF.addEventListener('click', function() {
-            descargarPDF();
+            // Evitar múltiples clics rápidos
+            if (!appState.pdfGenerating) {
+              descargarPDF();
+            }
           });
         }
         
@@ -447,8 +451,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const etiquetasPorPagina = formato.porPagina;
             const numPaginas = Math.ceil(cantidad / etiquetasPorPagina);
             
-            // Limitar a 2 páginas en la vista previa
-            const paginasAMostrar = Math.min(numPaginas, 1); // Solo mostramos 1 página
+            // Limitar a 1 página en la vista previa
+            const paginasAMostrar = 1;
             
             for (let pagina = 0; pagina < paginasAMostrar; pagina++) {
               previewHTML += `
@@ -461,9 +465,9 @@ document.addEventListener('DOMContentLoaded', function() {
                   const index = pagina * etiquetasPorPagina + i * formato.columnas + j;
                   
                   if (index < cantidad) {
-                    // Calcular posición de la etiqueta
-                    const posX = configuracion.marginX + j * formato.ancho;
-                    const posY = configuracion.marginY + i * formato.alto;
+                    // Calcular posición de la etiqueta - CORREGIDO para formatos específicos
+                    const posX = calcularPosicionX(formato, configuracion, j);
+                    const posY = calcularPosicionY(formato, configuracion, i);
                     
                     // Crear etiqueta
                     previewHTML += crearEtiquetaHTML(posX, posY, formato.ancho, formato.alto, index);
@@ -479,9 +483,9 @@ document.addEventListener('DOMContentLoaded', function() {
               previewHTML += `
                 <div style="margin-top:1rem;padding:0.75rem;background-color:#f0f9ff;border-radius:0.375rem;border:1px solid #e0f2fe;text-align:center;">
                   <div style="display:flex;align-items:center;justify-content:center;gap:0.5rem;">
-                    <i class="fas fa-info-circle" style="color:#0ea5e9;"></i>
+                    <i class="fas fa-info-circle" style="color:#0071e3;"></i>
                     <span style="color:#0c4a6e;font-size:0.875rem;font-weight:500;">
-                      Se generarán ${numPaginas} páginas en total con ${cantidad} etiquetas.
+                      Se generarán ${numPaginas} páginas con ${cantidad} etiquetas en total.
                     </span>
                   </div>
                 </div>
@@ -502,7 +506,7 @@ document.addEventListener('DOMContentLoaded', function() {
               previewHTML += `
                 <div style="margin-top:1rem;padding:0.75rem;background-color:#f0f9ff;border-radius:0.375rem;border:1px solid #e0f2fe;text-align:center;">
                   <div style="display:flex;align-items:center;justify-content:center;gap:0.5rem;">
-                    <i class="fas fa-info-circle" style="color:#0ea5e9;"></i>
+                    <i class="fas fa-info-circle" style="color:#0071e3;"></i>
                     <span style="color:#0c4a6e;font-size:0.875rem;font-weight:500;">
                       Se generarán ${cantidad} etiquetas en total.
                     </span>
@@ -543,6 +547,37 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       
       /**
+       * Calcula la posición X de una etiqueta, con correcciones para formatos específicos
+       * @param {Object} formato - Formato de etiqueta seleccionado 
+       * @param {Object} configuracion - Configuración de impresora
+       * @param {number} columnaIndex - Índice de la columna (0, 1, 2...)
+       * @returns {number} - Posición X en milímetros
+       */
+      function calcularPosicionX(formato, configuracion, columnaIndex) {
+        // Corrección especial para formatos 101.6mm x 50.8mm (Avery 5163)
+        if (formato.ancho === 101.6 && formato.alto === 50.8) {
+          // Usa un margen específico para este formato (A4 = 210mm)
+          const margenCorregido = (210 - (formato.ancho * formato.columnas)) / 2;
+          return margenCorregido + (columnaIndex * formato.ancho);
+        }
+        
+        // Para otros formatos, usar cálculo normal
+        return configuracion.marginX + (columnaIndex * formato.ancho);
+      }
+      
+      /**
+       * Calcula la posición Y de una etiqueta, con correcciones si son necesarias
+       * @param {Object} formato - Formato de etiqueta seleccionado 
+       * @param {Object} configuracion - Configuración de impresora
+       * @param {number} filaIndex - Índice de la fila (0, 1, 2...)
+       * @returns {number} - Posición Y en milímetros
+       */
+      function calcularPosicionY(formato, configuracion, filaIndex) {
+        // Por ahora usamos el margen Y estándar para todos los formatos
+        return configuracion.marginY + (filaIndex * formato.alto);
+      }
+      
+      /**
        * Obtiene la configuración específica para el tipo de impresora seleccionado
        * @param {Object} formato - Formato de etiqueta
        * @param {string} impresora - Tipo de impresora
@@ -550,12 +585,25 @@ document.addEventListener('DOMContentLoaded', function() {
        */
       function obtenerConfiguracionImpresora(formato, impresora) {
         if (impresora === 'normal') {
-          // Página A4 estándar para impresoras normales
+          // Usar margen específico por formato
+          let marginX = 6.35;  // Valor por defecto para la mayoría de formatos
+          let marginY = 12.7;  // Valor por defecto para la mayoría de formatos
+          
+          // Calcular márgenes optimizados para formatos especiales
+          if (formato.id === 'avery5163' || (formato.ancho === 101.6 && formato.alto === 50.8)) {
+            // Formato 101.6mm x 50.8mm (2 etiquetas por fila en A4)
+            // A4 ancho = 210mm, 2 etiquetas de 101.6mm = 203.2mm, margen total = 6.8mm, margen por lado = 3.4mm
+            marginX = 3.4;
+          } else if (formato.id === 'avery5161' || (formato.ancho === 101.6 && formato.alto === 26.9)) {
+            // Formato 101.6mm x 26.9mm (2 etiquetas por fila en A4)
+            marginX = 3.4; 
+          }
+          
           return {
-            paginaAncho: 210, // mm
-            paginaAlto: 297,  // mm
-            marginX: 6.35,    // mm
-            marginY: 12.7,    // mm
+            paginaAncho: 210, // mm (A4)
+            paginaAlto: 297,  // mm (A4)
+            marginX: marginX, // mm - CORREGIDO para formatos específicos
+            marginY: marginY, // mm
             orientation: 'portrait'
           };
         } else {
@@ -881,7 +929,7 @@ document.addEventListener('DOMContentLoaded', function() {
               font-weight: 700;
               font-size: 12px;
               margin-bottom: 2px;
-              color: #e52e2e;
+              color: #0071e3;
             }
             .etiqueta-codigo {
               font-size: 8px;
@@ -899,7 +947,7 @@ document.addEventListener('DOMContentLoaded', function() {
               right: 0;
               padding: 10px;
               background-color: #f0f9ff;
-              color: #0369a1;
+              color: #0071e3;
               text-align: center;
               font-size: 14px;
               z-index: 1000;
@@ -977,9 +1025,9 @@ document.addEventListener('DOMContentLoaded', function() {
                   const index = pagina * etiquetasPorPagina + i * formato.columnas + j;
                   
                   if (index < cantidad) {
-                    // Calcular posición
-                    const posX = configuracion.marginX + j * formato.ancho;
-                    const posY = configuracion.marginY + i * formato.alto;
+                    // Calcular posición corregida
+                    const posX = calcularPosicionX(formato, configuracion, j);
+                    const posY = calcularPosicionY(formato, configuracion, i);
                     
                     // Añadir etiqueta con ID único
                     const svgId = `print-barcode-${pagina}-${i}-${j}`;
@@ -1020,7 +1068,7 @@ document.addEventListener('DOMContentLoaded', function() {
                   try {
                     // Verificar que JsBarcode esté disponible
                     if (typeof JsBarcode === 'undefined') {
-                      document.body.innerHTML = '<div style="padding:20px;text-align:center;"><h2 style="color:#c53030;">Error: No se pudo cargar la biblioteca de códigos de barras</h2><p>Por favor, intente nuevamente o use otra opción.</p></div>';
+                      document.body.innerHTML = '<div style="padding:20px;text-align:center;"><h2 style="color:#0071e3;">Error: No se pudo cargar la biblioteca de códigos de barras</h2><p>Por favor, intente nuevamente o use otra opción.</p></div>';
                       processingComplete = true;
                       errorOccurred = true;
                       return;
@@ -1101,9 +1149,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     console.error("Error durante procesamiento:", e);
                     document.body.innerHTML = \`
                       <div style="padding:20px;text-align:center;">
-                        <h2 style="color:#c53030;">Error durante la preparación de impresión</h2>
-                        <p style="color:#742a2a;">\${e.message}</p>
-                        <button onclick="window.close()" style="margin-top:20px;padding:8px 16px;background:#e53e3e;color:white;border:none;border-radius:4px;cursor:pointer;">
+                        <h2 style="color:#0071e3;">Error durante la preparación de impresión</h2>
+                        <p style="color:#444;">\${e.message}</p>
+                        <button onclick="window.close()" style="margin-top:20px;padding:8px 16px;background:#0071e3;color:white;border:none;border-radius:6px;cursor:pointer;">
                           Cerrar ventana
                         </button>
                       </div>
@@ -1143,7 +1191,7 @@ document.addEventListener('DOMContentLoaded', function() {
       
       /**
        * Descarga las etiquetas como PDF
-       * Implementación completa usando jsPDF y html2canvas
+       * Implementación corregida para evitar descarga doble
        */
       function descargarPDF() {
         try {
@@ -1152,17 +1200,20 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
           }
           
+          // Flag para evitar descarga doble
+          appState.pdfGenerating = true;
+          appState.isProcessing = true;
+          
           // Verificar que las bibliotecas estén disponibles
           if (typeof window.jspdf === 'undefined' || typeof window.html2canvas === 'undefined') {
             alert("No se han podido cargar las bibliotecas necesarias para generar PDF. Verifica tu conexión a Internet o usa la opción 'Imprimir directamente'.");
+            appState.pdfGenerating = false;
+            appState.isProcessing = false;
             return;
           }
           
           console.log('Preparando generación de PDF...');
-          appState.isProcessing = true;
           mostrarCargando(elements.previewContainer, true, "Generando PDF...", "Preparando diseño");
-          
-          const { jsPDF } = window.jspdf;
           
           // Obtener configuración actualizada
           const formato = appState.formato || obtenerFormatoSeleccionado();
@@ -1188,6 +1239,8 @@ document.addEventListener('DOMContentLoaded', function() {
             hotfixes: ["px_scaling"]
           };
           
+          // CORREGIDO: Correcta inicialización para evitar descarga doble
+          const { jsPDF } = window.jspdf;
           const pdf = new jsPDF(pdfOptions);
           
           // Preparar CSS para el contenedor del PDF
@@ -1248,7 +1301,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 font-weight: 700;
                 font-size: 12px;
                 margin-bottom: 2px;
-                color: #e52e2e;
+                color: #0071e3;
               }
               .etiqueta-codigo {
                 font-size: 8px;
@@ -1280,9 +1333,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     const index = pagina * etiquetasPorPagina + i * formato.columnas + j;
                     
                     if (index < cantidad) {
-                      // Calcular posición de la etiqueta
-                      const posX = configuracion.marginX + j * formato.ancho;
-                      const posY = configuracion.marginY + i * formato.alto;
+                      // Calcular posición de la etiqueta - CORREGIDO para el formato específico
+                      const posX = calcularPosicionX(formato, configuracion, j);
+                      const posY = calcularPosicionY(formato, configuracion, i);
                       
                       // Crear etiqueta con ID único para PDF
                       const svgId = `pdf-barcode-${pagina}-${i}-${j}`;
@@ -1481,7 +1534,7 @@ document.addEventListener('DOMContentLoaded', function() {
               // Nombre del archivo
               const nombreArchivo = `Etiquetas_${nombreSeguro || 'Producto'}.pdf`;
               
-              // Guardar el PDF
+              // CORREGIDO: Guardar el PDF una sola vez
               pdf.save(nombreArchivo);
               
               console.log('Generación de PDF completada, archivo guardado:', nombreArchivo);
@@ -1492,12 +1545,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 pdfContainer.style.display = 'none';
                 mostrarCargando(elements.previewContainer, false);
                 appState.isProcessing = false;
+                appState.pdfGenerating = false; // Desactivar el flag
               }, 500);
             } catch (err) {
               console.error("Error al guardar el PDF:", err);
               alert("Error al guardar el PDF: " + err.message);
               mostrarCargando(elements.previewContainer, false);
               appState.isProcessing = false;
+              appState.pdfGenerating = false; // Desactivar el flag en caso de error
             }
           }
         } catch (e) {
@@ -1505,6 +1560,7 @@ document.addEventListener('DOMContentLoaded', function() {
           alert("Error al generar PDF: " + e.message);
           mostrarCargando(elements.previewContainer, false);
           appState.isProcessing = false;
+          appState.pdfGenerating = false; // Desactivar el flag en caso de error
         }
       }
     } catch (error) {
@@ -1514,13 +1570,13 @@ document.addEventListener('DOMContentLoaded', function() {
       const previewContent = document.getElementById('preview-content');
       if (previewContent) {
         previewContent.innerHTML = `
-          <div style="text-align:center;padding:2rem;color:#742a2a;background-color:#fff5f5;border-radius:0.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.1);max-width:90%;margin:1rem auto;">
-            <i class="fas fa-exclamation-triangle" style="font-size:2rem;color:#e53e3e;margin-bottom:1rem;display:block;"></i>
-            <h3 style="font-size:1.25rem;font-weight:600;margin-bottom:0.75rem;color:#c53030;">Error al inicializar el sistema de etiquetas</h3>
-            <p style="color:#742a2a;margin-bottom:1rem;">${error.message}</p>
-            <p style="color:#742a2a;font-size:0.875rem;">Por favor, recarga la página o contacta con soporte si el problema persiste.</p>
+          <div style="text-align:center;padding:2rem;color:#444;background-color:#f5f5f7;border-radius:0.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.1);max-width:90%;margin:1rem auto;">
+            <i class="fas fa-exclamation-triangle" style="font-size:2rem;color:#0071e3;margin-bottom:1rem;display:block;"></i>
+            <h3 style="font-size:1.25rem;font-weight:600;margin-bottom:0.75rem;color:#1d1d1f;">Error al inicializar el sistema de etiquetas</h3>
+            <p style="color:#444;margin-bottom:1rem;">${error.message}</p>
+            <p style="color:#666;font-size:0.875rem;">Por favor, recarga la página o contacta con soporte si el problema persiste.</p>
             
-            <button onclick="location.reload()" style="margin-top:1rem;padding:0.5rem 1rem;background:#e53e3e;color:white;border:none;border-radius:0.375rem;font-weight:500;cursor:pointer;">
+            <button onclick="location.reload()" style="margin-top:1rem;padding:0.5rem 1rem;background:#0071e3;color:white;border:none;border-radius:0.375rem;font-weight:500;cursor:pointer;">
               <i class="fas fa-sync-alt" style="margin-right:0.5rem;"></i> Recargar página
             </button>
           </div>
