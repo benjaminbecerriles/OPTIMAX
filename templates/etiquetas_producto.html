@@ -16,6 +16,8 @@
     --primary-color: #0071e3; /* Azul Apple */
     --primary-light: #e8f4ff;
     --primary-dark: #0058b0;
+    --accent-color: #e52e2e; /* Rojo para elementos específicos */
+    --accent-light: #fff0f0; /* Rojo claro para fondos */
     --neutral-900: #1d1d1f;
     --neutral-800: #2d2d2f;
     --neutral-700: #444;
@@ -55,11 +57,28 @@
     line-height: 1.5;
   }
   
-  /* Contenedor principal - Más compacto y minimalista */
-  .etiquetas-container {
-    max-width: 1000px;
+  /* Layout de dos columnas */
+  .etiquetas-layout {
+    display: flex;
+    gap: 1.5rem;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 2rem;
+    padding: 1.5rem;
+  }
+  
+  .left-column {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .right-column {
+    width: 450px;
+    min-width: 450px;
+    position: sticky;
+    top: 1.5rem;
+    height: calc(100vh - 3rem);
+    display: flex;
+    flex-direction: column;
   }
   
   /* Encabezado - Simplificado */
@@ -102,7 +121,7 @@
     left: 0;
     width: 4px;
     height: 100%;
-    background: var(--primary-color);
+    background: var(--accent-color);
     border-top-left-radius: var(--radius-md);
     border-bottom-left-radius: var(--radius-md);
   }
@@ -144,6 +163,7 @@
     flex-wrap: wrap;
     gap: 1rem;
     margin-bottom: 0.75rem;
+    align-items: center;
   }
   
   .meta-item {
@@ -158,11 +178,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     border-radius: var(--radius-md);
-    background-color: var(--neutral-200); /* Cambiado a gris */
-    color: var(--neutral-600); /* Cambiado a gris */
+    background-color: var(--neutral-100);
+    color: var(--neutral-600);
   }
   
   .meta-value {
@@ -201,6 +221,13 @@
     display: flex;
     border-bottom: 1px solid var(--neutral-200);
     margin-bottom: 1.25rem;
+    overflow-x: auto;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+  }
+  
+  .tabs-header::-webkit-scrollbar {
+    display: none; /* Chrome/Safari/Opera */
   }
   
   .tab-button {
@@ -216,6 +243,7 @@
     display: flex;
     align-items: center;
     gap: 0.375rem;
+    white-space: nowrap;
   }
   
   .tab-button:hover {
@@ -223,7 +251,7 @@
   }
   
   .tab-button.active {
-    color: var(--primary-color);
+    color: var(--accent-color);
   }
   
   .tab-button.active::after {
@@ -233,7 +261,7 @@
     left: 0;
     width: 100%;
     height: 2px;
-    background-color: var(--primary-color);
+    background-color: var(--accent-color);
   }
   
   .tab-icon {
@@ -268,6 +296,8 @@
     padding: 1rem 1.25rem;
     border-bottom: 1px solid var(--neutral-100);
     background-color: var(--neutral-50);
+    display: flex;
+    align-items: center;
   }
   
   .config-title {
@@ -280,7 +310,7 @@
   }
   
   .config-title-icon {
-    color: var(--primary-color);
+    color: var(--accent-color);
   }
   
   .config-body {
@@ -366,7 +396,7 @@
     box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.15);
   }
   
-  /* Toggles azules */
+  /* Toggles azules (mantenemos azul como se pidió) */
   .toggle-container {
     display: flex;
     align-items: center;
@@ -417,7 +447,7 @@
   }
   
   input:checked + .toggle-slider {
-    background-color: var(--primary-color); /* Azul */
+    background-color: var(--primary-color); /* Se mantiene azul como se pidió */
   }
   
   input:focus + .toggle-slider {
@@ -461,15 +491,15 @@
   }
   
   .printer-option:hover {
-    border-color: var(--primary-color);
+    border-color: var(--accent-color);
     box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     transform: translateY(-1px);
   }
   
   .printer-option.selected {
-    border-color: var(--primary-color);
-    background-color: var(--primary-light);
-    box-shadow: 0 2px 8px rgba(0, 113, 227, 0.1);
+    border-color: var(--accent-color);
+    background-color: var(--accent-light);
+    box-shadow: 0 2px 8px rgba(229, 46, 46, 0.1);
   }
   
   .printer-option.selected::after {
@@ -480,7 +510,7 @@
     top: 8px;
     right: 8px;
     color: white;
-    background-color: var(--primary-color);
+    background-color: var(--accent-color);
     width: 20px;
     height: 20px;
     border-radius: 50%;
@@ -499,7 +529,7 @@
     font-weight: 500;
     padding: 0.1875rem 0.4375rem;
     border-radius: 9999px;
-    background-color: var(--info-color);
+    background-color: var(--accent-color);
     color: white;
   }
   
@@ -519,8 +549,8 @@
   
   .printer-option:hover .printer-icon,
   .printer-option.selected .printer-icon {
-    background-color: var(--primary-light);
-    color: var(--primary-color);
+    background-color: var(--accent-light);
+    color: var(--accent-color);
   }
   
   .printer-name {
@@ -552,21 +582,23 @@
   }
   
   .printer-meta-item i {
-    color: var(--primary-color);
+    color: var(--accent-color);
   }
   
-  /* Vista previa - Rediseño estático y compacto */
+  /* Vista previa - Rediseño para panel lateral */
   .preview-section {
+    display: flex;
+    flex-direction: column;
     background-color: white;
     border-radius: var(--radius-md);
-    margin-bottom: 1.5rem;
     box-shadow: var(--shadow-sm);
     border: 1px solid var(--neutral-200);
     overflow: hidden;
+    height: 100%;
   }
   
   .preview-header {
-    padding: 1rem 1.25rem;
+    padding: 0.875rem 1rem;
     border-bottom: 1px solid var(--neutral-200);
     background-color: var(--neutral-50);
     display: flex;
@@ -575,7 +607,7 @@
   }
   
   .preview-title {
-    font-size: 1rem;
+    font-size: 0.9375rem;
     font-weight: 600;
     color: var(--neutral-800);
     display: flex;
@@ -607,25 +639,29 @@
     color: var(--neutral-700);
   }
   
-  /* Contenedor de vista previa sin scroll */
+  /* Contenedor de vista previa con scroll */
   .preview-container {
     position: relative;
+    flex: 1;
     padding: 1.25rem;
     background-color: var(--neutral-50);
     border-bottom: 1px solid var(--neutral-200);
-    overflow: hidden; /* No scroll */
+    overflow: auto; /* Permitir scroll */
     display: flex;
     justify-content: center;
+    align-items: flex-start;
   }
   
   .preview-content {
     display: flex;
     flex-direction: column;
     align-items: center;
+    transform-origin: top center;
+    transform: scale(0.6); /* Hacer más pequeño según solicitud */
   }
   
   .preview-footer {
-    padding: 0.875rem 1.25rem;
+    padding: 0.75rem 1rem;
     background-color: var(--neutral-50);
     display: flex;
     justify-content: space-between;
@@ -641,7 +677,7 @@
   }
   
   .preview-info-icon {
-    color: var(--info-color);
+    color: var(--accent-color);
   }
   
   .preview-zoom {
@@ -685,8 +721,6 @@
     position: relative;
     box-shadow: 0 1px 5px rgba(0,0,0,0.05);
     max-width: 100%;
-    transform-origin: top center;
-    transform: scale(0.8); /* Hacer más pequeño por defecto */
   }
   
   .etiqueta {
@@ -729,7 +763,7 @@
     font-weight: 700;
     font-size: 11px;
     margin-bottom: 2px;
-    color: var(--primary-color);
+    color: var(--accent-color);
   }
   
   .etiqueta-codigo {
@@ -809,12 +843,12 @@
   
   /* Mensaje de error de dependencias */
   .dependency-error {
-    background-color: var(--primary-light);
-    color: var(--primary-dark);
+    background-color: var(--accent-light);
+    color: var(--accent-color);
     padding: 0.875rem 1rem;
     border-radius: var(--radius-md);
     margin-bottom: 1.25rem;
-    border: 1px solid rgba(0, 113, 227, 0.2);
+    border: 1px solid rgba(229, 46, 46, 0.2);
     display: none;
     box-shadow: var(--shadow-sm);
   }
@@ -855,7 +889,7 @@
     height: 100%;
     border-radius: 50%;
     border: 2px solid transparent;
-    border-top-color: var(--primary-color);
+    border-top-color: var(--accent-color);
   }
   
   .loading-spinner::before {
@@ -931,7 +965,7 @@
   }
 
   .alerta-info i {
-    color: #0071e3;
+    color: var(--accent-color);
   }
 
   .alerta-mensaje {
@@ -961,46 +995,21 @@
     opacity: 0.8;
     background-color: rgba(0, 0, 0, 0.05);
   }
-
-  /* Estilos para el toggle de compatibilidad */
-  .toggle-compatibilidad-container {
-    display: flex;
-    align-items: center;
-    margin-top: 0.5rem;
-    padding: 0.5rem 0.75rem;
-    background-color: var(--neutral-50, #f5f5f7);
-    border-radius: var(--radius-md, 8px);
-    border: 1px solid var(--neutral-200, #e5e5ea);
-  }
-
-  .toggle-compatibilidad-label {
-    display: flex;
-    align-items: center;
-    font-size: 0.875rem;
-    color: var(--neutral-700, #444);
-    gap: 0.375rem;
-    user-select: none;
-  }
-
-  .toggle-compatibilidad-icon {
-    color: var(--primary-color, #0071e3);
-  }
-
-  .toggle-compatibilidad-title {
-    font-weight: 500;
-  }
-
-  .toggle-compatibilidad-description {
-    font-size: 0.8125rem;
-    margin-left: 0.375rem;
-    color: var(--neutral-600, #666);
-    flex: 1;
-  }
   
   /* Media queries - Responsive optimizado */
   @media (max-width: 1024px) {
-    .etiquetas-container {
-      padding: 1.25rem;
+    .etiquetas-layout {
+      flex-direction: column;
+      padding: 1rem;
+    }
+    
+    .right-column {
+      width: 100%;
+      min-width: 0;
+      height: auto;
+      min-height: 500px;
+      position: relative;
+      top: 0;
     }
     
     .product-card {
@@ -1018,8 +1027,8 @@
   }
   
   @media (max-width: 768px) {
-    .etiquetas-container {
-      padding: 1rem;
+    .etiquetas-layout {
+      padding: 0.5rem;
     }
     
     .config-row {
@@ -1038,473 +1047,440 @@
       width: 100%;
     }
     
-    .tabs-header {
-      overflow-x: auto;
-      padding-bottom: 0.5rem;
-    }
-    
-    .tab-button {
-      white-space: nowrap;
+    .preview-section {
+      height: 500px;
     }
   }
 </style>
 
-<div class="etiquetas-container">
-  <!-- Mensaje de error para dependencias -->
-  <div id="dependency-error" class="dependency-error">
-    <div class="flex items-center">
-      <i class="fas fa-exclamation-circle mr-2"></i>
-      <strong>Error:</strong> No se han podido cargar todas las bibliotecas necesarias. Por favor, recarga la página o verifica tu conexión a Internet.
-    </div>
-  </div>
-
-  <!-- Encabezado -->
-  <div class="page-header">
-    <h1 class="page-title">Generador de etiquetas</h1>
-    <p class="page-subtitle">Personaliza y genera etiquetas profesionales para tus productos con códigos de barras y precios.</p>
-  </div>
-  
-  <!-- Información del producto - Diseño premium -->
-  <div class="product-card" data-producto='{"id": {{ producto.id }}, "nombre": "{{ producto.nombre|replace('"', '\\"')|replace('\n', ' ')|replace('\r', '') }}", "codigo": "{{ producto.codigo_barras_externo }}", "precio": {{ precio_final }}, "stock": {{ producto.stock }}}'>
-    <div class="product-image-container">
-      <img src="{{ url_for('static', filename='uploads/' + producto.foto) }}" alt="{{ producto.nombre }}" class="product-image" onerror="this.src='{{ url_for('static', filename='img/default_product.jpg') }}'">
-    </div>
-    
-    <div class="product-details">
-      <h2 class="product-name">{{ producto.nombre }}</h2>
-      
-      <div class="product-meta">
-        <div class="meta-item">
-          <div class="meta-icon">
-            <i class="fas fa-barcode"></i>
-          </div>
-          <div>
-            <span class="meta-label">Código</span>
-            <span class="meta-value">{{ producto.codigo_barras_externo }}</span>
-          </div>
-        </div>
-        
-        <div class="meta-item">
-          <div class="meta-icon">
-            <i class="fas fa-tag"></i>
-          </div>
-          <div>
-            <span class="meta-label">Precio</span>
-            <span class="meta-value">${{ "%.2f"|format(precio_final) }}</span>
-          </div>
-        </div>
-        
-        <div class="meta-item">
-          <div class="meta-icon">
-            <i class="fas fa-box"></i>
-          </div>
-          <div>
-            <span class="meta-label">Inventario</span>
-            <span class="meta-value product-stock">{{ producto.stock }} unidades</span>
-          </div>
-        </div>
-        
-        {% if producto.categoria %}
-        <div class="meta-item">
-          <span class="category-pill">
-            <i class="fas fa-layer-group mr-1"></i> {{ producto.categoria }}
-          </span>
-        </div>
-        {% endif %}
+<!-- Contenedor principal con layout de dos columnas -->
+<div class="etiquetas-layout">
+  <!-- Columna Izquierda: Configuración -->
+  <div class="left-column">
+    <!-- Mensaje de error para dependencias -->
+    <div id="dependency-error" class="dependency-error">
+      <div style="display: flex; align-items: center;">
+        <i class="fas fa-exclamation-circle mr-2"></i>
+        <strong>Error:</strong> No se han podido cargar todas las bibliotecas necesarias. Por favor, recarga la página o verifica tu conexión a Internet.
       </div>
     </div>
-  </div>
-  
-  <!-- Sistema de pestañas para configuración -->
-  <div class="tabs-container">
-    <div class="tabs-header">
-      <button class="tab-button active" data-tab="general">
-        <i class="fas fa-cog tab-icon"></i> General
-      </button>
-      <button class="tab-button" data-tab="printer">
-        <i class="fas fa-print tab-icon"></i> Impresora
-      </button>
-      <button class="tab-button" data-tab="content">
-        <i class="fas fa-list-alt tab-icon"></i> Contenido
-      </button>
-      <button class="tab-button" data-tab="barcode">
-        <i class="fas fa-barcode tab-icon"></i> Código de barras
-      </button>
+
+    <!-- Encabezado -->
+    <div class="page-header">
+      <h1 class="page-title">Generador de etiquetas</h1>
+      <p class="page-subtitle">Personaliza y genera etiquetas profesionales para tus productos con códigos de barras y precios.</p>
     </div>
     
-    <!-- Pestaña: Configuración General -->
-    <div id="tab-general" class="tab-content active">
-      <div class="config-section">
-        <div class="config-header">
-          <h3 class="config-title">
-            <i class="fas fa-cog config-title-icon"></i> Configuración general
-          </h3>
+    <!-- Información del producto - Diseño premium -->
+    <div class="product-card" data-producto='{"id": {{ producto.id }}, "nombre": "{{ producto.nombre|replace('"', '\\"')|replace('\n', ' ')|replace('\r', '') }}", "codigo": "{{ producto.codigo_barras_externo }}", "precio": {{ precio_final }}, "stock": {{ producto.stock }}}'>
+      <div class="product-image-container">
+        <img src="{{ url_for('static', filename='uploads/' + producto.foto) }}" alt="{{ producto.nombre }}" class="product-image" onerror="this.src='{{ url_for('static', filename='img/default_product.jpg') }}'">
+      </div>
+      
+      <div class="product-details">
+        <h2 class="product-name">{{ producto.nombre }}</h2>
+        
+        <div class="product-meta">
+          <div class="meta-item">
+            <div class="meta-icon">
+              <i class="fas fa-barcode"></i>
+            </div>
+            <div>
+              <span class="meta-label">Código</span>
+              <span class="meta-value">{{ producto.codigo_barras_externo }}</span>
+            </div>
+          </div>
+          
+          <div class="meta-item">
+            <div class="meta-icon">
+              <i class="fas fa-tag"></i>
+            </div>
+            <div>
+              <span class="meta-label">Precio</span>
+              <span class="meta-value">${{ "%.2f"|format(precio_final) }}</span>
+            </div>
+          </div>
+          
+          <div class="meta-item">
+            <div class="meta-icon">
+              <i class="fas fa-box"></i>
+            </div>
+            <div>
+              <span class="meta-label">Inventario</span>
+              <span class="meta-value product-stock">{{ producto.stock }} unidades</span>
+            </div>
+          </div>
+          
+          {% if producto.categoria %}
+          <div class="meta-item">
+            <span class="category-pill">
+              <i class="fas fa-layer-group mr-1"></i> {{ producto.categoria }}
+            </span>
+          </div>
+          {% endif %}
         </div>
-        <div class="config-body">
-          <div class="config-row">
-            <div class="config-col">
-              <div class="form-group">
-                <label class="form-label" for="cantidad">
-                  <i class="fas fa-hashtag mr-1"></i> Cantidad de etiquetas
-                </label>
+      </div>
+    </div>
+    
+    <!-- Sistema de pestañas para configuración -->
+    <div class="tabs-container">
+      <div class="tabs-header">
+        <button class="tab-button active" data-tab="general">
+          <i class="fas fa-cog tab-icon"></i> General
+        </button>
+        <button class="tab-button" data-tab="printer">
+          <i class="fas fa-print tab-icon"></i> Impresora
+        </button>
+        <button class="tab-button" data-tab="content">
+          <i class="fas fa-list-alt tab-icon"></i> Contenido
+        </button>
+        <button class="tab-button" data-tab="barcode">
+          <i class="fas fa-barcode tab-icon"></i> Código de barras
+        </button>
+      </div>
+      
+      <!-- Pestaña: Configuración General -->
+      <div id="tab-general" class="tab-content active">
+        <div class="config-section">
+          <div class="config-header">
+            <h3 class="config-title">
+              <i class="fas fa-cog config-title-icon"></i> Configuración general
+            </h3>
+          </div>
+          <div class="config-body">
+            <div class="config-row">
+              <div class="config-col">
+                <div class="form-group">
+                  <label class="form-label" for="cantidad">
+                    <i class="fas fa-hashtag mr-1"></i> Cantidad de etiquetas
+                  </label>
+                  <div class="toggle-container">
+                    <label class="toggle-switch">
+                      <input type="checkbox" id="usar_stock" checked>
+                      <span class="toggle-slider"></span>
+                    </label>
+                    <span class="toggle-label">Usar stock actual ({{ producto.stock }} unidades)</span>
+                  </div>
+                  <input type="number" id="cantidad" class="form-control" min="1" value="{{ producto.stock }}" disabled placeholder="Ingrese la cantidad de etiquetas">
+                </div>
+              </div>
+              
+              <div class="config-col">
+                <div class="form-group">
+                  <label class="form-label" for="formato_etiqueta">
+                    <i class="fas fa-th mr-1"></i> Formato de etiqueta
+                  </label>
+                  <select id="formato_etiqueta" class="form-select">
+                    <!-- Los formatos serán filtrados automáticamente por JavaScript según la impresora seleccionada -->
+                    <!-- Formatos Avery para impresoras normales -->
+                    <option value="avery5160" 
+                            data-width="63.5" 
+                            data-height="26.9" 
+                            data-cols="3" 
+                            data-rows="10" 
+                            data-per-page="30">
+                      Avery 5160 (63.5mm x 26.9mm)
+                    </option>
+                    <option value="avery5161" 
+                            data-width="101.6" 
+                            data-height="25.4" 
+                            data-cols="2" 
+                            data-rows="10" 
+                            data-per-page="20">
+                      Avery 5161 (101.6mm x 25.4mm)
+                    </option>
+                    <option value="avery5163" 
+                            data-width="101.6" 
+                            data-height="50.8" 
+                            data-cols="2" 
+                            data-rows="5" 
+                            data-per-page="10">
+                      Avery 5163 (101.6mm x 50.8mm)
+                    </option>
+                    
+                    <!-- Formatos para impresoras térmicas -->
+                    <option value="zebra_2x1" 
+                            data-width="50.8" 
+                            data-height="25.4" 
+                            data-cols="1" 
+                            data-rows="1" 
+                            data-per-page="1">
+                      Zebra 2" x 1" (50.8mm x 25.4mm)
+                    </option>
+                    <option value="dymo_11352" 
+                            data-width="54" 
+                            data-height="25" 
+                            data-cols="1" 
+                            data-rows="1" 
+                            data-per-page="1">
+                      DYMO 11352 (54mm x 25mm)
+                    </option>
+                    <option value="termica_40x25" 
+                            data-width="40" 
+                            data-height="25" 
+                            data-cols="1" 
+                            data-rows="1" 
+                            data-per-page="1">
+                      Térmica 40mm x 25mm
+                    </option>
+                    <option value="termica_50x30" 
+                            data-width="50" 
+                            data-height="30" 
+                            data-cols="1" 
+                            data-rows="1" 
+                            data-per-page="1">
+                      Térmica 50mm x 30mm
+                    </option>
+                    <option value="termica_58x40" 
+                            data-width="58" 
+                            data-height="40" 
+                            data-cols="1" 
+                            data-rows="1" 
+                            data-per-page="1">
+                      Térmica 58mm x 40mm
+                    </option>
+                    <option value="termica_80x50" 
+                            data-width="80" 
+                            data-height="50" 
+                            data-cols="1" 
+                            data-rows="1" 
+                            data-per-page="1">
+                      Térmica 80mm x 50mm
+                    </option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Pestaña: Impresoras -->
+      <div id="tab-printer" class="tab-content">
+        <div class="config-section">
+          <div class="config-header">
+            <h3 class="config-title">
+              <i class="fas fa-print config-title-icon"></i> Selección de impresora
+            </h3>
+          </div>
+          <div class="config-body">
+            <p style="margin-bottom: 1rem; color: var(--neutral-600);">Seleccione el tipo de impresora que utilizará para imprimir las etiquetas.</p>
+            
+            <div class="printer-options">
+              <!-- Impresora Normal -->
+              <div class="printer-option selected" data-printer="normal">
+                <div class="printer-badge">Recomendado</div>
+                <div class="printer-icon">
+                  <i class="fas fa-print"></i>
+                </div>
+                <div class="printer-name">Impresora normal</div>
+                <div class="printer-description">Compatible con hojas de etiquetas estándar tipo Avery para impresoras láser o de inyección.</div>
+                <div class="printer-meta">
+                  <div class="printer-meta-item">
+                    <i class="fas fa-file-pdf"></i> PDF
+                  </div>
+                  <div class="printer-meta-item">
+                    <i class="fas fa-check"></i> Compatible
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Impresora Zebra -->
+              <div class="printer-option" data-printer="zebra">
+                <div class="printer-icon">
+                  <i class="fas fa-tag"></i>
+                </div>
+                <div class="printer-name">Zebra GK420d/GX420d</div>
+                <div class="printer-description">Impresora térmica industrial para etiquetas adhesivas de alta calidad.</div>
+                <div class="printer-meta">
+                  <div class="printer-meta-item">
+                    <i class="fas fa-tachometer-alt"></i> Rápida
+                  </div>
+                  <div class="printer-meta-item">
+                    <i class="fas fa-industry"></i> Profesional
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Impresora DYMO -->
+              <div class="printer-option" data-printer="dymo">
+                <div class="printer-icon">
+                  <i class="fas fa-ticket-alt"></i>
+                </div>
+                <div class="printer-name">DYMO LabelWriter</div>
+                <div class="printer-description">Impresora térmica compacta para etiquetas pequeñas y códigos de barras.</div>
+                <div class="printer-meta">
+                  <div class="printer-meta-item">
+                    <i class="fas fa-desktop"></i> Escritorio
+                  </div>
+                  <div class="printer-meta-item">
+                    <i class="fas fa-compact-disc"></i> Compacta
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Impresora Térmica -->
+              <div class="printer-option" data-printer="termica">
+                <div class="printer-icon">
+                  <i class="fas fa-receipt"></i>
+                </div>
+                <div class="printer-name">Térmica estándar</div>
+                <div class="printer-description">Impresora térmica económica para tickets y etiquetas de precio.</div>
+                <div class="printer-meta">
+                  <div class="printer-meta-item">
+                    <i class="fas fa-dollar-sign"></i> Económica
+                  </div>
+                  <div class="printer-meta-item">
+                    <i class="fas fa-store"></i> POS
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Pestaña: Contenido -->
+      <div id="tab-content" class="tab-content">
+        <div class="config-section">
+          <div class="config-header">
+            <h3 class="config-title">
+              <i class="fas fa-list-alt config-title-icon"></i> Contenido de la etiqueta
+            </h3>
+          </div>
+          <div class="config-body">
+            <div class="config-row">
+              <div class="config-col">
                 <div class="toggle-container">
                   <label class="toggle-switch">
-                    <input type="checkbox" id="usar_stock" checked>
+                    <input type="checkbox" id="mostrar_nombre" checked>
                     <span class="toggle-slider"></span>
                   </label>
-                  <span class="toggle-label">Usar stock actual ({{ producto.stock }} unidades)</span>
+                  <span class="toggle-label">Mostrar nombre del producto</span>
                 </div>
-                <input type="number" id="cantidad" class="form-control" min="1" value="{{ producto.stock }}" disabled placeholder="Ingrese la cantidad de etiquetas">
-              </div>
-            </div>
-            
-            <div class="config-col">
-              <div class="form-group">
-                <label class="form-label" for="formato_etiqueta">
-                  <i class="fas fa-th mr-1"></i> Formato de etiqueta
-                </label>
-                <select id="formato_etiqueta" class="form-select">
-                  <!-- Formatos Avery para impresoras normales -->
-                  <option value="avery5160" 
-                          data-width="63.5" 
-                          data-height="26.9" 
-                          data-cols="3" 
-                          data-rows="10" 
-                          data-per-page="30">
-                    Avery 5160 (63.5mm x 26.9mm)
-                  </option>
-                  <option value="avery5161" 
-                          data-width="101.6" 
-                          data-height="25.4" 
-                          data-cols="2" 
-                          data-rows="10" 
-                          data-per-page="20">
-                    Avery 5161 (101.6mm x 25.4mm)
-                  </option>
-                  <option value="avery5163" 
-                          data-width="101.6" 
-                          data-height="50.8" 
-                          data-cols="2" 
-                          data-rows="5" 
-                          data-per-page="10">
-                    Avery 5163 (101.6mm x 50.8mm)
-                  </option>
-                  
-                  <!-- Formatos para impresoras térmicas -->
-                  <option value="zebra_2x1" 
-                          data-width="50.8" 
-                          data-height="25.4" 
-                          data-cols="1" 
-                          data-rows="1" 
-                          data-per-page="1">
-                    Zebra 2" x 1" (50.8mm x 25.4mm)
-                  </option>
-                  <option value="dymo_11352" 
-                          data-width="54" 
-                          data-height="25" 
-                          data-cols="1" 
-                          data-rows="1" 
-                          data-per-page="1">
-                    DYMO 11352 (54mm x 25mm)
-                  </option>
-                  <option value="termica_40x25" 
-                          data-width="40" 
-                          data-height="25" 
-                          data-cols="1" 
-                          data-rows="1" 
-                          data-per-page="1">
-                    Térmica 40mm x 25mm
-                  </option>
-                  <option value="termica_50x30" 
-                          data-width="50" 
-                          data-height="30" 
-                          data-cols="1" 
-                          data-rows="1" 
-                          data-per-page="1">
-                    Térmica 50mm x 30mm
-                  </option>
-                  <option value="termica_58x40" 
-                          data-width="58" 
-                          data-height="40" 
-                          data-cols="1" 
-                          data-rows="1" 
-                          data-per-page="1">
-                    Térmica 58mm x 40mm
-                  </option>
-                  <option value="termica_80x50" 
-                          data-width="80" 
-                          data-height="50" 
-                          data-cols="1" 
-                          data-rows="1" 
-                          data-per-page="1">
-                    Térmica 80mm x 50mm
-                  </option>
-                </select>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Toggle de compatibilidad -->
-          <div class="toggle-compatibilidad-container">
-            <label class="toggle-compatibilidad-label">
-              <i class="fas fa-shield-alt toggle-compatibilidad-icon"></i>
-              <span class="toggle-compatibilidad-title">Validar compatibilidad</span>
-            </label>
-            
-            <div class="toggle-compatibilidad-description">
-              Verifica que el formato de etiqueta sea compatible con la impresora seleccionada
-            </div>
-            
-            <label class="toggle-switch">
-              <input type="checkbox" id="toggle_compatibilidad" checked>
-              <span class="toggle-slider"></span>
-            </label>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Pestaña: Impresoras -->
-    <div id="tab-printer" class="tab-content">
-      <div class="config-section">
-        <div class="config-header">
-          <h3 class="config-title">
-            <i class="fas fa-print config-title-icon"></i> Selección de impresora
-          </h3>
-        </div>
-        <div class="config-body">
-          <p class="mb-4 text-neutral-600">Seleccione el tipo de impresora que utilizará para imprimir las etiquetas.</p>
-          
-          <div class="printer-options">
-            <!-- Impresora Normal -->
-            <div class="printer-option selected" data-printer="normal">
-              <div class="printer-badge">Recomendado</div>
-              <div class="printer-icon">
-                <i class="fas fa-print"></i>
-              </div>
-              <div class="printer-name">Impresora normal</div>
-              <div class="printer-description">Compatible con hojas de etiquetas estándar tipo Avery para impresoras láser o de inyección.</div>
-              <div class="printer-meta">
-                <div class="printer-meta-item">
-                  <i class="fas fa-file-pdf"></i> PDF
+                
+                <div class="toggle-container">
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="mostrar_precio" checked>
+                    <span class="toggle-slider"></span>
+                  </label>
+                  <span class="toggle-label">Mostrar precio</span>
                 </div>
-                <div class="printer-meta-item">
-                  <i class="fas fa-check"></i> Compatible
-                </div>
-              </div>
-            </div>
-            
-            <!-- Impresora Zebra -->
-            <div class="printer-option" data-printer="zebra">
-              <div class="printer-icon">
-                <i class="fas fa-tag"></i>
-              </div>
-              <div class="printer-name">Zebra GK420d/GX420d</div>
-              <div class="printer-description">Impresora térmica industrial para etiquetas adhesivas de alta calidad.</div>
-              <div class="printer-meta">
-                <div class="printer-meta-item">
-                  <i class="fas fa-tachometer-alt"></i> Rápida
-                </div>
-                <div class="printer-meta-item">
-                  <i class="fas fa-industry"></i> Profesional
-                </div>
-              </div>
-            </div>
-            
-            <!-- Impresora DYMO -->
-            <div class="printer-option" data-printer="dymo">
-              <div class="printer-icon">
-                <i class="fas fa-ticket-alt"></i>
-              </div>
-              <div class="printer-name">DYMO LabelWriter</div>
-              <div class="printer-description">Impresora térmica compacta para etiquetas pequeñas y códigos de barras.</div>
-              <div class="printer-meta">
-                <div class="printer-meta-item">
-                  <i class="fas fa-desktop"></i> Escritorio
-                </div>
-                <div class="printer-meta-item">
-                  <i class="fas fa-compact-disc"></i> Compacta
-                </div>
-              </div>
-            </div>
-            
-            <!-- Impresora Térmica -->
-            <div class="printer-option" data-printer="termica">
-              <div class="printer-icon">
-                <i class="fas fa-receipt"></i>
-              </div>
-              <div class="printer-name">Térmica estándar</div>
-              <div class="printer-description">Impresora térmica económica para tickets y etiquetas de precio.</div>
-              <div class="printer-meta">
-                <div class="printer-meta-item">
-                  <i class="fas fa-dollar-sign"></i> Económica
-                </div>
-                <div class="printer-meta-item">
-                  <i class="fas fa-store"></i> POS
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Pestaña: Contenido -->
-    <div id="tab-content" class="tab-content">
-      <div class="config-section">
-        <div class="config-header">
-          <h3 class="config-title">
-            <i class="fas fa-list-alt config-title-icon"></i> Contenido de la etiqueta
-          </h3>
-        </div>
-        <div class="config-body">
-          <div class="config-row">
-            <div class="config-col">
-              <div class="toggle-container">
-                <label class="toggle-switch">
-                  <input type="checkbox" id="mostrar_nombre" checked>
-                  <span class="toggle-slider"></span>
-                </label>
-                <span class="toggle-label">Mostrar nombre del producto</span>
               </div>
               
-              <div class="toggle-container">
-                <label class="toggle-switch">
-                  <input type="checkbox" id="mostrar_precio" checked>
-                  <span class="toggle-slider"></span>
-                </label>
-                <span class="toggle-label">Mostrar precio</span>
-              </div>
-            </div>
-            
-            <div class="config-col">
-              <div class="toggle-container">
-                <label class="toggle-switch">
-                  <input type="checkbox" id="mostrar_codigo" checked>
-                  <span class="toggle-slider"></span>
-                </label>
-                <span class="toggle-label">Mostrar código en texto</span>
-              </div>
-              
-              <div class="toggle-container">
-                <label class="toggle-switch">
-                  <input type="checkbox" id="mostrar_codigo_barras" checked>
-                  <span class="toggle-slider"></span>
-                </label>
-                <span class="toggle-label">Mostrar código de barras</span>
+              <div class="config-col">
+                <div class="toggle-container">
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="mostrar_codigo" checked>
+                    <span class="toggle-slider"></span>
+                  </label>
+                  <span class="toggle-label">Mostrar código en texto</span>
+                </div>
+                
+                <div class="toggle-container">
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="mostrar_codigo_barras" checked>
+                    <span class="toggle-slider"></span>
+                  </label>
+                  <span class="toggle-label">Mostrar código de barras</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
-    
-    <!-- Pestaña: Código de barras -->
-    <div id="tab-barcode" class="tab-content">
-      <div class="config-section">
-        <div class="config-header">
-          <h3 class="config-title">
-            <i class="fas fa-barcode config-title-icon"></i> Opciones de código de barras
-          </h3>
-        </div>
-        <div class="config-body">
-          <div class="config-row">
-            <div class="config-col">
-              <div class="form-group">
-                <label class="form-label">
-                  <i class="fas fa-qrcode mr-1"></i> Formato de código de barras
-                </label>
-                <select id="formato_codigo" class="form-select">
-                  <option value="auto">Automático (recomendado)</option>
-                  <option value="CODE128">CODE128 (alfanumérico - cualquier longitud)</option>
-                  <option value="CODE39">CODE39 (alfanumérico)</option>
-                  <option value="EAN13">EAN-13 (13 dígitos)</option>
-                  <option value="EAN8">EAN-8 (8 dígitos)</option>
-                  <option value="UPC">UPC-A (12 dígitos)</option>
-                  <option value="ITF14">ITF-14 (14 dígitos)</option>
-                  <option value="CODE128B">CODE128B (códigos personalizados)</option>
-                </select>
-              </div>
-            </div>
-            
-            <div class="config-col">
-              <div class="form-group">
-                <label class="form-label">
-                  <i class="fas fa-text-height mr-1"></i> Tamaño del código
-                </label>
-                <select id="tamano_codigo" class="form-select">
-                  <option value="normal">Normal</option>
-                  <option value="grande" selected>Grande (mejor para escanear)</option>
-                  <option value="pequeno">Pequeño (ahorra espacio)</option>
-                </select>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  
-  <!-- Sección de previsualización -->
-  <div class="preview-section">
-    <div class="preview-header">
-      <h3 class="preview-title">
-        <i class="fas fa-eye"></i> Vista previa
-      </h3>
-      <div class="preview-actions">
-        <button class="preview-action-btn" id="btn-refresh-preview" title="Actualizar vista previa">
-          <i class="fas fa-sync-alt"></i>
-        </button>
-      </div>
-    </div>
-    
-    <div id="preview-container" class="preview-container">
-      <div id="preview-content" class="preview-content">
-        <!-- La previsualización se generará con JavaScript -->
-        <div style="text-align: center; padding: 40px 0;">
-          <div class="loading-spinner"></div>
-          <p style="margin-top: 8px; color: #666;">Cargando vista previa...</p>
-        </div>
-      </div>
-    </div>
-    
-    <div class="preview-footer">
-      <div class="preview-info">
-        <i class="fas fa-info-circle preview-info-icon"></i>
-        <span>Vista previa de la disposición de etiquetas</span>
       </div>
       
-      <div class="preview-zoom">
-        <button class="zoom-btn" id="zoom-out">
-          <i class="fas fa-search-minus"></i>
-        </button>
-        <span class="zoom-value" id="zoom-value">100%</span>
-        <button class="zoom-btn" id="zoom-in">
-          <i class="fas fa-search-plus"></i>
-        </button>
+      <!-- Pestaña: Código de barras -->
+      <div id="tab-barcode" class="tab-content">
+        <div class="config-section">
+          <div class="config-header">
+            <h3 class="config-title">
+              <i class="fas fa-barcode config-title-icon"></i> Opciones de código de barras
+            </h3>
+          </div>
+          <div class="config-body">
+            <div class="config-row">
+              <div class="config-col">
+                <div class="form-group">
+                  <label class="form-label">
+                    <i class="fas fa-text-height mr-1"></i> Tamaño del código
+                  </label>
+                  <select id="tamano_codigo" class="form-select">
+                    <option value="normal">Normal</option>
+                    <option value="grande" selected>Grande (mejor para escanear)</option>
+                    <option value="pequeno">Pequeño (ahorra espacio)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
+    </div>
+    
+    <!-- Botones de acción -->
+    <div class="actions-section">
+      <button id="btn-preview" class="btn btn-outline">
+        <i class="fas fa-sync-alt btn-icon"></i> Actualizar
+      </button>
+      
+      <button id="btn-print" class="btn btn-secondary">
+        <i class="fas fa-print btn-icon"></i> Imprimir
+      </button>
+      
+      <button id="btn-pdf" class="btn btn-primary">
+        <i class="fas fa-file-pdf btn-icon"></i> Descargar PDF
+      </button>
     </div>
   </div>
   
-  <!-- Botones de acción -->
-  <div class="actions-section">
-    <button id="btn-preview" class="btn btn-outline">
-      <i class="fas fa-sync-alt btn-icon"></i> Actualizar
-    </button>
-    
-    <button id="btn-print" class="btn btn-secondary">
-      <i class="fas fa-print btn-icon"></i> Imprimir
-    </button>
-    
-    <button id="btn-pdf" class="btn btn-primary">
-      <i class="fas fa-file-pdf btn-icon"></i> Descargar PDF
-    </button>
+  <!-- Columna Derecha: Vista previa -->
+  <div class="right-column">
+    <div class="preview-section">
+      <div class="preview-header">
+        <h3 class="preview-title">
+          <i class="fas fa-eye"></i> Vista previa
+        </h3>
+        <div class="preview-actions">
+          <button class="preview-action-btn" id="btn-refresh-preview" title="Actualizar vista previa">
+            <i class="fas fa-sync-alt"></i>
+          </button>
+        </div>
+      </div>
+      
+      <div id="preview-container" class="preview-container">
+        <div id="preview-content" class="preview-content">
+          <!-- La previsualización se generará con JavaScript -->
+          <div style="text-align: center; padding: 40px 0;">
+            <div class="loading-spinner"></div>
+            <p style="margin-top: 8px; color: #666;">Cargando vista previa...</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="preview-footer">
+        <div class="preview-info">
+          <i class="fas fa-info-circle preview-info-icon"></i>
+          <span>Vista previa de la disposición de etiquetas</span>
+        </div>
+        
+        <div class="preview-zoom">
+          <button class="zoom-btn" id="zoom-out">
+            <i class="fas fa-search-minus"></i>
+          </button>
+          <span class="zoom-value" id="zoom-value">60%</span>
+          <button class="zoom-btn" id="zoom-in">
+            <i class="fas fa-search-plus"></i>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
-  
-  <!-- Áreas ocultas -->
-  <div id="print-content" style="display: none;"></div>
-  <div id="pdf-container" style="display: none;"></div>
 </div>
+
+<!-- Áreas ocultas -->
+<div id="print-content" style="display: none;"></div>
+<div id="pdf-container" style="display: none;"></div>
 
 <!-- Cargar bibliotecas necesarias -->
 <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
@@ -1530,13 +1506,15 @@
       });
     });
     
-    // Control de zoom
+    // Control de zoom - Establecemos el zoom inicial en 60%
     const zoomIn = document.getElementById('zoom-in');
     const zoomOut = document.getElementById('zoom-out');
     const zoomValue = document.getElementById('zoom-value');
     const previewContent = document.getElementById('preview-content');
     
-    let zoomLevel = 100;
+    if (previewContent) {
+      previewContent.style.transform = 'scale(0.6)';
+    }
     
     zoomIn.addEventListener('click', function() {
       if (zoomLevel < 200) {
@@ -1546,19 +1524,11 @@
     });
     
     zoomOut.addEventListener('click', function() {
-      if (zoomLevel > 50) {
+      if (zoomLevel > 30) {
         zoomLevel -= 10;
         updateZoom();
       }
     });
-    
-    function updateZoom() {
-      zoomValue.textContent = `${zoomLevel}%`;
-      if (previewContent) {
-        previewContent.style.transform = `scale(${zoomLevel/100})`;
-        previewContent.style.transformOrigin = 'top center';
-      }
-    }
     
     // Sincronizar botón de actualizar vista previa
     const btnRefreshPreview = document.getElementById('btn-refresh-preview');

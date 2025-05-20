@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
       errorDiv.style.display = 'block';
       errorDiv.innerHTML = `
         <div style="display: flex; align-items: center;">
-          <i class="fas fa-exclamation-circle" style="margin-right: 0.5rem; color: #0071e3;"></i>
+          <i class="fas fa-exclamation-circle" style="margin-right: 0.5rem; color: #e52e2e;"></i>
           <div>
             <strong>Error:</strong> No se pudieron cargar algunas bibliotecas necesarias (${dependencias}).
             <br>
@@ -121,6 +121,142 @@ document.addEventListener('DOMContentLoaded', function() {
    */
   function initLabelApp() {
     try {
+      // Catalogar todos los formatos disponibles
+      const formatosCatalog = {
+        // Formatos para impresora normal
+        normal: [
+          {
+            value: "avery5160",
+            text: "Avery 5160 (63.5mm x 26.9mm)",
+            width: 63.5,
+            height: 26.9,
+            cols: 3,
+            rows: 10,
+            perPage: 30
+          },
+          {
+            value: "avery5161",
+            text: "Avery 5161 (101.6mm x 25.4mm)",
+            width: 101.6,
+            height: 25.4,
+            cols: 2,
+            rows: 10,
+            perPage: 20
+          },
+          {
+            value: "avery5163",
+            text: "Avery 5163 (101.6mm x 50.8mm)",
+            width: 101.6,
+            height: 50.8,
+            cols: 2,
+            rows: 5,
+            perPage: 10
+          }
+        ],
+        
+        // Formatos para impresora Zebra
+        zebra: [
+          {
+            value: "zebra_2x1",
+            text: "Zebra 2\" x 1\" (50.8mm x 25.4mm)",
+            width: 50.8,
+            height: 25.4,
+            cols: 1,
+            rows: 1,
+            perPage: 1
+          },
+          {
+            value: "zebra_3x1",
+            text: "Zebra 3\" x 1\" (76.2mm x 25.4mm)",
+            width: 76.2,
+            height: 25.4,
+            cols: 1,
+            rows: 1,
+            perPage: 1
+          },
+          {
+            value: "zebra_4x1",
+            text: "Zebra 4\" x 1\" (101.6mm x 25.4mm)",
+            width: 101.6,
+            height: 25.4,
+            cols: 1,
+            rows: 1,
+            perPage: 1
+          }
+        ],
+        
+        // Formatos para impresora DYMO
+        dymo: [
+          {
+            value: "dymo_11352",
+            text: "DYMO 11352 (54mm x 25mm)",
+            width: 54,
+            height: 25,
+            cols: 1,
+            rows: 1,
+            perPage: 1
+          },
+          {
+            value: "dymo_11353",
+            text: "DYMO 11353 (25mm x 13mm)",
+            width: 25,
+            height: 13,
+            cols: 1,
+            rows: 1,
+            perPage: 1
+          },
+          {
+            value: "dymo_11354",
+            text: "DYMO 11354 (57mm x 32mm)",
+            width: 55,
+            height: 32,
+            cols: 1,
+            rows: 1,
+            perPage: 1
+          }
+        ],
+        
+        // Formatos para impresora térmica
+        termica: [
+          {
+            value: "termica_40x25",
+            text: "Térmica 40mm x 25mm",
+            width: 40,
+            height: 25,
+            cols: 1,
+            rows: 1,
+            perPage: 1
+          },
+          {
+            value: "termica_50x30",
+            text: "Térmica 50mm x 30mm",
+            width: 50,
+            height: 30,
+            cols: 1,
+            rows: 1,
+            perPage: 1
+          },
+          {
+            value: "termica_58x40",
+            text: "Térmica 58mm x 40mm",
+            width: 58,
+            height: 40,
+            cols: 1,
+            rows: 1,
+            perPage: 1
+          },
+          {
+            value: "termica_80x50",
+            text: "Térmica 80mm x 50mm",
+            width: 80,
+            height: 50,
+            cols: 1,
+            rows: 1,
+            perPage: 1
+          }
+        ]
+      };
+
       // Estado de la aplicación
       const appState = {
         producto: null,           // Datos del producto
@@ -132,7 +268,7 @@ document.addEventListener('DOMContentLoaded', function() {
         zoomLevel: 100,           // Nivel de zoom para vista previa
         renderTimeout: null,      // Control de refresco
         pdfGenerating: false,     // Flag para evitar duplicación de PDF
-        compatibilidadActiva: true // Estado de la validación de compatibilidad
+        formatosCatalog: formatosCatalog // Catálogo de formatos disponibles
       };
       
       // Referencias a elementos del DOM
@@ -146,9 +282,7 @@ document.addEventListener('DOMContentLoaded', function() {
         checkboxPrecio: document.getElementById('mostrar_precio'),
         checkboxCodigo: document.getElementById('mostrar_codigo'),
         checkboxCodigoBarras: document.getElementById('mostrar_codigo_barras'),
-        formatoCodigoSelect: document.getElementById('formato_codigo'),
         tamanoCodigoSelect: document.getElementById('tamano_codigo'),
-        toggleCompatibilidad: document.getElementById('toggle_compatibilidad'),
         
         // Botones de acción
         btnRefreshPreview: document.getElementById('btn-refresh-preview'),
@@ -256,10 +390,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 appState.impresora = printerId;
                 console.log(`Impresora seleccionada: ${printerId}`);
                 
-                // Verificar compatibilidad con el formato actual
-                if (appState.compatibilidadActiva) {
-                  verificarCompatibilidadFormatoImpresora();
-                }
+                // Actualizar selectores de formato según la impresora seleccionada
+                actualizarFormatosDisponibles(printerId);
                 
                 // Regenerar vista previa
                 programarActualizacionVistaPrevia();
@@ -271,39 +403,18 @@ document.addEventListener('DOMContentLoaded', function() {
         // 3. Selector de formato de etiquetas
         if (elements.selectFormato) {
           elements.selectFormato.addEventListener('change', function() {
-            // Verificar compatibilidad con la impresora actual
-            if (appState.compatibilidadActiva) {
-              verificarCompatibilidadFormatoImpresora();
-            }
-            
             // Programar actualización
             programarActualizacionVistaPrevia();
           });
         }
         
-        // 4. Toggle de compatibilidad
-        if (elements.toggleCompatibilidad) {
-          elements.toggleCompatibilidad.addEventListener('change', function() {
-            appState.compatibilidadActiva = this.checked;
-            
-            // Si está activado, verificar compatibilidad inmediatamente
-            if (appState.compatibilidadActiva) {
-              verificarCompatibilidadFormatoImpresora();
-            } else {
-              // Si está desactivado, limpiar cualquier mensaje de alerta
-              mostrarAlertaFormato('');
-            }
-          });
-        }
-        
-        // 5. Elementos de configuración con eventos
+        // 4. Elementos de configuración con eventos
         const configElements = [
           { elem: elements.checkboxNombre },
           { elem: elements.checkboxPrecio },
           { elem: elements.checkboxCodigo },
           { elem: elements.checkboxCodigoBarras },
           { elem: elements.inputCantidad },
-          { elem: elements.formatoCodigoSelect },
           { elem: elements.tamanoCodigoSelect }
         ];
         
@@ -321,7 +432,7 @@ document.addEventListener('DOMContentLoaded', function() {
           }
         });
         
-        // 6. Botones de acción
+        // 5. Botones de acción
         if (elements.btnRefreshPreview) {
           elements.btnRefreshPreview.addEventListener('click', function() {
             generarVistaPrevia(true); // Forzar regeneración
@@ -349,7 +460,7 @@ document.addEventListener('DOMContentLoaded', function() {
           });
         }
         
-        // 7. Controles de zoom
+        // 6. Controles de zoom
         if (elements.zoomIn && elements.zoomOut && elements.zoomValue) {
           elements.zoomIn.addEventListener('click', function() {
             if (appState.zoomLevel < 200) {
@@ -382,95 +493,53 @@ document.addEventListener('DOMContentLoaded', function() {
         // Inicializar zoom
         updateZoom();
         
-        // Verificar compatibilidad inicial
-        if (appState.compatibilidadActiva && elements.toggleCompatibilidad && elements.toggleCompatibilidad.checked) {
-          verificarCompatibilidadFormatoImpresora();
-        }
+        // Inicializar formatos disponibles para la impresora por defecto
+        actualizarFormatosDisponibles('normal');
       }
       
       /**
-       * Verifica la compatibilidad entre el formato de etiqueta y la impresora seleccionada
-       * Muestra alertas si la combinación es incompatible
+       * Actualiza los formatos de etiqueta disponibles en el select según la impresora seleccionada
+       * @param {string} impresora - Tipo de impresora seleccionada
        */
-      function verificarCompatibilidadFormatoImpresora() {
-        const formato = obtenerFormatoSeleccionado();
-        const impresora = appState.impresora;
+      function actualizarFormatosDisponibles(impresora) {
+        if (!elements.selectFormato) return;
         
-        // Si no hay información de formato, no mostrar advertencia
-        if (!formato) {
-          mostrarAlertaFormato('');
-          return;
+        // Obtener los formatos específicos para esta impresora
+        const formatos = appState.formatosCatalog[impresora] || [];
+        
+        // Guardar el valor seleccionado actualmente (si existiera)
+        const valorActual = elements.selectFormato.value;
+        
+        // Vaciar el select para reconstruirlo con las opciones compatibles
+        elements.selectFormato.innerHTML = '';
+        
+        // Añadir las opciones compatibles
+        formatos.forEach(formato => {
+          const option = document.createElement('option');
+          option.value = formato.value;
+          option.textContent = formato.text;
+          option.dataset.width = formato.width;
+          option.dataset.height = formato.height;
+          option.dataset.cols = formato.cols;
+          option.dataset.rows = formato.rows;
+          option.dataset.perPage = formato.perPage;
+          
+          // Intentar mantener la selección previa si existe y es compatible
+          if (formato.value === valorActual) {
+            option.selected = true;
+          }
+          
+          elements.selectFormato.appendChild(option);
+        });
+        
+        // Si no hay opciones seleccionadas, seleccionar la primera
+        if (elements.selectFormato.selectedIndex === -1 && elements.selectFormato.options.length > 0) {
+          elements.selectFormato.selectedIndex = 0;
         }
         
-        // Verificaciones específicas
-        let compatible = true;
-        let mensaje = '';
-        
-        switch (impresora) {
-          case 'zebra':
-            // Zebra GK420d/GX420d: Ancho máximo 104mm
-            if (formato.ancho > 104) {
-              compatible = false;
-              mensaje = `Este formato (${formato.ancho}mm) excede el ancho máximo de impresión de Zebra GK420d/GX420d (104mm)`;
-            }
-            
-            // No compatible con formatos multi-etiqueta en la misma fila
-            if (formato.columnas > 1) {
-              compatible = false;
-              mensaje = 'Las impresoras Zebra no son compatibles con formatos multi-columna. Use una etiqueta simple.';
-            }
-            break;
-          
-          case 'dymo':
-            // DYMO LabelWriter: Ancho máximo 56mm
-            if (formato.ancho > 56) {
-              compatible = false;
-              mensaje = `Este formato (${formato.ancho}mm) excede el ancho máximo de impresión de DYMO LabelWriter (56mm)`;
-            }
-            
-            // No compatible con formatos multi-etiqueta
-            if (formato.columnas > 1 || formato.filas > 1) {
-              compatible = false;
-              mensaje = 'Las impresoras DYMO no son compatibles con formatos multi-etiqueta. Use una etiqueta simple.';
-            }
-            break;
-          
-          case 'termica':
-            // Impresoras térmicas POS: Anchos típicos 58mm o 80mm
-            if (formato.ancho > 80) {
-              compatible = false;
-              mensaje = `Este formato (${formato.ancho}mm) excede el ancho máximo típico de impresoras térmicas (80mm)`;
-            }
-            
-            // No compatible con formatos multi-etiqueta
-            if (formato.columnas > 1 || formato.filas > 1) {
-              compatible = false;
-              mensaje = 'Las impresoras térmicas estándar no son compatibles con formatos multi-etiqueta. Use una etiqueta simple.';
-            }
-            break;
-          
-          case 'normal':
-            // Impresoras normales: Comprobar si el formato es compatible con hoja A4
-            if (formato.ancho * formato.columnas > 200) { // Margen de seguridad para A4 (210mm)
-              compatible = false;
-              mensaje = `Este formato (${formato.ancho}mm x ${formato.columnas} columnas) puede exceder el ancho de impresión disponible en una hoja A4`;
-            }
-            
-            if (formato.alto * formato.filas > 287) { // Margen de seguridad para A4 (297mm)
-              compatible = false;
-              mensaje = `Este formato (${formato.alto}mm x ${formato.filas} filas) puede exceder el alto de impresión disponible en una hoja A4`;
-            }
-            break;
-        }
-        
-        // Mostrar alerta si corresponde
-        if (!compatible) {
-          mostrarAlertaFormato(mensaje, 'warning');
-        } else {
-          mostrarAlertaFormato('');
-        }
-        
-        return compatible;
+        // Disparar evento change para actualizar la UI
+        const event = new Event('change');
+        elements.selectFormato.dispatchEvent(event);
       }
       
       /**
@@ -531,7 +600,8 @@ document.addEventListener('DOMContentLoaded', function() {
        * @returns {Object} Objeto con todos los datos del formato
        */
       function obtenerFormatoSeleccionado() {
-        if (!elements.selectFormato) {
+        if (!elements.selectFormato || elements.selectFormato.selectedIndex === -1) {
+          // Valor predeterminado si no hay selección
           return {
             id: 'avery5160',
             ancho: 63.5,
@@ -645,7 +715,7 @@ document.addEventListener('DOMContentLoaded', function() {
               previewHTML += `
                 <div style="margin-top:1rem;padding:0.75rem;background-color:#f0f9ff;border-radius:0.375rem;border:1px solid #e0f2fe;text-align:center;">
                   <div style="display:flex;align-items:center;justify-content:center;gap:0.5rem;">
-                    <i class="fas fa-info-circle" style="color:#0071e3;"></i>
+                    <i class="fas fa-info-circle" style="color:#e52e2e;"></i>
                     <span style="color:#0c4a6e;font-size:0.875rem;font-weight:500;">
                       Se generarán ${numPaginas} páginas con ${cantidad} etiquetas en total.
                     </span>
@@ -668,7 +738,7 @@ document.addEventListener('DOMContentLoaded', function() {
               previewHTML += `
                 <div style="margin-top:1rem;padding:0.75rem;background-color:#f0f9ff;border-radius:0.375rem;border:1px solid #e0f2fe;text-align:center;">
                   <div style="display:flex;align-items:center;justify-content:center;gap:0.5rem;">
-                    <i class="fas fa-info-circle" style="color:#0071e3;"></i>
+                    <i class="fas fa-info-circle" style="color:#e52e2e;"></i>
                     <span style="color:#0c4a6e;font-size:0.875rem;font-weight:500;">
                       Se generarán ${cantidad} etiquetas en total.
                     </span>
@@ -720,8 +790,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (configuracion.impresora === 'normal') {
           // Corrección para Avery 5160 (63.5 x 26.9mm), 3 columnas
           if (formato.id === 'avery5160' || (Math.abs(formato.ancho - 63.5) < 0.1 && Math.abs(formato.alto - 26.9) < 0.1)) {
-            // Margen estándar para Avery 5160
-            return 4.75 + (columnaIndex * formato.ancho);
+            // Margen exacto para Avery 5160 con 3 columnas en página A4
+            // Cálculo: margen lateral + (índice de columna * ancho de etiqueta + espacio entre etiquetas)
+            return 4.75 + (columnaIndex * (formato.ancho + 5.0));
           }
           
           // Corrección para Avery 5161 (101.6 x 25.4mm), 2 columnas
@@ -756,8 +827,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (configuracion.impresora === 'normal') {
           // Corrección para Avery 5160 (63.5 x 26.9mm), 10 filas
           if (formato.id === 'avery5160' || (Math.abs(formato.ancho - 63.5) < 0.1 && Math.abs(formato.alto - 26.9) < 0.1)) {
-            // Margen superior de 15mm para Avery 5160 (ajustado con las especificaciones)
-            return 15.0 + (filaIndex * formato.alto);
+            // Margen superior corregido para Avery 5160 (valor exacto)
+            return 12.7 + (filaIndex * formato.alto);
           }
           
           // Corrección para Avery 5161 (101.6 x 25.4mm), 10 filas
@@ -839,9 +910,9 @@ document.addEventListener('DOMContentLoaded', function() {
             // Impresora normal (láser/inyección)
             // Usar margen específico por formato para mayor precisión
             if (formato.id === 'avery5160' || (Math.abs(formato.ancho - 63.5) < 0.1 && Math.abs(formato.alto - 26.9) < 0.1)) {
-              // Avery 5160: Margen lateral 4.75mm
+              // Avery 5160: Márgenes corregidos para distribución simétrica
               config.marginX = 4.75;
-              config.marginY = 15.0;
+              config.marginY = 12.7;
             } else if (formato.id === 'avery5161' || (Math.abs(formato.ancho - 101.6) < 0.1 && Math.abs(formato.alto - 25.4) < 0.1)) {
               // Avery 5161: Margen lateral 3.4mm
               config.marginX = 3.4;
@@ -868,7 +939,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       
       /**
-       * Crea HTML para una etiqueta individual (CORREGIDO: EVITAR DUPLICACIÓN)
+       * Crea HTML para una etiqueta individual
        * @param {number} x - Posición X en milímetros
        * @param {number} y - Posición Y en milímetros
        * @param {number} ancho - Ancho en milímetros
@@ -906,7 +977,6 @@ document.addEventListener('DOMContentLoaded', function() {
           // Agregar un identificador único para este SVG
           const svgId = `barcode-${index}-${Date.now()}`;
           
-          // CORRECCIÓN: Configurar opciones para el SVG basadas en las preferencias del usuario
           // Obtener si debemos mostrar el texto del código en el SVG
           const mostrarTextoEnSVG = !mostrarCodigoTexto; // Invertido para evitar duplicación
           
@@ -971,7 +1041,6 @@ document.addEventListener('DOMContentLoaded', function() {
       
       /**
        * Genera un código de barras en un elemento SVG específico
-       * CORREGIDO: Ahora respeta la preferencia de mostrar texto en el SVG
        * @param {SVGElement} svg - Elemento SVG donde generar el código
        * @param {Object} config - Configuración del código de barras
        */
@@ -979,7 +1048,7 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
           const codigoLimpio = svg.dataset.codigo.trim();
           
-          // CORRECCIÓN: Usar la preferencia almacenada en el SVG
+          // Usar la preferencia almacenada en el SVG
           const mostrarTextoEnSVG = svg.dataset.showText === "true";
           
           // Actualizar la configuración con la preferencia de mostrar texto
@@ -987,7 +1056,7 @@ document.addEventListener('DOMContentLoaded', function() {
             format: config.formato,
             width: config.anchoLinea,
             height: config.altoBarras,
-            displayValue: mostrarTextoEnSVG, // CORREGIDO: Mostrar texto solo si corresponde
+            displayValue: mostrarTextoEnSVG,
             fontSize: config.tamanoTexto,
             margin: 2,
             background: "#ffffff",
@@ -1029,26 +1098,20 @@ document.addEventListener('DOMContentLoaded', function() {
        * @returns {Object} Configuración para códigos de barras
        */
       function obtenerConfiguracionCodigoBarras() {
-        // Formato de código de barras
-        let formato = 'CODE128';
+        // Autodetectar formato basado en el código
+        const codigoLimpio = appState.producto.codigo.trim();
+        let formato;
         
-        // Usar formato seleccionado o autodetectar
-        if (elements.formatoCodigoSelect && elements.formatoCodigoSelect.value !== 'auto') {
-          formato = elements.formatoCodigoSelect.value;
+        if (/^\d{13}$/.test(codigoLimpio)) {
+          formato = "EAN13";
+        } else if (/^\d{8}$/.test(codigoLimpio)) {
+          formato = "EAN8";
+        } else if (/^\d{12}$/.test(codigoLimpio)) {
+          formato = "UPC";
+        } else if (/^[0-9]+$/.test(codigoLimpio)) {
+          formato = "CODE128C";
         } else {
-          // Autodetectar formato basado en el código
-          const codigoLimpio = appState.producto.codigo.trim();
-          if (/^\d{13}$/.test(codigoLimpio)) {
-            formato = "EAN13";
-          } else if (/^\d{8}$/.test(codigoLimpio)) {
-            formato = "EAN8";
-          } else if (/^\d{12}$/.test(codigoLimpio)) {
-            formato = "UPC";
-          } else if (/^[0-9]+$/.test(codigoLimpio)) {
-            formato = "CODE128C";
-          } else {
-            formato = "CODE128";
-          }
+          formato = "CODE128";
         }
         
         // Configurar tamaño
@@ -1090,18 +1153,6 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
           }
           
-          // Si está activada la validación, verificar compatibilidad
-          if (appState.compatibilidadActiva && elements.toggleCompatibilidad && elements.toggleCompatibilidad.checked) {
-            const compatible = verificarCompatibilidadFormatoImpresora();
-            
-            if (!compatible) {
-              const confirmar = confirm('La combinación de formato e impresora seleccionada puede no ser compatible. ¿Desea continuar de todos modos?');
-              if (!confirmar) {
-                return;
-              }
-            }
-          }
-          
           console.log('Preparando impresión...');
           appState.isProcessing = true;
           mostrarCargando(elements.previewContainer, true, "Preparando impresión...", "Creando diseño de etiquetas");
@@ -1127,7 +1178,7 @@ document.addEventListener('DOMContentLoaded', function() {
           // Obtener configuración de código de barras
           const barcodeConfig = obtenerConfiguracionCodigoBarras();
           
-          // CORRECCIÓN: Verificar si debemos mostrar el código como texto separado
+          // Verificar si debemos mostrar el código como texto separado
           const mostrarCodigoTexto = !elements.checkboxCodigo || elements.checkboxCodigo.checked;
           
           // Crear estilos CSS optimizados para impresión
@@ -1188,7 +1239,7 @@ document.addEventListener('DOMContentLoaded', function() {
               font-weight: 700;
               font-size: 12px;
               margin-bottom: 2px;
-              color: #0071e3;
+              color: #e52e2e;
             }
             .etiqueta-codigo {
               font-size: 8px;
@@ -1206,7 +1257,7 @@ document.addEventListener('DOMContentLoaded', function() {
               right: 0;
               padding: 10px;
               background-color: #f0f9ff;
-              color: #0071e3;
+              color: #e52e2e;
               text-align: center;
               font-size: 14px;
               z-index: 1000;
@@ -1257,7 +1308,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             if (mostrarCodigoBarras) {
-              // CORRECCIÓN: Pasar preferencia de mostrar texto en el SVG
+              // Pasar preferencia de mostrar texto en el SVG
               const mostrarTextoEnSVG = !mostrarCodigoTexto;
               html += `<svg class="etiqueta-barcode" id="${svgId}" data-codigo="${appState.producto.codigo}" data-show-text="${mostrarTextoEnSVG}"></svg>`;
             }
@@ -1332,7 +1383,7 @@ document.addEventListener('DOMContentLoaded', function() {
                   try {
                     // Verificar que JsBarcode esté disponible
                     if (typeof JsBarcode === 'undefined') {
-                      document.body.innerHTML = '<div style="padding:20px;text-align:center;"><h2 style="color:#0071e3;">Error: No se pudo cargar la biblioteca de códigos de barras</h2><p>Por favor, intente nuevamente o use otra opción.</p></div>';
+                      document.body.innerHTML = '<div style="padding:20px;text-align:center;"><h2 style="color:#e52e2e;">Error: No se pudo cargar la biblioteca de códigos de barras</h2><p>Por favor, intente nuevamente o use otra opción.</p></div>';
                       processingComplete = true;
                       errorOccurred = true;
                       return;
@@ -1351,7 +1402,7 @@ document.addEventListener('DOMContentLoaded', function() {
                       const svg = barcodes[i];
                       try {
                         const codigo = svg.dataset.codigo;
-                        // CORRECCIÓN: Obtener preferencia de mostrar texto
+                        // Obtener preferencia de mostrar texto
                         const mostrarTextoEnSVG = svg.dataset.showText === "true";
                         
                         if (codigo) {
@@ -1359,7 +1410,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             format: "${barcodeConfig.formato}",
                             width: ${barcodeConfig.anchoLinea},
                             height: ${barcodeConfig.altoBarras},
-                            displayValue: mostrarTextoEnSVG, // CORREGIDO
+                            displayValue: mostrarTextoEnSVG,
                             fontSize: ${barcodeConfig.tamanoTexto},
                             margin: 2,
                             background: "#ffffff",
@@ -1417,9 +1468,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     console.error("Error durante procesamiento:", e);
                     document.body.innerHTML = \`
                       <div style="padding:20px;text-align:center;">
-                        <h2 style="color:#0071e3;">Error durante la preparación de impresión</h2>
+                        <h2 style="color:#e52e2e;">Error durante la preparación de impresión</h2>
                         <p style="color:#444;">\${e.message}</p>
-                        <button onclick="window.close()" style="margin-top:20px;padding:8px 16px;background:#0071e3;color:white;border:none;border-radius:6px;cursor:pointer;">
+                        <button onclick="window.close()" style="margin-top:20px;padding:8px 16px;background:#e52e2e;color:white;border:none;border-radius:6px;cursor:pointer;">
                           Cerrar ventana
                         </button>
                       </div>
@@ -1468,18 +1519,6 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
           }
           
-          // Si está activada la validación, verificar compatibilidad
-          if (appState.compatibilidadActiva && elements.toggleCompatibilidad && elements.toggleCompatibilidad.checked) {
-            const compatible = verificarCompatibilidadFormatoImpresora();
-            
-            if (!compatible) {
-              const confirmar = confirm('La combinación de formato e impresora seleccionada puede no ser compatible. ¿Desea continuar de todos modos?');
-              if (!confirmar) {
-                return;
-              }
-            }
-          }
-          
           // Flag para evitar descarga doble
           appState.pdfGenerating = true;
           appState.isProcessing = true;
@@ -1519,11 +1558,11 @@ document.addEventListener('DOMContentLoaded', function() {
             hotfixes: ["px_scaling"]
           };
           
-          // CORREGIDO: Correcta inicialización para evitar descarga doble
+          // Correcta inicialización para evitar descarga doble
           const { jsPDF } = window.jspdf;
           const pdf = new jsPDF(pdfOptions);
           
-          // CORRECCIÓN: Verificar si debemos mostrar el código como texto separado
+          // Verificar si debemos mostrar el código como texto separado
           const mostrarCodigoTexto = !elements.checkboxCodigo || elements.checkboxCodigo.checked;
           
           // Preparar CSS para el contenedor del PDF
@@ -1584,7 +1623,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 font-weight: 700;
                 font-size: 12px;
                 margin-bottom: 2px;
-                color: #0071e3;
+                color: #e52e2e;
               }
               .etiqueta-codigo {
                 font-size: 8px;
@@ -1661,7 +1700,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             if (mostrarCodigoBarras) {
-              // CORRECCIÓN: Pasar preferencia de mostrar texto en el SVG
+              // Pasar preferencia de mostrar texto en el SVG
               const mostrarTextoEnSVG = !mostrarCodigoTexto;
               html += `<svg class="etiqueta-barcode" id="${svgId}" data-codigo="${appState.producto.codigo}" data-show-text="${mostrarTextoEnSVG}"></svg>`;
             }
@@ -1689,7 +1728,7 @@ document.addEventListener('DOMContentLoaded', function() {
           for (let svg of svgs) {
             try {
               const codigo = svg.dataset.codigo;
-              // CORRECCIÓN: Obtener preferencia de mostrar texto en el SVG
+              // Obtener preferencia de mostrar texto en el SVG
               const mostrarTextoEnSVG = svg.dataset.showText === "true";
               
               JsBarcode(svg, codigo, {
@@ -1825,7 +1864,7 @@ document.addEventListener('DOMContentLoaded', function() {
               // Nombre del archivo
               const nombreArchivo = `Etiquetas_${nombreSeguro || 'Producto'}.pdf`;
               
-              // CORREGIDO: Guardar el PDF una sola vez
+              // Guardar el PDF una sola vez
               pdf.save(nombreArchivo);
               
               console.log('Generación de PDF completada, archivo guardado:', nombreArchivo);
@@ -1862,12 +1901,12 @@ document.addEventListener('DOMContentLoaded', function() {
       if (previewContent) {
         previewContent.innerHTML = `
           <div style="text-align:center;padding:2rem;color:#444;background-color:#f5f5f7;border-radius:0.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.1);max-width:90%;margin:1rem auto;">
-            <i class="fas fa-exclamation-triangle" style="font-size:2rem;color:#0071e3;margin-bottom:1rem;display:block;"></i>
+            <i class="fas fa-exclamation-triangle" style="font-size:2rem;color:#e52e2e;margin-bottom:1rem;display:block;"></i>
             <h3 style="font-size:1.25rem;font-weight:600;margin-bottom:0.75rem;color:#1d1d1f;">Error al inicializar el sistema de etiquetas</h3>
             <p style="color:#444;margin-bottom:1rem;">${error.message}</p>
             <p style="color:#666;font-size:0.875rem;">Por favor, recarga la página o contacta con soporte si el problema persiste.</p>
             
-            <button onclick="location.reload()" style="margin-top:1rem;padding:0.5rem 1rem;background:#0071e3;color:white;border:none;border-radius:0.375rem;font-weight:500;cursor:pointer;">
+            <button onclick="location.reload()" style="margin-top:1rem;padding:0.5rem 1rem;background:#e52e2e;color:white;border:none;border-radius:0.375rem;font-weight:500;cursor:pointer;">
               <i class="fas fa-sync-alt" style="margin-right:0.5rem;"></i> Recargar página
             </button>
           </div>
