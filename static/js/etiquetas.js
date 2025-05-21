@@ -4,6 +4,8 @@
  * Version modificada: Sin vista previa y adaptada para etiquetas pequeñas
  * Corrección específica: Alineación vertical precisa para todos los formatos de etiquetas
  * Corrección adicional: Ajuste de precisión en la conversión de unidades para PDF
+ * Corrección del problema de stock: Manejo adecuado del valor manual de cantidad
+ * Optimización: Tamaño mejorado de códigos de barras para impresoras térmicas
  */
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -148,7 +150,9 @@ function initLabelApp() {
           contentPaddingX: 1.0,  // Reducido para evitar que el contenido se salga
           contentPaddingY: 1.0,  // Reducido para evitar que el contenido se salga
           horizontalSpacing: 2.65,  // Calibrado exactamente para este formato
-          verticalSpacing: 0.0
+          verticalSpacing: 0.0,
+          maxTextLength: 25,      // Máximo de caracteres para el nombre
+          barcodeHeightFactor: 1.0 // Factor de altura normal
         },
         {
           value: "avery5161",
@@ -164,7 +168,9 @@ function initLabelApp() {
           contentPaddingX: 1.5,  // Reducido para evitar desbordamiento 
           contentPaddingY: 1.0,  // Reducido para evitar desbordamiento
           horizontalSpacing: 2.25,  // Calibrado exacto
-          verticalSpacing: 0.0
+          verticalSpacing: 0.0,
+          maxTextLength: 40,      // Más espacio para texto
+          barcodeHeightFactor: 1.0 // Factor de altura normal
         },
         {
           value: "avery5163",
@@ -180,7 +186,9 @@ function initLabelApp() {
           contentPaddingX: 2.0,  // Ajustado para mejor alineación
           contentPaddingY: 2.0,  // Ajustado para mejor alineación
           horizontalSpacing: 2.25,  // Calibrado exacto
-          verticalSpacing: 0.0
+          verticalSpacing: 0.0,
+          maxTextLength: 60,      // Mucho espacio para texto
+          barcodeHeightFactor: 1.0 // Factor de altura normal
         }
       ],
       
@@ -197,13 +205,18 @@ function initLabelApp() {
           // Configuraciones de alineación mejoradas para Zebra
           marginX: 1.0, // CORREGIDO
           marginY: 1.0, // CORREGIDO
-          contentPaddingX: 2.0,
-          contentPaddingY: 2.0,
-          contentTopSpacing: 3.0,  // CORREGIDO
-          contentBottomSpacing: 3.0, // CORREGIDO
+          contentPaddingX: 1.0, // REDUCIDO para optimizar espacio
+          contentPaddingY: 1.0, // REDUCIDO para optimizar espacio
+          contentTopSpacing: 0.5,  // REDUCIDO para código de barras más grande
+          contentBottomSpacing: 0.5, // REDUCIDO para código de barras más grande
           barcodeVerticalShift: 0.0, // CORREGIDO
           verticalCenter: true,
-          horizontalCenter: true
+          horizontalCenter: true,
+          // OPTIMIZACIÓN: Parámetros específicos para códigos de barras
+          maxTextLength: 18,       // Límite de texto para nombres
+          barcodeHeightFactor: 1.5, // 50% más alto
+          barcodeWidthFactor: 1.2,  // 20% más ancho
+          prioritizeBarcode: true   // Priorizar código de barras
         },
         {
           value: "zebra_3x1",
@@ -216,13 +229,18 @@ function initLabelApp() {
           // Configuraciones de alineación mejoradas para Zebra
           marginX: 1.0, // CORREGIDO
           marginY: 1.0, // CORREGIDO
-          contentPaddingX: 2.0,
-          contentPaddingY: 2.0,
-          contentTopSpacing: 3.0,  // CORREGIDO
-          contentBottomSpacing: 3.0, // CORREGIDO
+          contentPaddingX: 1.5, // REDUCIDO para optimizar espacio
+          contentPaddingY: 1.0, // REDUCIDO para optimizar espacio
+          contentTopSpacing: 0.5,  // REDUCIDO para código de barras más grande
+          contentBottomSpacing: 0.5, // REDUCIDO para código de barras más grande
           barcodeVerticalShift: 0.0, // CORREGIDO
           verticalCenter: true,
-          horizontalCenter: true
+          horizontalCenter: true,
+          // OPTIMIZACIÓN: Parámetros específicos para códigos de barras
+          maxTextLength: 25,       // Límite de texto para nombres
+          barcodeHeightFactor: 1.5, // 50% más alto
+          barcodeWidthFactor: 1.2,  // 20% más ancho
+          prioritizeBarcode: true   // Priorizar código de barras
         },
         {
           value: "zebra_4x1",
@@ -235,13 +253,18 @@ function initLabelApp() {
           // Configuraciones de alineación mejoradas para Zebra
           marginX: 1.0, // CORREGIDO
           marginY: 1.0, // CORREGIDO
-          contentPaddingX: 2.0,
-          contentPaddingY: 2.0,
-          contentTopSpacing: 3.0,  // CORREGIDO
-          contentBottomSpacing: 3.0, // CORREGIDO
+          contentPaddingX: 1.5, // REDUCIDO para optimizar espacio
+          contentPaddingY: 1.0, // REDUCIDO para optimizar espacio
+          contentTopSpacing: 0.5,  // REDUCIDO para código de barras más grande
+          contentBottomSpacing: 0.5, // REDUCIDO para código de barras más grande
           barcodeVerticalShift: 0.0, // CORREGIDO
           verticalCenter: true,
-          horizontalCenter: true
+          horizontalCenter: true,
+          // OPTIMIZACIÓN: Parámetros específicos para códigos de barras
+          maxTextLength: 35,       // Límite de texto para nombres
+          barcodeHeightFactor: 1.5, // 50% más alto
+          barcodeWidthFactor: 1.2,  // 20% más ancho
+          prioritizeBarcode: true   // Priorizar código de barras
         }
       ],
       
@@ -258,13 +281,18 @@ function initLabelApp() {
           // Configuraciones de alineación mejoradas para DYMO
           marginX: 0.0, // CORREGIDO
           marginY: 0.0, // CORREGIDO
-          contentPaddingX: 2.0,
-          contentPaddingY: 2.0,
-          contentTopSpacing: 2.0,  // CORREGIDO
-          contentBottomSpacing: 2.0, // CORREGIDO
+          contentPaddingX: 1.0, // REDUCIDO para optimizar espacio
+          contentPaddingY: 1.0, // REDUCIDO para optimizar espacio
+          contentTopSpacing: 0.5,  // REDUCIDO para código de barras más grande
+          contentBottomSpacing: 0.5, // REDUCIDO para código de barras más grande
           barcodeVerticalShift: 0.0, // CORREGIDO
           verticalCenter: true,
-          horizontalCenter: true
+          horizontalCenter: true,
+          // OPTIMIZACIÓN: Parámetros específicos para códigos de barras
+          maxTextLength: 20,       // Límite de texto para nombres
+          barcodeHeightFactor: 1.6, // 60% más alto
+          barcodeWidthFactor: 1.3,  // 30% más ancho
+          prioritizeBarcode: true   // Priorizar código de barras
         },
         {
           value: "dymo_11353",
@@ -278,13 +306,19 @@ function initLabelApp() {
           // Configuraciones de alineación mejoradas para DYMO pequeña
           marginX: 0.0, // CORREGIDO
           marginY: 0.0, // CORREGIDO
-          contentPaddingX: 1.0, // CORREGIDO
-          contentPaddingY: 1.0, // CORREGIDO
-          contentTopSpacing: 0.5,  // CORREGIDO
-          contentBottomSpacing: 0.5, // CORREGIDO
+          contentPaddingX: 0.5, // REDUCIDO para optimizar espacio
+          contentPaddingY: 0.5, // REDUCIDO para optimizar espacio
+          contentTopSpacing: 0.2,  // REDUCIDO para código de barras más grande
+          contentBottomSpacing: 0.2, // REDUCIDO para código de barras más grande
           barcodeVerticalShift: 0.0, // CORREGIDO
           verticalCenter: true,
-          horizontalCenter: true
+          horizontalCenter: true,
+          // OPTIMIZACIÓN: Parámetros específicos para códigos de barras en etiqueta muy pequeña
+          maxTextLength: 10,       // Límite de texto para nombres
+          barcodeHeightFactor: 1.6, // 60% más alto
+          barcodeWidthFactor: 1.4,  // 40% más ancho
+          prioritizeBarcode: true,  // Priorizar código de barras
+          onlyBarcodeAndCode: true  // Mostrar solo el código y barcode
         },
         {
           value: "dymo_11354",
@@ -297,13 +331,18 @@ function initLabelApp() {
           // Configuraciones de alineación mejoradas para DYMO
           marginX: 0.0, // CORREGIDO
           marginY: 0.0, // CORREGIDO
-          contentPaddingX: 2.0,
-          contentPaddingY: 2.0,
-          contentTopSpacing: 3.0,  // CORREGIDO
-          contentBottomSpacing: 3.0, // CORREGIDO
+          contentPaddingX: 1.0, // REDUCIDO para optimizar espacio
+          contentPaddingY: 1.0, // REDUCIDO para optimizar espacio
+          contentTopSpacing: 1.0,  // REDUCIDO para código de barras más grande
+          contentBottomSpacing: 1.0, // REDUCIDO para código de barras más grande
           barcodeVerticalShift: 0.0, // CORREGIDO
           verticalCenter: true,
-          horizontalCenter: true
+          horizontalCenter: true,
+          // OPTIMIZACIÓN: Parámetros específicos para códigos de barras
+          maxTextLength: 25,       // Límite de texto para nombres
+          barcodeHeightFactor: 1.5, // 50% más alto
+          barcodeWidthFactor: 1.3,  // 30% más ancho
+          prioritizeBarcode: true   // Priorizar código de barras
         }
       ],
       
@@ -320,13 +359,19 @@ function initLabelApp() {
           // Configuraciones de alineación mejoradas para térmica
           marginX: 0.0, // CORREGIDO
           marginY: 0.0, // CORREGIDO
-          contentPaddingX: 2.0,
-          contentPaddingY: 2.0,
-          contentTopSpacing: 2.0,  // CORREGIDO
-          contentBottomSpacing: 2.0, // CORREGIDO
+          contentPaddingX: 1.0, // REDUCIDO para optimizar espacio
+          contentPaddingY: 1.0, // REDUCIDO para optimizar espacio
+          contentTopSpacing: 0.5,  // REDUCIDO para código de barras más grande
+          contentBottomSpacing: 0.5, // REDUCIDO para código de barras más grande
           barcodeVerticalShift: 0.0, // CORREGIDO
           verticalCenter: true,
-          horizontalCenter: true
+          horizontalCenter: true,
+          // OPTIMIZACIÓN: Parámetros específicos para códigos de barras
+          maxTextLength: 15,       // Límite de texto para nombres
+          barcodeHeightFactor: 1.7, // 70% más alto
+          barcodeWidthFactor: 1.3,  // 30% más ancho
+          prioritizeBarcode: true,  // Priorizar código de barras
+          onlyBarcodeAndCode: true  // Mostrar solo el código y barcode
         },
         {
           value: "termica_50x30",
@@ -339,13 +384,18 @@ function initLabelApp() {
           // Configuraciones de alineación mejoradas para térmica
           marginX: 0.0, // CORREGIDO
           marginY: 0.0, // CORREGIDO
-          contentPaddingX: 2.0,
-          contentPaddingY: 2.0,
-          contentTopSpacing: 3.0,  // CORREGIDO
-          contentBottomSpacing: 3.0, // CORREGIDO
+          contentPaddingX: 1.0, // REDUCIDO para optimizar espacio
+          contentPaddingY: 1.0, // REDUCIDO para optimizar espacio
+          contentTopSpacing: 0.5,  // REDUCIDO para código de barras más grande
+          contentBottomSpacing: 0.5, // REDUCIDO para código de barras más grande
           barcodeVerticalShift: 0.0, // CORREGIDO
           verticalCenter: true,
-          horizontalCenter: true
+          horizontalCenter: true,
+          // OPTIMIZACIÓN: Parámetros específicos para códigos de barras
+          maxTextLength: 18,       // Límite de texto para nombres
+          barcodeHeightFactor: 1.6, // 60% más alto
+          barcodeWidthFactor: 1.3,  // 30% más ancho
+          prioritizeBarcode: true   // Priorizar código de barras
         },
         {
           value: "termica_58x40",
@@ -358,13 +408,18 @@ function initLabelApp() {
           // Configuraciones de alineación mejoradas para térmica
           marginX: 0.0, // CORREGIDO
           marginY: 0.0, // CORREGIDO
-          contentPaddingX: 2.0,
-          contentPaddingY: 2.0,
-          contentTopSpacing: 4.0,  // CORREGIDO
-          contentBottomSpacing: 4.0, // CORREGIDO
+          contentPaddingX: 1.0, // REDUCIDO para optimizar espacio
+          contentPaddingY: 1.0, // REDUCIDO para optimizar espacio
+          contentTopSpacing: 1.0,  // REDUCIDO para código de barras más grande
+          contentBottomSpacing: 1.0, // REDUCIDO para código de barras más grande
           barcodeVerticalShift: 0.0, // CORREGIDO
           verticalCenter: true,
-          horizontalCenter: true
+          horizontalCenter: true,
+          // OPTIMIZACIÓN: Parámetros específicos para códigos de barras
+          maxTextLength: 20,       // Límite de texto para nombres
+          barcodeHeightFactor: 1.5, // 50% más alto
+          barcodeWidthFactor: 1.3,  // 30% más ancho
+          prioritizeBarcode: true   // Priorizar código de barras
         },
         {
           value: "termica_80x50",
@@ -377,13 +432,18 @@ function initLabelApp() {
           // Configuraciones de alineación mejoradas para térmica
           marginX: 0.0, // CORREGIDO
           marginY: 0.0, // CORREGIDO
-          contentPaddingX: 2.0,
-          contentPaddingY: 2.0,
-          contentTopSpacing: 5.0,  // CORREGIDO
-          contentBottomSpacing: 5.0, // CORREGIDO
+          contentPaddingX: 1.5, // REDUCIDO para optimizar espacio
+          contentPaddingY: 1.5, // REDUCIDO para optimizar espacio
+          contentTopSpacing: 1.5,  // REDUCIDO para código de barras más grande
+          contentBottomSpacing: 1.5, // REDUCIDO para código de barras más grande
           barcodeVerticalShift: 0.0, // CORREGIDO
           verticalCenter: true,
-          horizontalCenter: true
+          horizontalCenter: true,
+          // OPTIMIZACIÓN: Parámetros específicos para códigos de barras
+          maxTextLength: 30,       // Límite de texto para nombres
+          barcodeHeightFactor: 1.5, // 50% más alto
+          barcodeWidthFactor: 1.2,  // 20% más ancho
+          prioritizeBarcode: true   // Priorizar código de barras
         }
       ]
     };
@@ -486,6 +546,13 @@ function initLabelApp() {
             elements.inputCantidad.disabled = this.checked;
             if (this.checked) {
               elements.inputCantidad.value = appState.producto.stock;
+              // CORRECCIÓN: Actualizar appState.cantidad cuando se marca "usar stock"
+              appState.cantidad = parseInt(appState.producto.stock) || 0;
+              console.log('Cantidad actualizada a stock actual:', appState.cantidad);
+            } else {
+              // CORRECCIÓN: Actualizar appState.cantidad al valor actual del input cuando se desmarca
+              appState.cantidad = parseInt(elements.inputCantidad.value) || 0;
+              console.log('Cantidad actualizada a valor manual:', appState.cantidad);
             }
           }
         });
@@ -520,7 +587,7 @@ function initLabelApp() {
           const esEtiquetaPequena = verificarSiEtiquetaEsPequena(formatoSeleccionado);
           
           // Actualizar la interfaz según el tamaño
-          ajustarInterfazSegunFormatoEtiqueta(esEtiquetaPequena);
+          ajustarInterfazSegunFormatoEtiqueta(formatoSeleccionado);
         });
       }
       
@@ -540,6 +607,12 @@ function initLabelApp() {
             // Si es el checkbox de código de barras, mostrar/ocultar opciones
             if (this === elements.checkboxCodigoBarras) {
               toggleCodigoBarrasOpciones();
+            }
+            
+            // CORRECCIÓN: Actualizar appState.cantidad cuando cambia inputCantidad
+            if (this === elements.inputCantidad) {
+              appState.cantidad = parseInt(this.value) || 0;
+              console.log('Cantidad actualizada manualmente:', appState.cantidad);
             }
           });
         }
@@ -569,6 +642,13 @@ function initLabelApp() {
       // Configurar estado inicial de cantidad
       if (elements.inputCantidad && elements.checkboxStock) {
         elements.inputCantidad.disabled = elements.checkboxStock.checked;
+        // CORRECCIÓN: Inicializar appState.cantidad al valor correcto según el estado del checkbox
+        if (elements.checkboxStock.checked) {
+          appState.cantidad = parseInt(appState.producto.stock) || 0;
+        } else {
+          appState.cantidad = parseInt(elements.inputCantidad.value) || 0;
+        }
+        console.log('Cantidad inicial configurada:', appState.cantidad);
       }
       
       // Configurar opciones de código de barras
@@ -592,15 +672,34 @@ function initLabelApp() {
     }
     
     /**
-     * Ajusta la interfaz según el formato de etiqueta seleccionado
-     * @param {boolean} esEtiquetaPequena - Si la etiqueta es considerada pequeña
+     * Trunca el texto si excede el límite establecido
+     * @param {string} texto - Texto a truncar
+     * @param {number} limite - Límite de caracteres
+     * @returns {string} - Texto truncado si excede el límite
      */
-    function ajustarInterfazSegunFormatoEtiqueta(esEtiquetaPequena) {
-      // Para etiquetas pequeñas, forzar sólo código de barras y texto
-      if (esEtiquetaPequena) {
+    function truncarTexto(texto, limite) {
+      if (!texto) return '';
+      if (texto.length <= limite) return texto;
+      return texto.substring(0, limite) + '...';
+    }
+    
+    /**
+     * Ajusta la interfaz según el formato de etiqueta seleccionado
+     * @param {Object} formato - Formato de la etiqueta seleccionado
+     */
+    function ajustarInterfazSegunFormatoEtiqueta(formato) {
+      // Detectar si es una etiqueta pequeña
+      const esEtiquetaPequena = verificarSiEtiquetaEsPequena(formato);
+      
+      // Verificar si es una etiqueta para impresora térmica que requiere solo código de barras y código
+      const imprimiendoEnTermica = (appState.impresora !== 'normal');
+      const requiereSoloCodigoBarras = formato.onlyBarcodeAndCode === true;
+      
+      // Para etiquetas pequeñas o formatos que solo admiten código y barcode
+      if (esEtiquetaPequena || requiereSoloCodigoBarras) {
         // Mostrar alerta informativa
         mostrarAlertaFormato(
-          "El formato de etiqueta seleccionado es pequeño. Sólo se mostrará el código de barras y el texto del código.", 
+          "El formato de etiqueta seleccionado es pequeño. Solo se mostrará el código de barras y el texto del código.", 
           "info"
         );
         
@@ -626,10 +725,47 @@ function initLabelApp() {
           elements.checkboxCodigoBarras.disabled = true;
         }
         
-        // Forzar tamaño pequeño para el código de barras
+        // Forzar tamaño grande para el código de barras en térmicas
         if (elements.tamanoCodigoSelect) {
-          elements.tamanoCodigoSelect.value = "pequeno";
+          // Para impresoras térmicas, usar tamaño grande para barcode
+          if (imprimiendoEnTermica) {
+            elements.tamanoCodigoSelect.value = "grande";
+          } else {
+            elements.tamanoCodigoSelect.value = "pequeno";
+          }
           elements.tamanoCodigoSelect.disabled = true;
+        }
+      } else if (imprimiendoEnTermica && formato.prioritizeBarcode) {
+        // Para impresoras térmicas con etiquetas medianas, optimizar para código de barras
+        mostrarAlertaFormato(
+          "Formato optimizado para impresora térmica. Se priorizará el tamaño del código de barras.", 
+          "info"
+        );
+        
+        // Permitir nombres y precios pero dejar el código de barras como obligatorio
+        if (elements.checkboxNombre) {
+          elements.checkboxNombre.disabled = false;
+        }
+        
+        if (elements.checkboxPrecio) {
+          elements.checkboxPrecio.disabled = false;
+        }
+        
+        // Asegurar que código y código de barras estén activados
+        if (elements.checkboxCodigo) {
+          elements.checkboxCodigo.checked = true;
+          elements.checkboxCodigo.disabled = false;
+        }
+        
+        if (elements.checkboxCodigoBarras) {
+          elements.checkboxCodigoBarras.checked = true;
+          elements.checkboxCodigoBarras.disabled = false;
+        }
+        
+        // Forzar tamaño grande para el código de barras en térmicas
+        if (elements.tamanoCodigoSelect) {
+          elements.tamanoCodigoSelect.value = "grande";
+          elements.tamanoCodigoSelect.disabled = false;
         }
       } else {
         // Restaurar funcionalidad normal para etiquetas estándar
@@ -714,6 +850,23 @@ function initLabelApp() {
           option.dataset.isSmall = "true";
         }
         
+        // OPTIMIZACIONES ADICIONALES: Añadir parámetros para códigos de barras
+        if (formato.maxTextLength !== undefined) {
+          option.dataset.maxTextLength = formato.maxTextLength;
+        }
+        if (formato.barcodeHeightFactor !== undefined) {
+          option.dataset.barcodeHeightFactor = formato.barcodeHeightFactor;
+        }
+        if (formato.barcodeWidthFactor !== undefined) {
+          option.dataset.barcodeWidthFactor = formato.barcodeWidthFactor;
+        }
+        if (formato.prioritizeBarcode !== undefined) {
+          option.dataset.prioritizeBarcode = formato.prioritizeBarcode;
+        }
+        if (formato.onlyBarcodeAndCode !== undefined) {
+          option.dataset.onlyBarcodeAndCode = formato.onlyBarcodeAndCode;
+        }
+        
         // Intentar mantener la selección previa si existe y es compatible
         if (formato.value === valorActual) {
           option.selected = true;
@@ -781,7 +934,9 @@ function initLabelApp() {
           contentPaddingX: 2,
           contentPaddingY: 2,
           horizontalSpacing: 3.0, // NUEVO
-          verticalSpacing: 0.0 // NUEVO
+          verticalSpacing: 0.0, // NUEVO
+          maxTextLength: 25, // Valor predeterminado
+          barcodeHeightFactor: 1.0 // Factor de altura normal
         };
       }
       
@@ -807,7 +962,13 @@ function initLabelApp() {
         horizontalCenter: option.dataset.horizontalCenter === "true",
         horizontalSpacing: parseFloat(option.dataset.horizontalSpacing || 0),
         verticalSpacing: parseFloat(option.dataset.verticalSpacing || 0),
-        isSmall: option.dataset.isSmall === "true"
+        isSmall: option.dataset.isSmall === "true",
+        // OPTIMIZACIONES: Parámetros para códigos de barras
+        maxTextLength: parseInt(option.dataset.maxTextLength || 25),
+        barcodeHeightFactor: parseFloat(option.dataset.barcodeHeightFactor || 1.0),
+        barcodeWidthFactor: parseFloat(option.dataset.barcodeWidthFactor || 1.0),
+        prioritizeBarcode: option.dataset.prioritizeBarcode === "true",
+        onlyBarcodeAndCode: option.dataset.onlyBarcodeAndCode === "true"
       };
     }
     
@@ -823,108 +984,108 @@ function initLabelApp() {
       }
     }
     
-        // CORREGIDO: Función mejorada para posicionamiento preciso
-        function calcularPosicionX(formato, configuracion, columnaIndex) {
-          // Usar las configuraciones específicas para este formato
-          let posX;
-          
-          // COMPENSACIONES PRECISAS ESPECÍFICAS: Ajustes calibrados por tipo de impresora
-          const offsetCorrections = {
-            'normal': {
-              'avery5160': 0.35,
-              'avery5161': 0.40,
-              'avery5163': 0.40,
-              'default': 0.35
-            },
-            'zebra': {
-              'default': 0.25
-            },
-            'dymo': {
-              'default': 0.25
-            },
-            'termica': {
-              'default': 0.25
-            }
-          };
-          
-          // Obtener el factor de corrección adecuado
-          const formatoId = formato.id || 'default';
-          const correccion = (offsetCorrections[configuracion.impresora] && 
-                             offsetCorrections[configuracion.impresora][formatoId]) || 
-                             offsetCorrections[configuracion.impresora]?.default || 0;
-          
-          // Si la impresora es normal (impresora de hojas estándar)
-          if (configuracion.impresora === 'normal') {
-            // AJUSTE CRÍTICO: Fórmula mejorada con factor de corrección para cada columna
-            posX = formato.marginX + (columnaIndex * (formato.ancho + formato.horizontalSpacing)) + (columnaIndex * correccion);
-          } else {
-            // Para impresoras térmicas/DYMO/Zebra
-            posX = formato.marginX;
-            
-            // Aplicar centrado horizontal si está habilitado 
-            if (formato.horizontalCenter) {
-              // Ajuste para centrado horizontal preciso
-              const espacioDisponible = configuracion.paginaAncho - formato.ancho;
-              posX = Math.max(0, espacioDisponible / 2) + correccion;
-            }
-          }
-          
-          // Aplicar ajuste de posición para calibración fina
-          if (formato.centerOffset !== undefined) {
-            posX += formato.centerOffset;
-          }
-          
-          return posX;
+    // CORREGIDO: Función mejorada para posicionamiento preciso
+    function calcularPosicionX(formato, configuracion, columnaIndex) {
+      // Usar las configuraciones específicas para este formato
+      let posX;
+      
+      // COMPENSACIONES PRECISAS ESPECÍFICAS: Ajustes calibrados por tipo de impresora
+      const offsetCorrections = {
+        'normal': {
+          'avery5160': 0.35,
+          'avery5161': 0.40,
+          'avery5163': 0.40,
+          'default': 0.35
+        },
+        'zebra': {
+          'default': 0.25
+        },
+        'dymo': {
+          'default': 0.25
+        },
+        'termica': {
+          'default': 0.25
         }
+      };
+      
+      // Obtener el factor de corrección adecuado
+      const formatoId = formato.id || 'default';
+      const correccion = (offsetCorrections[configuracion.impresora] && 
+                          offsetCorrections[configuracion.impresora][formatoId]) || 
+                          offsetCorrections[configuracion.impresora]?.default || 0;
+      
+      // Si la impresora es normal (impresora de hojas estándar)
+      if (configuracion.impresora === 'normal') {
+        // AJUSTE CRÍTICO: Fórmula mejorada con factor de corrección para cada columna
+        posX = formato.marginX + (columnaIndex * (formato.ancho + formato.horizontalSpacing)) + (columnaIndex * correccion);
+      } else {
+        // Para impresoras térmicas/DYMO/Zebra
+        posX = formato.marginX;
+        
+        // Aplicar centrado horizontal si está habilitado 
+        if (formato.horizontalCenter) {
+          // Ajuste para centrado horizontal preciso
+          const espacioDisponible = configuracion.paginaAncho - formato.ancho;
+          posX = Math.max(0, espacioDisponible / 2) + correccion;
+        }
+      }
+      
+      // Aplicar ajuste de posición para calibración fina
+      if (formato.centerOffset !== undefined) {
+        posX += formato.centerOffset;
+      }
+      
+      return posX;
+    }
     
-        // CORREGIDO: Función mejorada para posicionamiento vertical preciso
-        function calcularPosicionY(formato, configuracion, filaIndex) {
-          // Usar las configuraciones específicas para este formato
-          let posY;
-          
-          // COMPENSACIONES PRECISAS ESPECÍFICAS: Ajustes calibrados por tipo de impresora
-          const offsetCorrections = {
-            'normal': {
-              'avery5160': 0.25,
-              'avery5161': 0.30,
-              'avery5163': 0.30,
-              'default': 0.25
-            },
-            'zebra': {
-              'default': 0.0
-            },
-            'dymo': {
-              'default': 0.0
-            },
-            'termica': {
-              'default': 0.0
-            }
-          };
-          
-          // Obtener el factor de corrección adecuado
-          const formatoId = formato.id || 'default';
-          const correccion = (offsetCorrections[configuracion.impresora] && 
-                            offsetCorrections[configuracion.impresora][formatoId]) || 
-                            offsetCorrections[configuracion.impresora]?.default || 0;
-          
-          // Si la impresora es normal (impresora de hojas estándar)
-          if (configuracion.impresora === 'normal') {
-            // AJUSTE CRÍTICO: Fórmula mejorada con factor de corrección para cada fila
-            posY = formato.marginY + (filaIndex * (formato.alto + formato.verticalSpacing)) + (filaIndex * correccion);
-          } else {
-            // Para impresoras térmicas/DYMO/Zebra
-            posY = formato.marginY;
-            
-            // Aplicar centrado vertical si está habilitado
-            if (formato.verticalCenter) {
-              // Ajuste para centrado vertical preciso
-              const espacioDisponible = configuracion.paginaAlto - formato.alto;
-              posY = Math.max(0, espacioDisponible / 2);
-            }
-          }
-          
-          return posY;
+    // CORREGIDO: Función mejorada para posicionamiento vertical preciso
+    function calcularPosicionY(formato, configuracion, filaIndex) {
+      // Usar las configuraciones específicas para este formato
+      let posY;
+      
+      // COMPENSACIONES PRECISAS ESPECÍFICAS: Ajustes calibrados por tipo de impresora
+      const offsetCorrections = {
+        'normal': {
+          'avery5160': 0.25,
+          'avery5161': 0.30,
+          'avery5163': 0.30,
+          'default': 0.25
+        },
+        'zebra': {
+          'default': 0.0
+        },
+        'dymo': {
+          'default': 0.0
+        },
+        'termica': {
+          'default': 0.0
         }
+      };
+      
+      // Obtener el factor de corrección adecuado
+      const formatoId = formato.id || 'default';
+      const correccion = (offsetCorrections[configuracion.impresora] && 
+                        offsetCorrections[configuracion.impresora][formatoId]) || 
+                        offsetCorrections[configuracion.impresora]?.default || 0;
+      
+      // Si la impresora es normal (impresora de hojas estándar)
+      if (configuracion.impresora === 'normal') {
+        // AJUSTE CRÍTICO: Fórmula mejorada con factor de corrección para cada fila
+        posY = formato.marginY + (filaIndex * (formato.alto + formato.verticalSpacing)) + (filaIndex * correccion);
+      } else {
+        // Para impresoras térmicas/DYMO/Zebra
+        posY = formato.marginY;
+        
+        // Aplicar centrado vertical si está habilitado
+        if (formato.verticalCenter) {
+          // Ajuste para centrado vertical preciso
+          const espacioDisponible = configuracion.paginaAlto - formato.alto;
+          posY = Math.max(0, espacioDisponible / 2);
+        }
+      }
+      
+      return posY;
+    }
     
     /**
      * Obtiene la configuración específica para el tipo de impresora seleccionado
@@ -949,7 +1110,13 @@ function initLabelApp() {
         orientation: 'portrait',
         mediaType: 'default',
         verticalCenter: formato.verticalCenter || false,
-        horizontalCenter: formato.horizontalCenter || false
+        horizontalCenter: formato.horizontalCenter || false,
+        // OPTIMIZACIONES: Añadir parámetros para códigos de barras
+        maxTextLength: formato.maxTextLength || 25,
+        barcodeHeightFactor: formato.barcodeHeightFactor || 1.0,
+        barcodeWidthFactor: formato.barcodeWidthFactor || 1.0,
+        prioritizeBarcode: formato.prioritizeBarcode || false,
+        onlyBarcodeAndCode: formato.onlyBarcodeAndCode || false
       };
       
       // Aplicar configuración específica por tipo de impresora
@@ -960,6 +1127,9 @@ function initLabelApp() {
           config.paginaAlto = formato.alto;
           config.mediaType = 'labels';
           config.orientation = formato.ancho > formato.alto ? 'landscape' : 'portrait';
+          // Valores por defecto mejorados para Zebra
+          if (!formato.barcodeHeightFactor) config.barcodeHeightFactor = 1.5;
+          if (!formato.barcodeWidthFactor) config.barcodeWidthFactor = 1.2;
           break;
         
         case 'dymo':
@@ -968,6 +1138,9 @@ function initLabelApp() {
           config.paginaAlto = formato.alto;
           config.mediaType = 'continuous';
           config.orientation = formato.ancho > formato.alto ? 'landscape' : 'portrait';
+          // Valores por defecto mejorados para DYMO
+          if (!formato.barcodeHeightFactor) config.barcodeHeightFactor = 1.6;
+          if (!formato.barcodeWidthFactor) config.barcodeWidthFactor = 1.3;
           break;
         
         case 'termica':
@@ -976,6 +1149,9 @@ function initLabelApp() {
           config.paginaAlto = formato.alto;
           config.mediaType = 'continuous';
           config.orientation = formato.ancho > formato.alto ? 'landscape' : 'portrait';
+          // Valores por defecto mejorados para térmicas
+          if (!formato.barcodeHeightFactor) config.barcodeHeightFactor = 1.7;
+          if (!formato.barcodeWidthFactor) config.barcodeWidthFactor = 1.3;
           break;
         
         case 'normal':
@@ -1003,11 +1179,28 @@ function initLabelApp() {
       // Detectar si es una etiqueta pequeña
       const esEtiquetaPequena = verificarSiEtiquetaEsPequena(formato);
       
+      // OPTIMIZACIÓN: Determinar si estamos en impresora térmica para ajustes especiales
+      const imprimiendoEnTermica = (appState.impresora !== 'normal');
+      const requiereSoloCodigoBarras = formato.onlyBarcodeAndCode === true;
+      
       // Determinar qué elementos mostrar según tamaño y configuración
-      const mostrarCodigoBarras = esEtiquetaPequena ? true : (!elements.checkboxCodigoBarras || elements.checkboxCodigoBarras.checked);
-      const mostrarCodigoTexto = esEtiquetaPequena ? true : (!elements.checkboxCodigo || elements.checkboxCodigo.checked);
-      const mostrarNombre = esEtiquetaPequena ? false : (!elements.checkboxNombre || elements.checkboxNombre.checked);
-      const mostrarPrecio = esEtiquetaPequena ? false : (!elements.checkboxPrecio || elements.checkboxPrecio.checked);
+      let mostrarCodigoBarras = esEtiquetaPequena ? true : (!elements.checkboxCodigoBarras || elements.checkboxCodigoBarras.checked);
+      let mostrarCodigoTexto = esEtiquetaPequena ? true : (!elements.checkboxCodigo || elements.checkboxCodigo.checked);
+      let mostrarNombre = esEtiquetaPequena ? false : (!elements.checkboxNombre || elements.checkboxNombre.checked);
+      let mostrarPrecio = esEtiquetaPequena ? false : (!elements.checkboxPrecio || elements.checkboxPrecio.checked);
+      
+      // OPTIMIZACIÓN: Si es una etiqueta térmica que prioriza el código, ajustar lo que se muestra
+      if (requiereSoloCodigoBarras || (imprimiendoEnTermica && formato.prioritizeBarcode)) {
+        // Forzar código de barras visible
+        mostrarCodigoBarras = true;
+        mostrarCodigoTexto = true;
+        
+        // Para etiquetas muy pequeñas, solo mostrar código
+        if (requiereSoloCodigoBarras) {
+          mostrarNombre = false;
+          mostrarPrecio = false;
+        }
+      }
       
       // Crear estilos CSS específicos para manejar el espacio vertical
       let contentStyle = '';
@@ -1034,17 +1227,24 @@ function initLabelApp() {
         barcodeMarginTop = Math.max(0, barcodeMarginTop);
         barcodeMarginBottom = Math.max(0, barcodeMarginBottom);
         
-        // Aplicar estilo al contenedor de barcode para etiquetas térmicas/DYMO/Zebra
+        // OPTIMIZADO: Aumentar el espacio para códigos en impresoras térmicas
+        const marginTopValue = imprimiendoEnTermica ? Math.max(0.5, barcodeMarginTop) : barcodeMarginTop;
+        const marginBottomValue = imprimiendoEnTermica ? Math.max(0.5, barcodeMarginBottom) : barcodeMarginBottom;
+        
+        // Aplicar estilo al contenedor de barcode
         if (!esEtiquetaPequena) {
-          barcodeContainerStyle = `style="display:flex;flex-direction:column;justify-content:center;align-items:center;margin-top:${barcodeMarginTop}mm;margin-bottom:${barcodeMarginBottom}mm;max-width:95%;overflow:hidden;"`;
+          // OPTIMIZADO: Usar max-width:98% para impresoras térmicas
+          const maxWidth = imprimiendoEnTermica ? "98%" : "95%";
+          barcodeContainerStyle = `style="display:flex;flex-direction:column;justify-content:center;align-items:center;margin-top:${marginTopValue}mm;margin-bottom:${marginBottomValue}mm;max-width:${maxWidth};overflow:hidden;"`;
         } else {
-          // Para etiquetas pequeñas, usar valores más reducidos
-          barcodeContainerStyle = `style="display:flex;flex-direction:column;justify-content:center;align-items:center;margin-top:${barcodeMarginTop/2}mm;margin-bottom:${barcodeMarginBottom/2}mm;max-width:95%;overflow:hidden;"`;
+          // Para etiquetas pequeñas, usar valores optimizados
+          const maxWidth = imprimiendoEnTermica ? "99%" : "95%";
+          barcodeContainerStyle = `style="display:flex;flex-direction:column;justify-content:center;align-items:center;margin-top:${marginTopValue/2}mm;margin-bottom:${marginBottomValue/2}mm;max-width:${maxWidth};overflow:hidden;"`;
         }
       }
       
       // OPTIMIZADO: Ajuste de padding para evitar desbordamiento
-      const reduccion = esEtiquetaPequena ? 1.5 : 1.0;
+      const reduccion = esEtiquetaPequena ? 1.5 : (imprimiendoEnTermica ? 1.0 : 0.5);
       const paddingX = Math.max(0.5, (formato.contentPaddingX || 2) - reduccion);
       const paddingY = Math.max(0.5, (formato.contentPaddingY || 2) - reduccion);
       
@@ -1085,25 +1285,31 @@ function initLabelApp() {
           html += `<div ${barcodeContainerStyle}>`;
           const svgId = `barcode-${index}-${Date.now()}`;
           // No mostrar texto en el SVG porque ocuparía demasiado espacio
-          html += `<svg class="etiqueta-barcode" id="${svgId}" data-codigo="${appState.producto.codigo}" data-show-text="false" style="max-width:95%;max-height:65%;margin:auto;"></svg>`;
+          // OPTIMIZADO: Mayor altura para etiquetas pequeñas en impresoras térmicas
+          const maxHeight = imprimiendoEnTermica ? "80%" : "65%";
+          html += `<svg class="etiqueta-barcode" id="${svgId}" data-codigo="${appState.producto.codigo}" data-show-text="false" style="max-width:99%;max-height:${maxHeight};margin:auto;"></svg>`;
           html += `</div>`;
           appState.barcodesToGenerate.push(svgId);
         }
         
         // Código en texto con fuente más pequeña
         if (mostrarCodigoTexto) {
-          html += `<div class="etiqueta-codigo" style="font-size:6px;margin-top:1px;margin-bottom:0;text-align:center;max-width:95%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${appState.producto.codigo}</div>`;
+          // OPTIMIZADO: Texto más grande para térmicas
+          const fontSize = imprimiendoEnTermica ? "7px" : "6px";
+          html += `<div class="etiqueta-codigo" style="font-size:${fontSize};margin-top:1px;margin-bottom:0;text-align:center;max-width:99%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${appState.producto.codigo}</div>`;
         }
       } else {
         // Comportamiento normal para etiquetas estándar
-        // Nombre del producto
+        // Nombre del producto (truncado según las configuraciones del formato)
         if (mostrarNombre) {
-          html += `<div class="etiqueta-nombre" style="max-width:95%;overflow:hidden;text-overflow:ellipsis;">${appState.producto.nombre}</div>`;
+          // OPTIMIZADO: Truncar el nombre si excede el límite de caracteres
+          const nombreTruncado = truncarTexto(appState.producto.nombre, formato.maxTextLength);
+          html += `<div class="etiqueta-nombre" style="max-width:98%;overflow:hidden;text-overflow:ellipsis;">${nombreTruncado}</div>`;
         }
         
         // Precio
         if (mostrarPrecio) {
-          html += `<div class="etiqueta-precio" style="max-width:95%;">${parseFloat(appState.producto.precio).toFixed(2)}</div>`;
+          html += `<div class="etiqueta-precio" style="max-width:98%;">${parseFloat(appState.producto.precio).toFixed(2)}</div>`;
         }
         
         // Código de barras - ENVUELTO EN DIV PARA CONTROL DE POSICIÓN
@@ -1116,8 +1322,12 @@ function initLabelApp() {
           // Obtener si debemos mostrar el texto del código en el SVG
           const mostrarTextoEnSVG = !mostrarCodigoTexto; // Invertido para evitar duplicación
           
+          // OPTIMIZADO: Mayor ancho para impresoras térmicas
+          const maxWidth = imprimiendoEnTermica ? "99%" : "95%";
+          const maxHeight = imprimiendoEnTermica ? "85%" : "75%";
+          
           // Almacenar preferencia en el propio elemento para uso posterior
-          html += `<svg class="etiqueta-barcode" id="${svgId}" data-codigo="${appState.producto.codigo}" data-show-text="${mostrarTextoEnSVG}" style="max-width:95%;"></svg>`;
+          html += `<svg class="etiqueta-barcode" id="${svgId}" data-codigo="${appState.producto.codigo}" data-show-text="${mostrarTextoEnSVG}" style="max-width:${maxWidth};max-height:${maxHeight};"></svg>`;
           html += `</div>`;
           
           // Agregar este SVG a la lista de códigos por generar
@@ -1126,7 +1336,7 @@ function initLabelApp() {
         
         // Código en texto (solo si no se muestra en el código de barras o si se especificó)
         if (mostrarCodigoTexto) {
-          html += `<div class="etiqueta-codigo" style="max-width:95%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${appState.producto.codigo}</div>`;
+          html += `<div class="etiqueta-codigo" style="max-width:98%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${appState.producto.codigo}</div>`;
         }
       }
       
@@ -1192,21 +1402,32 @@ function initLabelApp() {
         // Verificar si es para una etiqueta pequeña y ajustar el tamaño
         const formato = obtenerFormatoSeleccionado();
         const esEtiquetaPequena = verificarSiEtiquetaEsPequena(formato);
+        
+        // OPTIMIZADO: Obtener factores de ajuste de tamaño para la impresora y formato actual
+        const imprimiendoEnTermica = (appState.impresora !== 'normal');
+        
+        // OPTIMIZADO: Ajustes de tamaño mejorados para distintos tipos de impresoras y formatos
         let anchoLinea = config.anchoLinea;
         let altoBarras = config.altoBarras;
         let tamanoTexto = config.tamanoTexto;
         
-        if (esEtiquetaPequena) {
-          // Reducir tamaños para etiquetas pequeñas
-          anchoLinea = Math.max(0.8, config.anchoLinea * 0.6);
-          altoBarras = Math.max(15, config.altoBarras * 0.6);
-          tamanoTexto = Math.max(6, config.tamanoTexto * 0.6);
+        // Aplicar factores de ajuste según el formato y tipo de impresora
+        if (imprimiendoEnTermica) {
+          // Para impresoras térmicas, aumentar tamaño
+          anchoLinea = config.anchoLinea * formato.barcodeWidthFactor;
+          altoBarras = config.altoBarras * formato.barcodeHeightFactor;
+          tamanoTexto = config.tamanoTexto * 1.1; // Aumentar texto un 10%
+        } else if (esEtiquetaPequena) {
+          // Para etiquetas pequeñas en impresoras normales
+          anchoLinea = Math.max(0.8, config.anchoLinea * 0.8); // Reducir menos
+          altoBarras = Math.max(20, config.altoBarras * 0.8); // Reducir menos
+          tamanoTexto = Math.max(7, config.tamanoTexto * 0.8); // Reducir menos
         }
         
-        // Aplicar ajustes específicos para impresoras térmicas/DYMO/Zebra
-        if (appState.impresora !== 'normal') {
-          // Reducir margen vertical para impresoras térmicas
-          const margin = esEtiquetaPequena ? 1 : 0; // Reducir a 0 para impresoras térmicas no pequeñas
+        // OPTIMIZADO: Margen ajustado para impresoras térmicas
+        let margin = 0;
+        if (esEtiquetaPequena) {
+          margin = imprimiendoEnTermica ? 0 : 1;
         }
         
         // Actualizar la configuración con la preferencia de mostrar texto
@@ -1216,7 +1437,7 @@ function initLabelApp() {
           height: altoBarras,
           displayValue: mostrarTextoEnSVG,
           fontSize: tamanoTexto,
-          margin: esEtiquetaPequena ? 1 : 0, // Eliminar márgenes para mejor control posicional
+          margin: margin, // Eliminar márgenes para mejor control posicional
           background: "#ffffff",
           text: codigoLimpio,
           textMargin: mostrarTextoEnSVG ? (esEtiquetaPequena ? 1 : 2) : 0, // Sin margen si no se muestra texto
@@ -1257,6 +1478,67 @@ function initLabelApp() {
           errorMsg.style.padding = "4px";
           svg.parentNode.replaceChild(errorMsg, svg);
         }
+      }
+    }
+    
+    /**
+     * Ajusta la alineación vertical del SVG generado por JsBarcode
+     * Corrige problemas de alineación vertical en código de barras
+     * @param {SVGElement} svg - Elemento SVG a ajustar
+     * @param {Object} formato - Formato de la etiqueta
+     */
+    function ajustarAlineacionVerticalSVG(svg, formato) {
+      try {
+        // Verificar si es impresora normal
+        if (appState.impresora === 'normal') {
+          return; // No ajustar para impresoras normales
+        }
+        
+        // Obtener el elemento g principal dentro del SVG
+        const gElement = svg.querySelector('g');
+        if (!gElement) return;
+        
+        // Obtener la transformación actual (normalmente tiene un translate)
+        const currentTransform = gElement.getAttribute('transform') || '';
+        
+        // Si ya tiene nuestra clase de ajuste, no hacer nada más
+        if (svg.classList.contains('barcode-adjusted')) {
+          return;
+        }
+        
+        // Para impresoras térmicas, ajustar posicionamiento
+        if (appState.impresora === 'termica' || appState.impresora === 'dymo' || appState.impresora === 'zebra') {
+          // Calcular el desplazamiento vertical a aplicar
+          const verticalOffset = formato.barcodeVerticalShift || 0;
+          
+          // Si existe una transformación previa, adaptarla
+          if (currentTransform && currentTransform.includes('translate')) {
+            // El formato típico es "translate(X,Y)"
+            const match = currentTransform.match(/translate\s*\(\s*([^,]+)(?:,\s*([^)]+))?\s*\)/);
+            if (match && match.length >= 3) {
+              const x = parseFloat(match[1]) || 0;
+              const y = parseFloat(match[2]) || 0;
+              
+              // Aplicar desplazamiento vertical adicional
+              const newTransform = `translate(${x},${y + verticalOffset})`;
+              gElement.setAttribute('transform', newTransform);
+            }
+          } else {
+            // Si no hay transformación previa, crear una nueva
+            gElement.setAttribute('transform', `translate(0,${verticalOffset})`);
+          }
+          
+          // Eliminar márgenes internos adicionales que JsBarcode agrega
+          svg.style.margin = '0';
+          if (svg.parentNode) {
+            svg.parentNode.style.margin = '0';
+          }
+          
+          // Marcar como ajustado para evitar procesamiento múltiple
+          svg.classList.add('barcode-adjusted');
+        }
+      } catch (e) {
+        console.error("Error al ajustar alineación vertical del SVG:", e);
       }
     }
     
@@ -1353,7 +1635,7 @@ function initLabelApp() {
         formato = "CODE128";
       }
       
-      // Configurar tamaño
+      // Configurar tamaño según selección y tipo de impresora
       let anchoLinea = 2;
       let altoBarras = 40;
       let tamanoTexto = 10;
@@ -1369,6 +1651,39 @@ function initLabelApp() {
             anchoLinea = 3;
             altoBarras = 50;
             tamanoTexto = 12;
+            break;
+        }
+      }
+      
+      // OPTIMIZADO: Ajustes adicionales por tipo de impresora
+      if (appState.impresora !== 'normal') {
+        // Para impresoras térmicas, aumentar tamaño base
+        switch(appState.impresora) {
+          case 'zebra':
+            // Zebra: Solo ligero aumento
+            if (elements.tamanoCodigoSelect && elements.tamanoCodigoSelect.value === 'pequeno') {
+              // Si está en pequeño, dar un tamaño medio para térmicas
+              anchoLinea = 2.0;
+              altoBarras = 40;
+            }
+            break;
+          case 'dymo':
+            // DYMO: Mayor aumento para etiquetas pequeñas
+            if (elements.tamanoCodigoSelect && elements.tamanoCodigoSelect.value === 'pequeno') {
+              anchoLinea = 2.0;
+              altoBarras = 40;
+            }
+            break;
+          case 'termica':
+            // Térmica: Mayor aumento general
+            if (elements.tamanoCodigoSelect && elements.tamanoCodigoSelect.value === 'pequeno') {
+              anchoLinea = 2.2;
+              altoBarras = 45;
+            } else {
+              // Para tamaño normal/grande, aumentar ligeramente
+              anchoLinea += 0.5;
+              altoBarras += 10;
+            }
             break;
         }
       }
@@ -1410,7 +1725,10 @@ function initLabelApp() {
         // Obtener configuración actualizada
         const formato = appState.formato || obtenerFormatoSeleccionado();
         const impresora = appState.impresora;
-        const cantidad = appState.cantidad || obtenerCantidad();
+        
+        // CORRECCIÓN: Siempre usar obtenerCantidad() para tener el valor actual
+        const cantidad = obtenerCantidad();
+        console.log('Imprimiendo etiquetas, cantidad:', cantidad);
         
         // Obtener configuración específica para la impresora
         const configuracion = obtenerConfiguracionImpresora(formato, impresora);
@@ -1420,6 +1738,9 @@ function initLabelApp() {
         
         // Verificar si es una etiqueta pequeña
         const esEtiquetaPequena = verificarSiEtiquetaEsPequena(formato);
+        
+        // Verificar si estamos imprimiendo en impresora térmica
+        const imprimiendoEnTermica = (impresora !== 'normal');
         
         // Verificar si debemos mostrar el código como texto separado
         const mostrarCodigoTexto = esEtiquetaPequena ? true : (!elements.checkboxCodigo || elements.checkboxCodigo.checked);
@@ -1505,14 +1826,14 @@ function initLabelApp() {
           }
           
           .etiqueta-codigo {
-            font-size: 8px;
+            font-size: ${imprimiendoEnTermica ? '9px' : '8px'};
             margin-bottom: 3px;
             color: #666;
             text-align: center;
           }
           
           .etiqueta-barcode {
-            max-width: 95%;
+            max-width: ${imprimiendoEnTermica ? '99%' : '95%'};
             margin: 0 auto 2px;
             display: block;
           }
@@ -1570,15 +1891,30 @@ function initLabelApp() {
         function crearEtiquetaHTMLParaImpresion(x, y, ancho, alto, svgId) {
           // Verificar si es una etiqueta pequeña y ajustar el contenido
           const esEtiquetaPequena = verificarSiEtiquetaEsPequena(formato);
+          const imprimiendoEnTermica = (impresora !== 'normal');
+          const requiereSoloCodigoBarras = formato.onlyBarcodeAndCode === true;
           
           // Crear clase adicional para impresoras térmicas
           const claseAdicional = impresora !== 'normal' ? 'thermal-label' : '';
           
           // Configuración específica según tamaño de etiqueta
-          const mostrarCodigoBarras = esEtiquetaPequena ? true : (!elements.checkboxCodigoBarras || elements.checkboxCodigoBarras.checked);
-          const mostrarCodigoTexto = esEtiquetaPequena ? true : (!elements.checkboxCodigo || elements.checkboxCodigo.checked);
-          const mostrarNombre = esEtiquetaPequena ? false : (!elements.checkboxNombre || elements.checkboxNombre.checked);
-          const mostrarPrecio = esEtiquetaPequena ? false : (!elements.checkboxPrecio || elements.checkboxPrecio.checked);
+          let mostrarCodigoBarras = esEtiquetaPequena ? true : (!elements.checkboxCodigoBarras || elements.checkboxCodigoBarras.checked);
+          let mostrarCodigoTexto = esEtiquetaPequena ? true : (!elements.checkboxCodigo || elements.checkboxCodigo.checked);
+          let mostrarNombre = esEtiquetaPequena ? false : (!elements.checkboxNombre || elements.checkboxNombre.checked);
+          let mostrarPrecio = esEtiquetaPequena ? false : (!elements.checkboxPrecio || elements.checkboxPrecio.checked);
+          
+          // OPTIMIZACIÓN: Si es una etiqueta térmica que prioriza el código, ajustar lo que se muestra
+          if (requiereSoloCodigoBarras || (imprimiendoEnTermica && formato.prioritizeBarcode)) {
+            // Forzar código de barras visible
+            mostrarCodigoBarras = true;
+            mostrarCodigoTexto = true;
+            
+            // Para etiquetas muy pequeñas, solo mostrar código
+            if (requiereSoloCodigoBarras) {
+              mostrarNombre = false;
+              mostrarPrecio = false;
+            }
+          }
           
           // Estilos específicos para el contenedor del código de barras
           let barcodeContainerStyle = '';
@@ -1598,6 +1934,12 @@ function initLabelApp() {
             barcodeMarginTop = Math.max(0, barcodeMarginTop);
             barcodeMarginBottom = Math.max(0, barcodeMarginBottom);
             
+            // OPTIMIZADO: Reducir márgenes para impresoras térmicas
+            if (imprimiendoEnTermica) {
+              barcodeMarginTop = Math.max(0, barcodeMarginTop / 2);
+              barcodeMarginBottom = Math.max(0, barcodeMarginBottom / 2);
+            }
+            
             barcodeContainerStyle = `style="margin-top:${barcodeMarginTop}mm;margin-bottom:${barcodeMarginBottom}mm;"`;
           }
           
@@ -1614,18 +1956,23 @@ function initLabelApp() {
               // Contenedor para control de posición vertical
               html += `<div class="barcode-container" ${barcodeContainerStyle}>`;
               // No mostrar texto en el SVG porque ocuparía demasiado espacio
-              html += `<svg class="etiqueta-barcode" id="${svgId}" data-codigo="${appState.producto.codigo}" data-show-text="false" style="max-width:95%;max-height:70%;display:block;margin:0 auto;"></svg>`;
+              // OPTIMIZADO: Mayor altura para los códigos de barras en térmicas
+              const maxHeight = imprimiendoEnTermica ? "80%" : "70%";
+              html += `<svg class="etiqueta-barcode" id="${svgId}" data-codigo="${appState.producto.codigo}" data-show-text="false" style="max-width:${imprimiendoEnTermica ? '99%' : '95%'};max-height:${maxHeight};display:block;margin:0 auto;"></svg>`;
               html += `</div>`;
             }
             
-            // Código en texto con fuente más pequeña
+            // Código en texto con fuente más grande para impresoras térmicas
             if (mostrarCodigoTexto) {
-              html += `<div class="etiqueta-codigo" style="font-size:6px;margin-top:1px;margin-bottom:0;text-align:center;">${appState.producto.codigo}</div>`;
+              const fontSize = imprimiendoEnTermica ? "7px" : "6px";
+              html += `<div class="etiqueta-codigo" style="font-size:${fontSize};margin-top:1px;margin-bottom:0;text-align:center;">${appState.producto.codigo}</div>`;
             }
           } else {
             // Comportamiento normal para etiquetas estándar
             if (mostrarNombre) {
-              html += `<div class="etiqueta-nombre">${appState.producto.nombre}</div>`;
+              // Truncar el nombre si excede el límite de caracteres
+              const nombreTruncado = truncarTexto(appState.producto.nombre, formato.maxTextLength);
+              html += `<div class="etiqueta-nombre">${nombreTruncado}</div>`;
             }
             
             if (mostrarPrecio) {
@@ -1637,7 +1984,10 @@ function initLabelApp() {
               html += `<div class="barcode-container" ${barcodeContainerStyle}>`;
               // Pasar preferencia de mostrar texto en el SVG
               const mostrarTextoEnSVG = !mostrarCodigoTexto;
-              html += `<svg class="etiqueta-barcode" id="${svgId}" data-codigo="${appState.producto.codigo}" data-show-text="${mostrarTextoEnSVG}" style="display:block;margin:0 auto;"></svg>`;
+              // OPTIMIZADO: Tamaño máximo optimizado para térmicas
+              const maxWidth = imprimiendoEnTermica ? "99%" : "95%";
+              const maxHeight = imprimiendoEnTermica ? "85%" : "75%";
+              html += `<svg class="etiqueta-barcode" id="${svgId}" data-codigo="${appState.producto.codigo}" data-show-text="${mostrarTextoEnSVG}" style="max-width:${maxWidth};max-height:${maxHeight};display:block;margin:0 auto;"></svg>`;
               html += `</div>`;
             }
             
@@ -1806,18 +2156,29 @@ function initLabelApp() {
                       
                       // Detectar si es para una etiqueta pequeña basado en atributos
                       const esEtiquetaPequena = ${esEtiquetaPequena};
+                      const imprimiendoEnTermica = ${imprimiendoEnTermica};
                       
-                      // Configurar tamaños según el tipo de etiqueta
+                      // OPTIMIZADO: Configurar tamaños según el tipo de etiqueta e impresora
                       let anchoLinea = ${barcodeConfig.anchoLinea};
                       let altoBarras = ${barcodeConfig.altoBarras};
                       let tamanoTexto = ${barcodeConfig.tamanoTexto};
                       let margin = ${impresora === 'normal' ? 2 : 0}; // Eliminar márgenes para impresoras térmicas
                       
-                      if (esEtiquetaPequena) {
-                        // Reducir tamaños para etiquetas pequeñas
-                        anchoLinea = Math.max(0.8, ${barcodeConfig.anchoLinea} * 0.6);
-                        altoBarras = Math.max(15, ${barcodeConfig.altoBarras} * 0.6);
-                        tamanoTexto = Math.max(6, ${barcodeConfig.tamanoTexto} * 0.6);
+                      // Aplicar factores de ajuste según el tipo de impresora y formato
+                      if (imprimiendoEnTermica) {
+                        // Para impresoras térmicas, aumentar tamaño
+                        const barcodeWidthFactor = ${formato.barcodeWidthFactor || 1.0};
+                        const barcodeHeightFactor = ${formato.barcodeHeightFactor || 1.0};
+                        
+                        anchoLinea = anchoLinea * barcodeWidthFactor;
+                        altoBarras = altoBarras * barcodeHeightFactor;
+                        tamanoTexto = tamanoTexto * 1.1; // Aumentar texto un 10%
+                        margin = 0; // Sin margen para térmicas
+                      } else if (esEtiquetaPequena) {
+                        // Para etiquetas pequeñas en impresoras normales
+                        anchoLinea = Math.max(0.8, anchoLinea * 0.8); // Reducir menos
+                        altoBarras = Math.max(20, altoBarras * 0.8); // Reducir menos
+                        tamanoTexto = Math.max(7, tamanoTexto * 0.8); // Reducir menos
                         margin = 1;
                       }
                       
@@ -1963,7 +2324,10 @@ function initLabelApp() {
         // Obtener configuración actualizada
         const formato = appState.formato || obtenerFormatoSeleccionado();
         const impresora = appState.impresora;
-        const cantidad = appState.cantidad || obtenerCantidad();
+        
+        // CORRECCIÓN: Siempre usar obtenerCantidad() para tener el valor actual
+        const cantidad = obtenerCantidad();
+        console.log('Generando PDF, cantidad:', cantidad);
         
         // Obtener configuración específica para la impresora
         const configuracion = obtenerConfiguracionImpresora(formato, impresora);
@@ -1991,6 +2355,9 @@ function initLabelApp() {
         
         // Verificar si es una etiqueta pequeña
         const esEtiquetaPequena = verificarSiEtiquetaEsPequena(formato);
+        
+        // Verificar si estamos generando PDF para impresora térmica
+        const imprimiendoEnTermica = (impresora !== 'normal');
         
         // Verificar si debemos mostrar el código como texto separado
         const mostrarCodigoTexto = esEtiquetaPequena ? true : (!elements.checkboxCodigo || elements.checkboxCodigo.checked);
@@ -2077,7 +2444,7 @@ function initLabelApp() {
               padding: 0;
               width: 100%;
               background-color: white;
-              max-width: 95%; /* AJUSTE CRÍTICO: Limitar ancho */
+              max-width: ${imprimiendoEnTermica ? '99%' : '95%'}; /* OPTIMIZADO: Más espacio para impresoras térmicas */
               align-self: center; /* AJUSTE CRÍTICO: Centrar */
             }
             
@@ -2094,7 +2461,7 @@ function initLabelApp() {
               word-break: break-word;
               text-align: center;
               color: #1d1d1f;
-              max-width: 95%; /* AJUSTE CRÍTICO: Limitar ancho */
+              max-width: ${imprimiendoEnTermica ? '98%' : '95%'}; /* OPTIMIZADO: Más espacio para impresoras térmicas */
             }
             
             .etiqueta-precio {
@@ -2103,24 +2470,24 @@ function initLabelApp() {
               margin-bottom: 2px;
               color: #e52e2e;
               text-align: center;
-              max-width: 95%; /* AJUSTE CRÍTICO: Limitar ancho */
+              max-width: ${imprimiendoEnTermica ? '98%' : '95%'}; /* OPTIMIZADO: Más espacio para impresoras térmicas */
             }
             
             .etiqueta-codigo {
-              font-size: 8px;
+              font-size: ${imprimiendoEnTermica ? '9px' : '8px'}; /* OPTIMIZADO: Fuente más grande para térmicas */
               margin-bottom: 2px; /* AJUSTE CRÍTICO: Reducido */
               color: #666;
               text-align: center;
               width: 100%; /* AJUSTE CRÍTICO: Ancho fijo */
-              max-width: 95%; /* AJUSTE CRÍTICO: Limitar ancho */
+              max-width: ${imprimiendoEnTermica ? '98%' : '95%'}; /* OPTIMIZADO: Más espacio para impresoras térmicas */
               white-space: nowrap; /* AJUSTE CRÍTICO: Evitar saltos */
               overflow: hidden; /* AJUSTE CRÍTICO: Ocultar exceso */
               text-overflow: ellipsis; /* AJUSTE CRÍTICO: Mostrar elipsis */
             }
             
             .etiqueta-barcode {
-              max-width: 95%;
-              max-height: ${esEtiquetaPequena ? '60%' : '75%'}; /* OPTIMIZADO: Reducido para dejar espacio */
+              max-width: ${imprimiendoEnTermica ? '99%' : '95%'}; /* OPTIMIZADO: Más espacio para impresoras térmicas */
+              max-height: ${imprimiendoEnTermica ? '85%' : (esEtiquetaPequena ? '60%' : '75%')}; /* OPTIMIZADO */
               margin: 0 auto 2px;
               display: block;
               background-color: white;
@@ -2138,7 +2505,7 @@ function initLabelApp() {
             
             svg {
               background-color: white;
-              max-width: 95% !important; /* CRÍTICO: Limitar ancho SVG */
+              max-width: ${imprimiendoEnTermica ? '99%' : '95%'} !important; /* OPTIMIZADO */
             }
           </style>
         `;
@@ -2250,18 +2617,33 @@ function initLabelApp() {
     function crearEtiquetaHTMLParaPDF(x, y, ancho, alto, svgId) {
       // Verificar si es una etiqueta pequeña y ajustar el contenido
       const esEtiquetaPequena = verificarSiEtiquetaEsPequena(formato);
+      const imprimiendoEnTermica = (impresora !== 'normal');
+      const requiereSoloCodigoBarras = formato.onlyBarcodeAndCode === true;
       
       // Crear clase adicional para impresoras térmicas
       const claseAdicional = impresora !== 'normal' ? 'thermal-label' : '';
       
       // Configuración específica según tamaño de etiqueta
-      const mostrarCodigoBarras = esEtiquetaPequena ? true : (!elements.checkboxCodigoBarras || elements.checkboxCodigoBarras.checked);
-      const mostrarCodigoTexto = esEtiquetaPequena ? true : (!elements.checkboxCodigo || elements.checkboxCodigo.checked);
-      const mostrarNombre = esEtiquetaPequena ? false : (!elements.checkboxNombre || elements.checkboxNombre.checked);
-      const mostrarPrecio = esEtiquetaPequena ? false : (!elements.checkboxPrecio || elements.checkboxPrecio.checked);
+      let mostrarCodigoBarras = esEtiquetaPequena ? true : (!elements.checkboxCodigoBarras || elements.checkboxCodigoBarras.checked);
+      let mostrarCodigoTexto = esEtiquetaPequena ? true : (!elements.checkboxCodigo || elements.checkboxCodigo.checked);
+      let mostrarNombre = esEtiquetaPequena ? false : (!elements.checkboxNombre || elements.checkboxNombre.checked);
+      let mostrarPrecio = esEtiquetaPequena ? false : (!elements.checkboxPrecio || elements.checkboxPrecio.checked);
+      
+      // OPTIMIZACIÓN: Si es una etiqueta térmica que prioriza el código, ajustar lo que se muestra
+      if (requiereSoloCodigoBarras || (imprimiendoEnTermica && formato.prioritizeBarcode)) {
+        // Forzar código de barras visible
+        mostrarCodigoBarras = true;
+        mostrarCodigoTexto = true;
+        
+        // Para etiquetas muy pequeñas, solo mostrar código
+        if (requiereSoloCodigoBarras) {
+          mostrarNombre = false;
+          mostrarPrecio = false;
+        }
+      }
       
       // OPTIMIZADO: Ajuste de padding para evitar desbordamiento
-      const reduccion = esEtiquetaPequena ? 1.5 : 1.0;
+      const reduccion = esEtiquetaPequena ? 1.5 : (imprimiendoEnTermica ? 1.0 : 0.5);
       const paddingX = Math.max(0.5, (formato.contentPaddingX || 2) - reduccion);
       const paddingY = Math.max(0.5, (formato.contentPaddingY || 2) - reduccion);
       
@@ -2283,9 +2665,15 @@ function initLabelApp() {
         barcodeMarginTop = Math.max(0, barcodeMarginTop);
         barcodeMarginBottom = Math.max(0, barcodeMarginBottom);
         
-        barcodeContainerStyle = `style="margin-top:${barcodeMarginTop}mm;margin-bottom:${barcodeMarginBottom}mm;max-width:95%;overflow:hidden;"`;
+        // OPTIMIZADO: Reducir espaciado para térmicas y aumentar margen
+        if (imprimiendoEnTermica) {
+          barcodeMarginTop = Math.max(0, barcodeMarginTop / 2);
+          barcodeMarginBottom = Math.max(0, barcodeMarginBottom / 2);
+        }
+        
+        barcodeContainerStyle = `style="margin-top:${barcodeMarginTop}mm;margin-bottom:${barcodeMarginBottom}mm;max-width:${imprimiendoEnTermica ? '99%' : '95%'};overflow:hidden;"`;
       } else {
-        barcodeContainerStyle = `style="max-width:95%;overflow:hidden;"`;
+        barcodeContainerStyle = `style="max-width:${imprimiendoEnTermica ? '99%' : '95%'};overflow:hidden;"`;
       }
       
       // Construir HTML con clases y estilos específicos
@@ -2301,22 +2689,27 @@ function initLabelApp() {
           // Contenedor para control de posición vertical
           html += `<div class="barcode-container" ${barcodeContainerStyle}>`;
           // No mostrar texto en el SVG porque ocuparía demasiado espacio
-          html += `<svg class="etiqueta-barcode" id="${svgId}" data-codigo="${appState.producto.codigo}" data-show-text="false" style="max-width:95%;max-height:65%;display:block;margin:0 auto;"></svg>`;
+          // OPTIMIZADO: Mayor altura para los códigos en etiquetas pequeñas térmicas
+          const maxHeight = imprimiendoEnTermica ? "80%" : "65%";
+          html += `<svg class="etiqueta-barcode" id="${svgId}" data-codigo="${appState.producto.codigo}" data-show-text="false" style="max-width:${imprimiendoEnTermica ? '99%' : '95%'};max-height:${maxHeight};display:block;margin:0 auto;"></svg>`;
           html += `</div>`;
         }
         
-        // Código en texto con fuente más pequeña
+        // Código en texto con fuente más grande para impresoras térmicas
         if (mostrarCodigoTexto) {
-          html += `<div class="etiqueta-codigo" style="font-size:6px;margin-top:1px;margin-bottom:0;text-align:center;max-width:95%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${appState.producto.codigo}</div>`;
+          const fontSize = imprimiendoEnTermica ? "7px" : "6px";
+          html += `<div class="etiqueta-codigo" style="font-size:${fontSize};margin-top:1px;margin-bottom:0;text-align:center;max-width:99%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${appState.producto.codigo}</div>`;
         }
       } else {
         // Comportamiento normal para etiquetas estándar
         if (mostrarNombre) {
-          html += `<div class="etiqueta-nombre" style="max-width:95%;overflow:hidden;text-overflow:ellipsis;">${appState.producto.nombre}</div>`;
+          // OPTIMIZADO: Truncar el nombre si excede el límite de caracteres
+          const nombreTruncado = truncarTexto(appState.producto.nombre, formato.maxTextLength);
+          html += `<div class="etiqueta-nombre" style="max-width:98%;overflow:hidden;text-overflow:ellipsis;">${nombreTruncado}</div>`;
         }
         
         if (mostrarPrecio) {
-          html += `<div class="etiqueta-precio" style="max-width:95%;">${parseFloat(appState.producto.precio).toFixed(2)}</div>`;
+          html += `<div class="etiqueta-precio" style="max-width:98%;">${parseFloat(appState.producto.precio).toFixed(2)}</div>`;
         }
         
         if (mostrarCodigoBarras) {
@@ -2324,12 +2717,15 @@ function initLabelApp() {
           html += `<div class="barcode-container" ${barcodeContainerStyle}>`;
           // Pasar preferencia de mostrar texto en el SVG
           const mostrarTextoEnSVG = !mostrarCodigoTexto;
-          html += `<svg class="etiqueta-barcode" id="${svgId}" data-codigo="${appState.producto.codigo}" data-show-text="${mostrarTextoEnSVG}" style="max-width:95%;display:block;margin:0 auto;"></svg>`;
+          // OPTIMIZADO: Mayor tamaño y altura para códigos de barras en térmicas
+          const maxWidth = imprimiendoEnTermica ? "99%" : "95%";
+          const maxHeight = imprimiendoEnTermica ? "85%" : "75%";
+          html += `<svg class="etiqueta-barcode" id="${svgId}" data-codigo="${appState.producto.codigo}" data-show-text="${mostrarTextoEnSVG}" style="max-width:${maxWidth};max-height:${maxHeight};display:block;margin:0 auto;"></svg>`;
           html += `</div>`;
         }
         
         if (mostrarCodigoTexto) {
-          html += `<div class="etiqueta-codigo" style="max-width:95%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${appState.producto.codigo}</div>`;
+          html += `<div class="etiqueta-codigo" style="max-width:98%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${appState.producto.codigo}</div>`;
         }
       }
       
@@ -2357,29 +2753,41 @@ function initLabelApp() {
               // Obtener preferencia de mostrar texto en el SVG
               const mostrarTextoEnSVG = svg.dataset.showText === "true";
               
+              // OPTIMIZADO: Ajustes específicos para impresoras térmicas
+              let anchoLinea = barcodeConfig.anchoLinea;
+              let altoBarras = barcodeConfig.altoBarras;
+              let tamanoTexto = barcodeConfig.tamanoTexto;
+              let margin = impresora === 'normal' ? 2 : 0;
+              
+              // Aplicar factores de ajuste según el tipo de impresora y formato
+              if (imprimiendoEnTermica) {
+                // Para impresoras térmicas, aumentar tamaño base
+                anchoLinea = barcodeConfig.anchoLinea * formato.barcodeWidthFactor;
+                altoBarras = barcodeConfig.altoBarras * formato.barcodeHeightFactor;
+                tamanoTexto = barcodeConfig.tamanoTexto * 1.1; // Aumentar texto un 10%
+                margin = 0; // Sin margen para térmicas
+              } else if (esEtiquetaPequena) {
+                // Para etiquetas pequeñas en impresoras normales
+                anchoLinea = Math.max(0.8, barcodeConfig.anchoLinea * 0.8);
+                altoBarras = Math.max(20, barcodeConfig.altoBarras * 0.8);
+                tamanoTexto = Math.max(7, barcodeConfig.tamanoTexto * 0.8);
+                margin = 1;
+              }
+              
               // Parámetros de JsBarcode optimizados para precisión
               const parametrosBarcode = {
                 format: barcodeConfig.formato,
-                width: barcodeConfig.anchoLinea,
-                height: barcodeConfig.altoBarras,
+                width: anchoLinea,
+                height: altoBarras,
                 displayValue: mostrarTextoEnSVG,
-                fontSize: barcodeConfig.tamanoTexto,
-                margin: impresora === 'normal' ? 2 : 0, // Eliminar márgenes para impresoras térmicas
+                fontSize: tamanoTexto,
+                margin: margin,
                 background: "#ffffff",
                 text: codigo,
-                textMargin: mostrarTextoEnSVG ? 2 : 0,
+                textMargin: mostrarTextoEnSVG ? (esEtiquetaPequena ? 1 : 2) : 0,
                 lineColor: "#000000",
                 valid: () => true, // CRUCIAL: Evitar que bloquee códigos inválidos
               };
-              
-              // Si es etiqueta pequeña, ajustar tamaños
-              if (esEtiquetaPequena) {
-                parametrosBarcode.width = Math.max(0.8, barcodeConfig.anchoLinea * 0.6);
-                parametrosBarcode.height = Math.max(15, barcodeConfig.altoBarras * 0.6);
-                parametrosBarcode.fontSize = Math.max(6, barcodeConfig.tamanoTexto * 0.6);
-                parametrosBarcode.margin = 1;
-                parametrosBarcode.textMargin = mostrarTextoEnSVG ? 1 : 0;
-              }
               
               // Generar el código de barras
               // SOLUCIÓN PARA PDF NEGRO: Generar el código de barras con parámetros simples
@@ -2389,11 +2797,11 @@ function initLabelApp() {
                 height: parametrosBarcode.height,
                 displayValue: mostrarTextoEnSVG,
                 fontSize: parametrosBarcode.fontSize,
-                margin: 2,
+                margin: margin,
                 background: "#ffffff",
                 lineColor: "#000000",
                 text: codigo,
-                textMargin: 2
+                textMargin: parametrosBarcode.textMargin
               });
               
               // OPTIMIZACIÓN CRÍTICA: Aplicar nueva función de optimización
