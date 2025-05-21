@@ -39,6 +39,7 @@
     --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.05);
     --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.08);
     --transition-all: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --blue: #1a237e;
   }
   
   /* Reset y estilos generales */
@@ -69,9 +70,66 @@
     min-width: 0;
   }
   
-  /* Encabezado - Simplificado */
+  /* MODIFICADO: Encabezado página con mismo estilo que nuevo_producto.html */
   .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
     margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+  }
+  
+  .header-title-container {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .header-actions {
+    display: flex;
+    gap: 1rem;
+    padding-top: 8px; /* Ajuste para alinear con la primera línea del título */
+    align-items: center;
+  }
+  
+  /* MODIFICADO: Botón volver con mismo estilo que nuevo_producto.html */
+  .btn-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.25rem;
+    border-radius: 980px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    height: 44px; /* Altura fija para todos los botones */
+    white-space: nowrap; /* Evita que el texto se rompa */
+  }
+  
+  .btn-action i, 
+  .btn-action span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+    line-height: 1;
+  }
+  
+  /* Botón Volver estilo nuevo_producto.html */
+  .btn-volver {
+    background-color: var(--blue);
+    color: #ffffff;
+    box-shadow: 0 2px 4px rgba(26, 35, 126, 0.3);
+  }
+  
+  .btn-volver:hover {
+    background-color: #151c64;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(26, 35, 126, 0.4);
+    color: #ffffff;
   }
   
   .page-title {
@@ -162,17 +220,6 @@
     gap: 0.5rem;
   }
   
-  .meta-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: var(--radius-md);
-    background-color: var(--neutral-100);
-    color: var(--neutral-600);
-  }
-  
   .meta-value {
     font-weight: 500;
   }
@@ -198,6 +245,11 @@
     color: var(--neutral-800);
     background-color: var(--neutral-100); /* Color base más claro */
     opacity: 0.85; /* Reduce la intensidad */
+  }
+  
+  /* MODIFICADO: Añadir espacio entre icono y texto de categoría */
+  .category-pill i {
+    margin-right: 5px;
   }
   
   /* Pestañas de configuración - Estilo más simple */
@@ -813,10 +865,40 @@
     .btn {
       width: 100%;
     }
+
+    /* Ajuste responsivo para el header */
+    .page-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    
+    .header-actions {
+      width: 100%;
+    }
+  }
+  
+  /* NUEVO: Estilos adicionales para optimización de impresión */
+  .optimized-barcode {
+    transform-origin: center center !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+  }
+  
+  /* NUEVO: Correcciones para etiquetas pequeñas */
+  .etiqueta.small-label .etiqueta-content {
+    padding: 1mm !important;
+    justify-content: center !important;
+  }
+  
+  /* NUEVO: Ajustes para el contenedor del PDF */
+  #pdf-container .pdf-page {
+    transform-origin: top left;
+    position: relative !important;
   }
 </style>
 
-<!-- Contenedor principal con layout de una columna (eliminada la vista previa) -->
+<!-- Contenedor principal con layout de una sola columna (eliminada la vista previa) -->
 <div class="etiquetas-layout">
   <!-- Columna Única: Configuración -->
   <div class="left-column">
@@ -828,13 +910,21 @@
       </div>
     </div>
 
-    <!-- Encabezado -->
+    <!-- MODIFICADO: Encabezado con estilo de nuevo_producto.html -->
     <div class="page-header">
-      <h1 class="page-title">Generador de etiquetas</h1>
-      <p class="page-subtitle">Personaliza y genera etiquetas profesionales para tus productos con códigos de barras y precios.</p>
+      <div class="header-title-container">
+        <h1 class="page-title">Generador de etiquetas</h1>
+        <p class="page-subtitle">Personaliza y genera etiquetas profesionales para tus productos con códigos de barras y precios.</p>
+      </div>
+      <div class="header-actions">
+        <a href="{{ url_for('ver_productos') }}" class="btn-action btn-volver">
+          <i class="fas fa-arrow-left"></i>
+          <span>Volver</span>
+        </a>
+      </div>
     </div>
     
-    <!-- Información del producto - Diseño premium con iconos cambiados -->
+    <!-- Información del producto - MODIFICADO: Eliminados iconos junto a metadatos -->
     <div class="product-card" data-producto='{"id": {{ producto.id }}, "nombre": "{{ producto.nombre|replace('"', '\\"')|replace('\n', ' ')|replace('\r', '') }}", "codigo": "{{ producto.codigo_barras_externo }}", "precio": {{ precio_final }}, "stock": {{ producto.stock }}}'>
       <div class="product-image-container">
         <img src="{{ url_for('static', filename='uploads/' + producto.foto) }}" alt="{{ producto.nombre }}" class="product-image" onerror="this.src='{{ url_for('static', filename='img/default_product.jpg') }}'">
@@ -845,9 +935,6 @@
         
         <div class="product-meta">
           <div class="meta-item">
-            <div class="meta-icon">
-              <i class="fas fa-fingerprint"></i> <!-- Cambiado de fa-barcode a fa-fingerprint -->
-            </div>
             <div>
               <span class="meta-label">Código</span>
               <span class="meta-value">{{ producto.codigo_barras_externo }}</span>
@@ -855,9 +942,6 @@
           </div>
           
           <div class="meta-item">
-            <div class="meta-icon">
-              <i class="fas fa-dollar-sign"></i> <!-- Cambiado de fa-tag a fa-dollar-sign -->
-            </div>
             <div>
               <span class="meta-label">Precio</span>
               <span class="meta-value">${{ "%.2f"|format(precio_final) }}</span>
@@ -865,9 +949,6 @@
           </div>
           
           <div class="meta-item">
-            <div class="meta-icon">
-              <i class="fas fa-boxes"></i> <!-- Cambiado de fa-box a fa-boxes -->
-            </div>
             <div>
               <span class="meta-label">Inventario</span>
               <span class="meta-value product-stock">{{ producto.stock }} unidades</span>
@@ -877,7 +958,7 @@
           {% if producto.categoria %}
           <div class="meta-item">
             <span class="category-pill">
-              <i class="fas fa-layer-group mr-1"></i> {{ producto.categoria }}
+              <i class="fas fa-layer-group"></i> {{ producto.categoria }}
             </span>
           </div>
           {% endif %}
@@ -885,7 +966,7 @@
       </div>
     </div>
     
-    <!-- Sistema de pestañas para configuración -->
+    <!-- Sistema de pestañas para configuración - MODIFICADO: Eliminada pestaña de código de barras -->
     <div class="tabs-container">
       <div class="tabs-header">
         <button class="tab-button active" data-tab="general">
@@ -897,12 +978,9 @@
         <button class="tab-button" data-tab="content">
           <i class="fas fa-list-alt tab-icon"></i> Contenido
         </button>
-        <button class="tab-button" data-tab="barcode">
-          <i class="fas fa-barcode tab-icon"></i> Código de barras
-        </button>
       </div>
       
-      <!-- Pestaña: Configuración General -->
+      <!-- Pestaña: Configuración General - MODIFICADO: Alineados elementos en la misma fila -->
       <div id="tab-general" class="tab-content active">
         <div class="config-section">
           <div class="config-header">
@@ -1111,7 +1189,7 @@
         </div>
       </div>
       
-      <!-- Pestaña: Contenido -->
+      <!-- Pestaña: Contenido - MODIFICADO: Texto de toggle para nombre de producto -->
       <div id="tab-content" class="tab-content">
         <div class="config-section">
           <div class="config-header">
@@ -1127,7 +1205,7 @@
                     <input type="checkbox" id="mostrar_nombre" checked>
                     <span class="toggle-slider"></span>
                   </label>
-                  <span class="toggle-label">Mostrar nombre del producto</span>
+                  <span class="toggle-label">Mostrar nombre del producto (para formatos grandes)</span>
                 </div>
                 
                 <div class="toggle-container">
@@ -1161,32 +1239,8 @@
         </div>
       </div>
       
-      <!-- Pestaña: Código de barras -->
-      <div id="tab-barcode" class="tab-content">
-        <div class="config-section">
-          <div class="config-header">
-            <h3 class="config-title">
-              <i class="fas fa-barcode config-title-icon"></i> Opciones de código de barras
-            </h3>
-          </div>
-          <div class="config-body">
-            <div class="config-row">
-              <div class="config-col">
-                <div class="form-group">
-                  <label class="form-label">
-                    <i class="fas fa-text-height mr-1"></i> Tamaño del código
-                  </label>
-                  <select id="tamano_codigo" class="form-select">
-                    <option value="normal">Normal</option>
-                    <option value="grande" selected>Grande (mejor para escanear)</option>
-                    <option value="pequeno">Pequeño (ahorra espacio)</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <!-- ELIMINADO: Se eliminó la pestaña y sección de Código de barras -->
+      
     </div>
     
     <!-- Botones de acción (centrados ahora) -->

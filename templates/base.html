@@ -319,10 +319,7 @@
   <!-- Script original de mi_scanner_quagga.js como backup -->
   <script src="{{ url_for('static', filename='js/mi_scanner_quagga.js') }}"></script>
 
-  <!-- Script para la página de etiquetas -->
-  {% if request.path.startswith('/etiquetas-producto/') %}
-  <script src="{{ url_for('static', filename='js/etiquetas.js') }}"></script>
-  {% endif %}
+  <!-- Script para la página de etiquetas - ELIMINADA LA CARGA CONDICIONAL -->
 
   <script>
     // Recarga si se usa BFCache
