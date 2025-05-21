@@ -1,6 +1,8 @@
 /**
  * Etiquetas.js - Sistema profesional de generación de etiquetas con códigos de barras
  * Versión optimizada y corregida: Compatibilidad de impresoras mejorada
+ * Version modificada: Sin vista previa y adaptada para etiquetas pequeñas
+ * Corrección específica: Alineación vertical precisa para todos los formatos de etiquetas
  */
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -108,10 +110,16 @@ document.addEventListener('DOMContentLoaded', function() {
       <button class="alerta-cerrar" onclick="this.parentNode.remove();">×</button>
     `;
     
-    // Insertar encima de la vista previa
-    const previewContainer = document.getElementById('preview-container');
-    if (previewContainer && previewContainer.parentNode) {
-      previewContainer.parentNode.insertBefore(alertaDiv, previewContainer);
+    // Insertar antes de los botones de acción
+    const actionsSection = document.querySelector('.actions-section');
+    if (actionsSection) {
+      actionsSection.parentNode.insertBefore(alertaDiv, actionsSection);
+    } else {
+      // Insertar en cualquier lugar visible
+      const mainContainer = document.querySelector('.etiquetas-layout');
+      if (mainContainer) {
+        mainContainer.appendChild(alertaDiv);
+      }
     }
   }
   
@@ -121,7 +129,7 @@ document.addEventListener('DOMContentLoaded', function() {
    */
   function initLabelApp() {
     try {
-      // Catalogar todos los formatos disponibles
+      // Catalogar todos los formatos disponibles con configuraciones precisas de alineación
       const formatosCatalog = {
         // Formatos para impresora normal
         normal: [
@@ -132,7 +140,12 @@ document.addEventListener('DOMContentLoaded', function() {
             height: 26.9,
             cols: 3,
             rows: 10,
-            perPage: 30
+            perPage: 30,
+            // Configuraciones de alineación precisas para Avery 5160
+            marginX: 4.75,
+            marginY: 12.7,
+            contentPaddingX: 2,
+            contentPaddingY: 2
           },
           {
             value: "avery5161",
@@ -141,7 +154,12 @@ document.addEventListener('DOMContentLoaded', function() {
             height: 25.4,
             cols: 2,
             rows: 10,
-            perPage: 20
+            perPage: 20,
+            // Configuraciones de alineación precisas para Avery 5161
+            marginX: 3.4,
+            marginY: 15.0,
+            contentPaddingX: 3,
+            contentPaddingY: 2
           },
           {
             value: "avery5163",
@@ -150,11 +168,16 @@ document.addEventListener('DOMContentLoaded', function() {
             height: 50.8,
             cols: 2,
             rows: 5,
-            perPage: 10
+            perPage: 10,
+            // Configuraciones de alineación precisas para Avery 5163
+            marginX: 3.4,
+            marginY: 13.0,
+            contentPaddingX: 3,
+            contentPaddingY: 3
           }
         ],
         
-        // Formatos para impresora Zebra
+        // Formatos para impresora Zebra con configuraciones de alineación mejoradas
         zebra: [
           {
             value: "zebra_2x1",
@@ -163,7 +186,17 @@ document.addEventListener('DOMContentLoaded', function() {
             height: 25.4,
             cols: 1,
             rows: 1,
-            perPage: 1
+            perPage: 1,
+            // Configuraciones de alineación mejoradas para Zebra
+            marginX: 2.0,
+            marginY: 1.5,
+            contentPaddingX: 3.0,
+            contentPaddingY: 3.0,
+            contentTopSpacing: 4.5,  // Espacio superior específico en mm
+            contentBottomSpacing: 4.5, // Espacio inferior específico en mm
+            barcodeVerticalShift: 1.0, // Desplazamiento vertical específico para el código de barras
+            verticalCenter: true,
+            horizontalCenter: true
           },
           {
             value: "zebra_3x1",
@@ -172,7 +205,17 @@ document.addEventListener('DOMContentLoaded', function() {
             height: 25.4,
             cols: 1,
             rows: 1,
-            perPage: 1
+            perPage: 1,
+            // Configuraciones de alineación mejoradas para Zebra
+            marginX: 2.0,
+            marginY: 1.5,
+            contentPaddingX: 3.0,
+            contentPaddingY: 3.0,
+            contentTopSpacing: 4.5,  // Espacio superior específico en mm
+            contentBottomSpacing: 4.5, // Espacio inferior específico en mm
+            barcodeVerticalShift: 1.0, // Desplazamiento vertical específico para el código de barras
+            verticalCenter: true,
+            horizontalCenter: true
           },
           {
             value: "zebra_4x1",
@@ -181,11 +224,21 @@ document.addEventListener('DOMContentLoaded', function() {
             height: 25.4,
             cols: 1,
             rows: 1,
-            perPage: 1
+            perPage: 1,
+            // Configuraciones de alineación mejoradas para Zebra
+            marginX: 2.0,
+            marginY: 1.5,
+            contentPaddingX: 3.0,
+            contentPaddingY: 3.0,
+            contentTopSpacing: 4.5,  // Espacio superior específico en mm
+            contentBottomSpacing: 4.5, // Espacio inferior específico en mm
+            barcodeVerticalShift: 1.0, // Desplazamiento vertical específico para el código de barras
+            verticalCenter: true,
+            horizontalCenter: true
           }
         ],
         
-        // Formatos para impresora DYMO
+        // Formatos para impresora DYMO con configuraciones de alineación mejoradas
         dymo: [
           {
             value: "dymo_11352",
@@ -194,7 +247,17 @@ document.addEventListener('DOMContentLoaded', function() {
             height: 25,
             cols: 1,
             rows: 1,
-            perPage: 1
+            perPage: 1,
+            // Configuraciones de alineación mejoradas para DYMO
+            marginX: 1.0,
+            marginY: 1.0,
+            contentPaddingX: 2.0,
+            contentPaddingY: 2.0,
+            contentTopSpacing: 4.0,  // Espacio superior específico en mm
+            contentBottomSpacing: 4.0, // Espacio inferior específico en mm
+            barcodeVerticalShift: 1.0, // Desplazamiento vertical específico para el código de barras
+            verticalCenter: true,
+            horizontalCenter: true
           },
           {
             value: "dymo_11353",
@@ -203,7 +266,18 @@ document.addEventListener('DOMContentLoaded', function() {
             height: 13,
             cols: 1,
             rows: 1,
-            perPage: 1
+            perPage: 1,
+            isSmall: true,
+            // Configuraciones de alineación mejoradas para DYMO pequeña
+            marginX: 0.5,
+            marginY: 0.5,
+            contentPaddingX: 0.5,
+            contentPaddingY: 0.5,
+            contentTopSpacing: 1.5,  // Espacio superior específico en mm
+            contentBottomSpacing: 1.5, // Espacio inferior específico en mm
+            barcodeVerticalShift: 0.5, // Desplazamiento vertical específico para el código de barras
+            verticalCenter: true,
+            horizontalCenter: true
           },
           {
             value: "dymo_11354",
@@ -212,11 +286,21 @@ document.addEventListener('DOMContentLoaded', function() {
             height: 32,
             cols: 1,
             rows: 1,
-            perPage: 1
+            perPage: 1,
+            // Configuraciones de alineación mejoradas para DYMO
+            marginX: 1.0,
+            marginY: 1.0,
+            contentPaddingX: 2.0,
+            contentPaddingY: 2.0,
+            contentTopSpacing: 5.0,  // Espacio superior específico en mm
+            contentBottomSpacing: 5.0, // Espacio inferior específico en mm
+            barcodeVerticalShift: 1.5, // Desplazamiento vertical específico para el código de barras
+            verticalCenter: true,
+            horizontalCenter: true
           }
         ],
         
-        // Formatos para impresora térmica
+        // Formatos para impresora térmica con configuraciones de alineación mejoradas
         termica: [
           {
             value: "termica_40x25",
@@ -225,7 +309,17 @@ document.addEventListener('DOMContentLoaded', function() {
             height: 25,
             cols: 1,
             rows: 1,
-            perPage: 1
+            perPage: 1,
+            // Configuraciones de alineación mejoradas para térmica
+            marginX: 1.5,
+            marginY: 1.0,
+            contentPaddingX: 2.0,
+            contentPaddingY: 2.0,
+            contentTopSpacing: 4.0,  // Espacio superior específico en mm
+            contentBottomSpacing: 4.0, // Espacio inferior específico en mm
+            barcodeVerticalShift: 0.5, // Desplazamiento vertical específico para el código de barras
+            verticalCenter: true,
+            horizontalCenter: true
           },
           {
             value: "termica_50x30",
@@ -234,7 +328,17 @@ document.addEventListener('DOMContentLoaded', function() {
             height: 30,
             cols: 1,
             rows: 1,
-            perPage: 1
+            perPage: 1,
+            // Configuraciones de alineación mejoradas para térmica
+            marginX: 1.5,
+            marginY: 1.0,
+            contentPaddingX: 2.0,
+            contentPaddingY: 2.0,
+            contentTopSpacing: 5.0,  // Espacio superior específico en mm
+            contentBottomSpacing: 5.0, // Espacio inferior específico en mm
+            barcodeVerticalShift: 1.0, // Desplazamiento vertical específico para el código de barras
+            verticalCenter: true,
+            horizontalCenter: true
           },
           {
             value: "termica_58x40",
@@ -243,7 +347,17 @@ document.addEventListener('DOMContentLoaded', function() {
             height: 40,
             cols: 1,
             rows: 1,
-            perPage: 1
+            perPage: 1,
+            // Configuraciones de alineación mejoradas para térmica
+            marginX: 1.5,
+            marginY: 1.0,
+            contentPaddingX: 2.0,
+            contentPaddingY: 2.0,
+            contentTopSpacing: 7.0,  // Espacio superior específico en mm
+            contentBottomSpacing: 7.0, // Espacio inferior específico en mm
+            barcodeVerticalShift: 1.0, // Desplazamiento vertical específico para el código de barras
+            verticalCenter: true,
+            horizontalCenter: true
           },
           {
             value: "termica_80x50",
@@ -252,7 +366,17 @@ document.addEventListener('DOMContentLoaded', function() {
             height: 50,
             cols: 1,
             rows: 1,
-            perPage: 1
+            perPage: 1,
+            // Configuraciones de alineación mejoradas para térmica
+            marginX: 1.5,
+            marginY: 1.0,
+            contentPaddingX: 2.0,
+            contentPaddingY: 2.0,
+            contentTopSpacing: 9.0,  // Espacio superior específico en mm
+            contentBottomSpacing: 9.0, // Espacio inferior específico en mm
+            barcodeVerticalShift: 2.0, // Desplazamiento vertical específico para el código de barras
+            verticalCenter: true,
+            horizontalCenter: true
           }
         ]
       };
@@ -265,8 +389,6 @@ document.addEventListener('DOMContentLoaded', function() {
         cantidad: 0,              // Cantidad de etiquetas
         barcodesToGenerate: [],   // Códigos de barras pendientes
         isProcessing: false,      // Bloqueo de operaciones simultáneas
-        zoomLevel: 100,           // Nivel de zoom para vista previa
-        renderTimeout: null,      // Control de refresco
         pdfGenerating: false,     // Flag para evitar duplicación de PDF
         formatosCatalog: formatosCatalog // Catálogo de formatos disponibles
       };
@@ -285,21 +407,13 @@ document.addEventListener('DOMContentLoaded', function() {
         tamanoCodigoSelect: document.getElementById('tamano_codigo'),
         
         // Botones de acción
-        btnRefreshPreview: document.getElementById('btn-refresh-preview'),
-        btnPreview: document.getElementById('btn-preview'),
         btnPrint: document.getElementById('btn-print'),
         btnPDF: document.getElementById('btn-pdf'),
         
         // Contenedores
-        previewContainer: document.getElementById('preview-container'),
         previewContent: document.getElementById('preview-content'),
         printContent: document.getElementById('print-content'),
         pdfContainer: document.getElementById('pdf-container'),
-        
-        // Controles de zoom
-        zoomIn: document.getElementById('zoom-in'),
-        zoomOut: document.getElementById('zoom-out'),
-        zoomValue: document.getElementById('zoom-value')
       };
       
       // ====== INICIALIZACIÓN DE DATOS ======
@@ -312,11 +426,6 @@ document.addEventListener('DOMContentLoaded', function() {
       
       // Configurar estado inicial de la interfaz
       setupInitialState();
-      
-      // Generar vista previa inicial después de un breve retraso
-      setTimeout(() => {
-        generarVistaPrevia();
-      }, 300);
       
       /**
        * Inicializa los datos del producto desde el DOM o valores predeterminados
@@ -372,7 +481,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 elements.inputCantidad.value = appState.producto.stock;
               }
             }
-            programarActualizacionVistaPrevia();
           });
         }
         
@@ -392,9 +500,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Actualizar selectores de formato según la impresora seleccionada
                 actualizarFormatosDisponibles(printerId);
-                
-                // Regenerar vista previa
-                programarActualizacionVistaPrevia();
               }
             });
           });
@@ -403,8 +508,12 @@ document.addEventListener('DOMContentLoaded', function() {
         // 3. Selector de formato de etiquetas
         if (elements.selectFormato) {
           elements.selectFormato.addEventListener('change', function() {
-            // Programar actualización
-            programarActualizacionVistaPrevia();
+            // Verificar si es una etiqueta pequeña y ajustar la interfaz
+            const formatoSeleccionado = obtenerFormatoSeleccionado();
+            const esEtiquetaPequena = verificarSiEtiquetaEsPequena(formatoSeleccionado);
+            
+            // Actualizar la interfaz según el tamaño
+            ajustarInterfazSegunFormatoEtiqueta(esEtiquetaPequena);
           });
         }
         
@@ -425,26 +534,11 @@ document.addEventListener('DOMContentLoaded', function() {
               if (this === elements.checkboxCodigoBarras) {
                 toggleCodigoBarrasOpciones();
               }
-              
-              // Programar actualización
-              programarActualizacionVistaPrevia();
             });
           }
         });
         
         // 5. Botones de acción
-        if (elements.btnRefreshPreview) {
-          elements.btnRefreshPreview.addEventListener('click', function() {
-            generarVistaPrevia(true); // Forzar regeneración
-          });
-        }
-        
-        if (elements.btnPreview) {
-          elements.btnPreview.addEventListener('click', function() {
-            generarVistaPrevia(true); // Forzar regeneración
-          });
-        }
-        
         if (elements.btnPrint) {
           elements.btnPrint.addEventListener('click', function() {
             imprimirEtiquetas();
@@ -456,23 +550,6 @@ document.addEventListener('DOMContentLoaded', function() {
             // Evitar múltiples clics rápidos
             if (!appState.pdfGenerating) {
               descargarPDF();
-            }
-          });
-        }
-        
-        // 6. Controles de zoom
-        if (elements.zoomIn && elements.zoomOut && elements.zoomValue) {
-          elements.zoomIn.addEventListener('click', function() {
-            if (appState.zoomLevel < 200) {
-              appState.zoomLevel += 10;
-              updateZoom();
-            }
-          });
-          
-          elements.zoomOut.addEventListener('click', function() {
-            if (appState.zoomLevel > 50) {
-              appState.zoomLevel -= 10;
-              updateZoom();
             }
           });
         }
@@ -490,11 +567,76 @@ document.addEventListener('DOMContentLoaded', function() {
         // Configurar opciones de código de barras
         toggleCodigoBarrasOpciones();
         
-        // Inicializar zoom
-        updateZoom();
-        
         // Inicializar formatos disponibles para la impresora por defecto
         actualizarFormatosDisponibles('normal');
+      }
+      
+      /**
+       * Verifica si una etiqueta es considerada "pequeña" basada en sus dimensiones
+       * @param {Object} formato - Formato de la etiqueta
+       * @returns {boolean} - true si es una etiqueta pequeña
+       */
+      function verificarSiEtiquetaEsPequena(formato) {
+        // Considerar etiqueta pequeña si tiene el marcador isSmall o dimensiones reducidas
+        if (formato.isSmall) return true;
+        
+        // O si el ancho es menor a 30mm o la altura menor a 20mm
+        return (formato.ancho < 30 || formato.alto < 20);
+      }
+      
+      /**
+       * Ajusta la interfaz según el formato de etiqueta seleccionado
+       * @param {boolean} esEtiquetaPequena - Si la etiqueta es considerada pequeña
+       */
+      function ajustarInterfazSegunFormatoEtiqueta(esEtiquetaPequena) {
+        // Para etiquetas pequeñas, forzar sólo código de barras y texto
+        if (esEtiquetaPequena) {
+          // Mostrar alerta informativa
+          mostrarAlertaFormato(
+            "El formato de etiqueta seleccionado es pequeño. Sólo se mostrará el código de barras y el texto del código.", 
+            "info"
+          );
+          
+          // Desactivar opciones irrelevantes
+          if (elements.checkboxNombre) {
+            elements.checkboxNombre.checked = false;
+            elements.checkboxNombre.disabled = true;
+          }
+          
+          if (elements.checkboxPrecio) {
+            elements.checkboxPrecio.checked = false;
+            elements.checkboxPrecio.disabled = true;
+          }
+          
+          // Asegurar que código y código de barras estén activados
+          if (elements.checkboxCodigo) {
+            elements.checkboxCodigo.checked = true;
+            elements.checkboxCodigo.disabled = true;
+          }
+          
+          if (elements.checkboxCodigoBarras) {
+            elements.checkboxCodigoBarras.checked = true;
+            elements.checkboxCodigoBarras.disabled = true;
+          }
+          
+          // Forzar tamaño pequeño para el código de barras
+          if (elements.tamanoCodigoSelect) {
+            elements.tamanoCodigoSelect.value = "pequeno";
+            elements.tamanoCodigoSelect.disabled = true;
+          }
+        } else {
+          // Restaurar funcionalidad normal para etiquetas estándar
+          // Quitar alerta si existe
+          const alertaPrevia = document.getElementById('alerta-formato');
+          if (alertaPrevia) alertaPrevia.remove();
+          
+          // Habilitar todas las opciones
+          if (elements.checkboxNombre) elements.checkboxNombre.disabled = false;
+          if (elements.checkboxPrecio) elements.checkboxPrecio.disabled = false;
+          if (elements.checkboxCodigo) elements.checkboxCodigo.disabled = false;
+          if (elements.checkboxCodigoBarras) elements.checkboxCodigoBarras.disabled = false;
+          if (elements.tamanoCodigoSelect) elements.tamanoCodigoSelect.disabled = false;
+        }
       }
       
       /**
@@ -518,11 +660,44 @@ document.addEventListener('DOMContentLoaded', function() {
           const option = document.createElement('option');
           option.value = formato.value;
           option.textContent = formato.text;
+          
+          // Añadir todos los atributos específicos de configuración
           option.dataset.width = formato.width;
           option.dataset.height = formato.height;
           option.dataset.cols = formato.cols;
           option.dataset.rows = formato.rows;
           option.dataset.perPage = formato.perPage;
+          option.dataset.marginX = formato.marginX;
+          option.dataset.marginY = formato.marginY;
+          option.dataset.contentPaddingX = formato.contentPaddingX;
+          option.dataset.contentPaddingY = formato.contentPaddingY;
+          
+          // Añadir parámetros de espacio vertical específicos
+          if (formato.contentTopSpacing !== undefined) {
+            option.dataset.contentTopSpacing = formato.contentTopSpacing;
+          }
+          if (formato.contentBottomSpacing !== undefined) {
+            option.dataset.contentBottomSpacing = formato.contentBottomSpacing;
+          }
+          if (formato.barcodeVerticalShift !== undefined) {
+            option.dataset.barcodeVerticalShift = formato.barcodeVerticalShift;
+          }
+          
+          // Añadir marcadores de alineación si existen
+          if (formato.centerOffset !== undefined) {
+            option.dataset.centerOffset = formato.centerOffset;
+          }
+          if (formato.verticalCenter !== undefined) {
+            option.dataset.verticalCenter = formato.verticalCenter;
+          }
+          if (formato.horizontalCenter !== undefined) {
+            option.dataset.horizontalCenter = formato.horizontalCenter;
+          }
+          
+          // Añadir marcador si es etiqueta pequeña
+          if (formato.isSmall) {
+            option.dataset.isSmall = "true";
+          }
           
           // Intentar mantener la selección previa si existe y es compatible
           if (formato.value === valorActual) {
@@ -540,17 +715,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // Disparar evento change para actualizar la UI
         const event = new Event('change');
         elements.selectFormato.dispatchEvent(event);
-      }
-      
-      /**
-       * Actualiza la visualización del zoom en la vista previa
-       */
-      function updateZoom() {
-        if (elements.zoomValue && elements.previewContent) {
-          elements.zoomValue.textContent = `${appState.zoomLevel}%`;
-          elements.previewContent.style.transform = `scale(${appState.zoomLevel/100})`;
-          elements.previewContent.style.transformOrigin = 'top center';
-        }
       }
       
       /**
@@ -583,19 +747,6 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       
       /**
-       * Programa la actualización de la vista previa con debounce
-       */
-      function programarActualizacionVistaPrevia() {
-        if (appState.renderTimeout) {
-          clearTimeout(appState.renderTimeout);
-        }
-        
-        appState.renderTimeout = setTimeout(() => {
-          generarVistaPrevia();
-        }, 300);
-      }
-      
-      /**
        * Obtiene el formato de etiqueta seleccionado con todos sus parámetros
        * @returns {Object} Objeto con todos los datos del formato
        */
@@ -608,18 +759,36 @@ document.addEventListener('DOMContentLoaded', function() {
             alto: 26.9,
             columnas: 3,
             filas: 10,
-            porPagina: 30
+            porPagina: 30,
+            // Configuraciones predeterminadas de márgenes
+            marginX: 4.75,
+            marginY: 12.7,
+            contentPaddingX: 2,
+            contentPaddingY: 2
           };
         }
         
         const option = elements.selectFormato.options[elements.selectFormato.selectedIndex];
+        
+        // Crear objeto completo con todas las propiedades de configuración
         return {
           id: option.value,
           ancho: parseFloat(option.dataset.width),
           alto: parseFloat(option.dataset.height),
           columnas: parseInt(option.dataset.cols),
           filas: parseInt(option.dataset.rows),
-          porPagina: parseInt(option.dataset.perPage)
+          porPagina: parseInt(option.dataset.perPage),
+          marginX: parseFloat(option.dataset.marginX || 0),
+          marginY: parseFloat(option.dataset.marginY || 0),
+          contentPaddingX: parseFloat(option.dataset.contentPaddingX || 2),
+          contentPaddingY: parseFloat(option.dataset.contentPaddingY || 2),
+          contentTopSpacing: parseFloat(option.dataset.contentTopSpacing || 0),
+          contentBottomSpacing: parseFloat(option.dataset.contentBottomSpacing || 0),
+          barcodeVerticalShift: parseFloat(option.dataset.barcodeVerticalShift || 0),
+          centerOffset: parseFloat(option.dataset.centerOffset || 0),
+          verticalCenter: option.dataset.verticalCenter === "true",
+          horizontalCenter: option.dataset.horizontalCenter === "true",
+          isSmall: option.dataset.isSmall === "true"
         };
       }
       
@@ -636,149 +805,6 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       
       /**
-       * Genera la vista previa de las etiquetas con animación y manejo de errores
-       * @param {boolean} forzar - Si es true, fuerza la regeneración incluso si ya está en proceso
-       */
-      function generarVistaPrevia(forzar = false) {
-        if (!elements.previewContent) {
-          console.error('No se encontró el contenedor de vista previa');
-          return;
-        }
-        
-        // Evitar múltiples generaciones simultáneas
-        if (appState.isProcessing && !forzar) {
-          console.log('Ya hay una operación en proceso, se omite esta solicitud');
-          return;
-        }
-        
-        try {
-          console.log('Generando vista previa de etiquetas...');
-          appState.isProcessing = true;
-          
-          // Mostrar indicador de carga
-          mostrarCargando(elements.previewContainer, true, "Generando vista previa...");
-          
-          // Limpiar códigos pendientes
-          appState.barcodesToGenerate = [];
-          
-          // Obtener configuración actualizada
-          const cantidad = obtenerCantidad();
-          const formato = obtenerFormatoSeleccionado();
-          const impresora = appState.impresora;
-          
-          // Guardar en estado para uso posterior
-          appState.cantidad = cantidad;
-          appState.formato = formato;
-          
-          console.log(`Configuración: Formato=${formato.id}, Impresora=${impresora}, Cantidad=${cantidad}`);
-          
-          // Configuración según el tipo de impresora
-          let configuracion = obtenerConfiguracionImpresora(formato, impresora);
-          
-          // Preparamos el HTML para la vista previa
-          let previewHTML = '';
-          
-          if (impresora === 'normal') {
-            // Para impresoras normales, crear hojas con múltiples etiquetas
-            const etiquetasPorPagina = formato.porPagina;
-            const numPaginas = Math.ceil(cantidad / etiquetasPorPagina);
-            
-            // Limitar a 1 página en la vista previa
-            const paginasAMostrar = 1;
-            
-            for (let pagina = 0; pagina < paginasAMostrar; pagina++) {
-              previewHTML += `
-                <div class="preview-sheet" style="width:${configuracion.paginaAncho}mm;height:${configuracion.paginaAlto}mm;position:relative;">
-              `;
-              
-              // Añadir etiquetas a la hoja
-              for (let i = 0; i < formato.filas; i++) {
-                for (let j = 0; j < formato.columnas; j++) {
-                  const index = pagina * etiquetasPorPagina + i * formato.columnas + j;
-                  
-                  if (index < cantidad) {
-                    // Calcular posición de la etiqueta - CORREGIDO para formatos específicos
-                    const posX = calcularPosicionX(formato, configuracion, j);
-                    const posY = calcularPosicionY(formato, configuracion, i);
-                    
-                    // Crear etiqueta
-                    previewHTML += crearEtiquetaHTML(posX, posY, formato.ancho, formato.alto, index);
-                  }
-                }
-              }
-              
-              previewHTML += `</div>`;
-            }
-            
-            // Si hay más páginas, mostrar mensaje
-            if (numPaginas > paginasAMostrar) {
-              previewHTML += `
-                <div style="margin-top:1rem;padding:0.75rem;background-color:#f0f9ff;border-radius:0.375rem;border:1px solid #e0f2fe;text-align:center;">
-                  <div style="display:flex;align-items:center;justify-content:center;gap:0.5rem;">
-                    <i class="fas fa-info-circle" style="color:#e52e2e;"></i>
-                    <span style="color:#0c4a6e;font-size:0.875rem;font-weight:500;">
-                      Se generarán ${numPaginas} páginas con ${cantidad} etiquetas en total.
-                    </span>
-                  </div>
-                </div>
-              `;
-            }
-          } else {
-            // Para impresoras térmicas, mostrar solo algunas etiquetas como ejemplo
-            const numEjemplos = Math.min(cantidad, 2); // Reducido a 2 para simplificar la vista
-            previewHTML += `<div style="display:flex;flex-wrap:wrap;gap:1rem;justify-content:center;">`;
-            
-            for (let i = 0; i < numEjemplos; i++) {
-              previewHTML += crearEtiquetaHTML(0, 0, formato.ancho, formato.alto, i, true);
-            }
-            
-            previewHTML += `</div>`;
-            
-            if (cantidad > numEjemplos) {
-              previewHTML += `
-                <div style="margin-top:1rem;padding:0.75rem;background-color:#f0f9ff;border-radius:0.375rem;border:1px solid #e0f2fe;text-align:center;">
-                  <div style="display:flex;align-items:center;justify-content:center;gap:0.5rem;">
-                    <i class="fas fa-info-circle" style="color:#e52e2e;"></i>
-                    <span style="color:#0c4a6e;font-size:0.875rem;font-weight:500;">
-                      Se generarán ${cantidad} etiquetas en total.
-                    </span>
-                  </div>
-                </div>
-              `;
-            }
-          }
-          
-          // Actualizar contenido
-          elements.previewContent.innerHTML = previewHTML;
-          
-          // Restaurar zoom
-          updateZoom();
-          
-          // Generar códigos de barras después de un momento
-          setTimeout(function() {
-            generarCodigosBarras();
-            // Quitar indicador de carga después de que se generen los códigos
-            setTimeout(() => {
-              mostrarCargando(elements.previewContainer, false);
-              appState.isProcessing = false;
-            }, 300);
-          }, 200);
-        } catch (error) {
-          console.error("Error en generarVistaPrevia:", error);
-          elements.previewContent.innerHTML = `
-            <div style="padding:1.5rem;background-color:#fff5f5;border-radius:0.5rem;border:1px solid #fed7d7;text-align:center;margin:1rem auto;max-width:90%;">
-              <i class="fas fa-exclamation-triangle" style="font-size:2rem;color:#e53e3e;margin-bottom:1rem;"></i>
-              <h3 style="color:#c53030;font-size:1.125rem;font-weight:600;margin-bottom:0.5rem;">Error al generar vista previa</h3>
-              <p style="color:#742a2a;font-size:0.875rem;">${error.message}</p>
-              <p style="color:#742a2a;font-size:0.875rem;margin-top:0.5rem;">Intenta cambiar el formato de etiqueta o la impresora.</p>
-            </div>
-          `;
-          mostrarCargando(elements.previewContainer, false);
-          appState.isProcessing = false;
-        }
-      }
-      
-      /**
        * Calcula la posición X de una etiqueta, con correcciones para formatos específicos
        * @param {Object} formato - Formato de etiqueta seleccionado 
        * @param {Object} configuracion - Configuración de impresora
@@ -786,33 +812,30 @@ document.addEventListener('DOMContentLoaded', function() {
        * @returns {number} - Posición X en milímetros
        */
       function calcularPosicionX(formato, configuracion, columnaIndex) {
-        // Correcciones específicas por formato e impresora
+        // Usar las configuraciones específicas para este formato
+        let posX;
+        
+        // Si la impresora es normal (impresora de hojas estándar)
         if (configuracion.impresora === 'normal') {
-          // Corrección para Avery 5160 (63.5 x 26.9mm), 3 columnas
-          if (formato.id === 'avery5160' || (Math.abs(formato.ancho - 63.5) < 0.1 && Math.abs(formato.alto - 26.9) < 0.1)) {
-            // Margen exacto para Avery 5160 con 3 columnas en página A4
-            // Cálculo: margen lateral + (índice de columna * ancho de etiqueta + espacio entre etiquetas)
-            return 4.75 + (columnaIndex * (formato.ancho + 5.0));
-          }
-          
-          // Corrección para Avery 5161 (101.6 x 25.4mm), 2 columnas
-          if (formato.id === 'avery5161' || (Math.abs(formato.ancho - 101.6) < 0.1 && Math.abs(formato.alto - 25.4) < 0.1)) {
-            // A4 = 210mm, 2 etiquetas de 101.6mm = 203.2mm, margen distribuido
-            return 3.4 + (columnaIndex * formato.ancho);
-          }
-          
-          // Corrección para Avery 5163 (101.6 x 50.8mm), 2 columnas
-          if (formato.id === 'avery5163' || (Math.abs(formato.ancho - 101.6) < 0.1 && Math.abs(formato.alto - 50.8) < 0.1)) {
-            // A4 = 210mm, 2 etiquetas de 101.6mm = 203.2mm, margen distribuido
-            return 3.4 + (columnaIndex * formato.ancho);
-          }
-          
-          // Para otros formatos, usar cálculo general
-          return configuracion.marginX + (columnaIndex * formato.ancho);
+          // Usar valores específicos por formato desde el catálogo si existen
+          posX = formato.marginX + (columnaIndex * formato.ancho);
         } else {
-          // Para impresoras térmicas, usar margen específico
-          return configuracion.marginX;
+          // Para impresoras térmicas/DYMO/Zebra
+          posX = formato.marginX;
+          
+          // Aplicar centrado horizontal si está habilitado 
+          if (formato.horizontalCenter) {
+            // No hacemos ajustes adicionales aquí porque el centrado se maneja en el CSS
+            // dentro de la etiqueta para estas impresoras
+          }
         }
+        
+        // Aplicar ajuste de posición para calibración fina
+        if (formato.centerOffset !== undefined) {
+          posX += formato.centerOffset;
+        }
+        
+        return posX;
       }
       
       /**
@@ -823,32 +846,19 @@ document.addEventListener('DOMContentLoaded', function() {
        * @returns {number} - Posición Y en milímetros
        */
       function calcularPosicionY(formato, configuracion, filaIndex) {
-        // Correcciones específicas por formato e impresora
+        // Usar las configuraciones específicas para este formato
+        let posY;
+        
+        // Si la impresora es normal (impresora de hojas estándar)
         if (configuracion.impresora === 'normal') {
-          // Corrección para Avery 5160 (63.5 x 26.9mm), 10 filas
-          if (formato.id === 'avery5160' || (Math.abs(formato.ancho - 63.5) < 0.1 && Math.abs(formato.alto - 26.9) < 0.1)) {
-            // Margen superior corregido para Avery 5160 (valor exacto)
-            return 12.7 + (filaIndex * formato.alto);
-          }
-          
-          // Corrección para Avery 5161 (101.6 x 25.4mm), 10 filas
-          if (formato.id === 'avery5161' || (Math.abs(formato.ancho - 101.6) < 0.1 && Math.abs(formato.alto - 25.4) < 0.1)) {
-            // Margen superior de 15mm para Avery 5161
-            return 15.0 + (filaIndex * formato.alto);
-          }
-          
-          // Corrección para Avery 5163 (101.6 x 50.8mm), 5 filas
-          if (formato.id === 'avery5163' || (Math.abs(formato.ancho - 101.6) < 0.1 && Math.abs(formato.alto - 50.8) < 0.1)) {
-            // Margen superior de 13mm para Avery 5163
-            return 13.0 + (filaIndex * formato.alto);
-          }
-          
-          // Para otros formatos, usar cálculo general
-          return configuracion.marginY + (filaIndex * formato.alto);
+          // Usar valores específicos desde el catálogo
+          posY = formato.marginY + (filaIndex * formato.alto);
         } else {
-          // Para impresoras térmicas, usar margen específico
-          return configuracion.marginY;
+          // Para impresoras térmicas/DYMO/Zebra
+          posY = formato.marginY;
         }
+        
+        return posY;
       }
       
       /**
@@ -864,69 +874,47 @@ document.addEventListener('DOMContentLoaded', function() {
           dpi: 300, // DPI por defecto
           paginaAncho: 210, // Valor por defecto (A4)
           paginaAlto: 297,  // Valor por defecto (A4)
-          marginX: 5,       // Valor por defecto
-          marginY: 10,      // Valor por defecto
+          marginX: formato.marginX || 0,
+          marginY: formato.marginY || 0,
+          contentPaddingX: formato.contentPaddingX || 2,
+          contentPaddingY: formato.contentPaddingY || 2,
+          contentTopSpacing: formato.contentTopSpacing || 0,
+          contentBottomSpacing: formato.contentBottomSpacing || 0,
+          barcodeVerticalShift: formato.barcodeVerticalShift || 0,
           orientation: 'portrait',
-          mediaType: 'default'
+          mediaType: 'default',
+          verticalCenter: formato.verticalCenter || false,
+          horizontalCenter: formato.horizontalCenter || false
         };
         
         // Aplicar configuración específica por tipo de impresora
         switch (impresora) {
           case 'zebra':
-            // Zebra GK420d/GX420d
             config.dpi = 203; // 203 DPI es el estándar en Zebra GK420d/GX420d
             config.paginaAncho = Math.min(formato.ancho, 104); // 104mm es el ancho máximo (4.09")
             config.paginaAlto = formato.alto;
-            config.marginX = 2; // 2mm de margen típico
-            config.marginY = 1.5; // 1.5mm de margen superior
             config.mediaType = 'labels';
             config.orientation = formato.ancho > formato.alto ? 'landscape' : 'portrait';
             break;
           
           case 'dymo':
-            // DYMO LabelWriter 450
             config.dpi = 300; // 300 DPI es el estándar en DYMO LabelWriter 450
             config.paginaAncho = Math.min(formato.ancho, 56); // 56mm es el ancho máximo (2.2")
             config.paginaAlto = formato.alto;
-            config.marginX = 1.5; // 1.5mm de margen típico
-            config.marginY = 1.5; // 1.5mm de margen superior
             config.mediaType = 'continuous';
             config.orientation = formato.ancho > formato.alto ? 'landscape' : 'portrait';
             break;
           
           case 'termica':
-            // Impresora térmica estándar (POS)
             config.dpi = 203; // 203 DPI es común en impresoras térmicas
             config.paginaAncho = Math.min(formato.ancho, 80); // 80mm es el ancho estándar (también hay de 58mm)
             config.paginaAlto = formato.alto;
-            config.marginX = 3; // 3mm de margen típico
-            config.marginY = 2; // 2mm de margen superior
             config.mediaType = 'continuous';
             config.orientation = formato.ancho > formato.alto ? 'landscape' : 'portrait';
             break;
           
           case 'normal':
           default:
-            // Impresora normal (láser/inyección)
-            // Usar margen específico por formato para mayor precisión
-            if (formato.id === 'avery5160' || (Math.abs(formato.ancho - 63.5) < 0.1 && Math.abs(formato.alto - 26.9) < 0.1)) {
-              // Avery 5160: Márgenes corregidos para distribución simétrica
-              config.marginX = 4.75;
-              config.marginY = 12.7;
-            } else if (formato.id === 'avery5161' || (Math.abs(formato.ancho - 101.6) < 0.1 && Math.abs(formato.alto - 25.4) < 0.1)) {
-              // Avery 5161: Margen lateral 3.4mm
-              config.marginX = 3.4;
-              config.marginY = 15.0;
-            } else if (formato.id === 'avery5163' || (Math.abs(formato.ancho - 101.6) < 0.1 && Math.abs(formato.alto - 50.8) < 0.1)) {
-              // Avery 5163: Margen lateral 3.4mm
-              config.marginX = 3.4;
-              config.marginY = 13.0;
-            } else {
-              // Margen por defecto para otros formatos
-              config.marginX = 5;
-              config.marginY = 15;
-            }
-            
             config.dpi = 300; // 300 DPI típico para láser/inyección
             config.paginaAncho = 210; // A4
             config.paginaAlto = 297;  // A4
@@ -949,47 +937,135 @@ document.addEventListener('DOMContentLoaded', function() {
        * @returns {string} HTML de la etiqueta
        */
       function crearEtiquetaHTML(x, y, ancho, alto, index = 0, posicionRelativa = false) {
+        // Obtener el formato seleccionado
+        const formato = obtenerFormatoSeleccionado();
+        
+        // Determinar el estilo de posicionamiento
         let positionStyle = posicionRelativa ? 
           'position:relative;' : 
           `position:absolute;left:${x}mm;top:${y}mm;`;
         
-        // Verificar si debemos mostrar el código de barras y el texto del código por separado
-        const mostrarCodigoBarras = !elements.checkboxCodigoBarras || elements.checkboxCodigoBarras.checked;
-        const mostrarCodigoTexto = !elements.checkboxCodigo || elements.checkboxCodigo.checked;
+        // Detectar si es una etiqueta pequeña
+        const esEtiquetaPequena = verificarSiEtiquetaEsPequena(formato);
         
+        // Determinar qué elementos mostrar según tamaño y configuración
+        const mostrarCodigoBarras = esEtiquetaPequena ? true : (!elements.checkboxCodigoBarras || elements.checkboxCodigoBarras.checked);
+        const mostrarCodigoTexto = esEtiquetaPequena ? true : (!elements.checkboxCodigo || elements.checkboxCodigo.checked);
+        const mostrarNombre = esEtiquetaPequena ? false : (!elements.checkboxNombre || elements.checkboxNombre.checked);
+        const mostrarPrecio = esEtiquetaPequena ? false : (!elements.checkboxPrecio || elements.checkboxPrecio.checked);
+        
+        // Crear estilos CSS específicos para manejar el espacio vertical
+        let contentStyle = '';
+        let barcodeContainerStyle = '';
+        
+        // Configuración de espaciado y centrado personalizada
+        if (formato.impresora !== 'normal' || (formato.contentTopSpacing > 0 || formato.contentBottomSpacing > 0)) {
+          let barcodeMarginTop = 0;
+          let barcodeMarginBottom = 0;
+          
+          // Si tenemos espaciados específicos definidos para este formato
+          if (formato.contentTopSpacing > 0 || formato.contentBottomSpacing > 0) {
+            barcodeMarginTop = formato.contentTopSpacing;
+            barcodeMarginBottom = formato.contentBottomSpacing;
+          }
+          
+          // Si hay desplazamiento vertical específico para el código de barras
+          if (formato.barcodeVerticalShift !== undefined && formato.barcodeVerticalShift !== 0) {
+            barcodeMarginTop += formato.barcodeVerticalShift;
+            barcodeMarginBottom -= formato.barcodeVerticalShift;
+          }
+          
+          // Ajustar valores negativos
+          barcodeMarginTop = Math.max(0, barcodeMarginTop);
+          barcodeMarginBottom = Math.max(0, barcodeMarginBottom);
+          
+          // Aplicar estilo al contenedor de barcode para etiquetas térmicas/DYMO/Zebra
+          if (!esEtiquetaPequena) {
+            barcodeContainerStyle = `style="display:flex;flex-direction:column;justify-content:center;align-items:center;margin-top:${barcodeMarginTop}mm;margin-bottom:${barcodeMarginBottom}mm;"`;
+          } else {
+            // Para etiquetas pequeñas, usar valores más reducidos
+            barcodeContainerStyle = `style="display:flex;flex-direction:column;justify-content:center;align-items:center;margin-top:${barcodeMarginTop/2}mm;margin-bottom:${barcodeMarginBottom/2}mm;"`;
+          }
+        }
+        
+        // Estilo para el contenedor principal
+        if (formato.verticalCenter || formato.horizontalCenter) {
+          let centerStyles = [
+            'display:flex', 
+            'flex-direction:column'
+          ];
+          
+          if (formato.horizontalCenter) {
+            centerStyles.push('align-items:center', 'text-align:center');
+          }
+          
+          if (formato.verticalCenter) {
+            centerStyles.push('justify-content:center');
+          }
+          
+          contentStyle = `style="${centerStyles.join(';')};padding:${formato.contentPaddingY || 2}mm ${formato.contentPaddingX || 2}mm;"`;
+        } else {
+          // Para Avery, usar el estilo normal
+          contentStyle = `style="padding:${formato.contentPaddingY || 2}mm ${formato.contentPaddingX || 2}mm;"`;
+        }
+        
+        // Construir el HTML de la etiqueta
         let html = `
-          <div class="etiqueta" style="${positionStyle}width:${ancho}mm;height:${alto}mm;">
-            <div class="etiqueta-content">
+          <div class="etiqueta" style="${positionStyle}width:${ancho}mm;height:${alto}mm;overflow:hidden;">
+            <div class="etiqueta-content" ${contentStyle}>
         `;
         
-        // Nombre del producto
-        if (!elements.checkboxNombre || elements.checkboxNombre.checked) {
-          html += `<div class="etiqueta-nombre">${appState.producto.nombre}</div>`;
-        }
-        
-        // Precio
-        if (!elements.checkboxPrecio || elements.checkboxPrecio.checked) {
-          html += `<div class="etiqueta-precio">$${parseFloat(appState.producto.precio).toFixed(2)}</div>`;
-        }
-        
-        // Código de barras
-        if (mostrarCodigoBarras) {
-          // Agregar un identificador único para este SVG
-          const svgId = `barcode-${index}-${Date.now()}`;
+        // Para etiquetas pequeñas, optimizar el espacio y modificar el estilo
+        if (esEtiquetaPequena) {
+          // Código de barras con tamaño ajustado para formato pequeño
+          if (mostrarCodigoBarras) {
+            // Envolvemos en div para mejor control del posicionamiento vertical
+            html += `<div ${barcodeContainerStyle}>`;
+            const svgId = `barcode-${index}-${Date.now()}`;
+            // No mostrar texto en el SVG porque ocuparía demasiado espacio
+            html += `<svg class="etiqueta-barcode" id="${svgId}" data-codigo="${appState.producto.codigo}" data-show-text="false" style="max-width:95%;max-height:70%;margin:auto;"></svg>`;
+            html += `</div>`;
+            appState.barcodesToGenerate.push(svgId);
+          }
           
-          // Obtener si debemos mostrar el texto del código en el SVG
-          const mostrarTextoEnSVG = !mostrarCodigoTexto; // Invertido para evitar duplicación
+          // Código en texto con fuente más pequeña
+          if (mostrarCodigoTexto) {
+            html += `<div class="etiqueta-codigo" style="font-size:6px;margin-top:1px;margin-bottom:0;text-align:center;">${appState.producto.codigo}</div>`;
+          }
+        } else {
+          // Comportamiento normal para etiquetas estándar
+          // Nombre del producto
+          if (mostrarNombre) {
+            html += `<div class="etiqueta-nombre">${appState.producto.nombre}</div>`;
+          }
           
-          // Almacenar preferencia en el propio elemento para uso posterior
-          html += `<svg class="etiqueta-barcode" id="${svgId}" data-codigo="${appState.producto.codigo}" data-show-text="${mostrarTextoEnSVG}"></svg>`;
+          // Precio
+          if (mostrarPrecio) {
+            html += `<div class="etiqueta-precio">$${parseFloat(appState.producto.precio).toFixed(2)}</div>`;
+          }
           
-          // Agregar este SVG a la lista de códigos por generar
-          appState.barcodesToGenerate.push(svgId);
-        }
-        
-        // Código en texto (solo si no se muestra en el código de barras o si se especificó)
-        if (mostrarCodigoTexto) {
-          html += `<div class="etiqueta-codigo">${appState.producto.codigo}</div>`;
+          // Código de barras - ENVUELTO EN DIV PARA CONTROL DE POSICIÓN
+          if (mostrarCodigoBarras) {
+            // Envolvemos en div para mejor control del posicionamiento vertical
+            html += `<div ${barcodeContainerStyle}>`;
+            // Agregar un identificador único para este SVG
+            const svgId = `barcode-${index}-${Date.now()}`;
+            
+            // Obtener si debemos mostrar el texto del código en el SVG
+            const mostrarTextoEnSVG = !mostrarCodigoTexto; // Invertido para evitar duplicación
+            
+            // Almacenar preferencia en el propio elemento para uso posterior
+            html += `<svg class="etiqueta-barcode" id="${svgId}" data-codigo="${appState.producto.codigo}" data-show-text="${mostrarTextoEnSVG}"></svg>`;
+            html += `</div>`;
+            
+            // Agregar este SVG a la lista de códigos por generar
+            appState.barcodesToGenerate.push(svgId);
+          }
+          
+          // Código en texto (solo si no se muestra en el código de barras o si se especificó)
+          if (mostrarCodigoTexto) {
+            html += `<div class="etiqueta-codigo">${appState.producto.codigo}</div>`;
+          }
         }
         
         html += `
@@ -1051,23 +1127,49 @@ document.addEventListener('DOMContentLoaded', function() {
           // Usar la preferencia almacenada en el SVG
           const mostrarTextoEnSVG = svg.dataset.showText === "true";
           
+          // Verificar si es para una etiqueta pequeña y ajustar el tamaño
+          const formato = obtenerFormatoSeleccionado();
+          const esEtiquetaPequena = verificarSiEtiquetaEsPequena(formato);
+          let anchoLinea = config.anchoLinea;
+          let altoBarras = config.altoBarras;
+          let tamanoTexto = config.tamanoTexto;
+          
+          if (esEtiquetaPequena) {
+            // Reducir tamaños para etiquetas pequeñas
+            anchoLinea = Math.max(0.8, config.anchoLinea * 0.6);
+            altoBarras = Math.max(15, config.altoBarras * 0.6);
+            tamanoTexto = Math.max(6, config.tamanoTexto * 0.6);
+          }
+          
+          // Aplicar ajustes específicos para impresoras térmicas/DYMO/Zebra
+          if (appState.impresora !== 'normal') {
+            // Reducir margen vertical para impresoras térmicas
+            const margin = esEtiquetaPequena ? 1 : 0; // Reducir a 0 para impresoras térmicas no pequeñas
+          }
+          
           // Actualizar la configuración con la preferencia de mostrar texto
           const jsBarcodeConfig = {
             format: config.formato,
-            width: config.anchoLinea,
-            height: config.altoBarras,
+            width: anchoLinea,
+            height: altoBarras,
             displayValue: mostrarTextoEnSVG,
-            fontSize: config.tamanoTexto,
-            margin: 2,
+            fontSize: tamanoTexto,
+            margin: esEtiquetaPequena ? 1 : 0, // Eliminar márgenes para mejor control posicional
             background: "#ffffff",
             text: codigoLimpio,
-            textMargin: mostrarTextoEnSVG ? 2 : 0, // Sin margen si no se muestra texto
+            textMargin: mostrarTextoEnSVG ? (esEtiquetaPequena ? 1 : 2) : 0, // Sin margen si no se muestra texto
             lineColor: "#000000"
           };
           
           // Generar código de barras con manejo de errores
           try {
             JsBarcode(svg, codigoLimpio, jsBarcodeConfig);
+            
+            // Post-procesamiento del SVG para corregir alineación vertical
+            // Esto es crucial: el SVG generado por JsBarcode tiene problemas de posicionamiento interno
+            // que debemos corregir manualmente
+            ajustarAlineacionVerticalSVG(svg, formato);
+            
           } catch(err) {
             console.error(`Error en código de barras, usando CODE128:`, err);
             
@@ -1076,6 +1178,9 @@ document.addEventListener('DOMContentLoaded', function() {
               ...jsBarcodeConfig,
               format: "CODE128"
             });
+            
+            // También ajustar el fallback
+            ajustarAlineacionVerticalSVG(svg, formato);
           }
         } catch(e) {
           console.error(`Error fatal en código de barras:`, e);
@@ -1090,6 +1195,68 @@ document.addEventListener('DOMContentLoaded', function() {
             errorMsg.style.padding = "4px";
             svg.parentNode.replaceChild(errorMsg, svg);
           }
+        }
+      }
+      
+      /**
+       * Ajusta la alineación vertical del SVG generado por JsBarcode
+       * Este es un paso crucial para corregir los problemas de espaciado vertical
+       * @param {SVGElement} svg - El SVG a ajustar
+       * @param {Object} formato - El formato de etiqueta
+       */
+      function ajustarAlineacionVerticalSVG(svg, formato) {
+        try {
+          // Solo ajustamos impresoras térmicas/DYMO/Zebra, no Avery
+          if (appState.impresora === 'normal') {
+            return;
+          }
+          
+          // Obtener el elemento g principal dentro del SVG
+          const gElement = svg.querySelector('g');
+          if (!gElement) return;
+          
+          // Obtener la transformación actual (normalmente tiene un translate)
+          const currentTransform = gElement.getAttribute('transform') || '';
+          
+          // Si ya tiene nuestra clase de ajuste, no hacer nada
+          if (svg.classList.contains('barcode-adjusted')) {
+            return;
+          }
+          
+          // Para impresoras térmicas, ajustamos el posicionamiento vertical
+          // Este es el ajuste clave que resuelve el problema del código pegado al borde superior
+          if (appState.impresora === 'termica' || appState.impresora === 'dymo' || appState.impresora === 'zebra') {
+            // Calcular el desplazamiento vertical adecuado para centrar perfectamente
+            const verticalOffset = formato.barcodeVerticalShift || 0;
+            
+            // Si existe una transformación previa, adaptarla
+            if (currentTransform && currentTransform.includes('translate')) {
+              // El formato típico es "translate(X,Y)"
+              const match = currentTransform.match(/translate\(([^,]+),([^)]+)\)/);
+              if (match && match.length === 3) {
+                const x = parseFloat(match[1]);
+                const y = parseFloat(match[2]);
+                
+                // Aplicar nuestro desplazamiento vertical adicional
+                const newTransform = `translate(${x},${y + verticalOffset})`;
+                gElement.setAttribute('transform', newTransform);
+              }
+            } else {
+              // Si no hay transformación previa, crear una nueva
+              gElement.setAttribute('transform', `translate(0,${verticalOffset})`);
+            }
+            
+            // Eliminar márgenes internos adicionales que JsBarcode agrega
+            svg.style.margin = '0';
+            if (svg.parentNode) {
+              svg.parentNode.style.margin = '0';
+            }
+            
+            // Marcar como ajustado para evitar procesamiento múltiple
+            svg.classList.add('barcode-adjusted');
+          }
+        } catch (e) {
+          console.error("Error al ajustar alineación vertical del SVG:", e);
         }
       }
       
@@ -1155,14 +1322,15 @@ document.addEventListener('DOMContentLoaded', function() {
           
           console.log('Preparando impresión...');
           appState.isProcessing = true;
-          mostrarCargando(elements.previewContainer, true, "Preparando impresión...", "Creando diseño de etiquetas");
+          const mainContainer = document.querySelector('.etiquetas-layout');
+          mostrarCargando(mainContainer, true, "Preparando impresión...", "Creando diseño de etiquetas");
           
           // Crear ventana para impresión
           const printWindow = window.open('', '_blank');
           
           if (!printWindow) {
             alert('Por favor, permite las ventanas emergentes para imprimir.');
-            mostrarCargando(elements.previewContainer, false);
+            mostrarCargando(mainContainer, false);
             appState.isProcessing = false;
             return;
           }
@@ -1178,21 +1346,26 @@ document.addEventListener('DOMContentLoaded', function() {
           // Obtener configuración de código de barras
           const barcodeConfig = obtenerConfiguracionCodigoBarras();
           
-          // Verificar si debemos mostrar el código como texto separado
-          const mostrarCodigoTexto = !elements.checkboxCodigo || elements.checkboxCodigo.checked;
+          // Verificar si es una etiqueta pequeña
+          const esEtiquetaPequena = verificarSiEtiquetaEsPequena(formato);
           
-          // Crear estilos CSS optimizados para impresión
+          // Verificar si debemos mostrar el código como texto separado
+          const mostrarCodigoTexto = esEtiquetaPequena ? true : (!elements.checkboxCodigo || elements.checkboxCodigo.checked);
+          
+          // Crear estilos CSS optimizados para impresión con mejoras de alineación
           const cssStyles = `
             @page {
               size: ${impresora === 'normal' ? 'A4' : formato.ancho + 'mm ' + formato.alto + 'mm'};
               margin: 0;
             }
+            
             body {
               margin: 0;
               padding: 0;
               font-family: 'Inter', Arial, sans-serif;
               background-color: #f0f0f0;
             }
+            
             .preview-sheet {
               position: relative;
               width: ${impresora === 'normal' ? '210mm' : formato.ancho + 'mm'};
@@ -1202,6 +1375,7 @@ document.addEventListener('DOMContentLoaded', function() {
               margin: 0 auto;
               box-shadow: 0 0 10px rgba(0,0,0,0.1);
             }
+            
             .etiqueta {
               position: absolute;
               display: flex;
@@ -1212,7 +1386,9 @@ document.addEventListener('DOMContentLoaded', function() {
               background: white;
               font-family: 'Inter', Arial, sans-serif;
               box-sizing: border-box;
+              border: 1px dashed #ddd;
             }
+            
             .etiqueta-content {
               display: flex;
               flex-direction: column;
@@ -1220,9 +1396,20 @@ document.addEventListener('DOMContentLoaded', function() {
               justify-content: center;
               width: 100%;
               height: 100%;
-              padding: 2px;
+              padding: ${formato.contentPaddingY || 2}mm ${formato.contentPaddingX || 2}mm;
               text-align: center;
             }
+            
+            .barcode-container {
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+              align-items: center;
+              margin: 0;
+              padding: 0;
+              width: 100%;
+            }
+            
             .etiqueta-nombre {
               font-weight: 600;
               font-size: 10px;
@@ -1234,22 +1421,30 @@ document.addEventListener('DOMContentLoaded', function() {
               -webkit-line-clamp: 2;
               -webkit-box-orient: vertical;
               word-break: break-word;
+              text-align: center;
             }
+            
             .etiqueta-precio {
               font-weight: 700;
               font-size: 12px;
               margin-bottom: 2px;
               color: #e52e2e;
+              text-align: center;
             }
+            
             .etiqueta-codigo {
               font-size: 8px;
               margin-bottom: 3px;
               color: #666;
+              text-align: center;
             }
+            
             .etiqueta-barcode {
               max-width: 95%;
-              margin-bottom: 2px;
+              margin: 0 auto 2px;
+              display: block;
             }
+            
             .loading-indicator {
               position: fixed;
               top: 0;
@@ -1262,6 +1457,16 @@ document.addEventListener('DOMContentLoaded', function() {
               font-size: 14px;
               z-index: 1000;
             }
+            
+            /* Ajustes específicos para impresoras térmicas */
+            .thermal-label .etiqueta-content {
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+              align-items: center;
+              height: 100%;
+            }
+            
             @media print {
               body * {
                 visibility: visible;
@@ -1291,30 +1496,82 @@ document.addEventListener('DOMContentLoaded', function() {
           
           // Crear funciones para generar etiquetas
           function crearEtiquetaHTMLParaImpresion(x, y, ancho, alto, svgId) {
-            // Verificar si debemos mostrar el código de barras y el texto del código por separado
-            const mostrarCodigoBarras = !elements.checkboxCodigoBarras || elements.checkboxCodigoBarras.checked;
+            // Verificar si es una etiqueta pequeña y ajustar el contenido
+            const esEtiquetaPequena = verificarSiEtiquetaEsPequena(formato);
             
+            // Crear clase adicional para impresoras térmicas
+            const claseAdicional = impresora !== 'normal' ? 'thermal-label' : '';
+            
+            // Configuración específica según tamaño de etiqueta
+            const mostrarCodigoBarras = esEtiquetaPequena ? true : (!elements.checkboxCodigoBarras || elements.checkboxCodigoBarras.checked);
+            const mostrarCodigoTexto = esEtiquetaPequena ? true : (!elements.checkboxCodigo || elements.checkboxCodigo.checked);
+            const mostrarNombre = esEtiquetaPequena ? false : (!elements.checkboxNombre || elements.checkboxNombre.checked);
+            const mostrarPrecio = esEtiquetaPequena ? false : (!elements.checkboxPrecio || elements.checkboxPrecio.checked);
+            
+            // Estilos específicos para el contenedor del código de barras
+            let barcodeContainerStyle = '';
+            
+            // Si hay espaciamiento vertical específico, aplicarlo
+            if (formato.contentTopSpacing > 0 || formato.contentBottomSpacing > 0 || formato.barcodeVerticalShift !== 0) {
+              let barcodeMarginTop = formato.contentTopSpacing || 0;
+              let barcodeMarginBottom = formato.contentBottomSpacing || 0;
+              
+              // Aplicar desplazamiento vertical si se especificó
+              if (formato.barcodeVerticalShift !== undefined && formato.barcodeVerticalShift !== 0) {
+                barcodeMarginTop += formato.barcodeVerticalShift;
+                barcodeMarginBottom -= formato.barcodeVerticalShift;
+              }
+              
+              // Asegurar valores no negativos
+              barcodeMarginTop = Math.max(0, barcodeMarginTop);
+              barcodeMarginBottom = Math.max(0, barcodeMarginBottom);
+              
+              barcodeContainerStyle = `style="margin-top:${barcodeMarginTop}mm;margin-bottom:${barcodeMarginBottom}mm;"`;
+            }
+            
+            // Construir HTML con clases y estilos específicos
             let html = `
-              <div class="etiqueta" style="left:${x}mm;top:${y}mm;width:${ancho}mm;height:${alto}mm;">
+              <div class="etiqueta ${claseAdicional}" style="left:${x}mm;top:${y}mm;width:${ancho}mm;height:${alto}mm;">
                 <div class="etiqueta-content">
             `;
             
-            if (!elements.checkboxNombre || elements.checkboxNombre.checked) {
-              html += `<div class="etiqueta-nombre">${appState.producto.nombre}</div>`;
-            }
-            
-            if (!elements.checkboxPrecio || elements.checkboxPrecio.checked) {
-              html += `<div class="etiqueta-precio">$${parseFloat(appState.producto.precio).toFixed(2)}</div>`;
-            }
-            
-            if (mostrarCodigoBarras) {
-              // Pasar preferencia de mostrar texto en el SVG
-              const mostrarTextoEnSVG = !mostrarCodigoTexto;
-              html += `<svg class="etiqueta-barcode" id="${svgId}" data-codigo="${appState.producto.codigo}" data-show-text="${mostrarTextoEnSVG}"></svg>`;
-            }
-            
-            if (mostrarCodigoTexto) {
-              html += `<div class="etiqueta-codigo">${appState.producto.codigo}</div>`;
+            // Para etiquetas pequeñas, optimizar el espacio
+            if (esEtiquetaPequena) {
+              // Código de barras con tamaño ajustado para formato pequeño
+              if (mostrarCodigoBarras) {
+                // Contenedor para control de posición vertical
+                html += `<div class="barcode-container" ${barcodeContainerStyle}>`;
+                // No mostrar texto en el SVG porque ocuparía demasiado espacio
+                html += `<svg class="etiqueta-barcode" id="${svgId}" data-codigo="${appState.producto.codigo}" data-show-text="false" style="max-width:95%;max-height:70%;display:block;margin:0 auto;"></svg>`;
+                html += `</div>`;
+              }
+              
+              // Código en texto con fuente más pequeña
+              if (mostrarCodigoTexto) {
+                html += `<div class="etiqueta-codigo" style="font-size:6px;margin-top:1px;margin-bottom:0;text-align:center;">${appState.producto.codigo}</div>`;
+              }
+            } else {
+              // Comportamiento normal para etiquetas estándar
+              if (mostrarNombre) {
+                html += `<div class="etiqueta-nombre">${appState.producto.nombre}</div>`;
+              }
+              
+              if (mostrarPrecio) {
+                html += `<div class="etiqueta-precio">$${parseFloat(appState.producto.precio).toFixed(2)}</div>`;
+              }
+              
+              if (mostrarCodigoBarras) {
+                // Contenedor para control de posición vertical
+                html += `<div class="barcode-container" ${barcodeContainerStyle}>`;
+                // Pasar preferencia de mostrar texto en el SVG
+                const mostrarTextoEnSVG = !mostrarCodigoTexto;
+                html += `<svg class="etiqueta-barcode" id="${svgId}" data-codigo="${appState.producto.codigo}" data-show-text="${mostrarTextoEnSVG}" style="display:block;margin:0 auto;"></svg>`;
+                html += `</div>`;
+              }
+              
+              if (mostrarCodigoTexto) {
+                html += `<div class="etiqueta-codigo">${appState.producto.codigo}</div>`;
+              }
             }
             
             html += `
@@ -1354,11 +1611,28 @@ document.addEventListener('DOMContentLoaded', function() {
               printHtml += `</div>`;
             }
           } else {
-            // Para impresoras térmicas: una etiqueta por página
+            // Para impresoras térmicas: una etiqueta por página con centrado
             for (let i = 0; i < cantidad; i++) {
-              printHtml += `<div class="preview-sheet">`;
+              // Centrar la etiqueta en la página
+              let posX = (configuracion.paginaAncho - formato.ancho) / 2;
+              let posY = (configuracion.paginaAlto - formato.alto) / 2;
+              
+              // Asegurar que los valores no sean negativos
+              posX = Math.max(0, posX);
+              posY = Math.max(0, posY);
+              
+              // Si se especificaron márgenes, usarlos
+              if (formato.marginX !== undefined) {
+                posX = formato.marginX;
+              }
+              
+              if (formato.marginY !== undefined) {
+                posY = formato.marginY;
+              }
+              
+              printHtml += `<div class="preview-sheet thermal-page">`;
               const svgId = `print-barcode-thermal-${i}`;
-              printHtml += crearEtiquetaHTMLParaImpresion(configuracion.marginX, configuracion.marginY, formato.ancho, formato.alto, svgId);
+              printHtml += crearEtiquetaHTMLParaImpresion(posX, posY, formato.ancho, formato.alto, svgId);
               printHtml += `</div>`;
             }
           }
@@ -1377,6 +1651,62 @@ document.addEventListener('DOMContentLoaded', function() {
                     window.close();
                   }
                 }, 60000);
+                
+                // Función para ajustar la alineación vertical del SVG generado por JsBarcode
+                function ajustarAlineacionVerticalSVG(svg, formato) {
+                  try {
+                    // Solo ajustamos impresoras térmicas/DYMO/Zebra, no Avery
+                    if ('${impresora}' === 'normal') {
+                      return;
+                    }
+                    
+                    // Obtener el elemento g principal dentro del SVG
+                    const gElement = svg.querySelector('g');
+                    if (!gElement) return;
+                    
+                    // Obtener la transformación actual (normalmente tiene un translate)
+                    const currentTransform = gElement.getAttribute('transform') || '';
+                    
+                    // Si ya tiene nuestra clase de ajuste, no hacer nada
+                    if (svg.classList.contains('barcode-adjusted')) {
+                      return;
+                    }
+                    
+                    // Para impresoras térmicas, ajustamos el posicionamiento vertical
+                    if ('${impresora}' === 'termica' || '${impresora}' === 'dymo' || '${impresora}' === 'zebra') {
+                      // Calcular el desplazamiento vertical adecuado para centrar perfectamente
+                      const verticalOffset = ${formato.barcodeVerticalShift || 0};
+                      
+                      // Si existe una transformación previa, adaptarla
+                      if (currentTransform && currentTransform.includes('translate')) {
+                        // El formato típico es "translate(X,Y)"
+                        const match = currentTransform.match(/translate\\(([^,]+),([^)]+)\\)/);
+                        if (match && match.length === 3) {
+                          const x = parseFloat(match[1]);
+                          const y = parseFloat(match[2]);
+                          
+                          // Aplicar nuestro desplazamiento vertical adicional
+                          const newTransform = \`translate(\${x},\${y + verticalOffset})\`;
+                          gElement.setAttribute('transform', newTransform);
+                        }
+                      } else {
+                        // Si no hay transformación previa, crear una nueva
+                        gElement.setAttribute('transform', \`translate(0,\${verticalOffset})\`);
+                      }
+                      
+                      // Eliminar márgenes internos adicionales que JsBarcode agrega
+                      svg.style.margin = '0';
+                      if (svg.parentNode) {
+                        svg.parentNode.style.margin = '0';
+                      }
+                      
+                      // Marcar como ajustado para evitar procesamiento múltiple
+                      svg.classList.add('barcode-adjusted');
+                    }
+                  } catch (e) {
+                    console.error("Error al ajustar alineación vertical del SVG:", e);
+                  }
+                }
                 
                 // Generar códigos de barras al cargar
                 window.onload = async function() {
@@ -1405,18 +1735,40 @@ document.addEventListener('DOMContentLoaded', function() {
                         // Obtener preferencia de mostrar texto
                         const mostrarTextoEnSVG = svg.dataset.showText === "true";
                         
+                        // Detectar si es para una etiqueta pequeña basado en atributos
+                        const esEtiquetaPequena = ${esEtiquetaPequena};
+                        
+                        // Configurar tamaños según el tipo de etiqueta
+                        let anchoLinea = ${barcodeConfig.anchoLinea};
+                        let altoBarras = ${barcodeConfig.altoBarras};
+                        let tamanoTexto = ${barcodeConfig.tamanoTexto};
+                        let margin = ${impresora === 'normal' ? 2 : 0}; // Eliminar márgenes para impresoras térmicas
+                        
+                        if (esEtiquetaPequena) {
+                          // Reducir tamaños para etiquetas pequeñas
+                          anchoLinea = Math.max(0.8, ${barcodeConfig.anchoLinea} * 0.6);
+                          altoBarras = Math.max(15, ${barcodeConfig.altoBarras} * 0.6);
+                          tamanoTexto = Math.max(6, ${barcodeConfig.tamanoTexto} * 0.6);
+                          margin = 1;
+                        }
+                        
                         if (codigo) {
                           JsBarcode(svg, codigo, {
                             format: "${barcodeConfig.formato}",
-                            width: ${barcodeConfig.anchoLinea},
-                            height: ${barcodeConfig.altoBarras},
+                            width: anchoLinea,
+                            height: altoBarras,
                             displayValue: mostrarTextoEnSVG,
-                            fontSize: ${barcodeConfig.tamanoTexto},
-                            margin: 2,
+                            fontSize: tamanoTexto,
+                            margin: margin,
                             background: "#ffffff",
                             text: codigo,
-                            textMargin: mostrarTextoEnSVG ? 2 : 0,
+                            textMargin: mostrarTextoEnSVG ? (esEtiquetaPequena ? 1 : 2) : 0,
                             lineColor: "#000000"
+                          });
+                          
+                          // Ajustar alineación vertical después de generar el código
+                          ajustarAlineacionVerticalSVG(svg, {
+                            barcodeVerticalShift: ${formato.barcodeVerticalShift || 0}
                           });
                         }
                       } catch(e) {
@@ -1430,6 +1782,11 @@ document.addEventListener('DOMContentLoaded', function() {
                             width: ${barcodeConfig.anchoLinea},
                             height: ${barcodeConfig.altoBarras},
                             displayValue: mostrarTextoEnSVG
+                          });
+                          
+                          // También ajustar el fallback
+                          ajustarAlineacionVerticalSVG(svg, {
+                            barcodeVerticalShift: ${formato.barcodeVerticalShift || 0}
                           });
                         } catch(e2) {
                           console.error("Error secundario:", e2);
@@ -1491,19 +1848,19 @@ document.addEventListener('DOMContentLoaded', function() {
           
           // Temporizador de seguridad para quitar el indicador de carga
           setTimeout(() => {
-            mostrarCargando(elements.previewContainer, false);
+            mostrarCargando(mainContainer, false);
             appState.isProcessing = false;
           }, 3000);
           
           // Evento para manejar cuando la ventana se cierra
           printWindow.addEventListener('unload', function() {
-            mostrarCargando(elements.previewContainer, false);
+            mostrarCargando(mainContainer, false);
             appState.isProcessing = false;
           });
         } catch(e) {
           console.error("Error al imprimir etiquetas:", e);
           alert("Error al preparar la impresión: " + e.message);
-          mostrarCargando(elements.previewContainer, false);
+          mostrarCargando(document.querySelector('.etiquetas-layout'), false);
           appState.isProcessing = false;
         }
       }
@@ -1532,7 +1889,7 @@ document.addEventListener('DOMContentLoaded', function() {
           }
           
           console.log('Preparando generación de PDF...');
-          mostrarCargando(elements.previewContainer, true, "Generando PDF...", "Preparando diseño");
+          mostrarCargando(document.querySelector('.etiquetas-layout'), true, "Generando PDF...", "Preparando diseño");
           
           // Obtener configuración actualizada
           const formato = appState.formato || obtenerFormatoSeleccionado();
@@ -1562,10 +1919,13 @@ document.addEventListener('DOMContentLoaded', function() {
           const { jsPDF } = window.jspdf;
           const pdf = new jsPDF(pdfOptions);
           
-          // Verificar si debemos mostrar el código como texto separado
-          const mostrarCodigoTexto = !elements.checkboxCodigo || elements.checkboxCodigo.checked;
+          // Verificar si es una etiqueta pequeña
+          const esEtiquetaPequena = verificarSiEtiquetaEsPequena(formato);
           
-          // Preparar CSS para el contenedor del PDF
+          // Verificar si debemos mostrar el código como texto separado
+          const mostrarCodigoTexto = esEtiquetaPequena ? true : (!elements.checkboxCodigo || elements.checkboxCodigo.checked);
+          
+          // Preparar CSS para el contenedor del PDF con mejoras de alineación
           const pdfCSS = `
             <style>
               body, html {
@@ -1575,6 +1935,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 -webkit-print-color-adjust: exact;
                 color-adjust: exact;
               }
+              
               .pdf-page {
                 width: ${impresora === 'normal' ? '210mm' : formato.ancho + 'mm'};
                 height: ${impresora === 'normal' ? '297mm' : formato.alto + 'mm'};
@@ -1586,6 +1947,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 page-break-after: always;
                 box-sizing: border-box;
               }
+              
               .etiqueta {
                 position: absolute;
                 display: flex;
@@ -1597,6 +1959,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 box-sizing: border-box;
                 border: 1px dashed #ddd;
               }
+              
               .etiqueta-content {
                 display: flex;
                 flex-direction: column;
@@ -1604,9 +1967,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 justify-content: center;
                 width: 100%;
                 height: 100%;
-                padding: 2px;
+                padding: ${formato.contentPaddingY || 2}mm ${formato.contentPaddingX || 2}mm;
                 text-align: center;
               }
+              
+              .barcode-container {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                margin: 0;
+                padding: 0;
+                width: 100%;
+              }
+              
               .etiqueta-nombre {
                 font-weight: 600;
                 font-size: 10px;
@@ -1618,21 +1992,38 @@ document.addEventListener('DOMContentLoaded', function() {
                 -webkit-line-clamp: 2;
                 -webkit-box-orient: vertical;
                 word-break: break-word;
+                text-align: center;
               }
+              
               .etiqueta-precio {
                 font-weight: 700;
                 font-size: 12px;
                 margin-bottom: 2px;
                 color: #e52e2e;
+                text-align: center;
               }
+              
               .etiqueta-codigo {
                 font-size: 8px;
                 margin-bottom: 3px;
                 color: #666;
+                text-align: center;
               }
+              
               .etiqueta-barcode {
                 max-width: 95%;
-                margin-bottom: 2px;
+                max-height: ${esEtiquetaPequena ? '70%' : '80%'};
+                margin: 0 auto 2px;
+                display: block;
+              }
+              
+              /* Ajustes específicos para impresoras térmicas */
+              .thermal-label .etiqueta-content {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                height: 100%;
               }
             </style>
           `;
@@ -1669,11 +2060,28 @@ document.addEventListener('DOMContentLoaded', function() {
                 pdfHTML += `</div>`;
               }
             } else {
-              // Para impresoras térmicas, crear una hoja por etiqueta
+              // Para impresoras térmicas, crear una hoja por etiqueta con centrado
               for (let i = 0; i < cantidad; i++) {
+                // Centrar la etiqueta en la página
+                let posX = (configuracion.paginaAncho - formato.ancho) / 2;
+                let posY = (configuracion.paginaAlto - formato.alto) / 2;
+                
+                // Asegurar que los valores no sean negativos
+                posX = Math.max(0, posX);
+                posY = Math.max(0, posY);
+                
+                // Si se especificaron márgenes, usarlos
+                if (formato.marginX !== undefined) {
+                  posX = formato.marginX;
+                }
+                
+                if (formato.marginY !== undefined) {
+                  posY = formato.marginY;
+                }
+                
                 pdfHTML += `<div class="pdf-page">`;
                 const svgId = `pdf-barcode-thermal-${i}`;
-                pdfHTML += crearEtiquetaHTMLParaPDF(configuracion.marginX, configuracion.marginY, formato.ancho, formato.alto, svgId);
+                pdfHTML += crearEtiquetaHTMLParaPDF(posX, posY, formato.ancho, formato.alto, svgId);
                 pdfHTML += `</div>`;
               }
             }
@@ -1683,30 +2091,82 @@ document.addEventListener('DOMContentLoaded', function() {
           
           // Función para crear HTML de etiqueta individual para PDF
           function crearEtiquetaHTMLParaPDF(x, y, ancho, alto, svgId) {
-            // Verificar si debemos mostrar el código de barras y el texto del código por separado
-            const mostrarCodigoBarras = !elements.checkboxCodigoBarras || elements.checkboxCodigoBarras.checked;
+            // Verificar si es una etiqueta pequeña y ajustar el contenido
+            const esEtiquetaPequena = verificarSiEtiquetaEsPequena(formato);
             
+            // Crear clase adicional para impresoras térmicas
+            const claseAdicional = impresora !== 'normal' ? 'thermal-label' : '';
+            
+            // Configuración específica según tamaño de etiqueta
+            const mostrarCodigoBarras = esEtiquetaPequena ? true : (!elements.checkboxCodigoBarras || elements.checkboxCodigoBarras.checked);
+            const mostrarCodigoTexto = esEtiquetaPequena ? true : (!elements.checkboxCodigo || elements.checkboxCodigo.checked);
+            const mostrarNombre = esEtiquetaPequena ? false : (!elements.checkboxNombre || elements.checkboxNombre.checked);
+            const mostrarPrecio = esEtiquetaPequena ? false : (!elements.checkboxPrecio || elements.checkboxPrecio.checked);
+            
+            // Estilos específicos para el contenedor del código de barras
+            let barcodeContainerStyle = '';
+            
+            // Si hay espaciamiento vertical específico, aplicarlo
+            if (formato.contentTopSpacing > 0 || formato.contentBottomSpacing > 0 || formato.barcodeVerticalShift !== 0) {
+              let barcodeMarginTop = formato.contentTopSpacing || 0;
+              let barcodeMarginBottom = formato.contentBottomSpacing || 0;
+              
+              // Aplicar desplazamiento vertical si se especificó
+              if (formato.barcodeVerticalShift !== undefined && formato.barcodeVerticalShift !== 0) {
+                barcodeMarginTop += formato.barcodeVerticalShift;
+                barcodeMarginBottom -= formato.barcodeVerticalShift;
+              }
+              
+              // Asegurar valores no negativos
+              barcodeMarginTop = Math.max(0, barcodeMarginTop);
+              barcodeMarginBottom = Math.max(0, barcodeMarginBottom);
+              
+              barcodeContainerStyle = `style="margin-top:${barcodeMarginTop}mm;margin-bottom:${barcodeMarginBottom}mm;"`;
+            }
+            
+            // Construir HTML con clases y estilos específicos
             let html = `
-              <div class="etiqueta" style="left:${x}mm;top:${y}mm;width:${ancho}mm;height:${alto}mm;">
+              <div class="etiqueta ${claseAdicional}" style="left:${x}mm;top:${y}mm;width:${ancho}mm;height:${alto}mm;">
                 <div class="etiqueta-content">
             `;
             
-            if (!elements.checkboxNombre || elements.checkboxNombre.checked) {
-              html += `<div class="etiqueta-nombre">${appState.producto.nombre}</div>`;
-            }
-            
-            if (!elements.checkboxPrecio || elements.checkboxPrecio.checked) {
-              html += `<div class="etiqueta-precio">$${parseFloat(appState.producto.precio).toFixed(2)}</div>`;
-            }
-            
-            if (mostrarCodigoBarras) {
-              // Pasar preferencia de mostrar texto en el SVG
-              const mostrarTextoEnSVG = !mostrarCodigoTexto;
-              html += `<svg class="etiqueta-barcode" id="${svgId}" data-codigo="${appState.producto.codigo}" data-show-text="${mostrarTextoEnSVG}"></svg>`;
-            }
-            
-            if (mostrarCodigoTexto) {
-              html += `<div class="etiqueta-codigo">${appState.producto.codigo}</div>`;
+            // Para etiquetas pequeñas, optimizar el espacio
+            if (esEtiquetaPequena) {
+              // Código de barras con tamaño ajustado para formato pequeño
+              if (mostrarCodigoBarras) {
+                // Contenedor para control de posición vertical
+                html += `<div class="barcode-container" ${barcodeContainerStyle}>`;
+                // No mostrar texto en el SVG porque ocuparía demasiado espacio
+                html += `<svg class="etiqueta-barcode" id="${svgId}" data-codigo="${appState.producto.codigo}" data-show-text="false" style="max-width:95%;max-height:70%;display:block;margin:0 auto;"></svg>`;
+                html += `</div>`;
+              }
+              
+              // Código en texto con fuente más pequeña
+              if (mostrarCodigoTexto) {
+                html += `<div class="etiqueta-codigo" style="font-size:6px;margin-top:1px;margin-bottom:0;text-align:center;">${appState.producto.codigo}</div>`;
+              }
+            } else {
+              // Comportamiento normal para etiquetas estándar
+              if (mostrarNombre) {
+                html += `<div class="etiqueta-nombre">${appState.producto.nombre}</div>`;
+              }
+              
+              if (mostrarPrecio) {
+                html += `<div class="etiqueta-precio">$${parseFloat(appState.producto.precio).toFixed(2)}</div>`;
+              }
+              
+              if (mostrarCodigoBarras) {
+                // Contenedor para control de posición vertical
+                html += `<div class="barcode-container" ${barcodeContainerStyle}>`;
+                // Pasar preferencia de mostrar texto en el SVG
+                const mostrarTextoEnSVG = !mostrarCodigoTexto;
+                html += `<svg class="etiqueta-barcode" id="${svgId}" data-codigo="${appState.producto.codigo}" data-show-text="${mostrarTextoEnSVG}" style="display:block;margin:0 auto;"></svg>`;
+                html += `</div>`;
+              }
+              
+              if (mostrarCodigoTexto) {
+                html += `<div class="etiqueta-codigo">${appState.producto.codigo}</div>`;
+              }
             }
             
             html += `
@@ -1731,18 +2191,34 @@ document.addEventListener('DOMContentLoaded', function() {
               // Obtener preferencia de mostrar texto en el SVG
               const mostrarTextoEnSVG = svg.dataset.showText === "true";
               
-              JsBarcode(svg, codigo, {
+              // Verificar si es para una etiqueta pequeña
+              const parametrosBarcode = {
                 format: barcodeConfig.formato,
                 width: barcodeConfig.anchoLinea,
                 height: barcodeConfig.altoBarras,
                 displayValue: mostrarTextoEnSVG,
                 fontSize: barcodeConfig.tamanoTexto,
-                margin: 2,
+                margin: impresora === 'normal' ? 2 : 0, // Eliminar márgenes para impresoras térmicas
                 background: "#ffffff",
                 text: codigo,
                 textMargin: mostrarTextoEnSVG ? 2 : 0,
                 lineColor: "#000000"
-              });
+              };
+              
+              // Si es etiqueta pequeña, ajustar tamaños
+              if (esEtiquetaPequena) {
+                parametrosBarcode.width = Math.max(0.8, barcodeConfig.anchoLinea * 0.6);
+                parametrosBarcode.height = Math.max(15, barcodeConfig.altoBarras * 0.6);
+                parametrosBarcode.fontSize = Math.max(6, barcodeConfig.tamanoTexto * 0.6);
+                parametrosBarcode.margin = 1;
+                parametrosBarcode.textMargin = mostrarTextoEnSVG ? 1 : 0;
+              }
+              
+              JsBarcode(svg, codigo, parametrosBarcode);
+              
+              // Ajustar alineación vertical para impresoras térmicas
+              ajustarAlineacionVerticalSVG(svg, formato);
+              
             } catch (e) {
               console.error("Error al generar código de barras para PDF:", e);
               // Intentar con CODE128 como fallback
@@ -1754,6 +2230,10 @@ document.addEventListener('DOMContentLoaded', function() {
                   height: 40,
                   displayValue: mostrarTextoEnSVG
                 });
+                
+                // También ajustar el fallback
+                ajustarAlineacionVerticalSVG(svg, formato);
+                
               } catch (e2) {
                 console.error("Error secundario de código de barras:", e2);
               }
@@ -1777,7 +2257,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Actualizar mensaje
             mostrarCargando(
-              elements.previewContainer, 
+              document.querySelector('.etiquetas-layout'), 
               true, 
               "Generando PDF...", 
               `Procesando página 1 de ${paginas.length}`
@@ -1795,7 +2275,7 @@ document.addEventListener('DOMContentLoaded', function() {
               
               // Actualizar mensaje
               mostrarCargando(
-                elements.previewContainer, 
+                document.querySelector('.etiquetas-layout'), 
                 true, 
                 "Generando PDF...", 
                 `Procesando página ${index + 1} de ${paginas.length}`
@@ -1873,14 +2353,14 @@ document.addEventListener('DOMContentLoaded', function() {
               setTimeout(() => {
                 pdfContainer.innerHTML = '';
                 pdfContainer.style.display = 'none';
-                mostrarCargando(elements.previewContainer, false);
+                mostrarCargando(document.querySelector('.etiquetas-layout'), false);
                 appState.isProcessing = false;
                 appState.pdfGenerating = false; // Desactivar el flag
               }, 500);
             } catch (err) {
               console.error("Error al guardar el PDF:", err);
               alert("Error al guardar el PDF: " + err.message);
-              mostrarCargando(elements.previewContainer, false);
+              mostrarCargando(document.querySelector('.etiquetas-layout'), false);
               appState.isProcessing = false;
               appState.pdfGenerating = false; // Desactivar el flag en caso de error
             }
@@ -1888,7 +2368,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (e) {
           console.error("Error al generar PDF:", e);
           alert("Error al generar PDF: " + e.message);
-          mostrarCargando(elements.previewContainer, false);
+          mostrarCargando(document.querySelector('.etiquetas-layout'), false);
           appState.isProcessing = false;
           appState.pdfGenerating = false; // Desactivar el flag en caso de error
         }
@@ -1897,20 +2377,30 @@ document.addEventListener('DOMContentLoaded', function() {
       console.error("Error global en la inicialización:", error);
       
       // Mostrar error en la interfaz
-      const previewContent = document.getElementById('preview-content');
-      if (previewContent) {
-        previewContent.innerHTML = `
-          <div style="text-align:center;padding:2rem;color:#444;background-color:#f5f5f7;border-radius:0.5rem;box-shadow:0 1px 3px rgba(0,0,0,0.1);max-width:90%;margin:1rem auto;">
-            <i class="fas fa-exclamation-triangle" style="font-size:2rem;color:#e52e2e;margin-bottom:1rem;display:block;"></i>
-            <h3 style="font-size:1.25rem;font-weight:600;margin-bottom:0.75rem;color:#1d1d1f;">Error al inicializar el sistema de etiquetas</h3>
-            <p style="color:#444;margin-bottom:1rem;">${error.message}</p>
-            <p style="color:#666;font-size:0.875rem;">Por favor, recarga la página o contacta con soporte si el problema persiste.</p>
-            
-            <button onclick="location.reload()" style="margin-top:1rem;padding:0.5rem 1rem;background:#e52e2e;color:white;border:none;border-radius:0.375rem;font-weight:500;cursor:pointer;">
-              <i class="fas fa-sync-alt" style="margin-right:0.5rem;"></i> Recargar página
-            </button>
-          </div>
+      const mainContainer = document.querySelector('.etiquetas-layout');
+      if (mainContainer) {
+        const errorMsg = document.createElement('div');
+        errorMsg.style.textAlign = 'center';
+        errorMsg.style.padding = '2rem';
+        errorMsg.style.color = '#444';
+        errorMsg.style.backgroundColor = '#f5f5f7';
+        errorMsg.style.borderRadius = '0.5rem';
+        errorMsg.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+        errorMsg.style.maxWidth = '90%';
+        errorMsg.style.margin = '1rem auto';
+        
+        errorMsg.innerHTML = `
+          <i class="fas fa-exclamation-triangle" style="font-size:2rem;color:#e52e2e;margin-bottom:1rem;display:block;"></i>
+          <h3 style="font-size:1.25rem;font-weight:600;margin-bottom:0.75rem;color:#1d1d1f;">Error al inicializar el sistema de etiquetas</h3>
+          <p style="color:#444;margin-bottom:1rem;">${error.message}</p>
+          <p style="color:#666;font-size:0.875rem;">Por favor, recarga la página o contacta con soporte si el problema persiste.</p>
+          
+          <button onclick="location.reload()" style="margin-top:1rem;padding:0.5rem 1rem;background:#e52e2e;color:white;border:none;border-radius:0.375rem;font-weight:500;cursor:pointer;">
+            <i class="fas fa-sync-alt" style="margin-right:0.5rem;"></i> Recargar página
+          </button>
         `;
+        
+        mainContainer.appendChild(errorMsg);
       }
     }
   }
