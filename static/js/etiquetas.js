@@ -1,15 +1,12 @@
 /**
  * Etiquetas.js - Sistema profesional de generación de etiquetas con códigos de barras
- * Versión optimizada y corregida: Compatibilidad de impresoras mejorada
- * Version modificada: Sin vista previa y adaptada para etiquetas pequeñas
- * Corrección específica: Alineación vertical precisa para todos los formatos de etiquetas
- * Corrección adicional: Ajuste de precisión en la conversión de unidades para PDF
- * Corrección del problema de stock: Manejo adecuado del valor manual de cantidad
- * Optimización: Tamaño mejorado de códigos de barras para impresoras térmicas
+ * Versión optimizada con procesamiento por lotes y concordancia completa con HTML
+ * Mejoras: Procesamiento por lotes, indicadores de progreso, validación de límites,
+ * optimización de memoria, sistema de cancelación
  */
 
 document.addEventListener('DOMContentLoaded', function() {
-  console.log('Iniciando sistema de etiquetas profesional...');
+  console.log('Iniciando sistema de etiquetas profesional con procesamiento por lotes...');
   
   // Verificar dependencias críticas
   const dependencyChecks = [
@@ -127,6 +124,109 @@ function mostrarAlertaFormato(mensaje, tipo = 'warning') {
 }
 
 /**
+ * NUEVA: Función para mostrar progreso por lotes (integrada del HTML)
+ * @param {boolean} show - Mostrar u ocultar
+ * @param {number} current - Etiquetas procesadas
+ * @param {number} total - Total de etiquetas
+ * @param {string} message - Mensaje de estado
+ */
+function showBatchProgress(show, current = 0, total = 0, message = 'Procesando...') {
+  const batchProgress = document.getElementById('batch-progress');
+  const progressBar = document.getElementById('progress-bar');
+  const progressText = document.getElementById('progress-text');
+  const progressMessage = document.getElementById('progress-message');
+  
+  if (!batchProgress) return;
+  
+  if (show) {
+    batchProgress.style.display = 'block';
+    const percentage = total > 0 ? (current / total) * 100 : 0;
+    
+    if (progressBar) progressBar.style.width = percentage + '%';
+    if (progressText) progressText.textContent = `${current.toLocaleString()} / ${total.toLocaleString()} etiquetas`;
+    if (progressMessage) progressMessage.textContent = message;
+  } else {
+    batchProgress.style.display = 'none';
+  }
+}
+
+/**
+ * NUEVA: Función para obtener límites por tipo de impresora (integrada del HTML)
+ * @param {string} impresora - Tipo de impresora
+ * @returns {Object} Límites de la impresora
+ */
+function getPrinterLimits(impresora) {
+  const limits = {
+    normal: { safe: 300, warning: 500, maximum: 2000 },
+    zebra: { safe: 500, warning: 800, maximum: 3000 },
+    dymo: { safe: 500, warning: 800, maximum: 3000 },
+    termica: { safe: 800, warning: 1200, maximum: 5000 }
+  };
+  
+  return limits[impresora] || limits.normal;
+}
+
+/**
+ * NUEVA: Función para obtener el tipo de impresora seleccionado (integrada del HTML)
+ * @returns {string} Tipo de impresora
+ */
+function getSelectedPrinterType() {
+  const selectedPrinter = document.querySelector('.printer-option.selected');
+  return selectedPrinter ? selectedPrinter.dataset.printer : 'normal';
+}
+
+/**
+ * NUEVA: Función para delay/pausa entre operaciones
+ * @param {number} ms - Milisegundos a esperar
+ * @returns {Promise} Promise que se resuelve después del delay
+ */
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/**
+ * NUEVA: Sistema de control de cancelación
+ */
+const batchController = {
+  cancelled: false,
+  cancel() {
+    this.cancelled = true;
+    console.log('Operación cancelada por el usuario');
+  },
+  reset() {
+    this.cancelled = false;
+  },
+  isCancelled() {
+    return this.cancelled;
+  }
+};
+
+/**
+ * NUEVA: Función para limpiar memoria entre lotes
+ * @param {HTMLElement} container - Contenedor a limpiar
+ */
+function cleanupMemory(container) {
+  if (!container) return;
+  
+  // Limpiar SVGs y elementos DOM
+  const svgs = container.querySelectorAll('svg');
+  svgs.forEach(svg => {
+    svg.innerHTML = '';
+    if (svg.parentNode) {
+      svg.parentNode.removeChild(svg);
+    }
+  });
+  
+  // Limpiar contenedor
+  container.innerHTML = '';
+  
+  // Forzar garbage collection si está disponible
+  if (window.gc) {
+    window.gc();
+  }
+}
+
+/**
  * Inicializa la aplicación completa de etiquetas
  * Arquitectura modular para máxima eficiencia y mantenibilidad
  */
@@ -135,7 +235,7 @@ function initLabelApp() {
     // Catalogar todos los formatos disponibles con configuraciones precisas de alineación
     const formatosCatalog = {
       // Formatos para impresora normal
-                  normal: [
+      normal: [
         {
           value: "avery5160",
           text: "Avery 5160 (63.5mm x 26.9mm)",
@@ -448,7 +548,7 @@ function initLabelApp() {
       ]
     };
 
-    // Estado de la aplicación
+    // Estado de la aplicación MEJORADO con control de lotes
     const appState = {
       producto: null,           // Datos del producto
       formato: null,            // Formato de etiqueta seleccionado
@@ -457,7 +557,12 @@ function initLabelApp() {
       barcodesToGenerate: [],   // Códigos de barras pendientes
       isProcessing: false,      // Bloqueo de operaciones simultáneas
       pdfGenerating: false,     // Flag para evitar duplicación de PDF
-      formatosCatalog: formatosCatalog // Catálogo de formatos disponibles
+      formatosCatalog: formatosCatalog, // Catálogo de formatos disponibles
+      // NUEVOS: Control de lotes
+      batchSize: 50,            // Tamaño de lote por defecto
+      currentBatch: 0,          // Lote actual
+      totalBatches: 0,          // Total de lotes
+      processedLabels: 0        // Etiquetas procesadas
     };
     
     // Referencias a elementos del DOM
@@ -536,7 +641,7 @@ function initLabelApp() {
     }
     
     /**
-     * Configura los controladores de eventos para todos los componentes interactivos
+     * MEJORADO: Configura los controladores de eventos para todos los componentes interactivos
      */
     function setupEventListeners() {
       // 1. Checkbox de stock
@@ -554,6 +659,8 @@ function initLabelApp() {
               appState.cantidad = parseInt(elements.inputCantidad.value) || 0;
               console.log('Cantidad actualizada a valor manual:', appState.cantidad);
             }
+            // NUEVO: Actualizar configuración de lotes
+            updateBatchConfig();
           }
         });
       }
@@ -574,6 +681,9 @@ function initLabelApp() {
               
               // Actualizar selectores de formato según la impresora seleccionada
               actualizarFormatosDisponibles(printerId);
+              
+              // NUEVO: Actualizar configuración de lotes
+              updateBatchConfig();
             }
           });
         });
@@ -613,26 +723,83 @@ function initLabelApp() {
             if (this === elements.inputCantidad) {
               appState.cantidad = parseInt(this.value) || 0;
               console.log('Cantidad actualizada manualmente:', appState.cantidad);
+              // NUEVO: Actualizar configuración de lotes
+              updateBatchConfig();
             }
           });
         }
       });
       
-      // 5. Botones de acción
+      // 5. Botones de acción MEJORADOS con validación
       if (elements.btnPrint) {
         elements.btnPrint.addEventListener('click', function() {
-          imprimirEtiquetas();
+          if (validateBeforeProcessing()) {
+            imprimirEtiquetas();
+          }
         });
       }
       
       if (elements.btnPDF) {
         elements.btnPDF.addEventListener('click', function() {
           // Evitar múltiples clics rápidos
-          if (!appState.pdfGenerating) {
+          if (!appState.pdfGenerating && validateBeforeProcessing()) {
             descargarPDF();
           }
         });
       }
+    }
+    
+    /**
+     * NUEVO: Valida antes de procesar etiquetas
+     * @returns {boolean} Si es válido procesar
+     */
+    function validateBeforeProcessing() {
+      const cantidad = obtenerCantidad();
+      const impresora = appState.impresora;
+      const limits = getPrinterLimits(impresora);
+      
+      // Verificar si excede límites máximos
+      if (cantidad > limits.maximum) {
+        mostrarAlertaFormato(
+          `No se pueden procesar ${cantidad.toLocaleString()} etiquetas. El límite máximo para impresoras ${impresora} es ${limits.maximum.toLocaleString()} etiquetas.`,
+          'error'
+        );
+        return false;
+      }
+      
+      // Verificar si necesita confirmación para cantidades grandes
+      if (cantidad > limits.warning) {
+        const confirmMessage = `¿Está seguro de que desea procesar ${cantidad.toLocaleString()} etiquetas? Esta operación puede tomar varios minutos.`;
+        if (!confirm(confirmMessage)) {
+          return false;
+        }
+      }
+      
+      return true;
+    }
+    
+    /**
+     * NUEVO: Actualiza la configuración de lotes basada en la cantidad y tipo de impresora
+     */
+    function updateBatchConfig() {
+      const cantidad = obtenerCantidad();
+      const impresora = appState.impresora;
+      const limits = getPrinterLimits(impresora);
+      
+      // Determinar tamaño de lote óptimo
+      if (cantidad <= limits.safe) {
+        appState.batchSize = cantidad; // Procesar todo de una vez
+      } else if (impresora === 'normal') {
+        appState.batchSize = 50; // Lotes más pequeños para impresoras normales
+      } else {
+        appState.batchSize = 100; // Lotes más grandes para impresoras térmicas
+      }
+      
+      appState.totalBatches = Math.ceil(cantidad / appState.batchSize);
+      appState.currentBatch = 0;
+      appState.processedLabels = 0;
+      
+      console.log(`Configuración de lotes actualizada: ${appState.totalBatches} lotes de ${appState.batchSize} etiquetas`);
     }
     
     /**
@@ -656,6 +823,9 @@ function initLabelApp() {
       
       // Inicializar formatos disponibles para la impresora por defecto
       actualizarFormatosDisponibles('normal');
+      
+      // NUEVO: Configurar lotes iniciales
+      updateBatchConfig();
     }
     
     /**
@@ -896,13 +1066,15 @@ function initLabelApp() {
         // En el sistema de pestañas, controlamos visibilidad de la pestaña completa
         const tabButton = document.querySelector('[data-tab="barcode"]');
         
-        if (mostrar) {
-          tabButton.style.display = '';
-        } else {
-          tabButton.style.display = 'none';
-          // Si la pestaña está activa, cambiar a general
-          if (tabButton.classList.contains('active')) {
-            document.querySelector('[data-tab="general"]').click();
+        if (tabButton) {
+          if (mostrar) {
+            tabButton.style.display = '';
+          } else {
+            tabButton.style.display = 'none';
+            // Si la pestaña está activa, cambiar a general
+            if (tabButton.classList.contains('active')) {
+              document.querySelector('[data-tab="general"]').click();
+            }
           }
         }
       } else {
@@ -1697,52 +1869,61 @@ function initLabelApp() {
     }
     
     /**
-     * Imprime las etiquetas directamente
-     * Implementación mejorada para compatibilidad con todas las impresoras
+     * MEJORADO: Imprime las etiquetas directamente con procesamiento por lotes
+     * Implementación optimizada para compatibilidad con todas las impresoras
      */
-    function imprimirEtiquetas() {
+    async function imprimirEtiquetas() {
       try {
         if (appState.isProcessing) {
           alert('Hay una operación en proceso. Por favor, espere un momento e intente nuevamente.');
           return;
         }
         
-        console.log('Preparando impresión...');
+        console.log('Preparando impresión con procesamiento por lotes...');
+        
+        // Resetear controlador de cancelación
+        batchController.reset();
         appState.isProcessing = true;
+        
         const mainContainer = document.querySelector('.etiquetas-layout');
-        mostrarCargando(mainContainer, true, "Preparando impresión...", "Creando diseño de etiquetas");
+        
+        // Obtener configuración actualizada
+        const formato = appState.formato || obtenerFormatoSeleccionado();
+        const impresora = appState.impresora;
+        const cantidad = obtenerCantidad();
+        const limits = getPrinterLimits(impresora);
+        
+        console.log('Imprimiendo etiquetas, cantidad:', cantidad);
+        
+        // Actualizar configuración de lotes
+        updateBatchConfig();
+        
+        // Mostrar progreso si es necesario procesamiento por lotes
+        if (cantidad > limits.safe) {
+          showBatchProgress(true, 0, cantidad, "Preparando impresión por lotes...");
+          await delay(100); // Dar tiempo para que se muestre la UI
+        } else {
+          mostrarCargando(mainContainer, true, "Preparando impresión...", "Creando diseño de etiquetas");
+        }
         
         // Crear ventana para impresión
         const printWindow = window.open('', '_blank');
         
         if (!printWindow) {
           alert('Por favor, permite las ventanas emergentes para imprimir.');
+          showBatchProgress(false);
           mostrarCargando(mainContainer, false);
           appState.isProcessing = false;
           return;
         }
         
-        // Obtener configuración actualizada
-        const formato = appState.formato || obtenerFormatoSeleccionado();
-        const impresora = appState.impresora;
-        
-        // CORRECCIÓN: Siempre usar obtenerCantidad() para tener el valor actual
-        const cantidad = obtenerCantidad();
-        console.log('Imprimiendo etiquetas, cantidad:', cantidad);
-        
         // Obtener configuración específica para la impresora
         const configuracion = obtenerConfiguracionImpresora(formato, impresora);
-        
-        // Obtener configuración de código de barras
         const barcodeConfig = obtenerConfiguracionCodigoBarras();
         
         // Verificar si es una etiqueta pequeña
         const esEtiquetaPequena = verificarSiEtiquetaEsPequena(formato);
-        
-        // Verificar si estamos imprimiendo en impresora térmica
         const imprimiendoEnTermica = (impresora !== 'normal');
-        
-        // Verificar si debemos mostrar el código como texto separado
         const mostrarCodigoTexto = esEtiquetaPequena ? true : (!elements.checkboxCodigo || elements.checkboxCodigo.checked);
         
         // Crear estilos CSS optimizados para impresión con mejoras de alineación
@@ -1870,7 +2051,7 @@ function initLabelApp() {
           }
         `;
         
-        // Crear HTML para impresión, con indicador de carga
+        // NUEVO: Procesar etiquetas por lotes
         let printHtml = `
           <!DOCTYPE html>
           <html>
@@ -1883,11 +2064,11 @@ function initLabelApp() {
           </head>
           <body>
             <div class="loading-indicator">
-              Generando etiquetas, por favor espere...
+              Generando etiquetas por lotes, por favor espere...
             </div>
         `;
         
-        // Crear funciones para generar etiquetas
+        // Función para crear etiqueta HTML para impresión (mantenida igual)
         function crearEtiquetaHTMLParaImpresion(x, y, ancho, alto, svgId) {
           // Verificar si es una etiqueta pequeña y ajustar el contenido
           const esEtiquetaPequena = verificarSiEtiquetaEsPequena(formato);
@@ -2004,72 +2185,144 @@ function initLabelApp() {
           return html;
         }
         
-        // Generar contenido según tipo de impresora
-        if (impresora === 'normal') {
-          // Calcular número de páginas
-          const etiquetasPorPagina = formato.porPagina;
-          const numPaginas = Math.ceil(cantidad / etiquetasPorPagina);
+        // NUEVO: Generar contenido por lotes
+        if (cantidad > limits.safe) {
+          // Procesamiento por lotes para cantidades grandes
+          let etiquetasGeneradas = 0;
           
-          for (let pagina = 0; pagina < numPaginas; pagina++) {
-            printHtml += `<div class="preview-sheet">`;
+          for (let batchIndex = 0; batchIndex < appState.totalBatches; batchIndex++) {
+            if (batchController.isCancelled()) {
+              console.log('Operación cancelada por el usuario');
+              break;
+            }
             
-            // Añadir etiquetas a la hoja
-            for (let i = 0; i < formato.filas; i++) {
-              for (let j = 0; j < formato.columnas; j++) {
-                const index = pagina * etiquetasPorPagina + i * formato.columnas + j;
+            // Actualizar progreso
+            showBatchProgress(true, etiquetasGeneradas, cantidad, `Procesando lote ${batchIndex + 1} de ${appState.totalBatches}...`);
+            
+            const batchStart = batchIndex * appState.batchSize;
+            const batchEnd = Math.min(batchStart + appState.batchSize, cantidad);
+            const batchCantidad = batchEnd - batchStart;
+            
+            console.log(`Procesando lote ${batchIndex + 1}: etiquetas ${batchStart + 1} a ${batchEnd}`);
+            
+            // Generar contenido según tipo de impresora para este lote
+            if (impresora === 'normal') {
+              // Para impresoras normales: agrupar en hojas
+              const etiquetasPorPagina = formato.porPagina;
+              const paginasEnLote = Math.ceil(batchCantidad / etiquetasPorPagina);
+              
+              for (let paginaEnLote = 0; paginaEnLote < paginasEnLote; paginaEnLote++) {
+                printHtml += `<div class="preview-sheet">`;
                 
-                if (index < cantidad) {
-                  // Calcular posición corregida
-                  const posX = calcularPosicionX(formato, configuracion, j);
-                  const posY = calcularPosicionY(formato, configuracion, i);
-                  
-                  // Añadir etiqueta con ID único
-                  const svgId = `print-barcode-${pagina}-${i}-${j}`;
-                  printHtml += crearEtiquetaHTMLParaImpresion(posX, posY, formato.ancho, formato.alto, svgId);
+                // Añadir etiquetas a la hoja
+                for (let i = 0; i < formato.filas; i++) {
+                  for (let j = 0; j < formato.columnas; j++) {
+                    const indexEnPagina = paginaEnLote * etiquetasPorPagina + i * formato.columnas + j;
+                    const indexGlobal = batchStart + indexEnPagina;
+                    
+                    if (indexGlobal < batchEnd && indexGlobal < cantidad) {
+                      // Calcular posición corregida
+                      const posX = calcularPosicionX(formato, configuracion, j);
+                      const posY = calcularPosicionY(formato, configuracion, i);
+                      
+                      // Añadir etiqueta con ID único
+                      const svgId = `print-barcode-${batchIndex}-${paginaEnLote}-${i}-${j}`;
+                      printHtml += crearEtiquetaHTMLParaImpresion(posX, posY, formato.ancho, formato.alto, svgId);
+                    }
+                  }
                 }
+                
+                printHtml += `</div>`;
+              }
+            } else {
+              // Para impresoras térmicas: una etiqueta por página
+              for (let i = 0; i < batchCantidad; i++) {
+                const indexGlobal = batchStart + i;
+                if (indexGlobal >= cantidad) break;
+                
+                let posX = formato.marginX || 0;
+                let posY = formato.marginY || 0;
+                
+                printHtml += `<div class="preview-sheet thermal-page">`;
+                const svgId = `print-barcode-thermal-${batchIndex}-${i}`;
+                printHtml += crearEtiquetaHTMLParaImpresion(posX, posY, formato.ancho, formato.alto, svgId);
+                printHtml += `</div>`;
               }
             }
             
-            printHtml += `</div>`;
+            etiquetasGeneradas = batchEnd;
+            
+            // Pequeño delay para mantener UI responsiva
+            await delay(50);
           }
         } else {
-          // Para impresoras térmicas: una etiqueta por página con centrado
-          for (let i = 0; i < cantidad; i++) {
-            // CORREGIDO: posicionamiento más preciso para etiquetas individuales
-            // Centrar la etiqueta en la página basado en sus dimensiones reales
-            let posX = 0; // Comenzar en el borde izquierdo
-            let posY = 0; // Comenzar en el borde superior
+          // Procesamiento normal para cantidades pequeñas (mantener código original)
+          if (impresora === 'normal') {
+            // Calcular número de páginas
+            const etiquetasPorPagina = formato.porPagina;
+            const numPaginas = Math.ceil(cantidad / etiquetasPorPagina);
             
-            // Si se especificaron márgenes, usarlos
-            if (formato.marginX !== undefined) {
-              posX = formato.marginX;
+            for (let pagina = 0; pagina < numPaginas; pagina++) {
+              printHtml += `<div class="preview-sheet">`;
+              
+              // Añadir etiquetas a la hoja
+              for (let i = 0; i < formato.filas; i++) {
+                for (let j = 0; j < formato.columnas; j++) {
+                  const index = pagina * etiquetasPorPagina + i * formato.columnas + j;
+                  
+                  if (index < cantidad) {
+                    // Calcular posición corregida
+                    const posX = calcularPosicionX(formato, configuracion, j);
+                    const posY = calcularPosicionY(formato, configuracion, i);
+                    
+                    // Añadir etiqueta con ID único
+                    const svgId = `print-barcode-${pagina}-${i}-${j}`;
+                    printHtml += crearEtiquetaHTMLParaImpresion(posX, posY, formato.ancho, formato.alto, svgId);
+                  }
+                }
+              }
+              
+              printHtml += `</div>`;
             }
-            
-            if (formato.marginY !== undefined) {
-              posY = formato.marginY;
+          } else {
+            // Para impresoras térmicas: una etiqueta por página con centrado
+            for (let i = 0; i < cantidad; i++) {
+              // CORREGIDO: posicionamiento más preciso para etiquetas individuales
+              // Centrar la etiqueta en la página basado en sus dimensiones reales
+              let posX = 0; // Comenzar en el borde izquierdo
+              let posY = 0; // Comenzar en el borde superior
+              
+              // Si se especificaron márgenes, usarlos
+              if (formato.marginX !== undefined) {
+                posX = formato.marginX;
+              }
+              
+              if (formato.marginY !== undefined) {
+                posY = formato.marginY;
+              }
+              
+              printHtml += `<div class="preview-sheet thermal-page">`;
+              const svgId = `print-barcode-thermal-${i}`;
+              printHtml += crearEtiquetaHTMLParaImpresion(posX, posY, formato.ancho, formato.alto, svgId);
+              printHtml += `</div>`;
             }
-            
-            printHtml += `<div class="preview-sheet thermal-page">`;
-            const svgId = `print-barcode-thermal-${i}`;
-            printHtml += crearEtiquetaHTMLParaImpresion(posX, posY, formato.ancho, formato.alto, svgId);
-            printHtml += `</div>`;
           }
         }
         
-        // Script para generar códigos de barras y luego imprimir con manejo de errores
+        // Script mejorado para generar códigos de barras y luego imprimir con manejo de errores
         printHtml += `
             <script>
               // Variables para seguimiento
               let processingComplete = false;
               let errorOccurred = false;
               
-              // Temporizador de seguridad (60 segundos)
+              // Temporizador de seguridad (90 segundos para lotes grandes)
               const safetyTimeout = setTimeout(() => {
                 if (!processingComplete) {
                   console.error("Timeout alcanzado - cerrando ventana");
                   window.close();
                 }
-              }, 60000);
+              }, 90000);
               
               // Función para ajustar la alineación vertical del SVG generado por JsBarcode
               function ajustarAlineacionVerticalSVG(svg, formato) {
@@ -2127,7 +2380,12 @@ function initLabelApp() {
                 }
               }
               
-              // Generar códigos de barras al cargar
+              // NUEVO: Función para delay
+              function delay(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+              }
+              
+              // Generar códigos de barras al cargar MEJORADO con procesamiento por lotes
               window.onload = async function() {
                 try {
                   // Verificar que JsBarcode esté disponible
@@ -2142,94 +2400,102 @@ function initLabelApp() {
                   document.querySelector('.loading-indicator').textContent = "Generando códigos de barras...";
                   
                   // Generar códigos de barras (con pequeño retraso para UI)
-                  await new Promise(resolve => setTimeout(resolve, 100));
+                  await delay(100);
                   
                   const barcodes = document.querySelectorAll('.etiqueta-barcode');
                   console.log(\`Generando \${barcodes.length} códigos de barras\`);
                   
-                  for (let i = 0; i < barcodes.length; i++) {
-                    const svg = barcodes[i];
-                    try {
-                      const codigo = svg.dataset.codigo;
-                      // Obtener preferencia de mostrar texto
-                      const mostrarTextoEnSVG = svg.dataset.showText === "true";
-                      
-                      // Detectar si es para una etiqueta pequeña basado en atributos
-                      const esEtiquetaPequena = ${esEtiquetaPequena};
-                      const imprimiendoEnTermica = ${imprimiendoEnTermica};
-                      
-                      // OPTIMIZADO: Configurar tamaños según el tipo de etiqueta e impresora
-                      let anchoLinea = ${barcodeConfig.anchoLinea};
-                      let altoBarras = ${barcodeConfig.altoBarras};
-                      let tamanoTexto = ${barcodeConfig.tamanoTexto};
-                      let margin = ${impresora === 'normal' ? 2 : 0}; // Eliminar márgenes para impresoras térmicas
-                      
-                      // Aplicar factores de ajuste según el tipo de impresora y formato
-                      if (imprimiendoEnTermica) {
-                        // Para impresoras térmicas, aumentar tamaño
-                        const barcodeWidthFactor = ${formato.barcodeWidthFactor || 1.0};
-                        const barcodeHeightFactor = ${formato.barcodeHeightFactor || 1.0};
-                        
-                        anchoLinea = anchoLinea * barcodeWidthFactor;
-                        altoBarras = altoBarras * barcodeHeightFactor;
-                        tamanoTexto = tamanoTexto * 1.1; // Aumentar texto un 10%
-                        margin = 0; // Sin margen para térmicas
-                      } else if (esEtiquetaPequena) {
-                        // Para etiquetas pequeñas en impresoras normales
-                        anchoLinea = Math.max(0.8, anchoLinea * 0.8); // Reducir menos
-                        altoBarras = Math.max(20, altoBarras * 0.8); // Reducir menos
-                        tamanoTexto = Math.max(7, tamanoTexto * 0.8); // Reducir menos
-                        margin = 1;
-                      }
-                      
-                      if (codigo) {
-                        JsBarcode(svg, codigo, {
-                          format: "${barcodeConfig.formato}",
-                          width: anchoLinea,
-                          height: altoBarras,
-                          displayValue: mostrarTextoEnSVG,
-                          fontSize: tamanoTexto,
-                          margin: margin,
-                          background: "#ffffff",
-                          text: codigo,
-                          textMargin: mostrarTextoEnSVG ? (esEtiquetaPequena ? 1 : 2) : 0,
-                          lineColor: "#000000"
-                        });
-                        
-                        // Ajustar alineación vertical después de generar el código
-                        ajustarAlineacionVerticalSVG(svg, {
-                          barcodeVerticalShift: ${formato.barcodeVerticalShift || 0}
-                        });
-                      }
-                    } catch(e) {
-                      console.error("Error generando código:", e);
-                      // Intentar con formato alternativo
+                  // NUEVO: Procesar códigos de barras por lotes para mejor rendimiento
+                  const batchSize = 50; // Procesar 50 códigos a la vez
+                  const totalBatches = Math.ceil(barcodes.length / batchSize);
+                  
+                  for (let batchIndex = 0; batchIndex < totalBatches; batchIndex++) {
+                    const batchStart = batchIndex * batchSize;
+                    const batchEnd = Math.min(batchStart + batchSize, barcodes.length);
+                    
+                    document.querySelector('.loading-indicator').textContent = 
+                      \`Generando códigos de barras... lote \${batchIndex + 1}/\${totalBatches} (\${batchEnd}/\${barcodes.length})\`;
+                    
+                    // Procesar lote actual
+                    for (let i = batchStart; i < batchEnd; i++) {
+                      const svg = barcodes[i];
                       try {
                         const codigo = svg.dataset.codigo;
+                        // Obtener preferencia de mostrar texto
                         const mostrarTextoEnSVG = svg.dataset.showText === "true";
-                        JsBarcode(svg, codigo, {
-                          format: "CODE128",
-                          width: ${barcodeConfig.anchoLinea},
-                          height: ${barcodeConfig.altoBarras},
-                          displayValue: mostrarTextoEnSVG
-                        });
                         
-                        // También ajustar el fallback
-                        ajustarAlineacionVerticalSVG(svg, {
-                          barcodeVerticalShift: ${formato.barcodeVerticalShift || 0}
-                        });
-                      } catch(e2) {
-                        console.error("Error secundario:", e2);
+                        // Detectar si es para una etiqueta pequeña basado en atributos
+                        const esEtiquetaPequena = ${esEtiquetaPequena};
+                        const imprimiendoEnTermica = ${imprimiendoEnTermica};
+                        
+                        // OPTIMIZADO: Configurar tamaños según el tipo de etiqueta e impresora
+                        let anchoLinea = ${barcodeConfig.anchoLinea};
+                        let altoBarras = ${barcodeConfig.altoBarras};
+                        let tamanoTexto = ${barcodeConfig.tamanoTexto};
+                        let margin = ${impresora === 'normal' ? 2 : 0}; // Eliminar márgenes para impresoras térmicas
+                        
+                        // Aplicar factores de ajuste según el tipo de impresora y formato
+                        if (imprimiendoEnTermica) {
+                          // Para impresoras térmicas, aumentar tamaño
+                          const barcodeWidthFactor = ${formato.barcodeWidthFactor || 1.0};
+                          const barcodeHeightFactor = ${formato.barcodeHeightFactor || 1.0};
+                          
+                          anchoLinea = anchoLinea * barcodeWidthFactor;
+                          altoBarras = altoBarras * barcodeHeightFactor;
+                          tamanoTexto = tamanoTexto * 1.1; // Aumentar texto un 10%
+                          margin = 0; // Sin margen para térmicas
+                        } else if (esEtiquetaPequena) {
+                          // Para etiquetas pequeñas en impresoras normales
+                          anchoLinea = Math.max(0.8, anchoLinea * 0.8); // Reducir menos
+                          altoBarras = Math.max(20, altoBarras * 0.8); // Reducir menos
+                          tamanoTexto = Math.max(7, tamanoTexto * 0.8); // Reducir menos
+                          margin = 1;
+                        }
+                        
+                        if (codigo) {
+                          JsBarcode(svg, codigo, {
+                            format: "${barcodeConfig.formato}",
+                            width: anchoLinea,
+                            height: altoBarras,
+                            displayValue: mostrarTextoEnSVG,
+                            fontSize: tamanoTexto,
+                            margin: margin,
+                            background: "#ffffff",
+                            text: codigo,
+                            textMargin: mostrarTextoEnSVG ? (esEtiquetaPequena ? 1 : 2) : 0,
+                            lineColor: "#000000"
+                          });
+                          
+                          // Ajustar alineación vertical después de generar el código
+                          ajustarAlineacionVerticalSVG(svg, {
+                            barcodeVerticalShift: ${formato.barcodeVerticalShift || 0}
+                          });
+                        }
+                      } catch(e) {
+                        console.error("Error generando código:", e);
+                        // Intentar con formato alternativo
+                        try {
+                          const codigo = svg.dataset.codigo;
+                          const mostrarTextoEnSVG = svg.dataset.showText === "true";
+                          JsBarcode(svg, codigo, {
+                            format: "CODE128",
+                            width: ${barcodeConfig.anchoLinea},
+                            height: ${barcodeConfig.altoBarras},
+                            displayValue: mostrarTextoEnSVG
+                          });
+                          
+                          // También ajustar el fallback
+                          ajustarAlineacionVerticalSVG(svg, {
+                            barcodeVerticalShift: ${formato.barcodeVerticalShift || 0}
+                          });
+                        } catch(e2) {
+                          console.error("Error secundario:", e2);
+                        }
                       }
                     }
                     
-                    // Actualizar indicador cada 10 códigos
-                    if (i % 10 === 0) {
-                      document.querySelector('.loading-indicator').textContent = 
-                        \`Generando códigos de barras... \${i+1}/\${barcodes.length}\`;
-                      // Dar tiempo para actualizar UI
-                      await new Promise(resolve => setTimeout(resolve, 0));
-                    }
+                    // Pequeña pausa entre lotes para mantener UI responsiva
+                    await delay(10);
                   }
                   
                   console.log('Códigos generados, enviando a impresión...');
@@ -2278,31 +2544,40 @@ function initLabelApp() {
         
         // Temporizador de seguridad para quitar el indicador de carga
         setTimeout(() => {
+          showBatchProgress(false);
           mostrarCargando(mainContainer, false);
           appState.isProcessing = false;
-        }, 3000);
+        }, 5000);
         
         // Evento para manejar cuando la ventana se cierra
         printWindow.addEventListener('unload', function() {
+          showBatchProgress(false);
           mostrarCargando(mainContainer, false);
           appState.isProcessing = false;
         });
       } catch(e) {
         console.error("Error al imprimir etiquetas:", e);
         alert("Error al preparar la impresión: " + e.message);
+        showBatchProgress(false);
         mostrarCargando(document.querySelector('.etiquetas-layout'), false);
         appState.isProcessing = false;
       }
     }
     
     /**
-     * Descarga las etiquetas como PDF
-     * Implementación corregida para evitar descarga doble
+     * MEJORADO: Descarga las etiquetas como PDF con procesamiento por lotes
+     * Implementación optimizada para evitar descarga doble y manejar grandes cantidades
      */
-    function descargarPDF() {
+    async function descargarPDF() {
       try {
         if (appState.isProcessing) {
           alert('Hay una operación en proceso. Por favor, espere un momento e intente nuevamente.');
+          return;
+        }
+        
+        // Verificar que las bibliotecas estén disponibles
+        if (typeof window.jspdf === 'undefined' || typeof window.html2canvas === 'undefined') {
+          alert("No se han podido cargar las bibliotecas necesarias para generar PDF. Verifica tu conexión a Internet o usa la opción 'Imprimir directamente'.");
           return;
         }
         
@@ -2310,24 +2585,31 @@ function initLabelApp() {
         appState.pdfGenerating = true;
         appState.isProcessing = true;
         
-        // Verificar que las bibliotecas estén disponibles
-        if (typeof window.jspdf === 'undefined' || typeof window.html2canvas === 'undefined') {
-          alert("No se han podido cargar las bibliotecas necesarias para generar PDF. Verifica tu conexión a Internet o usa la opción 'Imprimir directamente'.");
-          appState.pdfGenerating = false;
-          appState.isProcessing = false;
-          return;
-        }
+        // Resetear controlador de cancelación
+        batchController.reset();
         
-        console.log('Preparando generación de PDF...');
-        mostrarCargando(document.querySelector('.etiquetas-layout'), true, "Generando PDF...", "Preparando diseño");
+        console.log('Preparando generación de PDF con procesamiento por lotes...');
+        
+        const mainContainer = document.querySelector('.etiquetas-layout');
         
         // Obtener configuración actualizada
         const formato = appState.formato || obtenerFormatoSeleccionado();
         const impresora = appState.impresora;
-        
-        // CORRECCIÓN: Siempre usar obtenerCantidad() para tener el valor actual
         const cantidad = obtenerCantidad();
+        const limits = getPrinterLimits(impresora);
+        
         console.log('Generando PDF, cantidad:', cantidad);
+        
+        // Actualizar configuración de lotes
+        updateBatchConfig();
+        
+        // Mostrar progreso si es necesario procesamiento por lotes
+        if (cantidad > limits.safe) {
+          showBatchProgress(true, 0, cantidad, "Preparando generación de PDF por lotes...");
+          await delay(100);
+        } else {
+          mostrarCargando(mainContainer, true, "Generando PDF...", "Preparando diseño");
+        }
         
         // Obtener configuración específica para la impresora
         const configuracion = obtenerConfiguracionImpresora(formato, impresora);
@@ -2510,103 +2792,176 @@ function initLabelApp() {
           </style>
         `;
         
-            // SOLUCIÓN PARA PDF NEGRO: Preprocesamiento CSS fundamental
-            function crearEtiquetasParaPDF() {
-              let pdfHTML = pdfCSS;
-              
-              // AJUSTE CRUCIAL: CSS específico para asegurar fondo blanco
-              pdfHTML += `
-                <style>
-                  html, body {
-                    margin: 0 !important;
-                    padding: 0 !important;
-                    font-family: 'Inter', sans-serif !important;
-                    background-color: white !important;
-                    color: black !important;
-                  }
-                  .pdf-page {
-                    width: ${impresora === 'normal' ? '210mm' : formato.ancho + 'mm'} !important;
-                    height: ${impresora === 'normal' ? '297mm' : formato.alto + 'mm'} !important;
-                    background-color: white !important;
-                    margin: 0 !important;
-                    padding: 0 !important;
-                    position: relative !important;
-                    overflow: visible !important;
-                  }
-                  .etiqueta {
-                    box-sizing: border-box !important;
-                    background-color: white !important;
-                    border: 1px dashed #ddd !important;
-                    color: black !important;
-                  }
-                  .etiqueta-content {
-                    background-color: white !important;
-                    color: black !important;
-                  }
-                  .etiqueta-barcode, .barcode-container {
-                    background-color: white !important;
-                  }
-                  /* FUNDAMENTAL: Forzar colores para elementos específicos */
-                  .etiqueta-nombre {
-                    color: #1d1d1f !important;
-                  }
-                  .etiqueta-precio {
-                    color: #e52e2e !important;
-                  }
-                  .etiqueta-codigo {
-                    color: #666 !important;
-                  }
-                </style>
-              `;
-              
-              if (impresora === 'normal') {
-            // Para impresoras normales, crear hojas con múltiples etiquetas
-            const etiquetasPorPagina = formato.porPagina;
-            const numPaginas = Math.ceil(cantidad / etiquetasPorPagina);
+        // SOLUCIÓN PARA PDF NEGRO: Preprocesamiento CSS fundamental
+        async function crearEtiquetasParaPDF() {
+          let pdfHTML = pdfCSS;
+          
+          // AJUSTE CRUCIAL: CSS específico para asegurar fondo blanco
+          pdfHTML += `
+            <style>
+              html, body {
+                margin: 0 !important;
+                padding: 0 !important;
+                font-family: 'Inter', sans-serif !important;
+                background-color: white !important;
+                color: black !important;
+              }
+              .pdf-page {
+                width: ${impresora === 'normal' ? '210mm' : formato.ancho + 'mm'} !important;
+                height: ${impresora === 'normal' ? '297mm' : formato.alto + 'mm'} !important;
+                background-color: white !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                position: relative !important;
+                overflow: visible !important;
+              }
+              .etiqueta {
+                box-sizing: border-box !important;
+                background-color: white !important;
+                border: 1px dashed #ddd !important;
+                color: black !important;
+              }
+              .etiqueta-content {
+                background-color: white !important;
+                color: black !important;
+              }
+              .etiqueta-barcode, .barcode-container {
+                background-color: white !important;
+              }
+              /* FUNDAMENTAL: Forzar colores para elementos específicos */
+              .etiqueta-nombre {
+                color: #1d1d1f !important;
+              }
+              .etiqueta-precio {
+                color: #e52e2e !important;
+              }
+              .etiqueta-codigo {
+                color: #666 !important;
+              }
+            </style>
+          `;
+          
+          // NUEVO: Generar contenido por lotes para PDFs grandes
+          if (cantidad > limits.safe) {
+            // Procesamiento por lotes para cantidades grandes
+            let etiquetasGeneradas = 0;
             
-            for (let pagina = 0; pagina < numPaginas; pagina++) {
-              pdfHTML += `<div class="pdf-page">`;
+            for (let batchIndex = 0; batchIndex < appState.totalBatches; batchIndex++) {
+              if (batchController.isCancelled()) {
+                console.log('Operación de PDF cancelada por el usuario');
+                break;
+              }
               
-              // Añadir etiquetas a la hoja
-              for (let i = 0; i < formato.filas; i++) {
-                for (let j = 0; j < formato.columnas; j++) {
-                  const index = pagina * etiquetasPorPagina + i * formato.columnas + j;
+              // Actualizar progreso
+              showBatchProgress(true, etiquetasGeneradas, cantidad, `Generando PDF: lote ${batchIndex + 1} de ${appState.totalBatches}...`);
+              
+              const batchStart = batchIndex * appState.batchSize;
+              const batchEnd = Math.min(batchStart + appState.batchSize, cantidad);
+              const batchCantidad = batchEnd - batchStart;
+              
+              console.log(`Generando PDF lote ${batchIndex + 1}: etiquetas ${batchStart + 1} a ${batchEnd}`);
+              
+              // Generar contenido según tipo de impresora para este lote
+              if (impresora === 'normal') {
+                // Para impresoras normales: agrupar en hojas
+                const etiquetasPorPagina = formato.porPagina;
+                const paginasEnLote = Math.ceil(batchCantidad / etiquetasPorPagina);
+                
+                for (let paginaEnLote = 0; paginaEnLote < paginasEnLote; paginaEnLote++) {
+                  pdfHTML += `<div class="pdf-page">`;
                   
-                  if (index < cantidad) {
-                    // Calcular posición de la etiqueta - CORREGIDO para el formato específico
-                    const posX = calcularPosicionX(formato, configuracion, j);
-                    const posY = calcularPosicionY(formato, configuracion, i);
-                    
-                    // Crear etiqueta con ID único para PDF
-                    const svgId = `pdf-barcode-${pagina}-${i}-${j}`;
-                    pdfHTML += crearEtiquetaHTMLParaPDF(posX, posY, formato.ancho, formato.alto, svgId);
+                  // Añadir etiquetas a la hoja
+                  for (let i = 0; i < formato.filas; i++) {
+                    for (let j = 0; j < formato.columnas; j++) {
+                      const indexEnPagina = paginaEnLote * etiquetasPorPagina + i * formato.columnas + j;
+                      const indexGlobal = batchStart + indexEnPagina;
+                      
+                      if (indexGlobal < batchEnd && indexGlobal < cantidad) {
+                        // Calcular posición de la etiqueta - CORREGIDO para el formato específico
+                        const posX = calcularPosicionX(formato, configuracion, j);
+                        const posY = calcularPosicionY(formato, configuracion, i);
+                        
+                        // Crear etiqueta con ID único para PDF
+                        const svgId = `pdf-barcode-${batchIndex}-${paginaEnLote}-${i}-${j}`;
+                        pdfHTML += crearEtiquetaHTMLParaPDF(posX, posY, formato.ancho, formato.alto, svgId);
+                      }
+                    }
                   }
+                  
+                  pdfHTML += `</div>`;
+                }
+              } else {
+                // Para impresoras térmicas: una etiqueta por página
+                for (let i = 0; i < batchCantidad; i++) {
+                  const indexGlobal = batchStart + i;
+                  if (indexGlobal >= cantidad) break;
+                  
+                  let posX = formato.marginX || 0;
+                  let posY = formato.marginY || 0;
+                  
+                  pdfHTML += `<div class="pdf-page">`;
+                  const svgId = `pdf-barcode-thermal-${batchIndex}-${i}`;
+                  pdfHTML += crearEtiquetaHTMLParaPDF(posX, posY, formato.ancho, formato.alto, svgId);
+                  pdfHTML += `</div>`;
                 }
               }
               
-              pdfHTML += `</div>`;
+              etiquetasGeneradas = batchEnd;
+              
+              // Pequeño delay para mantener UI responsiva
+              await delay(50);
             }
           } else {
-            // Para impresoras térmicas, crear una hoja por etiqueta con centrado
-            for (let i = 0; i < cantidad; i++) {
-              // CORREGIDO: posicionamiento más preciso para etiquetas individuales
-              // Centrar la etiqueta en la página basado en sus dimensiones reales
-              let posX = 0; // Comenzar en el borde izquierdo
-              let posY = 0; // Comenzar en el borde superior
+            // Procesamiento normal para cantidades pequeñas (código original)
+            if (impresora === 'normal') {
+              // Para impresoras normales, crear hojas con múltiples etiquetas
+              const etiquetasPorPagina = formato.porPagina;
+              const numPaginas = Math.ceil(cantidad / etiquetasPorPagina);
               
-              // Si se especificaron márgenes, usarlos
-              if (formato.marginX !== undefined) {
-                posX = formato.marginX;
+              for (let pagina = 0; pagina < numPaginas; pagina++) {
+                pdfHTML += `<div class="pdf-page">`;
+                
+                // Añadir etiquetas a la hoja
+                for (let i = 0; i < formato.filas; i++) {
+                  for (let j = 0; j < formato.columnas; j++) {
+                    const index = pagina * etiquetasPorPagina + i * formato.columnas + j;
+                    
+                    if (index < cantidad) {
+                      // Calcular posición de la etiqueta - CORREGIDO para el formato específico
+                      const posX = calcularPosicionX(formato, configuracion, j);
+                      const posY = calcularPosicionY(formato, configuracion, i);
+                      
+                      // Crear etiqueta con ID único para PDF
+                      const svgId = `pdf-barcode-${pagina}-${i}-${j}`;
+                      pdfHTML += crearEtiquetaHTMLParaPDF(posX, posY, formato.ancho, formato.alto, svgId);
+                    }
+                  }
+                }
+                
+                pdfHTML += `</div>`;
               }
-              
-              if (formato.marginY !== undefined) {
-                posY = formato.marginY;
+            } else {
+              // Para impresoras térmicas, crear una hoja por etiqueta con centrado
+              for (let i = 0; i < cantidad; i++) {
+                // CORREGIDO: posicionamiento más preciso para etiquetas individuales
+                // Centrar la etiqueta en la página basado en sus dimensiones reales
+                let posX = 0; // Comenzar en el borde izquierdo
+                let posY = 0; // Comenzar en el borde superior
+                
+                // Si se especificaron márgenes, usarlos
+                if (formato.marginX !== undefined) {
+                  posX = formato.marginX;
+                }
+                
+                if (formato.marginY !== undefined) {
+                  posY = formato.marginY;
+                }
+                
+                pdfHTML += `<div class="pdf-page">`;
+                const svgId = `pdf-barcode-thermal-${i}`;
+                pdfHTML += crearEtiquetaHTMLParaPDF(posX, posY, formato.ancho, formato.alto, svgId);
+                pdfHTML += `</div>`;
               }
-              
-              pdfHTML += `<div class="pdf-page">`;
-              const svgId = `pdf-barcode-thermal-${i}`;
-              pdfHTML += crearEtiquetaHTMLParaPDF(posX, posY, formato.ancho, formato.alto, svgId);
-              pdfHTML += `</div>`;
             }
           }
           
@@ -2614,199 +2969,355 @@ function initLabelApp() {
         }
         
         // Función para crear HTML de etiqueta individual para PDF
-    function crearEtiquetaHTMLParaPDF(x, y, ancho, alto, svgId) {
-      // Verificar si es una etiqueta pequeña y ajustar el contenido
-      const esEtiquetaPequena = verificarSiEtiquetaEsPequena(formato);
-      const imprimiendoEnTermica = (impresora !== 'normal');
-      const requiereSoloCodigoBarras = formato.onlyBarcodeAndCode === true;
-      
-      // Crear clase adicional para impresoras térmicas
-      const claseAdicional = impresora !== 'normal' ? 'thermal-label' : '';
-      
-      // Configuración específica según tamaño de etiqueta
-      let mostrarCodigoBarras = esEtiquetaPequena ? true : (!elements.checkboxCodigoBarras || elements.checkboxCodigoBarras.checked);
-      let mostrarCodigoTexto = esEtiquetaPequena ? true : (!elements.checkboxCodigo || elements.checkboxCodigo.checked);
-      let mostrarNombre = esEtiquetaPequena ? false : (!elements.checkboxNombre || elements.checkboxNombre.checked);
-      let mostrarPrecio = esEtiquetaPequena ? false : (!elements.checkboxPrecio || elements.checkboxPrecio.checked);
-      
-      // OPTIMIZACIÓN: Si es una etiqueta térmica que prioriza el código, ajustar lo que se muestra
-      if (requiereSoloCodigoBarras || (imprimiendoEnTermica && formato.prioritizeBarcode)) {
-        // Forzar código de barras visible
-        mostrarCodigoBarras = true;
-        mostrarCodigoTexto = true;
-        
-        // Para etiquetas muy pequeñas, solo mostrar código
-        if (requiereSoloCodigoBarras) {
-          mostrarNombre = false;
-          mostrarPrecio = false;
+        function crearEtiquetaHTMLParaPDF(x, y, ancho, alto, svgId) {
+          // Verificar si es una etiqueta pequeña y ajustar el contenido
+          const esEtiquetaPequena = verificarSiEtiquetaEsPequena(formato);
+          const imprimiendoEnTermica = (impresora !== 'normal');
+          const requiereSoloCodigoBarras = formato.onlyBarcodeAndCode === true;
+          
+          // Crear clase adicional para impresoras térmicas
+          const claseAdicional = impresora !== 'normal' ? 'thermal-label' : '';
+          
+          // Configuración específica según tamaño de etiqueta
+          let mostrarCodigoBarras = esEtiquetaPequena ? true : (!elements.checkboxCodigoBarras || elements.checkboxCodigoBarras.checked);
+          let mostrarCodigoTexto = esEtiquetaPequena ? true : (!elements.checkboxCodigo || elements.checkboxCodigo.checked);
+          let mostrarNombre = esEtiquetaPequena ? false : (!elements.checkboxNombre || elements.checkboxNombre.checked);
+          let mostrarPrecio = esEtiquetaPequena ? false : (!elements.checkboxPrecio || elements.checkboxPrecio.checked);
+          
+          // OPTIMIZACIÓN: Si es una etiqueta térmica que prioriza el código, ajustar lo que se muestra
+          if (requiereSoloCodigoBarras || (imprimiendoEnTermica && formato.prioritizeBarcode)) {
+            // Forzar código de barras visible
+            mostrarCodigoBarras = true;
+            mostrarCodigoTexto = true;
+            
+            // Para etiquetas muy pequeñas, solo mostrar código
+            if (requiereSoloCodigoBarras) {
+              mostrarNombre = false;
+              mostrarPrecio = false;
+            }
+          }
+          
+          // OPTIMIZADO: Ajuste de padding para evitar desbordamiento
+          const reduccion = esEtiquetaPequena ? 1.5 : (imprimiendoEnTermica ? 1.0 : 0.5);
+          const paddingX = Math.max(0.5, (formato.contentPaddingX || 2) - reduccion);
+          const paddingY = Math.max(0.5, (formato.contentPaddingY || 2) - reduccion);
+          
+          // Estilos específicos para el contenedor del código de barras
+          let barcodeContainerStyle = '';
+          
+          // Si hay espaciamiento vertical específico, aplicarlo
+          if (formato.contentTopSpacing > 0 || formato.contentBottomSpacing > 0 || formato.barcodeVerticalShift !== 0) {
+            let barcodeMarginTop = formato.contentTopSpacing || 0;
+            let barcodeMarginBottom = formato.contentBottomSpacing || 0;
+            
+            // Aplicar desplazamiento vertical si se especificó
+            if (formato.barcodeVerticalShift !== undefined && formato.barcodeVerticalShift !== 0) {
+              barcodeMarginTop += formato.barcodeVerticalShift;
+              barcodeMarginBottom -= formato.barcodeVerticalShift;
+            }
+            
+            // Asegurar valores no negativos
+            barcodeMarginTop = Math.max(0, barcodeMarginTop);
+            barcodeMarginBottom = Math.max(0, barcodeMarginBottom);
+            
+            // OPTIMIZADO: Reducir espaciado para térmicas y aumentar margen
+            if (imprimiendoEnTermica) {
+              barcodeMarginTop = Math.max(0, barcodeMarginTop / 2);
+              barcodeMarginBottom = Math.max(0, barcodeMarginBottom / 2);
+            }
+            
+            barcodeContainerStyle = `style="margin-top:${barcodeMarginTop}mm;margin-bottom:${barcodeMarginBottom}mm;max-width:${imprimiendoEnTermica ? '99%' : '95%'};overflow:hidden;"`;
+          } else {
+            barcodeContainerStyle = `style="max-width:${imprimiendoEnTermica ? '99%' : '95%'};overflow:hidden;"`;
+          }
+          
+          // Construir HTML con clases y estilos específicos
+          let html = `
+            <div class="etiqueta ${claseAdicional} ${esEtiquetaPequena ? 'small-label' : ''}" style="left:${x}mm;top:${y}mm;width:${ancho}mm;height:${alto}mm;">
+              <div class="etiqueta-content" style="padding:${paddingY}mm ${paddingX}mm;overflow:hidden;">
+          `;
+          
+          // Para etiquetas pequeñas, optimizar el espacio
+          if (esEtiquetaPequena) {
+            // Código de barras con tamaño ajustado para formato pequeño
+            if (mostrarCodigoBarras) {
+              // Contenedor para control de posición vertical
+              html += `<div class="barcode-container" ${barcodeContainerStyle}>`;
+              // No mostrar texto en el SVG porque ocuparía demasiado espacio
+              // OPTIMIZADO: Mayor altura para los códigos en etiquetas pequeñas térmicas
+              const maxHeight = imprimiendoEnTermica ? "80%" : "65%";
+              html += `<svg class="etiqueta-barcode" id="${svgId}" data-codigo="${appState.producto.codigo}" data-show-text="false" style="max-width:${imprimiendoEnTermica ? '99%' : '95%'};max-height:${maxHeight};display:block;margin:0 auto;"></svg>`;
+              html += `</div>`;
+            }
+            
+            // Código en texto con fuente más grande para impresoras térmicas
+            if (mostrarCodigoTexto) {
+              const fontSize = imprimiendoEnTermica ? "7px" : "6px";
+              html += `<div class="etiqueta-codigo" style="font-size:${fontSize};margin-top:1px;margin-bottom:0;text-align:center;max-width:99%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${appState.producto.codigo}</div>`;
+            }
+          } else {
+            // Comportamiento normal para etiquetas estándar
+            if (mostrarNombre) {
+              // OPTIMIZADO: Truncar el nombre si excede el límite de caracteres
+              const nombreTruncado = truncarTexto(appState.producto.nombre, formato.maxTextLength);
+              html += `<div class="etiqueta-nombre" style="max-width:98%;overflow:hidden;text-overflow:ellipsis;">${nombreTruncado}</div>`;
+            }
+            
+            if (mostrarPrecio) {
+              html += `<div class="etiqueta-precio" style="max-width:98%;">${parseFloat(appState.producto.precio).toFixed(2)}</div>`;
+            }
+            
+            if (mostrarCodigoBarras) {
+              // Contenedor para control de posición vertical
+              html += `<div class="barcode-container" ${barcodeContainerStyle}>`;
+              // Pasar preferencia de mostrar texto en el SVG
+              const mostrarTextoEnSVG = !mostrarCodigoTexto;
+              // OPTIMIZADO: Mayor tamaño y altura para códigos de barras en térmicas
+              const maxWidth = imprimiendoEnTermica ? "99%" : "95%";
+              const maxHeight = imprimiendoEnTermica ? "85%" : "75%";
+              html += `<svg class="etiqueta-barcode" id="${svgId}" data-codigo="${appState.producto.codigo}" data-show-text="${mostrarTextoEnSVG}" style="max-width:${maxWidth};max-height:${maxHeight};display:block;margin:0 auto;"></svg>`;
+              html += `</div>`;
+            }
+            
+            if (mostrarCodigoTexto) {
+              html += `<div class="etiqueta-codigo" style="max-width:98%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${appState.producto.codigo}</div>`;
+            }
+          }
+          
+          html += `
+              </div>
+            </div>
+          `;
+          
+          return html;
         }
-      }
-      
-      // OPTIMIZADO: Ajuste de padding para evitar desbordamiento
-      const reduccion = esEtiquetaPequena ? 1.5 : (imprimiendoEnTermica ? 1.0 : 0.5);
-      const paddingX = Math.max(0.5, (formato.contentPaddingX || 2) - reduccion);
-      const paddingY = Math.max(0.5, (formato.contentPaddingY || 2) - reduccion);
-      
-      // Estilos específicos para el contenedor del código de barras
-      let barcodeContainerStyle = '';
-      
-      // Si hay espaciamiento vertical específico, aplicarlo
-      if (formato.contentTopSpacing > 0 || formato.contentBottomSpacing > 0 || formato.barcodeVerticalShift !== 0) {
-        let barcodeMarginTop = formato.contentTopSpacing || 0;
-        let barcodeMarginBottom = formato.contentBottomSpacing || 0;
-        
-        // Aplicar desplazamiento vertical si se especificó
-        if (formato.barcodeVerticalShift !== undefined && formato.barcodeVerticalShift !== 0) {
-          barcodeMarginTop += formato.barcodeVerticalShift;
-          barcodeMarginBottom -= formato.barcodeVerticalShift;
-        }
-        
-        // Asegurar valores no negativos
-        barcodeMarginTop = Math.max(0, barcodeMarginTop);
-        barcodeMarginBottom = Math.max(0, barcodeMarginBottom);
-        
-        // OPTIMIZADO: Reducir espaciado para térmicas y aumentar margen
-        if (imprimiendoEnTermica) {
-          barcodeMarginTop = Math.max(0, barcodeMarginTop / 2);
-          barcodeMarginBottom = Math.max(0, barcodeMarginBottom / 2);
-        }
-        
-        barcodeContainerStyle = `style="margin-top:${barcodeMarginTop}mm;margin-bottom:${barcodeMarginBottom}mm;max-width:${imprimiendoEnTermica ? '99%' : '95%'};overflow:hidden;"`;
-      } else {
-        barcodeContainerStyle = `style="max-width:${imprimiendoEnTermica ? '99%' : '95%'};overflow:hidden;"`;
-      }
-      
-      // Construir HTML con clases y estilos específicos
-      let html = `
-        <div class="etiqueta ${claseAdicional} ${esEtiquetaPequena ? 'small-label' : ''}" style="left:${x}mm;top:${y}mm;width:${ancho}mm;height:${alto}mm;">
-          <div class="etiqueta-content" style="padding:${paddingY}mm ${paddingX}mm;overflow:hidden;">
-      `;
-      
-      // Para etiquetas pequeñas, optimizar el espacio
-      if (esEtiquetaPequena) {
-        // Código de barras con tamaño ajustado para formato pequeño
-        if (mostrarCodigoBarras) {
-          // Contenedor para control de posición vertical
-          html += `<div class="barcode-container" ${barcodeContainerStyle}>`;
-          // No mostrar texto en el SVG porque ocuparía demasiado espacio
-          // OPTIMIZADO: Mayor altura para los códigos en etiquetas pequeñas térmicas
-          const maxHeight = imprimiendoEnTermica ? "80%" : "65%";
-          html += `<svg class="etiqueta-barcode" id="${svgId}" data-codigo="${appState.producto.codigo}" data-show-text="false" style="max-width:${imprimiendoEnTermica ? '99%' : '95%'};max-height:${maxHeight};display:block;margin:0 auto;"></svg>`;
-          html += `</div>`;
-        }
-        
-        // Código en texto con fuente más grande para impresoras térmicas
-        if (mostrarCodigoTexto) {
-          const fontSize = imprimiendoEnTermica ? "7px" : "6px";
-          html += `<div class="etiqueta-codigo" style="font-size:${fontSize};margin-top:1px;margin-bottom:0;text-align:center;max-width:99%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${appState.producto.codigo}</div>`;
-        }
-      } else {
-        // Comportamiento normal para etiquetas estándar
-        if (mostrarNombre) {
-          // OPTIMIZADO: Truncar el nombre si excede el límite de caracteres
-          const nombreTruncado = truncarTexto(appState.producto.nombre, formato.maxTextLength);
-          html += `<div class="etiqueta-nombre" style="max-width:98%;overflow:hidden;text-overflow:ellipsis;">${nombreTruncado}</div>`;
-        }
-        
-        if (mostrarPrecio) {
-          html += `<div class="etiqueta-precio" style="max-width:98%;">${parseFloat(appState.producto.precio).toFixed(2)}</div>`;
-        }
-        
-        if (mostrarCodigoBarras) {
-          // Contenedor para control de posición vertical
-          html += `<div class="barcode-container" ${barcodeContainerStyle}>`;
-          // Pasar preferencia de mostrar texto en el SVG
-          const mostrarTextoEnSVG = !mostrarCodigoTexto;
-          // OPTIMIZADO: Mayor tamaño y altura para códigos de barras en térmicas
-          const maxWidth = imprimiendoEnTermica ? "99%" : "95%";
-          const maxHeight = imprimiendoEnTermica ? "85%" : "75%";
-          html += `<svg class="etiqueta-barcode" id="${svgId}" data-codigo="${appState.producto.codigo}" data-show-text="${mostrarTextoEnSVG}" style="max-width:${maxWidth};max-height:${maxHeight};display:block;margin:0 auto;"></svg>`;
-          html += `</div>`;
-        }
-        
-        if (mostrarCodigoTexto) {
-          html += `<div class="etiqueta-codigo" style="max-width:98%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${appState.producto.codigo}</div>`;
-        }
-      }
-      
-      html += `
-          </div>
-        </div>
-      `;
-      
-      return html;
-    }
         
         // Insertar HTML en el contenedor temporal
-        pdfContainer.innerHTML = crearEtiquetasParaPDF();
+        const htmlContent = await crearEtiquetasParaPDF();
+        pdfContainer.innerHTML = htmlContent;
         
         // Obtener configuración de códigos de barras
         const barcodeConfig = obtenerConfiguracionCodigoBarras();
         
-        // Generar códigos de barras para el PDF
+        // NUEVO: Generar códigos de barras por lotes para el PDF
         const svgs = pdfContainer.querySelectorAll('.etiqueta-barcode');
+        console.log(`Generando ${svgs.length} códigos de barras para PDF...`);
         
-        // Una vez que se genera un código de barras para PDF, optimizarlo para impresión precisa
-        for (let svg of svgs) {
-            try {
-              const codigo = svg.dataset.codigo;
-              // Obtener preferencia de mostrar texto en el SVG
-              const mostrarTextoEnSVG = svg.dataset.showText === "true";
+        if (cantidad > limits.safe) {
+          // Procesamiento por lotes para códigos de barras
+          const barcodesBatchSize = 25; // Lotes más pequeños para códigos de barras
+          const totalBarcodesBatches = Math.ceil(svgs.length / barcodesBatchSize);
+          
+          for (let batchIndex = 0; batchIndex < totalBarcodesBatches; batchIndex++) {
+            if (batchController.isCancelled()) {
+              console.log('Generación de códigos de barras cancelada');
+              break;
+            }
+            
+            // Actualizar progreso
+            const barcodeStart = batchIndex * barcodesBatchSize;
+            const barcodeEnd = Math.min(barcodeStart + barcodesBatchSize, svgs.length);
+            
+            showBatchProgress(true, barcodeEnd, svgs.length, `Generando códigos de barras: lote ${batchIndex + 1}/${totalBarcodesBatches}...`);
+            
+            // Procesar lote de códigos de barras
+            for (let i = barcodeStart; i < barcodeEnd; i++) {
+              const svg = svgs[i];
+              await generarCodigoBarrasParaPDF(svg, barcodeConfig, formato);
+            }
+            
+            // Pequeño delay entre lotes
+            await delay(20);
+          }
+        } else {
+          // Procesamiento normal para cantidades pequeñas
+          for (let svg of svgs) {
+            await generarCodigoBarrasParaPDF(svg, barcodeConfig, formato);
+          }
+        }
+        
+        // Dar tiempo para que los SVG se rendericen correctamente
+        await delay(500);
+        
+        // Función para procesar las páginas del PDF una por una MEJORADA
+        async function procesarPaginasPDF() {
+          const paginas = pdfContainer.querySelectorAll('.pdf-page');
+          let paginasProcesadas = 0;
+          
+          if (paginas.length === 0) {
+            finalizarPDF();
+            return;
+          }
+          
+          // Actualizar mensaje
+          if (cantidad > limits.safe) {
+            showBatchProgress(true, 0, paginas.length, `Procesando páginas de PDF: 0 de ${paginas.length}`);
+          } else {
+            mostrarCargando(
+              document.querySelector('.etiquetas-layout'), 
+              true, 
+              "Generando PDF...", 
+              `Procesando página 1 de ${paginas.length}`
+            );
+          }
+          
+          // NUEVO: Procesar páginas por lotes para mejor rendimiento
+          const pagesBatchSize = Math.min(5, paginas.length); // Máximo 5 páginas por lote
+          const totalPagesBatches = Math.ceil(paginas.length / pagesBatchSize);
+          
+          for (let batchIndex = 0; batchIndex < totalPagesBatches; batchIndex++) {
+            if (batchController.isCancelled()) {
+              console.log('Procesamiento de páginas cancelado');
+              break;
+            }
+            
+            const pageStart = batchIndex * pagesBatchSize;
+            const pageEnd = Math.min(pageStart + pagesBatchSize, paginas.length);
+            
+            // Procesar lote de páginas
+            for (let pageIndex = pageStart; pageIndex < pageEnd; pageIndex++) {
+              const pagina = paginas[pageIndex];
               
-              // OPTIMIZADO: Ajustes específicos para impresoras térmicas
-              let anchoLinea = barcodeConfig.anchoLinea;
-              let altoBarras = barcodeConfig.altoBarras;
-              let tamanoTexto = barcodeConfig.tamanoTexto;
-              let margin = impresora === 'normal' ? 2 : 0;
-              
-              // Aplicar factores de ajuste según el tipo de impresora y formato
-              if (imprimiendoEnTermica) {
-                // Para impresoras térmicas, aumentar tamaño base
-                anchoLinea = barcodeConfig.anchoLinea * formato.barcodeWidthFactor;
-                altoBarras = barcodeConfig.altoBarras * formato.barcodeHeightFactor;
-                tamanoTexto = barcodeConfig.tamanoTexto * 1.1; // Aumentar texto un 10%
-                margin = 0; // Sin margen para térmicas
-              } else if (esEtiquetaPequena) {
-                // Para etiquetas pequeñas en impresoras normales
-                anchoLinea = Math.max(0.8, barcodeConfig.anchoLinea * 0.8);
-                altoBarras = Math.max(20, barcodeConfig.altoBarras * 0.8);
-                tamanoTexto = Math.max(7, barcodeConfig.tamanoTexto * 0.8);
-                margin = 1;
+              // Actualizar mensaje
+              if (cantidad > limits.safe) {
+                showBatchProgress(true, pageIndex + 1, paginas.length, `Procesando páginas de PDF: ${pageIndex + 1} de ${paginas.length}`);
+              } else {
+                mostrarCargando(
+                  document.querySelector('.etiquetas-layout'), 
+                  true, 
+                  "Generando PDF...", 
+                  `Procesando página ${pageIndex + 1} de ${paginas.length}`
+                );
               }
               
-              // Parámetros de JsBarcode optimizados para precisión
-              const parametrosBarcode = {
-                format: barcodeConfig.formato,
-                width: anchoLinea,
-                height: altoBarras,
-                displayValue: mostrarTextoEnSVG,
-                fontSize: tamanoTexto,
-                margin: margin,
-                background: "#ffffff",
-                text: codigo,
-                textMargin: mostrarTextoEnSVG ? (esEtiquetaPequena ? 1 : 2) : 0,
-                lineColor: "#000000",
-                valid: () => true, // CRUCIAL: Evitar que bloquee códigos inválidos
-              };
-              
-              // Generar el código de barras
-              // SOLUCIÓN PARA PDF NEGRO: Generar el código de barras con parámetros simples
-              JsBarcode(svg, codigo, {
-                format: "CODE128", // Usar CODE128 para mayor compatibilidad
-                width: parametrosBarcode.width,
-                height: parametrosBarcode.height,
-                displayValue: mostrarTextoEnSVG,
-                fontSize: parametrosBarcode.fontSize,
-                margin: margin,
-                background: "#ffffff",
-                lineColor: "#000000",
-                text: codigo,
-                textMargin: parametrosBarcode.textMargin
-              });
-              
-              // OPTIMIZACIÓN CRÍTICA: Aplicar nueva función de optimización
-              optimizarSVGParaImpresion(svg);
-            } catch (e) {
+              try {
+                // SOLUCIÓN CRUCIAL para evitar PDFs en negro: Configuración optimizada para html2canvas
+                const canvas = await window.html2canvas(pagina, {
+                  scale: 3.0,               // Equilibrio entre calidad y rendimiento
+                  logging: false,
+                  backgroundColor: "white",  // CRÍTICO: Forzar fondo blanco
+                  allowTaint: false,         // CRÍTICO: Cambiado a false para evitar problemas de renderizado
+                  useCORS: true,
+                  x: 0,
+                  y: 0,
+                  scrollX: 0,
+                  scrollY: 0,
+                  windowWidth: pagina.offsetWidth * MM_TO_PX,
+                  windowHeight: pagina.offsetHeight * MM_TO_PX,
+                  // CRUCIAL: Configuración para evitar PDFs en negro
+                  imageTimeout: 0,           // Sin timeout para imágenes
+                  ignoreElements: (element) => {
+                    // Ignorar elementos que puedan causar problemas de renderizado  
+                    return element.tagName === 'IFRAME' || 
+                           element.classList.contains('ignore-render');
+                  }
+                });
+                
+                // Añadir imagen al PDF (excepto para la primera página)
+                if (pageIndex > 0) {
+                  pdf.addPage();
+                }
+                
+                // CORREGIDO: Añadir la imagen con dimensiones precisas
+                const imgData = canvas.toDataURL('image/JPEG', 0.95);
+                
+                // Obtener dimensiones de la página PDF
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = pdf.internal.pageSize.getHeight();
+                
+                // Añadir la imagen manteniendo proporciones precisas
+                pdf.addImage(
+                  imgData, 
+                  'JPEG', 
+                  0, 
+                  0, 
+                  pdfWidth, 
+                  pdfHeight,
+                  null,
+                  'FAST' // Para mejor rendimiento
+                );
+                
+                paginasProcesadas++;
+                
+                // Limpiar memoria para páginas ya procesadas
+                cleanupMemory(pagina);
+                
+              } catch (err) {
+                console.error(`Error procesando página ${pageIndex + 1}:`, err);
+                // Continuar con la siguiente página
+                paginasProcesadas++;
+              }
+            }
+            
+            // Pequeño delay entre lotes de páginas
+            await delay(100);
+          }
+          
+          // Finalizar PDF
+          finalizarPDF();
+        }
+        
+        // Función auxiliar para generar código de barras específicamente para PDF
+        async function generarCodigoBarrasParaPDF(svg, barcodeConfig, formato) {
+          try {
+            const codigo = svg.dataset.codigo;
+            // Obtener preferencia de mostrar texto en el SVG
+            const mostrarTextoEnSVG = svg.dataset.showText === "true";
+            
+            // OPTIMIZADO: Ajustes específicos para impresoras térmicas
+            let anchoLinea = barcodeConfig.anchoLinea;
+            let altoBarras = barcodeConfig.altoBarras;
+            let tamanoTexto = barcodeConfig.tamanoTexto;
+            let margin = impresora === 'normal' ? 2 : 0;
+            
+            // Aplicar factores de ajuste según el tipo de impresora y formato
+            if (imprimiendoEnTermica) {
+              // Para impresoras térmicas, aumentar tamaño base
+              anchoLinea = barcodeConfig.anchoLinea * formato.barcodeWidthFactor;
+              altoBarras = barcodeConfig.altoBarras * formato.barcodeHeightFactor;
+              tamanoTexto = barcodeConfig.tamanoTexto * 1.1; // Aumentar texto un 10%
+              margin = 0; // Sin margen para térmicas
+            } else if (esEtiquetaPequena) {
+              // Para etiquetas pequeñas en impresoras normales
+              anchoLinea = Math.max(0.8, barcodeConfig.anchoLinea * 0.8);
+              altoBarras = Math.max(20, barcodeConfig.altoBarras * 0.8);
+              tamanoTexto = Math.max(7, barcodeConfig.tamanoTexto * 0.8);
+              margin = 1;
+            }
+            
+            // Parámetros de JsBarcode optimizados para precisión
+            const parametrosBarcode = {
+              format: barcodeConfig.formato,
+              width: anchoLinea,
+              height: altoBarras,
+              displayValue: mostrarTextoEnSVG,
+              fontSize: tamanoTexto,
+              margin: margin,
+              background: "#ffffff",
+              text: codigo,
+              textMargin: mostrarTextoEnSVG ? (esEtiquetaPequena ? 1 : 2) : 0,
+              lineColor: "#000000",
+              valid: () => true, // CRUCIAL: Evitar que bloquee códigos inválidos
+            };
+            
+            // Generar el código de barras
+            // SOLUCIÓN PARA PDF NEGRO: Generar el código de barras con parámetros simples
+            JsBarcode(svg, codigo, {
+              format: "CODE128", // Usar CODE128 para mayor compatibilidad
+              width: parametrosBarcode.width,
+              height: parametrosBarcode.height,
+              displayValue: mostrarTextoEnSVG,
+              fontSize: parametrosBarcode.fontSize,
+              margin: margin,
+              background: "#ffffff",
+              lineColor: "#000000",
+              text: codigo,
+              textMargin: parametrosBarcode.textMargin
+            });
+            
+            // OPTIMIZACIÓN CRÍTICA: Aplicar nueva función de optimización
+            optimizarSVGParaImpresion(svg);
+          } catch (e) {
             console.error("Error al generar código de barras para PDF:", e);
             // Intentar con CODE128 como fallback
             try {
@@ -2827,113 +3338,8 @@ function initLabelApp() {
           }
         }
         
-        // Dar tiempo para que los SVG se rendericen correctamente
-        setTimeout(() => {
-          procesarPaginasPDF();
-        }, 500);
-        
-        // Función para procesar las páginas del PDF una por una
-        function procesarPaginasPDF() {
-          const paginas = pdfContainer.querySelectorAll('.pdf-page');
-          let paginasProcesadas = 0;
-          
-          if (paginas.length === 0) {
-            finalizarPDF();
-            return;
-          }
-          
-          // Actualizar mensaje
-          mostrarCargando(
-            document.querySelector('.etiquetas-layout'), 
-            true, 
-            "Generando PDF...", 
-            `Procesando página 1 de ${paginas.length}`
-          );
-          
-          // Función recursiva para procesar cada página
-          function procesarPagina(index) {
-            if (index >= paginas.length) {
-              // Todas las páginas procesadas, guardar PDF
-              finalizarPDF();
-              return;
-            }
-            
-            const pagina = paginas[index];
-            
-            // Actualizar mensaje
-            mostrarCargando(
-              document.querySelector('.etiquetas-layout'), 
-              true, 
-              "Generando PDF...", 
-              `Procesando página ${index + 1} de ${paginas.length}`
-            );
-            
-            // SOLUCIÓN CRUCIAL para evitar PDFs en negro: Configuración optimizada para html2canvas
-            window.html2canvas(pagina, {
-              scale: 3.0,               // Equilibrio entre calidad y rendimiento
-              logging: false,
-              backgroundColor: "white",  // CRÍTICO: Forzar fondo blanco
-              allowTaint: false,         // CRÍTICO: Cambiado a false para evitar problemas de renderizado
-              useCORS: true,
-              x: 0,
-              y: 0,
-              scrollX: 0,
-              scrollY: 0,
-              windowWidth: pagina.offsetWidth * MM_TO_PX,
-              windowHeight: pagina.offsetHeight * MM_TO_PX,
-              // CRUCIAL: Configuración para evitar PDFs en negro
-              imageTimeout: 0,           // Sin timeout para imágenes
-              ignoreElements: (element) => {
-                // Ignorar elementos que puedan causar problemas de renderizado  
-                return element.tagName === 'IFRAME' || 
-                       element.classList.contains('ignore-render');
-              }
-            }).then(canvas => {
-              // Añadir imagen al PDF (excepto para la primera página)
-              if (index > 0) {
-                pdf.addPage();
-              }
-              
-              // CORREGIDO: Añadir la imagen con dimensiones precisas
-              try {
-                const imgData = canvas.toDataURL('image/jpeg', 0.95);
-                
-                // Obtener dimensiones de la página PDF
-                const pdfWidth = pdf.internal.pageSize.getWidth();
-                const pdfHeight = pdf.internal.pageSize.getHeight();
-                
-                // Añadir la imagen manteniendo proporciones precisas
-                pdf.addImage(
-                  imgData, 
-                  'JPEG', 
-                  0, 
-                  0, 
-                  pdfWidth, 
-                  pdfHeight,
-                  null,
-                  'FAST' // Para mejor rendimiento
-                );
-                
-                // Actualizar contador y procesar siguiente página
-                paginasProcesadas++;
-                setTimeout(() => procesarPagina(index + 1), 100);
-              } catch (err) {
-                console.error("Error añadiendo imagen al PDF:", err);
-                // Intentar continuar con la siguiente página
-                paginasProcesadas++;
-                setTimeout(() => procesarPagina(index + 1), 100);
-              }
-            }).catch(err => {
-              console.error("Error en html2canvas:", err);
-              // Intentar continuar con la siguiente página
-              paginasProcesadas++;
-              setTimeout(() => procesarPagina(index + 1), 100);
-            });
-          }
-          
-          // Comenzar procesamiento con la primera página
-          procesarPagina(0);
-        }
+        // Comenzar procesamiento de páginas
+        await procesarPaginasPDF();
         
         // Finalizar y guardar el PDF
         function finalizarPDF() {
@@ -2957,6 +3363,7 @@ function initLabelApp() {
             setTimeout(() => {
               pdfContainer.innerHTML = '';
               pdfContainer.style.display = 'none';
+              showBatchProgress(false);
               mostrarCargando(document.querySelector('.etiquetas-layout'), false);
               appState.isProcessing = false;
               appState.pdfGenerating = false; // Desactivar el flag
@@ -2964,6 +3371,7 @@ function initLabelApp() {
           } catch (err) {
             console.error("Error al guardar el PDF:", err);
             alert("Error al guardar el PDF: " + err.message);
+            showBatchProgress(false);
             mostrarCargando(document.querySelector('.etiquetas-layout'), false);
             appState.isProcessing = false;
             appState.pdfGenerating = false; // Desactivar el flag en caso de error
@@ -2972,6 +3380,7 @@ function initLabelApp() {
       } catch (e) {
         console.error("Error al generar PDF:", e);
         alert("Error al generar PDF: " + e.message);
+        showBatchProgress(false);
         mostrarCargando(document.querySelector('.etiquetas-layout'), false);
         appState.isProcessing = false;
         appState.pdfGenerating = false; // Desactivar el flag en caso de error

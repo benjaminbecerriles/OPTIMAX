@@ -1672,21 +1672,15 @@
       </a>
       <a href="#" class="action-item" id="actionEdit">
         <div class="action-icon">
-          <i class="fas fa-dollar-sign"></i>
-        </div>
-        <span class="action-text">Cambiar precios</span>
-      </a>
-      <a href="#" class="action-item" id="actionToggleVisibility">
-        <div class="action-icon">
           <i class="fas fa-edit"></i>
         </div>
-        <span class="action-text" id="visibilityActionText">Editar producto</span>
+        <span class="action-text">Editar producto</span>
       </a>
-      <a href="#" class="action-item" id="actionPrintLabels">
+      <a href="#" class="action-item" id="actionPrintLabels" style="grid-column: span 2;">
         <div class="action-icon">
           <i class="fas fa-print"></i>
         </div>
-        <span class="action-text">Imprimir etiqueta</span>
+        <span class="action-text">Imprimir etiquetas</span>
       </a>
       <a href="#" class="action-item" id="actionDelete" style="grid-column: span 2; background-color: rgba(231, 76, 60, 0.1); color: var(--red); border-color: rgba(231, 76, 60, 0.2);">
         <div class="action-icon" style="color: var(--red);">
@@ -2633,6 +2627,7 @@
     const actionAddStock = document.getElementById('actionAddStock');
     const actionChangePrice = document.getElementById('actionChangePrice');
     const actionChangeCost = document.getElementById('actionChangeCost');
+    const actionPrintLabels = document.getElementById('actionPrintLabels');
     
     if (productNameEl) {
       productNameEl.textContent = productName;
@@ -2661,6 +2656,11 @@
     // Modificar el enlace de cambiar costo
     if (actionChangeCost) {
       actionChangeCost.href = `/cambiar-costos/${productId}`;
+    }
+    
+    // NUEVO: Configurar enlace para imprimir etiquetas
+    if (actionPrintLabels) {
+      actionPrintLabels.href = `/etiquetas-producto/${productId}`;
     }
     
     if (modal) {
