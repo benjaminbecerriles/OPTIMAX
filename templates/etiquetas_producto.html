@@ -357,10 +357,11 @@
     padding: 1.25rem;
   }
   
+  /* CORREGIDO: Perfecta alineación de campos en configuración general */
   .config-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1.25rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
     margin-bottom: 1.25rem;
   }
   
@@ -369,24 +370,32 @@
   }
   
   .config-col {
-    flex: 1;
-    min-width: 240px;
+    display: flex;
+    flex-direction: column;
   }
   
   .form-group {
-    margin-bottom: 1.25rem;
-  }
-  
-  .form-group:last-child {
-    margin-bottom: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
   }
   
   .form-label {
     display: block;
-    margin-bottom: 0.375rem;
+    margin-bottom: 0.5rem;
     font-weight: 500;
     color: var(--neutral-700);
     font-size: 0.875rem;
+    height: 20px; /* Altura fija exacta */
+    line-height: 20px;
+    display: flex;
+    align-items: center;
+  }
+  
+  /* Contenedor del toggle para mantener alineación */
+  .toggle-section {
+    margin-bottom: 0.75rem;
+    min-height: 32px; /* Altura mínima para mantener alineación */
   }
   
   .form-control {
@@ -399,6 +408,8 @@
     transition: var(--transition-all);
     background-color: white;
     box-shadow: var(--shadow-sm);
+    height: 42px; /* Altura fija para alineación exacta */
+    margin-top: auto; /* Push al final del container */
   }
   
   .form-control:focus {
@@ -428,6 +439,8 @@
     background-position: right 0.75rem center;
     background-size: 0.875rem;
     padding-right: 2.25rem;
+    height: 42px; /* Altura fija para alineación exacta */
+    margin-top: auto; /* Push al final del container */
   }
   
   .form-select:focus {
@@ -453,6 +466,7 @@
     width: 46px;
     height: 24px;
     margin-right: 0.75rem;
+    flex-shrink: 0;
   }
   
   .toggle-switch input {
@@ -502,6 +516,7 @@
     font-size: 0.875rem;
     color: var(--neutral-700);
     user-select: none;
+    line-height: 1.3;
   }
   
   /* Opciones de impresora - Diseño más limpio */
@@ -804,6 +819,13 @@
     min-width: 110px;
   }
   
+  .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: var(--shadow-sm) !important;
+  }
+  
   .btn-icon {
     font-size: 0.9375rem;
   }
@@ -813,7 +835,7 @@
     color: white;
   }
   
-  .btn-primary:hover {
+  .btn-primary:hover:not(:disabled) {
     background-color: var(--primary-dark);
     transform: translateY(-1px);
     box-shadow: var(--shadow-md);
@@ -824,7 +846,7 @@
     color: white;
   }
   
-  .btn-secondary:hover {
+  .btn-secondary:hover:not(:disabled) {
     background-color: var(--neutral-800);
     transform: translateY(-1px);
     box-shadow: var(--shadow-md);
@@ -836,7 +858,7 @@
     color: var(--neutral-700);
   }
   
-  .btn-outline:hover {
+  .btn-outline:hover:not(:disabled) {
     background-color: var(--neutral-50);
     border-color: var(--neutral-400);
     transform: translateY(-1px);
@@ -851,11 +873,8 @@
     }
     
     .config-row {
-      flex-direction: column;
-    }
-    
-    .config-col {
-      min-width: unset;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
     }
     
     .actions-section {
@@ -944,7 +963,7 @@
           <div class="meta-item">
             <div>
               <span class="meta-label">Precio</span>
-              <span class="meta-value">${{ "%.2f"|format(precio_final) }}</span>
+              <span class="meta-value product-price">${{ "%.2f"|format(precio_final) }}</span>
             </div>
           </div>
           
@@ -980,7 +999,7 @@
         </button>
       </div>
       
-      <!-- Pestaña: Configuración General - MODIFICADO: Alineados elementos en la misma fila -->
+      <!-- Pestaña: Configuración General - CORREGIDO: Perfecta alineación -->
       <div id="tab-general" class="tab-content active">
         <div class="config-section">
           <div class="config-header">
@@ -993,24 +1012,29 @@
               <div class="config-col">
                 <div class="form-group">
                   <label class="form-label" for="cantidad">
-                    <i class="fas fa-hashtag mr-1"></i> Cantidad de etiquetas
+                    <i class="fas fa-hashtag" style="margin-right: 0.75rem;"></i> Cantidad de etiquetas
                   </label>
-                  <div class="toggle-container">
-                    <label class="toggle-switch">
-                      <input type="checkbox" id="usar_stock" checked>
-                      <span class="toggle-slider"></span>
-                    </label>
-                    <span class="toggle-label">Usar stock actual ({{ producto.stock }} unidades)</span>
+                  <div class="toggle-section">
+                    <div class="toggle-container">
+                      <label class="toggle-switch">
+                        <input type="checkbox" id="usar_stock" checked>
+                        <span class="toggle-slider"></span>
+                      </label>
+                      <span class="toggle-label">Usar stock actual (<span id="stock-display">{{ producto.stock }}</span> unidades)</span>
+                    </div>
                   </div>
-                  <input type="number" id="cantidad" class="form-control" min="1" value="{{ producto.stock }}" disabled placeholder="Ingrese la cantidad de etiquetas">
+                  <input type="number" id="cantidad" class="form-control" min="1" step="1" value="{{ producto.stock }}" disabled placeholder="Ingrese la cantidad de etiquetas">
                 </div>
               </div>
               
               <div class="config-col">
                 <div class="form-group">
                   <label class="form-label" for="formato_etiqueta">
-                    <i class="fas fa-th mr-1"></i> Formato de etiqueta
+                    <i class="fas fa-th" style="margin-right: 0.75rem;"></i> Formato de etiqueta
                   </label>
+                  <div class="toggle-section">
+                    <!-- Espaciador para mantener alineación -->
+                  </div>
                   <select id="formato_etiqueta" class="form-select">
                     <!-- Los formatos serán filtrados automáticamente por JavaScript según la impresora seleccionada -->
                     <!-- Formatos Avery para impresoras normales -->
@@ -1104,7 +1128,7 @@
         </div>
       </div>
       
-      <!-- Pestaña: Impresoras -->
+      <!-- Pestaña: Impresoras - CORREGIDO: Iconos específicos de impresoras -->
       <div id="tab-printer" class="tab-content">
         <div class="config-section">
           <div class="config-header">
@@ -1137,7 +1161,7 @@
               <!-- Impresora Zebra -->
               <div class="printer-option" data-printer="zebra">
                 <div class="printer-icon">
-                  <i class="fas fa-tag"></i>
+                  <i class="fas fa-barcode"></i>
                 </div>
                 <div class="printer-name">Zebra GK420d/GX420d</div>
                 <div class="printer-description">Impresora térmica industrial para etiquetas adhesivas de alta calidad.</div>
@@ -1154,7 +1178,7 @@
               <!-- Impresora DYMO -->
               <div class="printer-option" data-printer="dymo">
                 <div class="printer-icon">
-                  <i class="fas fa-ticket-alt"></i>
+                  <i class="fas fa-tags"></i>
                 </div>
                 <div class="printer-name">DYMO LabelWriter</div>
                 <div class="printer-description">Impresora térmica compacta para etiquetas pequeñas y códigos de barras.</div>
@@ -1243,6 +1267,39 @@
       
     </div>
     
+    <!-- Alerta de cantidad grande -->
+    <div id="cantidad-warning" class="alerta-formato alerta-warning" style="display: none;">
+      <i class="fas fa-exclamation-triangle"></i>
+      <div class="alerta-mensaje">
+        <strong>Cantidad grande detectada:</strong> <span id="warning-message"></span>
+        <br><small>Para mejor rendimiento, considera dividir en lotes menores.</small>
+      </div>
+      <button class="alerta-cerrar" onclick="this.parentNode.style.display='none'">×</button>
+    </div>
+
+    <!-- Indicador de progreso para procesamiento por lotes -->
+    <div id="batch-progress" class="config-section" style="display: none;">
+      <div class="config-header">
+        <h3 class="config-title">
+          <i class="fas fa-cogs config-title-icon"></i> Procesando etiquetas por lotes
+        </h3>
+      </div>
+      <div class="config-body">
+        <div style="margin-bottom: 1rem;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+            <span>Progreso:</span>
+            <span id="progress-text">0 / 0 etiquetas</span>
+          </div>
+          <div style="width: 100%; background-color: var(--neutral-200); border-radius: 10px; height: 8px;">
+            <div id="progress-bar" style="width: 0%; background-color: var(--accent-color); height: 100%; border-radius: 10px; transition: width 0.3s ease;"></div>
+          </div>
+        </div>
+        <div style="text-align: center; color: var(--neutral-600); font-size: 0.875rem;">
+          <span id="progress-message">Preparando...</span>
+        </div>
+      </div>
+    </div>
+
     <!-- Botones de acción (centrados ahora) -->
     <div class="actions-section">
       <button id="btn-print" class="btn btn-secondary">
@@ -1268,6 +1325,185 @@
 
 <!-- JavaScript para control de pestañas -->
 <script>
+  // Función para formatear números con separadores de miles
+  function formatNumber(num) {
+    if (typeof num === 'string') {
+      num = parseFloat(num);
+    }
+    
+    if (isNaN(num)) return '0';
+    
+    // Si es un número entero, mostrarlo sin decimales
+    if (num === Math.floor(num)) {
+      return num.toLocaleString('es-MX');
+    } else {
+      // Si tiene decimales, mostrar máximo 2 decimales
+      return num.toLocaleString('es-MX', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+      });
+    }
+  }
+  
+  // Función para formatear precio con símbolo de moneda
+  function formatPrice(price) {
+    if (typeof price === 'string') {
+      price = parseFloat(price);
+    }
+    
+    if (isNaN(price)) return '$0.00';
+    
+    return '$' + price.toLocaleString('es-MX', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  }
+  
+  // Función para formatear stock con unidades
+  function formatStock(stock) {
+    if (typeof stock === 'string') {
+      stock = parseFloat(stock);
+    }
+    
+    if (isNaN(stock)) return '0 unidades';
+    
+    const formattedStock = formatNumber(stock);
+    const unit = stock === 1 ? 'unidad' : 'unidades';
+    
+    return `${formattedStock} ${unit}`;
+  }
+
+  // Función para validar y limpiar input de cantidad (mejorada)
+  function validateQuantityInput(input, allowEmpty = false) {
+    let value = input.value;
+    
+    // Si está vacío y lo permitimos (durante edición), salir
+    if (allowEmpty && value === '') {
+      return;
+    }
+    
+    // Remover cualquier caracter que no sea dígito
+    value = value.replace(/[^\d]/g, '');
+    
+    // Si queda vacío después de limpiar, poner 1
+    if (value === '') {
+      value = '1';
+    }
+    
+    // Convertir a número
+    let num = parseInt(value) || 1;
+    
+    // Asegurar que sea al menos 1
+    if (num < 1) {
+      num = 1;
+    }
+    
+    // Actualizar el input solo si es diferente
+    if (input.value !== num.toString()) {
+      input.value = num;
+    }
+    
+    return num;
+  }
+
+  // Función para validar y habilitar/deshabilitar botones
+  function updateButtonStates() {
+    const cantidadInput = document.getElementById('cantidad');
+    const usarStockCheckbox = document.getElementById('usar_stock');
+    const btnPrint = document.getElementById('btn-print');
+    const btnPDF = document.getElementById('btn-pdf');
+    const cantidadWarning = document.getElementById('cantidad-warning');
+    const warningMessage = document.getElementById('warning-message');
+    
+    let cantidad = 0;
+    
+    if (usarStockCheckbox && usarStockCheckbox.checked) {
+      cantidad = parseInt({{ producto.stock }}) || 0;
+    } else if (cantidadInput) {
+      cantidad = parseInt(cantidadInput.value) || 0;
+    }
+    
+    const shouldDisable = cantidad <= 0;
+    
+    if (btnPrint) {
+      btnPrint.disabled = shouldDisable;
+    }
+    
+    if (btnPDF) {
+      btnPDF.disabled = shouldDisable;
+    }
+    
+    // Mostrar warning para cantidades grandes
+    if (cantidad > 0 && cantidadWarning && warningMessage) {
+      const impresora = getSelectedPrinterType();
+      const limits = getPrinterLimits(impresora);
+      
+      if (cantidad > limits.warning) {
+        let message = '';
+        if (cantidad > limits.maximum) {
+          message = `${cantidad.toLocaleString()} etiquetas es demasiado (máximo: ${limits.maximum.toLocaleString()}). El sistema puede fallar.`;
+          cantidadWarning.className = 'alerta-formato alerta-error';
+        } else if (cantidad > limits.safe) {
+          message = `${cantidad.toLocaleString()} etiquetas es una cantidad grande. Se procesará por lotes automáticamente.`;
+          cantidadWarning.className = 'alerta-formato alerta-warning';
+        }
+        
+        if (message) {
+          warningMessage.textContent = message;
+          cantidadWarning.style.display = 'flex';
+        } else {
+          cantidadWarning.style.display = 'none';
+        }
+      } else {
+        cantidadWarning.style.display = 'none';
+      }
+    }
+  }
+
+  // Función para obtener el tipo de impresora seleccionado
+  function getSelectedPrinterType() {
+    const selectedPrinter = document.querySelector('.printer-option.selected');
+    return selectedPrinter ? selectedPrinter.dataset.printer : 'normal';
+  }
+
+  // Función para obtener límites por tipo de impresora
+  function getPrinterLimits(impresora) {
+    const limits = {
+      normal: { safe: 300, warning: 500, maximum: 2000 },
+      zebra: { safe: 500, warning: 800, maximum: 3000 },
+      dymo: { safe: 500, warning: 800, maximum: 3000 },
+      termica: { safe: 800, warning: 1200, maximum: 5000 }
+    };
+    
+    return limits[impresora] || limits.normal;
+  }
+
+  // Función para mostrar progreso por lotes
+  function showBatchProgress(show, current = 0, total = 0, message = 'Procesando...') {
+    const batchProgress = document.getElementById('batch-progress');
+    const progressBar = document.getElementById('progress-bar');
+    const progressText = document.getElementById('progress-text');
+    const progressMessage = document.getElementById('progress-message');
+    
+    if (!batchProgress) return;
+    
+    if (show) {
+      batchProgress.style.display = 'block';
+      const percentage = total > 0 ? (current / total) * 100 : 0;
+      
+      if (progressBar) progressBar.style.width = percentage + '%';
+      if (progressText) progressText.textContent = `${current.toLocaleString()} / ${total.toLocaleString()} etiquetas`;
+      if (progressMessage) progressMessage.textContent = message;
+    } else {
+      batchProgress.style.display = 'none';
+    }
+  }
+
+  // Función para delay/pausa
+  function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
   // Controlador de pestañas
   document.addEventListener('DOMContentLoaded', function() {
     const tabButtons = document.querySelectorAll('.tab-button');
@@ -1284,6 +1520,114 @@
         document.getElementById(tabId).classList.add('active');
       });
     });
+    
+    // Formatear precio e inventario en la tarjeta del producto
+    const productPriceEl = document.querySelector('.product-price');
+    const productStockEl = document.querySelector('.product-stock');
+    const stockDisplayEl = document.getElementById('stock-display');
+    
+    if (productPriceEl) {
+      const rawPrice = productPriceEl.textContent.replace('$', '');
+      productPriceEl.textContent = formatPrice(parseFloat(rawPrice));
+    }
+    
+    if (productStockEl) {
+      const rawStock = productStockEl.textContent.replace(' unidades', '');
+      productStockEl.textContent = formatStock(parseFloat(rawStock));
+    }
+    
+    if (stockDisplayEl) {
+      const rawStock = stockDisplayEl.textContent;
+      stockDisplayEl.textContent = formatNumber(parseFloat(rawStock));
+    }
+    
+    // Configurar validación del campo de cantidad (mejorada)
+    const cantidadInput = document.getElementById('cantidad');
+    const usarStockCheckbox = document.getElementById('usar_stock');
+    
+    if (cantidadInput) {
+      // Prevenir entrada de caracteres no numéricos en keydown
+      cantidadInput.addEventListener('keydown', function(e) {
+        // Permitir: backspace, delete, tab, escape, enter, home, end, flechas
+        if ([46, 8, 9, 27, 13, 35, 36, 37, 38, 39, 40].indexOf(e.keyCode) !== -1 ||
+            // Permitir Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+            (e.keyCode === 65 && e.ctrlKey === true) ||
+            (e.keyCode === 67 && e.ctrlKey === true) ||
+            (e.keyCode === 86 && e.ctrlKey === true) ||
+            (e.keyCode === 88 && e.ctrlKey === true)) {
+          return;
+        }
+        
+        // Prevenir punto decimal (190, 110) y signo menos (189, 109)
+        if ([190, 110, 189, 109, 188, 107, 187].indexOf(e.keyCode) !== -1) {
+          e.preventDefault();
+          return;
+        }
+        
+        // Asegurar que es un número (0-9)
+        if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+          e.preventDefault();
+        }
+      });
+      
+      // Validar durante la escritura (permitir vacío temporalmente)
+      cantidadInput.addEventListener('input', function() {
+        // Permitir campo vacío durante edición
+        if (this.value === '') {
+          updateButtonStates();
+          return;
+        }
+        
+        validateQuantityInput(this, true);
+        updateButtonStates();
+      });
+      
+      // Validar al perder el foco (obligar valor válido)
+      cantidadInput.addEventListener('blur', function() {
+        validateQuantityInput(this, false);
+        updateButtonStates();
+      });
+      
+      // Validar al pegar contenido
+      cantidadInput.addEventListener('paste', function(e) {
+        setTimeout(() => {
+          validateQuantityInput(this, false);
+          updateButtonStates();
+        }, 10);
+      });
+    }
+    
+    // Configurar el toggle de usar stock
+    if (usarStockCheckbox && cantidadInput) {
+      usarStockCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+          // Usar stock actual
+          cantidadInput.disabled = true;
+          cantidadInput.value = {{ producto.stock }};
+        } else {
+          // Permitir cantidad manual
+          cantidadInput.disabled = false;
+          validateQuantityInput(cantidadInput, false);
+        }
+        updateButtonStates();
+      });
+    }
+
+    // Configurar eventos de impresoras para actualizar warnings
+    const printerOptions = document.querySelectorAll('.printer-option');
+    printerOptions.forEach(option => {
+      option.addEventListener('click', function() {
+        // Actualizar selección visual
+        printerOptions.forEach(opt => opt.classList.remove('selected'));
+        this.classList.add('selected');
+        
+        // Actualizar warnings basado en nueva impresora
+        setTimeout(updateButtonStates, 50);
+      });
+    });
+    
+    // Estado inicial de botones
+    updateButtonStates();
     
     // Desactivar funcionalidad de vista previa anterior
     const btnRefreshPreview = document.getElementById('btn-refresh-preview');
