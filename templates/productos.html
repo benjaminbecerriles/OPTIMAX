@@ -37,6 +37,8 @@
     --gray-900: #212529;
     --excel-green: #217346;
     --excel-green-hover: #1a5c38;
+    --discount-green: #27ae60;
+    --discount-bg: rgba(39, 174, 96, 0.1);
   }
 
   body {
@@ -356,7 +358,7 @@
     font-size: 1rem;
   }
 
-  /* Tabla estilizada - MEJORADA PARA AJUSTARSE MEJOR */
+  /* Tabla estilizada - MEJORADA PARA AJUSTARSE MEJOR CON ALTURAS VARIABLES */
   .products-table-container {
     margin-top: 1.5rem;
     border-radius: 12px;
@@ -395,6 +397,8 @@
     vertical-align: middle;
     border-bottom: 1px solid var(--gray-200);
     text-align: center;
+    /* MODIFICADO: Altura mínima variable para acomodar descuentos */
+    min-height: 60px;
   }
   
   .products-table tbody tr:last-child td {
@@ -571,7 +575,48 @@
     color: var(--orange);
   }
 
-  /* Precio y costo */
+  /* NUEVOS ESTILOS PARA PRECIOS CON DESCUENTOS */
+  .price-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    min-height: 40px;
+    justify-content: center;
+  }
+  
+  .price-original {
+    font-size: 0.7rem;
+    color: var(--gray-600);
+    text-decoration: line-through;
+    font-weight: 400;
+    line-height: 1;
+  }
+  
+  .price-final {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--text-color);
+    line-height: 1;
+  }
+  
+  .price-final.discounted {
+    color: var(--discount-green);
+    font-weight: 700;
+  }
+  
+  .discount-badge {
+    font-size: 0.6rem;
+    background-color: var(--discount-bg);
+    color: var(--discount-green);
+    padding: 1px 4px;
+    border-radius: 4px;
+    font-weight: 500;
+    margin-top: 1px;
+    line-height: 1;
+  }
+
+  /* Precio y costo normales (sin descuento) */
   .price-value, .cost-value {
     font-weight: 600;
     font-size: 0.85rem; /* Tamaño más reducido */
@@ -1224,7 +1269,7 @@
       max-width: 150px; /* Reducido más */
     }
     
-    .price-value, .cost-value, .stock-value {
+    .price-final, .cost-value, .stock-value {
       font-size: 0.8rem; /* Reducido más */
     }
     
@@ -1234,6 +1279,20 @@
     
     .actions-modal-body {
       grid-template-columns: 1fr;
+    }
+    
+    /* Responsive para precios con descuento */
+    .price-container {
+      min-height: 35px;
+    }
+    
+    .price-original {
+      font-size: 0.65rem;
+    }
+    
+    .discount-badge {
+      font-size: 0.55rem;
+      padding: 0.5px 3px;
     }
   }
   
@@ -1272,6 +1331,24 @@
     .action-button {
       font-size: 0.8rem; /* Reducido */
       padding: 0.4rem 0.8rem; /* Reducido */
+    }
+    
+    /* Mobile responsive para precios con descuento */
+    .price-container {
+      min-height: 30px;
+    }
+    
+    .price-original {
+      font-size: 0.6rem;
+    }
+    
+    .price-final {
+      font-size: 0.75rem;
+    }
+    
+    .discount-badge {
+      font-size: 0.5rem;
+      padding: 0.5px 2px;
     }
   }
 </style>
@@ -1443,7 +1520,7 @@
           <th class="text-start column-product" style="width: 200px;">PRODUCTO</th>
           <th style="width: 75px;" class="column-category">CATEGORÍA</th>
           <th style="width: 90px;" class="column-stock">STOCK</th>
-          <th style="width: 90px;" class="column-price">PRECIO</th>
+          <th style="width: 90px;" class="column-price">PRECIO FINAL</th>
           <!-- NUEVO: Cambiamos el encabezado de costo y añadimos botón de despliegue -->
           <th style="width: 90px;" class="column-cost">
             <div class="cost-type-dropdown">
@@ -1532,9 +1609,27 @@
             </span>
           </td>
           
-          <!-- Precio con formato -->
+          <!-- MODIFICADO: Precio con descuento visual -->
           <td class="column-price">
-            <span class="price-value">${{ '{:,.2f}'.format(p.precio_venta) }}</span>
+            <div class="price-container">
+              {% if p.tiene_descuento and p.valor_descuento > 0 %}
+                <!-- Precio original tachado arriba -->
+                <div class="price-original">${{ '{:,.2f}'.format(p.precio_venta) }}</div>
+                <!-- Precio final con descuento abajo -->
+                <div class="price-final discounted">${{ '{:,.2f}'.format(p.precio_final) }}</div>
+                <!-- Badge de descuento -->
+                <div class="discount-badge">
+                  {% if p.tipo_descuento == 'percentage' %}
+                    -{{ p.valor_descuento|int }}%
+                  {% else %}
+                    -${{ '{:,.0f}'.format(p.valor_descuento) }}
+                  {% endif %}
+                </div>
+              {% else %}
+                <!-- Precio normal sin descuento -->
+                <div class="price-final">${{ '{:,.2f}'.format(p.precio_final) }}</div>
+              {% endif %}
+            </div>
           </td>
           
           <!-- NUEVO: Costo con formato y data-attributes para alternar entre tipos -->

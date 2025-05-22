@@ -43,7 +43,7 @@ class CodigoAsignado(db.Model):
                 f"activo={self.esta_activo}, empresa_id={self.empresa_id}>")
 
 # ===============================
-# MODELO 'PRODUCTO'
+# MODELO 'PRODUCTO' - OPTIMIZADO PARA PUNTO DE VENTA
 # ===============================
 class Producto(db.Model):
     __tablename__ = 'producto'
@@ -56,6 +56,11 @@ class Producto(db.Model):
     stock = db.Column(db.Float, default=0.0)
     costo = db.Column(db.Float, default=0.0)
     precio_venta = db.Column(db.Float, default=0.0)
+    
+    # ===== NUEVO CAMPO CRÍTICO PARA PUNTO DE VENTA =====
+    # Este campo se actualiza automáticamente y siempre contiene el precio real que debe cobrarse
+    precio_final = db.Column(db.Float, default=0.0, nullable=False)
+    
     categoria = db.Column(db.String(100), nullable=True)
 
     # Código de barras principal
@@ -173,11 +178,18 @@ class Producto(db.Model):
     def __repr__(self):
         return (f"<Producto {self.nombre} (ID={self.id}), "
                 f"stock={self.stock}, costo={self.costo}, "
-                f"precio_venta={self.precio_venta}, aprobado={self.is_approved}>")
+                f"precio_venta={self.precio_venta}, precio_final={self.precio_final}, aprobado={self.is_approved}>")
     
-    # Método para obtener el precio con descuento aplicado
+    # =========================================================================
+    # MÉTODOS OPTIMIZADOS PARA PUNTO DE VENTA
+    # =========================================================================
+    
     def get_precio_con_descuento(self):
-        """Calcula el precio final con el descuento aplicado."""
+        """
+        Calcula el precio final con el descuento aplicado.
+        NOTA: Este método ahora es principalmente para validación, 
+        ya que precio_final se mantiene actualizado automáticamente.
+        """
         if not self.tiene_descuento or self.valor_descuento <= 0:
             return self.precio_venta
             
@@ -189,10 +201,27 @@ class Producto(db.Model):
             # Aplicar monto fijo (asegurar que no sea negativo)
             return max(0, self.precio_venta - self.valor_descuento)
     
-    # Método para aplicar un descuento
+    def actualizar_precio_final(self):
+        """
+        MÉTODO CRÍTICO: Actualiza el campo precio_final basado en precio_venta y descuentos.
+        Este método debe llamarse SIEMPRE que cambien precio_venta o descuentos.
+        """
+        self.precio_final = self.get_precio_con_descuento()
+        return self.precio_final
+    
+    def cambiar_precio_venta(self, nuevo_precio):
+        """
+        Método seguro para cambiar el precio de venta.
+        Actualiza automáticamente el precio_final.
+        """
+        self.precio_venta = float(nuevo_precio)
+        self.actualizar_precio_final()
+        return self.precio_final
+    
     def aplicar_descuento(self, valor, tipo='percentage', origen='individual', grupo_id=None):
         """
         Aplica un descuento al producto con todos los campos de rastreo.
+        ACTUALIZA AUTOMÁTICAMENTE precio_final.
         
         Args:
             valor (float): Valor del descuento (porcentaje o cantidad fija)
@@ -206,10 +235,17 @@ class Producto(db.Model):
         self.origen_descuento = origen
         self.descuento_grupo_id = grupo_id
         self.fecha_aplicacion_descuento = datetime.utcnow()
+        
+        # CRÍTICO: Actualizar precio_final inmediatamente
+        self.actualizar_precio_final()
+        
+        return self.precio_final
     
-    # Método para quitar el descuento
     def quitar_descuento(self):
-        """Elimina completamente el descuento del producto."""
+        """
+        Elimina completamente el descuento del producto.
+        ACTUALIZA AUTOMÁTICAMENTE precio_final.
+        """
         self.tiene_descuento = False
         self.tipo_descuento = None
         self.valor_descuento = 0.0
@@ -218,6 +254,119 @@ class Producto(db.Model):
         self.fecha_inicio_descuento = None
         self.fecha_fin_descuento = None
         self.fecha_aplicacion_descuento = None
+        
+        # CRÍTICO: Actualizar precio_final inmediatamente
+        self.actualizar_precio_final()
+        
+        return self.precio_final
+    
+    # =========================================================================
+    # MÉTODOS ÚTILES PARA PUNTO DE VENTA Y TERMINAL
+    # =========================================================================
+    
+    def get_precio_para_terminal(self):
+        """
+        Método específico para terminales de punto de venta.
+        Siempre retorna el precio que debe cobrarse (precio_final).
+        """
+        return self.precio_final
+    
+    def get_info_descuento_para_ticket(self):
+        """
+        Retorna información del descuento formateada para imprimir en tickets.
+        """
+        if not self.tiene_descuento:
+            return None
+            
+        info = {
+            'precio_original': self.precio_venta,
+            'precio_final': self.precio_final,
+            'ahorro': self.precio_venta - self.precio_final,
+            'tipo': self.tipo_descuento,
+            'valor': self.valor_descuento
+        }
+        
+        if self.tipo_descuento == 'percentage':
+            info['descripcion'] = f"Descuento {self.valor_descuento}%"
+        else:
+            info['descripcion'] = f"Descuento $-{self.valor_descuento}"
+            
+        return info
+    
+    def validar_precio_final(self):
+        """
+        Valida que precio_final esté sincronizado con precio_venta y descuentos.
+        Útil para auditorías y depuración.
+        """
+        precio_calculado = self.get_precio_con_descuento()
+        esta_sincronizado = abs(self.precio_final - precio_calculado) < 0.01  # Tolerancia de 1 centavo
+        
+        if not esta_sincronizado:
+            print(f"⚠️ ADVERTENCIA: Producto {self.id} tiene precio_final desincronizado")
+            print(f"   precio_final actual: {self.precio_final}")
+            print(f"   precio_final esperado: {precio_calculado}")
+            
+        return esta_sincronizado
+    
+    def sincronizar_precio_final(self):
+        """
+        Fuerza la sincronización del precio_final.
+        Útil para corregir inconsistencias.
+        """
+        precio_anterior = self.precio_final
+        self.actualizar_precio_final()
+        
+        if abs(precio_anterior - self.precio_final) > 0.01:
+            print(f"✅ Producto {self.id} sincronizado: {precio_anterior} → {self.precio_final}")
+            return True
+        return False
+
+    # =========================================================================
+    # MÉTODOS PARA MANTENER COMPATIBILIDAD CON CÓDIGO EXISTENTE
+    # =========================================================================
+    
+    @property
+    def precio_para_mostrar(self):
+        """Alias para compatibilidad - siempre retorna precio_final"""
+        return self.precio_final
+    
+    @property
+    def tiene_descuento_activo(self):
+        """Verificación rápida si tiene descuento activo"""
+        return self.tiene_descuento and self.valor_descuento > 0
+
+# ===============================
+# EVENTO AUTOMÁTICO PARA MANTENER precio_final SINCRONIZADO
+# ===============================
+from sqlalchemy import event
+
+@event.listens_for(Producto.precio_venta, 'set')
+def actualizar_precio_final_on_precio_change(target, value, oldvalue, initiator):
+    """
+    Event listener que actualiza automáticamente precio_final cuando cambia precio_venta.
+    Esto asegura que precio_final SIEMPRE esté sincronizado.
+    """
+    if value != oldvalue:  # Solo actualizar si realmente cambió
+        # Usar un callback para actualizar después de que se confirme el cambio
+        def callback():
+            target.actualizar_precio_final()
+        
+        # Programar callback para después del commit
+        if hasattr(target, '_precio_final_callbacks'):
+            target._precio_final_callbacks.append(callback)
+        else:
+            target._precio_final_callbacks = [callback]
+            
+@event.listens_for(Producto, 'after_insert')
+@event.listens_for(Producto, 'after_update')
+def ejecutar_callbacks_precio_final(mapper, connection, target):
+    """
+    Ejecuta los callbacks de actualización de precio_final después de insert/update.
+    """
+    if hasattr(target, '_precio_final_callbacks'):
+        for callback in target._precio_final_callbacks:
+            callback()
+        target._precio_final_callbacks = []
 
 # ===============================
 # MODELO 'CATÁLOGO GLOBAL'

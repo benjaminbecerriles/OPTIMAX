@@ -1514,7 +1514,7 @@ def ver_productos():
             'nombre': p.nombre,
             'stock': p.stock,
             'costo': p.costo,
-            'precio_venta': p.precio_venta,
+            'precio_venta': p.precio_final,
             'categoria': p.categoria,
             'categoria_color': p.categoria_color,
             'foto': p.foto,
