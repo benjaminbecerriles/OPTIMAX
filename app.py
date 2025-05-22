@@ -1514,7 +1514,8 @@ def ver_productos():
             'nombre': p.nombre,
             'stock': p.stock,
             'costo': p.costo,
-            'precio_venta': p.precio_final,
+            'precio_venta': p.precio_venta,
+            'precio_final': p.precio_final,  # ✅ Ahora usa directamente el campo de la BD
             'categoria': p.categoria,
             'categoria_color': p.categoria_color,
             'foto': p.foto,
@@ -1699,13 +1700,11 @@ def toggle_visibility(product_id):
 @login_requerido
 def update_price(product_id):
     try:
-        # Obtener el producto y verificar que pertenezca a la empresa del usuario
         producto = Producto.query.get_or_404(product_id)
         
         if producto.empresa_id != session.get('user_id'):
             return jsonify({"success": False, "message": "No tienes permiso para modificar este producto"}), 403
         
-        # Obtener el nuevo precio desde la solicitud JSON
         data = request.get_json()
         try:
             nuevo_precio = float(data.get('price', 0))
@@ -1714,43 +1713,40 @@ def update_price(product_id):
         except ValueError:
             return jsonify({"success": False, "message": "El precio debe ser un número válido"}), 400
         
-        # Guardar el precio anterior para referencia
         precio_anterior = producto.precio_venta
-        
-        # Actualizar el precio base
         producto.precio_venta = nuevo_precio
         
-        # Calcular precio final SIEMPRE (incluso sin descuento)
+        # CALCULAR PRECIO FINAL DINÁMICAMENTE
         precio_final = nuevo_precio
         tiene_descuento = False
         tipo_descuento = None
         valor_descuento = 0.0
         
         # Verificar descuento activo
-        if producto.tiene_descuento and producto.valor_descuento > 0:
+        if (hasattr(producto, 'tiene_descuento') and producto.tiene_descuento and 
+            hasattr(producto, 'valor_descuento') and producto.valor_descuento > 0):
+            
             tiene_descuento = True
-            tipo_descuento = producto.tipo_descuento
-            valor_descuento = producto.valor_descuento
+            tipo_descuento = getattr(producto, 'tipo_descuento', None)
+            valor_descuento = getattr(producto, 'valor_descuento', 0.0)
             
             if tipo_descuento == 'percentage':
                 precio_final = nuevo_precio * (1 - valor_descuento / 100)
-            else:  # fixed amount
+            elif tipo_descuento == 'fixed':
                 precio_final = max(0, nuevo_precio - valor_descuento)
         
-        # Commit los cambios
         db.session.commit()
         
-        # Respuesta SIEMPRE con la misma estructura
         return jsonify({
             "success": True, 
             "message": "Precio actualizado correctamente", 
-            "precio": nuevo_precio,  # Para compatibilidad con código existente
+            "precio": nuevo_precio,
             "precio_base": nuevo_precio,
-            "precio_final": precio_final,  # SIEMPRE presente
-            "precio_anterior": precio_anterior,  # Información adicional útil
-            "tiene_descuento": tiene_descuento,  # SIEMPRE boolean
-            "tipo_descuento": tipo_descuento,  # SIEMPRE string o null
-            "valor_descuento": valor_descuento  # SIEMPRE número
+            "precio_final": precio_final,
+            "precio_anterior": precio_anterior,
+            "tiene_descuento": tiene_descuento,
+            "tipo_descuento": tipo_descuento,
+            "valor_descuento": valor_descuento
         })
         
     except Exception as e:
@@ -1758,7 +1754,6 @@ def update_price(product_id):
         return jsonify({
             "success": False, 
             "message": f"Error al actualizar: {str(e)}",
-            # En caso de error, también enviar estructura consistente
             "precio": 0,
             "precio_base": 0,
             "precio_final": 0,
