@@ -5,250 +5,362 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}OptiMax Dashboard{% endblock %}</title>
   
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   
   <style>
     :root {
-      --primary-color: #e52e2e;
-      --primary-dark: #c51818;
-      --primary-light: #f8d7d7;
-      --sidebar-width: 250px;
-      --sidebar-collapsed-width: 70px;
-      --header-height: 60px;
-      --font-family: 'Inter', sans-serif;
-      --transition-speed: 0.3s;
+      /* Colores principales - Estilo moderno oscuro */
+      --bg-primary: #0a0e27;
+      --bg-secondary: #1a1f3a;
+      --sidebar-bg: #111827;
+      --sidebar-hover: #1f2937;
+      --sidebar-active-bg: rgba(99, 102, 241, 0.1);
+      --sidebar-border: rgba(99, 102, 241, 0.3);
+      
+      /* Gradientes */
+      --gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      --gradient-hover: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%);
+      
+      /* Texto */
+      --text-primary: #ffffff;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      
+      /* Acentos */
+      --accent-primary: #6366f1;
+      --accent-secondary: #8b5cf6;
+      --accent-success: #10b981;
+      --accent-warning: #f59e0b;
+      --accent-danger: #ef4444;
+      
+      /* Layout */
+      --sidebar-width: 260px;
+      --sidebar-collapsed-width: 80px;
+      --header-height: 70px;
+      
+      /* Otros */
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.4);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
     
     body {
-      font-family: var(--font-family);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
       overflow-x: hidden;
-      background-color: #f8f9fa;
-      margin: 0;
-      padding: 0;
+      line-height: 1.6;
     }
     
-    /* Sidebar */
+    /* Sidebar Moderno */
     .sidebar {
       position: fixed;
       top: 0;
       left: 0;
       height: 100vh;
       width: var(--sidebar-width);
-      background-color: var(--primary-color);
-      border-right: 1px solid var(--primary-dark);
+      background: var(--sidebar-bg);
+      backdrop-filter: blur(10px);
+      border-right: 1px solid rgba(255, 255, 255, 0.05);
       z-index: 1000;
-      transition: width var(--transition-speed);
+      transition: var(--transition);
       overflow-y: auto;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+      overflow-x: hidden;
     }
     
+    /* Sidebar Header */
     .sidebar-header {
       height: var(--header-height);
       display: flex;
       align-items: center;
-      padding: 0 1.25rem;
-      background-color: var(--primary-dark);
+      justify-content: center;
+      padding: 0 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      position: relative;
     }
     
-    .logo-expanded, .logo-collapsed {
-      height: 40px;
-      transition: opacity 0.3s;
+    .logo-expanded {
+      height: 45px;
+      filter: brightness(0) invert(1);
+      transition: var(--transition);
     }
     
     .logo-collapsed {
+      height: 35px;
+      filter: brightness(0) invert(1);
       display: none;
     }
     
-    .sidebar .nav-link {
-      padding: 0.75rem 1.25rem;
-      color: #ffffff;
+    /* Navigation */
+    .sidebar-nav {
+      padding: 1.5rem 0;
+    }
+    
+    .nav-section {
+      margin-bottom: 2rem;
+    }
+    
+    .nav-section-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      padding: 0 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .nav-item {
+      margin-bottom: 0.25rem;
+    }
+    
+    .nav-link {
       display: flex;
       align-items: center;
-      border-left: 3px solid transparent;
-      transition: all var(--transition-speed);
-    }
-    
-    .sidebar .nav-link:hover {
-      background-color: rgba(255, 255, 255, 0.1);
-      color: #ffffff;
-    }
-    
-    .sidebar .nav-link.active {
-      border-left-color: #ffffff;
-      background-color: rgba(255, 255, 255, 0.15);
-      color: #ffffff;
+      padding: 0.75rem 1.5rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: var(--transition);
+      position: relative;
       font-weight: 500;
+      font-size: 0.875rem;
+      border-radius: 0;
     }
     
-    .sidebar .nav-icon {
-      margin-right: 0.75rem;
+    /* Hover effect */
+    .nav-link:hover {
+      background: var(--sidebar-hover);
+      color: var(--text-primary);
+    }
+    
+    /* Active state con gradiente */
+    .nav-link.active {
+      background: var(--sidebar-active-bg);
+      color: var(--accent-primary);
+      font-weight: 600;
+    }
+    
+    .nav-link.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--gradient-primary);
+      border-radius: 0 3px 3px 0;
+    }
+    
+    /* Icon styling */
+    .nav-icon {
       width: 20px;
-      text-align: center;
-      color: #ffffff;
+      height: 20px;
+      margin-right: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      transition: var(--transition);
     }
     
-    .sidebar .nav-text {
+    .nav-link.active .nav-icon {
+      color: var(--accent-primary);
+    }
+    
+    .nav-text {
       white-space: nowrap;
-      color: #ffffff;
+      transition: var(--transition);
     }
     
-    /* Main content */
+    /* Notification badge */
+    .nav-badge {
+      margin-left: auto;
+      background: var(--gradient-primary);
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.125rem 0.375rem;
+      border-radius: 10px;
+      min-width: 18px;
+      text-align: center;
+    }
+    
+    /* Main Content */
     .main-content {
       margin-left: var(--sidebar-width);
-      transition: margin-left var(--transition-speed);
       min-height: 100vh;
-      padding: 1rem;
+      transition: var(--transition);
       position: relative;
+      background: var(--bg-primary);
     }
     
     /* Header */
     .content-header {
       position: sticky;
       top: 0;
+      height: var(--header-height);
+      background: rgba(10, 14, 39, 0.8);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 1rem 0;
-      margin-bottom: 1.5rem;
-      background-color: #f8f9fa;
+      padding: 0 2rem;
       z-index: 100;
     }
     
     .header-left {
       display: flex;
       align-items: center;
+      gap: 1.5rem;
     }
     
     .toggle-sidebar-btn {
+      width: 40px;
+      height: 40px;
       border: none;
-      background: transparent;
-      font-size: 1.25rem;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-primary);
+      border-radius: 10px;
       cursor: pointer;
-      color: var(--primary-color);
-      padding: 0.5rem;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: all var(--transition-speed);
+      transition: var(--transition);
+      font-size: 1.125rem;
     }
     
     .toggle-sidebar-btn:hover {
-      color: var(--primary-dark);
+      background: rgba(255, 255, 255, 0.1);
+      transform: scale(1.05);
     }
     
+    /* Search bar */
+    .header-search {
+      position: relative;
+      width: 300px;
+    }
+    
+    .header-search input {
+      width: 100%;
+      padding: 0.5rem 1rem 0.5rem 2.5rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      color: var(--text-primary);
+      font-size: 0.875rem;
+      transition: var(--transition);
+    }
+    
+    .header-search input::placeholder {
+      color: var(--text-muted);
+    }
+    
+    .header-search input:focus {
+      outline: none;
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+    
+    .header-search i {
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+    
+    /* Header Right */
     .header-right {
       display: flex;
       align-items: center;
       gap: 1rem;
     }
     
-    .notification-badge {
-      position: relative;
-    }
-    
-    .notification-badge .badge {
-      position: absolute;
-      top: -5px;
-      right: -5px;
-      padding: 0.25rem 0.5rem;
-      border-radius: 50%;
-      background-color: var(--primary-color);
-      color: white;
-      font-size: 0.75rem;
-    }
-    
-    .user-dropdown {
+    .header-btn {
+      width: 40px;
+      height: 40px;
+      border: none;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-secondary);
+      border-radius: 10px;
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      padding: 0.5rem;
-      border-radius: 0.375rem;
-      transition: background-color var(--transition-speed);
+      justify-content: center;
+      transition: var(--transition);
+      position: relative;
     }
     
-    .user-dropdown:hover {
-      background-color: #e9ecef;
+    .header-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-primary);
+      transform: scale(1.05);
+    }
+    
+    .notification-dot {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 8px;
+      height: 8px;
+      background: var(--accent-danger);
+      border-radius: 50%;
+      border: 2px solid var(--bg-primary);
+    }
+    
+    /* User Menu */
+    .user-menu {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 50px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    
+    .user-menu:hover {
+      background: rgba(255, 255, 255, 0.1);
     }
     
     .user-avatar {
       width: 32px;
       height: 32px;
       border-radius: 50%;
-      background-color: var(--primary-light);
+      background: var(--gradient-primary);
       display: flex;
       align-items: center;
       justify-content: center;
-      color: var(--primary-dark);
       font-weight: 600;
-    }
-    
-    /* Dashboard content */
-    .dashboard-title {
-      font-size: 1.75rem;
-      font-weight: 600;
-      margin-bottom: 0.25rem;
-      color: #212529;
-    }
-    
-    .dashboard-subtitle {
-      font-size: 1rem;
-      color: #6c757d;
-      margin-bottom: 1.5rem;
-    }
-    
-    .dashboard-card {
-      background: white;
-      border-radius: 0.5rem;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-      padding: 1.25rem;
-      margin-bottom: 1.5rem;
-      border: 1px solid #e9ecef;
-      transition: all var(--transition-speed);
-    }
-    
-    .dashboard-card:hover {
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-      transform: translateY(-2px);
-    }
-    
-    .section-title {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-    }
-    
-    .section-title h2 {
-      font-size: 1.25rem;
-      font-weight: 600;
-      margin: 0;
-      color: #212529;
-    }
-    
-    .section-title a {
-      color: var(--primary-color);
-      text-decoration: none;
-      font-weight: 500;
       font-size: 0.875rem;
-      display: flex;
-      align-items: center;
-      gap: 0.25rem;
-      transition: color var(--transition-speed);
+      color: white;
     }
     
-    .section-title a:hover {
-      color: var(--primary-dark);
+    .user-name {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-primary);
     }
     
-    /* Sidebar collapsed state */
+    /* Page Content */
+    .page-content {
+      padding: 2rem;
+    }
+    
+    /* Sidebar Collapsed State */
     .sidebar-collapsed .sidebar {
       width: var(--sidebar-collapsed-width);
     }
@@ -257,21 +369,6 @@
       margin-left: var(--sidebar-collapsed-width);
     }
     
-    .sidebar-collapsed .nav-text {
-      display: none;
-    }
-    
-    .sidebar-collapsed .sidebar .nav-link {
-      justify-content: center;
-      padding: 0.75rem;
-    }
-    
-    .sidebar-collapsed .sidebar .nav-icon {
-      margin-right: 0;
-      font-size: 1.25rem;
-    }
-
-    /* Logo en estado contraído */
     .sidebar-collapsed .logo-expanded {
       display: none;
     }
@@ -280,250 +377,84 @@
       display: block;
     }
     
-    /* Stats cards */
-    .stats-card {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      padding: 1.25rem;
-      border-radius: 0.5rem;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-      background-color: white;
-      transition: all var(--transition-speed);
-      border: 1px solid #e9ecef;
+    .sidebar-collapsed .nav-section-title {
+      opacity: 0;
+      visibility: hidden;
     }
     
-    .stats-card:hover {
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-      transform: translateY(-2px);
-    }
-    
-    .stats-icon {
-      width: 50px;
-      height: 50px;
-      border-radius: 0.5rem;
-      display: flex;
-      align-items: center;
+    .sidebar-collapsed .nav-link {
       justify-content: center;
-      font-size: 1.5rem;
+      padding: 0.75rem;
     }
     
-    .stats-info h3 {
-      font-size: 1.5rem;
-      font-weight: 600;
-      margin: 0;
-      color: #212529;
+    .sidebar-collapsed .nav-icon {
+      margin-right: 0;
+      font-size: 1.25rem;
     }
     
-    .stats-info p {
-      font-size: 0.875rem;
-      color: #6c757d;
-      margin: 0;
+    .sidebar-collapsed .nav-text,
+    .sidebar-collapsed .nav-badge {
+      opacity: 0;
+      visibility: hidden;
+      position: absolute;
     }
     
-    /* Color variants for stats cards */
-    .stats-primary .stats-icon {
-      background-color: #e6f2ff;
-      color: #0d6efd;
+    /* Tooltip for collapsed sidebar */
+    .sidebar-collapsed .nav-link {
+      position: relative;
     }
     
-    .stats-success .stats-icon {
-      background-color: #e6fff2;
-      color: #198754;
-    }
-    
-    .stats-warning .stats-icon {
-      background-color: #fff8e6;
-      color: #ffc107;
-    }
-    
-    .stats-danger .stats-icon {
-      background-color: #ffe6e6;
-      color: var(--primary-color);
-    }
-    
-    /* Data tables */
-    .dashboard-table {
-      width: 100%;
-      border-collapse: separate;
-      border-spacing: 0;
-      border-radius: 0.5rem;
-      overflow: hidden;
-      margin-bottom: 0;
-    }
-    
-    .dashboard-table thead th {
-      background-color: #f8f9fa;
-      font-weight: 600;
-      color: #495057;
-      padding: 1rem;
-      font-size: 0.875rem;
-      text-transform: uppercase;
-      border-bottom: 1px solid #dee2e6;
-    }
-    
-    .dashboard-table tbody td {
-      padding: 1rem;
-      vertical-align: middle;
-      border-bottom: 1px solid #dee2e6;
-    }
-    
-    .dashboard-table tbody tr:last-child td {
-      border-bottom: none;
-    }
-    
-    .dashboard-table tbody tr:hover {
-      background-color: #f8f9fa;
-    }
-    
-    /* Badge styles */
-    .badge-custom {
-      padding: 0.375rem 0.75rem;
-      border-radius: 50rem;
-      font-weight: 500;
-      font-size: 0.75rem;
-    }
-    
-    .badge-in-stock {
-      background-color: #e6fff2;
-      color: #198754;
-    }
-    
-    .badge-low-stock {
-      background-color: #fff8e6;
-      color: #ffc107;
-    }
-    
-    .badge-out-of-stock {
-      background-color: #ffe6e6;
-      color: var(--primary-color);
-    }
-    
-    /* Buttons */
-    .btn-custom {
+    .sidebar-collapsed .nav-link::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      left: calc(100% + 1rem);
+      top: 50%;
+      transform: translateY(-50%);
+      background: var(--sidebar-bg);
+      color: var(--text-primary);
       padding: 0.5rem 1rem;
-      border-radius: 0.375rem;
-      font-weight: 500;
-      transition: all var(--transition-speed);
-    }
-    
-    .btn-primary-custom {
-      background-color: var(--primary-color);
-      border-color: var(--primary-color);
-      color: white;
-    }
-    
-    .btn-primary-custom:hover {
-      background-color: var(--primary-dark);
-      border-color: var(--primary-dark);
-      color: white;
-    }
-    
-    .btn-outline-custom {
-      background-color: transparent;
-      border-color: #dee2e6;
-      color: #495057;
-    }
-    
-    .btn-outline-custom:hover {
-      background-color: #f8f9fa;
-      border-color: #dee2e6;
-      color: #212529;
-    }
-    
-    /* Product image in table */
-    .product-img {
-      width: 50px;
-      height: 50px;
-      object-fit: contain;
-      border-radius: 0.25rem;
-      border: 1px solid #dee2e6;
-    }
-    
-    /* Category badge */
-    .category-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.25rem;
-      padding: 0.25rem 0.5rem;
-      border-radius: 50rem;
-      font-size: 0.75rem;
-      font-weight: 500;
-      background-color: #f8f9fa;
-      color: #495057;
-    }
-    
-    .category-indicator {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      display: inline-block;
-    }
-    
-    /* Footer */
-    .dashboard-footer {
-      margin-top: 2rem;
-      padding: 1rem 0;
-      text-align: center;
-      color: #6c757d;
+      border-radius: 8px;
       font-size: 0.875rem;
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--transition);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      pointer-events: none;
     }
     
-    /* Scrollbar personalizado para sidebar */
+    .sidebar-collapsed .nav-link:hover::after {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    /* Scrollbar personalizado */
     .sidebar::-webkit-scrollbar {
-      width: 5px;
+      width: 4px;
     }
     
     .sidebar::-webkit-scrollbar-track {
-      background: var(--primary-color);
+      background: transparent;
     }
     
     .sidebar::-webkit-scrollbar-thumb {
-      background-color: rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.1);
       border-radius: 20px;
     }
     
     .sidebar::-webkit-scrollbar-thumb:hover {
-      background-color: rgba(255, 255, 255, 0.5);
+      background: rgba(255, 255, 255, 0.2);
     }
     
-    /* Estilo para el título de la página */
-    .page-title-area {
-      display: flex;
-      align-items: center;
-    }
-    
-    .page-back-arrow {
-      color: var(--primary-color);
-      font-size: 1.5rem;
-      margin-right: 0.75rem;
-      text-decoration: none;
-    }
-    
-    .page-title {
-      font-size: 2rem;
-      font-weight: 700;
-      margin: 0;
-      color: #333;
-      text-transform: uppercase;
-    }
-    
-    /* Responsive Media Queries */
-    @media (max-width: 992px) {
-      :root {
-        --sidebar-width: 200px;
-      }
-    }
-    
+    /* Mobile Responsive */
     @media (max-width: 768px) {
       .sidebar {
-        left: calc(-1 * var(--sidebar-width));
-        box-shadow: none;
+        transform: translateX(-100%);
       }
       
       .sidebar.active {
-        left: 0;
-        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        transform: translateX(0);
+        box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
       }
       
       .main-content {
@@ -537,199 +468,248 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
+        background: rgba(0, 0, 0, 0.7);
         z-index: 999;
+        backdrop-filter: blur(5px);
       }
       
       .sidebar-overlay.active {
         display: block;
       }
       
-      .sidebar-collapsed .sidebar {
-        left: calc(-1 * var(--sidebar-collapsed-width));
-      }
-      
-      .sidebar-collapsed .main-content {
-        margin-left: 0;
+      .header-search {
+        display: none;
       }
     }
+    
+    /* Animations */
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    .nav-link {
+      animation: slideIn 0.3s ease-out;
+      animation-fill-mode: backwards;
+    }
+    
+    .nav-item:nth-child(1) .nav-link { animation-delay: 0.1s; }
+    .nav-item:nth-child(2) .nav-link { animation-delay: 0.15s; }
+    .nav-item:nth-child(3) .nav-link { animation-delay: 0.2s; }
+    .nav-item:nth-child(4) .nav-link { animation-delay: 0.25s; }
+    .nav-item:nth-child(5) .nav-link { animation-delay: 0.3s; }
+    .nav-item:nth-child(6) .nav-link { animation-delay: 0.35s; }
+    .nav-item:nth-child(7) .nav-link { animation-delay: 0.4s; }
+    .nav-item:nth-child(8) .nav-link { animation-delay: 0.45s; }
+    .nav-item:nth-child(9) .nav-link { animation-delay: 0.5s; }
+    .nav-item:nth-child(10) .nav-link { animation-delay: 0.55s; }
   </style>
   
   {% block extra_css %}{% endblock %}
 </head>
 <body>
   <!-- Sidebar -->
-  <div class="sidebar">
+  <nav class="sidebar">
     <div class="sidebar-header">
-      <img src="{{ url_for('static', filename='img/optimaxlogo.png') }}" alt="OptiMax Logo" class="logo-expanded">
-      <img src="{{ url_for('static', filename='img/retraido.png') }}" alt="OptiMax Logo" class="logo-collapsed">
+      <img src="{{ url_for('static', filename='img/optimaxlogo.png') }}" alt="OptiMax" class="logo-expanded">
+      <img src="{{ url_for('static', filename='img/retraido.png') }}" alt="OptiMax" class="logo-collapsed">
     </div>
-    <ul class="nav flex-column mt-3">
-      <li class="nav-item">
-        <a class="nav-link {% block home_active %}{% endblock %}" href="{{ url_for('dashboard_home') }}">
-          <i class="fas fa-home nav-icon"></i>
-          <span class="nav-text">Home</span>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link {% block inventario_active %}{% endblock %}" href="{{ url_for('dashboard_inventario') }}">
-          <i class="fas fa-boxes-stacked nav-icon"></i>
-          <span class="nav-text">Inventario</span>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link {% block competencia_active %}{% endblock %}" href="#">
-          <i class="fas fa-chart-line nav-icon"></i>
-          <span class="nav-text">Competencia</span>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link {% block proveedores_active %}{% endblock %}" href="#">
-          <i class="fas fa-truck nav-icon"></i>
-          <span class="nav-text">Proveedores</span>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link {% block financiera_active %}{% endblock %}" href="#">
-          <i class="fas fa-money-bill-wave nav-icon"></i>
-          <span class="nav-text">Gestión Financiera</span>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link {% block seguridad_active %}{% endblock %}" href="#">
-          <i class="fas fa-shield-alt nav-icon"></i>
-          <span class="nav-text">Seguridad</span>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link {% block cotizaciones_active %}{% endblock %}" href="#">
-          <i class="fas fa-calculator nav-icon"></i>
-          <span class="nav-text">Cotizaciones</span>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link {% block empleados_active %}{% endblock %}" href="#">
-          <i class="fas fa-users nav-icon"></i>
-          <span class="nav-text">Empleados</span>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link {% block ventas_active %}{% endblock %}" href="#">
-          <i class="fas fa-cash-register nav-icon"></i>
-          <span class="nav-text">Punto de Venta</span>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link {% block soporte_active %}{% endblock %}" href="#">
-          <i class="fas fa-headset nav-icon"></i>
-          <span class="nav-text">Dudas y Soporte</span>
-        </a>
-      </li>
-      <li class="nav-item mt-3">
-        <a class="nav-link" href="{{ url_for('logout') }}">
-          <i class="fas fa-sign-out-alt nav-icon"></i>
-          <span class="nav-text">Cerrar Sesión</span>
-        </a>
-      </li>
-    </ul>
-  </div>
+    
+    <div class="sidebar-nav">
+      <!-- Main Navigation -->
+      <div class="nav-section">
+        <div class="nav-section-title">Principal</div>
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a class="nav-link {% block home_active %}{% endblock %}" href="{{ url_for('dashboard_home') }}" data-tooltip="Home">
+              <i class="fas fa-home nav-icon"></i>
+              <span class="nav-text">Home</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% block inventario_active %}{% endblock %}" href="{{ url_for('dashboard_inventario') }}" data-tooltip="Inventario">
+              <i class="fas fa-boxes-stacked nav-icon"></i>
+              <span class="nav-text">Inventario</span>
+              {% if productos_agotarse|default(0) > 0 %}
+                <span class="nav-badge">{{ productos_agotarse }}</span>
+              {% endif %}
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% block ventas_active %}{% endblock %}" href="#" data-tooltip="Punto de Venta">
+              <i class="fas fa-cash-register nav-icon"></i>
+              <span class="nav-text">Punto de Venta</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+      
+      <!-- Analytics -->
+      <div class="nav-section">
+        <div class="nav-section-title">Análisis</div>
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a class="nav-link {% block competencia_active %}{% endblock %}" href="#" data-tooltip="Competencia">
+              <i class="fas fa-chart-line nav-icon"></i>
+              <span class="nav-text">Competencia</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% block financiera_active %}{% endblock %}" href="#" data-tooltip="Gestión Financiera">
+              <i class="fas fa-money-bill-wave nav-icon"></i>
+              <span class="nav-text">Gestión Financiera</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+      
+      <!-- Management -->
+      <div class="nav-section">
+        <div class="nav-section-title">Gestión</div>
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a class="nav-link {% block proveedores_active %}{% endblock %}" href="#" data-tooltip="Proveedores">
+              <i class="fas fa-truck nav-icon"></i>
+              <span class="nav-text">Proveedores</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% block empleados_active %}{% endblock %}" href="#" data-tooltip="Empleados">
+              <i class="fas fa-users nav-icon"></i>
+              <span class="nav-text">Empleados</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% block cotizaciones_active %}{% endblock %}" href="#" data-tooltip="Cotizaciones">
+              <i class="fas fa-calculator nav-icon"></i>
+              <span class="nav-text">Cotizaciones</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+      
+      <!-- System -->
+      <div class="nav-section">
+        <div class="nav-section-title">Sistema</div>
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a class="nav-link {% block seguridad_active %}{% endblock %}" href="#" data-tooltip="Seguridad">
+              <i class="fas fa-shield-alt nav-icon"></i>
+              <span class="nav-text">Seguridad</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% block soporte_active %}{% endblock %}" href="#" data-tooltip="Soporte">
+              <i class="fas fa-headset nav-icon"></i>
+              <span class="nav-text">Soporte</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('logout') }}" data-tooltip="Cerrar Sesión">
+              <i class="fas fa-sign-out-alt nav-icon"></i>
+              <span class="nav-text">Cerrar Sesión</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
   
   <!-- Main Content -->
   <div class="main-content">
-    <div class="content-header">
+    <!-- Header -->
+    <header class="content-header">
       <div class="header-left">
         <button class="toggle-sidebar-btn" id="toggleSidebar">
-          <i class="fas fa-arrow-left"></i>
+          <i class="fas fa-bars"></i>
         </button>
         
-        <!-- Aquí van los títulos de página específicos -->
-        {% block page_header %}{% endblock %}
+        <div class="header-search">
+          <i class="fas fa-search"></i>
+          <input type="text" placeholder="Buscar productos, reportes..." />
+        </div>
       </div>
       
       <div class="header-right">
-        <div class="notification-badge">
+        <button class="header-btn">
+          <i class="fas fa-moon"></i>
+        </button>
+        
+        <button class="header-btn">
           <i class="fas fa-bell"></i>
-          <span class="badge">3</span>
-        </div>
-        <div class="user-dropdown">
+          <span class="notification-dot"></span>
+        </button>
+        
+        <div class="user-menu">
           <div class="user-avatar">
-            {{ session.get('user_id', 'U')[0]|upper }}
+            {{ session.get('user_name', 'Usuario')[0]|upper }}
           </div>
-          <span class="d-none d-sm-inline">{{ session.get('user_name', 'Usuario') }}</span>
-          <i class="fas fa-chevron-down"></i>
+          <span class="user-name">{{ session.get('user_name', 'Usuario') }}</span>
+          <i class="fas fa-chevron-down" style="font-size: 0.75rem; color: var(--text-muted);"></i>
         </div>
       </div>
-    </div>
+    </header>
     
-    <!-- Page content -->
-    <div class="container-fluid px-0">
+    <!-- Page Content -->
+    <div class="page-content">
       {% block content %}{% endblock %}
     </div>
-    
-    <!-- Footer -->
-    <footer class="dashboard-footer">
-      <p>© 2025 OptiMax Manage. Todos los derechos reservados.</p>
-    </footer>
   </div>
   
   <!-- Mobile overlay -->
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
   
-  <!-- Bootstrap Bundle with Popper -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       const body = document.body;
-      const toggleBtn = document.getElementById('toggleSidebar');
-      const toggleBtnIcon = toggleBtn.querySelector('i');
-      const overlay = document.getElementById('sidebarOverlay');
       const sidebar = document.querySelector('.sidebar');
+      const toggleBtn = document.getElementById('toggleSidebar');
+      const overlay = document.getElementById('sidebarOverlay');
       
-      // Inicialmente verificar si debe estar contraído o expandido
-      function updateToggleButton() {
-        if (body.classList.contains('sidebar-collapsed')) {
-          toggleBtnIcon.classList.remove('fa-arrow-left');
-          toggleBtnIcon.classList.add('fa-arrow-right');
-        } else {
-          toggleBtnIcon.classList.remove('fa-arrow-right');
-          toggleBtnIcon.classList.add('fa-arrow-left');
-        }
-      }
-      
-      // Toggle sidebar on button click
+      // Toggle sidebar
       toggleBtn.addEventListener('click', function() {
-        if (window.innerWidth < 768) {
+        if (window.innerWidth <= 768) {
           sidebar.classList.toggle('active');
           overlay.classList.toggle('active');
         } else {
           body.classList.toggle('sidebar-collapsed');
-          updateToggleButton();
         }
       });
       
-      // Close sidebar when clicking on overlay
+      // Close sidebar on overlay click
       overlay.addEventListener('click', function() {
         sidebar.classList.remove('active');
         overlay.classList.remove('active');
       });
       
-      // Adjust sidebar display on window resize
+      // Handle resize
+      let resizeTimer;
       window.addEventListener('resize', function() {
-        if (window.innerWidth >= 768) {
-          sidebar.classList.remove('active');
-          overlay.classList.remove('active');
-        }
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function() {
+          if (window.innerWidth > 768) {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+          }
+        }, 250);
       });
       
-      // Initialize tooltips
-      const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-      tooltipTriggerList.map(function(tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
+      // Add smooth scroll behavior
+      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+          e.preventDefault();
+          const target = document.querySelector(this.getAttribute('href'));
+          if (target) {
+            target.scrollIntoView({ behavior: 'smooth' });
+          }
+        });
       });
-      
-      // Inicializar estado del botón de toggle
-      updateToggleButton();
     });
   </script>
   

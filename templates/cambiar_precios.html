@@ -402,9 +402,10 @@
     line-height: 1.2;
   }
   
-  /* Contenedor de precio con altura fija */
+  /* Contenedor de precio con altura fija - CORREGIDO PARA DESCUENTOS */
   .product-price-container {
-    height: 40px; /* Aumentado a 40px para acomodar precios con descuento */
+    min-height: 50px; /* CAMBIADO de height: 40px a min-height: 50px */
+    height: auto; /* AÑADIDO: altura automática para acomodar contenido */
     margin-top: 10px; /* Valor fijo en lugar de auto */
     margin-bottom: 12px;
     display: flex;
@@ -423,6 +424,7 @@
     font-size: 13px; /* Aumentado de 12px a 13px */
     color: var(--text-secondary);
     font-weight: 500;
+    margin-top: 2px; /* AÑADIDO: pequeño margen superior para separación */
   }
   
   /* Estilos para precios con descuento */
@@ -672,6 +674,86 @@
     z-index: 100;
   }
   
+  /* Notificación centrada estilo Apple - AÑADIDO */
+  .notification-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+  
+  .notification-container {
+    background-color: white;
+    border-radius: 14px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    width: 350px;
+    max-width: 90%;
+    padding: 24px;
+    text-align: center;
+    transform: translateY(20px);
+    transition: transform 0.3s ease;
+  }
+  
+  .notification-icon {
+    color: var(--red);
+    font-size: 32px;
+    margin-bottom: 16px;
+  }
+  
+  .notification-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  
+  .notification-message {
+    font-size: 15px;
+    margin-bottom: 16px;
+    color: var(--text-secondary);
+  }
+  
+  .notification-example {
+    background-color: #f5f5f7;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 20px;
+    font-size: 14px;
+  }
+  
+  .notification-button {
+    background-color: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 20px;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .notification-button:hover {
+    background-color: var(--accent-hover);
+  }
+  
+  .notification-overlay.active {
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  .notification-overlay.active .notification-container {
+    transform: translateY(0);
+  }
+  
   /* Responsive */
   @media (max-width: 768px) {
     .page-header {
@@ -898,6 +980,23 @@
   <div class="toast-container" id="toastContainer"></div>
 </div>
 
+<!-- Notificación centrada - AÑADIDO para formato inválido -->
+<div class="notification-overlay" id="notificationOverlay">
+  <div class="notification-container">
+    <div class="notification-icon">
+      <i class="fas fa-exclamation-circle"></i>
+    </div>
+    <div class="notification-title">Formato incorrecto</div>
+    <div class="notification-message">Debe incluir un dígito antes del punto decimal.</div>
+    <div class="notification-example">
+      <span style="font-weight: 600;">Ejemplo:</span> 0.123 <span style="color: #4CAF50;">✓</span>
+      &nbsp;&nbsp;&nbsp;
+      <span style="text-decoration: line-through;">.123</span> <span style="color: #FF5252;">✗</span>
+    </div>
+    <button id="notificationButton" class="notification-button">Entendido</button>
+  </div>
+</div>
+
 <script>
   // ----------------------------------------------------
   // Funciones para el slider de productos
@@ -921,6 +1020,36 @@
   // ----------------------------------------------------
   function formatNumber(num) {
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+  
+  // ----------------------------------------------------
+  // Notificación centrada para formato inválido
+  // ----------------------------------------------------
+  const notificationOverlay = document.getElementById('notificationOverlay');
+  const notificationButton = document.getElementById('notificationButton');
+  
+  // Función para mostrar notificación centrada
+  function showFormatNotification() {
+    if (notificationOverlay) {
+      notificationOverlay.classList.add('active');
+      
+      // Auto-cerrar después de 5 segundos
+      setTimeout(() => {
+        hideFormatNotification();
+      }, 5000);
+    }
+  }
+  
+  // Función para ocultar notificación
+  function hideFormatNotification() {
+    if (notificationOverlay) {
+      notificationOverlay.classList.remove('active');
+    }
+  }
+  
+  // Cerrar al hacer clic en el botón
+  if (notificationButton) {
+    notificationButton.addEventListener('click', hideFormatNotification);
   }
   
   // Formatea el precio con comas de miles al cargar la página
@@ -956,6 +1085,19 @@
     // Obtener el valor actual sin formato
     let value = input.value.replace(/[^\d.]/g, '');
     
+    // NUEVO: Verificar si comienza con punto decimal
+    if (value.startsWith('.')) {
+      // Cancelar el cambio y mostrar notificación
+      showFormatNotification();
+      // Revertir al valor anterior o usar "0"
+      if (input.dataset.lastValidValue) {
+        input.value = input.dataset.lastValidValue;
+      } else {
+        input.value = '0';
+      }
+      return;
+    }
+    
     // Asegurar que solo haya un punto decimal
     const parts = value.split('.');
     if (parts.length > 2) {
@@ -979,6 +1121,9 @@
     
     // Actualizar el valor del input
     input.value = formattedValue;
+    
+    // Guardar como último valor válido
+    input.dataset.lastValidValue = formattedValue;
     
     // Ajustar la posición del cursor considerando las comas añadidas
     // Esta lógica es compleja y puede necesitar ajustes según el caso

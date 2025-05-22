@@ -115,6 +115,7 @@
     gap: 0.75rem;
     font-size: 0.95rem;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-decoration: none;
   }
   
   .btn-excel:hover {
@@ -122,6 +123,7 @@
     color: white;
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    text-decoration: none;
   }
 
   /* Controles de filtro y búsqueda */
@@ -1410,7 +1412,7 @@
                 <label class="form-check-label" for="colProduct">Producto</label>
               </div>
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="colCategory" checked>
+                <input class="form-check-input" type="checkbox" id="colCategory">
                 <label class="form-check-label" for="colCategory">Categoría</label>
               </div>
               <div class="form-check">
@@ -2275,6 +2277,15 @@
         });
       });
     });
+    
+    // NUEVO: Aplicar estado inicial de la columna de categoría (oculta por defecto)
+    const colCategory = document.getElementById('colCategory');
+    if (colCategory && !colCategory.checked) {
+      const categoryElements = document.querySelectorAll('.column-category');
+      categoryElements.forEach(el => {
+        el.style.display = 'none';
+      });
+    }
     
     // Inicializar el filtro de favoritos
     const heartIcon = document.getElementById('heartIcon');

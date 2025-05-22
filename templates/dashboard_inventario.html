@@ -5,553 +5,137 @@
 {% block inventario_active %}active{% endblock %}
 
 {% block extra_css %}
-<style>
-  /* Sistema de Diseño Auténticamente Apple - Perfeccionado */
-  :root {
-    --font-apple: -apple-system, BlinkMacSystemFont, 'SF Pro Text', Helvetica, Arial, sans-serif;
-    
-    /* Colores esenciales - MODIFICADOS para más contraste */
-    --text-color: #000000; /* Negro puro para texto principal */
-    --text-secondary: #333333; /* Gris muy oscuro para texto secundario */
-    --text-tertiary: #555555; /* Gris medio para texto terciario */
-    --background: #ffffff;
-    --light-background: #f5f5f7;
-    --separator: rgba(0, 0, 0, 0.2); /* Separador más visible */
-    --accent: #e52e2e;
-    --accent-hover: #c51818;
-    --accent-light: rgba(229, 46, 46, 0.1);
-    
-    /* Colores de estado */
-    --green: #1a9951; /* Verde más oscuro */
-    --orange: #d17d08; /* Naranja más oscuro */
-    --red: #c0392b; /* Rojo más oscuro */
-  }
-  
-  body {
-    font-family: var(--font-apple);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    line-height: 1.5;
-    color: var(--text-color);
-    background-color: var(--background);
-  }
-  
-  /* Tipografía */
-  h1 {
-    font-size: 32px;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-    margin-bottom: 8px;
-    color: #000000; /* Negro puro */
-  }
-  
-  h2 {
-    font-size: 22px;
-    font-weight: 600; /* Más bold */
-    letter-spacing: -0.01em;
-    margin-bottom: 24px;
-    color: #000000; /* Negro puro */
-  }
-  
-  .page-description {
-    font-size: 17px;
-    color: #86868b; /* MODIFICADO: Ahora utiliza el mismo gris claro */
-    margin-bottom: 48px;
-    max-width: 600px;
-    font-weight: 400; /* MODIFICADO: Mismo peso que en ajuste_stock */
-  }
-  
-  /* Container para contenido */
-  .apple-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 24px;
-  }
-  
-  /* Secciones con espaciado generoso */
-  .section {
-    margin-bottom: 80px;
-    width: 100%;
-  }
-  
-  /* Grid para tarjetas estadísticas */
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 20px;
-    width: 100%;
-  }
-  
-  .stat-card {
-    background-color: var(--light-background);
-    border-radius: 12px;
-    padding: 24px;
-    overflow: hidden;
-    border: 1px solid rgba(0,0,0,0.08); /* Borde sutil para mejor definición */
-  }
-  
-  .stat-number {
-    font-size: 36px;
-    font-weight: 700; /* Extra bold */
-    letter-spacing: -0.03em;
-    color: #000000; /* Negro puro */
-    margin-bottom: 8px; /* Aumentado */
-    line-height: 1.1;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  
-  .stat-label {
-    font-size: 15px; /* Ligeramente más grande */
-    color: var(--text-secondary);
-    font-weight: 500; /* Más peso */
-  }
-  
-  /* Herramientas */
-  .tools-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 20px;
-    width: 100%;
-  }
-  
-  .tool-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background-color: var(--light-background);
-    border-radius: 12px;
-    padding: 24px;
-    text-decoration: none;
-    cursor: pointer;
-    text-align: center;
-    transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
-    position: relative;
-    overflow: hidden;
-    border: 1px solid rgba(0,0,0,0.08); /* Borde sutil para mejor definición */
-  }
-  
-  .tool-item::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    border-radius: 12px;
-    border: 2px solid transparent;
-    transition: border-color 0.3s ease;
-    pointer-events: none;
-  }
-  
-  .tool-item:hover {
-    background-color: #f0f0f2;
-    transform: translateY(-4px);
-  }
-  
-  .tool-item:hover::before {
-    border-color: #1a237e;
-  }
-  
-  .tool-icon {
-    width: 60px;
-    height: 60px;
-    margin-bottom: 18px;
-    color: #ffffff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 32px;
-    border-radius: 50%;
-    background-color: #1a237e;
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15); /* Sombra más visible */
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
-  
-  .tool-item:hover .tool-icon {
-    transform: scale(1.1);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Sombra más visible */
-  }
-  
-  .tool-name {
-    font-size: 16px;
-    font-weight: 600; /* Más peso para mejor legibilidad */
-    color: #000000; /* Negro puro */
-    text-align: center;
-  }
-  
-  /* Tabla minimalista - Texto oscurecido */
-  .products-table-container {
-    width: 100%;
-    border-radius: 12px;
-    overflow: hidden;
-    margin-top: 24px;
-    border: 3px solid #dee2e6;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.15); /* Sombra más pronunciada */
-  }
-  
-  .products-table {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
-  }
-  
-  .products-table th {
-    text-align: center;
-    padding: 16px 5px;
-    font-size: 13px; /* Ligeramente más grande */
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: #000000; /* Negro puro */
-    background-color: #e0e0e0;
-    border-bottom: 2px solid #aaaaaa; /* Borde más oscuro */
-    line-height: 1.2;
-    vertical-align: middle;
-  }
-  
-  .products-table th:first-child {
-    width: 35%;
-  }
-  
-  .products-table th:nth-child(2) {
-    width: 20%;
-  }
-  
-  .products-table th:nth-child(3), 
-  .products-table th:nth-child(4), 
-  .products-table th:nth-child(5) {
-    width: 15%;
-  }
-  
-  .products-table td {
-    padding: 16px 5px;
-    border-bottom: 1px solid var(--separator);
-    font-size: 15px;
-    text-align: center;
-    vertical-align: middle;
-    color: #000000; /* Texto negro en todas las celdas */
-    font-weight: 500; /* Más peso para mejor legibilidad */
-  }
-  
-  .product-cell {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    padding-left: 10px;
-  }
-  
-  .product-image {
-    width: 40px;
-    height: 40px;
-    min-width: 40px;
-    border-radius: 8px;
-    margin-right: 12px;
-    object-fit: cover;
-    background-color: var(--light-background);
-    border: 1px solid rgba(0,0,0,0.1); /* Borde para mejor definición */
-  }
-  
-  .product-info {
-    display: flex;
-    flex-direction: column;
-    text-align: left;
-    max-width: calc(100% - 52px);
-  }
-  
-  .product-name {
-    font-weight: 600; /* Más peso */
-    margin-bottom: 4px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    color: #000000; /* Negro puro */
-  }
-  
-  .product-sku {
-    font-size: 12px;
-    color: var(--text-secondary); /* Más oscuro */
-    font-weight: 500; /* Más peso */
-  }
-  
-  /* Badges con mejor contraste */
-  .badge {
-    display: inline-block;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 600; /* Más peso */
-  }
-  
-  .badge-category {
-    padding: 4px 10px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 600; /* Más peso */
-    display: inline-block;
-    text-align: center;
-  }
-  
-  .badge-green {
-    background-color: rgba(46, 204, 113, 0.2); /* Más oscuro */
-    color: var(--green);
-    border: 1px solid rgba(46, 204, 113, 0.3);
-  }
-  
-  .badge-orange {
-    background-color: rgba(243, 156, 18, 0.2); /* Más oscuro */
-    color: var(--orange);
-    border: 1px solid rgba(243, 156, 18, 0.3);
-  }
-  
-  .badge-red {
-    background-color: rgba(231, 76, 60, 0.2); /* Más oscuro */
-    color: var(--red);
-    border: 1px solid rgba(231, 76, 60, 0.3);
-  }
-  
-  /* Ver todos link - Botón ovalado rojo con mejor contraste */
-  .view-all {
-    font-size: 14px;
-    color: white;
-    background-color: var(--accent);
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50px;
-    padding: 8px 18px;
-    transition: background-color 0.2s ease;
-    font-weight: 600; /* Más peso */
-    box-shadow: 0 2px 4px rgba(229, 46, 46, 0.3); /* Sombra roja */
-  }
-  
-  .view-all:hover {
-    background-color: var(--accent-hover);
-    color: white;
-  }
-  
-  .view-all svg {
-    margin-left: 6px;
-    width: 14px;
-    height: 14px;
-    stroke: white;
-  }
-  
-  /* Header de sección con botón */
-  .section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 24px;
-  }
-  
-  .section-header h2 {
-    margin: 0;
-    font-weight: 600;
-    color: #000000; /* Negro puro */
-  }
-  
-  /* Estado vacío */
-  .empty-state {
-    padding: 64px 0;
-    text-align: center;
-    background-color: var(--light-background);
-    border-radius: 12px;
-    border: 1px solid rgba(0,0,0,0.08); /* Borde sutil */
-  }
-  
-  .empty-icon {
-    font-size: 36px;
-    color: var(--text-secondary);
-    margin-bottom: 16px;
-  }
-  
-  .empty-message {
-    font-size: 17px;
-    color: var(--text-secondary);
-    margin-bottom: 16px;
-    max-width: 300px;
-    margin-left: auto;
-    margin-right: auto;
-    font-weight: 500; /* Más peso */
-  }
-  
-  /* Alertas con mayor contraste */
-  .alerts-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
-    width: 100%;
-  }
-  
-  .alert-box {
-    background-color: var(--light-background);
-    border-radius: 12px;
-    overflow: hidden;
-    border: 1px solid rgba(0,0,0,0.08); /* Borde sutil */
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05); /* Sombra sutil */
-  }
-  
-  .alert-header {
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--separator);
-    background-color: #f0f0f2; /* Fondo ligeramente más oscuro */
-  }
-  
-  .alert-title {
-    font-size: 16px;
-    font-weight: 600; /* Más peso */
-    color: #000000; /* Negro puro */
-    margin: 0;
-  }
-  
-  .alert-item {
-    padding: 16px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid var(--separator);
-  }
-  
-  .alert-item:last-child {
-    border-bottom: none;
-  }
-  
-  .alert-content {
-    font-size: 15px;
-    color: #000000; /* Negro puro */
-    font-weight: 500; /* Más peso */
-  }
-  
-  .alert-value {
-    font-size: 14px;
-    font-weight: 600; /* Más peso */
-    color: var(--orange);
-  }
-  
-  /* Enlaces */
-  .button-link {
-    display: inline-block;
-    padding: 10px 20px;
-    font-size: 15px;
-    font-weight: 600; /* Más peso */
-    text-align: center;
-    border-radius: 980px;
-    background-color: var(--accent);
-    color: white;
-    text-decoration: none;
-    margin-top: 16px;
-    transition: background-color 0.2s ease;
-    box-shadow: 0 2px 4px rgba(229, 46, 46, 0.3); /* Sombra roja */
-  }
-  
-  .button-link:hover {
-    background-color: var(--accent-hover);
-  }
+<!-- CSS Moderno del Dashboard -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard_modern.css') }}">
 
-  /* Ver todos abajo de la tabla con alineación derecha */
-  .view-all-container {
-    display: flex;
-    justify-content: flex-end;
-    width: 100%;
-    margin-top: 15px;
-  }
-</style>
+<!-- AOS (Animate On Scroll) -->
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 {% endblock %}
 
 {% block page_header %}
-<!-- Dejamos vacío para implementar nuestro propio header -->
+<!-- Header personalizado para el diseño moderno -->
 {% endblock %}
 
 {% block content %}
-<div class="apple-container">
-  <h1>Inventario</h1>
-  <p class="page-description">Gestiona tus productos, stock y precios de manera eficiente.</p>
+<!-- Particles Background -->
+<div id="particles-js"></div>
 
-  <!-- Estadísticas - CORREGIDO: Formato con comas en valores numerales -->
-  <div class="section">
-    <h2>Datos generales</h2>
-    
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-number">{{ '{:,}'.format(total_productos|default(0, true)) }}</div>
-        <div class="stat-label">Total productos</div>
-      </div>
-      
-      <div class="stat-card">
-        <!-- CORREGIDO: Formato con comas para miles en unidades de stock -->
-        <div class="stat-number">{{ '{:,}'.format(total_unidades|default(0, true)) }}</div>
-        <div class="stat-label">Unidades en stock</div>
-      </div>
-      
-      <div class="stat-card">
-        <!-- CORREGIDO: Usando formato con comas para miles en valor de inventario -->
-        <div class="stat-number">${{ '{:,}'.format(valor_inventario|default(0, true)) }}</div>
-        <div class="stat-label">Valor del inventario</div>
-      </div>
-      
-      <div class="stat-card">
-        <div class="stat-number">{{ '{:,}'.format(productos|selectattr('stock', 'gt', 0)|selectattr('stock', 'le', 5)|list|length|default(0, true)) }}</div>
-        <div class="stat-label">Productos por agotarse</div>
-      </div>
-    </div>
+<!-- Main Dashboard Container -->
+<div class="dashboard-container">
+  
+  <!-- Hero Section Simple -->
+  <div class="hero-section" data-aos="fade-down">
+    <h1 class="hero-title">
+      <span class="gradient-text">Inventario</span>
+    </h1>
+    <p class="hero-description">
+      Gestiona tus productos, stock y precios de manera eficiente.
+    </p>
   </div>
 
-  <!-- Herramientas -->
-  <div class="section">
-    <h2>Herramientas</h2>
+  <!-- Estadísticas (IGUAL QUE EL ORIGINAL) -->
+  <section class="stats-section">
+    <h2 class="section-title" data-aos="fade-right">
+      <span>Datos generales</span>
+      <span class="title-line"></span>
+    </h2>
+    
+    <div class="stats-grid">
+      <!-- Total Productos -->
+      <div class="stat-card" data-aos="fade-up" data-aos-delay="100">
+        <div class="stat-content">
+          <div class="stat-number" data-value="{{ total_productos|default(0) }}">0</div>
+          <div class="stat-label">Total productos</div>
+        </div>
+        <div class="stat-glow"></div>
+      </div>
+      
+      <!-- Unidades en Stock -->
+      <div class="stat-card purple" data-aos="fade-up" data-aos-delay="200">
+        <div class="stat-content">
+          <div class="stat-number" data-value="{{ total_unidades|default(0) }}">0</div>
+          <div class="stat-label">Unidades en stock</div>
+        </div>
+        <div class="stat-glow purple"></div>
+      </div>
+      
+      <!-- Valor del Inventario -->
+      <div class="stat-card gold" data-aos="fade-up" data-aos-delay="300">
+        <div class="stat-content">
+          <div class="stat-number">$<span data-value="{{ valor_inventario|default(0) }}" data-format="currency">0</span></div>
+          <div class="stat-label">Valor del inventario</div>
+        </div>
+        <div class="stat-glow gold"></div>
+      </div>
+      
+      <!-- Productos por Agotarse -->
+      <div class="stat-card red" data-aos="fade-up" data-aos-delay="400">
+        <div class="stat-content">
+          {% set productos_agotarse = productos|selectattr('stock', 'gt', 0)|selectattr('stock', 'le', 5)|list|length if productos else 0 %}
+          <div class="stat-number" data-value="{{ productos_agotarse }}">0</div>
+          <div class="stat-label">Productos por agotarse</div>
+        </div>
+        <div class="stat-glow red"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Herramientas (IGUAL QUE EL ORIGINAL) -->
+  <section class="tools-section">
+    <h2 class="section-title" data-aos="fade-right">
+      <span>Herramientas</span>
+      <span class="title-line"></span>
+    </h2>
     
     <div class="tools-grid">
-      <a href="{{ url_for('nuevo_producto') }}" class="tool-item">
+      <a href="{{ url_for('nuevo_producto') }}" class="tool-card" data-aos="zoom-in" data-aos-delay="100">
         <div class="tool-icon">
           <i class="fas fa-barcode"></i>
         </div>
-        <div class="tool-name">Registrar producto</div>
+        <span class="tool-name">Registrar producto</span>
       </a>
       
-      <a href="{{ url_for('ajuste_stock') }}" class="tool-item">
-        <div class="tool-icon">
+      <a href="{{ url_for('ajuste_stock') }}" class="tool-card" data-aos="zoom-in" data-aos-delay="200">
+        <div class="tool-icon purple">
           <i class="fas fa-plus-minus"></i>
         </div>
-        <div class="tool-name">Ajuste de stock</div>
+        <span class="tool-name">Ajuste de stock</span>
       </a>
       
-      <a href="{{ url_for('cambiar_precios') }}" class="tool-item">
-        <div class="tool-icon">
+      <a href="{{ url_for('cambiar_precios') }}" class="tool-card" data-aos="zoom-in" data-aos-delay="300">
+        <div class="tool-icon green">
           <i class="fas fa-tag"></i>
         </div>
-        <div class="tool-name">Cambiar precios</div>
+        <span class="tool-name">Cambiar precios</span>
       </a>
       
-      <a href="{{ url_for('descuentos') }}" class="tool-item">
-        <div class="tool-icon">
+      <a href="{{ url_for('descuentos') }}" class="tool-card" data-aos="zoom-in" data-aos-delay="400">
+        <div class="tool-icon orange">
           <i class="fas fa-percent"></i>
         </div>
-        <div class="tool-name">Descuentos</div>
+        <span class="tool-name">Descuentos</span>
       </a>
       
-      <!-- CORREGIDO: Link a la nueva página de ubicación de productos -->
-      <a href="{{ url_for('ubicacion_productos') }}" class="tool-item">
-        <div class="tool-icon">
+      <a href="{{ url_for('ubicacion_productos') }}" class="tool-card" data-aos="zoom-in" data-aos-delay="500">
+        <div class="tool-icon red">
           <i class="fas fa-map-marker-alt"></i>
         </div>
-        <div class="tool-name">Ubicación</div>
+        <span class="tool-name">Ubicación</span>
       </a>
     </div>
-  </div>
+  </section>
 
-  <!-- Productos - CORREGIDO: Mejor formateo de números con comas -->
-  <div class="section">
-    <div class="section-header">
-      <h2>Ver y gestionar productos</h2>
-      <!-- El botón "Ver todos" se ha movido abajo de la tabla -->
+  <!-- Ver y gestionar productos (TABLA IGUAL QUE EL ORIGINAL) -->
+  <section class="products-section">
+    <div class="section-header" data-aos="fade-right">
+      <h2 class="section-title">
+        <span>Ver y gestionar productos</span>
+        <span class="title-line"></span>
+      </h2>
     </div>
     
     {% if productos and productos|length > 0 %}
-      <div class="products-table-container">
+      <div class="products-table-container" data-aos="fade-up">
         <table class="products-table">
           <thead>
             <tr>
@@ -570,8 +154,8 @@
                     {% if p.foto %}
                       <img src="{{ url_for('static', filename='uploads/' ~ p.foto) }}" class="product-image" alt="{{ p.nombre }}">
                     {% else %}
-                      <div class="product-image" style="display: flex; align-items: center; justify-content: center;">
-                        <i class="fas fa-box" style="color: #333333;"></i>
+                      <div class="product-image placeholder">
+                        <i class="fas fa-box"></i>
                       </div>
                     {% endif %}
                     <div class="product-info">
@@ -588,8 +172,10 @@
                 </td>
                 
                 <td>
-                  {% set cat_color = p.categoria_color|default('#333333') %}
-                  <span class="badge-category" style="background-color: {{ cat_color }}15; color: {{ cat_color }}; border: 1px solid {{ cat_color }}30;">{{ p.categoria|default('Sin categoría')|title }}</span>
+                  {% set cat_color = p.categoria_color|default('#6366f1') %}
+                  <span class="badge-category" style="--cat-color: {{ cat_color }}">
+                    {{ p.categoria|default('Sin categoría')|title }}
+                  </span>
                 </td>
                 
                 <td>
@@ -610,115 +196,97 @@
           </tbody>
         </table>
       </div>
-      <!-- Botón "Ver todos" ahora está abajo de la tabla -->
+      
       <div class="view-all-container">
-        <a href="{{ url_for('ver_productos') }}" class="view-all">
+        <a href="{{ url_for('ver_productos') }}" class="view-all-btn">
           Ver todos
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-left: 6px; width: 14px; height: 14px;">
-            <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+          <i class="fas fa-arrow-right"></i>
         </a>
       </div>
     {% else %}
-      <div class="empty-state">
+      <div class="empty-state" data-aos="fade-up">
         <div class="empty-icon">
           <i class="fas fa-box-open"></i>
         </div>
         <p class="empty-message">No hay productos en tu inventario</p>
-        <!-- MODIFICADO: Eliminar el botón cuando no hay productos -->
       </div>
     {% endif %}
-  </div>
+  </section>
 
-  <!-- Alertas -->
-  <div class="section">
+  <!-- Alertas (IGUAL QUE EL ORIGINAL) -->
+  <section class="alerts-section">
     <div class="alerts-grid">
-      <div class="alert-box">
+      <!-- Productos por agotarse -->
+      <div class="alert-box" data-aos="fade-up" data-aos-delay="100">
         <div class="alert-header">
           <h3 class="alert-title">Productos por agotarse</h3>
         </div>
         
         {% set low_stock = productos|selectattr('stock', 'gt', 0)|selectattr('stock', 'le', 5)|list if productos else [] %}
         {% if low_stock|length > 0 %}
-          {% for p in low_stock[:5] %}
-            <div class="alert-item">
-              <div class="alert-content">{{ p.nombre }}</div>
-              <div class="alert-value">{{ '{:,}'.format(p.stock) }}</div>
-            </div>
+          {% for p in low_stock %}
+            {% if loop.index <= 5 %}
+              <div class="alert-item">
+                <div class="alert-content">{{ p.nombre }}</div>
+                <div class="alert-value">{{ '{:,}'.format(p.stock) }}</div>
+              </div>
+            {% endif %}
           {% endfor %}
         {% else %}
-          <div class="empty-state" style="padding: 32px 0;">
+          <div class="empty-state-small">
             <div class="empty-icon">
-              <i class="fas fa-check-circle" style="color: #333333;"></i>
+              <i class="fas fa-check-circle"></i>
             </div>
             <p class="empty-message">No hay productos por agotarse</p>
           </div>
         {% endif %}
       </div>
       
-      <div class="alert-box">
+      <!-- Notificaciones -->
+      <div class="alert-box" data-aos="fade-up" data-aos-delay="200">
         <div class="alert-header">
           <h3 class="alert-title">Notificaciones</h3>
         </div>
         
-        <div class="empty-state" style="padding: 32px 0;">
+        <div class="empty-state-small">
           <div class="empty-icon">
-            <i class="fas fa-bell" style="color: #333333;"></i>
+            <i class="fas fa-bell"></i>
           </div>
           <p class="empty-message">No hay notificaciones</p>
         </div>
       </div>
     </div>
-  </div>
+  </section>
 </div>
 {% endblock %}
 
 {% block extra_js %}
+<!-- GSAP -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+<!-- Particles.js -->
+<script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+
+<!-- AOS -->
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+<!-- CountUp.js -->
+<script src="https://cdn.jsdelivr.net/npm/countup.js@2.8.0/dist/countUp.min.js"></script>
+
+<!-- Dashboard Animations Simplificado -->
+<script src="{{ url_for('static', filename='js/dashboard_animations.js') }}"></script>
+
+<!-- Datos para JavaScript -->
 <script>
-  // Función para formatear números con separadores de miles
-  function formatNumberWithCommas(number) {
-    return new Intl.NumberFormat('es-MX').format(number);
-  }
-
-  document.addEventListener('DOMContentLoaded', function() {
-    // Las herramientas ya tienen animaciones de borde rojo en CSS con :hover::before
-    // Ajustes adicionales para mejorar la experiencia del usuario
-    const toolItems = document.querySelectorAll('.tool-item');
-    
-    toolItems.forEach(tool => {
-      tool.addEventListener('mousedown', function() {
-        this.style.transform = 'scale(0.98)';
-      });
-      
-      tool.addEventListener('mouseup', function() {
-        this.style.transform = 'translateY(-4px)';
-      });
-      
-      tool.addEventListener('mouseleave', function() {
-        if (this.style.transform === 'scale(0.98)') {
-          this.style.transform = 'translateY(0)';
-        }
-      });
-    });
-
-    // Formatear todos los valores numéricos en la página para asegurar que tengan comas
-    document.querySelectorAll('.stat-number').forEach(element => {
-      // Si contiene un valor numérico, asegurarse de que tenga formato con comas
-      if (element.textContent && element.textContent.match(/\d{4,}/)) {
-        // Si comienza con $ mantenerlo
-        if (element.textContent.startsWith('$')) {
-          const numberPart = element.textContent.substring(1).replace(/,/g, '');
-          if (!isNaN(parseFloat(numberPart))) {
-            element.textContent = '$' + formatNumberWithCommas(parseFloat(numberPart));
-          }
-        } else {
-          const number = parseFloat(element.textContent.replace(/,/g, ''));
-          if (!isNaN(number)) {
-            element.textContent = formatNumberWithCommas(number);
-          }
-        }
-      }
-    });
-  });
+  // Verificar que los datos se están pasando correctamente
+  window.dashboardData = {
+    totalProductos: {{ total_productos|default(0)|int }},
+    totalUnidades: {{ total_unidades|default(0)|int }},
+    valorInventario: {{ valor_inventario|default(0)|int }},
+    productosAgotarse: {{ productos_agotarse|default(0)|int }}
+  };
+  
+  // Debug en consola
+  console.log('Datos del Dashboard:', window.dashboardData);
 </script>
 {% endblock %}

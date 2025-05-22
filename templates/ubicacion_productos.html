@@ -142,13 +142,14 @@
   /* Controles de ubicación */
   .location-controls {
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     gap: 12px;
     flex-wrap: wrap;
   }
 
   .location-target-selector {
     min-width: 200px;
+    align-self: flex-end;
   }
 
   .location-target-selector select {
@@ -166,11 +167,14 @@
     background-position: right 12px center;
     background-size: 12px;
     padding-right: 36px;
+    height: 44px;
+    box-sizing: border-box;
   }
 
   .specific-selector {
     min-width: 200px;
     display: none;
+    align-self: flex-end;
   }
 
   .specific-selector select {
@@ -188,12 +192,15 @@
     background-position: right 12px center;
     background-size: 12px;
     padding-right: 36px;
+    height: 44px;
+    box-sizing: border-box;
   }
 
   .product-search-container {
     min-width: 250px;
     position: relative;
     display: none;
+    align-self: flex-end;
   }
 
   .product-search-input {
@@ -209,6 +216,8 @@
     background-repeat: no-repeat;
     background-position: left 10px center;
     background-size: 16px;
+    height: 44px;
+    box-sizing: border-box;
   }
 
   /* Estilo de resultados de búsqueda similar a descuentos.html */
@@ -319,6 +328,8 @@
     padding: 10px 12px;
     transition: all 0.2s ease;
     position: relative;
+    height: 44px;
+    box-sizing: border-box;
   }
   
   .selected-product-box img {
@@ -367,6 +378,19 @@
     flex: 1;
     min-width: 200px;
     position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* NUEVO: Estilo para el título del campo de ubicación */
+  .location-input-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-color);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
   }
 
   .location-input {
@@ -378,6 +402,8 @@
     font-family: var(--font-apple);
     background-color: white;
     color: var(--text-color);
+    height: 44px;
+    box-sizing: border-box;
   }
 
   .location-action-btn {
@@ -393,6 +419,8 @@
     border: none;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     white-space: nowrap;
+    height: 44px;
+    align-self: flex-end;
   }
 
   .btn-apply-location {
@@ -1217,6 +1245,11 @@
       </div>
       
       <div class="location-input-group">
+        <!-- NUEVO: Título para el campo de ubicación -->
+        <label class="location-input-label" for="globalLocationValue">
+          <i class="fas fa-map-marker-alt"></i>
+          Ubicación del producto:
+        </label>
         <input type="text" class="location-input" id="globalLocationValue" placeholder="Ej: Estante B, Bodega 2" required>
       </div>
       
