@@ -1385,7 +1385,7 @@
         </div>
       </div>
       
-      <!-- Acciones masivas -->
+      <!-- Acciones masivas - MODIFICADO PARA SOLO ELIMINAR TODOS -->
       <div class="col-lg-4 col-md-12 mb-3">
         <div class="btn-actions position-relative w-100">
           <button class="action-button w-100" id="bulkActionsBtn">
@@ -1393,22 +1393,8 @@
             Acciones masivas
           </button>
           <div class="dropdown-menu" id="actionsDropdown">
-            <a class="dropdown-item" href="#" id="bulkChangeCategory">
-              <i class="fas fa-tag"></i> Cambiar categoría
-            </a>
-            <a class="dropdown-item" href="#" id="bulkUpdatePrices">
-              <i class="fas fa-dollar-sign"></i> Modificar precios
-            </a>
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="#" id="bulkToggleVisibility">
-              <i class="fas fa-eye"></i> Cambiar visibilidad
-            </a>
-            <a class="dropdown-item" href="#" id="bulkAddToFavorites">
-              <i class="fas fa-heart"></i> Marcar como favoritos
-            </a>
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="#" id="bulkPrintLabels">
-              <i class="fas fa-print"></i> Imprimir etiquetas
+            <a class="dropdown-item" href="#" id="bulkDeleteAll">
+              <i class="fas fa-trash"></i> Eliminar todos
             </a>
           </div>
         </div>
@@ -1692,21 +1678,36 @@
   </div>
 </div>
 
-<!-- Modal de confirmación para eliminar -->
+<!-- Modal de confirmación para eliminar - MODIFICADO PARA FUNCIONAR CON INDIVIDUAL Y MASIVO -->
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Confirmar eliminación</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);">
+      <div class="modal-header" style="border-bottom: 1px solid #f0f0f0; padding: 24px 32px 20px; border-radius: 16px 16px 0 0;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 40px; height: 40px; background-color: rgba(231, 76, 60, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+            <i class="fas fa-exclamation-triangle" style="color: #e74c3c; font-size: 18px;"></i>
+          </div>
+          <h5 class="modal-title" id="deleteModalTitle" style="color: #1d1d1f; font-weight: 600; font-size: 20px; margin: 0;">Confirmar eliminación</h5>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="padding: 8px; margin: 0; opacity: 0.6;"></button>
       </div>
-      <div class="modal-body">
-        <p>¿Estás seguro de que deseas eliminar el producto "<span id="deleteProductName"></span>"?</p>
-        <p class="text-danger">Esta acción no se puede deshacer.</p>
+      <div class="modal-body" style="padding: 24px 32px;">
+        <div id="deleteModalMessage" style="color: #495057; font-size: 16px; line-height: 1.5; margin-bottom: 16px;">
+          ¿Estás seguro de que deseas eliminar el producto "<span id="deleteProductName" style="font-weight: 600; color: #1d1d1f;"></span>"?
+        </div>
+        <div id="deleteModalWarning" style="background-color: rgba(231, 76, 60, 0.05); border-left: 4px solid #e74c3c; padding: 12px 16px; border-radius: 8px; font-size: 14px; color: #721c24;">
+          <i class="fas fa-exclamation-triangle" style="margin-right: 8px;"></i>
+          Esta acción no se puede deshacer.
+        </div>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <a href="#" id="confirmDelete" class="btn btn-danger">Eliminar</a>
+      <div class="modal-footer" style="border-top: 1px solid #f0f0f0; padding: 20px 32px 24px; display: flex; gap: 12px; justify-content: flex-end;">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius: 8px; padding: 10px 20px; font-weight: 500; border: 1px solid #dee2e6; background: #f8f9fa; color: #6c757d;">
+          Cancelar
+        </button>
+        <a href="#" id="confirmDelete" class="btn btn-danger" style="border-radius: 8px; padding: 10px 20px; font-weight: 500; background: #e74c3c; border: 1px solid #e74c3c; color: white; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+          <i class="fas fa-trash" style="font-size: 14px;"></i>
+          Eliminar
+        </a>
       </div>
     </div>
   </div>
@@ -1989,6 +1990,63 @@
     });
   }
 
+  // NUEVA: Función para configurar el modal para eliminar todos los productos
+  function confirmDeleteAll() {
+    // Obtener elementos del modal
+    const deleteModalTitle = document.getElementById('deleteModalTitle');
+    const deleteModalMessage = document.getElementById('deleteModalMessage');
+    const deleteModalWarning = document.getElementById('deleteModalWarning');
+    const confirmDeleteBtn = document.getElementById('confirmDelete');
+    
+    // Configurar textos para eliminación masiva
+    if (deleteModalTitle) {
+      deleteModalTitle.innerHTML = 'Eliminación masiva';
+    }
+    
+    if (deleteModalMessage) {
+      deleteModalMessage.innerHTML = '¿Estás seguro de que deseas eliminar <strong style="color: #e74c3c;">TODOS</strong> los productos de tu inventario?<br><br><span style="color: #6c757d; font-size: 14px;">Se eliminarán todos los productos, sus movimientos, lotes y datos relacionados.</span>';
+    }
+    
+    if (deleteModalWarning) {
+      deleteModalWarning.innerHTML = `
+        <i class="fas fa-exclamation-triangle" style="margin-right: 8px; color: #e74c3c;"></i>
+        <strong>ADVERTENCIA:</strong> Esta acción eliminará TODOS tus productos de forma permanente y NO se puede deshacer.
+      `;
+      deleteModalWarning.style.backgroundColor = 'rgba(220, 53, 69, 0.1)';
+      deleteModalWarning.style.borderLeftColor = '#dc3545';
+      deleteModalWarning.style.color = '#721c24';
+    }
+    
+    // Configurar enlace de confirmación
+    if (confirmDeleteBtn) {
+      confirmDeleteBtn.href = '/eliminar-todos-productos';
+      confirmDeleteBtn.innerHTML = '<i class="fas fa-trash-alt" style="font-size: 14px; margin-right: 6px;"></i>Sí, eliminar TODOS';
+      confirmDeleteBtn.className = 'btn btn-danger';
+      confirmDeleteBtn.style.background = '#dc3545';
+      confirmDeleteBtn.style.borderColor = '#dc3545';
+      confirmDeleteBtn.style.fontWeight = '600';
+    }
+    
+    // Mostrar el modal
+    try {
+      if (window.deleteModal) {
+        window.deleteModal.show();
+      } else {
+        // Fallback usando Bootstrap directamente
+        const modalElement = document.getElementById('deleteModal');
+        if (modalElement) {
+          const modal = new bootstrap.Modal(modalElement);
+          modal.show();
+        }
+      }
+    } catch (e) {
+      // Fallback con confirm simple
+      if (confirm('¿Estás seguro de que deseas eliminar TODOS los productos? Esta acción NO se puede deshacer.')) {
+        window.location.href = '/eliminar-todos-productos';
+      }
+    }
+  }
+
   // Funcionalidad específica para el menú de columnas
   document.addEventListener('DOMContentLoaded', function() {
     console.log("DOM cargado, inicializando funcionalidades...");
@@ -2049,6 +2107,24 @@
         } else {
           actionsDropdown.style.display = 'block';
         }
+      });
+    }
+    
+    // NUEVO: Event listener para "Eliminar todos los productos"
+    const bulkDeleteAllBtn = document.getElementById('bulkDeleteAll');
+    if (bulkDeleteAllBtn) {
+      bulkDeleteAllBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log("Botón eliminar todos clickeado");
+        
+        // Cerrar el dropdown
+        if (actionsDropdown) {
+          actionsDropdown.style.display = 'none';
+        }
+        
+        // Mostrar modal de confirmación
+        confirmDeleteAll();
       });
     }
     
@@ -2594,24 +2670,57 @@
     }, 100); // revisar cada 100ms
   });
   
-  // Función para confirmar eliminación
+  // Función para confirmar eliminación INDIVIDUAL - MODIFICADA
   function confirmDelete(id, name) {
-    const deleteProductNameEl = document.getElementById('deleteProductName');
-    const confirmDeleteEl = document.getElementById('confirmDelete');
+    // Obtener elementos del modal
+    const deleteModalTitle = document.getElementById('deleteModalTitle');
+    const deleteModalMessage = document.getElementById('deleteModalMessage');
+    const deleteModalWarning = document.getElementById('deleteModalWarning');
+    const confirmDeleteBtn = document.getElementById('confirmDelete');
     
-    if (deleteProductNameEl) {
-      deleteProductNameEl.textContent = name;
+    // Configurar textos para eliminación individual
+    if (deleteModalTitle) {
+      deleteModalTitle.innerHTML = 'Confirmar eliminación';
     }
     
-    if (confirmDeleteEl) {
-      confirmDeleteEl.href = `/eliminar-producto/${id}`;
+    if (deleteModalMessage) {
+      deleteModalMessage.innerHTML = `¿Estás seguro de que deseas eliminar el producto "<strong style="color: #1d1d1f;">${name}</strong>"?`;
     }
     
+    if (deleteModalWarning) {
+      deleteModalWarning.innerHTML = `
+        <i class="fas fa-exclamation-triangle" style="margin-right: 8px;"></i>
+        Esta acción no se puede deshacer.
+      `;
+      deleteModalWarning.style.backgroundColor = 'rgba(231, 76, 60, 0.05)';
+      deleteModalWarning.style.borderLeftColor = '#e74c3c';
+      deleteModalWarning.style.color = '#721c24';
+    }
+    
+    // Configurar enlace de confirmación
+    if (confirmDeleteBtn) {
+      confirmDeleteBtn.href = `/eliminar-producto/${id}`;
+      confirmDeleteBtn.innerHTML = '<i class="fas fa-trash" style="font-size: 14px; margin-right: 6px;"></i>Eliminar';
+      confirmDeleteBtn.className = 'btn btn-danger';
+      confirmDeleteBtn.style.background = '#e74c3c';
+      confirmDeleteBtn.style.borderColor = '#e74c3c';
+      confirmDeleteBtn.style.fontWeight = '500';
+    }
+    
+    // Mostrar el modal
     try {
       if (window.deleteModal) {
         window.deleteModal.show();
+      } else {
+        // Fallback usando Bootstrap directamente
+        const modalElement = document.getElementById('deleteModal');
+        if (modalElement) {
+          const modal = new bootstrap.Modal(modalElement);
+          modal.show();
+        }
       }
     } catch (e) {
+      // Fallback con confirm simple
       if (confirm(`¿Estás seguro de que deseas eliminar el producto "${name}"? Esta acción no se puede deshacer.`)) {
         window.location.href = `/eliminar-producto/${id}`;
       }
