@@ -8,8 +8,13 @@ import threading
 import sys
 import shutil
 import urllib.parse
+from io import BytesIO
 
 from flask import Flask, request, render_template, session, redirect, url_for, jsonify, flash, send_file, make_response
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from openpyxl.utils.dataframe import dataframe_to_rows
+from openpyxl.worksheet.table import Table, TableStyleInfo
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from functools import wraps
@@ -1544,6 +1549,150 @@ def ver_productos():
         termino_busqueda=termino_busqueda,
         total_productos=total_productos
     )
+
+@app.route('/exportar-productos-excel')
+@login_requerido
+def exportar_productos_excel():
+    """
+    Exporta todos los productos de la empresa a un archivo Excel con formato profesional.
+    """
+    try:
+        empresa_id = session['user_id']
+        
+        # Obtener todos los productos aprobados de la empresa
+        productos_db = Producto.query.filter_by(
+            empresa_id=empresa_id,
+            is_approved=True
+        ).order_by(Producto.categoria, Producto.nombre).all()
+        
+        if not productos_db:
+            flash('No hay productos para exportar', 'warning')
+            return redirect(url_for('ver_productos'))
+        
+        # Crear workbook y worksheet
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Productos"
+        
+        # Definir encabezados
+        headers = [
+            'PRODUCTO', 'SKU', 'MARCA', 'CATEGORÍA', 'STOCK', 
+            'PRECIO FINAL', 'ÚLTIMO COSTO', 'COSTO PROMEDIO', 
+            'PRÓX LOTE CADUCA EN', 'FAVORITO', 'A LA VENTA'
+        ]
+        
+        # Agregar encabezados
+        for col, header in enumerate(headers, 1):
+            cell = ws.cell(row=1, column=col, value=header)
+            # Estilo del encabezado: fondo azul oscuro con texto blanco
+            cell.font = Font(color="FFFFFF", bold=True, size=11)
+            cell.fill = PatternFill(start_color="1F4E79", end_color="1F4E79", fill_type="solid")
+            cell.alignment = Alignment(horizontal="center", vertical="center")
+        
+        # Procesar cada producto
+        for row_num, producto in enumerate(productos_db, 2):
+            try:
+                # Calcular costo promedio para este producto
+                lotes_activos = LoteInventario.query.filter(
+                    LoteInventario.producto_id == producto.id,
+                    LoteInventario.esta_activo == True,
+                    LoteInventario.stock > 0
+                ).all()
+                
+                costo_promedio = producto.costo or 0
+                if lotes_activos:
+                    costo_total = sum((lote.costo_unitario or 0) * (lote.stock or 0) for lote in lotes_activos)
+                    stock_total = sum(lote.stock or 0 for lote in lotes_activos)
+                    if stock_total > 0:
+                        costo_promedio = costo_total / stock_total
+                
+                # Calcular días hasta próxima caducidad
+                dias_caducidad = "N/A"
+                if lotes_activos:
+                    from datetime import date
+                    hoy = date.today()
+                    lotes_con_caducidad = [l for l in lotes_activos if l.fecha_caducidad]
+                    
+                    if lotes_con_caducidad:
+                        # Ordenar por fecha de caducidad
+                        lotes_con_caducidad.sort(key=lambda x: x.fecha_caducidad)
+                        
+                        # Buscar el primer lote que no haya caducado
+                        proximo_lote = None
+                        for lote in lotes_con_caducidad:
+                            if lote.fecha_caducidad >= hoy:
+                                proximo_lote = lote
+                                break
+                        
+                        # Si no hay lote sin caducar, usar el más recientemente caducado
+                        if not proximo_lote and lotes_con_caducidad:
+                            proximo_lote = lotes_con_caducidad[0]
+                        
+                        if proximo_lote:
+                            if proximo_lote.fecha_caducidad < hoy:
+                                dias_diff = (hoy - proximo_lote.fecha_caducidad).days
+                                dias_caducidad = f"Caducado hace {dias_diff} días"
+                            elif proximo_lote.fecha_caducidad == hoy:
+                                dias_caducidad = "Caduca hoy"
+                            else:
+                                dias_diff = (proximo_lote.fecha_caducidad - hoy).days
+                                dias_caducidad = f"{dias_diff} días"
+                
+                # Preparar datos de la fila - asegurar que todos sean valores básicos
+                row_data = [
+                    str(producto.nombre or "Sin nombre"),
+                    str(producto.codigo_barras_externo or f"SKU-{producto.id:05d}"),
+                    str(producto.marca or "No definida"),
+                    str(producto.categoria or "Sin categoría"),
+                    float(producto.stock or 0),
+                    float(producto.precio_final or producto.precio_venta or 0),
+                    float(producto.costo or 0),
+                    float(costo_promedio),
+                    str(dias_caducidad),
+                    "Sí" if producto.es_favorito else "No",
+                    "Sí" if producto.esta_a_la_venta else "No"
+                ]
+                
+                # Agregar datos a la fila
+                for col, value in enumerate(row_data, 1):
+                    ws.cell(row=row_num, column=col, value=value)
+                
+            except Exception as e:
+                print(f"Error procesando producto {producto.id}: {str(e)}")
+                continue
+        
+        # Ajustar ancho de columnas
+        column_widths = [25, 18, 18, 20, 12, 15, 15, 15, 20, 12, 12]
+        for col, width in enumerate(column_widths, 1):
+            column_letter = ws.cell(row=1, column=col).column_letter
+            ws.column_dimensions[column_letter].width = width
+        
+        # Aplicar filtros automáticos solo al rango de datos
+        if len(productos_db) > 0:
+            ws.auto_filter.ref = f"A1:K{len(productos_db) + 1}"
+        
+        # Crear buffer en memoria para el archivo
+        output = BytesIO()
+        wb.save(output)
+        output.seek(0)
+        
+        # Preparar respuesta con el archivo
+        from datetime import datetime
+        fecha_actual = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"productos_inventario_{fecha_actual}.xlsx"
+        
+        response = make_response(output.getvalue())
+        response.headers['Content-Type'] = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        response.headers['Content-Disposition'] = f'attachment; filename="{filename}"'
+        
+        return response
+        
+    except Exception as e:
+        print(f"Error en exportar_productos_excel: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        flash(f'Error al generar el archivo Excel: {str(e)}', 'danger')
+        return redirect(url_for('ver_productos'))
 
 @app.route('/actualizar-lotes-caducidad', methods=['GET'])
 @login_requerido

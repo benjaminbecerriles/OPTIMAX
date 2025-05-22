@@ -1345,9 +1345,10 @@
         <i class="fas fa-arrow-left"></i>
         <span>Volver</span>
       </a>
-      <button class="btn-excel">
-        <i class="fas fa-file-excel"></i>
+      <a href="{{ url_for('exportar_productos_excel') }}" class="btn-excel">
+      <i class="fas fa-file-excel"></i>
         Exportar a Excel
+      </a>
       </button>
     </div>
   </div>
