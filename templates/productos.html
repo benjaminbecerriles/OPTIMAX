@@ -604,17 +604,6 @@
     color: var(--discount-green);
     font-weight: 700;
   }
-  
-  .discount-badge {
-    font-size: 0.6rem;
-    background-color: var(--discount-bg);
-    color: var(--discount-green);
-    padding: 1px 4px;
-    border-radius: 4px;
-    font-weight: 500;
-    margin-top: 1px;
-    line-height: 1;
-  }
 
   /* Precio y costo normales (sin descuento) */
   .price-value, .cost-value {
@@ -1289,11 +1278,6 @@
     .price-original {
       font-size: 0.65rem;
     }
-    
-    .discount-badge {
-      font-size: 0.55rem;
-      padding: 0.5px 3px;
-    }
   }
   
   @media (max-width: 767px) {
@@ -1344,11 +1328,6 @@
     
     .price-final {
       font-size: 0.75rem;
-    }
-    
-    .discount-badge {
-      font-size: 0.5rem;
-      padding: 0.5px 2px;
     }
   }
 </style>
@@ -1609,7 +1588,7 @@
             </span>
           </td>
           
-          <!-- MODIFICADO: Precio con descuento visual -->
+          <!-- MODIFICADO: Precio con descuento visual (SIN BADGE) -->
           <td class="column-price">
             <div class="price-container">
               {% if p.tiene_descuento and p.valor_descuento > 0 %}
@@ -1617,14 +1596,6 @@
                 <div class="price-original">${{ '{:,.2f}'.format(p.precio_venta) }}</div>
                 <!-- Precio final con descuento abajo -->
                 <div class="price-final discounted">${{ '{:,.2f}'.format(p.precio_final) }}</div>
-                <!-- Badge de descuento -->
-                <div class="discount-badge">
-                  {% if p.tipo_descuento == 'percentage' %}
-                    -{{ p.valor_descuento|int }}%
-                  {% else %}
-                    -${{ '{:,.0f}'.format(p.valor_descuento) }}
-                  {% endif %}
-                </div>
               {% else %}
                 <!-- Precio normal sin descuento -->
                 <div class="price-final">${{ '{:,.2f}'.format(p.precio_final) }}</div>
