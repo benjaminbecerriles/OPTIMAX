@@ -1,10 +1,10 @@
 // =============================================
-// DASHBOARD ANIMATIONS - JAVASCRIPT SIMPLIFICADO
+// DASHBOARD ANIMATIONS - VERSIÓN OPTIMIZADA
 // =============================================
 
 document.addEventListener('DOMContentLoaded', function() {
     
-    // Función para formatear números grandes (definida al inicio)
+    // Función para formatear números grandes
     function formatLargeNumber(num) {
         if (num >= 1000000) {
             return (num / 1000000).toFixed(1) + 'M';
@@ -15,126 +15,40 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Inicializar AOS (Animate On Scroll)
-    AOS.init({
-        duration: 800,
-        once: true,
-        offset: 50,
-        easing: 'ease-out-cubic'
-    });
-
-    // =============================================
-    // PARTICLES.JS CONFIGURATION
-    // =============================================
-    if (document.getElementById('particles-js')) {
-        particlesJS('particles-js', {
-            particles: {
-                number: {
-                    value: 50,
-                    density: {
-                        enable: true,
-                        value_area: 800
-                    }
-                },
-                color: {
-                    value: '#6366f1'
-                },
-                shape: {
-                    type: 'circle'
-                },
-                opacity: {
-                    value: 0.5,
-                    random: true,
-                    anim: {
-                        enable: true,
-                        speed: 1,
-                        opacity_min: 0.1,
-                        sync: false
-                    }
-                },
-                size: {
-                    value: 3,
-                    random: true,
-                    anim: {
-                        enable: true,
-                        speed: 2,
-                        size_min: 0.1,
-                        sync: false
-                    }
-                },
-                line_linked: {
-                    enable: true,
-                    distance: 150,
-                    color: '#6366f1',
-                    opacity: 0.2,
-                    width: 1
-                },
-                move: {
-                    enable: true,
-                    speed: 1,
-                    direction: 'none',
-                    random: false,
-                    straight: false,
-                    out_mode: 'out',
-                    bounce: false
-                }
-            },
-            interactivity: {
-                detect_on: 'canvas',
-                events: {
-                    onhover: {
-                        enable: true,
-                        mode: 'grab'
-                    },
-                    onclick: {
-                        enable: true,
-                        mode: 'push'
-                    },
-                    resize: true
-                },
-                modes: {
-                    grab: {
-                        distance: 140,
-                        line_linked: {
-                            opacity: 0.5
-                        }
-                    },
-                    push: {
-                        particles_nb: 4
-                    }
-                }
-            },
-            retina_detect: true
+    // Inicializar AOS (si está disponible)
+    if (typeof AOS !== 'undefined') {
+        AOS.init({
+            duration: 600,
+            once: true,
+            offset: 30,
+            easing: 'ease-out-cubic'
         });
     }
 
     // =============================================
-    // ANIMATED NUMBER COUNTERS
+    // ANIMATED NUMBER COUNTERS OPTIMIZADO
     // =============================================
     
     function animateNumbers() {
-        // Buscar todos los elementos con data-value
         const statNumbers = document.querySelectorAll('.stat-number[data-value], .stat-number span[data-value]');
         
         statNumbers.forEach(element => {
             const endValue = parseInt(element.getAttribute('data-value')) || 0;
             const isCurrency = element.getAttribute('data-format') === 'currency';
             
-            // Si no hay valor, continuar
             if (isNaN(endValue)) return;
             
-            const duration = 2000;
+            const duration = 1500; // Optimizado
             const startTime = performance.now();
             
             const updateNumber = (currentTime) => {
                 const elapsed = currentTime - startTime;
                 const progress = Math.min(elapsed / duration, 1);
                 
-                // Easing function
+                // Easing function suave
                 const easeOutQuart = 1 - Math.pow(1 - progress, 4);
                 const currentValue = Math.floor(endValue * easeOutQuart);
                 
-                // Format number based on size and type
                 let formattedValue;
                 if (isCurrency && currentValue >= 100000) {
                     formattedValue = formatLargeNumber(currentValue);
@@ -142,7 +56,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     formattedValue = currentValue.toLocaleString('es-MX');
                 }
                 
-                // Update the number
                 element.textContent = formattedValue;
                 
                 if (progress < 1) {
@@ -152,119 +65,161 @@ document.addEventListener('DOMContentLoaded', function() {
             
             requestAnimationFrame(updateNumber);
         });
-        
-        // Log para debug
-        console.log('Animating numbers:', {
-            totalProductos: window.dashboardData?.totalProductos,
-            totalUnidades: window.dashboardData?.totalUnidades,
-            valorInventario: window.dashboardData?.valorInventario,
-            productosAgotarse: window.dashboardData?.productosAgotarse
-        });
     }
 
-    // Iniciar contadores cuando sean visibles
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                animateNumbers();
-                observer.disconnect();
-            }
-        });
-    }, { threshold: 0.5 });
-
-    const statsSection = document.querySelector('.stats-section');
-    if (statsSection) {
-        observer.observe(statsSection);
-    } else {
-        // Si no hay observer, ejecutar directamente
-        setTimeout(animateNumbers, 100);
-    }
-    
-    // Fallback: Si después de 3 segundos no se han animado los números, mostrarlos directamente
-    setTimeout(() => {
-        const statNumbers = document.querySelectorAll('.stat-number[data-value], .stat-number span[data-value]');
-        statNumbers.forEach(element => {
-            const value = parseInt(element.getAttribute('data-value')) || 0;
-            const isCurrency = element.getAttribute('data-format') === 'currency';
-            
-            if (element.textContent === '0' || element.textContent === '') {
-                if (isCurrency && value >= 100000) {
-                    element.textContent = formatLargeNumber(value);
-                } else {
-                    element.textContent = value.toLocaleString('es-MX');
-                }
-            }
-        });
-    }, 3000);
+    // Iniciar contadores con delay corto
+    setTimeout(animateNumbers, 200);
 
     // =============================================
-    // SIMPLE HOVER ANIMATIONS WITH GSAP
+    // GSAP ANIMATIONS (optimizadas)
     // =============================================
     
-    // Hero title animation
     if (typeof gsap !== 'undefined') {
-        gsap.from('.hero-title', {
+        // Timeline para mejor control
+        const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+        
+        tl.from('.hero-title', {
             y: 30,
             opacity: 0,
-            duration: 1,
-            ease: 'power3.out'
-        });
-        
-        gsap.from('.hero-description', {
+            duration: 0.8
+        })
+        .from('.hero-description', {
             y: 20,
             opacity: 0,
-            duration: 1,
-            delay: 0.2,
-            ease: 'power3.out'
-        });
-        
-        // Animate title lines
-        gsap.from('.title-line', {
+            duration: 0.8
+        }, '-=0.4')
+        .from('.title-line', {
             width: 0,
-            duration: 0.8,
-            delay: 0.5,
-            ease: 'power2.out',
+            duration: 0.6,
             stagger: 0.2
-        });
+        }, '-=0.2');
     }
 
     // =============================================
-    // SMOOTH HOVER EFFECTS
+    // HOVER EFFECTS CON THROTTLING
     // =============================================
+    
+    let isHovering = false;
     
     // Tool cards hover effect
     const toolCards = document.querySelectorAll('.tool-card');
     toolCards.forEach(card => {
-        card.addEventListener('mouseenter', function() {
-            const icon = this.querySelector('.tool-icon');
-            if (icon) {
-                icon.style.transform = 'scale(1.1) rotate(10deg)';
+        card.addEventListener('mouseenter', function(e) {
+            if (!isHovering) {
+                isHovering = true;
+                const icon = this.querySelector('.tool-icon');
+                if (icon) {
+                    gsap.to(icon, {
+                        scale: 1.1,
+                        rotation: 10,
+                        duration: 0.3,
+                        ease: 'power2.out'
+                    });
+                }
+                gsap.to(this, {
+                    y: -5,
+                    duration: 0.3,
+                    ease: 'power2.out'
+                });
             }
         });
         
         card.addEventListener('mouseleave', function() {
+            isHovering = false;
             const icon = this.querySelector('.tool-icon');
             if (icon) {
-                icon.style.transform = 'scale(1) rotate(0deg)';
+                gsap.to(icon, {
+                    scale: 1,
+                    rotation: 0,
+                    duration: 0.3,
+                    ease: 'power2.out'
+                });
+            }
+            gsap.to(this, {
+                y: 0,
+                duration: 0.3,
+                ease: 'power2.out'
+            });
+        });
+    });
+
+    // Stat cards hover effect
+    const statCards = document.querySelectorAll('.stat-card');
+    statCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            gsap.to(this, {
+                y: -5,
+                duration: 0.3,
+                ease: 'power2.out'
+            });
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            gsap.to(this, {
+                y: 0,
+                duration: 0.3,
+                ease: 'power2.out'
+            });
+        });
+    });
+
+    // =============================================
+    // SMOOTH SCROLL OPTIMIZADO
+    // =============================================
+    
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            const href = this.getAttribute('href');
+            if (href && href !== '#') {
+                e.preventDefault();
+                const target = document.querySelector(href);
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
             }
         });
     });
 
-    // Stat cards hover effect (sin iconos)
-    const statCards = document.querySelectorAll('.stat-card');
-    statCards.forEach(card => {
-        card.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-5px)';
-        });
-        
-        card.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateY(0)';
+    // =============================================
+    // RIPPLE EFFECT (optimizado)
+    // =============================================
+    
+    document.querySelectorAll('.quick-link-item, .promo-btn, .view-all-btn').forEach(element => {
+        element.addEventListener('click', function(e) {
+            const ripple = document.createElement('span');
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            
+            ripple.style.cssText = `
+                position: absolute;
+                width: ${size}px;
+                height: ${size}px;
+                left: ${x}px;
+                top: ${y}px;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.5);
+                transform: scale(0);
+                animation: ripple-effect 0.6s ease-out;
+                pointer-events: none;
+            `;
+            
+            this.style.position = 'relative';
+            this.style.overflow = 'hidden';
+            this.appendChild(ripple);
+            
+            setTimeout(() => ripple.remove(), 600);
         });
     });
 
     // =============================================
     // TABLE ROW HOVER
     // =============================================
+    
     const tableRows = document.querySelectorAll('.products-table tbody tr');
     tableRows.forEach(row => {
         row.addEventListener('mouseenter', function() {
@@ -279,6 +234,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // =============================================
     // KEYBOARD SHORTCUTS
     // =============================================
+    
     document.addEventListener('keydown', function(e) {
         // Ctrl/Cmd + N para nuevo producto
         if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
@@ -288,30 +244,68 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // =============================================
-    // RESPONSIVE ADJUSTMENTS
+    // PERFORMANCE OPTIMIZATION
     // =============================================
-    function handleResize() {
-        const width = window.innerWidth;
+    
+    // Reducir animaciones si hay lag
+    let fps = 60;
+    let lastTime = performance.now();
+    let frameCount = 0;
+    
+    function checkPerformance() {
+        frameCount++;
+        const currentTime = performance.now();
         
-        // Ajustar tamaño de partículas en móvil
-        if (width < 768 && window.pJSDom && window.pJSDom[0]) {
-            window.pJSDom[0].pJS.particles.number.value = 30;
-            window.pJSDom[0].pJS.fn.particlesRefresh();
+        if (currentTime >= lastTime + 1000) {
+            fps = frameCount;
+            frameCount = 0;
+            lastTime = currentTime;
+            
+            // Si FPS es bajo, reducir efectos
+            if (fps < 30) {
+                document.body.classList.add('reduce-motion');
+            }
         }
+        
+        requestAnimationFrame(checkPerformance);
     }
-
-    window.addEventListener('resize', handleResize);
-    handleResize();
+    
+    // Iniciar monitoreo de performance
+    requestAnimationFrame(checkPerformance);
 
     console.log('Dashboard animations initialized!');
-    
-    // Debug: Verificar valores del dashboard
-    if (window.dashboardData) {
-        console.log('Dashboard Data:', window.dashboardData);
-        
-        // Verificar que los valores en HTML coincidan
-        document.querySelectorAll('.stat-number[data-value], .stat-number span[data-value]').forEach(el => {
-            console.log('Element data-value:', el.getAttribute('data-value'));
-        });
-    }
 });
+
+// =============================================
+// CSS PARA RIPPLE EFFECT
+// =============================================
+
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes ripple-effect {
+        to {
+            transform: scale(4);
+            opacity: 0;
+        }
+    }
+    
+    .reduce-motion * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .stat-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .tool-card {
+        transition: transform 0.3s ease;
+    }
+    
+    .tool-icon {
+        transition: transform 0.3s ease;
+    }
+`;
+
+document.head.appendChild(style);

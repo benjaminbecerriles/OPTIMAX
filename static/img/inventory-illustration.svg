@@ -1,0 +1,36 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Caja principal -->
+  <rect x="40" y="60" width="80" height="80" rx="8" fill="white" fill-opacity="0.2"/>
+  <rect x="40" y="60" width="80" height="80" rx="8" stroke="white" stroke-width="2" stroke-opacity="0.4"/>
+  
+  <!-- Tapa de la caja -->
+  <path d="M40 60 L80 30 L160 30 L120 60 Z" fill="white" fill-opacity="0.3"/>
+  <path d="M40 60 L80 30 L160 30 L120 60 Z" stroke="white" stroke-width="2" stroke-opacity="0.4"/>
+  
+  <!-- Lado derecho -->
+  <path d="M120 60 L160 30 L160 110 L120 140 Z" fill="white" fill-opacity="0.15"/>
+  <path d="M120 60 L160 30 L160 110 L120 140 Z" stroke="white" stroke-width="2" stroke-opacity="0.4"/>
+  
+  <!-- Código de barras -->
+  <rect x="55" y="85" width="3" height="30" fill="white" opacity="0.8"/>
+  <rect x="60" y="85" width="5" height="30" fill="white" opacity="0.8"/>
+  <rect x="68" y="85" width="3" height="30" fill="white" opacity="0.8"/>
+  <rect x="73" y="85" width="7" height="30" fill="white" opacity="0.8"/>
+  <rect x="83" y="85" width="3" height="30" fill="white" opacity="0.8"/>
+  <rect x="88" y="85" width="5" height="30" fill="white" opacity="0.8"/>
+  <rect x="95" y="85" width="3" height="30" fill="white" opacity="0.8"/>
+  <rect x="100" y="85" width="5" height="30" fill="white" opacity="0.8"/>
+  
+  <!-- Flecha de inventario -->
+  <path d="M140 90 L155 90 L155 85 L165 95 L155 105 L155 100 L140 100 Z" fill="white" opacity="0.6"/>
+  
+  <!-- Puntos flotantes decorativos -->
+  <circle cx="30" cy="40" r="3" fill="white" opacity="0.3"/>
+  <circle cx="170" cy="60" r="2" fill="white" opacity="0.4"/>
+  <circle cx="165" cy="130" r="4" fill="white" opacity="0.2"/>
+  <circle cx="35" cy="150" r="2.5" fill="white" opacity="0.35"/>
+  
+  <!-- Estrellas decorativas -->
+  <path d="M25 90 L27 94 L31 94 L28 97 L29 101 L25 98 L21 101 L22 97 L19 94 L23 94 Z" fill="white" opacity="0.4"/>
+  <path d="M175 100 L176 102 L178 102 L176.5 103.5 L177 105.5 L175 104 L173 105.5 L173.5 103.5 L172 102 L174 102 Z" fill="white" opacity="0.5"/>
+</svg>

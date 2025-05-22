@@ -9,42 +9,40 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
   <style>
     :root {
-      /* Colores principales - Estilo moderno oscuro */
-      --bg-primary: #0a0e27;
-      --bg-secondary: #1a1f3a;
-      --sidebar-bg: #111827;
-      --sidebar-hover: #1f2937;
-      --sidebar-active-bg: rgba(99, 102, 241, 0.1);
-      --sidebar-border: rgba(99, 102, 241, 0.3);
+      /* Colores principales - Estilo moderno con gradientes vibrantes */
+      --bg-primary: #0f0f1e;
+      --bg-secondary: #1a1a2e;
+      --sidebar-bg: #16161f;
+      --sidebar-hover: rgba(255, 255, 255, 0.05);
+      --sidebar-active: rgba(255, 255, 255, 0.1);
       
-      /* Gradientes */
-      --gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-      --gradient-hover: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%);
+      /* Gradientes vibrantes */
+      --gradient-primary: linear-gradient(135deg, #f97316 0%, #ec4899 100%);
+      --gradient-secondary: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
+      --gradient-accent: linear-gradient(135deg, #10b981 0%, #14b8a6 100%);
+      --gradient-danger: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
+      
+      /* Fondos con gradientes */
+      --bg-gradient-1: radial-gradient(circle at 20% 50%, rgba(249, 115, 22, 0.15) 0%, transparent 50%);
+      --bg-gradient-2: radial-gradient(circle at 80% 80%, rgba(236, 72, 153, 0.15) 0%, transparent 50%);
+      --bg-gradient-3: radial-gradient(circle at 50% 0%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
       
       /* Texto */
       --text-primary: #ffffff;
-      --text-secondary: #94a3b8;
-      --text-muted: #64748b;
-      
-      /* Acentos */
-      --accent-primary: #6366f1;
-      --accent-secondary: #8b5cf6;
-      --accent-success: #10b981;
-      --accent-warning: #f59e0b;
-      --accent-danger: #ef4444;
+      --text-secondary: #a1a1aa;
+      --text-muted: #71717a;
       
       /* Layout */
-      --sidebar-width: 260px;
-      --sidebar-collapsed-width: 80px;
-      --header-height: 70px;
+      --sidebar-width: 80px;
+      --header-height: 0;
       
       /* Otros */
       --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.4);
+      --border-radius: 12px;
     }
     
     * {
@@ -53,364 +51,172 @@
       box-sizing: border-box;
     }
     
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--bg-primary);
-      color: var(--text-primary);
+    /* Global scroll fix */
+    html, body {
+      min-height: 100%;
       overflow-x: hidden;
-      line-height: 1.6;
+      overflow-y: visible;
     }
     
-    /* Sidebar Moderno */
+    body {
+      font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      position: relative;
+      margin: 0;
+      padding: 0;
+    }
+    
+    /* Fondos con gradientes animados */
+    body::before,
+    body::after,
+    .gradient-orb {
+      content: '';
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.5;
+      animation: float 20s infinite ease-in-out;
+      pointer-events: none;
+    }
+    
+    body::before {
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(249, 115, 22, 0.4) 0%, transparent 70%);
+      top: -200px;
+      right: -200px;
+    }
+    
+    body::after {
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(236, 72, 153, 0.3) 0%, transparent 70%);
+      bottom: -300px;
+      left: -300px;
+      animation-delay: -10s;
+    }
+    
+    .gradient-orb {
+      position: fixed;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.3) 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation-delay: -5s;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      25% { transform: translate(50px, -50px) scale(1.1); }
+      50% { transform: translate(-50px, 50px) scale(0.9); }
+      75% { transform: translate(30px, 30px) scale(1.05); }
+    }
+    
+    /* Sidebar Minimalista */
     .sidebar {
       position: fixed;
       top: 0;
       left: 0;
       height: 100vh;
       width: var(--sidebar-width);
-      background: var(--sidebar-bg);
-      backdrop-filter: blur(10px);
-      border-right: 1px solid rgba(255, 255, 255, 0.05);
+      background: rgba(22, 22, 31, 0.8);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
       z-index: 1000;
-      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 0;
+      gap: 3rem;
       overflow-y: auto;
       overflow-x: hidden;
     }
     
-    /* Sidebar Header */
-    .sidebar-header {
-      height: var(--header-height);
+    /* Logo */
+    .sidebar-logo {
+      width: 50px;
+      height: 50px;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 0 1.5rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
       position: relative;
     }
     
-    .logo-expanded {
-      height: 45px;
+    .sidebar-logo img {
+      width: 40px;
+      height: 40px;
       filter: brightness(0) invert(1);
-      transition: var(--transition);
-    }
-    
-    .logo-collapsed {
-      height: 35px;
-      filter: brightness(0) invert(1);
-      display: none;
+      opacity: 0.9;
     }
     
     /* Navigation */
     .sidebar-nav {
-      padding: 1.5rem 0;
-    }
-    
-    .nav-section {
-      margin-bottom: 2rem;
-    }
-    
-    .nav-section-title {
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--text-muted);
-      padding: 0 1.5rem;
-      margin-bottom: 0.5rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      width: 100%;
+      padding: 0 1rem;
     }
     
     .nav-item {
-      margin-bottom: 0.25rem;
+      position: relative;
+      width: 100%;
     }
     
     .nav-link {
+      width: 100%;
+      height: 56px;
       display: flex;
       align-items: center;
-      padding: 0.75rem 1.5rem;
+      justify-content: center;
       color: var(--text-secondary);
       text-decoration: none;
+      border-radius: var(--border-radius);
       transition: var(--transition);
       position: relative;
-      font-weight: 500;
-      font-size: 0.875rem;
-      border-radius: 0;
+      overflow: hidden;
     }
     
-    /* Hover effect */
+    .nav-link::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--gradient-primary);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
     .nav-link:hover {
-      background: var(--sidebar-hover);
       color: var(--text-primary);
+      background: var(--sidebar-hover);
     }
     
-    /* Active state con gradiente */
     .nav-link.active {
-      background: var(--sidebar-active-bg);
-      color: var(--accent-primary);
-      font-weight: 600;
+      color: var(--text-primary);
     }
     
     .nav-link.active::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 3px;
-      background: var(--gradient-primary);
-      border-radius: 0 3px 3px 0;
+      opacity: 0.1;
     }
     
-    /* Icon styling */
     .nav-icon {
-      width: 20px;
-      height: 20px;
-      margin-right: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1rem;
-      transition: var(--transition);
-    }
-    
-    .nav-link.active .nav-icon {
-      color: var(--accent-primary);
-    }
-    
-    .nav-text {
-      white-space: nowrap;
-      transition: var(--transition);
-    }
-    
-    /* Notification badge */
-    .nav-badge {
-      margin-left: auto;
-      background: var(--gradient-primary);
-      color: white;
-      font-size: 0.7rem;
-      font-weight: 600;
-      padding: 0.125rem 0.375rem;
-      border-radius: 10px;
-      min-width: 18px;
-      text-align: center;
-    }
-    
-    /* Main Content */
-    .main-content {
-      margin-left: var(--sidebar-width);
-      min-height: 100vh;
-      transition: var(--transition);
-      position: relative;
-      background: var(--bg-primary);
-    }
-    
-    /* Header */
-    .content-header {
-      position: sticky;
-      top: 0;
-      height: var(--header-height);
-      background: rgba(10, 14, 39, 0.8);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 2rem;
-      z-index: 100;
-    }
-    
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 1.5rem;
-    }
-    
-    .toggle-sidebar-btn {
-      width: 40px;
-      height: 40px;
-      border: none;
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--text-primary);
-      border-radius: 10px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: var(--transition);
-      font-size: 1.125rem;
-    }
-    
-    .toggle-sidebar-btn:hover {
-      background: rgba(255, 255, 255, 0.1);
-      transform: scale(1.05);
-    }
-    
-    /* Search bar */
-    .header-search {
-      position: relative;
-      width: 300px;
-    }
-    
-    .header-search input {
-      width: 100%;
-      padding: 0.5rem 1rem 0.5rem 2.5rem;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 10px;
-      color: var(--text-primary);
-      font-size: 0.875rem;
-      transition: var(--transition);
-    }
-    
-    .header-search input::placeholder {
-      color: var(--text-muted);
-    }
-    
-    .header-search input:focus {
-      outline: none;
-      background: rgba(255, 255, 255, 0.08);
-      border-color: var(--accent-primary);
-      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-    }
-    
-    .header-search i {
-      position: absolute;
-      left: 0.75rem;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-muted);
-      font-size: 0.875rem;
-    }
-    
-    /* Header Right */
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-    
-    .header-btn {
-      width: 40px;
-      height: 40px;
-      border: none;
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--text-secondary);
-      border-radius: 10px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: var(--transition);
-      position: relative;
-    }
-    
-    .header-btn:hover {
-      background: rgba(255, 255, 255, 0.1);
-      color: var(--text-primary);
-      transform: scale(1.05);
-    }
-    
-    .notification-dot {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      width: 8px;
-      height: 8px;
-      background: var(--accent-danger);
-      border-radius: 50%;
-      border: 2px solid var(--bg-primary);
-    }
-    
-    /* User Menu */
-    .user-menu {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 0.5rem 1rem;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 50px;
-      cursor: pointer;
-      transition: var(--transition);
-    }
-    
-    .user-menu:hover {
-      background: rgba(255, 255, 255, 0.1);
-    }
-    
-    .user-avatar {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: var(--gradient-primary);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 600;
-      font-size: 0.875rem;
-      color: white;
-    }
-    
-    .user-name {
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: var(--text-primary);
-    }
-    
-    /* Page Content */
-    .page-content {
-      padding: 2rem;
-    }
-    
-    /* Sidebar Collapsed State */
-    .sidebar-collapsed .sidebar {
-      width: var(--sidebar-collapsed-width);
-    }
-    
-    .sidebar-collapsed .main-content {
-      margin-left: var(--sidebar-collapsed-width);
-    }
-    
-    .sidebar-collapsed .logo-expanded {
-      display: none;
-    }
-    
-    .sidebar-collapsed .logo-collapsed {
-      display: block;
-    }
-    
-    .sidebar-collapsed .nav-section-title {
-      opacity: 0;
-      visibility: hidden;
-    }
-    
-    .sidebar-collapsed .nav-link {
-      justify-content: center;
-      padding: 0.75rem;
-    }
-    
-    .sidebar-collapsed .nav-icon {
-      margin-right: 0;
       font-size: 1.25rem;
-    }
-    
-    .sidebar-collapsed .nav-text,
-    .sidebar-collapsed .nav-badge {
-      opacity: 0;
-      visibility: hidden;
-      position: absolute;
-    }
-    
-    /* Tooltip for collapsed sidebar */
-    .sidebar-collapsed .nav-link {
       position: relative;
+      z-index: 1;
     }
     
-    .sidebar-collapsed .nav-link::after {
-      content: attr(data-tooltip);
+    /* Tooltip */
+    .nav-tooltip {
       position: absolute;
       left: calc(100% + 1rem);
       top: 50%;
       transform: translateY(-50%);
-      background: var(--sidebar-bg);
+      background: rgba(0, 0, 0, 0.9);
       color: var(--text-primary);
       padding: 0.5rem 1rem;
       border-radius: 8px;
@@ -419,71 +225,122 @@
       opacity: 0;
       visibility: hidden;
       transition: var(--transition);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
       pointer-events: none;
     }
     
-    .sidebar-collapsed .nav-link:hover::after {
+    .nav-link:hover .nav-tooltip {
       opacity: 1;
       visibility: visible;
     }
     
-    /* Scrollbar personalizado */
-    .sidebar::-webkit-scrollbar {
-      width: 4px;
+    /* Notification Badge */
+    .nav-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: var(--gradient-danger);
+      color: white;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 10px;
+      min-width: 16px;
+      text-align: center;
     }
     
-    .sidebar::-webkit-scrollbar-track {
-      background: transparent;
+    /* Bottom section */
+    .sidebar-bottom {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      width: 100%;
+      padding: 0 1rem;
     }
     
-    .sidebar::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 20px;
+    /* Main Content */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      min-height: 100vh;
+      position: relative;
+      z-index: 1;
+      overflow: visible;
     }
     
-    .sidebar::-webkit-scrollbar-thumb:hover {
-      background: rgba(255, 255, 255, 0.2);
+    /* Page Content */
+    .page-content {
+      padding: 0;
+      max-width: 1600px;
+      margin: 0 auto;
+      overflow: visible;
     }
     
-    /* Mobile Responsive */
+    /* User Avatar en sidebar */
+    .user-avatar-sidebar {
+      width: 56px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--gradient-secondary);
+      border-radius: 50%;
+      font-weight: 600;
+      font-size: 1.25rem;
+      color: white;
+      cursor: pointer;
+      transition: var(--transition);
+      position: relative;
+    }
+    
+    .user-avatar-sidebar:hover {
+      transform: scale(1.05);
+    }
+    
+    /* Responsive */
     @media (max-width: 768px) {
       .sidebar {
-        transform: translateX(-100%);
+        width: 100%;
+        height: auto;
+        bottom: 0;
+        top: auto;
+        flex-direction: row;
+        padding: 1rem;
+        border-right: none;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
       }
       
-      .sidebar.active {
-        transform: translateX(0);
-        box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+      .sidebar-logo {
+        display: none;
+      }
+      
+      .sidebar-nav {
+        flex-direction: row;
+        padding: 0;
+      }
+      
+      .sidebar-bottom {
+        display: none;
       }
       
       .main-content {
         margin-left: 0;
+        margin-bottom: 80px;
       }
       
-      .sidebar-overlay {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.7);
-        z-index: 999;
-        backdrop-filter: blur(5px);
-      }
-      
-      .sidebar-overlay.active {
-        display: block;
-      }
-      
-      .header-search {
+      .nav-tooltip {
         display: none;
       }
     }
     
-    /* Animations */
-    @keyframes slideIn {
+    /* Glass effect para cards */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--border-radius);
+    }
+    
+    /* Animaciones de entrada */
+    @keyframes slideInLeft {
       from {
         opacity: 0;
         transform: translateX(-20px);
@@ -494,224 +351,158 @@
       }
     }
     
-    .nav-link {
-      animation: slideIn 0.3s ease-out;
-      animation-fill-mode: backwards;
+    .nav-item {
+      animation: slideInLeft 0.5s ease-out;
+      animation-fill-mode: both;
     }
     
-    .nav-item:nth-child(1) .nav-link { animation-delay: 0.1s; }
-    .nav-item:nth-child(2) .nav-link { animation-delay: 0.15s; }
-    .nav-item:nth-child(3) .nav-link { animation-delay: 0.2s; }
-    .nav-item:nth-child(4) .nav-link { animation-delay: 0.25s; }
-    .nav-item:nth-child(5) .nav-link { animation-delay: 0.3s; }
-    .nav-item:nth-child(6) .nav-link { animation-delay: 0.35s; }
-    .nav-item:nth-child(7) .nav-link { animation-delay: 0.4s; }
-    .nav-item:nth-child(8) .nav-link { animation-delay: 0.45s; }
-    .nav-item:nth-child(9) .nav-link { animation-delay: 0.5s; }
-    .nav-item:nth-child(10) .nav-link { animation-delay: 0.55s; }
+    .nav-item:nth-child(1) { animation-delay: 0.1s; }
+    .nav-item:nth-child(2) { animation-delay: 0.15s; }
+    .nav-item:nth-child(3) { animation-delay: 0.2s; }
+    .nav-item:nth-child(4) { animation-delay: 0.25s; }
+    .nav-item:nth-child(5) { animation-delay: 0.3s; }
+    .nav-item:nth-child(6) { animation-delay: 0.35s; }
+    .nav-item:nth-child(7) { animation-delay: 0.4s; }
+    .nav-item:nth-child(8) { animation-delay: 0.45s; }
+    .nav-item:nth-child(9) { animation-delay: 0.5s; }
   </style>
   
   {% block extra_css %}{% endblock %}
 </head>
 <body>
-  <!-- Sidebar -->
+  <!-- Gradientes de fondo animados -->
+  <div class="gradient-orb"></div>
+  
+  <!-- Sidebar Minimalista -->
   <nav class="sidebar">
-    <div class="sidebar-header">
-      <img src="{{ url_for('static', filename='img/optimaxlogo.png') }}" alt="OptiMax" class="logo-expanded">
-      <img src="{{ url_for('static', filename='img/retraido.png') }}" alt="OptiMax" class="logo-collapsed">
+    <!-- Logo -->
+    <div class="sidebar-logo">
+      <img src="{{ url_for('static', filename='img/retraido.png') }}" alt="OptiMax">
     </div>
     
+    <!-- Navigation -->
     <div class="sidebar-nav">
-      <!-- Main Navigation -->
-      <div class="nav-section">
-        <div class="nav-section-title">Principal</div>
-        <ul class="nav flex-column">
-          <li class="nav-item">
-            <a class="nav-link {% block home_active %}{% endblock %}" href="{{ url_for('dashboard_home') }}" data-tooltip="Home">
-              <i class="fas fa-home nav-icon"></i>
-              <span class="nav-text">Home</span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link {% block inventario_active %}{% endblock %}" href="{{ url_for('dashboard_inventario') }}" data-tooltip="Inventario">
-              <i class="fas fa-boxes-stacked nav-icon"></i>
-              <span class="nav-text">Inventario</span>
-              {% if productos_agotarse|default(0) > 0 %}
-                <span class="nav-badge">{{ productos_agotarse }}</span>
-              {% endif %}
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link {% block ventas_active %}{% endblock %}" href="#" data-tooltip="Punto de Venta">
-              <i class="fas fa-cash-register nav-icon"></i>
-              <span class="nav-text">Punto de Venta</span>
-            </a>
-          </li>
-        </ul>
+      <div class="nav-item">
+        <a class="nav-link {% block home_active %}{% endblock %}" href="{{ url_for('dashboard_home') }}">
+          <i class="fas fa-home nav-icon"></i>
+          <span class="nav-tooltip">Home</span>
+        </a>
       </div>
       
-      <!-- Analytics -->
-      <div class="nav-section">
-        <div class="nav-section-title">Análisis</div>
-        <ul class="nav flex-column">
-          <li class="nav-item">
-            <a class="nav-link {% block competencia_active %}{% endblock %}" href="#" data-tooltip="Competencia">
-              <i class="fas fa-chart-line nav-icon"></i>
-              <span class="nav-text">Competencia</span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link {% block financiera_active %}{% endblock %}" href="#" data-tooltip="Gestión Financiera">
-              <i class="fas fa-money-bill-wave nav-icon"></i>
-              <span class="nav-text">Gestión Financiera</span>
-            </a>
-          </li>
-        </ul>
+      <div class="nav-item">
+        <a class="nav-link {% block inventario_active %}{% endblock %}" href="{{ url_for('dashboard_inventario') }}">
+          <i class="fas fa-cube nav-icon"></i>
+          <span class="nav-tooltip">Inventario</span>
+          {% set productos_agotarse = productos|selectattr('stock', 'gt', 0)|selectattr('stock', 'le', 5)|list|length if productos else 0 %}
+          {% if productos_agotarse > 0 %}
+            <span class="nav-badge">{{ productos_agotarse }}</span>
+          {% endif %}
+        </a>
       </div>
       
-      <!-- Management -->
-      <div class="nav-section">
-        <div class="nav-section-title">Gestión</div>
-        <ul class="nav flex-column">
-          <li class="nav-item">
-            <a class="nav-link {% block proveedores_active %}{% endblock %}" href="#" data-tooltip="Proveedores">
-              <i class="fas fa-truck nav-icon"></i>
-              <span class="nav-text">Proveedores</span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link {% block empleados_active %}{% endblock %}" href="#" data-tooltip="Empleados">
-              <i class="fas fa-users nav-icon"></i>
-              <span class="nav-text">Empleados</span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link {% block cotizaciones_active %}{% endblock %}" href="#" data-tooltip="Cotizaciones">
-              <i class="fas fa-calculator nav-icon"></i>
-              <span class="nav-text">Cotizaciones</span>
-            </a>
-          </li>
-        </ul>
+      <div class="nav-item">
+        <a class="nav-link {% block ventas_active %}{% endblock %}" href="#">
+          <i class="fas fa-shopping-cart nav-icon"></i>
+          <span class="nav-tooltip">Punto de Venta</span>
+        </a>
       </div>
       
-      <!-- System -->
-      <div class="nav-section">
-        <div class="nav-section-title">Sistema</div>
-        <ul class="nav flex-column">
-          <li class="nav-item">
-            <a class="nav-link {% block seguridad_active %}{% endblock %}" href="#" data-tooltip="Seguridad">
-              <i class="fas fa-shield-alt nav-icon"></i>
-              <span class="nav-text">Seguridad</span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link {% block soporte_active %}{% endblock %}" href="#" data-tooltip="Soporte">
-              <i class="fas fa-headset nav-icon"></i>
-              <span class="nav-text">Soporte</span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('logout') }}" data-tooltip="Cerrar Sesión">
-              <i class="fas fa-sign-out-alt nav-icon"></i>
-              <span class="nav-text">Cerrar Sesión</span>
-            </a>
-          </li>
-        </ul>
+      <div class="nav-item">
+        <a class="nav-link {% block competencia_active %}{% endblock %}" href="#">
+          <i class="fas fa-chart-line nav-icon"></i>
+          <span class="nav-tooltip">Análisis</span>
+        </a>
+      </div>
+      
+      <div class="nav-item">
+        <a class="nav-link {% block financiera_active %}{% endblock %}" href="#">
+          <i class="fas fa-wallet nav-icon"></i>
+          <span class="nav-tooltip">Finanzas</span>
+        </a>
+      </div>
+      
+      <div class="nav-item">
+        <a class="nav-link {% block proveedores_active %}{% endblock %}" href="#">
+          <i class="fas fa-truck nav-icon"></i>
+          <span class="nav-tooltip">Proveedores</span>
+        </a>
+      </div>
+      
+      <div class="nav-item">
+        <a class="nav-link {% block empleados_active %}{% endblock %}" href="#">
+          <i class="fas fa-users nav-icon"></i>
+          <span class="nav-tooltip">Empleados</span>
+        </a>
+      </div>
+    </div>
+    
+    <!-- Bottom section -->
+    <div class="sidebar-bottom">
+      <div class="nav-item">
+        <a class="nav-link {% block configuracion_active %}{% endblock %}" href="#">
+          <i class="fas fa-cog nav-icon"></i>
+          <span class="nav-tooltip">Configuración</span>
+        </a>
+      </div>
+      
+      <div class="nav-item">
+        <div class="user-avatar-sidebar">
+          {{ session.get('user_name', 'Usuario')[0]|upper }}
+        </div>
       </div>
     </div>
   </nav>
   
   <!-- Main Content -->
   <div class="main-content">
-    <!-- Header -->
-    <header class="content-header">
-      <div class="header-left">
-        <button class="toggle-sidebar-btn" id="toggleSidebar">
-          <i class="fas fa-bars"></i>
-        </button>
-        
-        <div class="header-search">
-          <i class="fas fa-search"></i>
-          <input type="text" placeholder="Buscar productos, reportes..." />
-        </div>
-      </div>
-      
-      <div class="header-right">
-        <button class="header-btn">
-          <i class="fas fa-moon"></i>
-        </button>
-        
-        <button class="header-btn">
-          <i class="fas fa-bell"></i>
-          <span class="notification-dot"></span>
-        </button>
-        
-        <div class="user-menu">
-          <div class="user-avatar">
-            {{ session.get('user_name', 'Usuario')[0]|upper }}
-          </div>
-          <span class="user-name">{{ session.get('user_name', 'Usuario') }}</span>
-          <i class="fas fa-chevron-down" style="font-size: 0.75rem; color: var(--text-muted);"></i>
-        </div>
-      </div>
-    </header>
-    
-    <!-- Page Content -->
     <div class="page-content">
       {% block content %}{% endblock %}
     </div>
   </div>
   
-  <!-- Mobile overlay -->
-  <div class="sidebar-overlay" id="sidebarOverlay"></div>
-  
   <script>
+    // Animaciones simples al cargar
     document.addEventListener('DOMContentLoaded', function() {
-      const body = document.body;
-      const sidebar = document.querySelector('.sidebar');
-      const toggleBtn = document.getElementById('toggleSidebar');
-      const overlay = document.getElementById('sidebarOverlay');
-      
-      // Toggle sidebar
-      toggleBtn.addEventListener('click', function() {
-        if (window.innerWidth <= 768) {
-          sidebar.classList.toggle('active');
-          overlay.classList.toggle('active');
-        } else {
-          body.classList.toggle('sidebar-collapsed');
-        }
-      });
-      
-      // Close sidebar on overlay click
-      overlay.addEventListener('click', function() {
-        sidebar.classList.remove('active');
-        overlay.classList.remove('active');
-      });
-      
-      // Handle resize
-      let resizeTimer;
-      window.addEventListener('resize', function() {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(function() {
-          if (window.innerWidth > 768) {
-            sidebar.classList.remove('active');
-            overlay.classList.remove('active');
-          }
-        }, 250);
-      });
-      
-      // Add smooth scroll behavior
-      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-          e.preventDefault();
-          const target = document.querySelector(this.getAttribute('href'));
-          if (target) {
-            target.scrollIntoView({ behavior: 'smooth' });
-          }
+      // Efecto ripple en clicks
+      document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+          const ripple = document.createElement('span');
+          const rect = this.getBoundingClientRect();
+          const size = Math.max(rect.width, rect.height);
+          const x = e.clientX - rect.left - size / 2;
+          const y = e.clientY - rect.top - size / 2;
+          
+          ripple.style.width = ripple.style.height = size + 'px';
+          ripple.style.left = x + 'px';
+          ripple.style.top = y + 'px';
+          ripple.classList.add('ripple');
+          
+          this.appendChild(ripple);
+          
+          setTimeout(() => ripple.remove(), 600);
         });
       });
     });
   </script>
+  
+  <style>
+    /* Efecto ripple */
+    .ripple {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.5);
+      transform: scale(0);
+      animation: ripple-animation 0.6s ease-out;
+      pointer-events: none;
+    }
+    
+    @keyframes ripple-animation {
+      to {
+        transform: scale(4);
+        opacity: 0;
+      }
+    }
+  </style>
   
   {% block extra_js %}{% endblock %}
 </body>
