@@ -8,18 +8,37 @@ let mouseX = 0, mouseY = 0;
 let clock = new THREE.Clock();
 let robotBaseY = 0; // Posición base del robot
 
-// Configuración
+// Variables para seguimiento del cursor
+let targetRotationX = 0;
+let targetRotationY = 0;
+let currentRotationX = 0;
+let currentRotationY = 0;
+let maxRotationY = Math.PI / 6; // 30 grados máximo horizontal
+let maxRotationX = Math.PI / 12; // 15 grados máximo vertical
+let rotationSpeed = 0.15; // Velocidad de interpolación (aumentada de 0.08)
+
+// Variables de inversión de ejes para debugging
+window._invertX = false;
+window._invertY = false;
+
+// Factor de escala para sensibilidad vertical
+window._verticalScale = 1.0;
+
+// Configuración ACTUALIZADA con cámara más cercana y centrada
 const config = {
-    modelPath: '/static/models/robot/robotmiov2.glb', // ACTUALIZADO A ROBOTMIOV2.GLB
+    modelPath: '/static/models/robot/robotmiov2.glb',
     backgroundColor: 0xf0f0f0,
-    cameraPosition: { x: 0, y: 1.5, z: 5 } // Cámara frontal a la altura del robot
+    cameraPosition: { x: 0, y: 1.0, z: 6.5 } // Acercamos la cámara y ajustamos altura
 };
 
 // Estado del robot
 const robotState = {
     loaded: false,
     animations: {},
-    currentAnimation: null
+    currentAnimation: null,
+    isHovered: false,
+    isFollowing: true, // Seguimiento activo por defecto
+    baseRotation: { x: 0, y: 0.1, z: 0 } // Rotación base del modelo
 };
 
 // Inicializar
@@ -40,11 +59,11 @@ function initRealisticRobot() {
     scene.background = new THREE.Color(config.backgroundColor);
     scene.fog = new THREE.Fog(config.backgroundColor, 8, 30);
     
-    // Configurar cámara
+    // Configurar cámara con FOV ajustado para mejor encuadre
     const aspect = container.clientWidth / container.clientHeight;
-    camera = new THREE.PerspectiveCamera(45, aspect, 0.1, 1000);
+    camera = new THREE.PerspectiveCamera(35, aspect, 0.1, 1000); // FOV reducido a 35 para menos distorsión
     camera.position.set(config.cameraPosition.x, config.cameraPosition.y, config.cameraPosition.z);
-    camera.lookAt(0, 1, 0); // Mirar al centro del robot
+    camera.lookAt(0, 0.6, 0); // Miramos al centro del robot
     
     // Configurar renderer
     renderer = new THREE.WebGLRenderer({ 
@@ -152,11 +171,15 @@ function loadRobotModel() {
             
             robot = gltf.scene;
             
-            // Configuración de rotación para robotmiov2.glb
-            // Ajustar según la orientación del modelo
-            robot.rotation.x = 0; // Sin rotación en X
-            robot.rotation.y = Math.PI; // 180 grados para que mire de frente
-            robot.rotation.z = 0; // Sin rotación en Z
+            // CORRECCIÓN: Rotación para que mire de frente (ajuste fino)
+            robot.rotation.x = 0;
+            robot.rotation.y = 0.1; // Ligera rotación para compensar orientación del modelo
+            robot.rotation.z = 0;
+            
+            // Guardar rotación base para el seguimiento del cursor
+            robotState.baseRotation.x = robot.rotation.x;
+            robotState.baseRotation.y = robot.rotation.y;
+            robotState.baseRotation.z = robot.rotation.z;
             
             // Calcular dimensiones y centrar
             const box = new THREE.Box3().setFromObject(robot);
@@ -168,21 +191,23 @@ function loadRobotModel() {
             console.log('Centro:', center);
             console.log('Box Min:', box.min);
             console.log('Box Max:', box.max);
-            console.log('📍 La cámara está en Z=5 (positivo), mirando hacia Z negativo');
             
-            // Escalar si es necesario
-            const targetHeight = 3; // Altura deseada del robot
+            // Escalar a altura deseada (ajustada para nueva distancia)
+            const targetHeight = 2.3; // Altura ligeramente aumentada para mejor visibilidad con seguimiento
             const currentHeight = size.y;
             const scale = targetHeight / currentHeight;
             robot.scale.set(scale, scale, scale);
+            
+            // Guardar escala base para efectos
+            robot.scale._baseScale = scale;
             
             // Recalcular después del escalado
             const newBox = new THREE.Box3().setFromObject(robot);
             const newCenter = newBox.getCenter(new THREE.Vector3());
             
-            // Posicionar el robot con los pies en el suelo
-            robot.position.x = -newCenter.x;
-            robot.position.y = -newBox.min.y; // Pies en Y=0
+            // Posicionar el robot con los pies en el suelo y centrado
+            robot.position.x = -newCenter.x * 0.95; // Ajuste fino para centrado perfecto
+            robot.position.y = -newBox.min.y;
             robot.position.z = -newCenter.z;
             
             // Guardar posición base para animaciones
@@ -191,21 +216,17 @@ function loadRobotModel() {
             console.log('=== Posición final del robot ===');
             console.log('Posición:', robot.position);
             console.log('Escala:', robot.scale);
-            console.log('Rotación (radianes):', robot.rotation);
             console.log('Rotación (grados):', {
                 x: (robot.rotation.x * 180 / Math.PI).toFixed(2),
                 y: (robot.rotation.y * 180 / Math.PI).toFixed(2),
                 z: (robot.rotation.z * 180 / Math.PI).toFixed(2)
             });
-            console.log('ℹ️ Rotación Y = 180° para que mire de frente');
             
             // Configurar materiales y sombras
             robot.traverse((child) => {
                 if (child.isMesh) {
                     child.castShadow = true;
                     child.receiveShadow = true;
-                    
-                    // El modelo GLB ya tiene sus propios materiales y colores
                     console.log('Mesh encontrado:', child.name, 'Material:', child.material);
                 }
             });
@@ -234,16 +255,38 @@ function loadRobotModel() {
             robotState.loaded = true;
             
             // Mostrar mensaje de éxito
-            showMessage("¡Hola! Soy OptiBot 🤖", 'success');
+            showMessage("¡Hola! Soy OptiBot 🤖 Sígueme con tu cursor 👀", 'success');
             
-            // Tips para ajustar orientación si fuera necesario
-            console.log('=== ORIENTACIÓN DEL ROBOT ===');
-            console.log('✅ El robot debería estar mirando de frente');
-            console.log('Si necesitas ajustar la orientación:');
-            console.log('• window.OptiBot3D.setRotation(0, 0, 0)  // Sin rotación');
-            console.log('• window.OptiBot3D.setRotation(0, Math.PI/2, 0)  // 90°');
-            console.log('• window.OptiBot3D.testRotations()  // Probar automáticamente');
-            console.log('===============================');
+            // Mensaje adicional después de un segundo
+            setTimeout(() => {
+                showMessage("Mi mirada ahora sigue correctamente tu cursor ✨", 'info');
+            }, 2000);
+            
+            console.log('=== ROBOT CARGADO CORRECTAMENTE ===');
+            console.log('✅ El robot debería estar mirando de frente y centrado');
+            console.log('🎯 SEGUIMIENTO DEL CURSOR ACTIVADO');
+            console.log('');
+            console.log('📍 Características del seguimiento:');
+            console.log('• El robot sigue tu cursor en toda la página');
+            console.log('• Rotación máxima: ±30° horizontal, ±15° vertical');
+            console.log('• Movimiento suave e interpolado');
+            console.log('• Eje Y invertido para corrección de mirada');
+            console.log('');
+            console.log('🎮 Comandos disponibles:');
+            console.log('• window.OptiBot3D.setFollowSpeed(0.2)  // Velocidad máxima');
+            console.log('• window.OptiBot3D.setFollowSpeed(0.15)  // Velocidad rápida (actual)');
+            console.log('• window.OptiBot3D.setFollowSpeed(0.08)  // Velocidad normal');
+            console.log('• window.OptiBot3D.setFollowSpeed(0.05)  // Velocidad lenta');
+            console.log('• window.OptiBot3D.setMaxRotation(Math.PI/4, Math.PI/8)  // Cambiar límites');
+            console.log('• window.OptiBot3D.resetView()  // Volver al centro');
+            console.log('• window.OptiBot3D.getFollowInfo()  // Ver información actual');
+            console.log('• window.OptiBot3D.debugRotation()  // Debug de rotaciones');
+            console.log('');
+            console.log('🔧 Si la mirada está invertida:');
+            console.log('• window.OptiBot3D.invertAxisY()  // Invertir vertical');
+            console.log('• window.OptiBot3D.invertAxisX()  // Invertir horizontal');
+            console.log('• window.OptiBot3D.setVerticalScale(0.5)  // Reducir sensibilidad vertical');
+            console.log('• window.OptiBot3D.setVerticalScale(1.5)  // Aumentar sensibilidad vertical');
         },
         // Progreso
         (progress) => {
@@ -268,21 +311,38 @@ function loadRobotModel() {
 function setupEvents() {
     const container = renderer.domElement;
     
-    // Mouse move
-    container.addEventListener('mousemove', onMouseMove, false);
+    // Mouse move en TODA la página para seguimiento global
+    document.addEventListener('mousemove', onDocumentMouseMove, false);
     
-    // Click
+    // Click en el canvas del robot
     container.addEventListener('click', onRobotClick, false);
     
     // Resize
     window.addEventListener('resize', onWindowResize, false);
+    
+    // Mouse enter/leave para activar/desactivar seguimiento
+    container.addEventListener('mouseenter', () => {
+        robotState.isHovered = true;
+    });
+    
+    container.addEventListener('mouseleave', () => {
+        robotState.isHovered = false;
+    });
 }
 
 // Eventos
-function onMouseMove(event) {
-    const rect = renderer.domElement.getBoundingClientRect();
-    mouseX = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-    mouseY = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+function onDocumentMouseMove(event) {
+    // Normalizar coordenadas del mouse para toda la ventana
+    mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+    mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+    
+    // Calcular rotaciones objetivo basadas en la posición del cursor
+    // Aplicar inversión dinámica si está activada (para debugging)
+    const xMultiplier = window._invertY ? 1 : -1; // Invertido por defecto para corrección
+    const yMultiplier = window._invertX ? -1 : 1;
+    
+    targetRotationY = mouseX * window.maxRotationY * yMultiplier;
+    targetRotationX = mouseY * window.maxRotationX * xMultiplier * window._verticalScale;
 }
 
 function onRobotClick() {
@@ -294,13 +354,43 @@ function onRobotClick() {
     // Mostrar mensaje
     const messages = [
         "¡Hola! 👋",
-        "¿Cómo va el inventario?",
-        "¡Mira este movimiento!",
+        "¿Me estás siguiendo con el cursor? 👀",
+        "¡Mira hacia donde miro! 🎯",
         "Stock óptimo al 95% 📊",
         "¿Ya revisaste las caducidades?"
     ];
     const randomMessage = messages[Math.floor(Math.random() * messages.length)];
     showMessage(randomMessage, 'info');
+    
+    // Efecto visual cuando hace click
+    if (robot) {
+        // Pequeño "salto" del robot
+        const jumpAnimation = () => {
+            const startY = robotBaseY;
+            const jumpHeight = 0.2;
+            const duration = 300;
+            const startTime = Date.now();
+            
+            const animateJump = () => {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                // Curva de salto parabólica
+                const jumpCurve = Math.sin(progress * Math.PI);
+                robot.position.y = startY + (jumpHeight * jumpCurve);
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animateJump);
+                } else {
+                    robot.position.y = startY;
+                }
+            };
+            
+            animateJump();
+        };
+        
+        jumpAnimation();
+    }
 }
 
 function onWindowResize() {
@@ -322,10 +412,48 @@ function animate() {
         mixer.update(delta);
     }
     
-    // Solo mantener el robot estático, sin rotación automática
+    // Animaciones del robot
     if (robot && robotState.loaded) {
         // Animación idle (balanceo suave vertical)
         robot.position.y = robotBaseY + Math.sin(Date.now() * 0.001) * 0.05;
+        
+        // SEGUIMIENTO DEL CURSOR - Solo si está activado
+        if (robotState.isFollowing) {
+            currentRotationY += (targetRotationY - currentRotationY) * window.rotationSpeed;
+            currentRotationX += (targetRotationX - currentRotationX) * window.rotationSpeed;
+        } else {
+            // Volver suavemente a la posición neutral cuando no está siguiendo
+            currentRotationY += (0 - currentRotationY) * window.rotationSpeed;
+            currentRotationX += (0 - currentRotationX) * window.rotationSpeed;
+        }
+        
+        // Aplicar rotaciones con límites
+        robot.rotation.y = robotState.baseRotation.y + currentRotationY;
+        robot.rotation.x = robotState.baseRotation.x + currentRotationX;
+        
+        // Efecto de "respiración" sutil (solo en altura)
+        const breathingEffect = Math.sin(Date.now() * 0.002) * 0.005;
+        if (robot.scale._baseScale) {
+            robot.scale.y = robot.scale._baseScale * (1 + breathingEffect);
+        }
+        
+        // Indicador visual cuando el robot alcanza el límite de rotación
+        const container = document.getElementById('warehouse3d');
+        if (container) {
+            if (Math.abs(currentRotationY) > window.maxRotationY * 0.9 || 
+                Math.abs(currentRotationX) > window.maxRotationX * 0.9) {
+                container.classList.add('at-limit');
+            } else {
+                container.classList.remove('at-limit');
+            }
+            
+            // Agregar clase cuando está siguiendo
+            if (robotState.isFollowing) {
+                container.classList.add('following-cursor');
+            } else {
+                container.classList.remove('following-cursor');
+            }
+        }
     }
     
     renderer.render(scene, camera);
@@ -416,7 +544,7 @@ function showMessage(text, type = 'info') {
     }, 5000);
 }
 
-// API pública
+// API pública con métodos de debugging adicionales
 window.OptiBot3D = {
     loaded: () => robotState.loaded,
     
@@ -435,30 +563,97 @@ window.OptiBot3D = {
     },
     
     setMood: (mood) => {
-        // Implementar cambios visuales según mood
         console.log(`🎭 Cambiando mood a: ${mood}`);
     },
     
-    // Nuevos métodos para control manual
+    // Control del seguimiento del cursor
+    setFollowSpeed: (speed) => {
+        window.rotationSpeed = Math.max(0.01, Math.min(0.2, speed));
+        console.log('⚡ Velocidad de seguimiento:', window.rotationSpeed);
+        
+        // Mostrar mensaje visual
+        let speedText = 'Normal';
+        if (window.rotationSpeed >= 0.18) speedText = 'Máxima';
+        else if (window.rotationSpeed >= 0.12) speedText = 'Rápida';
+        else if (window.rotationSpeed <= 0.06) speedText = 'Lenta';
+        
+        showMessage(`Velocidad de seguimiento: ${speedText} (${window.rotationSpeed})`, 'info');
+    },
+    
+    setMaxRotation: (horizontal, vertical) => {
+        if (horizontal !== undefined) {
+            window.maxRotationY = horizontal;
+            console.log('Rotación máxima horizontal:', (window.maxRotationY * 180 / Math.PI).toFixed(0) + '°');
+        }
+        if (vertical !== undefined) {
+            window.maxRotationX = vertical;
+            console.log('Rotación máxima vertical:', (window.maxRotationX * 180 / Math.PI).toFixed(0) + '°');
+        }
+    },
+    
+    toggleFollowing: () => {
+        robotState.isFollowing = !robotState.isFollowing;
+        console.log('Seguimiento del cursor:', robotState.isFollowing ? 'Activado' : 'Desactivado');
+        
+        // Actualizar botón visual
+        const btn = document.getElementById('followToggle');
+        if (btn) {
+            if (robotState.isFollowing) {
+                btn.classList.add('active');
+                btn.innerHTML = '<i class="fas fa-eye"></i>';
+            } else {
+                btn.classList.remove('active');
+                btn.innerHTML = '<i class="fas fa-eye-slash"></i>';
+            }
+        }
+        
+        if (!robotState.isFollowing) {
+            targetRotationX = 0;
+            targetRotationY = 0;
+        }
+    },
+    
+    resetView: () => {
+        targetRotationX = 0;
+        targetRotationY = 0;
+        currentRotationX = 0;
+        currentRotationY = 0;
+        if (robot && robotState.loaded) {
+            robot.rotation.x = robotState.baseRotation.x;
+            robot.rotation.y = robotState.baseRotation.y;
+        }
+        console.log('Vista reseteada al frente');
+    },
+    
     rotateRobot: (angleY) => {
         if (robot && robotState.loaded) {
             robot.rotation.y += angleY;
+            robotState.baseRotation.y = robot.rotation.y;
         }
     },
     
     resetRotation: () => {
         if (robot && robotState.loaded) {
-            robot.rotation.y = Math.PI; // 180 grados, mirando de frente
+            robot.rotation.y = 0.1; // Rotación óptima para este modelo
+            robotState.baseRotation.y = robot.rotation.y;
         }
     },
     
-    // Método para ajustar rotación directamente
     setRotation: (x, y, z) => {
         if (robot && robotState.loaded) {
-            if (x !== undefined) robot.rotation.x = x;
-            if (y !== undefined) robot.rotation.y = y;
-            if (z !== undefined) robot.rotation.z = z;
-            console.log('Nueva rotación:', {
+            if (x !== undefined) {
+                robot.rotation.x = x;
+                robotState.baseRotation.x = x;
+            }
+            if (y !== undefined) {
+                robot.rotation.y = y;
+                robotState.baseRotation.y = y;
+            }
+            if (z !== undefined) {
+                robot.rotation.z = z;
+                robotState.baseRotation.z = z;
+            }
+            console.log('Nueva rotación base:', {
                 x: (robot.rotation.x * 180 / Math.PI).toFixed(2) + '°',
                 y: (robot.rotation.y * 180 / Math.PI).toFixed(2) + '°',
                 z: (robot.rotation.z * 180 / Math.PI).toFixed(2) + '°'
@@ -466,7 +661,83 @@ window.OptiBot3D = {
         }
     },
     
-    // Método de prueba para encontrar el frente
+    // Métodos de debugging para ajustar cámara
+    setCameraPosition: (x, y, z) => {
+        if (camera) {
+            if (x !== undefined) camera.position.x = x;
+            if (y !== undefined) camera.position.y = y;
+            if (z !== undefined) camera.position.z = z;
+            console.log('Nueva posición de cámara:', camera.position);
+        }
+    },
+    
+    setCameraLookAt: (x, y, z) => {
+        if (camera) {
+            camera.lookAt(x, y, z);
+            console.log('Cámara mirando a:', x, y, z);
+        }
+    },
+    
+    // Métodos de debugging adicionales
+    debugRotation: () => {
+        if (robot && robotState.loaded) {
+            console.log('=== DEBUG ROTACIÓN ===');
+            console.log('Mouse Position:', { x: mouseX.toFixed(3), y: mouseY.toFixed(3) });
+            console.log('Target Rotation:', { 
+                x: (targetRotationX * 180 / Math.PI).toFixed(2) + '°', 
+                y: (targetRotationY * 180 / Math.PI).toFixed(2) + '°' 
+            });
+            console.log('Current Rotation:', { 
+                x: (currentRotationX * 180 / Math.PI).toFixed(2) + '°', 
+                y: (currentRotationY * 180 / Math.PI).toFixed(2) + '°' 
+            });
+            console.log('Robot Rotation:', { 
+                x: (robot.rotation.x * 180 / Math.PI).toFixed(2) + '°', 
+                y: (robot.rotation.y * 180 / Math.PI).toFixed(2) + '°' 
+            });
+            console.log('Inversión de ejes:', {
+                X: window._invertX ? 'Invertido' : 'Normal',
+                Y: window._invertY ? 'Invertido' : 'Normal (corregido)'
+            });
+            console.log('===================');
+        }
+    },
+    
+    // Invertir ejes individualmente para pruebas
+    invertAxisX: () => {
+        window._invertX = !window._invertX;
+        console.log('❌ Eje X (horizontal) invertido:', window._invertX ? 'Sí' : 'No');
+        console.log('ℹ️ Ahora el robot mirará en dirección opuesta horizontalmente');
+    },
+    
+    invertAxisY: () => {
+        window._invertY = !window._invertY;
+        console.log('↕️ Eje Y (vertical) invertido:', window._invertY ? 'Sí' : 'No');
+        console.log('ℹ️ Estado actual:', window._invertY ? 'Sin corrección (problema original)' : 'Con corrección (normal)');
+    },
+    
+    // Obtener info del seguimiento
+    getFollowInfo: () => {
+        return {
+            mouseX: mouseX.toFixed(3),
+            mouseY: mouseY.toFixed(3),
+            targetRotationX: (targetRotationX * 180 / Math.PI).toFixed(2) + '°',
+            targetRotationY: (targetRotationY * 180 / Math.PI).toFixed(2) + '°',
+            currentRotationX: (currentRotationX * 180 / Math.PI).toFixed(2) + '°',
+            currentRotationY: (currentRotationY * 180 / Math.PI).toFixed(2) + '°',
+            speed: window.rotationSpeed,
+            maxRotationY: (window.maxRotationY * 180 / Math.PI).toFixed(0) + '°',
+            maxRotationX: (window.maxRotationX * 180 / Math.PI).toFixed(0) + '°',
+            isFollowing: robotState.isFollowing
+        };
+    },
+    
+    // Ajustar sensibilidad vertical
+    setVerticalScale: (scale) => {
+        window._verticalScale = Math.max(0.1, Math.min(2.0, scale));
+        console.log('Escala vertical ajustada a:', window._verticalScale);
+    },
+    
     testRotations: () => {
         if (robot && robotState.loaded) {
             console.log('🔄 Probando rotaciones...');
@@ -475,17 +746,28 @@ window.OptiBot3D = {
             
             const interval = setInterval(() => {
                 robot.rotation.y = rotations[rotationIndex];
+                robotState.baseRotation.y = robot.rotation.y;
                 console.log(`Rotación Y = ${(rotations[rotationIndex] * 180 / Math.PI).toFixed(0)}°`);
                 rotationIndex++;
                 
                 if (rotationIndex >= rotations.length) {
                     clearInterval(interval);
-                    console.log('✅ Prueba completada. Usa setRotation(0, [ángulo], 0) con el ángulo correcto');
+                    console.log('✅ Prueba completada');
+                    window.OptiBot3D.resetView();
                 }
             }, 2000);
         }
     }
 };
+
+// Hacer disponibles globalmente para debugging
+window.scene = scene;
+window.camera = camera;
+window.renderer = renderer;
+window.robot = robot;
+window.rotationSpeed = rotationSpeed;
+window.maxRotationY = maxRotationY;
+window.maxRotationX = maxRotationX;
 
 // Iniciar cuando el DOM esté listo
 if (document.readyState === 'loading') {
@@ -497,3 +779,10 @@ if (document.readyState === 'loading') {
 // Debug info
 console.log('📁 Robot Realistic JS cargado');
 console.log('📍 Ruta del modelo:', config.modelPath);
+console.log('📷 Posición inicial de cámara:', config.cameraPosition);
+console.log('👁️ Punto de mira: x:0, y:0.6, z:0');
+console.log('🎯 Seguimiento del cursor: ACTIVADO');
+console.log('⚡ Velocidad de seguimiento:', window.rotationSpeed);
+console.log('📐 Límites de rotación: ±30° horizontal, ±15° vertical');
+console.log('🔄 Corrección de eje Y aplicada (el robot ahora mira correctamente)');
+console.log('🚀 Velocidad aumentada para respuesta más rápida');
