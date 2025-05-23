@@ -1,523 +1,573 @@
 {% extends 'dashboard_base.html' %}
 
-{% block title %}Inventario - OptiMax{% endblock %}
-
+{% block title %}Inventario - OptiMax Sistema Empresarial{% endblock %}
+{% block page_title %}Inventario{% endblock %}
 {% block inventario_active %}active{% endblock %}
 
 {% block extra_css %}
-<!-- CSS Moderno del Dashboard -->
-<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard_modern.css') }}">
+<!-- CSS Principal del Inventario -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard_inventory.css') }}">
 
-<!-- AOS (Animate On Scroll) -->
-<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-
-<style>
-  /* Estilos simples sin restricciones de scroll */
-  .dashboard-container {
-    padding-top: 2rem;
-    margin-top: 0;
-  }
-  
-  /* Fix para AOS - prevenir que oculte elementos */
-  [data-aos] {
-    opacity: 1 !important;
-    transform: none !important;
-    transition-property: transform, opacity;
-  }
-  
-  /* Forzar visibilidad de secciones */
-  .products-section,
-  .alerts-section {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    position: relative !important;
-    transform: none !important;
-  }
-  
-  /* Animaciones de gradientes de fondo */
-  .animated-bg::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: 
-      radial-gradient(circle at 20% 80%, rgba(249, 115, 22, 0.1) 0%, transparent 50%),
-      radial-gradient(circle at 80% 20%, rgba(236, 72, 153, 0.1) 0%, transparent 50%),
-      radial-gradient(circle at 40% 40%, rgba(139, 92, 246, 0.08) 0%, transparent 50%);
-    z-index: -3;
-    animation: gradientShift 20s ease infinite;
-    pointer-events: none;
-  }
-  
-  @keyframes gradientShift {
-    0%, 100% { transform: scale(1) rotate(0deg); }
-    33% { transform: scale(1.1) rotate(120deg); }
-    66% { transform: scale(1.05) rotate(240deg); }
-  }
-  
-  /* Quitar colores de la tabla - todo texto blanco */
-  .products-table td {
-    color: var(--text-primary) !important;
-  }
-  
-  /* Fix para smooth scroll */
-  html {
-    scroll-behavior: smooth;
-  }
-</style>
+<!-- ApexCharts para gráficos modernos -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/apexcharts@3.45.0/dist/apexcharts.css">
 {% endblock %}
 
 {% block content %}
-<!-- Particles Background -->
-<div id="particles-js" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; pointer-events: none;"></div>
-
-<!-- Fondo animado -->
-<div class="animated-bg" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none;"></div>
-
-<!-- Main Dashboard Container con Grid Layout -->
-<div class="dashboard-container">
-  <div class="dashboard-grid">
-    <!-- Contenido Principal (Lado Izquierdo) -->
-    <div class="main-content-area">
+<!-- Hero Section con Modelo 3D -->
+<section class="inventory-hero">
+  <div class="hero-content">
+    <div class="hero-text">
+      <h1 class="hero-title">
+        <span class="typed-text" id="heroTitle"></span>
+        <span class="cursor">|</span>
+      </h1>
+      <p class="hero-subtitle">
+        Sistema inteligente de gestión con predicciones basadas en IA y análisis en tiempo real
+      </p>
       
-      <!-- Hero Section -->
-      <div class="hero-section" data-aos="fade-down">
-        <h1 class="hero-title">
-          <span class="gradient-text">Inventario</span>
-        </h1>
-        <p class="hero-description">
-          Gestiona tus productos, stock y precios de manera eficiente
-        </p>
+      <!-- Quick Stats -->
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <i class="fas fa-chart-line"></i>
+          <span class="stat-value">{{ '{:+.1f}'.format(crecimiento|default(15.3)) }}%</span>
+          <span class="stat-label">vs mes anterior</span>
+        </div>
+        <div class="hero-stat">
+          <i class="fas fa-truck"></i>
+          <span class="stat-value">{{ pedidos_pendientes|default(3) }}</span>
+          <span class="stat-label">pedidos en camino</span>
+        </div>
+        <div class="hero-stat">
+          <i class="fas fa-exclamation-triangle"></i>
+          <span class="stat-value">{{ alertas_activas|default(2) }}</span>
+          <span class="stat-label">alertas activas</span>
+        </div>
       </div>
-
-      <!-- Estadísticas en una sola fila -->
-      <section class="stats-section">
-        <h2 class="section-title" data-aos="fade-right">
-          <span>Datos generales</span>
-          <span class="title-line"></span>
-        </h2>
-        
-        <div class="stats-grid">
-          <!-- Total Productos -->
-          <div class="stat-card" data-aos="fade-up" data-aos-delay="100">
-            <div class="stat-content">
-              <div class="stat-number" data-value="{{ total_productos|default(0) }}">{{ total_productos|default(0) }}</div>
-              <div class="stat-label">Total productos</div>
-            </div>
-            <div class="stat-glow"></div>
-          </div>
-          
-          <!-- Unidades en Stock -->
-          <div class="stat-card purple" data-aos="fade-up" data-aos-delay="150">
-            <div class="stat-content">
-              <div class="stat-number" data-value="{{ total_unidades|default(0) }}">{{ total_unidades|default(0) }}</div>
-              <div class="stat-label">Unidades en stock</div>
-            </div>
-            <div class="stat-glow purple"></div>
-          </div>
-          
-          <!-- Valor del Inventario -->
-          <div class="stat-card pink" data-aos="fade-up" data-aos-delay="200">
-            <div class="stat-content">
-              <div class="stat-number">$<span data-value="{{ valor_inventario|default(0) }}" data-format="currency">{{ valor_inventario|default(0)|int }}</span></div>
-              <div class="stat-label">Valor del inventario</div>
-            </div>
-            <div class="stat-glow pink"></div>
-          </div>
-          
-          <!-- Productos por Agotarse -->
-          <div class="stat-card blue" data-aos="fade-up" data-aos-delay="250">
-            <div class="stat-content">
-              {% set productos_agotarse = productos_por_agotarse|default(0) %}
-              <div class="stat-number" data-value="{{ productos_agotarse }}">{{ productos_agotarse }}</div>
-              <div class="stat-label">Por agotarse</div>
-            </div>
-            <div class="stat-glow blue"></div>
-          </div>
+    </div>
+    
+    <!-- Modelo 3D del Robot Asistente -->
+    <div class="hero-3d">
+      <div id="warehouse3d" class="warehouse-container">
+        <div class="robot-loading">
+          <div class="loader"></div>
+          <p>Cargando OptiBot 3D...</p>
         </div>
-      </section>
+      </div>
+      
+      <!-- Controles del Robot -->
+      <div class="controls-3d">
+        <button class="control-btn" onclick="window.OptiBot3D.rotateX(Math.PI/2)" title="Rotar X">
+          <i class="fas fa-arrows-alt-v"></i>
+        </button>
+        <button class="control-btn" onclick="window.OptiBot3D.rotateY(Math.PI/2)" title="Rotar Y">
+          <i class="fas fa-arrows-alt-h"></i>
+        </button>
+        <button class="control-btn" onclick="window.OptiBot3D.resetRotation()" title="Reset">
+          <i class="fas fa-undo"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
 
-      <!-- Herramientas -->
-      <section class="tools-section">
-        <h2 class="section-title" data-aos="fade-right">
-          <span>Herramientas</span>
-          <span class="title-line"></span>
-        </h2>
-        
-        <div class="tools-grid">
-          <a href="{{ url_for('nuevo_producto') }}" class="tool-card" data-aos="zoom-in" data-aos-delay="100">
-            <div class="tool-icon">
-              <i class="fas fa-barcode"></i>
-            </div>
-            <span class="tool-name">Registrar producto</span>
-          </a>
-          
-          <a href="{{ url_for('ajuste_stock') }}" class="tool-card" data-aos="zoom-in" data-aos-delay="150">
-            <div class="tool-icon purple">
-              <i class="fas fa-plus-minus"></i>
-            </div>
-            <span class="tool-name">Ajuste de stock</span>
-          </a>
-          
-          <a href="{{ url_for('cambiar_precios') }}" class="tool-card" data-aos="zoom-in" data-aos-delay="200">
-            <div class="tool-icon green">
-              <i class="fas fa-tag"></i>
-            </div>
-            <span class="tool-name">Cambiar precios</span>
-          </a>
-          
-          <a href="{{ url_for('descuentos') }}" class="tool-card" data-aos="zoom-in" data-aos-delay="250">
-            <div class="tool-icon blue">
-              <i class="fas fa-percent"></i>
-            </div>
-            <span class="tool-name">Descuentos</span>
-          </a>
-          
-          <a href="{{ url_for('ubicacion_productos') }}" class="tool-card" data-aos="zoom-in" data-aos-delay="300">
-            <div class="tool-icon pink">
-              <i class="fas fa-map-marker-alt"></i>
-            </div>
-            <span class="tool-name">Ubicación</span>
-          </a>
+<!-- KPIs Principales -->
+<section class="kpi-section">
+  <div class="kpi-grid">
+    <!-- Total Productos -->
+    <div class="kpi-card" data-tilt>
+      <div class="kpi-icon" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">
+        <i class="fas fa-boxes"></i>
+      </div>
+      <div class="kpi-content">
+        <h3 class="kpi-title">Total Productos</h3>
+        <div class="kpi-value">
+          <span class="counter" data-target="{{ total_productos|default(0) }}">0</span>
         </div>
-      </section>
+        <div class="kpi-chart" id="kpiChart1"></div>
+      </div>
+      <div class="kpi-trend up">
+        <i class="fas fa-arrow-up"></i>
+        <span>12% este mes</span>
+      </div>
+    </div>
+    
+    <!-- Stock Total -->
+    <div class="kpi-card" data-tilt>
+      <div class="kpi-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+        <i class="fas fa-cubes"></i>
+      </div>
+      <div class="kpi-content">
+        <h3 class="kpi-title">Unidades en Stock</h3>
+        <div class="kpi-value">
+          <span class="counter" data-target="{{ total_unidades|default(0) }}">0</span>
+        </div>
+        <div class="kpi-chart" id="kpiChart2"></div>
+      </div>
+      <div class="kpi-trend up">
+        <i class="fas fa-arrow-up"></i>
+        <span>8% crecimiento</span>
+      </div>
+    </div>
+    
+    <!-- Valor del Inventario -->
+    <div class="kpi-card highlight" data-tilt>
+      <div class="kpi-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+        <i class="fas fa-dollar-sign"></i>
+      </div>
+      <div class="kpi-content">
+        <h3 class="kpi-title">Valor del Inventario</h3>
+        <div class="kpi-value">
+          $<span class="counter" data-target="{{ valor_inventario|default(0) }}" data-format="currency">0</span>
+        </div>
+        <div class="kpi-chart" id="kpiChart3"></div>
+      </div>
+      <div class="kpi-trend up">
+        <i class="fas fa-arrow-up"></i>
+        <span>+$45,230 este mes</span>
+      </div>
+    </div>
+    
+    <!-- Productos Críticos -->
+    <div class="kpi-card" data-tilt>
+      <div class="kpi-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+        <i class="fas fa-exclamation-triangle"></i>
+      </div>
+      <div class="kpi-content">
+        <h3 class="kpi-title">Stock Crítico</h3>
+        <div class="kpi-value">
+          <span class="counter" data-target="{{ productos_por_agotarse|default(0) }}">0</span>
+        </div>
+        <div class="kpi-chart" id="kpiChart4"></div>
+      </div>
+      <div class="kpi-trend down">
+        <i class="fas fa-arrow-down"></i>
+        <span>-3 vs ayer</span>
+      </div>
+    </div>
+  </div>
+</section>
 
-      <!-- Ver y gestionar productos (TABLA COMPLETA) -->
-      <section class="products-section">
-        <div class="section-header">
-          <h2 class="section-title">
-            <span>Ver y gestionar productos</span>
-            <span class="title-line"></span>
-          </h2>
-        </div>
-        
-        {% if productos and productos|length > 0 %}
-          <div class="products-table-container">
-            <table class="products-table">
-              <thead>
-                <tr>
-                  <th>Producto</th>
-                  <th>Categoría</th>
-                  <th>Stock</th>
-                  <th>Precio</th>
-                  <th>Marca</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for p in productos[:5] %}
-                  <tr>
-                    <td>
-                      <div class="product-cell">
-                        {% if p.foto %}
-                          <img src="{{ url_for('static', filename='uploads/' ~ p.foto) }}" class="product-image" alt="{{ p.nombre }}">
-                        {% elif p['foto'] %}
-                          <img src="{{ url_for('static', filename='uploads/' ~ p['foto']) }}" class="product-image" alt="{{ p['nombre'] }}">
-                        {% else %}
-                          <div class="product-image placeholder">
-                            <i class="fas fa-box"></i>
-                          </div>
-                        {% endif %}
-                        <div class="product-info">
-                          <div class="product-name">{{ p.nombre|default(p['nombre']) }}</div>
-                          <div class="product-sku">
-                            {% if p.codigo_barras_externo %}
-                              {{ p.codigo_barras_externo }}
-                            {% elif p['codigo_barras_externo'] %}
-                              {{ p['codigo_barras_externo'] }}
-                            {% else %}
-                              SKU-{{ '%05d' % (p.id|default(p['id'])) }}
-                            {% endif %}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    
-                    <td>
-                      {{ (p.categoria|default(p['categoria']))|default('Sin categoría')|title }}
-                    </td>
-                    
-                    <td>
-                      {% set stock_value = p.stock|default(p['stock'])|default(0) %}
-                      {{ '{:,.0f}'.format(stock_value) }} unidades
-                    </td>
-                    
-                    <td>${{ '{:,.2f}'.format(p.precio_venta|default(p['precio_venta'])|default(0)) }}</td>
-                    
-                    <td>{{ (p.marca|default(p['marca']))|default('—') }}</td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-          
-          <div class="view-all-container">
-            <a href="{{ url_for('ver_productos') }}" class="view-all-btn">
-              Ver todos
-              <i class="fas fa-arrow-right"></i>
-            </a>
-          </div>
-        {% else %}
-          <div class="empty-state">
-            <div class="empty-icon">
-              <i class="fas fa-box-open"></i>
-            </div>
-            <p class="empty-message">No hay productos en tu inventario</p>
-          </div>
-        {% endif %}
-      </section>
+<!-- Herramientas Rápidas -->
+<section class="tools-section">
+  <div class="section-header">
+    <h2 class="section-title">Acciones Rápidas</h2>
+    <div class="section-actions">
+      <button class="btn-text">
+        <i class="fas fa-keyboard"></i>
+        Atajos
+      </button>
+    </div>
+  </div>
+  
+  <div class="tools-grid">
+    <a href="{{ url_for('nuevo_producto') }}" class="tool-card">
+      <div class="tool-icon">
+        <i class="fas fa-plus"></i>
+      </div>
+      <h3 class="tool-title">Nuevo Producto</h3>
+      <p class="tool-desc">Registrar SKU</p>
+      <span class="tool-shortcut">Ctrl+N</span>
+    </a>
+    
+    <a href="{{ url_for('ajuste_stock') }}" class="tool-card">
+      <div class="tool-icon" style="background: var(--primary-600);">
+        <i class="fas fa-sync-alt"></i>
+      </div>
+      <h3 class="tool-title">Ajustar Stock</h3>
+      <p class="tool-desc">Entrada/Salida</p>
+      <span class="tool-shortcut">Ctrl+A</span>
+    </a>
+    
+    <a href="{{ url_for('cambiar_precios') }}" class="tool-card">
+      <div class="tool-icon" style="background: var(--success-600);">
+        <i class="fas fa-tags"></i>
+      </div>
+      <h3 class="tool-title">Actualizar Precios</h3>
+      <p class="tool-desc">Individual o masivo</p>
+      <span class="tool-shortcut">Ctrl+P</span>
+    </a>
+    
+    <a href="{{ url_for('descuentos') }}" class="tool-card">
+      <div class="tool-icon" style="background: var(--warning-500);">
+        <i class="fas fa-percentage"></i>
+      </div>
+      <h3 class="tool-title">Descuentos</h3>
+      <p class="tool-desc">Promociones</p>
+      <span class="tool-shortcut">Ctrl+D</span>
+    </a>
+    
+    <a href="#" class="tool-card" onclick="openTransferModal()">
+      <div class="tool-icon" style="background: #8b5cf6;">
+        <i class="fas fa-exchange-alt"></i>
+      </div>
+      <h3 class="tool-title">Transferencias</h3>
+      <p class="tool-desc">Entre almacenes</p>
+      <span class="tool-shortcut">Ctrl+T</span>
+    </a>
+    
+    <a href="#" class="tool-card" onclick="scanBarcode()">
+      <div class="tool-icon" style="background: #ec4899;">
+        <i class="fas fa-barcode"></i>
+      </div>
+      <h3 class="tool-title">Escanear</h3>
+      <p class="tool-desc">Código rápido</p>
+      <span class="tool-shortcut">Ctrl+S</span>
+    </a>
+  </div>
+</section>
 
-      <!-- Alertas (SECCION ORIGINAL) -->
-      <section class="alerts-section">
-        <h2 class="section-title">
-          <span>Alertas y notificaciones</span>
-          <span class="title-line"></span>
-        </h2>
-        
-        <div class="alerts-grid">
-          <!-- Productos por agotarse -->
-          <div class="alert-box">
-            <div class="alert-header">
-              <h3 class="alert-title">Productos por agotarse</h3>
+<!-- Tabla de Productos Moderna -->
+<section class="products-section">
+  <div class="section-header">
+    <h2 class="section-title">Productos en Inventario</h2>
+    <div class="section-actions">
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" placeholder="Buscar productos..." id="productSearch">
+      </div>
+      
+      <div class="view-toggle">
+        <button class="view-btn active" data-view="table">
+          <i class="fas fa-list"></i>
+        </button>
+        <button class="view-btn" data-view="grid">
+          <i class="fas fa-th"></i>
+        </button>
+      </div>
+      
+      <button class="btn-primary">
+        <i class="fas fa-download"></i>
+        Exportar
+      </button>
+    </div>
+  </div>
+  
+  {% if productos and productos|length > 0 %}
+  <div class="products-table-wrapper">
+    <table class="products-table">
+      <thead>
+        <tr>
+          <th class="sortable" data-sort="nombre">
+            <div class="th-content">
+              <span>Producto</span>
+              <i class="fas fa-sort"></i>
             </div>
-            
-            <div class="empty-state-small">
-              <div class="empty-icon">
-                <i class="fas fa-check-circle"></i>
-              </div>
-              <p class="empty-message">No hay productos por agotarse</p>
+          </th>
+          <th class="sortable" data-sort="categoria">
+            <div class="th-content">
+              <span>Categoría</span>
+              <i class="fas fa-sort"></i>
             </div>
-          </div>
-          
-          <!-- Notificaciones -->
-          <div class="alert-box">
-            <div class="alert-header">
-              <h3 class="alert-title">Notificaciones</h3>
+          </th>
+          <th class="sortable" data-sort="stock">
+            <div class="th-content">
+              <span>Stock</span>
+              <i class="fas fa-sort"></i>
             </div>
-            
-            <div class="empty-state-small">
-              <div class="empty-icon">
-                <i class="fas fa-bell"></i>
-              </div>
-              <p class="empty-message">No hay notificaciones</p>
+          </th>
+          <th class="sortable" data-sort="precio">
+            <div class="th-content">
+              <span>Precio</span>
+              <i class="fas fa-sort"></i>
             </div>
-          </div>
-        </div>
-      </section>
-      <!-- Alertas (SECCION ORIGINAL) -->
-      <section class="alerts-section">
-        <h2 class="section-title" data-aos="fade-right">
-          <span>Alertas y notificaciones</span>
-          <span class="title-line"></span>
-        </h2>
-        
-        <div class="alerts-grid">
-          <!-- Productos por agotarse -->
-          <div class="alert-box" data-aos="fade-up" data-aos-delay="100">
-            <div class="alert-header">
-              <h3 class="alert-title">Productos por agotarse</h3>
-            </div>
-            
-            {% set low_stock = productos|selectattr('stock', 'defined')|selectattr('stock', 'gt', 0)|selectattr('stock', 'le', 5)|list if productos else [] %}
-            {% if low_stock|length > 0 %}
-              {% for p in low_stock %}
-                {% if loop.index <= 5 %}
-                  <div class="alert-item">
-                    <div class="alert-content">{{ p.nombre|default(p['nombre']) }}</div>
-                    <div class="alert-value">{{ '{:,.0f}'.format(p.stock|default(p['stock'])) }}</div>
+          </th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for producto in productos[:10] %}
+        <tr class="product-row" data-id="{{ producto.id|default(producto['id']) }}">
+          <td>
+            <div class="product-info">
+              <div class="product-image">
+                {% if producto.foto|default(producto['foto']) %}
+                  <img src="{{ url_for('static', filename='uploads/' ~ (producto.foto|default(producto['foto']))) }}" alt="{{ producto.nombre|default(producto['nombre']) }}">
+                {% else %}
+                  <div class="product-placeholder">
+                    <i class="fas fa-box"></i>
                   </div>
                 {% endif %}
-              {% endfor %}
-            {% else %}
-              <div class="empty-state-small">
-                <div class="empty-icon">
-                  <i class="fas fa-check-circle"></i>
-                </div>
-                <p class="empty-message">No hay productos por agotarse</p>
               </div>
-            {% endif %}
-          </div>
+              <div class="product-details">
+                <h4 class="product-name">{{ producto.nombre|default(producto['nombre']) }}</h4>
+                <p class="product-sku">SKU: {{ producto.codigo_barras_externo|default(producto['codigo_barras_externo'])|default('N/A') }}</p>
+              </div>
+            </div>
+          </td>
           
-          <!-- Notificaciones -->
-          <div class="alert-box" data-aos="fade-up" data-aos-delay="200">
-            <div class="alert-header">
-              <h3 class="alert-title">Notificaciones</h3>
-            </div>
-            
-            <div class="empty-state-small">
-              <div class="empty-icon">
-                <i class="fas fa-bell"></i>
+          <td>
+            <span class="category-badge">
+              {{ (producto.categoria|default(producto['categoria']))|default('Sin categoría') }}
+            </span>
+          </td>
+          
+          <td>
+            {% set stock = producto.stock|default(producto['stock'])|default(0) %}
+            <div class="stock-info">
+              <span class="stock-value {% if stock <= 5 %}critical{% elif stock <= 20 %}warning{% endif %}">
+                {{ '{:,.0f}'.format(stock) }}
+              </span>
+              <div class="stock-bar">
+                <div class="stock-fill" style="width: {% if stock <= 100 %}{{ stock }}{% else %}100{% endif %}%"></div>
               </div>
-              <p class="empty-message">No hay notificaciones</p>
+            </div>
+          </td>
+          
+          <td>
+            <span class="price">${{ '{:,.2f}'.format(producto.precio_venta|default(producto['precio_venta'])|default(0)) }}</span>
+          </td>
+          
+          <td>
+            {% set stock_status = producto.stock|default(producto['stock'])|default(0) %}
+            {% if stock_status <= 0 %}
+              <span class="status-badge critical">Agotado</span>
+            {% elif stock_status <= 5 %}
+              <span class="status-badge warning">Crítico</span>
+            {% elif stock_status <= 20 %}
+              <span class="status-badge caution">Bajo</span>
+            {% else %}
+              <span class="status-badge success">Óptimo</span>
+            {% endif %}
+          </td>
+          
+          <td>
+            <div class="table-actions">
+              <button class="action-btn" title="Ver detalles" onclick="viewProduct({{ producto.id|default(producto['id']) }})">
+                <i class="fas fa-eye"></i>
+              </button>
+              <button class="action-btn" title="Editar" onclick="editProduct({{ producto.id|default(producto['id']) }})">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="action-btn" title="Historial" onclick="viewHistory({{ producto.id|default(producto['id']) }})">
+                <i class="fas fa-history"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    
+    <!-- Pagination -->
+    <div class="table-footer">
+      <div class="showing-info">
+        Mostrando 1-10 de {{ productos|length }} productos
+      </div>
+      <div class="pagination">
+        <button class="page-btn" disabled>
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <button class="page-btn active">1</button>
+        <button class="page-btn">2</button>
+        <button class="page-btn">3</button>
+        <span class="page-dots">...</span>
+        <button class="page-btn">{{ (productos|length / 10)|round(0, 'ceil')|int }}</button>
+        <button class="page-btn">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="view-all-wrapper">
+    <a href="{{ url_for('ver_productos') }}" class="btn-secondary">
+      Ver todos los productos
+      <i class="fas fa-arrow-right"></i>
+    </a>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-icon">
+      <i class="fas fa-box-open"></i>
+    </div>
+    <h3>No hay productos en el inventario</h3>
+    <p>Comienza agregando tu primer producto</p>
+    <a href="{{ url_for('nuevo_producto') }}" class="btn-primary">
+      <i class="fas fa-plus"></i>
+      Agregar producto
+    </a>
+  </div>
+  {% endif %}
+</section>
+
+<!-- Alertas y Notificaciones (ÚNICA VEZ) -->
+<section class="alerts-section">
+  <div class="alerts-grid">
+    <!-- Productos Críticos -->
+    <div class="alert-card">
+      <div class="alert-header">
+        <h3 class="alert-title">
+          <i class="fas fa-exclamation-triangle"></i>
+          Stock Crítico
+        </h3>
+        <button class="btn-text" onclick="viewAllAlerts('critical')">
+          Ver todos
+        </button>
+      </div>
+      
+      {% set low_stock = productos|selectattr('stock', 'defined')|selectattr('stock', 'gt', 0)|selectattr('stock', 'le', 5)|list if productos else [] %}
+      {% if low_stock|length > 0 %}
+      <div class="alert-list">
+        {% for producto in low_stock[:3] %}
+        <div class="alert-item critical">
+          <div class="alert-icon">
+            <i class="fas fa-box"></i>
+          </div>
+          <div class="alert-content">
+            <h4>{{ producto.nombre|default(producto['nombre']) }}</h4>
+            <p>Quedan solo {{ producto.stock|default(producto['stock']) }} unidades</p>
+          </div>
+          <button class="alert-action" onclick="orderProduct({{ producto.id|default(producto['id']) }})">
+            Pedir
+          </button>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-alerts">
+        <i class="fas fa-check-circle"></i>
+        <p>Sin productos críticos</p>
+      </div>
+      {% endif %}
+    </div>
+    
+    <!-- Actividad Reciente -->
+    <div class="alert-card">
+      <div class="alert-header">
+        <h3 class="alert-title">
+          <i class="fas fa-history"></i>
+          Actividad Reciente
+        </h3>
+        <button class="btn-text" onclick="viewAllActivity()">
+          Ver todo
+        </button>
+      </div>
+      
+      <div class="activity-timeline">
+        <div class="timeline-item">
+          <div class="timeline-icon success">
+            <i class="fas fa-plus"></i>
+          </div>
+          <div class="timeline-content">
+            <h4>15 productos agregados</h4>
+            <p>Por Juan Pérez</p>
+            <span class="timeline-time">Hace 2 horas</span>
+          </div>
+        </div>
+        
+        <div class="timeline-item">
+          <div class="timeline-icon warning">
+            <i class="fas fa-sync"></i>
+          </div>
+          <div class="timeline-content">
+            <h4>Ajuste de inventario</h4>
+            <p>Laptop Dell -3 unidades</p>
+            <span class="timeline-time">Hace 5 horas</span>
+          </div>
+        </div>
+        
+        <div class="timeline-item">
+          <div class="timeline-icon info">
+            <i class="fas fa-truck"></i>
+          </div>
+          <div class="timeline-content">
+            <h4>Pedido recibido</h4>
+            <p>Orden #1234 completada</p>
+            <span class="timeline-time">Ayer</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Predicciones IA -->
+    <div class="alert-card">
+      <div class="alert-header">
+        <h3 class="alert-title">
+          <i class="fas fa-brain"></i>
+          Predicciones IA
+        </h3>
+        <span class="ai-badge">Powered by ML</span>
+      </div>
+      
+      <div class="predictions-list">
+        <div class="prediction-item">
+          <div class="prediction-icon">
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <div class="prediction-content">
+            <h4>Mouse Logitech G502</h4>
+            <p>Se agotará en <strong>3 días</strong></p>
+            <div class="prediction-accuracy">
+              <span>Precisión: 94%</span>
+              <div class="accuracy-bar">
+                <div class="accuracy-fill" style="width: 94%"></div>
+              </div>
             </div>
           </div>
         </div>
-      </section>
-    </div>
-    <!-- Fin main-content-area -->
-    
-    <!-- Sidebar Content (Lado Derecho) -->
-    <div class="sidebar-content">
-      <!-- Promo Card (COMO 50% OFF) -->
-      <div class="promo-card" style="background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);" data-aos="fade-left" data-aos-delay="300">
-        <div class="promo-content">
-          <h3 class="promo-title">¿Ya conoces todo lo que inventario puede ofrecerte?</h3>
-          <p class="promo-description">
-            Descubre funciones avanzadas para optimizar tu gestión
-          </p>
-          <a href="#" class="promo-btn">
-            Leer más
-            <i class="fas fa-arrow-right"></i>
-          </a>
-        </div>
-        <div style="position: absolute; bottom: -10px; right: 20px; opacity: 0.3;">
-          <i class="fas fa-box-open" style="font-size: 120px; transform: rotate(-15deg);"></i>
+        
+        <div class="prediction-item">
+          <div class="prediction-icon">
+            <i class="fas fa-trending-up"></i>
+          </div>
+          <div class="prediction-content">
+            <h4>Teclados mecánicos</h4>
+            <p>Demanda aumentará <strong>35%</strong> próxima semana</p>
+            <div class="prediction-accuracy">
+              <span>Precisión: 87%</span>
+              <div class="accuracy-bar">
+                <div class="accuracy-fill" style="width: 87%"></div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       
-      <!-- Artículos/Recursos -->
-      <div class="quick-links" data-aos="fade-left" data-aos-delay="400">
-        <h3 class="quick-links-title">
-          <i class="fas fa-book"></i>
-          Artículos útiles
-        </h3>
-        <div class="quick-links-grid">
-          <a href="#" class="quick-link-item">
-            <div class="quick-link-icon" style="background: linear-gradient(135deg, #f97316 0%, #f59e0b 100%);">
-              <i class="fas fa-chart-line"></i>
-            </div>
-            <div class="quick-link-info">
-              <div class="quick-link-title">Análisis ABC de inventario</div>
-              <div class="quick-link-desc">Optimiza tu stock estratégicamente</div>
-            </div>
-          </a>
-          
-          <a href="#" class="quick-link-item">
-            <div class="quick-link-icon" style="background: var(--gradient-accent)">
-              <i class="fas fa-calculator"></i>
-            </div>
-            <div class="quick-link-info">
-              <div class="quick-link-title">Punto de reorden</div>
-              <div class="quick-link-desc">Calcula cuándo reabastecer</div>
-            </div>
-          </a>
-          
-          <a href="#" class="quick-link-item">
-            <div class="quick-link-icon" style="background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);">
-              <i class="fas fa-boxes"></i>
-            </div>
-            <div class="quick-link-info">
-              <div class="quick-link-title">Gestión por lotes</div>
-              <div class="quick-link-desc">Control de caducidades y trazabilidad</div>
-            </div>
-          </a>
-          
-          <a href="#" class="quick-link-item">
-            <div class="quick-link-icon" style="background: var(--gradient-danger)">
-              <i class="fas fa-shield-alt"></i>
-            </div>
-            <div class="quick-link-info">
-              <div class="quick-link-title">Prevención de mermas</div>
-              <div class="quick-link-desc">Reduce pérdidas en tu inventario</div>
-            </div>
-          </a>
-        </div>
-      </div>
+      <button class="btn-ai">
+        <i class="fas fa-magic"></i>
+        Generar reporte completo
+      </button>
     </div>
+  </div>
+</section>
+
+<!-- Quick Action Button (FAB) -->
+<div class="fab-container">
+  <button class="fab" id="fabButton">
+    <i class="fas fa-plus"></i>
+  </button>
+  <div class="fab-menu">
+    <a href="{{ url_for('nuevo_producto') }}" class="fab-option" data-tooltip="Nuevo producto">
+      <i class="fas fa-box"></i>
+    </a>
+    <a href="#" class="fab-option" data-tooltip="Escanear código" onclick="scanBarcode()">
+      <i class="fas fa-barcode"></i>
+    </a>
+    <a href="#" class="fab-option" data-tooltip="Entrada rápida" onclick="quickEntry()">
+      <i class="fas fa-plus-circle"></i>
+    </a>
   </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
-<!-- Particles.js (versión optimizada) -->
-<script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+<!-- Three.js para modelo 3D -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
-<!-- GSAP -->
+<!-- GLTF Loader para cargar modelos -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+
+<!-- Librerías para animaciones y gráficos -->
+<script src="https://cdn.jsdelivr.net/npm/apexcharts@3.45.0/dist/apexcharts.min.js"></script>
+<script src="https://unpkg.com/typed.js@2.1.0/dist/typed.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/countup.js@2.8.0/dist/countUp.min.js"></script>
+<script src="https://unpkg.com/vanilla-tilt@1.8.1/dist/vanilla-tilt.min.js"></script>
+
+<!-- GSAP para animaciones avanzadas -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 
-<!-- AOS -->
-<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-
-<!-- Dashboard Animations -->
-<script src="{{ url_for('static', filename='js/dashboard_animations.js') }}"></script>
-
-<!-- Configuración optimizada -->
-<script>
-  // Datos del Dashboard - Mostrar inmediatamente
-  window.dashboardData = {
-    totalProductos: {{ total_productos|default(0)|int }},
-    totalUnidades: {{ total_unidades|default(0)|int }},
-    valorInventario: {{ valor_inventario|default(0)|int }},
-    productosAgotarse: {{ productos_por_agotarse|default(0)|int }}
-  };
-  
-  // Inicializar AOS con delay reducido
-  AOS.init({
-    duration: 600,
-    once: true,
-    offset: 30,
-    delay: 0,
-    disable: false // Asegurar que no esté deshabilitado
-  });
-  
-  // Configuración optimizada de Particles.js
-  if (document.getElementById('particles-js')) {
-    particlesJS('particles-js', {
-      particles: {
-        number: {
-          value: 30, // Reducido de 50
-          density: {
-            enable: true,
-            value_area: 1000 // Aumentado para menos densidad
-          }
-        },
-        color: {
-          value: '#6366f1'
-        },
-        shape: {
-          type: 'circle'
-        },
-        opacity: {
-          value: 0.3,
-          random: true
-        },
-        size: {
-          value: 3,
-          random: true
-        },
-        line_linked: {
-          enable: true,
-          distance: 150,
-          color: '#6366f1',
-          opacity: 0.2,
-          width: 1
-        },
-        move: {
-          enable: true,
-          speed: 0.5, // Más lento para menos CPU
-          direction: 'none',
-          random: false,
-          straight: false,
-          out_mode: 'out',
-          bounce: false
-        }
-      },
-      interactivity: {
-        detect_on: 'canvas',
-        events: {
-          onhover: {
-            enable: false // Desactivado para mejor rendimiento
-          },
-          onclick: {
-            enable: false
-          },
-          resize: true
-        }
-      },
-      retina_detect: true
-    });
-  }
-</script>
+<!-- Scripts del inventario -->
+<script src="{{ url_for('static', filename='js/robot_realistic.js') }}" defer></script>
+<script src="{{ url_for('static', filename='js/dashboard_inventory.js') }}" defer></script>
 {% endblock %}

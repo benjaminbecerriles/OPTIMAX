@@ -3,46 +3,58 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}OptiMax Dashboard{% endblock %}</title>
+  <title>{% block title %}OptiMax - Sistema de Inventario Empresarial{% endblock %}</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
+  
+  <!-- Tipografía Profesional -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  
+  <!-- CSS Crítico (inline para velocidad) -->
   <style>
     :root {
-      /* Colores principales - Estilo moderno con gradientes vibrantes */
-      --bg-primary: #0f0f1e;
-      --bg-secondary: #1a1a2e;
-      --sidebar-bg: #16161f;
-      --sidebar-hover: rgba(255, 255, 255, 0.05);
-      --sidebar-active: rgba(255, 255, 255, 0.1);
+      /* Paleta Profesional de Inventario */
+      --primary-900: #0f172a;    /* Azul muy oscuro */
+      --primary-800: #1e293b;    /* Azul oscuro */
+      --primary-700: #334155;    /* Azul grisáceo */
+      --primary-600: #475569;
+      --primary-500: #64748b;
+      --primary-400: #94a3b8;
+      --primary-300: #cbd5e1;
+      --primary-200: #e2e8f0;
+      --primary-100: #f1f5f9;
+      --primary-50: #f8fafc;
       
-      /* Gradientes vibrantes */
-      --gradient-primary: linear-gradient(135deg, #f97316 0%, #ec4899 100%);
-      --gradient-secondary: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
-      --gradient-accent: linear-gradient(135deg, #10b981 0%, #14b8a6 100%);
-      --gradient-danger: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
+      /* Verde Inventario (principal) */
+      --success-600: #059669;
+      --success-500: #10b981;
+      --success-400: #34d399;
+      --success-100: #d1fae5;
       
-      /* Fondos con gradientes */
-      --bg-gradient-1: radial-gradient(circle at 20% 50%, rgba(249, 115, 22, 0.15) 0%, transparent 50%);
-      --bg-gradient-2: radial-gradient(circle at 80% 80%, rgba(236, 72, 153, 0.15) 0%, transparent 50%);
-      --bg-gradient-3: radial-gradient(circle at 50% 0%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
-      
-      /* Texto */
-      --text-primary: #ffffff;
-      --text-secondary: #a1a1aa;
-      --text-muted: #71717a;
+      /* Alertas */
+      --warning-500: #f59e0b;
+      --warning-100: #fef3c7;
+      --danger-500: #ef4444;
+      --danger-100: #fee2e2;
       
       /* Layout */
-      --sidebar-width: 80px;
-      --header-height: 0;
+      --sidebar-width: 260px;
+      --sidebar-collapsed: 80px;
+      --header-height: 72px;
       
-      /* Otros */
-      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      --border-radius: 12px;
+      /* Transiciones */
+      --transition-base: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-slow: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      
+      /* Sombras profesionales */
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
     }
     
     * {
@@ -51,458 +63,643 @@
       box-sizing: border-box;
     }
     
-    /* Global scroll fix */
-    html, body {
-      min-height: 100%;
-      overflow-x: hidden;
-      overflow-y: visible;
-    }
-    
     body {
-      font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--bg-primary);
-      color: var(--text-primary);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--primary-50);
+      color: var(--primary-900);
       line-height: 1.6;
-      position: relative;
-      margin: 0;
-      padding: 0;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
     
-    /* Fondos con gradientes animados */
-    body::before,
-    body::after,
-    .gradient-orb {
-      content: '';
-      position: fixed;
-      border-radius: 50%;
-      filter: blur(80px);
-      opacity: 0.5;
-      animation: float 20s infinite ease-in-out;
-      pointer-events: none;
+    /* Layout Principal */
+    .app-layout {
+      display: flex;
+      min-height: 100vh;
     }
     
-    body::before {
-      width: 400px;
-      height: 400px;
-      background: radial-gradient(circle, rgba(249, 115, 22, 0.4) 0%, transparent 70%);
-      top: -200px;
-      right: -200px;
-    }
-    
-    body::after {
-      width: 600px;
-      height: 600px;
-      background: radial-gradient(circle, rgba(236, 72, 153, 0.3) 0%, transparent 70%);
-      bottom: -300px;
-      left: -300px;
-      animation-delay: -10s;
-    }
-    
-    .gradient-orb {
-      position: fixed;
-      width: 500px;
-      height: 500px;
-      background: radial-gradient(circle, rgba(139, 92, 246, 0.3) 0%, transparent 70%);
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      animation-delay: -5s;
-    }
-    
-    @keyframes float {
-      0%, 100% { transform: translate(0, 0) scale(1); }
-      25% { transform: translate(50px, -50px) scale(1.1); }
-      50% { transform: translate(-50px, 50px) scale(0.9); }
-      75% { transform: translate(30px, 30px) scale(1.05); }
-    }
-    
-    /* Sidebar Minimalista */
+    /* Sidebar Profesional */
     .sidebar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 100vh;
       width: var(--sidebar-width);
-      background: rgba(22, 22, 31, 0.8);
-      backdrop-filter: blur(20px);
-      border-right: 1px solid rgba(255, 255, 255, 0.1);
-      z-index: 1000;
+      background: white;
+      border-right: 1px solid var(--primary-200);
       display: flex;
       flex-direction: column;
-      align-items: center;
-      padding: 2rem 0;
-      gap: 3rem;
-      overflow-y: auto;
-      overflow-x: hidden;
+      position: fixed;
+      height: 100vh;
+      z-index: 40;
+      transition: var(--transition-slow);
+      box-shadow: var(--shadow-sm);
     }
     
-    /* Logo */
-    .sidebar-logo {
-      width: 50px;
-      height: 50px;
+    .sidebar.collapsed {
+      width: var(--sidebar-collapsed);
+    }
+    
+    /* Logo Section */
+    .sidebar-header {
+      height: var(--header-height);
+      display: flex;
+      align-items: center;
+      padding: 0 1.5rem;
+      border-bottom: 1px solid var(--primary-200);
+    }
+    
+    .logo-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--success-500);
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
-      position: relative;
+      flex-shrink: 0;
     }
     
-    .sidebar-logo img {
-      width: 40px;
-      height: 40px;
-      filter: brightness(0) invert(1);
-      opacity: 0.9;
+    .logo-icon i {
+      color: white;
+      font-size: 1.25rem;
+    }
+    
+    .logo-text {
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: var(--primary-900);
+      transition: var(--transition-base);
+    }
+    
+    .sidebar.collapsed .logo-text {
+      opacity: 0;
+      visibility: hidden;
     }
     
     /* Navigation */
     .sidebar-nav {
       flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      width: 100%;
-      padding: 0 1rem;
+      padding: 1.5rem 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+    
+    .nav-section {
+      margin-bottom: 2rem;
+    }
+    
+    .nav-section-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--primary-500);
+      padding: 0 1.5rem;
+      margin-bottom: 0.5rem;
+      transition: var(--transition-base);
+    }
+    
+    .sidebar.collapsed .nav-section-title {
+      opacity: 0;
+      visibility: hidden;
+      height: 0;
+      margin: 0;
     }
     
     .nav-item {
       position: relative;
-      width: 100%;
     }
     
     .nav-link {
-      width: 100%;
-      height: 56px;
       display: flex;
       align-items: center;
-      justify-content: center;
-      color: var(--text-secondary);
+      gap: 0.75rem;
+      padding: 0.625rem 1.5rem;
+      color: var(--primary-700);
       text-decoration: none;
-      border-radius: var(--border-radius);
-      transition: var(--transition);
+      font-weight: 500;
+      font-size: 0.875rem;
+      transition: var(--transition-base);
       position: relative;
       overflow: hidden;
     }
     
-    .nav-link::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: var(--gradient-primary);
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-    
     .nav-link:hover {
-      color: var(--text-primary);
-      background: var(--sidebar-hover);
+      color: var(--success-600);
+      background: var(--success-100);
     }
     
     .nav-link.active {
-      color: var(--text-primary);
+      color: var(--success-600);
+      background: var(--success-100);
     }
     
     .nav-link.active::before {
-      opacity: 0.1;
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--success-600);
     }
     
     .nav-icon {
-      font-size: 1.25rem;
-      position: relative;
-      z-index: 1;
-    }
-    
-    /* Tooltip */
-    .nav-tooltip {
-      position: absolute;
-      left: calc(100% + 1rem);
-      top: 50%;
-      transform: translateY(-50%);
-      background: rgba(0, 0, 0, 0.9);
-      color: var(--text-primary);
-      padding: 0.5rem 1rem;
-      border-radius: 8px;
-      font-size: 0.875rem;
-      white-space: nowrap;
-      opacity: 0;
-      visibility: hidden;
-      transition: var(--transition);
-      pointer-events: none;
-    }
-    
-    .nav-link:hover .nav-tooltip {
-      opacity: 1;
-      visibility: visible;
-    }
-    
-    /* Notification Badge */
-    .nav-badge {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      background: var(--gradient-danger);
-      color: white;
-      font-size: 0.65rem;
-      font-weight: 700;
-      padding: 2px 6px;
-      border-radius: 10px;
-      min-width: 16px;
-      text-align: center;
-    }
-    
-    /* Bottom section */
-    .sidebar-bottom {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      width: 100%;
-      padding: 0 1rem;
-    }
-    
-    /* Main Content */
-    .main-content {
-      margin-left: var(--sidebar-width);
-      min-height: 100vh;
-      position: relative;
-      z-index: 1;
-      overflow: visible;
-    }
-    
-    /* Page Content */
-    .page-content {
-      padding: 0;
-      max-width: 1600px;
-      margin: 0 auto;
-      overflow: visible;
-    }
-    
-    /* User Avatar en sidebar */
-    .user-avatar-sidebar {
-      width: 56px;
-      height: 56px;
+      width: 20px;
+      height: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: var(--gradient-secondary);
-      border-radius: 50%;
-      font-weight: 600;
-      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+    
+    .nav-text {
+      transition: var(--transition-base);
+    }
+    
+    .sidebar.collapsed .nav-text {
+      opacity: 0;
+      visibility: hidden;
+    }
+    
+    .nav-badge {
+      margin-left: auto;
+      background: var(--danger-500);
       color: white;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.125rem 0.5rem;
+      border-radius: 10px;
+      min-width: 20px;
+      text-align: center;
+    }
+    
+    .sidebar.collapsed .nav-badge {
+      position: absolute;
+      top: 8px;
+      right: 12px;
+      padding: 0.125rem 0.375rem;
+      min-width: 16px;
+    }
+    
+    /* Collapse Button */
+    .sidebar-footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--primary-200);
+    }
+    
+    .collapse-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.625rem;
+      background: var(--primary-100);
+      border: none;
+      border-radius: 8px;
+      color: var(--primary-700);
+      font-weight: 500;
+      font-size: 0.875rem;
       cursor: pointer;
-      transition: var(--transition);
+      transition: var(--transition-base);
+    }
+    
+    .collapse-btn:hover {
+      background: var(--primary-200);
+    }
+    
+    .collapse-btn i {
+      transition: transform 0.3s ease;
+    }
+    
+    .sidebar.collapsed .collapse-btn i {
+      transform: rotate(180deg);
+    }
+    
+    /* Main Content */
+    .main-wrapper {
+      flex: 1;
+      margin-left: var(--sidebar-width);
+      transition: var(--transition-slow);
+    }
+    
+    .sidebar.collapsed ~ .main-wrapper {
+      margin-left: var(--sidebar-collapsed);
+    }
+    
+    /* Header */
+    .main-header {
+      height: var(--header-height);
+      background: white;
+      border-bottom: 1px solid var(--primary-200);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 30;
+    }
+    
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    .page-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary-900);
+    }
+    
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    .header-btn {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: white;
+      border: 1px solid var(--primary-200);
+      border-radius: 10px;
+      color: var(--primary-700);
+      cursor: pointer;
+      transition: var(--transition-base);
       position: relative;
     }
     
-    .user-avatar-sidebar:hover {
-      transform: scale(1.05);
+    .header-btn:hover {
+      background: var(--primary-50);
+      border-color: var(--primary-300);
+    }
+    
+    .notification-dot {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 8px;
+      height: 8px;
+      background: var(--danger-500);
+      border-radius: 50%;
+      border: 2px solid white;
+    }
+    
+    .user-menu {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem;
+      background: white;
+      border: 1px solid var(--primary-200);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: var(--transition-base);
+    }
+    
+    .user-menu:hover {
+      background: var(--primary-50);
+      border-color: var(--primary-300);
+    }
+    
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      background: var(--success-500);
+      color: white;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.875rem;
+    }
+    
+    .user-info {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .user-name {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--primary-900);
+      line-height: 1.2;
+    }
+    
+    .user-role {
+      font-size: 0.75rem;
+      color: var(--primary-500);
+    }
+    
+    /* Main Content Area */
+    .main-content {
+      padding: 2rem;
+      max-width: 1920px;
+      margin: 0 auto;
+    }
+    
+    /* Loading Animation */
+    .loading-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--success-500);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s ease;
+      z-index: 50;
+    }
+    
+    .loading-bar.active {
+      transform: scaleX(1);
+    }
+    
+    /* Tooltips */
+    .tooltip {
+      position: absolute;
+      background: var(--primary-900);
+      color: white;
+      font-size: 0.75rem;
+      padding: 0.375rem 0.75rem;
+      border-radius: 6px;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(4px);
+      transition: var(--transition-base);
+      white-space: nowrap;
+      z-index: 50;
+    }
+    
+    .tooltip.show {
+      opacity: 1;
+      transform: translateY(0);
     }
     
     /* Responsive */
-    @media (max-width: 768px) {
+    @media (max-width: 1024px) {
       .sidebar {
-        width: 100%;
-        height: auto;
-        bottom: 0;
-        top: auto;
-        flex-direction: row;
-        padding: 1rem;
-        border-right: none;
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        transform: translateX(-100%);
       }
       
-      .sidebar-logo {
-        display: none;
-      }
-      
-      .sidebar-nav {
-        flex-direction: row;
-        padding: 0;
-      }
-      
-      .sidebar-bottom {
-        display: none;
-      }
-      
-      .main-content {
-        margin-left: 0;
-        margin-bottom: 80px;
-      }
-      
-      .nav-tooltip {
-        display: none;
-      }
-    }
-    
-    /* Glass effect para cards */
-    .glass-card {
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: var(--border-radius);
-    }
-    
-    /* Animaciones de entrada */
-    @keyframes slideInLeft {
-      from {
-        opacity: 0;
-        transform: translateX(-20px);
-      }
-      to {
-        opacity: 1;
+      .sidebar.mobile-open {
         transform: translateX(0);
       }
+      
+      .main-wrapper {
+        margin-left: 0;
+      }
+      
+      .mobile-menu-btn {
+        display: flex;
+      }
     }
     
-    .nav-item {
-      animation: slideInLeft 0.5s ease-out;
-      animation-fill-mode: both;
+    @media (min-width: 1025px) {
+      .mobile-menu-btn {
+        display: none;
+      }
     }
     
-    .nav-item:nth-child(1) { animation-delay: 0.1s; }
-    .nav-item:nth-child(2) { animation-delay: 0.15s; }
-    .nav-item:nth-child(3) { animation-delay: 0.2s; }
-    .nav-item:nth-child(4) { animation-delay: 0.25s; }
-    .nav-item:nth-child(5) { animation-delay: 0.3s; }
-    .nav-item:nth-child(6) { animation-delay: 0.35s; }
-    .nav-item:nth-child(7) { animation-delay: 0.4s; }
-    .nav-item:nth-child(8) { animation-delay: 0.45s; }
-    .nav-item:nth-child(9) { animation-delay: 0.5s; }
+    /* Utility Classes */
+    .glass-effect {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    /* Scrollbar Personalizado */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: var(--primary-100);
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: var(--primary-400);
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--primary-500);
+    }
   </style>
   
   {% block extra_css %}{% endblock %}
 </head>
 <body>
-  <!-- Gradientes de fondo animados -->
-  <div class="gradient-orb"></div>
+  <!-- Loading Bar -->
+  <div class="loading-bar" id="loadingBar"></div>
   
-  <!-- Sidebar Minimalista -->
-  <nav class="sidebar">
-    <!-- Logo -->
-    <div class="sidebar-logo">
-      <img src="{{ url_for('static', filename='img/retraido.png') }}" alt="OptiMax">
-    </div>
-    
-    <!-- Navigation -->
-    <div class="sidebar-nav">
-      <div class="nav-item">
-        <a class="nav-link {% block home_active %}{% endblock %}" href="{{ url_for('dashboard_home') }}">
-          <i class="fas fa-home nav-icon"></i>
-          <span class="nav-tooltip">Home</span>
-        </a>
-      </div>
-      
-      <div class="nav-item">
-        <a class="nav-link {% block inventario_active %}{% endblock %}" href="{{ url_for('dashboard_inventario') }}">
-          <i class="fas fa-cube nav-icon"></i>
-          <span class="nav-tooltip">Inventario</span>
-          {% set productos_agotarse = productos|selectattr('stock', 'gt', 0)|selectattr('stock', 'le', 5)|list|length if productos else 0 %}
-          {% if productos_agotarse > 0 %}
-            <span class="nav-badge">{{ productos_agotarse }}</span>
-          {% endif %}
-        </a>
-      </div>
-      
-      <div class="nav-item">
-        <a class="nav-link {% block ventas_active %}{% endblock %}" href="#">
-          <i class="fas fa-shopping-cart nav-icon"></i>
-          <span class="nav-tooltip">Punto de Venta</span>
-        </a>
-      </div>
-      
-      <div class="nav-item">
-        <a class="nav-link {% block competencia_active %}{% endblock %}" href="#">
-          <i class="fas fa-chart-line nav-icon"></i>
-          <span class="nav-tooltip">Análisis</span>
-        </a>
-      </div>
-      
-      <div class="nav-item">
-        <a class="nav-link {% block financiera_active %}{% endblock %}" href="#">
-          <i class="fas fa-wallet nav-icon"></i>
-          <span class="nav-tooltip">Finanzas</span>
-        </a>
-      </div>
-      
-      <div class="nav-item">
-        <a class="nav-link {% block proveedores_active %}{% endblock %}" href="#">
-          <i class="fas fa-truck nav-icon"></i>
-          <span class="nav-tooltip">Proveedores</span>
-        </a>
-      </div>
-      
-      <div class="nav-item">
-        <a class="nav-link {% block empleados_active %}{% endblock %}" href="#">
-          <i class="fas fa-users nav-icon"></i>
-          <span class="nav-tooltip">Empleados</span>
-        </a>
-      </div>
-    </div>
-    
-    <!-- Bottom section -->
-    <div class="sidebar-bottom">
-      <div class="nav-item">
-        <a class="nav-link {% block configuracion_active %}{% endblock %}" href="#">
-          <i class="fas fa-cog nav-icon"></i>
-          <span class="nav-tooltip">Configuración</span>
-        </a>
-      </div>
-      
-      <div class="nav-item">
-        <div class="user-avatar-sidebar">
-          {{ session.get('user_name', 'Usuario')[0]|upper }}
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <!-- Logo -->
+      <div class="sidebar-header">
+        <div class="logo-wrapper">
+          <div class="logo-icon">
+            <i class="fas fa-cube"></i>
+          </div>
+          <span class="logo-text">OptiMax</span>
         </div>
       </div>
-    </div>
-  </nav>
-  
-  <!-- Main Content -->
-  <div class="main-content">
-    <div class="page-content">
-      {% block content %}{% endblock %}
+      
+      <!-- Navigation -->
+      <nav class="sidebar-nav">
+        <!-- Main Section -->
+        <div class="nav-section">
+          <div class="nav-section-title">Principal</div>
+          
+          <div class="nav-item">
+            <a href="{{ url_for('dashboard_home') }}" class="nav-link {% block home_active %}{% endblock %}">
+              <i class="fas fa-th-large nav-icon"></i>
+              <span class="nav-text">Dashboard</span>
+            </a>
+          </div>
+          
+          <div class="nav-item">
+            <a href="{{ url_for('dashboard_inventario') }}" class="nav-link {% block inventario_active %}{% endblock %}">
+              <i class="fas fa-boxes nav-icon"></i>
+              <span class="nav-text">Inventario</span>
+              {% if productos_agotarse|default(0) > 0 %}
+                <span class="nav-badge">{{ productos_agotarse }}</span>
+              {% endif %}
+            </a>
+          </div>
+          
+          <div class="nav-item">
+            <a href="#" class="nav-link {% block ventas_active %}{% endblock %}">
+              <i class="fas fa-cash-register nav-icon"></i>
+              <span class="nav-text">Punto de Venta</span>
+            </a>
+          </div>
+        </div>
+        
+        <!-- Analytics Section -->
+        <div class="nav-section">
+          <div class="nav-section-title">Análisis</div>
+          
+          <div class="nav-item">
+            <a href="#" class="nav-link {% block reportes_active %}{% endblock %}">
+              <i class="fas fa-chart-bar nav-icon"></i>
+              <span class="nav-text">Reportes</span>
+            </a>
+          </div>
+          
+          <div class="nav-item">
+            <a href="#" class="nav-link {% block finanzas_active %}{% endblock %}">
+              <i class="fas fa-wallet nav-icon"></i>
+              <span class="nav-text">Finanzas</span>
+            </a>
+          </div>
+          
+          <div class="nav-item">
+            <a href="#" class="nav-link {% block predicciones_active %}{% endblock %}">
+              <i class="fas fa-brain nav-icon"></i>
+              <span class="nav-text">Predicciones IA</span>
+            </a>
+          </div>
+        </div>
+        
+        <!-- Management Section -->
+        <div class="nav-section">
+          <div class="nav-section-title">Gestión</div>
+          
+          <div class="nav-item">
+            <a href="#" class="nav-link {% block proveedores_active %}{% endblock %}">
+              <i class="fas fa-truck nav-icon"></i>
+              <span class="nav-text">Proveedores</span>
+            </a>
+          </div>
+          
+          <div class="nav-item">
+            <a href="#" class="nav-link {% block empleados_active %}{% endblock %}">
+              <i class="fas fa-users nav-icon"></i>
+              <span class="nav-text">Empleados</span>
+            </a>
+          </div>
+          
+          <div class="nav-item">
+            <a href="#" class="nav-link {% block configuracion_active %}{% endblock %}">
+              <i class="fas fa-cog nav-icon"></i>
+              <span class="nav-text">Configuración</span>
+            </a>
+          </div>
+        </div>
+      </nav>
+      
+      <!-- Collapse Button -->
+      <div class="sidebar-footer">
+        <button class="collapse-btn" onclick="toggleSidebar()">
+          <i class="fas fa-chevron-left"></i>
+          <span class="nav-text">Colapsar menú</span>
+        </button>
+      </div>
+    </aside>
+    
+    <!-- Main Content Wrapper -->
+    <div class="main-wrapper">
+      <!-- Header -->
+      <header class="main-header">
+        <div class="header-left">
+          <button class="header-btn mobile-menu-btn" onclick="toggleMobileSidebar()">
+            <i class="fas fa-bars"></i>
+          </button>
+          <h1 class="page-title">{% block page_title %}Dashboard{% endblock %}</h1>
+        </div>
+        
+        <div class="header-right">
+          <!-- Search -->
+          <button class="header-btn">
+            <i class="fas fa-search"></i>
+          </button>
+          
+          <!-- Notifications -->
+          <button class="header-btn">
+            <i class="fas fa-bell"></i>
+            <span class="notification-dot"></span>
+          </button>
+          
+          <!-- User Menu -->
+          <div class="user-menu">
+            <div class="user-avatar">
+              {{ session.get('user_name', 'Usuario')[0]|upper }}
+            </div>
+            <div class="user-info">
+              <span class="user-name">{{ session.get('user_name', 'Usuario') }}</span>
+              <span class="user-role">Administrador</span>
+            </div>
+            <i class="fas fa-chevron-down" style="font-size: 0.75rem; color: var(--primary-500);"></i>
+          </div>
+        </div>
+      </header>
+      
+      <!-- Page Content -->
+      <main class="main-content">
+        {% block content %}{% endblock %}
+      </main>
     </div>
   </div>
   
+  <!-- Scripts Base -->
   <script>
-    // Animaciones simples al cargar
+    // Toggle Sidebar
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('collapsed');
+      
+      // Guardar preferencia
+      localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+    }
+    
+    // Toggle Mobile Sidebar
+    function toggleMobileSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('mobile-open');
+    }
+    
+    // Restaurar estado del sidebar
     document.addEventListener('DOMContentLoaded', function() {
-      // Efecto ripple en clicks
-      document.querySelectorAll('.nav-link').forEach(link => {
-        link.addEventListener('click', function(e) {
-          const ripple = document.createElement('span');
-          const rect = this.getBoundingClientRect();
-          const size = Math.max(rect.width, rect.height);
-          const x = e.clientX - rect.left - size / 2;
-          const y = e.clientY - rect.top - size / 2;
-          
-          ripple.style.width = ripple.style.height = size + 'px';
-          ripple.style.left = x + 'px';
-          ripple.style.top = y + 'px';
-          ripple.classList.add('ripple');
-          
-          this.appendChild(ripple);
-          
-          setTimeout(() => ripple.remove(), 600);
-        });
+      const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+      if (isCollapsed) {
+        document.getElementById('sidebar').classList.add('collapsed');
+      }
+      
+      // Loading animation
+      const loadingBar = document.getElementById('loadingBar');
+      loadingBar.classList.add('active');
+      
+      window.addEventListener('load', function() {
+        setTimeout(() => {
+          loadingBar.classList.remove('active');
+        }, 300);
+      });
+      
+      // Click outside to close mobile menu
+      document.addEventListener('click', function(e) {
+        const sidebar = document.getElementById('sidebar');
+        const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+        
+        if (!sidebar.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+          sidebar.classList.remove('mobile-open');
+        }
       });
     });
   </script>
-  
-  <style>
-    /* Efecto ripple */
-    .ripple {
-      position: absolute;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.5);
-      transform: scale(0);
-      animation: ripple-animation 0.6s ease-out;
-      pointer-events: none;
-    }
-    
-    @keyframes ripple-animation {
-      to {
-        transform: scale(4);
-        opacity: 0;
-      }
-    }
-  </style>
   
   {% block extra_js %}{% endblock %}
 </body>
