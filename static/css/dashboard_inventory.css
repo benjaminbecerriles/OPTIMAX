@@ -122,12 +122,17 @@
   position: relative;
   overflow: hidden;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+  /* Asegurar que el contenedor no deforme el contenido */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .warehouse-container canvas {
   width: 100% !important;
   height: 100% !important;
   cursor: grab;
+  object-fit: contain; /* Mantener proporciones del contenido */
 }
 
 .warehouse-container canvas:active {
