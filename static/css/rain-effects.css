@@ -1,0 +1,386 @@
+/* =============================================
+   RAIN EFFECTS CSS - Efectos de Lluvia de Dulces
+   Sistema de partículas y efectos visuales
+   ============================================= */
+
+/* ========== Contenedor del Robot con Lluvia ========== */
+#warehouse3d.rain-active {
+    overflow: visible !important;
+    animation: rainGlow 8s ease-in-out;
+  }
+  
+  @keyframes rainGlow {
+    0%, 100% { 
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06); 
+    }
+    50% { 
+      box-shadow: 
+        inset 0 2px 4px rgba(0, 0, 0, 0.06),
+        0 0 30px rgba(236, 72, 153, 0.2),
+        0 0 60px rgba(236, 72, 153, 0.1);
+    }
+  }
+  
+  /* ========== Partículas de Azúcar (CSS puro) ========== */
+  .sugar-particles {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 5;
+  }
+  
+  .sugar-particle {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    animation: sugarFall linear infinite;
+  }
+  
+  @keyframes sugarFall {
+    from {
+      transform: translateY(-10px) rotate(0deg);
+      opacity: 0;
+    }
+    10% {
+      opacity: 1;
+    }
+    90% {
+      opacity: 1;
+    }
+    to {
+      transform: translateY(500px) rotate(720deg);
+      opacity: 0;
+    }
+  }
+  
+  /* Variaciones de partículas */
+  .sugar-particle:nth-child(odd) {
+    width: 3px;
+    height: 3px;
+    animation-duration: 3s;
+    animation-delay: 0s;
+  }
+  
+  .sugar-particle:nth-child(even) {
+    animation-duration: 4s;
+    animation-delay: 0.5s;
+  }
+  
+  .sugar-particle:nth-child(3n) {
+    animation-duration: 3.5s;
+    animation-delay: 1s;
+    background: rgba(255, 182, 193, 0.8);
+  }
+  
+  /* ========== Efecto de Brillo en Dulces ========== */
+  .candy-glow {
+    animation: candySparkle 2s ease-in-out infinite;
+  }
+  
+  @keyframes candySparkle {
+    0%, 100% { 
+      filter: brightness(1) saturate(1); 
+    }
+    50% { 
+      filter: brightness(1.2) saturate(1.3) drop-shadow(0 0 5px rgba(255, 255, 255, 0.5)); 
+    }
+  }
+  
+  /* ========== Efecto Splash al Tocar el Suelo ========== */
+  .candy-splash {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    pointer-events: none;
+    animation: splashEffect 0.6s ease-out forwards;
+  }
+  
+  .candy-splash::before,
+  .candy-splash::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.6) 0%, transparent 70%);
+  }
+  
+  .candy-splash::before {
+    width: 100%;
+    height: 100%;
+    animation: splashRing 0.6s ease-out forwards;
+  }
+  
+  .candy-splash::after {
+    width: 60%;
+    height: 60%;
+    top: 20%;
+    left: 20%;
+    animation: splashRing 0.6s ease-out 0.1s forwards;
+  }
+  
+  @keyframes splashEffect {
+    from {
+      opacity: 1;
+      transform: scale(0);
+    }
+    to {
+      opacity: 0;
+      transform: scale(2);
+    }
+  }
+  
+  @keyframes splashRing {
+    from {
+      transform: scale(0);
+      opacity: 1;
+    }
+    to {
+      transform: scale(1.5);
+      opacity: 0;
+    }
+  }
+  
+  /* ========== Indicador de Cooldown ========== */
+  #warehouse3d.rain-cooldown {
+    position: relative;
+  }
+  
+  #warehouse3d.rain-cooldown::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(59, 130, 246, 0.05) 50%,
+      transparent 100%
+    );
+    opacity: 0.5;
+    pointer-events: none;
+    animation: cooldownPulse 1s ease-in-out infinite;
+  }
+  
+  @keyframes cooldownPulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.1; }
+  }
+  
+  /* ========== Efecto de Rebote ========== */
+  .candy-bounce {
+    animation: candyBounce 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+  
+  @keyframes candyBounce {
+    0% {
+      transform: translateY(0) scale(1);
+    }
+    50% {
+      transform: translateY(-20px) scale(1.1);
+    }
+    100% {
+      transform: translateY(0) scale(1);
+    }
+  }
+  
+  /* ========== Trail de Movimiento ========== */
+  .candy-trail {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0.3;
+    filter: blur(2px);
+    animation: trailFade 0.5s ease-out forwards;
+  }
+  
+  @keyframes trailFade {
+    from {
+      opacity: 0.3;
+      transform: scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: scale(0.8);
+    }
+  }
+  
+  /* ========== Mensaje de Lluvia ========== */
+  .rain-announcement {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #ec4899 0%, #f59e0b 100%);
+    color: white;
+    padding: 0.75rem 2rem;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 1rem;
+    box-shadow: 0 4px 20px rgba(236, 72, 153, 0.3);
+    animation: announceSlide 1s ease-out forwards;
+    z-index: 100;
+  }
+  
+  @keyframes announceSlide {
+    from {
+      opacity: 0;
+      transform: translateX(-50%) translateY(-30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  }
+  
+  /* ========== Efectos de Robot Durante Lluvia ========== */
+  .robot-rain-happy {
+    animation: robotDance 0.5s ease-in-out infinite alternate;
+  }
+  
+  @keyframes robotDance {
+    from {
+      transform: translateY(0) rotate(-1deg);
+    }
+    to {
+      transform: translateY(-5px) rotate(1deg);
+    }
+  }
+  
+  /* ========== Partículas Mágicas ========== */
+  .magic-particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: #fbbf24;
+    border-radius: 50%;
+    box-shadow: 0 0 6px #fbbf24;
+    animation: magicFloat 3s ease-in-out infinite;
+  }
+  
+  @keyframes magicFloat {
+    0%, 100% {
+      transform: translateY(0) translateX(0);
+      opacity: 0;
+    }
+    20% {
+      opacity: 1;
+    }
+    50% {
+      transform: translateY(-50px) translateX(20px);
+      opacity: 1;
+    }
+    80% {
+      opacity: 1;
+    }
+  }
+  
+  /* ========== Sombras Dinámicas para Dulces ========== */
+  .candy-shadow {
+    position: absolute;
+    width: 30px;
+    height: 10px;
+    background: radial-gradient(ellipse, rgba(0, 0, 0, 0.2) 0%, transparent 70%);
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    animation: shadowPulse 1s ease-in-out infinite;
+  }
+  
+  @keyframes shadowPulse {
+    0%, 100% {
+      transform: translateX(-50%) scale(1);
+      opacity: 0.2;
+    }
+    50% {
+      transform: translateX(-50%) scale(1.2);
+      opacity: 0.1;
+    }
+  }
+  
+  /* ========== Cursor Especial Durante Lluvia ========== */
+  #warehouse3d.rain-active {
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><text y="20" font-size="20">🍬</text></svg>') 16 16, auto;
+  }
+  
+  /* ========== Responsive ========== */
+  @media (max-width: 768px) {
+    .rain-announcement {
+      font-size: 0.875rem;
+      padding: 0.5rem 1.5rem;
+    }
+    
+    .sugar-particles {
+      display: none; /* Desactivar en móviles para rendimiento */
+    }
+  }
+  
+  /* ========== Performance Optimizations ========== */
+  @media (prefers-reduced-motion: reduce) {
+    .candy-glow,
+    .candy-bounce,
+    .robot-rain-happy,
+    .magic-particle,
+    .sugar-particle {
+      animation: none !important;
+    }
+    
+    .candy-splash,
+    .candy-trail {
+      display: none;
+    }
+  }
+  
+  /* ========== Debug Mode (opcional) ========== */
+  .rain-debug #warehouse3d::after {
+    content: attr(data-rain-stats);
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    color: #00ff00;
+    padding: 0.5rem;
+    font-family: monospace;
+    font-size: 0.75rem;
+    border-radius: 4px;
+    pointer-events: none;
+  }
+  
+  /* ========== Estilos para los Controles ========== */
+  .controls-3d.rain-active .control-btn {
+    pointer-events: none;
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  /* ========== Efecto de Carga de Modelos ========== */
+  .candy-loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2rem;
+    animation: candyRotate 2s linear infinite;
+  }
+  
+  @keyframes candyRotate {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+  }
+  
+  /* ========== Easter Egg: Super Lluvia ========== */
+  .super-rain #warehouse3d {
+    animation: superRainShake 0.1s ease-in-out infinite;
+  }
+  
+  @keyframes superRainShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-2px); }
+    75% { transform: translateX(2px); }
+  }

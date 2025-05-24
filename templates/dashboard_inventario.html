@@ -5,11 +5,101 @@
 {% block inventario_active %}active{% endblock %}
 
 {% block extra_css %}
-<!-- CSS Principal del Inventario -->
 <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard_inventory.css') }}">
-
-<!-- ApexCharts para gráficos modernos -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/rain-effects.css') }}">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/apexcharts@3.45.0/dist/apexcharts.css">
+
+<style>
+    body { 
+        background-color: #f8fafc !important; 
+    }
+    
+    #warehouse3d {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%) !important;
+    }
+    
+    .typed-cursor {
+        display: inline-block;
+        width: 3px;
+        background-color: #10b981;
+        animation: blink 1s infinite;
+        margin-left: 2px;
+    }
+    
+    @keyframes blink {
+        0%, 50% { opacity: 1; }
+        51%, 100% { opacity: 0; }
+    }
+    
+    @keyframes countPop {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+    }
+    
+    .count-complete {
+        animation: countPop 0.3s ease-out;
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .kpi-card {
+        animation: fadeInUp 0.8s ease-out forwards;
+        opacity: 0;
+        position: relative;
+        overflow: visible;
+    }
+    
+    .alert-card {
+        animation: fadeInUp 0.8s ease-out forwards;
+        opacity: 0;
+    }
+    
+    .tool-card {
+        opacity: 1 !important;
+        transform: translateY(0) !important;
+        visibility: visible !important;
+        transition: all 0.3s ease;
+    }
+    
+    .tool-card:hover {
+        transform: scale(1.05) !important;
+        box-shadow: 0 8px 20px rgba(30, 64, 175, 0.3);
+    }
+    
+    .kpi-card:nth-child(1) { animation-delay: 0.1s; }
+    .kpi-card:nth-child(2) { animation-delay: 0.2s; }
+    .kpi-card:nth-child(3) { animation-delay: 0.3s; }
+    .kpi-card:nth-child(4) { animation-delay: 0.4s; }
+    
+    .alert-card:nth-child(1) { animation-delay: 0.5s; }
+    .alert-card:nth-child(2) { animation-delay: 0.6s; }
+    
+    .kpi-content {
+        position: relative;
+        z-index: 2;
+    }
+    
+    .kpi-chart {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 100px;
+        height: 50px;
+        opacity: 0.4;
+        pointer-events: none;
+        z-index: 1;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -19,34 +109,33 @@
     <div class="hero-text">
       <div class="hero-title-wrapper">
         <h1 class="hero-title">
-          <span><span class="typed-text" id="heroTitle"></span><span class="cursor">|</span></span>
+          <span class="typed-text" id="heroTitle"></span>
+          <noscript>Control Total de Inventario</noscript>
         </h1>
       </div>
       <p class="hero-subtitle">
         Controla tu inventario en tiempo real, optimiza tu stock y maximiza tus ganancias con herramientas inteligentes de gestión
       </p>
       
-      <!-- Quick Stats -->
       <div class="hero-stats">
         <div class="hero-stat">
           <i class="fas fa-chart-line"></i>
-          <span class="stat-value">{{ '{:+.1f}'.format(crecimiento|default(15.3)) }}%</span>
+          <span class="stat-value">{{ '{:+.1f}'.format(crecimiento|default(0.0)) }}%</span>
           <span class="stat-label">vs mes anterior</span>
         </div>
         <div class="hero-stat">
           <i class="fas fa-truck"></i>
-          <span class="stat-value">{{ pedidos_pendientes|default(3) }}</span>
+          <span class="stat-value">{{ pedidos_pendientes|default(0) }}</span>
           <span class="stat-label">pedidos en camino</span>
         </div>
         <div class="hero-stat">
           <i class="fas fa-exclamation-triangle"></i>
-          <span class="stat-value">{{ alertas_activas|default(2) }}</span>
+          <span class="stat-value">{{ alertas_activas|default(0) }}</span>
           <span class="stat-label">alertas activas</span>
         </div>
       </div>
     </div>
     
-    <!-- Modelo 3D del Robot Asistente -->
     <div class="hero-3d">
       <div id="warehouse3d" class="warehouse-container">
         <div class="robot-loading">
@@ -55,16 +144,15 @@
         </div>
       </div>
       
-      <!-- Controles del Robot -->
       <div class="controls-3d">
-        <button class="control-btn" onclick="window.OptiBot3D.rotateX(Math.PI/2)" title="Rotar X">
-          <i class="fas fa-arrows-alt-v"></i>
+        <button class="control-btn" onclick="if(window.OptiBot3D) window.OptiBot3D.rotateRobot(Math.PI/4)" title="Rotar">
+          <i class="fas fa-sync-alt"></i>
         </button>
-        <button class="control-btn" onclick="window.OptiBot3D.rotateY(Math.PI/2)" title="Rotar Y">
-          <i class="fas fa-arrows-alt-h"></i>
-        </button>
-        <button class="control-btn" onclick="window.OptiBot3D.resetRotation()" title="Reset">
+        <button class="control-btn" onclick="if(window.OptiBot3D) window.OptiBot3D.resetRotation()" title="Reset">
           <i class="fas fa-undo"></i>
+        </button>
+        <button class="control-btn" onclick="if(window.OptiBot3D) window.OptiBot3D.toggleFollowing()" title="Seguir cursor" id="followToggle">
+          <i class="fas fa-eye"></i>
         </button>
       </div>
     </div>
@@ -78,7 +166,6 @@
   </div>
   
   <div class="kpi-grid">
-    <!-- Total Productos -->
     <div class="kpi-card" data-tilt>
       <div class="kpi-icon" style="background: linear-gradient(135deg, #94a3b8, #64748b);">
         <i class="fas fa-boxes"></i>
@@ -86,12 +173,12 @@
       <div class="kpi-content">
         <h3 class="kpi-title">Total Productos</h3>
         <div class="kpi-value">
-          <span class="counter" data-target="{{ total_productos|default(0) }}">0</span>
+          <span class="counter" data-target="{{ total_productos }}">0</span>
         </div>
+        <div id="kpiChart1" class="kpi-chart"></div>
       </div>
     </div>
     
-    <!-- Stock Total -->
     <div class="kpi-card" data-tilt>
       <div class="kpi-icon" style="background: linear-gradient(135deg, #94a3b8, #64748b);">
         <i class="fas fa-cubes"></i>
@@ -99,12 +186,12 @@
       <div class="kpi-content">
         <h3 class="kpi-title">Unidades en Stock</h3>
         <div class="kpi-value">
-          <span class="counter" data-target="{{ total_unidades|default(0) }}">0</span>
+          <span class="counter" data-target="{{ total_unidades }}">0</span>
         </div>
+        <div id="kpiChart2" class="kpi-chart"></div>
       </div>
     </div>
     
-    <!-- Valor del Inventario -->
     <div class="kpi-card highlight" data-tilt>
       <div class="kpi-icon" style="background: linear-gradient(135deg, #94a3b8, #64748b);">
         <i class="fas fa-dollar-sign"></i>
@@ -112,12 +199,12 @@
       <div class="kpi-content">
         <h3 class="kpi-title">Valor del Inventario</h3>
         <div class="kpi-value">
-          $<span class="counter" data-target="{{ valor_inventario|default(0) }}" data-format="currency">0</span>
+          $<span class="counter" data-target="{{ valor_inventario }}" data-format="currency">0</span>
         </div>
+        <div id="kpiChart3" class="kpi-chart"></div>
       </div>
     </div>
     
-    <!-- Productos Críticos -->
     <div class="kpi-card" data-tilt>
       <div class="kpi-icon" style="background: linear-gradient(135deg, #94a3b8, #64748b);">
         <i class="fas fa-exclamation-triangle"></i>
@@ -125,8 +212,9 @@
       <div class="kpi-content">
         <h3 class="kpi-title">Stock Crítico</h3>
         <div class="kpi-value">
-          <span class="counter" data-target="{{ productos_por_agotarse|default(0) }}">0</span>
+          <span class="counter" data-target="{{ productos_por_agotarse }}">0</span>
         </div>
+        <div id="kpiChart4" class="kpi-chart"></div>
       </div>
     </div>
   </div>
@@ -198,23 +286,15 @@
     <table class="products-table">
       <thead>
         <tr>
-          <th>
-            <span>Producto</span>
-          </th>
-          <th>
-            <span>Categoría</span>
-          </th>
-          <th>
-            <span>Stock</span>
-          </th>
-          <th>
-            <span>Precio</span>
-          </th>
+          <th><span>Producto</span></th>
+          <th><span>Categoría</span></th>
+          <th><span>Stock</span></th>
+          <th><span>Precio</span></th>
           <th>Marca</th>
         </tr>
       </thead>
       <tbody>
-        {% for producto in productos[:2] %}
+        {% for producto in productos[:5] %}
         <tr class="product-row" data-id="{{ producto.id|default(producto['id']) }}">
           <td>
             <div class="product-info">
@@ -242,7 +322,7 @@
           
           <td>
             {% set stock = producto.stock|default(producto['stock'])|default(0) %}
-            <span class="stock-value">{{ '{:,.0f}'.format(stock) }}</span>
+            <span class="stock-value{% if stock <= 5 and stock > 0 %} critical{% endif %}">{{ '{:,.0f}'.format(stock) }}</span>
           </td>
           
           <td>
@@ -286,7 +366,6 @@
   </div>
   
   <div class="alerts-grid">
-    <!-- Productos Críticos -->
     <div class="alert-card">
       <div class="alert-header">
         <h3 class="alert-title">
@@ -332,7 +411,6 @@
       </div>
     </div>
     
-    <!-- Predicciones IA -->
     <div class="alert-card">
       <div class="alert-header">
         <h3 class="alert-title">
@@ -346,8 +424,8 @@
         <div class="predictions-list">
           <div class="prediction-item">
             <div class="prediction-content">
-              <h4>Mouse Logitech G502</h4>
-              <p>Se agotará en <strong>3 días</strong></p>
+              <h4>Análisis de tendencias</h4>
+              <p>Stock óptimo alcanzado en <strong>85%</strong> de productos</p>
               <div class="prediction-accuracy">
                 <span>Precisión: 94%</span>
                 <div class="accuracy-bar">
@@ -359,8 +437,8 @@
           
           <div class="prediction-item">
             <div class="prediction-content">
-              <h4>Teclados mecánicos</h4>
-              <p>Demanda aumentará <strong>35%</strong> próxima semana</p>
+              <h4>Rotación de inventario</h4>
+              <p>Velocidad aumentará <strong>20%</strong> próxima semana</p>
               <div class="prediction-accuracy">
                 <span>Precisión: 87%</span>
                 <div class="accuracy-bar">
@@ -372,8 +450,8 @@
 
           <div class="prediction-item">
             <div class="prediction-content">
-              <h4>Cables USB-C</h4>
-              <p>Pico de ventas en <strong>5 días</strong></p>
+              <h4>Optimización de costos</h4>
+              <p>Ahorro potencial de <strong>${{ '{:,.0f}'.format(valor_inventario * 0.05) }}</strong></p>
               <div class="prediction-accuracy">
                 <span>Precisión: 91%</span>
                 <div class="accuracy-bar">
@@ -387,26 +465,55 @@
     </div>
   </div>
 </section>
-
 {% endblock %}
 
 {% block extra_js %}
 <!-- Three.js para modelo 3D -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-
-<!-- GLTF Loader para cargar modelos -->
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 
 <!-- Librerías para animaciones y gráficos -->
-<script src="https://cdn.jsdelivr.net/npm/apexcharts@3.45.0/dist/apexcharts.min.js"></script>
 <script src="https://unpkg.com/typed.js@2.1.0/dist/typed.umd.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/countup.js@2.8.0/dist/countUp.min.js"></script>
 <script src="https://unpkg.com/vanilla-tilt@1.8.1/dist/vanilla-tilt.min.js"></script>
-
-<!-- GSAP para animaciones avanzadas -->
+<script src="https://cdn.jsdelivr.net/npm/apexcharts@3.45.0/dist/apexcharts.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 
 <!-- Scripts del inventario -->
-<script src="{{ url_for('static', filename='js/robot_realistic.js') }}" defer></script>
-<script src="{{ url_for('static', filename='js/dashboard_inventory.js') }}" defer></script>
+<script src="{{ url_for('static', filename='js/robot_realistic.js') }}"></script>
+<script src="{{ url_for('static', filename='js/dashboard_inventory.js') }}"></script>
+
+<script>
+// Script de emergencia para asegurar funcionalidad
+setTimeout(function() {
+    const heroTitle = document.getElementById('heroTitle');
+    if (heroTitle && !heroTitle.textContent.trim()) {
+        heroTitle.textContent = 'Control Total de Inventario';
+    }
+    
+    const counters = document.querySelectorAll('.counter');
+    counters.forEach(counter => {
+        if (counter.textContent === '0') {
+            const target = parseInt(counter.getAttribute('data-target')) || 0;
+            if (target > 0) {
+                const format = counter.getAttribute('data-format');
+                if (format === 'currency' && target > 1000000) {
+                    counter.textContent = '$' + (target / 1000000).toFixed(1) + 'M';
+                } else if (format === 'currency' && target > 1000) {
+                    counter.textContent = '$' + (target / 1000).toFixed(1) + 'K';
+                } else if (format === 'currency') {
+                    counter.textContent = '$' + target.toLocaleString('es-MX');
+                } else {
+                    counter.textContent = target.toLocaleString('es-MX');
+                }
+            }
+        }
+    });
+    
+    document.querySelectorAll('.tool-card').forEach(card => {
+        card.style.opacity = '1';
+        card.style.transform = 'translateY(0)';
+        card.style.visibility = 'visible';
+    });
+}, 3000);
+</script>
 {% endblock %}
