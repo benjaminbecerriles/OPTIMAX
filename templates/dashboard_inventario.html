@@ -84,11 +84,6 @@
         <div class="kpi-value">
           <span class="counter" data-target="{{ total_productos|default(0) }}">0</span>
         </div>
-        <div class="kpi-chart" id="kpiChart1"></div>
-      </div>
-      <div class="kpi-trend up">
-        <i class="fas fa-arrow-up"></i>
-        <span>12% este mes</span>
       </div>
     </div>
     
@@ -102,11 +97,6 @@
         <div class="kpi-value">
           <span class="counter" data-target="{{ total_unidades|default(0) }}">0</span>
         </div>
-        <div class="kpi-chart" id="kpiChart2"></div>
-      </div>
-      <div class="kpi-trend up">
-        <i class="fas fa-arrow-up"></i>
-        <span>8% crecimiento</span>
       </div>
     </div>
     
@@ -120,11 +110,6 @@
         <div class="kpi-value">
           $<span class="counter" data-target="{{ valor_inventario|default(0) }}" data-format="currency">0</span>
         </div>
-        <div class="kpi-chart" id="kpiChart3"></div>
-      </div>
-      <div class="kpi-trend up">
-        <i class="fas fa-arrow-up"></i>
-        <span>+$45,230 este mes</span>
       </div>
     </div>
     
@@ -138,11 +123,6 @@
         <div class="kpi-value">
           <span class="counter" data-target="{{ productos_por_agotarse|default(0) }}">0</span>
         </div>
-        <div class="kpi-chart" id="kpiChart4"></div>
-      </div>
-      <div class="kpi-trend down">
-        <i class="fas fa-arrow-down"></i>
-        <span>-3 vs ayer</span>
       </div>
     </div>
   </div>
@@ -162,7 +142,7 @@
   
   <div class="tools-grid">
     <a href="{{ url_for('nuevo_producto') }}" class="tool-card">
-      <div class="tool-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+      <div class="tool-icon">
         <i class="fas fa-barcode"></i>
       </div>
       <h3 class="tool-title">Registrar Producto</h3>
@@ -171,7 +151,7 @@
     </a>
     
     <a href="{{ url_for('ajuste_stock') }}" class="tool-card">
-      <div class="tool-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+      <div class="tool-icon">
         <i class="fas fa-plus-minus"></i>
       </div>
       <h3 class="tool-title">Ajuste de Stock</h3>
@@ -180,7 +160,7 @@
     </a>
     
     <a href="{{ url_for('cambiar_precios') }}" class="tool-card">
-      <div class="tool-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
+      <div class="tool-icon">
         <i class="fas fa-tag"></i>
       </div>
       <h3 class="tool-title">Cambiar Precios</h3>
@@ -189,7 +169,7 @@
     </a>
     
     <a href="{{ url_for('descuentos') }}" class="tool-card">
-      <div class="tool-icon" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">
+      <div class="tool-icon">
         <i class="fas fa-percent"></i>
       </div>
       <h3 class="tool-title">Descuentos</h3>
@@ -198,7 +178,7 @@
     </a>
     
     <a href="{{ url_for('ubicacion_productos') }}" class="tool-card">
-      <div class="tool-icon" style="background: linear-gradient(135deg, #ec4899, #db2777);">
+      <div class="tool-icon">
         <i class="fas fa-map-marker-alt"></i>
       </div>
       <h3 class="tool-title">Ubicación</h3>
@@ -219,32 +199,19 @@
     <table class="products-table">
       <thead>
         <tr>
-          <th class="sortable" data-sort="nombre">
-            <div class="th-content">
-              <span>Producto</span>
-              <i class="fas fa-sort"></i>
-            </div>
+          <th>
+            <span>Producto</span>
           </th>
-          <th class="sortable" data-sort="categoria">
-            <div class="th-content">
-              <span>Categoría</span>
-              <i class="fas fa-sort"></i>
-            </div>
+          <th>
+            <span>Categoría</span>
           </th>
-          <th class="sortable" data-sort="stock">
-            <div class="th-content">
-              <span>Stock</span>
-              <i class="fas fa-sort"></i>
-            </div>
+          <th>
+            <span>Stock</span>
           </th>
-          <th class="sortable" data-sort="precio">
-            <div class="th-content">
-              <span>Precio</span>
-              <i class="fas fa-sort"></i>
-            </div>
+          <th>
+            <span>Precio</span>
           </th>
           <th>Marca</th>
-          <th>Acciones</th>
         </tr>
       </thead>
       <tbody>
@@ -262,8 +229,8 @@
                 {% endif %}
               </div>
               <div class="product-details">
-                <h4 class="product-name">{{ producto.nombre|default(producto['nombre']) }}</h4>
-                <p class="product-sku">SKU: {{ producto.codigo_barras_externo|default(producto['codigo_barras_externo'])|default('N/A') }}</p>
+                <div class="product-name">{{ producto.nombre|default(producto['nombre']) }}</div>
+                <div class="product-sku">SKU: {{ producto.codigo_barras_externo|default(producto['codigo_barras_externo'])|default('N/A') }}</div>
               </div>
             </div>
           </td>
@@ -276,14 +243,7 @@
           
           <td>
             {% set stock = producto.stock|default(producto['stock'])|default(0) %}
-            <div class="stock-info">
-              <span class="stock-value {% if stock <= 5 %}critical{% elif stock <= 20 %}warning{% endif %}">
-                {{ '{:,.0f}'.format(stock) }}
-              </span>
-              <div class="stock-bar">
-                <div class="stock-fill" style="width: {% if stock <= 100 %}{{ stock }}{% else %}100{% endif %}%"></div>
-              </div>
-            </div>
+            <span class="stock-value">{{ '{:,.0f}'.format(stock) }}</span>
           </td>
           
           <td>
@@ -292,20 +252,6 @@
           
           <td>
             <span>{{ producto.marca|default('—') }}</span>
-          </td>
-          
-          <td>
-            <div class="table-actions">
-              <button class="action-btn" title="Ver detalles" onclick="viewProduct({{ producto.id|default(producto['id']) }})">
-                <i class="fas fa-eye"></i>
-              </button>
-              <button class="action-btn" title="Editar" onclick="editProduct({{ producto.id|default(producto['id']) }})">
-                <i class="fas fa-edit"></i>
-              </button>
-              <button class="action-btn" title="Historial" onclick="viewHistory({{ producto.id|default(producto['id']) }})">
-                <i class="fas fa-history"></i>
-              </button>
-            </div>
           </td>
         </tr>
         {% endfor %}
@@ -334,9 +280,9 @@
   {% endif %}
 </section>
 
-<!-- Alertas y Notificaciones (ÚNICA VEZ) -->
+<!-- Alertas y Notificaciones -->
 <section class="alerts-section">
-  <div class="alerts-grid alerts-grid-fixed">
+  <div class="alerts-grid">
     <!-- Productos Críticos -->
     <div class="alert-card">
       <div class="alert-header">
