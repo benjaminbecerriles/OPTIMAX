@@ -323,56 +323,6 @@
       </div>
     </div>
     
-    <!-- Actividad Reciente -->
-    <div class="alert-card">
-      <div class="alert-header">
-        <h3 class="alert-title">
-          <i class="fas fa-history"></i>
-          Actividad Reciente
-        </h3>
-        <button class="btn-text" onclick="viewAllActivity()">
-          Ver todo
-        </button>
-      </div>
-      
-      <div class="alert-body">
-        <div class="activity-timeline">
-          <div class="timeline-item">
-            <div class="timeline-icon success">
-              <i class="fas fa-plus"></i>
-            </div>
-            <div class="timeline-content">
-              <h4>15 productos agregados</h4>
-              <p>Por Juan Pérez</p>
-              <span class="timeline-time">Hace 2 horas</span>
-            </div>
-          </div>
-          
-          <div class="timeline-item">
-            <div class="timeline-icon warning">
-              <i class="fas fa-sync"></i>
-            </div>
-            <div class="timeline-content">
-              <h4>Ajuste de inventario</h4>
-              <p>Laptop Dell -3 unidades</p>
-              <span class="timeline-time">Hace 5 horas</span>
-            </div>
-          </div>
-          
-          <div class="timeline-item">
-            <div class="timeline-icon info">
-              <i class="fas fa-truck"></i>
-            </div>
-            <div class="timeline-content">
-              <h4>Pedido recibido</h4>
-              <p>Orden #1234 completada</p>
-              <span class="timeline-time">Ayer</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    
     <!-- Predicciones IA -->
     <div class="alert-card">
       <div class="alert-header">
@@ -427,23 +377,6 @@
   </div>
 </section>
 
-<!-- Quick Action Button (FAB) -->
-<div class="fab-container">
-  <button class="fab" id="fabButton">
-    <i class="fas fa-plus"></i>
-  </button>
-  <div class="fab-menu">
-    <a href="{{ url_for('nuevo_producto') }}" class="fab-option" data-tooltip="Nuevo producto">
-      <i class="fas fa-box"></i>
-    </a>
-    <a href="#" class="fab-option" data-tooltip="Escanear código" onclick="scanBarcode()">
-      <i class="fas fa-barcode"></i>
-    </a>
-    <a href="#" class="fab-option" data-tooltip="Entrada rápida" onclick="quickEntry()">
-      <i class="fas fa-plus-circle"></i>
-    </a>
-  </div>
-</div>
 {% endblock %}
 
 {% block extra_js %}
