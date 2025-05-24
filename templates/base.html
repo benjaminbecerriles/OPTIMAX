@@ -255,6 +255,64 @@
       animation: blink 1s infinite;
     }
 
+    /* Botón Volver Inteligente */
+    .smart-back-button {
+      position: absolute;
+      right: 2rem;
+      top: 50%;
+      transform: translateY(-50%);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      color: white;
+      border-radius: 10px;
+      font-weight: 500;
+      font-size: 0.875rem;
+      text-decoration: none;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .smart-back-button:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-50%) translateX(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      color: white;
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .smart-back-button i {
+      font-size: 0.75rem;
+      transition: transform 0.2s ease;
+    }
+
+    .smart-back-button:hover i {
+      transform: translateX(-2px);
+    }
+
+    .back-text {
+      font-weight: 600;
+    }
+
+    /* Animación de entrada */
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateY(-50%) translateX(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(-50%) translateX(0);
+      }
+    }
+
+    .smart-back-button {
+      animation: slideInRight 0.3s ease-out;
+    }
+
     /* Responsive */
     @media (max-width: 768px) {
       .optimax-header {
@@ -268,6 +326,15 @@
       .main-content {
         padding: 1rem;
       }
+
+      .smart-back-button {
+        right: 1rem;
+        padding: 0.5rem;
+      }
+
+      .smart-back-button .back-text {
+        display: none; /* Solo mostrar icono en móvil */
+      }
     }
   </style>
 </head>
@@ -280,6 +347,14 @@
       </div>
       <span class="logo-text">OptiMax</span>
     </a>
+    
+    <!-- Botón Volver Inteligente -->
+    {% if show_back_button and previous_page %}
+    <a href="{{ previous_page }}" class="smart-back-button" title="Volver a la página anterior">
+      <i class="fas fa-arrow-left"></i>
+      <span class="back-text">Volver</span>
+    </a>
+    {% endif %}
   </header>
 
   <!-- Contenido -->
@@ -425,6 +500,34 @@
   </script>
 
   <script src="{{ url_for('static', filename='js/mi_scanner_quagga.js') }}"></script>
+
+  <!-- Script para mejorar el botón Volver -->
+  <script>
+    // Atajo de teclado ESC para volver
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        const backButton = document.querySelector('.smart-back-button');
+        if (backButton) {
+          e.preventDefault();
+          backButton.click();
+        }
+      }
+    });
+    
+    // Tooltip dinámico con la página destino
+    document.addEventListener('DOMContentLoaded', function() {
+      const backButton = document.querySelector('.smart-back-button');
+      if (backButton) {
+        const href = backButton.getAttribute('href');
+        if (href) {
+          // Extraer el nombre de la página del URL
+          const pageName = href.split('/').pop() || 'inicio';
+          const readableName = pageName.replace(/-/g, ' ').replace(/_/g, ' ');
+          backButton.setAttribute('title', 'Volver a ' + readableName);
+        }
+      }
+    });
+  </script>
 
   <script>
     window.addEventListener("pageshow", function(e){

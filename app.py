@@ -22,6 +22,10 @@ from functools import wraps
 # 1) IMPORTA Flask-Migrate
 from flask_migrate import Migrate
 
+# NUEVO: Importar Flask-Compress y Flask-Caching
+from flask_compress import Compress
+from flask_caching import Cache
+
 from models import db
 # Importamos los modelos necesarios directamente
 from models.models import Empresa, CodigoDisponible, CodigoAsignado, Producto, CatalogoGlobal
@@ -389,8 +393,80 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 db.init_app(app)
 migrate = Migrate(app, db)
 
+# NUEVO: Configurar compresión GZIP
+Compress(app)
+
+# NUEVO: Configurar cache
+cache = Cache(app, config={
+    'CACHE_TYPE': 'simple',
+    'CACHE_DEFAULT_TIMEOUT': 300
+})
+
 # Inicializar el módulo de ajuste de stock
 init_ajuste_stock(app)
+
+##############################
+# Sistema de navegación "Volver" con rutas predefinidas
+##############################
+# Mapa de navegación: endpoint actual -> ruta destino del botón volver
+MAPA_NAVEGACION = {
+    # Grupo 1: Vuelven a dashboard/inventario
+    'nuevo_producto': 'dashboard_inventario',
+    'ajuste_stock': 'dashboard_inventario',
+    'ajuste_stock.index': 'dashboard_inventario',
+    'ajuste_stock.ajuste_stock': 'dashboard_inventario',  # NUEVA LÍNEA CORRECTA  
+    'cambiar_precios': 'dashboard_inventario',
+    'descuentos': 'dashboard_inventario',
+    'ubicacion_productos': 'dashboard_inventario',
+    'ver_productos': 'dashboard_inventario',
+    
+    # Grupo 2: Vuelven a nuevo-producto
+    'agregar_producto': 'nuevo_producto',
+    'agregar_sin_codigo': 'nuevo_producto',
+    'agregar_a_granel': 'nuevo_producto',
+    
+    # Grupo 3: Vuelven a ajuste-inventario
+    'historial_movimientos': 'ajuste_stock',
+    'ajuste_stock.ajuste_entrada': 'ajuste_stock',
+    'ajuste_stock.ajuste_salida': 'ajuste_stock',
+    'ajuste_stock.ajuste_confirmacion': 'ajuste_stock',
+    
+    # Grupo 4: Vuelven a productos (CON LOS PREFIJOS CORRECTOS)
+    'new_ajuste_stock.new_ajuste_entrada': 'ver_productos',
+    'new_ajuste_stock.new_ajuste_salida': 'ver_productos',
+    'new_ajuste_stock.new_ajuste_confirmacion': 'ver_productos',
+    'cambiar_costos': 'ver_productos',
+    'editar_producto': 'ver_productos',
+    'etiquetas_producto': 'ver_productos',
+}
+
+@app.context_processor
+def inject_navigation():
+    """Inyecta la información de navegación predefinida en todos los templates"""
+    current_endpoint = request.endpoint
+    
+    # DEBUG - Imprimir el endpoint actual
+    print(f"DEBUG - Endpoint actual: {current_endpoint}")
+    
+    # Buscar si el endpoint actual tiene una ruta de retorno definida
+    back_route = None
+    show_button = False
+    
+    if current_endpoint in MAPA_NAVEGACION:
+        back_route = url_for(MAPA_NAVEGACION[current_endpoint])
+        show_button = True
+        print(f"DEBUG - Ruta de retorno encontrada: {back_route}")
+    else:
+        print(f"DEBUG - No se encontró ruta de retorno para: {current_endpoint}")
+    
+    # No mostrar en login, registro o index
+    if current_endpoint in ['login', 'registro', 'index']:
+        show_button = False
+    
+    return {
+        'previous_page': back_route,
+        'show_back_button': show_button
+    }
 
 # NUEVO: Filtro Jinja2 para obtener el color de categoría
 @app.template_filter('category_color')
@@ -426,13 +502,26 @@ with app.app_context():
         print(f"AVISO: SerpAPI no disponible, usando imágenes predeterminadas: {e}")
 
 ##############################
-# Desactivar caché globalmente
+# Headers de seguridad y caché
 ##############################
 @app.after_request
-def no_cache(response):
-    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, private, max-age=0"
-    response.headers["Expires"] = "0"
-    response.headers["Pragma"] = "no-cache"
+def add_security_headers(response):
+    # Headers anti-cache para contenido dinámico
+    if response.mimetype == 'text/html':
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, private, max-age=0"
+        response.headers["Expires"] = "0"
+        response.headers["Pragma"] = "no-cache"
+    
+    # Headers de seguridad
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    
+    # Cache agresivo para assets estáticos
+    if response.mimetype in ['text/css', 'application/javascript', 'image/png', 'image/jpeg', 'image/webp']:
+        response.headers['Cache-Control'] = 'public, max-age=31536000'
+    
     return response
 
 ##############################
@@ -1069,6 +1158,132 @@ def dashboard_inventario():
         alertas_activas=alertas_activas,
         productos_agotarse=productos_por_agotarse  # Para el sidebar
     )
+
+# ========== RUTAS AUXILIARES DEL DASHBOARD ==========
+
+@app.route('/api/dashboard/stats')
+@login_requerido
+def api_dashboard_stats():
+    """
+    API endpoint para obtener estadísticas en tiempo real del dashboard
+    """
+    empresa_id = session.get('user_id')
+    
+    try:
+        # Estadísticas rápidas
+        total_productos = Producto.query.filter_by(empresa_id=empresa_id, is_approved=True).count()
+        productos_activos = Producto.query.filter_by(empresa_id=empresa_id, is_approved=True, esta_a_la_venta=True).count()
+        
+        # Movimientos recientes (últimos 7 días)
+        fecha_limite = datetime.now() - timedelta(days=7)
+        movimientos_recientes = MovimientoInventario.query.filter(
+            MovimientoInventario.empresa_id == empresa_id,
+            MovimientoInventario.fecha >= fecha_limite
+        ).count()
+        
+        return jsonify({
+            'success': True,
+            'stats': {
+                'total_productos': total_productos,
+                'productos_activos': productos_activos,
+                'movimientos_recientes': movimientos_recientes,
+                'ultima_actualizacion': datetime.now().strftime('%H:%M:%S')
+            }
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/product/<int:product_id>')
+@login_requerido
+def api_product_detail(product_id):
+    """
+    API endpoint para obtener detalles de un producto (usado por el modal del dashboard)
+    """
+    empresa_id = session.get('user_id')
+    
+    producto = Producto.query.filter_by(
+        id=product_id,
+        empresa_id=empresa_id
+    ).first()
+    
+    if not producto:
+        return jsonify({'success': False, 'error': 'Producto no encontrado'}), 404
+    
+    # Obtener lotes activos
+    lotes = LoteInventario.query.filter_by(
+        producto_id=product_id,
+        esta_activo=True
+    ).filter(LoteInventario.stock > 0).all()
+    
+    lotes_data = []
+    for lote in lotes:
+        lotes_data.append({
+            'numero_lote': lote.numero_lote,
+            'stock': float(lote.stock),
+            'costo': float(lote.costo_unitario) if lote.costo_unitario else 0,
+            'fecha_entrada': lote.fecha_entrada.strftime('%Y-%m-%d') if lote.fecha_entrada else None,
+            'fecha_caducidad': lote.fecha_caducidad.strftime('%Y-%m-%d') if lote.fecha_caducidad else None
+        })
+    
+    return jsonify({
+        'success': True,
+        'producto': {
+            'id': producto.id,
+            'nombre': producto.nombre,
+            'codigo_barras': producto.codigo_barras_externo,
+            'categoria': producto.categoria,
+            'marca': producto.marca,
+            'stock': float(producto.stock) if producto.stock else 0,
+            'precio_venta': float(producto.precio_venta) if producto.precio_venta else 0,
+            'costo': float(producto.costo) if producto.costo else 0,
+            'ubicacion': producto.ubicacion,
+            'descripcion': producto.descripcion,
+            'foto': producto.foto,
+            'lotes': lotes_data
+        }
+    })
+
+
+@app.route('/api/product/<int:product_id>/quick-update', methods=['POST'])
+@login_requerido
+def api_quick_update_product(product_id):
+    """
+    API endpoint para actualización rápida de productos desde el dashboard
+    """
+    empresa_id = session.get('user_id')
+    
+    producto = Producto.query.filter_by(
+        id=product_id,
+        empresa_id=empresa_id
+    ).first()
+    
+    if not producto:
+        return jsonify({'success': False, 'error': 'Producto no encontrado'}), 404
+    
+    try:
+        data = request.get_json()
+        
+        # Actualizar solo los campos permitidos
+        if 'precio_venta' in data:
+            producto.precio_venta = float(data['precio_venta'])
+        
+        if 'ubicacion' in data:
+            producto.ubicacion = data['ubicacion']
+        
+        if 'esta_a_la_venta' in data:
+            producto.esta_a_la_venta = bool(data['esta_a_la_venta'])
+        
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Producto actualizado correctamente'
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/cambiar-precios')
 @login_requerido
@@ -4732,6 +4947,30 @@ def sync_gsheet_to_catalogo():
             db.session.delete(ref)
             print(f"Borrando {ref.codigo_barras}, ya no está en la hoja.")
     db.session.commit()
+
+@app.route('/debug-endpoint')
+@login_requerido
+def debug_endpoint():
+    """Muestra todos los endpoints registrados"""
+    import pprint
+    endpoints = []
+    for rule in app.url_map.iter_rules():
+        endpoints.append({
+            'endpoint': rule.endpoint,
+            'methods': list(rule.methods),
+            'rule': str(rule)
+        })
+    
+    # Filtrar solo los relacionados con ajuste
+    ajuste_endpoints = [e for e in endpoints if 'ajuste' in e['endpoint'].lower() or 'new' in e['endpoint'].lower()]
+    
+    return f"""
+    <h2>Endpoints relacionados con ajuste:</h2>
+    <pre>{pprint.pformat(ajuste_endpoints, indent=2)}</pre>
+    
+    <h2>Todos los endpoints:</h2>
+    <pre>{pprint.pformat(endpoints, indent=2)}</pre>
+    """
 
 ##############################################
 # MAIN
