@@ -17,12 +17,13 @@
 <section class="inventory-hero">
   <div class="hero-content">
     <div class="hero-text">
-      <h1 class="hero-title">
-        <span class="typed-text" id="heroTitle"></span>
-        <span class="cursor">|</span>
-      </h1>
+      <div class="hero-title-wrapper">
+        <h1 class="hero-title">
+          <span><span class="typed-text" id="heroTitle"></span><span class="cursor">|</span></span>
+        </h1>
+      </div>
       <p class="hero-subtitle">
-        Sistema inteligente de gestión con predicciones basadas en IA y análisis en tiempo real
+        Controla tu inventario en tiempo real, optimiza tu stock y maximiza tus ganancias con herramientas inteligentes de gestión
       </p>
       
       <!-- Quick Stats -->
@@ -75,7 +76,7 @@
   <div class="kpi-grid">
     <!-- Total Productos -->
     <div class="kpi-card" data-tilt>
-      <div class="kpi-icon" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">
+      <div class="kpi-icon" style="background: linear-gradient(135deg, #94a3b8, #64748b);">
         <i class="fas fa-boxes"></i>
       </div>
       <div class="kpi-content">
@@ -93,7 +94,7 @@
     
     <!-- Stock Total -->
     <div class="kpi-card" data-tilt>
-      <div class="kpi-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+      <div class="kpi-icon" style="background: linear-gradient(135deg, #94a3b8, #64748b);">
         <i class="fas fa-cubes"></i>
       </div>
       <div class="kpi-content">
@@ -111,7 +112,7 @@
     
     <!-- Valor del Inventario -->
     <div class="kpi-card highlight" data-tilt>
-      <div class="kpi-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+      <div class="kpi-icon" style="background: linear-gradient(135deg, #94a3b8, #64748b);">
         <i class="fas fa-dollar-sign"></i>
       </div>
       <div class="kpi-content">
@@ -129,7 +130,7 @@
     
     <!-- Productos Críticos -->
     <div class="kpi-card" data-tilt>
-      <div class="kpi-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+      <div class="kpi-icon" style="background: linear-gradient(135deg, #94a3b8, #64748b);">
         <i class="fas fa-exclamation-triangle"></i>
       </div>
       <div class="kpi-content">
@@ -152,7 +153,7 @@
   <div class="section-header">
     <h2 class="section-title">Acciones Rápidas</h2>
     <div class="section-actions">
-      <button class="btn-text">
+      <button class="btn-text" onclick="showShortcutsInfo()" title="Ver todos los atajos de teclado">
         <i class="fas fa-keyboard"></i>
         Atajos
       </button>
@@ -161,57 +162,48 @@
   
   <div class="tools-grid">
     <a href="{{ url_for('nuevo_producto') }}" class="tool-card">
-      <div class="tool-icon">
-        <i class="fas fa-plus"></i>
+      <div class="tool-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+        <i class="fas fa-barcode"></i>
       </div>
-      <h3 class="tool-title">Nuevo Producto</h3>
-      <p class="tool-desc">Registrar SKU</p>
-      <span class="tool-shortcut">Ctrl+N</span>
+      <h3 class="tool-title">Registrar Producto</h3>
+      <p class="tool-desc">Agregar nuevo SKU</p>
+      <span class="tool-shortcut">Ctrl+Q</span>
     </a>
     
     <a href="{{ url_for('ajuste_stock') }}" class="tool-card">
-      <div class="tool-icon" style="background: var(--primary-600);">
-        <i class="fas fa-sync-alt"></i>
+      <div class="tool-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+        <i class="fas fa-plus-minus"></i>
       </div>
-      <h3 class="tool-title">Ajustar Stock</h3>
+      <h3 class="tool-title">Ajuste de Stock</h3>
       <p class="tool-desc">Entrada/Salida</p>
-      <span class="tool-shortcut">Ctrl+A</span>
+      <span class="tool-shortcut">Ctrl+E</span>
     </a>
     
     <a href="{{ url_for('cambiar_precios') }}" class="tool-card">
-      <div class="tool-icon" style="background: var(--success-600);">
-        <i class="fas fa-tags"></i>
+      <div class="tool-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
+        <i class="fas fa-tag"></i>
       </div>
-      <h3 class="tool-title">Actualizar Precios</h3>
+      <h3 class="tool-title">Cambiar Precios</h3>
       <p class="tool-desc">Individual o masivo</p>
-      <span class="tool-shortcut">Ctrl+P</span>
+      <span class="tool-shortcut">Ctrl+G</span>
     </a>
     
     <a href="{{ url_for('descuentos') }}" class="tool-card">
-      <div class="tool-icon" style="background: var(--warning-500);">
-        <i class="fas fa-percentage"></i>
+      <div class="tool-icon" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">
+        <i class="fas fa-percent"></i>
       </div>
       <h3 class="tool-title">Descuentos</h3>
       <p class="tool-desc">Promociones</p>
-      <span class="tool-shortcut">Ctrl+D</span>
+      <span class="tool-shortcut">Ctrl+B</span>
     </a>
     
-    <a href="#" class="tool-card" onclick="openTransferModal()">
-      <div class="tool-icon" style="background: #8b5cf6;">
-        <i class="fas fa-exchange-alt"></i>
+    <a href="{{ url_for('ubicacion_productos') }}" class="tool-card">
+      <div class="tool-icon" style="background: linear-gradient(135deg, #ec4899, #db2777);">
+        <i class="fas fa-map-marker-alt"></i>
       </div>
-      <h3 class="tool-title">Transferencias</h3>
-      <p class="tool-desc">Entre almacenes</p>
-      <span class="tool-shortcut">Ctrl+T</span>
-    </a>
-    
-    <a href="#" class="tool-card" onclick="scanBarcode()">
-      <div class="tool-icon" style="background: #ec4899;">
-        <i class="fas fa-barcode"></i>
-      </div>
-      <h3 class="tool-title">Escanear</h3>
-      <p class="tool-desc">Código rápido</p>
-      <span class="tool-shortcut">Ctrl+S</span>
+      <h3 class="tool-title">Ubicación</h3>
+      <p class="tool-desc">Gestión de espacios</p>
+      <span class="tool-shortcut">Ctrl+U</span>
     </a>
   </div>
 </section>
@@ -219,27 +211,7 @@
 <!-- Tabla de Productos Moderna -->
 <section class="products-section">
   <div class="section-header">
-    <h2 class="section-title">Productos en Inventario</h2>
-    <div class="section-actions">
-      <div class="search-box">
-        <i class="fas fa-search"></i>
-        <input type="text" placeholder="Buscar productos..." id="productSearch">
-      </div>
-      
-      <div class="view-toggle">
-        <button class="view-btn active" data-view="table">
-          <i class="fas fa-list"></i>
-        </button>
-        <button class="view-btn" data-view="grid">
-          <i class="fas fa-th"></i>
-        </button>
-      </div>
-      
-      <button class="btn-primary">
-        <i class="fas fa-download"></i>
-        Exportar
-      </button>
-    </div>
+    <h2 class="section-title">Ver y gestionar productos</h2>
   </div>
   
   {% if productos and productos|length > 0 %}
@@ -271,12 +243,12 @@
               <i class="fas fa-sort"></i>
             </div>
           </th>
-          <th>Estado</th>
+          <th>Marca</th>
           <th>Acciones</th>
         </tr>
       </thead>
       <tbody>
-        {% for producto in productos[:10] %}
+        {% for producto in productos[:2] %}
         <tr class="product-row" data-id="{{ producto.id|default(producto['id']) }}">
           <td>
             <div class="product-info">
@@ -319,16 +291,7 @@
           </td>
           
           <td>
-            {% set stock_status = producto.stock|default(producto['stock'])|default(0) %}
-            {% if stock_status <= 0 %}
-              <span class="status-badge critical">Agotado</span>
-            {% elif stock_status <= 5 %}
-              <span class="status-badge warning">Crítico</span>
-            {% elif stock_status <= 20 %}
-              <span class="status-badge caution">Bajo</span>
-            {% else %}
-              <span class="status-badge success">Óptimo</span>
-            {% endif %}
+            <span>{{ producto.marca|default('—') }}</span>
           </td>
           
           <td>
@@ -348,31 +311,11 @@
         {% endfor %}
       </tbody>
     </table>
-    
-    <!-- Pagination -->
-    <div class="table-footer">
-      <div class="showing-info">
-        Mostrando 1-10 de {{ productos|length }} productos
-      </div>
-      <div class="pagination">
-        <button class="page-btn" disabled>
-          <i class="fas fa-chevron-left"></i>
-        </button>
-        <button class="page-btn active">1</button>
-        <button class="page-btn">2</button>
-        <button class="page-btn">3</button>
-        <span class="page-dots">...</span>
-        <button class="page-btn">{{ (productos|length / 10)|round(0, 'ceil')|int }}</button>
-        <button class="page-btn">
-          <i class="fas fa-chevron-right"></i>
-        </button>
-      </div>
-    </div>
   </div>
   
   <div class="view-all-wrapper">
-    <a href="{{ url_for('ver_productos') }}" class="btn-secondary">
-      Ver todos los productos
+    <a href="{{ url_for('ver_productos') }}" class="btn-secondary view-all-enhanced">
+      <span>Ver todos los productos</span>
       <i class="fas fa-arrow-right"></i>
     </a>
   </div>
@@ -393,7 +336,7 @@
 
 <!-- Alertas y Notificaciones (ÚNICA VEZ) -->
 <section class="alerts-section">
-  <div class="alerts-grid">
+  <div class="alerts-grid alerts-grid-fixed">
     <!-- Productos Críticos -->
     <div class="alert-card">
       <div class="alert-header">
@@ -406,30 +349,32 @@
         </button>
       </div>
       
-      {% set low_stock = productos|selectattr('stock', 'defined')|selectattr('stock', 'gt', 0)|selectattr('stock', 'le', 5)|list if productos else [] %}
-      {% if low_stock|length > 0 %}
-      <div class="alert-list">
-        {% for producto in low_stock[:3] %}
-        <div class="alert-item critical">
-          <div class="alert-icon">
-            <i class="fas fa-box"></i>
+      <div class="alert-body">
+        {% set low_stock = productos|selectattr('stock', 'defined')|selectattr('stock', 'gt', 0)|selectattr('stock', 'le', 5)|list if productos else [] %}
+        {% if low_stock|length > 0 %}
+        <div class="alert-list">
+          {% for producto in low_stock[:3] %}
+          <div class="alert-item critical">
+            <div class="alert-icon">
+              <i class="fas fa-box"></i>
+            </div>
+            <div class="alert-content">
+              <h4>{{ producto.nombre|default(producto['nombre']) }}</h4>
+              <p>Quedan solo {{ producto.stock|default(producto['stock']) }} unidades</p>
+            </div>
+            <button class="alert-action" onclick="orderProduct({{ producto.id|default(producto['id']) }})">
+              Pedir
+            </button>
           </div>
-          <div class="alert-content">
-            <h4>{{ producto.nombre|default(producto['nombre']) }}</h4>
-            <p>Quedan solo {{ producto.stock|default(producto['stock']) }} unidades</p>
-          </div>
-          <button class="alert-action" onclick="orderProduct({{ producto.id|default(producto['id']) }})">
-            Pedir
-          </button>
+          {% endfor %}
         </div>
-        {% endfor %}
+        {% else %}
+        <div class="empty-alerts">
+          <i class="fas fa-check-circle"></i>
+          <p>Sin productos críticos</p>
+        </div>
+        {% endif %}
       </div>
-      {% else %}
-      <div class="empty-alerts">
-        <i class="fas fa-check-circle"></i>
-        <p>Sin productos críticos</p>
-      </div>
-      {% endif %}
     </div>
     
     <!-- Actividad Reciente -->
@@ -444,37 +389,39 @@
         </button>
       </div>
       
-      <div class="activity-timeline">
-        <div class="timeline-item">
-          <div class="timeline-icon success">
-            <i class="fas fa-plus"></i>
+      <div class="alert-body">
+        <div class="activity-timeline">
+          <div class="timeline-item">
+            <div class="timeline-icon success">
+              <i class="fas fa-plus"></i>
+            </div>
+            <div class="timeline-content">
+              <h4>15 productos agregados</h4>
+              <p>Por Juan Pérez</p>
+              <span class="timeline-time">Hace 2 horas</span>
+            </div>
           </div>
-          <div class="timeline-content">
-            <h4>15 productos agregados</h4>
-            <p>Por Juan Pérez</p>
-            <span class="timeline-time">Hace 2 horas</span>
+          
+          <div class="timeline-item">
+            <div class="timeline-icon warning">
+              <i class="fas fa-sync"></i>
+            </div>
+            <div class="timeline-content">
+              <h4>Ajuste de inventario</h4>
+              <p>Laptop Dell -3 unidades</p>
+              <span class="timeline-time">Hace 5 horas</span>
+            </div>
           </div>
-        </div>
-        
-        <div class="timeline-item">
-          <div class="timeline-icon warning">
-            <i class="fas fa-sync"></i>
-          </div>
-          <div class="timeline-content">
-            <h4>Ajuste de inventario</h4>
-            <p>Laptop Dell -3 unidades</p>
-            <span class="timeline-time">Hace 5 horas</span>
-          </div>
-        </div>
-        
-        <div class="timeline-item">
-          <div class="timeline-icon info">
-            <i class="fas fa-truck"></i>
-          </div>
-          <div class="timeline-content">
-            <h4>Pedido recibido</h4>
-            <p>Orden #1234 completada</p>
-            <span class="timeline-time">Ayer</span>
+          
+          <div class="timeline-item">
+            <div class="timeline-icon info">
+              <i class="fas fa-truck"></i>
+            </div>
+            <div class="timeline-content">
+              <h4>Pedido recibido</h4>
+              <p>Orden #1234 completada</p>
+              <span class="timeline-time">Ayer</span>
+            </div>
           </div>
         </div>
       </div>
@@ -490,44 +437,46 @@
         <span class="ai-badge">Powered by ML</span>
       </div>
       
-      <div class="predictions-list">
-        <div class="prediction-item">
-          <div class="prediction-icon">
-            <i class="fas fa-chart-line"></i>
+      <div class="alert-body">
+        <div class="predictions-list">
+          <div class="prediction-item">
+            <div class="prediction-icon">
+              <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="prediction-content">
+              <h4>Mouse Logitech G502</h4>
+              <p>Se agotará en <strong>3 días</strong></p>
+              <div class="prediction-accuracy">
+                <span>Precisión: 94%</span>
+                <div class="accuracy-bar">
+                  <div class="accuracy-fill" style="width: 94%"></div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="prediction-content">
-            <h4>Mouse Logitech G502</h4>
-            <p>Se agotará en <strong>3 días</strong></p>
-            <div class="prediction-accuracy">
-              <span>Precisión: 94%</span>
-              <div class="accuracy-bar">
-                <div class="accuracy-fill" style="width: 94%"></div>
+          
+          <div class="prediction-item">
+            <div class="prediction-icon">
+              <i class="fas fa-trending-up"></i>
+            </div>
+            <div class="prediction-content">
+              <h4>Teclados mecánicos</h4>
+              <p>Demanda aumentará <strong>35%</strong> próxima semana</p>
+              <div class="prediction-accuracy">
+                <span>Precisión: 87%</span>
+                <div class="accuracy-bar">
+                  <div class="accuracy-fill" style="width: 87%"></div>
+                </div>
               </div>
             </div>
           </div>
         </div>
         
-        <div class="prediction-item">
-          <div class="prediction-icon">
-            <i class="fas fa-trending-up"></i>
-          </div>
-          <div class="prediction-content">
-            <h4>Teclados mecánicos</h4>
-            <p>Demanda aumentará <strong>35%</strong> próxima semana</p>
-            <div class="prediction-accuracy">
-              <span>Precisión: 87%</span>
-              <div class="accuracy-bar">
-                <div class="accuracy-fill" style="width: 87%"></div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <button class="btn-ai">
+          <i class="fas fa-magic"></i>
+          Generar reporte completo
+        </button>
       </div>
-      
-      <button class="btn-ai">
-        <i class="fas fa-magic"></i>
-        Generar reporte completo
-      </button>
     </div>
   </div>
 </section>

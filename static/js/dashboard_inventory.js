@@ -4,6 +4,11 @@
 // =============================================
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Prevenir scroll horizontal
+    document.documentElement.style.overflowX = 'hidden';
+    document.body.style.overflowX = 'hidden';
+    document.body.style.maxWidth = '100vw';
+    
     // Inicializar componentes
     initTypedTitle();
     initCounters();
@@ -11,8 +16,8 @@ document.addEventListener('DOMContentLoaded', function() {
     initVanillaTilt();
     initTableInteractions();
     initFAB();
-    initSearch();
     initKeyboardShortcuts();
+    animateToolsOnScroll();
     
     // Marcar como cargado para animaciones CSS
     setTimeout(() => {
@@ -25,17 +30,37 @@ function initTypedTitle() {
     const element = document.getElementById('heroTitle');
     if (!element) return;
     
+    // Frases optimizadas para mejor ajuste visual
+    const phrases = [
+        'Control Total de Inventario',
+        'Gestión Inteligente de Stock',
+        'Optimización de Productos',
+        'Análisis en Tiempo Real',
+        'Predicciones con IA Avanzada'
+    ];
+    
     new Typed(element, {
-        strings: [
-            'Gestión Inteligente de Inventario',
-            'Control Total de tu Stock',
-            'Análisis Predictivo con IA'
-        ],
+        strings: phrases,
         typeSpeed: 50,
         backSpeed: 30,
         backDelay: 2000,
         loop: true,
-        showCursor: false
+        showCursor: false,
+        contentType: 'html',
+        onStringTyped: function() {
+            // Asegurar que el cursor esté siempre bien posicionado
+            const cursor = document.querySelector('.cursor');
+            if (cursor) {
+                cursor.style.display = 'inline-block';
+            }
+        },
+        preStringTyped: function() {
+            // Ocultar el cursor durante el borrado
+            const cursor = document.querySelector('.cursor');
+            if (cursor) {
+                cursor.style.opacity = '1';
+            }
+        }
     });
 }
 
@@ -63,7 +88,7 @@ function initCounters() {
 function animateCounter(element) {
     const target = parseInt(element.getAttribute('data-target')) || 0;
     const format = element.getAttribute('data-format');
-    const duration = 2000;
+    const duration = 800; // Reducido de 2000 a 800ms
     const step = target / (duration / 16);
     let current = 0;
     
@@ -239,75 +264,42 @@ function initFAB() {
     }
 }
 
-// ========== Búsqueda en tiempo real ==========
-function initSearch() {
-    const searchInput = document.getElementById('productSearch');
-    if (!searchInput) return;
-    
-    let searchTimeout;
-    
-    searchInput.addEventListener('input', function(e) {
-        clearTimeout(searchTimeout);
-        const query = e.target.value.toLowerCase();
-        
-        searchTimeout = setTimeout(() => {
-            const rows = document.querySelectorAll('.product-row');
-            
-            rows.forEach(row => {
-                const productName = row.querySelector('.product-name').textContent.toLowerCase();
-                const productSKU = row.querySelector('.product-sku').textContent.toLowerCase();
-                
-                if (productName.includes(query) || productSKU.includes(query)) {
-                    row.style.display = '';
-                    row.style.animation = 'fadeInUp 0.3s ease';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-            
-            // Actualizar contador
-            updateShowingInfo();
-        }, 300);
-    });
-}
-
-function updateShowingInfo() {
-    const visibleRows = document.querySelectorAll('.product-row:not([style*="display: none"])');
-    const showingInfo = document.querySelector('.showing-info');
-    
-    if (showingInfo) {
-        const total = document.querySelectorAll('.product-row').length;
-        showingInfo.textContent = `Mostrando ${visibleRows.length} de ${total} productos`;
-    }
-}
-
 // ========== Atajos de teclado ==========
 function initKeyboardShortcuts() {
+    // Mostrar información sobre atajos al cargar
+    console.log('🎯 Atajos de teclado disponibles:');
+    console.log('Ctrl+Q: Nuevo Producto | Ctrl+E: Ajuste Stock | Ctrl+G: Precios');
+    console.log('Ctrl+B: Descuentos | Ctrl+U: Ubicación | Ctrl+K: Escanear | Ctrl+L: Buscar');
+    
     document.addEventListener('keydown', function(e) {
-        // Ctrl/Cmd + tecla
+        // Ctrl + tecla (evitando conflictos con navegador)
         if (e.ctrlKey || e.metaKey) {
-            switch(e.key) {
-                case 'n':
+            switch(e.key.toLowerCase()) {
+                case 'q': // Registrar producto
                     e.preventDefault();
                     window.location.href = '/nuevo-producto';
                     break;
-                case 'a':
+                case 'e': // Ajuste de stock
                     e.preventDefault();
                     window.location.href = '/ajuste-stock';
                     break;
-                case 'p':
+                case 'g': // Cambiar precios
                     e.preventDefault();
                     window.location.href = '/cambiar-precios';
                     break;
-                case 'd':
+                case 'b': // Descuentos
                     e.preventDefault();
                     window.location.href = '/descuentos';
                     break;
-                case 's':
+                case 'u': // Ubicación
+                    e.preventDefault();
+                    window.location.href = '/ubicacion-productos';
+                    break;
+                case 'k': // Escanear (K de sKan para evitar conflicto con Ctrl+S)
                     e.preventDefault();
                     scanBarcode();
                     break;
-                case '/':
+                case 'l': // Buscar (L de Look para evitar conflicto con Ctrl+F)
                     e.preventDefault();
                     document.getElementById('productSearch')?.focus();
                     break;
@@ -320,6 +312,42 @@ function initKeyboardShortcuts() {
         }
     });
 }
+
+// ========== Animación mejorada para herramientas ==========
+function animateToolsOnScroll() {
+    const tools = document.querySelectorAll('.tool-card');
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry, index) => {
+            if (entry.isIntersecting) {
+                setTimeout(() => {
+                    entry.target.style.animation = 'toolPop 0.5s ease forwards';
+                }, index * 50);
+            }
+        });
+    }, { threshold: 0.5 });
+    
+    tools.forEach(tool => observer.observe(tool));
+}
+
+// Añadir animación al CSS
+const toolAnimation = `
+@keyframes toolPop {
+    from {
+        opacity: 0;
+        transform: scale(0.8) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+`;
+
+// Inyectar la animación
+const styleSheet = document.createElement('style');
+styleSheet.textContent = toolAnimation;
+document.head.appendChild(styleSheet);
 
 // ========== Funciones de utilidad ==========
 window.viewProduct = function(id) {
@@ -368,8 +396,26 @@ window.viewAllActivity = function() {
     window.location.href = '/actividad';
 };
 
+window.showShortcutsInfo = function() {
+    const shortcuts = `
+        <div style="font-size: 14px; line-height: 1.8;">
+            <strong>Atajos de Teclado Disponibles:</strong><br>
+            <span style="color: #10b981;">Ctrl+Q</span> → Nuevo Producto<br>
+            <span style="color: #8b5cf6;">Ctrl+E</span> → Ajuste de Stock<br>
+            <span style="color: #3b82f6;">Ctrl+G</span> → Cambiar Precios<br>
+            <span style="color: #06b6d4;">Ctrl+B</span> → Descuentos<br>
+            <span style="color: #ec4899;">Ctrl+U</span> → Ubicación<br>
+            <span style="color: #f59e0b;">Ctrl+K</span> → Escanear<br>
+            <span style="color: #10b981;">Ctrl+L</span> → Buscar<br>
+            <span style="color: #64748b;">ESC</span> → Cerrar ventanas
+        </div>
+    `;
+    
+    showNotification(shortcuts, 'info', 5000);
+};
+
 // ========== Sistema de notificaciones ==========
-function showNotification(message, type = 'info') {
+function showNotification(message, type = 'info', duration = 3000) {
     const notification = document.createElement('div');
     notification.className = `notification notification-${type}`;
     notification.innerHTML = `
@@ -384,11 +430,11 @@ function showNotification(message, type = 'info') {
         notification.classList.add('show');
     }, 10);
     
-    // Remover después de 3 segundos
+    // Remover después del tiempo especificado
     setTimeout(() => {
         notification.classList.remove('show');
         setTimeout(() => notification.remove(), 300);
-    }, 3000);
+    }, duration);
 }
 
 function getNotificationIcon(type) {
@@ -412,22 +458,22 @@ function closeAllModals() {
 const robotPhrases = {
     // Saludos según hora
     morning: [
-        "¡Buenos días jefe! ☀️ ¿Listo para un día productivo?",
-        "¡Arriba! El café ya está listo y las ventas esperan 📈",
-        "Buenos días, veo que tienes {stock_critico} productos por reabastecer",
-        "¡Qué madrugador! Me gusta tu actitud 💪"
+        "¡Buenos días! 📊 Tu inventario está listo para un gran día",
+        "¡Arriba! Tienes {total_productos} productos esperando gestión",
+        "Buenos días, {stock_critico} productos necesitan tu atención",
+        "¡Madrugador! El inventario está al {porcentaje_optimo}% de capacidad"
     ],
     afternoon: [
-        "¡Buenas tardes! Las ventas van de maravilla 🎯",
-        "La hora pico se acerca, ¿todo listo? 📦",
-        "Esta tarde has vendido {ventas_hoy} productos, ¡sigue así!",
-        "¿Ya comiste? No olvides recargar energías 🍽️"
+        "¡Buenas tardes! Has movido {productos_vendidos} productos hoy",
+        "La gestión va excelente, {porcentaje_vendido}% del objetivo diario",
+        "Esta tarde tu inventario vale ${valor_inventario}",
+        "¿Todo bajo control? Tienes {alertas} alertas pendientes"
     ],
     evening: [
-        "¡Trabajando tarde! Yo te acompaño 🌙",
-        "Casi es hora de cerrar, ¿revisamos el inventario?",
-        "¡Qué día! Vendiste {ventas_hoy} productos 🎉",
-        "No te desveles mucho, mañana será otro gran día"
+        "¡Gran día de gestión! {movimientos} movimientos registrados",
+        "Casi es hora de cerrar, ¿revisamos los críticos?",
+        "Tu inventario creció {crecimiento}% hoy 📈",
+        "Excelente trabajo, mañana será otro día productivo"
     ],
     
     // Estados del inventario
@@ -708,7 +754,7 @@ style.textContent = `
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 0.75rem;
     transform: translateX(400px);
     transition: transform 0.3s ease;
@@ -750,6 +796,8 @@ style.textContent = `
 
 .notification-info i {
     color: #3b82f6;
+    flex-shrink: 0;
+    margin-top: 2px;
 }
 
 /* Animación de carga para acciones */
@@ -761,6 +809,17 @@ style.textContent = `
     border-top-color: white;
     border-radius: 50%;
     animation: spin 1s linear infinite;
+}
+
+.notification strong {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 16px;
+}
+
+.notification span > span {
+    font-family: 'SF Mono', Monaco, monospace;
+    font-weight: 600;
 }
 
 @keyframes spin {
