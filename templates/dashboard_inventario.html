@@ -73,6 +73,10 @@
 
 <!-- KPIs Principales -->
 <section class="kpi-section">
+  <div class="section-header">
+    <h2 class="section-title">Datos Generales</h2>
+  </div>
+  
   <div class="kpi-grid">
     <!-- Total Productos -->
     <div class="kpi-card" data-tilt>
@@ -146,7 +150,6 @@
         <i class="fas fa-barcode"></i>
       </div>
       <h3 class="tool-title">Registrar Producto</h3>
-      <p class="tool-desc">Agregar nuevo SKU</p>
       <span class="tool-shortcut">Ctrl+Q</span>
     </a>
     
@@ -155,7 +158,6 @@
         <i class="fas fa-plus-minus"></i>
       </div>
       <h3 class="tool-title">Ajuste de Stock</h3>
-      <p class="tool-desc">Entrada/Salida</p>
       <span class="tool-shortcut">Ctrl+E</span>
     </a>
     
@@ -164,7 +166,6 @@
         <i class="fas fa-tag"></i>
       </div>
       <h3 class="tool-title">Cambiar Precios</h3>
-      <p class="tool-desc">Individual o masivo</p>
       <span class="tool-shortcut">Ctrl+G</span>
     </a>
     
@@ -173,7 +174,6 @@
         <i class="fas fa-percent"></i>
       </div>
       <h3 class="tool-title">Descuentos</h3>
-      <p class="tool-desc">Promociones</p>
       <span class="tool-shortcut">Ctrl+B</span>
     </a>
     
@@ -182,7 +182,6 @@
         <i class="fas fa-map-marker-alt"></i>
       </div>
       <h3 class="tool-title">Ubicación</h3>
-      <p class="tool-desc">Gestión de espacios</p>
       <span class="tool-shortcut">Ctrl+U</span>
     </a>
   </div>
@@ -282,6 +281,10 @@
 
 <!-- Alertas y Notificaciones -->
 <section class="alerts-section">
+  <div class="section-header">
+    <h2 class="section-title">Notificaciones</h2>
+  </div>
+  
   <div class="alerts-grid">
     <!-- Productos Críticos -->
     <div class="alert-card">
@@ -301,12 +304,18 @@
         <div class="alert-list">
           {% for producto in low_stock[:3] %}
           <div class="alert-item critical">
-            <div class="alert-icon">
-              <i class="fas fa-box"></i>
+            <div class="alert-image">
+              {% if producto.foto|default(producto['foto']) %}
+                <img src="{{ url_for('static', filename='uploads/' ~ (producto.foto|default(producto['foto']))) }}" alt="{{ producto.nombre|default(producto['nombre']) }}">
+              {% else %}
+                <div class="alert-placeholder">
+                  <i class="fas fa-box"></i>
+                </div>
+              {% endif %}
             </div>
             <div class="alert-content">
               <h4>{{ producto.nombre|default(producto['nombre']) }}</h4>
-              <p>Quedan solo {{ producto.stock|default(producto['stock']) }} unidades</p>
+              <p>Quedan solo <span class="stock-highlight">{{ producto.stock|default(producto['stock']) }} unidades</span></p>
             </div>
             <button class="alert-action" onclick="orderProduct({{ producto.id|default(producto['id']) }})">
               Pedir
@@ -336,9 +345,6 @@
       <div class="alert-body">
         <div class="predictions-list">
           <div class="prediction-item">
-            <div class="prediction-icon">
-              <i class="fas fa-chart-line"></i>
-            </div>
             <div class="prediction-content">
               <h4>Mouse Logitech G502</h4>
               <p>Se agotará en <strong>3 días</strong></p>
@@ -352,9 +358,6 @@
           </div>
           
           <div class="prediction-item">
-            <div class="prediction-icon">
-              <i class="fas fa-trending-up"></i>
-            </div>
             <div class="prediction-content">
               <h4>Teclados mecánicos</h4>
               <p>Demanda aumentará <strong>35%</strong> próxima semana</p>
@@ -366,12 +369,20 @@
               </div>
             </div>
           </div>
+
+          <div class="prediction-item">
+            <div class="prediction-content">
+              <h4>Cables USB-C</h4>
+              <p>Pico de ventas en <strong>5 días</strong></p>
+              <div class="prediction-accuracy">
+                <span>Precisión: 91%</span>
+                <div class="accuracy-bar">
+                  <div class="accuracy-fill" style="width: 91%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        
-        <button class="btn-ai">
-          <i class="fas fa-magic"></i>
-          Generar reporte completo
-        </button>
       </div>
     </div>
   </div>
