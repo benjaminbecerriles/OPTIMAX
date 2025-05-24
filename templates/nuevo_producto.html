@@ -1,721 +1,623 @@
 {% extends 'base.html' %}
 
-{% block title %}Agregar Producto{% endblock %}
+{% block title %}Registrar Producto - OptiMax{% endblock %}
 
 {% block content %}
+<!-- Botón Volver Global - Siempre en la misma posición -->
+<a href="{{ url_for('dashboard_inventario') }}" class="global-back-button">
+  <i class="fas fa-arrow-left"></i>
+  <span>Volver</span>
+</a>
+
 <style>
-  /* Sistema de Diseño Apple - Consistente con dashboard_inventario.html */
-  :root {
-    --font-apple: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', Helvetica, Arial, sans-serif;
-    
-    /* Colores esenciales */
-    --text-color: #1d1d1f;
-    --text-secondary: #86868b;
-    --background: #ffffff;
-    --light-background: #f5f5f7;
-    --separator: rgba(0, 0, 0, 0.1);
-    --accent: #e52e2e;
-    --accent-hover: #c51818;
-    --accent-light: rgba(229, 46, 46, 0.1);
-    --blue: #1a237e;
-  }
-  
+  /* Sistema de diseño coherente con dashboard */
   body {
-    font-family: var(--font-apple);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    color: var(--text-color);
-    background-color: var(--background);
+    background: #f8fafc;
   }
-  
-  /* Contenedor principal */
-  .apple-container {
+
+  /* Container con padding ajustado para el botón volver */
+  .register-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 36px 24px;
+    padding: 2rem 2rem 3rem;
   }
-  
-  /* Tipografía */
-  h1 {
-    font-size: 32px;
-    font-weight: 600;
+
+  /* Header centrado y elegante */
+  .page-header {
+    text-align: center;
+    margin-bottom: 3.5rem;
+    animation: fadeIn 0.6s ease-out;
+  }
+
+  .page-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 0.75rem;
     letter-spacing: -0.02em;
-    margin-bottom: 8px;
-    color: var(--text-color);
+    line-height: 1.2;
   }
-  
-  .page-description {
-    font-size: 17px;
-    color: var(--text-secondary);
-    margin-bottom: 28px;
+
+  .page-subtitle {
+    font-size: 1.125rem;
+    color: #64748b;
     max-width: 600px;
-    font-weight: 400;
+    margin: 0 auto;
+    line-height: 1.6;
   }
-  
-  /* Grid de opciones */
+
+  /* Grid principal */
   .options-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 24px;
-    margin-bottom: 48px;
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 4rem;
   }
-  
-  /* Tarjeta de producto - Ahora toda la tarjeta es clickeable */
-  .product-option {
-    background-color: var(--light-background);
-    border-radius: 12px;
+
+  /* Cards principales */
+  .product-card {
+    background: white;
+    border-radius: 16px;
     overflow: hidden;
-    position: relative;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    height: 100%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    text-decoration: none;
     display: flex;
     flex-direction: column;
-    cursor: pointer; /* Cursor pointer para toda la tarjeta */
-    text-decoration: none; /* Para cuando es un enlace <a> */
+    position: relative;
+    border: 1px solid transparent;
   }
-  
-  .product-option:hover {
-    transform: translateY(-5px);
+
+  .product-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+    border-color: #10b981;
   }
-  
-  .product-option::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    border-radius: 12px;
-    border: 2px solid transparent;
-    transition: border-color 0.3s ease;
-    pointer-events: none;
-    z-index: 2;
-  }
-  
-  .product-option:hover::before {
-    border-color: var(--accent);
-  }
-  
-  /* Área de media */
-  .option-media {
+
+  /* Media container */
+  .card-media {
     position: relative;
     width: 100%;
     height: 220px;
     overflow: hidden;
+    background: #f1f5f9;
   }
-  
-  .option-media video,
-  .option-media img {
+
+  .card-media video {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform 0.3s ease;
   }
-  
-  /* Badge y botón info */
-  .option-badge {
+
+  .product-card:hover .card-media video {
+    transform: scale(1.05);
+  }
+
+  /* Badge minimalista */
+  .card-badge {
     position: absolute;
-    top: 16px;
-    left: 16px;
-    font-size: 12px;
-    font-weight: 500;
-    padding: 4px 12px;
-    border-radius: 4px;
-    background-color: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(4px);
-    color: var(--text-color);
-    z-index: 1;
-  }
-  
-  /* Botón de info - Ajustado z-index para asegurar que funcione por encima de la tarjeta clickeable */
-  .info-button {
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background-color: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(4px);
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    color: var(--text-color);
-    z-index: 10; /* Mayor z-index para estar sobre la tarjeta */
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-  }
-  
-  .info-button:hover {
-    background-color: white;
-  }
-  
-  /* Elimino option-footer ya que no se usará más */
-  .option-content {
-    padding: 24px;
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-    text-align: center;
-    padding-bottom: 32px; /* Añado más padding abajo para compensar el botón eliminado */
-  }
-  
-  .option-title {
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 12px;
-    color: var(--text-color);
-  }
-  
-  .option-description {
-    font-size: 14px;
-    color: var(--text-secondary);
-    line-height: 1.5;
-    margin: 0;
-  }
-  
-  /* Botón de selección */
-  .option-footer {
-    padding: 0 24px 24px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .btn-select {
-    display: inline-block;
-    width: 100%;
-    padding: 12px 24px;
-    background-color: #3478f6;
-    color: white;
-    font-size: 14px;
-    font-weight: 500;
-    text-align: center;
+    top: 1rem;
+    left: 1rem;
+    padding: 0.375rem 0.875rem;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
     border-radius: 8px;
-    text-decoration: none;
-    transition: background-color 0.2s ease;
-  }
-  
-  .btn-select:hover {
-    background-color: #2865d9;
-  }
-  
-  /* MODIFICADO: Encabezado página con mismo estilo que ajuste_stock.html */
-  .page-header {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #10b981;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
+    align-items: center;
+    gap: 0.375rem;
   }
-  
-  .header-title-container {
+
+  /* Contenido de la card */
+  .card-content {
+    padding: 1.75rem;
+    flex: 1;
     display: flex;
     flex-direction: column;
   }
-  
-  .header-actions {
-    display: flex;
-    gap: 1rem;
-    padding-top: 8px; /* Ajuste para alinear con la primera línea del título */
-    align-items: center;
-  }
-  
-  /* MODIFICADO: Botón volver con mismo estilo que ajuste_stock.html */
-  .btn-action {
+
+  .card-icon {
+    width: 48px;
+    height: 48px;
+    background: #f8fafc;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.75rem;
-    padding: 0.75rem 1.25rem;
-    border-radius: 980px;
-    font-weight: 500;
-    font-size: 0.95rem;
-    transition: all 0.2s ease;
-    text-decoration: none;
-    cursor: pointer;
-    border: none;
-    height: 44px; /* Altura fija para todos los botones */
-    white-space: nowrap; /* Evita que el texto se rompa */
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    color: #64748b;
+    transition: all 0.3s ease;
   }
-  
-  .btn-action i, 
-  .btn-action span {
+
+  .product-card:hover .card-icon {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    transform: scale(1.1);
+  }
+
+  .card-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 0.5rem;
+  }
+
+  .card-description {
+    font-size: 0.9375rem;
+    color: #64748b;
+    line-height: 1.6;
+    flex: 1;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Call to action */
+  .card-cta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 1.25rem;
+    border-top: 1px solid #f1f5f9;
+  }
+
+  .cta-text {
+    font-weight: 600;
+    color: #10b981;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: gap 0.3s ease;
+  }
+
+  .product-card:hover .cta-text {
+    gap: 0.75rem;
+  }
+
+  .cta-time {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  /* Botón de registro masivo */
+  .mass-register-section {
+    text-align: center;
+    padding: 3rem;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border-radius: 20px;
+    color: white;
+    margin-bottom: 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .mass-register-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    animation: pulse 4s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.1); opacity: 0.3; }
+  }
+
+  .mass-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    position: relative;
+  }
+
+  .mass-subtitle {
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+    opacity: 0.9;
+    position: relative;
+  }
+
+  .btn-mass {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    vertical-align: middle;
-    line-height: 1;
-  }
-  
-  /* Botón Volver estilo historial de movimientos */
-  .btn-volver {
-    background-color: var(--blue);
-    color: #ffffff;
-    box-shadow: 0 2px 4px rgba(26, 35, 126, 0.3);
-  }
-  
-  .btn-volver:hover {
-    background-color: #151c64;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(26, 35, 126, 0.4);
-    color: #ffffff;
-  }
-  
-  /* Botón registrar masivamente */
-  .btn-mass-add {
-    background-color: var(--accent);
-    color: white;
-    box-shadow: 0 2px 4px rgba(229, 46, 46, 0.3);
-  }
-  
-  .btn-mass-add:hover {
-    background-color: var(--accent-hover);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(229, 46, 46, 0.4);
-    color: white;
-  }
-  
-  /* Botón de cancelar - Mantenido pero oculto */
-  .actions-container {
-    display: none; /* Ocultar el contenedor original */
-  }
-  
-  .btn-cancel {
-    display: inline-block;
-    padding: 12px 24px;
-    font-size: 14px;
-    font-weight: 500;
-    background-color: transparent;
-    color: var(--text-color);
-    border: 1px solid var(--separator);
-    border-radius: 8px;
-    text-decoration: none;
-    transition: background-color 0.2s ease, border-color 0.2s ease;
-  }
-  
-  .btn-cancel:hover {
-    background-color: var(--light-background);
-    border-color: var(--text-secondary);
-  }
-  
-  /* Modal */
-  .info-modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.4);
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(5px);
-  }
-  
-  .modal-content {
-    position: relative;
-    background-color: var(--background);
+    gap: 0.75rem;
+    padding: 0.875rem 2rem;
+    background: white;
+    color: #059669;
     border-radius: 12px;
-    padding: 32px;
-    width: 100%;
-    max-width: 650px;
-    max-height: 85vh;
-    overflow-y: auto;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    position: relative;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
   }
-  
-  .modal-close {
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    width: 30px;
-    height: 30px;
+
+  .btn-mass:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Tips section mejorada */
+  .tips-container {
+    background: white;
+    border-radius: 20px;
+    padding: 2.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+
+  .tips-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .tips-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 0.5rem;
+  }
+
+  .tips-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .tip-item {
+    display: flex;
+    gap: 1rem;
+    padding: 1.25rem;
+    background: #f8fafc;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+  }
+
+  .tip-item:hover {
+    background: #f1f5f9;
+    transform: translateY(-2px);
+  }
+
+  .tip-icon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    background: white;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: none;
-    background: none;
-    font-size: 24px;
-    color: var(--text-secondary);
-    cursor: pointer;
+    color: #10b981;
+    font-size: 1.125rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   }
-  
-  .modal-title {
-    font-size: 24px;
+
+  .tip-content h4 {
+    font-size: 0.875rem;
     font-weight: 600;
-    margin-bottom: 24px;
-    color: var(--text-color);
+    color: #0f172a;
+    margin-bottom: 0.25rem;
   }
-  
-  /* Grid en el modal */
-  .modal-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-    margin-bottom: 24px;
-  }
-  
-  @media (max-width: 576px) {
-    .modal-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-  
-  .modal-feature-card {
-    background-color: var(--light-background);
-    border-radius: 8px;
-    padding: 20px;
-  }
-  
-  .modal-feature-title {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 12px;
-    color: var(--text-color);
-  }
-  
-  .modal-feature-icon {
-    width: 32px;
-    height: 32px;
-    object-fit: contain;
-  }
-  
-  .modal-feature-text {
-    font-size: 14px;
-    color: var(--text-secondary);
+
+  .tip-content p {
+    font-size: 0.8125rem;
+    color: #64748b;
     line-height: 1.5;
     margin: 0;
   }
-  
+
   /* Animaciones */
   @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
   }
-  
-  .animated-fade {
-    animation: fadeIn 0.3s ease-out;
+
+  .product-card {
+    animation: fadeIn 0.6s ease-out;
+    animation-fill-mode: both;
   }
-  
-  @keyframes scaleIn {
-    from { transform: scale(0.95); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-  }
-  
-  .scale-in {
-    animation: scaleIn 0.3s ease-out;
-  }
-  
+
+  .product-card:nth-child(1) { animation-delay: 0.1s; }
+  .product-card:nth-child(2) { animation-delay: 0.2s; }
+  .product-card:nth-child(3) { animation-delay: 0.3s; }
+
   /* Responsive */
-  @media (max-width: 768px) {
-    .apple-container {
-      padding: 24px 16px;
-    }
-    
+  @media (max-width: 1024px) {
     .options-grid {
       grid-template-columns: 1fr;
+      max-width: 500px;
+      margin: 0 auto 3rem;
     }
-    
-    h1 {
-      font-size: 28px;
+  }
+
+  @media (max-width: 768px) {
+    .register-container {
+      padding: 1.5rem 1rem 2rem;
     }
-    
-    .page-description {
-      font-size: 16px;
+
+    .page-title {
+      font-size: 2rem;
     }
-    
-    /* Ajuste responsivo para el header */
-    .page-header {
-      flex-direction: column;
-      align-items: flex-start;
+
+    .options-grid {
       gap: 1rem;
     }
-    
-    .header-actions {
-      width: 100%;
+
+    .tips-grid {
+      grid-template-columns: 1fr;
     }
+
+    .mass-register-section {
+      padding: 2rem 1.5rem;
+    }
+  }
+
+  /* Focus states */
+  .product-card:focus {
+    outline: 3px solid #10b981;
+    outline-offset: 4px;
+  }
+
+  /* Loading animation para videos */
+  .card-media::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 40px;
+    border: 3px solid #e2e8f0;
+    border-top-color: #10b981;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .card-media.loading::after {
+    opacity: 1;
+  }
+
+  @keyframes spin {
+    to { transform: translate(-50%, -50%) rotate(360deg); }
   }
 </style>
 
-<div class="apple-container animated-fade">
-  <!-- MODIFICADO: Estructura del encabezado para que coincida con ajuste_stock.html -->
-  <div class="page-header">
-    <div class="header-title-container">
-      <h1 class="page-title">Registrar producto</h1>
-      <p class="page-description">Elige el tipo de producto que deseas añadir a tu inventario</p>
+<div class="main-content has-back-button">
+  <div class="register-container">
+    <!-- Header simple y directo -->
+    <div class="page-header">
+      <h1 class="page-title">¿Qué tipo de producto quieres registrar?</h1>
+      <p class="page-subtitle">Selecciona la opción que mejor se adapte a tu producto</p>
     </div>
-    <div class="header-actions">
-      <!-- Botón Volver con clase btn-action y btn-volver -->
-      <a href="{{ url_for('dashboard_inventario') }}" class="btn-action btn-volver">
-        <i class="fas fa-arrow-left"></i>
-        <span>Volver</span>
+
+    <!-- Grid de opciones principales -->
+    <div class="options-grid">
+      <!-- Con código de barras -->
+      <a href="{{ url_for('agregar_producto') }}" class="product-card">
+        <div class="card-media loading">
+          <video autoplay loop muted playsinline 
+                 onloadeddata="this.parentElement.classList.remove('loading')">
+            <source src="{{ url_for('static', filename='vid/producto.MOV') }}" type="video/mp4">
+          </video>
+          <div class="card-badge">
+            <i class="fas fa-check-circle"></i>
+            Más usado
+          </div>
+        </div>
+        
+        <div class="card-content">
+          <div class="card-icon">
+            <i class="fas fa-barcode"></i>
+          </div>
+          <h3 class="card-title">Con código de barras</h3>
+          <p class="card-description">
+            Para productos comerciales que ya tienen código impreso. 
+            La IA completará la información automáticamente.
+          </p>
+          
+          <div class="card-cta">
+            <span class="cta-text">
+              Continuar
+              <i class="fas fa-arrow-right"></i>
+            </span>
+            <span class="cta-time">
+              <i class="fas fa-clock"></i>
+              30 seg
+            </span>
+          </div>
+        </div>
       </a>
-      <!-- Botón Registrar masivamente con clase btn-action y btn-mass-add -->
-      <a href="#" class="btn-action btn-mass-add">
+
+      <!-- Sin código -->
+      <a href="{{ url_for('agregar_sin_codigo') }}" class="product-card">
+        <div class="card-media loading">
+          <video autoplay loop muted playsinline
+                 onloadeddata="this.parentElement.classList.remove('loading')">
+            <source src="{{ url_for('static', filename='vid/croquetas.mp4') }}" type="video/mp4">
+          </video>
+          <div class="card-badge">
+            <i class="fas fa-star"></i>
+            Personalizado
+          </div>
+        </div>
+        
+        <div class="card-content">
+          <div class="card-icon">
+            <i class="fas fa-tag"></i>
+          </div>
+          <h3 class="card-title">Sin código de barras</h3>
+          <p class="card-description">
+            Para productos propios o que no tienen código. 
+            Generaremos un código único para imprimir.
+          </p>
+          
+          <div class="card-cta">
+            <span class="cta-text">
+              Continuar
+              <i class="fas fa-arrow-right"></i>
+            </span>
+            <span class="cta-time">
+              <i class="fas fa-clock"></i>
+              1 min
+            </span>
+          </div>
+        </div>
+      </a>
+
+      <!-- A granel -->
+      <a href="{{ url_for('agregar_a_granel') }}" class="product-card">
+        <div class="card-media loading">
+          <video autoplay loop muted playsinline
+                 onloadeddata="this.parentElement.classList.remove('loading')">
+            <source src="{{ url_for('static', filename='vid/aguacates.mp4') }}" type="video/mp4">
+          </video>
+          <div class="card-badge">
+            <i class="fas fa-weight"></i>
+            A granel
+          </div>
+        </div>
+        
+        <div class="card-content">
+          <div class="card-icon">
+            <i class="fas fa-balance-scale"></i>
+          </div>
+          <h3 class="card-title">A granel</h3>
+          <p class="card-description">
+            Para productos que se venden por peso o volumen. 
+            Compatible con básculas y diferentes unidades.
+          </p>
+          
+          <div class="card-cta">
+            <span class="cta-text">
+              Continuar
+              <i class="fas fa-arrow-right"></i>
+            </span>
+            <span class="cta-time">
+              <i class="fas fa-clock"></i>
+              2 min
+            </span>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <!-- Sección de registro masivo -->
+    <div class="mass-register-section">
+      <h2 class="mass-title">¿Tienes muchos productos?</h2>
+      <p class="mass-subtitle">Ahorra tiempo registrando varios productos a la vez</p>
+      <a href="#" class="btn-mass">
         <i class="fas fa-layer-group"></i>
-        <span>Registrar masivamente</span>
+        Registro masivo
       </a>
     </div>
-  </div>
 
-<!-- Grid de opciones de producto -->
-  <div class="options-grid">
-    <!-- Opción 1: Con código de barras -->
-    <a href="{{ url_for('agregar_producto') }}" class="product-option">
-      <div class="option-media">
-        <video src="{{ url_for('static', filename='vid/producto.MOV') }}" autoplay loop muted playsinline></video>
-      </div>
-      <div class="option-badge">Código de barras</div>
-      <button class="info-button" onclick="openModal('modal-barcode'); event.preventDefault();">i</button>
-      
-      <div class="option-content">
-        <h3 class="option-title">Con código de barras</h3>
-        <p class="option-description">Para artículos comerciales que ya incluyen un código de barras impreso.</p>
-      </div>
-    </a>
-    
-    <!-- Opción 2: Sin código de barras -->
-    <a href="{{ url_for('agregar_sin_codigo') }}" class="product-option">
-      <div class="option-media">
-        <video src="{{ url_for('static', filename='vid/croquetas.mp4') }}" autoplay loop muted playsinline></video>
-      </div>
-      <div class="option-badge">Personalizado</div>
-      <button class="info-button" onclick="openModal('modal-custom'); event.preventDefault();">i</button>
-      
-      <div class="option-content">
-        <h3 class="option-title">Sin código de barras</h3>
-        <p class="option-description">Para artículos que no incluyen código de barras o son fabricados por ti.</p>
-      </div>
-    </a>
-    
-    <!-- Opción 3: A granel -->
-    <a href="{{ url_for('agregar_a_granel') }}" class="product-option">
-      <div class="option-media">
-        <video src="{{ url_for('static', filename='vid/aguacates.mp4') }}" autoplay loop muted playsinline></video>
-      </div>
-      <div class="option-badge">A granel</div>
-      <button class="info-button" onclick="openModal('modal-bulk'); event.preventDefault();">i</button>
-      
-      <div class="option-content">
-        <h3 class="option-title">A granel</h3>
-        <p class="option-description">Para artículos que se venden por peso, volumen u otras medidas variables.</p>
-      </div>
-    </a>
-  </div>
-  
-  <!-- Botón cancelar original (ahora oculto) -->
-  <div class="actions-container">
-    <a href="{{ url_for('dashboard_inventario') }}" class="btn-cancel">Cancelar</a>
-  </div>
-</div>
-
-<!-- Modales de información -->
-<!-- Modal Código de Barras -->
-<div id="modal-barcode" class="info-modal">
-  <div class="modal-content scale-in">
-    <button class="modal-close" onclick="closeModal('modal-barcode')">&times;</button>
-    <h3 class="modal-title">Con código de barras</h3>
-    
-    <div class="modal-grid">
-      <div class="modal-feature-card">
-        <h4 class="modal-feature-title">
-          <img src="{{ url_for('static', filename='img/scaneando.png') }}" alt="Escaneo rápido" class="modal-feature-icon">
-          Escaneo rápido
-        </h4>
-        <p class="modal-feature-text">Usa la cámara o un lector físico para capturar el código al instante.</p>
+    <!-- Tips útiles -->
+    <div class="tips-container">
+      <div class="tips-header">
+        <h3 class="tips-title">Tips para ahorrar tiempo</h3>
       </div>
       
-      <div class="modal-feature-card">
-        <h4 class="modal-feature-title">
-          <img src="{{ url_for('static', filename='img/datos.png') }}" alt="Búsqueda inteligente" class="modal-feature-icon">
-          Búsqueda inteligente
-        </h4>
-        <p class="modal-feature-text">La IA completa automáticamente nombre, imagen y categoría del producto.</p>
-      </div>
-      
-      <div class="modal-feature-card">
-        <h4 class="modal-feature-title">
-          <img src="{{ url_for('static', filename='img/sku.png') }}" alt="Prevención de duplicados" class="modal-feature-icon">
-          Prevención de duplicados
-        </h4>
-        <p class="modal-feature-text">Detección automática para evitar duplicados en tu inventario.</p>
-      </div>
-      
-      <div class="modal-feature-card">
-        <h4 class="modal-feature-title">
-          <img src="{{ url_for('static', filename='img/preciso.png') }}" alt="Precisión garantizada" class="modal-feature-icon">
-          Precisión garantizada
-        </h4>
-        <p class="modal-feature-text">Elimina errores de entrada manual y asegura la trazabilidad del producto.</p>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Modal Producto Sin Código -->
-<div id="modal-custom" class="info-modal">
-  <div class="modal-content scale-in">
-    <button class="modal-close" onclick="closeModal('modal-custom')">&times;</button>
-    <h3 class="modal-title">Sin código de barras</h3>
-    
-    <div class="modal-grid">
-      <div class="modal-feature-card">
-        <h4 class="modal-feature-title">
-          <img src="{{ url_for('static', filename='img/sku.png') }}" alt="Código único" class="modal-feature-icon">
-          Código único
-        </h4>
-        <p class="modal-feature-text">Generación automática de un código interno para trazabilidad perfecta.</p>
-      </div>
-      
-      <div class="modal-feature-card">
-        <h4 class="modal-feature-title">
-          <img src="{{ url_for('static', filename='img/adaptable.png') }}" alt="Personalización total" class="modal-feature-icon">
-          Personalización total
-        </h4>
-        <p class="modal-feature-text">Control completo sobre la información del producto a tu medida.</p>
-      </div>
-      
-      <div class="modal-feature-card">
-        <h4 class="modal-feature-title">
-          <img src="{{ url_for('static', filename='img/etiqueta.png') }}" alt="Etiquetado profesional" class="modal-feature-icon">
-          Etiquetado profesional
-        </h4>
-        <p class="modal-feature-text">Imprime etiquetas personalizadas para identificación y venta eficiente.</p>
-      </div>
-      
-      <div class="modal-feature-card">
-        <h4 class="modal-feature-title">
-          <img src="{{ url_for('static', filename='img/control.png') }}" alt="Gestión avanzada" class="modal-feature-icon">
-          Gestión avanzada
-        </h4>
-        <p class="modal-feature-text">Ideal para desarrollar catálogos propios o gestionar productos locales.</p>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Modal Producto a Granel -->
-<div id="modal-bulk" class="info-modal">
-  <div class="modal-content scale-in">
-    <button class="modal-close" onclick="closeModal('modal-bulk')">&times;</button>
-    <h3 class="modal-title">A granel</h3>
-    
-    <div class="modal-grid">
-      <div class="modal-feature-card">
-        <h4 class="modal-feature-title">
-          <img src="{{ url_for('static', filename='img/kg.png') }}" alt="Medidas flexibles" class="modal-feature-icon">
-          Medidas flexibles
-        </h4>
-        <p class="modal-feature-text">Define unidades específicas de peso, volumen o longitud según necesites.</p>
-      </div>
-      
-      <div class="modal-feature-card">
-        <h4 class="modal-feature-title">
-          <img src="{{ url_for('static', filename='img/datos.png') }}" alt="Precios por unidad" class="modal-feature-icon">
-          Precios por unidad
-        </h4>
-        <p class="modal-feature-text">Establece precios por kilo, litro o la unidad de medida que elijas.</p>
-      </div>
-      
-      <div class="modal-feature-card">
-        <h4 class="modal-feature-title">
-          <img src="{{ url_for('static', filename='img/control.png') }}" alt="Control de caducidad" class="modal-feature-icon">
-          Control de caducidad
-        </h4>
-        <p class="modal-feature-text">Gestión inteligente de fechas de vencimiento para minimizar pérdidas.</p>
-      </div>
-      
-      <div class="modal-feature-card">
-        <h4 class="modal-feature-title">
-          <img src="{{ url_for('static', filename='img/adaptable.png') }}" alt="Integración avanzada" class="modal-feature-icon">
-          Integración avanzada
-        </h4>
-        <p class="modal-feature-text">Compatible con básculas y sistemas de medición para máxima precisión.</p>
+      <div class="tips-grid">
+        <div class="tip-item">
+          <div class="tip-icon">
+            <i class="fas fa-keyboard"></i>
+          </div>
+          <div class="tip-content">
+            <h4>Atajo rápido</h4>
+            <p>Presiona Ctrl+K desde cualquier página para escanear</p>
+          </div>
+        </div>
+        
+        <div class="tip-item">
+          <div class="tip-icon">
+            <i class="fas fa-robot"></i>
+          </div>
+          <div class="tip-content">
+            <h4>IA automática</h4>
+            <p>El sistema completa nombre, imagen y categoría al escanear</p>
+          </div>
+        </div>
+        
+        <div class="tip-item">
+          <div class="tip-icon">
+            <i class="fas fa-print"></i>
+          </div>
+          <div class="tip-content">
+            <h4>Etiquetas gratis</h4>
+            <p>Imprime códigos de barras para productos sin código</p>
+          </div>
+        </div>
+        
+        <div class="tip-item">
+          <div class="tip-icon">
+            <i class="fas fa-shield-alt"></i>
+          </div>
+          <div class="tip-content">
+            <h4>Sin duplicados</h4>
+            <p>Validación automática para evitar productos repetidos</p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-  // Gestión de modales
-  function openModal(modalId) {
-    document.getElementById(modalId).style.display = 'flex';
-    document.body.style.overflow = 'hidden'; // Prevenir scroll
-  }
-  
-  function closeModal(modalId) {
-    document.getElementById(modalId).style.display = 'none';
-    document.body.style.overflow = 'auto'; // Restaurar scroll
-  }
-  
-  // Inicialización al cargar la página
+  // Gestión optimizada de videos
   document.addEventListener('DOMContentLoaded', function() {
-    // Configuración para cerrar modales al hacer clic fuera del contenido
-    const modals = document.querySelectorAll('.info-modal');
-    modals.forEach(modal => {
-      modal.addEventListener('click', function(e) {
-        if (e.target === modal) {
-          modal.style.display = 'none';
-          document.body.style.overflow = 'auto';
-        }
-      });
-    });
-    
-    // Mejorar reproducción de videos
     const videos = document.querySelectorAll('video');
-    videos.forEach(video => {
-      // Función para intentar reproducir con backoff exponencial
-      let attempts = 0;
-      const maxAttempts = 3;
-      const tryPlayVideo = () => {
-        video.play().catch(error => {
-          console.log(`Intento ${attempts+1} fallido:`, error);
-          if (attempts < maxAttempts) {
-            attempts++;
-            setTimeout(tryPlayVideo, 1000 * Math.pow(2, attempts));
+    
+    // Intersection Observer para reproducir solo videos visibles
+    if ('IntersectionObserver' in window) {
+      const videoObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          const video = entry.target;
+          if (entry.isIntersecting) {
+            video.play().catch(() => {
+              console.log('Autoplay bloqueado');
+            });
           } else {
-            // Fallback final: configurar poster estático
-            const videoSrc = video.getAttribute('src');
-            const posterSrc = videoSrc.replace(/\.(MOV|mp4)$/i, '.jpg');
-            video.setAttribute('poster', posterSrc);
-            console.log("Usando poster estático como fallback:", posterSrc);
+            video.pause();
           }
         });
-      };
+      }, { threshold: 0.25 });
       
-      // Intentar reproducción inicial
-      tryPlayVideo();
-      
-      // Observer para reproducir/pausar cuando el video está en viewport
-      if ('IntersectionObserver' in window) {
-        const observer = new IntersectionObserver((entries) => {
-          entries.forEach(entry => {
-            if (entry.isIntersecting) {
-              tryPlayVideo();
-            } else {
-              video.pause();
-            }
-          });
-        }, { threshold: 0.5 });
-        
-        observer.observe(video);
-      }
+      videos.forEach(video => {
+        videoObserver.observe(video);
+      });
+    } else {
+      // Fallback para navegadores antiguos
+      videos.forEach(video => {
+        video.play().catch(() => {});
+      });
+    }
+    
+    // Precargar videos
+    videos.forEach(video => {
+      video.load();
     });
   });
   
-  // Manejo de tecla Escape para cerrar modales
+  // Keyboard shortcuts
   document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-      const openModals = document.querySelectorAll('.info-modal[style*="display: flex"]');
-      openModals.forEach(modal => {
-        modal.style.display = 'none';
-      });
-      document.body.style.overflow = 'auto';
+    // Ctrl+K para escanear (ejemplo)
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault();
+      window.location.href = "{{ url_for('agregar_producto') }}";
     }
   });
 </script>

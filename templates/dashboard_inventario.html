@@ -14,8 +14,140 @@
         background-color: #f8fafc !important; 
     }
     
-    #warehouse3d {
-        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%) !important;
+    /* Forzar fondo blanco en todos los estados */
+    #warehouse3d,
+    .warehouse-container {
+        background: white !important;
+        background-color: white !important;
+        background-image: none !important;
+        box-shadow: none !important;
+        border: none !important;
+        transition: none !important;
+        animation: none !important;
+    }
+    
+    /* Eliminar cualquier efecto hover */
+    #warehouse3d:hover,
+    .warehouse-container:hover {
+        background: white !important;
+        background-color: white !important;
+        background-image: none !important;
+        box-shadow: none !important;
+        transition: none !important;
+    }
+    
+    /* Ocultar los botones de control */
+    .controls-3d {
+        display: none !important;
+    }
+    
+    /* Asegurar que no haya efectos de animación que cambien el fondo */
+    #warehouse3d.rain-active,
+    #warehouse3d.rain-enabled,
+    #warehouse3d.following-cursor,
+    #warehouse3d.at-limit {
+        background: white !important;
+        box-shadow: none !important;
+    }
+    
+    /* Eliminar TODOS los posibles fondos y efectos */
+    .hero-3d,
+    .hero-3d > div,
+    #warehouse3d::before,
+    #warehouse3d::after,
+    .warehouse-container::before,
+    .warehouse-container::after {
+        background: white !important;
+        background-color: white !important;
+        background-image: none !important;
+        box-shadow: none !important;
+        border: none !important;
+    }
+    
+    /* Asegurar que el canvas del robot no tenga fondo */
+    #warehouse3d canvas {
+        background: transparent !important;
+    }
+    
+    /* Eliminar el mensaje de "Click para lluvia mágica" */
+    #warehouse3d.rain-enabled::after {
+        display: none !important;
+    }
+    
+    /* ELIMINAR EL OJO Y TODOS LOS INDICADORES */
+    #warehouse3d::before,
+    #warehouse3d:hover::before,
+    .warehouse-container::before,
+    .warehouse-container:hover::before {
+        display: none !important;
+        content: none !important;
+    }
+    
+    /* Eliminar TODOS los efectos visuales del robot */
+    #warehouse3d.following-cursor,
+    #warehouse3d.at-limit,
+    #warehouse3d:hover {
+        box-shadow: none !important;
+        border: none !important;
+        filter: none !important;
+    }
+    
+    /* Eliminar el efecto de brillo cuando sigue el cursor */
+    #warehouse3d.following-cursor {
+        box-shadow: none !important;
+    }
+    
+    /* Eliminar el borde cuando alcanza el límite */
+    #warehouse3d.at-limit::after {
+        display: none !important;
+    }
+    
+    /* Desactivar el cursor especial */
+    #warehouse3d,
+    #warehouse3d.rain-enabled,
+    #warehouse3d.rain-active {
+        cursor: default !important;
+    }
+    
+    /* OVERRIDE TOTAL DE DASHBOARD_INVENTORY.CSS */
+    /* Eliminar indicador de seguimiento del cursor */
+    #warehouse3d::before {
+        display: none !important;
+        content: none !important;
+        opacity: 0 !important;
+    }
+    
+    #warehouse3d:hover::before {
+        display: none !important;
+        opacity: 0 !important;
+    }
+    
+    /* Eliminar efecto de brillo */
+    #warehouse3d.following-cursor {
+        box-shadow: none !important;
+    }
+    
+    /* Eliminar indicador de límite */
+    #warehouse3d.at-limit::after {
+        display: none !important;
+        content: none !important;
+        border: none !important;
+        animation: none !important;
+    }
+    
+    /* Eliminar TODOS los pseudo-elementos */
+    #warehouse3d::before,
+    #warehouse3d::after,
+    #warehouse3d:hover::before,
+    #warehouse3d:hover::after,
+    .warehouse-container::before,
+    .warehouse-container::after,
+    .warehouse-container:hover::before,
+    .warehouse-container:hover::after {
+        display: none !important;
+        content: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
     }
     
     .typed-cursor {
@@ -99,6 +231,50 @@
         pointer-events: none;
         z-index: 1;
     }
+    
+    .hero-3d {
+      position: relative;
+      min-width: 0;
+      flex-shrink: 0;
+    }
+    
+    /* OVERRIDE FINAL - MÁXIMA PRIORIDAD */
+    #warehouse3d[class],
+    #warehouse3d[class]:hover,
+    .warehouse-container[class],
+    .warehouse-container[class]:hover {
+        background: white !important;
+        background-color: white !important;
+        background-image: none !important;
+        box-shadow: none !important;
+        border: none !important;
+        filter: none !important;
+    }
+    
+    /* Eliminar COMPLETAMENTE todos los indicadores visuales */
+    #warehouse3d *::before,
+    #warehouse3d *::after {
+        display: none !important;
+    }
+    
+    /* FORZAR FONDO BLANCO EN EL ÁREA DEL ROBOT */
+    /* Usar selectores ultra-específicos para override total */
+    body .hero-3d #warehouse3d,
+    body .hero-3d .warehouse-container,
+    body #warehouse3d.warehouse-container,
+    body div#warehouse3d,
+    body div.warehouse-container {
+        background: #ffffff !important;
+        background-color: #ffffff !important;
+        background-image: none !important;
+    }
+    
+    /* Asegurar que el canvas esté integrado */
+    body #warehouse3d canvas,
+    body .warehouse-container canvas {
+        background: transparent !important;
+        background-color: transparent !important;
+    }
 </style>
 {% endblock %}
 
@@ -137,24 +313,14 @@
     </div>
     
     <div class="hero-3d">
-      <div id="warehouse3d" class="warehouse-container">
+      <div id="warehouse3d" class="warehouse-container" style="background: #ffffff !important; background-color: #ffffff !important; background-image: none !important; box-shadow: none !important; border: none !important; border-radius: 0 !important;">
         <div class="robot-loading">
           <div class="loader"></div>
           <p>Cargando OptiBot 3D...</p>
         </div>
       </div>
       
-      <div class="controls-3d">
-        <button class="control-btn" onclick="if(window.OptiBot3D) window.OptiBot3D.rotateRobot(Math.PI/4)" title="Rotar">
-          <i class="fas fa-sync-alt"></i>
-        </button>
-        <button class="control-btn" onclick="if(window.OptiBot3D) window.OptiBot3D.resetRotation()" title="Reset">
-          <i class="fas fa-undo"></i>
-        </button>
-        <button class="control-btn" onclick="if(window.OptiBot3D) window.OptiBot3D.toggleFollowing()" title="Seguir cursor" id="followToggle">
-          <i class="fas fa-eye"></i>
-        </button>
-      </div>
+      <!-- Botones de control eliminados -->
     </div>
   </div>
 </section>
@@ -199,7 +365,8 @@
       <div class="kpi-content">
         <h3 class="kpi-title">Valor del Inventario</h3>
         <div class="kpi-value">
-          $<span class="counter" data-target="{{ valor_inventario }}" data-format="currency">0</span>
+          <!-- CAMBIO 1: Removido el signo $ del HTML para evitar duplicación -->
+          <span class="counter" data-target="{{ valor_inventario }}" data-format="currency">0</span>
         </div>
         <div id="kpiChart3" class="kpi-chart"></div>
       </div>
@@ -294,7 +461,8 @@
         </tr>
       </thead>
       <tbody>
-        {% for producto in productos[:5] %}
+        <!-- CAMBIO 2: Mostrar solo los últimos 2 productos (más recientes) -->
+        {% for producto in productos[-2:] %}
         <tr class="product-row" data-id="{{ producto.id|default(producto['id']) }}">
           <td>
             <div class="product-info">
@@ -478,12 +646,206 @@
 <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.45.0/dist/apexcharts.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 
+<!-- Override del color de fondo del robot antes de cargar el script -->
+<script>
+// Override del color de fondo del robot antes de cargar el script
+window.robotBackgroundOverride = 0xffffff; // Blanco
+
+// Modificar la configuración antes de que se cargue el robot
+window.config = {
+    backgroundColor: 0xffffff, // BLANCO PURO en lugar de 0xf0f0f0
+    modelPath: '/static/models/robot/robotmiov2.glb',
+    candyPath: '/static/models/robot/candy.glb',
+    strawberryPath: '/static/models/robot/strawberry.glb',
+    cameraPosition: { x: 0, y: 1.0, z: 6.5 }
+};
+
+// Configuración del robot - MANTENER SEGUIMIENTO ACTIVO
+window.robotState = {
+    isFollowing: true  // MANTENER el seguimiento del cursor
+};
+
+// Interceptar Three.js para forzar fondo blanco
+const originalThree = window.THREE;
+if (originalThree) {
+    // Interceptar la creación de Color
+    const OriginalColor = originalThree.Color;
+    originalThree.Color = function(...args) {
+        // Si intentan crear el color gris #f0f0f0, cambiarlo a blanco
+        if (args[0] === 0xf0f0f0) {
+            args[0] = 0xffffff;
+        }
+        return new OriginalColor(...args);
+    };
+    originalThree.Color.prototype = OriginalColor.prototype;
+}
+
+// Interceptar la configuración del robot para forzar blanco
+Object.defineProperty(window, 'config', {
+    get: function() {
+        return {
+            backgroundColor: 0xffffff,  // SIEMPRE blanco
+            modelPath: '/static/models/robot/robotmiov2.glb',
+            candyPath: '/static/models/robot/candy.glb',
+            strawberryPath: '/static/models/robot/strawberry.glb',
+            cameraPosition: { x: 0, y: 1.0, z: 6.5 }
+        };
+    },
+    set: function(value) {
+        // Ignorar cambios, mantener blanco
+    }
+});
+</script>
+
 <!-- Scripts del inventario -->
 <script src="{{ url_for('static', filename='js/robot_realistic.js') }}"></script>
 <script src="{{ url_for('static', filename='js/dashboard_inventory.js') }}"></script>
 
+<!-- Forzar fondo blanco después de cargar todo -->
 <script>
-// Script de emergencia para asegurar funcionalidad
+// Configurar el fondo blanco pero MANTENER el seguimiento del cursor
+window.addEventListener('load', function() {
+    // Remover solo las clases visuales no deseadas, pero mantener la funcionalidad
+    const warehouse = document.getElementById('warehouse3d');
+    if (warehouse) {
+        warehouse.classList.remove('rain-enabled'); // Solo quitar lluvia
+        warehouse.style.cursor = 'default';
+        // NO desactivar el seguimiento
+    }
+});
+
+// Forzar el fondo COMPLETAMENTE BLANCO en Three.js
+setTimeout(function() {
+    // Cambiar el color de fondo del scene a blanco puro
+    if (window.scene) {
+        window.scene.background = new THREE.Color(0xffffff); // Blanco puro
+        window.scene.fog = null; // Eliminar la niebla gris
+    }
+    
+    // Cambiar el color del renderer a blanco puro
+    if (window.renderer) {
+        window.renderer.setClearColor(0xffffff, 1); // Blanco puro, opacidad completa
+    }
+    
+    // Buscar el canvas y asegurar que no tenga estilos que lo hagan gris
+    const canvas = document.querySelector('#warehouse3d canvas');
+    if (canvas) {
+        canvas.style.background = 'transparent';
+    }
+    
+    // Forzar el contenedor a ser blanco
+    const container = document.getElementById('warehouse3d');
+    if (container) {
+        container.style.backgroundColor = 'white';
+    }
+}, 500); // Ejecutar rápidamente
+
+// Repetir el proceso para asegurar que se aplique
+setInterval(function() {
+    if (window.scene && window.scene.background) {
+        // Si el fondo no es blanco, cambiarlo
+        if (window.scene.background.r < 1 || window.scene.background.g < 1 || window.scene.background.b < 1) {
+            window.scene.background = new THREE.Color(0xffffff);
+            window.scene.fog = null;
+        }
+    }
+    if (window.renderer && window.renderer.getClearColor) {
+        const clearColor = new THREE.Color();
+        window.renderer.getClearColor(clearColor);
+        // Si no es blanco puro, cambiarlo
+        if (clearColor.getHex() !== 0xffffff) {
+            window.renderer.setClearColor(0xffffff, 1);
+        }
+    }
+}, 1000); // Revisar cada segundo
+
+// Script agresivo para eliminar el fondo gris
+document.addEventListener('DOMContentLoaded', function() {
+    // Función para cambiar el fondo a blanco
+    function forceWhiteBackground() {
+        // Cambiar el scene de Three.js
+        if (window.scene) {
+            window.scene.background = new THREE.Color(0xffffff);
+            window.scene.fog = null;
+        }
+        
+        // Cambiar el renderer
+        if (window.renderer) {
+            window.renderer.setClearColor(0xffffff, 1);
+            
+            // Si el renderer tiene un domElement (canvas)
+            if (window.renderer.domElement) {
+                window.renderer.domElement.style.background = 'white';
+            }
+        }
+        
+        // Buscar CUALQUIER elemento con fondo gris y cambiarlo
+        const elements = document.querySelectorAll('*');
+        elements.forEach(el => {
+            const styles = window.getComputedStyle(el);
+            const bgColor = styles.backgroundColor;
+            
+            // Si el fondo es gris claro (#f0f0f0 o rgb(240, 240, 240))
+            if (bgColor === 'rgb(240, 240, 240)' || bgColor === '#f0f0f0') {
+                el.style.backgroundColor = 'white';
+            }
+        });
+    }
+    
+    // Ejecutar inmediatamente
+    forceWhiteBackground();
+    
+    // Ejecutar después de un pequeño delay
+    setTimeout(forceWhiteBackground, 100);
+    setTimeout(forceWhiteBackground, 500);
+    setTimeout(forceWhiteBackground, 1000);
+    setTimeout(forceWhiteBackground, 2000);
+});
+
+// También interceptar cuando se crea el renderer
+const checkRenderer = setInterval(function() {
+    if (window.renderer && window.scene) {
+        window.renderer.setClearColor(0xffffff, 1);
+        window.scene.background = new THREE.Color(0xffffff);
+        window.scene.fog = null;
+        clearInterval(checkRenderer);
+    }
+}, 50);
+</script>
+
+<script>
+// Script final para limpiar cualquier efecto residual
+window.addEventListener('load', function() {
+    // Esperar un poco más para asegurar que todo esté cargado
+    setTimeout(function() {
+        const warehouse = document.getElementById('warehouse3d');
+        if (warehouse) {
+            // Limpiar todas las clases
+            warehouse.className = 'warehouse-container';
+            
+            // Forzar estilos inline
+            warehouse.style.cssText = 'background: white !important; box-shadow: none !important; border: none !important; filter: none !important;';
+            
+            // Cambiar el fondo del canvas si existe
+            const canvas = warehouse.querySelector('canvas');
+            if (canvas && canvas.style) {
+                canvas.style.background = 'transparent';
+            }
+        }
+        
+        // Cambiar el fondo del scene de Three.js
+        if (window.scene) {
+            window.scene.background = new THREE.Color(0xffffff);
+            window.scene.fog = null;
+        }
+        
+        // Cambiar el renderer
+        if (window.renderer) {
+            window.renderer.setClearColor(0xffffff, 1);
+        }
+    }, 3000);
+});
+
 setTimeout(function() {
     const heroTitle = document.getElementById('heroTitle');
     if (heroTitle && !heroTitle.textContent.trim()) {
