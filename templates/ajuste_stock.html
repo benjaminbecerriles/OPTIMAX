@@ -6,7 +6,7 @@
 
 {% block content %}
 <style>
-  /* ===== SISTEMA DE DISEÑO PREMIUM ===== */
+  /* ===== SISTEMA DE DISEÑO PREMIUM MEJORADO ===== */
   :root {
     /* Paleta Premium Dark */
     --premium-black: #0a0a0a;
@@ -52,6 +52,7 @@
     --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
     --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.16);
     --shadow-glow: 0 0 40px rgba(16, 185, 129, 0.15);
+    --shadow-inner: inset 0 2px 4px rgba(0, 0, 0, 0.06);
   }
 
   /* Reset y base */
@@ -63,7 +64,7 @@
 
   body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: #fafbfc;
+    background: #f8fafc;
     color: var(--premium-dark);
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
@@ -74,34 +75,50 @@
   .stock-adjustment-container {
     max-width: 1400px;
     margin: 0 auto;
-    padding: var(--space-lg) var(--space-md);
+    padding: 1.5rem 1rem;
+    animation: fadeIn 0.6s ease-out;
   }
 
-  /* ===== HERO SECTION PREMIUM ===== */
+  /* ===== HERO SECTION ULTRA PREMIUM ===== */
   .hero-section {
-    background: var(--gradient-dark);
+    background: linear-gradient(135deg, #0f172a 0%, #020617 100%);
     border-radius: 24px;
     padding: var(--space-2xl);
     margin-bottom: var(--space-xl);
     position: relative;
     overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
   }
 
-  /* Efecto de brillo sutil */
+  /* Efecto de partículas flotantes */
   .hero-section::before {
     content: '';
     position: absolute;
-    top: -50%;
-    right: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 60%);
-    animation: rotateGlow 20s linear infinite;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%);
+    border-radius: 50%;
+    top: -150px;
+    right: -100px;
+    animation: float 20s ease-in-out infinite;
   }
 
-  @keyframes rotateGlow {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+  .hero-section::after {
+    content: '';
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%);
+    border-radius: 50%;
+    bottom: -100px;
+    left: -50px;
+    animation: float 15s ease-in-out infinite reverse;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(30px, -30px) scale(1.1); }
+    66% { transform: translate(-20px, 20px) scale(0.9); }
   }
 
   .hero-content {
@@ -109,28 +126,29 @@
     z-index: 1;
     display: grid;
     grid-template-columns: 1fr auto;
-    gap: var(--space-xl);
+    gap: 2rem;
     align-items: center;
   }
 
   .hero-text h1 {
-    font-size: 3rem;
+    font-size: 3.5rem;
     font-weight: 800;
-    color: var(--premium-white);
+    color: #ffffff;
     margin-bottom: var(--space-sm);
     letter-spacing: -0.03em;
     line-height: 1.1;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
   }
 
   .hero-text p {
     font-size: 1.25rem;
-    color: var(--premium-silver);
+    color: rgba(255, 255, 255, 0.85);
     margin-bottom: var(--space-lg);
     max-width: 600px;
-    line-height: 1.6;
+    line-height: 1.7;
   }
 
-  /* Stats minimalistas */
+  /* Stats minimalistas mejorados */
   .hero-stats {
     display: flex;
     gap: var(--space-xl);
@@ -140,341 +158,431 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-xs);
+    position: relative;
+  }
+
+  .stat-item::after {
+    content: '';
+    position: absolute;
+    right: calc(var(--space-xl) * -0.5);
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1px;
+    height: 60%;
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .stat-item:last-child::after {
+    display: none;
   }
 
   .stat-value {
     font-size: 2.5rem;
     font-weight: 700;
-    color: var(--accent-emerald);
+    color: #ffffff;
     line-height: 1;
     font-variant-numeric: tabular-nums;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
   }
 
   .stat-label {
     font-size: 0.875rem;
     color: var(--premium-silver);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.1em;
+    opacity: 0.8;
   }
 
-  /* Botón hero */
-  .hero-action {
-    background: var(--gradient-emerald);
-    color: white;
-    padding: 1rem 2rem;
-    border-radius: 12px;
-    font-weight: 600;
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-sm);
-    text-decoration: none;
-    transition: var(--transition-smooth);
-    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
-  }
-
-  .hero-action:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
-    color: white;
-  }
-
-  /* Gráfico decorativo */
+  /* Visual decorativo mejorado */
   .hero-visual {
     width: 300px;
     height: 300px;
-    background: var(--gradient-subtle);
-    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
-    backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: var(--shadow-inner);
   }
 
   .hero-visual-icon {
     font-size: 8rem;
-    color: var(--accent-emerald);
-    opacity: 0.8;
-    animation: float 6s ease-in-out infinite;
+    color: rgba(16, 185, 129, 0.3);
+    filter: drop-shadow(0 0 30px rgba(16, 185, 129, 0.4));
+    animation: pulse 3s ease-in-out infinite;
   }
 
-  @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-20px); }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.05); opacity: 1; }
   }
 
-  /* ===== BARRA DE FILTROS PREMIUM ===== */
-  .filters-bar {
+  /* ===== SEARCH BAR PREMIUM MEJORADA ===== */
+  .search-section {
     background: white;
-    border-radius: 16px;
-    padding: var(--space-md);
+    border-radius: 20px;
+    padding: var(--space-lg);
     margin-bottom: var(--space-lg);
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
     border: 1px solid rgba(0, 0, 0, 0.05);
   }
 
-  .filters-content {
+  .search-container {
     display: grid;
     grid-template-columns: 1fr auto;
     gap: var(--space-md);
     align-items: center;
   }
 
-  /* Búsqueda premium */
-  .search-premium {
+  /* Barra de búsqueda ultra premium */
+  .search-bar-premium {
     position: relative;
-    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
   }
 
-  .search-premium input {
+  .search-input-group {
+    flex: 1;
+    position: relative;
+  }
+
+  .search-input-group input {
     width: 100%;
-    padding: 1rem 1rem 1rem 3.5rem;
+    padding: 1.25rem 1.25rem 1.25rem 3.75rem;
     background: #f8fafc;
     border: 2px solid transparent;
-    border-radius: 12px;
+    border-radius: 16px;
     font-size: 1rem;
-    transition: var(--transition-fast);
+    transition: var(--transition-smooth);
     color: var(--premium-dark);
+    box-shadow: var(--shadow-inner);
   }
 
-  .search-premium input:focus {
+  .search-input-group input:focus {
     outline: none;
     border-color: var(--accent-emerald);
     background: white;
-    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1), 0 4px 12px rgba(0, 0, 0, 0.05);
+    transform: translateY(-1px);
   }
 
-  .search-premium i {
+  .search-input-group i {
     position: absolute;
-    left: 1.25rem;
+    left: 1.5rem;
     top: 50%;
     transform: translateY(-50%);
     color: var(--premium-gray-light);
     font-size: 1.125rem;
+    transition: var(--transition-fast);
   }
 
-  /* Controles de filtro */
-  .filter-controls {
-    display: flex;
-    gap: var(--space-sm);
-    align-items: center;
+  .search-input-group input:focus ~ i {
+    color: var(--accent-emerald);
   }
 
-  /* Chip filters */
-  .filter-chips {
+  /* Botones de escaneo integrados */
+  .scan-buttons {
     display: flex;
     gap: var(--space-xs);
   }
 
-  .filter-chip {
-    padding: 0.5rem 1rem;
-    background: #f1f5f9;
-    border: 2px solid transparent;
-    border-radius: 10px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--premium-gray);
-    cursor: pointer;
-    transition: var(--transition-fast);
-    white-space: nowrap;
-  }
-
-  .filter-chip:hover {
-    background: #e2e8f0;
-    transform: translateY(-1px);
-  }
-
-  .filter-chip.active {
-    background: var(--gradient-emerald);
-    color: white;
-    border-color: var(--accent-emerald);
-    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
-  }
-
-  /* Dropdown moderno */
-  .filter-dropdown {
-    position: relative;
-  }
-
-  .filter-dropdown select {
-    appearance: none;
-    padding: 0.75rem 2.5rem 0.75rem 1rem;
-    background: white;
-    border: 2px solid #e2e8f0;
-    border-radius: 10px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--premium-dark);
-    cursor: pointer;
-    transition: var(--transition-fast);
-  }
-
-  .filter-dropdown select:hover {
-    border-color: var(--premium-silver);
-  }
-
-  .filter-dropdown select:focus {
-    outline: none;
-    border-color: var(--accent-emerald);
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-  }
-
-  .filter-dropdown::after {
-    content: '\f078';
-    font-family: 'Font Awesome 6 Free';
-    font-weight: 900;
-    position: absolute;
-    right: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--premium-gray-light);
-    pointer-events: none;
-  }
-
-  /* Botones de acción */
-  .action-buttons {
-    display: flex;
-    gap: var(--space-xs);
-  }
-
-  .btn-icon {
-    width: 48px;
-    height: 48px;
+  .scan-btn {
+    width: 56px;
+    height: 56px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: white;
     border: 2px solid #e2e8f0;
-    border-radius: 12px;
-    color: var(--premium-gray);
-    cursor: pointer;
-    transition: var(--transition-fast);
-  }
-
-  .btn-icon:hover {
-    border-color: var(--accent-emerald);
-    color: var(--accent-emerald);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-  }
-
-  .btn-icon.active {
-    background: var(--gradient-emerald);
-    border-color: var(--accent-emerald);
-    color: white;
-  }
-
-  /* Favoritos toggle premium */
-  .favorites-toggle {
-    display: flex;
-    align-items: center;
-    gap: var(--space-xs);
-    padding: 0.75rem 1.25rem;
-    background: white;
-    border: 2px solid #e2e8f0;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: var(--transition-fast);
-    user-select: none;
-  }
-
-  .favorites-toggle:hover {
-    border-color: var(--accent-rose);
-    background: #fef2f2;
-  }
-
-  .favorites-toggle.active {
-    background: var(--accent-rose);
-    border-color: var(--accent-rose);
-    color: white;
-  }
-
-  .favorites-toggle .heart {
-    font-size: 1.125rem;
-    transition: var(--transition-fast);
-  }
-
-  .favorites-toggle.active .heart {
-    animation: heartBeat 0.5s ease-out;
-  }
-
-  @keyframes heartBeat {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.2); }
-  }
-
-  /* ===== SECCIÓN DE RESUMEN ===== */
-  .summary-section {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: var(--space-md);
-    margin-bottom: var(--space-xl);
-  }
-
-  .summary-card {
-    background: white;
     border-radius: 16px;
-    padding: var(--space-lg);
-    box-shadow: var(--shadow-sm);
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    cursor: pointer;
     transition: var(--transition-smooth);
     position: relative;
     overflow: hidden;
   }
 
-  .summary-card::before {
+  .scan-btn::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
     background: var(--gradient-emerald);
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 0.3s ease;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
   }
 
-  .summary-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-lg);
+  .scan-btn:hover::before {
+    width: 100px;
+    height: 100px;
   }
 
-  .summary-card:hover::before {
-    transform: scaleX(1);
+  .scan-btn img,
+  .scan-btn i {
+    position: relative;
+    z-index: 1;
+    transition: var(--transition-fast);
   }
 
-  .summary-icon {
-    width: 48px;
-    height: 48px;
-    background: var(--gradient-emerald);
-    border-radius: 12px;
+  .scan-btn:hover {
+    border-color: var(--accent-emerald);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.2);
+  }
+
+  .scan-btn:hover img,
+  .scan-btn:hover i {
+    filter: brightness(0) invert(1);
+  }
+
+  /* Acciones adicionales */
+  .search-actions {
     display: flex;
+    gap: var(--space-sm);
     align-items: center;
-    justify-content: center;
-    margin-bottom: var(--space-sm);
   }
 
-  .summary-icon i {
-    font-size: 1.25rem;
+  .btn-history {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: 0.875rem 1.5rem;
+    background: var(--gradient-dark);
+    color: white;
+    border-radius: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: var(--transition-smooth);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
+  }
+
+  .btn-history:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.3);
     color: white;
   }
 
-  .summary-value {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--premium-dark);
-    margin-bottom: 0.25rem;
-    font-variant-numeric: tabular-nums;
+  /* ===== FILTROS PREMIUM REDISEÑADOS - VERSIÓN PROFESIONAL ===== */
+  .filters-premium {
+    background: white;
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    border: 1px solid #f1f5f9;
   }
 
-  .summary-label {
+  .filters-row {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  /* Grupo de filtros compacto */
+  .filter-group-compact {
+    display: flex;
+    align-items: center;
+  }
+
+  .filter-label-inline {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #475569;
+    margin-right: 0.5rem;
+    white-space: nowrap;
+  }
+
+  /* Botones de stock en línea */
+  .stock-filters {
+    display: flex;
+    background: #f8fafc;
+    padding: 0.125rem;
+    border-radius: 8px;
+    gap: 0.0625rem;
+  }
+
+  .stock-filter-btn {
+    padding: 0.425rem 0.875rem;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .stock-filter-btn i {
+    font-size: 0.8125rem;
+    opacity: 0.7;
+  }
+
+  .stock-filter-btn:hover {
+    background: white;
+    color: #1e293b;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  .stock-filter-btn.active {
+    background: #10b981;
+    color: white;
+    box-shadow: 0 1px 2px rgba(16, 185, 129, 0.2);
+  }
+
+  .stock-filter-btn.active i {
+    opacity: 1;
+  }
+
+  .filter-badge {
+    font-size: 0.625rem;
+    padding: 0 0.25rem;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+    margin-left: 0.25rem;
+  }
+
+  /* Controles secundarios */
+  .filter-controls-compact {
+    display: flex;
+    gap: 0.625rem;
+    align-items: center;
+  }
+
+  /* Dropdowns minimalistas */
+  .select-minimal {
+    appearance: none;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 0.425rem 1.75rem 0.425rem 0.75rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: #1e293b;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    background-image: url("data:image/svg+xml,%3Csvg width='8' height='5' viewBox='0 0 8 5' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L4 4L7 1' stroke='%2394a3b8' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    min-width: 150px;
+  }
+
+  .select-minimal:hover {
+    background-color: white;
+    border-color: #cbd5e1;
+  }
+
+  .select-minimal:focus {
+    outline: none;
+    border-color: #10b981;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.1);
+  }
+
+  /* Toggle favoritos compacto */
+  .fav-toggle-compact {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.425rem 0.875rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: #64748b;
+  }
+
+  .fav-toggle-compact input {
+    display: none;
+  }
+
+  .fav-toggle-compact i {
     font-size: 0.875rem;
-    color: var(--premium-gray-light);
+    transition: all 0.15s ease;
   }
 
-  /* ===== GRID DE PRODUCTOS PREMIUM ===== */
+  .fav-toggle-compact:hover {
+    background: #fff0f6;
+    border-color: #ec4899;
+    color: #ec4899;
+  }
+
+  .fav-toggle-compact:has(input:checked) {
+    background: #fef2f2;
+    border-color: #ec4899;
+    color: #ec4899;
+  }
+
+  .fav-toggle-compact:has(input:checked) i {
+    font-weight: 900;
+    animation: heartPulse 0.3s ease-out;
+  }
+
+  @keyframes heartPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+  }
+
+  /* Vista switcher minimalista */
+  .view-switch-minimal {
+    display: flex;
+    background: #f8fafc;
+    padding: 0.125rem;
+    border-radius: 6px;
+    gap: 0.0625rem;
+    border: 1px solid #e2e8f0;
+  }
+
+  .view-btn-minimal {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: 5px;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-size: 0.875rem;
+  }
+
+  .view-btn-minimal:hover {
+    background: rgba(255, 255, 255, 0.7);
+    color: #1e293b;
+  }
+
+  .view-btn-minimal.active {
+    background: white;
+    color: #10b981;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  }
+
+  /* Separador vertical sutil */
+  .filter-separator {
+    width: 1px;
+    height: 20px;
+    background: #e2e8f0;
+    margin: 0 0.25rem;
+  }
+
+  /* ===== PRODUCTOS GRID ULTRA PREMIUM ===== */
   .products-section {
     margin-bottom: var(--space-xl);
   }
@@ -483,37 +591,25 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--space-lg);
+    margin-bottom: 0.75rem;
   }
 
   .section-title {
     font-size: 1.75rem;
     font-weight: 700;
     color: var(--premium-dark);
-  }
-
-  .view-toggle {
     display: flex;
-    gap: var(--space-xs);
-    background: #f1f5f9;
-    padding: 0.25rem;
-    border-radius: 10px;
+    align-items: center;
+    gap: var(--space-sm);
   }
 
-  .view-toggle button {
-    padding: 0.5rem 1rem;
-    background: transparent;
-    border: none;
+  .product-count {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--premium-gray-light);
+    background: #f8fafc;
+    padding: 0.25rem 0.75rem;
     border-radius: 8px;
-    color: var(--premium-gray);
-    cursor: pointer;
-    transition: var(--transition-fast);
-  }
-
-  .view-toggle button.active {
-    background: white;
-    color: var(--premium-dark);
-    box-shadow: var(--shadow-sm);
   }
 
   /* Grid de productos */
@@ -521,76 +617,167 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: var(--space-lg);
+    transition: var(--transition-smooth);
   }
 
-  /* Tarjeta de producto premium */
-  .product-card-premium {
+  /* Vista lista */
+  .products-list {
+    display: none;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  body.list-view .products-grid {
+    display: none;
+  }
+
+  body.list-view .products-list {
+    display: flex;
+  }
+
+  /* Card de producto ULTRA PREMIUM - IMAGEN CUADRADA */
+  .product-card {
     background: white;
     border-radius: 20px;
     overflow: hidden;
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
     border: 1px solid rgba(0, 0, 0, 0.05);
     transition: var(--transition-smooth);
     position: relative;
     display: flex;
     flex-direction: column;
+    transform: translateY(0);
   }
 
-  .product-card-premium:hover {
+  .product-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--gradient-emerald);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+    z-index: 2;
+  }
+
+  .product-card:hover {
     transform: translateY(-8px);
-    box-shadow: var(--shadow-xl);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
   }
 
-  /* Imagen del producto */
-  .product-image-container {
+  .product-card:hover::before {
+    transform: scaleX(1);
+  }
+
+  /* Imagen cuadrada optimizada */
+  .product-image-wrapper {
     position: relative;
-    height: 200px;
+    width: 100%;
+    padding-bottom: 100%; /* Aspect ratio 1:1 para imagen cuadrada */
     overflow: hidden;
     background: #f8fafc;
   }
 
   .product-image {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
     transition: var(--transition-slow);
   }
 
-  .product-card-premium:hover .product-image {
-    transform: scale(1.05);
+  .product-card:hover .product-image {
+    transform: scale(1.08);
   }
 
-  /* Badge de categoría */
-  .category-badge {
+  /* Overlay de imagen */
+  .image-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 50%, rgba(0, 0, 0, 0.7) 100%);
+    opacity: 0;
+    transition: var(--transition-smooth);
+  }
+
+  .product-card:hover .image-overlay {
+    opacity: 1;
+  }
+
+  /* Badges mejorados */
+  .product-badges {
     position: absolute;
     top: 1rem;
     left: 1rem;
+    right: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    z-index: 2;
+  }
+
+  .category-badge {
     padding: 0.5rem 1rem;
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
-    border-radius: 10px;
+    border-radius: 12px;
     font-size: 0.75rem;
     font-weight: 600;
     color: var(--premium-dark);
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    max-width: 70%;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
   }
 
-  /* Stock indicator */
-  .stock-indicator {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    width: 12px;
-    height: 12px;
+  .stock-badge {
+    width: 40px;
+    height: 40px;
+    background: white;
     border-radius: 50%;
-    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
   }
 
-  .stock-indicator.high { background: var(--accent-emerald); }
-  .stock-indicator.medium { background: var(--accent-amber); }
-  .stock-indicator.low { background: #ef4444; }
+  .stock-indicator {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    position: relative;
+  }
 
-  /* Contenido del producto */
+  .stock-indicator.high { 
+    background: var(--accent-emerald);
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
+  }
+  
+  .stock-indicator.medium { 
+    background: var(--accent-amber);
+    box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.2);
+  }
+  
+  .stock-indicator.low { 
+    background: #ef4444;
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.2);
+    animation: pulseRed 2s ease-in-out infinite;
+  }
+
+  @keyframes pulseRed {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+  }
+
+  /* Contenido del producto - más compacto */
   .product-content {
     padding: var(--space-lg);
     flex: 1;
@@ -604,51 +791,68 @@
 
   .product-name {
     font-size: 1.125rem;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--premium-dark);
     margin-bottom: 0.25rem;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    line-height: 1.4;
+  }
+
+  .product-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: 0.875rem;
+    color: var(--premium-gray-light);
   }
 
   .product-code {
-    font-size: 0.875rem;
-    color: var(--premium-gray-light);
     font-family: 'SF Mono', 'Monaco', monospace;
   }
 
-  /* Info del producto */
-  .product-info {
+  .product-brand {
+    font-weight: 500;
+  }
+
+  /* Stats del producto */
+  .product-stats {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: var(--space-sm);
-    margin-bottom: var(--space-lg);
-    padding-top: var(--space-sm);
+    padding: var(--space-sm) 0;
     border-top: 1px solid #f1f5f9;
+    border-bottom: 1px solid #f1f5f9;
+    margin-bottom: var(--space-sm);
   }
 
-  .info-item {
+  .stat {
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
   }
 
-  .info-label {
+  .stat-label {
     font-size: 0.75rem;
     color: var(--premium-gray-light);
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
 
-  .info-value {
+  .stat-value {
     font-size: 1rem;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--premium-dark);
+    font-variant-numeric: tabular-nums;
   }
 
-  /* Acciones del producto */
+  .stat-value.critical {
+    color: #ef4444;
+  }
+
+  /* Acciones del producto mejoradas */
   .product-actions {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -656,7 +860,7 @@
     margin-top: auto;
   }
 
-  .btn-product {
+  .btn-action {
     padding: 0.875rem;
     border-radius: 12px;
     font-weight: 600;
@@ -666,45 +870,141 @@
     justify-content: center;
     gap: var(--space-xs);
     cursor: pointer;
-    border: 2px solid transparent;
-    transition: var(--transition-fast);
+    border: none;
+    transition: var(--transition-smooth);
     text-decoration: none;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-action::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
   }
 
   .btn-entrada {
     background: rgba(16, 185, 129, 0.1);
     color: var(--accent-emerald-dark);
-    border-color: rgba(16, 185, 129, 0.2);
+  }
+
+  .btn-entrada::before {
+    background: var(--gradient-emerald);
   }
 
   .btn-entrada:hover {
-    background: var(--gradient-emerald);
     color: white;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+  }
+
+  .btn-entrada:hover::before {
+    width: 300px;
+    height: 300px;
   }
 
   .btn-salida {
     background: rgba(239, 68, 68, 0.1);
     color: #dc2626;
-    border-color: rgba(239, 68, 68, 0.2);
+  }
+
+  .btn-salida::before {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   }
 
   .btn-salida:hover {
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
     color: white;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
   }
 
-  /* ===== ESTADO VACÍO ===== */
+  .btn-salida:hover::before {
+    width: 300px;
+    height: 300px;
+  }
+
+  .btn-action span,
+  .btn-action i {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Vista Lista - Card horizontal */
+  .product-list-item {
+    background: white;
+    border-radius: 16px;
+    padding: var(--space-lg);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    display: grid;
+    grid-template-columns: 120px 1fr auto;
+    gap: var(--space-lg);
+    align-items: center;
+    transition: var(--transition-smooth);
+  }
+
+  .product-list-item:hover {
+    transform: translateX(4px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  }
+
+  .list-image {
+    width: 120px;
+    height: 80px;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .list-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .list-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: var(--space-lg);
+    align-items: center;
+  }
+
+  .list-actions {
+    display: flex;
+    gap: var(--space-sm);
+  }
+
+  /* ===== EMPTY STATE MEJORADO ===== */
   .empty-state {
     text-align: center;
     padding: var(--space-2xl) var(--space-lg);
     background: white;
-    border-radius: 20px;
-    box-shadow: var(--shadow-sm);
+    border-radius: 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
     margin: var(--space-xl) 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .empty-state::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(16, 185, 129, 0.05) 0%, transparent 70%);
+    animation: rotate 30s linear infinite;
+  }
+
+  @keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
   }
 
   .empty-illustration {
@@ -716,26 +1016,38 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
+    z-index: 1;
   }
 
   .empty-illustration i {
     font-size: 5rem;
     color: var(--premium-silver);
+    animation: float 3s ease-in-out infinite;
   }
 
   .empty-title {
     font-size: 1.5rem;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--premium-dark);
     margin-bottom: var(--space-sm);
+    position: relative;
+    z-index: 1;
   }
 
   .empty-description {
     color: var(--premium-gray-light);
     margin-bottom: var(--space-lg);
+    position: relative;
+    z-index: 1;
   }
 
-  /* ===== PAGINACIÓN PREMIUM ===== */
+  /* ===== MENSAJE NO RESULTADOS ===== */
+  #noResultsMessage {
+    animation: fadeInUp 0.6s ease-out;
+  }
+
+  /* ===== PAGINACIÓN ULTRA PREMIUM ===== */
   .pagination-wrapper {
     display: flex;
     justify-content: center;
@@ -747,35 +1059,55 @@
     align-items: center;
     gap: var(--space-xs);
     background: white;
-    padding: 0.5rem;
-    border-radius: 14px;
-    box-shadow: var(--shadow-sm);
+    padding: 0.75rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(0, 0, 0, 0.05);
   }
 
   .page-item {
-    min-width: 40px;
-    height: 40px;
+    min-width: 44px;
+    height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 10px;
+    border-radius: 12px;
     font-weight: 500;
     font-size: 0.875rem;
     color: var(--premium-gray);
     cursor: pointer;
-    transition: var(--transition-fast);
+    transition: var(--transition-smooth);
     text-decoration: none;
+    position: relative;
+  }
+
+  .page-item::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gradient-emerald);
+    border-radius: 12px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
   }
 
   .page-item:hover {
-    background: #f1f5f9;
     color: var(--premium-dark);
+    transform: translateY(-1px);
   }
 
   .page-item.active {
-    background: var(--gradient-emerald);
     color: white;
-    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  }
+
+  .page-item.active::before {
+    opacity: 1;
+  }
+
+  .page-item span {
+    position: relative;
+    z-index: 1;
   }
 
   .page-item.disabled {
@@ -783,7 +1115,20 @@
     cursor: not-allowed;
   }
 
-  /* ===== ANIMACIONES ===== */
+  .page-item.disabled:hover {
+    transform: none;
+  }
+
+  /* ===== ANIMACIONES GLOBALES ===== */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
   @keyframes fadeInUp {
     from {
       opacity: 0;
@@ -800,51 +1145,192 @@
     opacity: 0;
   }
 
-  /* Stagger animation */
-  .product-card-premium:nth-child(1) { animation-delay: 0.1s; }
-  .product-card-premium:nth-child(2) { animation-delay: 0.15s; }
-  .product-card-premium:nth-child(3) { animation-delay: 0.2s; }
-  .product-card-premium:nth-child(4) { animation-delay: 0.25s; }
+  /* Stagger animation para cards */
+  .product-card:nth-child(1) { animation-delay: 0.1s; }
+  .product-card:nth-child(2) { animation-delay: 0.15s; }
+  .product-card:nth-child(3) { animation-delay: 0.2s; }
+  .product-card:nth-child(4) { animation-delay: 0.25s; }
+  .product-card:nth-child(5) { animation-delay: 0.3s; }
+  .product-card:nth-child(6) { animation-delay: 0.35s; }
 
-  /* ===== RESPONSIVE ===== */
+  /* ===== RESPONSIVE PREMIUM ===== */
   @media (max-width: 1200px) {
-    .summary-section {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-
-  @media (max-width: 768px) {
-    .hero-content {
-      grid-template-columns: 1fr;
-      text-align: center;
+    .products-grid {
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     }
     
-    .hero-text h1 {
-      font-size: 2rem;
+    .hero-content {
+      grid-template-columns: 1fr;
     }
     
     .hero-visual {
       display: none;
     }
     
-    .filters-content {
-      grid-template-columns: 1fr;
-    }
-    
-    .filter-controls {
+    .filters-row {
       flex-wrap: wrap;
+      gap: 0.75rem;
     }
     
-    .summary-section {
-      grid-template-columns: 1fr;
+    .filter-separator {
+      display: none;
     }
     
-    .products-grid {
-      grid-template-columns: 1fr;
+    .filter-group-compact {
+      width: 100%;
+    }
+    
+    .stock-filters {
+      flex-wrap: wrap;
     }
   }
 
-  /* ===== SCANNER MODAL MEJORADO ===== */
+  @media (max-width: 768px) {
+    .hero-section {
+      padding: 1.5rem;
+    }
+    
+    .hero-text h1 {
+      font-size: 2rem;
+    }
+    
+    .hero-text p {
+      font-size: 1rem;
+    }
+    
+    .hero-stats {
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+    
+    .stat-value {
+      font-size: 2rem;
+    }
+    
+    .stat-item::after {
+      display: none;
+    }
+    
+    .hero-visual {
+      width: 200px;
+      height: 200px;
+    }
+    
+    .hero-visual-icon {
+      font-size: 5rem;
+    }
+    
+    .search-container {
+      grid-template-columns: 1fr;
+    }
+    
+    .search-bar-premium {
+      flex-wrap: wrap;
+    }
+    
+    .search-input-group {
+      width: 100%;
+    }
+    
+    .filters-premium {
+      padding: 1rem;
+    }
+    
+    .filter-controls-compact {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+    }
+    
+    .select-minimal {
+      min-width: 100%;
+    }
+    
+    .fav-toggle-compact {
+      grid-column: span 2;
+      justify-content: center;
+    }
+    
+    .view-switch-minimal {
+      grid-column: span 2;
+      justify-self: center;
+    }
+    
+    .stock-filter-btn {
+      flex: 1;
+      padding: 0.375rem 0.5rem;
+      font-size: 0.75rem;
+    }
+    
+    .stock-filter-btn span:not(.filter-badge) {
+      display: none;
+    }
+    
+    .stock-filter-btn i {
+      font-size: 0.875rem;
+    }
+    
+    .filter-badge {
+      display: inline;
+      font-size: 0.5625rem;
+    }
+    
+    .products-grid {
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: var(--space-md);
+    }
+    
+    .product-card {
+      height: auto;
+    }
+    
+    .list-content {
+      grid-template-columns: 1fr;
+      gap: var(--space-sm);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .products-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .hero-text h1 {
+      font-size: 2rem;
+    }
+    
+    .stat-value {
+      font-size: 2.25rem;
+    }
+    
+    .stock-filters {
+      width: 100%;
+      gap: 0.125rem;
+    }
+    
+    .stock-filter-btn {
+      flex: 1;
+      padding: 0.5rem 0.25rem;
+      font-size: 0.7rem;
+    }
+    
+    .stock-filter-btn i {
+      display: block;
+      font-size: 1rem;
+      margin-bottom: 0.25rem;
+    }
+    
+    .stock-filter-btn span:not(.filter-badge) {
+      display: block;
+    }
+    
+    .filter-badge {
+      display: none;
+    }
+  }
+
+  /* ===== SCANNER MODAL ULTRA PREMIUM ===== */
   #quaggaScanner {
     position: fixed;
     top: 0;
@@ -857,6 +1343,7 @@
     display: none;
     align-items: center;
     justify-content: center;
+    animation: fadeIn 0.3s ease-out;
   }
 
   #quaggaScanner.active {
@@ -868,10 +1355,22 @@
     max-width: 600px;
     height: 400px;
     background: black;
-    border-radius: 20px;
+    border-radius: 24px;
     overflow: hidden;
     position: relative;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+    animation: scaleIn 0.3s ease-out;
+  }
+
+  @keyframes scaleIn {
+    from {
+      transform: scale(0.9);
+      opacity: 0;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
   }
 
   #closeScanner {
@@ -891,15 +1390,15 @@
     font-size: 1.25rem;
     cursor: pointer;
     z-index: 10;
-    transition: var(--transition-fast);
+    transition: var(--transition-smooth);
   }
 
   #closeScanner:hover {
     background: rgba(255, 255, 255, 0.2);
-    transform: scale(1.1);
+    transform: scale(1.1) rotate(90deg);
   }
 
-  /* Scanner overlay */
+  /* Scanner overlay mejorado */
   .scanner-overlay {
     position: absolute;
     top: 50%;
@@ -907,33 +1406,79 @@
     transform: translate(-50%, -50%);
     width: 280px;
     height: 180px;
-    border: 2px solid var(--accent-emerald);
-    border-radius: 12px;
     pointer-events: none;
     z-index: 5;
   }
 
-  .scanner-overlay::before,
-  .scanner-overlay::after {
+  .scanner-overlay::before {
     content: '';
     position: absolute;
-    width: 20px;
-    height: 20px;
+    inset: 0;
+    border: 2px solid var(--accent-emerald);
+    border-radius: 16px;
+    animation: scannerPulse 2s ease-in-out infinite;
+  }
+
+  @keyframes scannerPulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.02); }
+  }
+
+  /* Corners del scanner */
+  .scanner-corner {
+    position: absolute;
+    width: 40px;
+    height: 40px;
     border: 3px solid var(--accent-emerald);
   }
 
-  .scanner-overlay::before {
-    top: -3px;
-    left: -3px;
+  .scanner-corner-tl {
+    top: -1px;
+    left: -1px;
     border-right: none;
     border-bottom: none;
+    border-top-left-radius: 16px;
   }
 
-  .scanner-overlay::after {
-    bottom: -3px;
-    right: -3px;
+  .scanner-corner-tr {
+    top: -1px;
+    right: -1px;
+    border-left: none;
+    border-bottom: none;
+    border-top-right-radius: 16px;
+  }
+
+  .scanner-corner-bl {
+    bottom: -1px;
+    left: -1px;
+    border-right: none;
+    border-top: none;
+    border-bottom-left-radius: 16px;
+  }
+
+  .scanner-corner-br {
+    bottom: -1px;
+    right: -1px;
     border-left: none;
     border-top: none;
+    border-bottom-right-radius: 16px;
+  }
+
+  /* Scanner line animation */
+  .scanner-line {
+    position: absolute;
+    left: 20px;
+    right: 20px;
+    height: 2px;
+    background: var(--gradient-emerald);
+    top: 20px;
+    animation: scannerLine 2s linear infinite;
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.8);
+  }
+
+  @keyframes scannerLine {
+    from { top: 20px; }
+    to { top: calc(100% - 20px); }
   }
 
   /* Loading animation para scanner */
@@ -944,11 +1489,12 @@
     transform: translate(-50%, -50%);
     color: white;
     text-align: center;
+    z-index: 6;
   }
 
   .scanner-loading .spinner {
-    width: 48px;
-    height: 48px;
+    width: 60px;
+    height: 60px;
     border: 3px solid rgba(255, 255, 255, 0.2);
     border-top-color: var(--accent-emerald);
     border-radius: 50%;
@@ -958,6 +1504,49 @@
 
   @keyframes spin {
     to { transform: rotate(360deg); }
+  }
+
+  .scanner-loading p {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 500;
+  }
+
+  /* Utilidades */
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* Smooth scroll */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Focus visible para accesibilidad */
+  :focus-visible {
+    outline: 2px solid var(--accent-emerald);
+    outline-offset: 2px;
+  }
+
+  /* Optimizaciones de rendimiento */
+  .product-card,
+  .btn-action,
+  .filter-chip {
+    will-change: transform;
+  }
+
+  /* GPU acceleration */
+  .product-image,
+  .hero-visual-icon {
+    transform: translateZ(0);
   }
 </style>
 
@@ -975,12 +1564,12 @@
             <div class="stat-label">Productos Activos</div>
           </div>
           <div class="stat-item">
-            <div class="stat-value">{{ productos|selectattr('stock', 'le', 5)|list|length }}</div>
-            <div class="stat-label">Stock Crítico</div>
+            <div class="stat-value">{{ salidas_hoy|default(18) }}</div>
+            <div class="stat-label">Salidas Hoy</div>
           </div>
           <div class="stat-item">
-            <div class="stat-value">{{ categorias|length }}</div>
-            <div class="stat-label">Categorías</div>
+            <div class="stat-value">{{ productos|selectattr('stock', 'le', 5)|list|length }}</div>
+            <div class="stat-label">Stock Crítico</div>
           </div>
         </div>
       </div>
@@ -991,105 +1580,38 @@
     </div>
   </section>
 
-  <!-- Barra de filtros premium -->
-  <div class="filters-bar">
-    <div class="filters-content">
-      <!-- Búsqueda premium -->
-      <div class="search-premium">
-        <i class="fas fa-search"></i>
-        <input type="text" id="searchInput" placeholder="Buscar productos por nombre, código o categoría...">
+  <!-- Search Section Premium -->
+  <div class="search-section">
+    <div class="search-container">
+      <!-- Barra de búsqueda con scanner integrado -->
+      <div class="search-bar-premium">
+        <div class="search-input-group">
+          <input type="text" id="searchInput" placeholder="Buscar productos por nombre, código o categoría..." autocomplete="off">
+          <i class="fas fa-search"></i>
+        </div>
+        
+        <div class="scan-buttons">
+          <button class="scan-btn" id="scanButton" title="Escanear con pistola">
+            <img src="{{ url_for('static', filename='img/3.png') }}" alt="Scanner" style="width: 24px;">
+          </button>
+          
+          <button class="scan-btn" id="cameraButton" title="Escanear con cámara">
+            <img src="{{ url_for('static', filename='img/4.png') }}" alt="Camera" style="width: 24px;">
+          </button>
+        </div>
       </div>
       
-      <!-- Controles de filtro -->
-      <div class="filter-controls">
-        <!-- Chips de filtros rápidos -->
-        <div class="filter-chips">
-          <button class="filter-chip" onclick="setStockFilter('all')">Todos</button>
-          <button class="filter-chip" onclick="setStockFilter('low')">Stock Bajo</button>
-          <button class="filter-chip" onclick="setStockFilter('medium')">Stock Medio</button>
-          <button class="filter-chip" onclick="setStockFilter('high')">Stock Alto</button>
-        </div>
-        
-        <!-- Dropdowns -->
-        <div class="filter-dropdown">
-          <select id="categoriaFilter">
-            <option value="">Todas las categorías</option>
-            {% for categoria in categorias %}
-              <option value="{{ categoria }}">{{ categoria|title }}</option>
-            {% endfor %}
-          </select>
-        </div>
-        
-        <div class="filter-dropdown">
-          <select id="orderFilter">
-            <option value="recientes">Más recientes</option>
-            <option value="alfabetico">Alfabético</option>
-            <option value="stock-asc">Stock ↑</option>
-            <option value="stock-desc">Stock ↓</option>
-          </select>
-        </div>
-        
-        <!-- Acciones -->
-        <div class="action-buttons">
-          <!-- Toggle favoritos -->
-          <div class="favorites-toggle" id="favoritosContainer">
-            <input type="checkbox" id="favoritosCheck" style="display: none;">
-            <span class="heart">♡</span>
-            <span>Favoritos</span>
-          </div>
-          
-          <!-- Botones de escaneo -->
-          <button class="btn-icon" id="scanButton" title="Escanear con pistola">
-            <img src="{{ url_for('static', filename='img/3.png') }}" alt="Scanner" style="width: 20px;">
-          </button>
-          
-          <button class="btn-icon" id="cameraButton" title="Escanear con cámara">
-            <img src="{{ url_for('static', filename='img/4.png') }}" alt="Camera" style="width: 20px;">
-          </button>
-          
-          <!-- Historial -->
-          <a href="{{ url_for('historial_movimientos') }}" class="btn-icon" title="Ver historial">
-            <i class="fas fa-history"></i>
-          </a>
-        </div>
+      <!-- Acciones adicionales -->
+      <div class="search-actions">
+        <a href="{{ url_for('historial_movimientos') }}" class="btn-history">
+          <i class="fas fa-history"></i>
+          <span>Ver Historial</span>
+        </a>
       </div>
     </div>
   </div>
 
-  <!-- Resumen de información -->
-  <section class="summary-section">
-    <div class="summary-card animate-on-scroll">
-      <div class="summary-icon">
-        <i class="fas fa-plus"></i>
-      </div>
-      <div class="summary-value" id="entradasHoy">0</div>
-      <div class="summary-label">Entradas hoy</div>
-    </div>
-    
-    <div class="summary-card animate-on-scroll">
-      <div class="summary-icon" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
-        <i class="fas fa-minus"></i>
-      </div>
-      <div class="summary-value" id="salidasHoy">0</div>
-      <div class="summary-label">Salidas hoy</div>
-    </div>
-    
-    <div class="summary-card animate-on-scroll">
-      <div class="summary-icon" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">
-        <i class="fas fa-chart-line"></i>
-      </div>
-      <div class="summary-value" id="movimientosTotal">0</div>
-      <div class="summary-label">Movimientos totales</div>
-    </div>
-    
-    <div class="summary-card animate-on-scroll">
-      <div class="summary-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
-        <i class="fas fa-exclamation-triangle"></i>
-      </div>
-      <div class="summary-value" id="alertasActivas">{{ productos|selectattr('stock', 'le', 5)|list|length }}</div>
-      <div class="summary-label">Alertas activas</div>
-    </div>
-  </section>
+
 
   <!-- Mensaje cuando no hay resultados -->
   <div id="noResultsMessage" style="display: none;">
@@ -1099,7 +1621,7 @@
       </div>
       <h3 class="empty-title">No se encontraron productos</h3>
       <p class="empty-description">Intenta ajustar los filtros o buscar con otros términos</p>
-      <button class="hero-action" onclick="resetFilters()">
+      <button class="btn-history" onclick="resetFilters()" style="display: inline-flex; margin: 0 auto;">
         <i class="fas fa-undo"></i>
         Restablecer filtros
       </button>
@@ -1110,90 +1632,213 @@
   <section class="products-section">
     <div class="section-header">
       <h2 class="section-title">
-        <span id="visibleCount">{{ productos|length }}</span> productos disponibles
+        Productos disponibles
+        <span class="product-count"><span id="visibleCount">{{ productos|length }}</span> items</span>
       </h2>
-      
-      <div class="view-toggle">
-        <button class="active"><i class="fas fa-th"></i> Grid</button>
-        <button><i class="fas fa-list"></i> Lista</button>
+    </div>
+    
+    <!-- Filtros Premium Rediseñados - Versión Profesional -->
+    <div class="filters-premium">
+      <div class="filters-row">
+        <!-- Filtros de Stock -->
+        <div class="filter-group-compact">
+          <div class="stock-filters">
+            <button class="stock-filter-btn active" onclick="setStockFilter('all')">
+              <i class="fas fa-layer-group"></i>
+              <span>Todos</span>
+            </button>
+            <button class="stock-filter-btn" onclick="setStockFilter('low')">
+              <i class="fas fa-exclamation-triangle"></i>
+              <span>Stock Bajo</span>
+              <span class="filter-badge">≤5</span>
+            </button>
+            <button class="stock-filter-btn" onclick="setStockFilter('medium')">
+              <i class="fas fa-box"></i>
+              <span>Stock Medio</span>
+              <span class="filter-badge">6-20</span>
+            </button>
+            <button class="stock-filter-btn" onclick="setStockFilter('high')">
+              <i class="fas fa-boxes"></i>
+              <span>Stock Alto</span>
+              <span class="filter-badge">>20</span>
+            </button>
+          </div>
+        </div>
+        
+        <div class="filter-separator"></div>
+        
+        <!-- Controles adicionales -->
+        <div class="filter-controls-compact">
+          <select class="select-minimal" id="categoriaFilter">
+            <option value="">Todas las categorías</option>
+            {% for categoria in categorias %}
+              <option value="{{ categoria }}">{{ categoria|title }}</option>
+            {% endfor %}
+          </select>
+          
+          <select class="select-minimal" id="orderFilter">
+            <option value="recientes">Más recientes</option>
+            <option value="alfabetico">Alfabético</option>
+            <option value="stock-asc">Stock ↑</option>
+            <option value="stock-desc">Stock ↓</option>
+          </select>
+          
+          <label class="fav-toggle-compact">
+            <input type="checkbox" id="favoritosCheck">
+            <i class="far fa-heart"></i>
+            <span>Solo Favoritos</span>
+          </label>
+          
+          <div class="view-switch-minimal">
+            <button class="view-btn-minimal active" onclick="setView('grid')" title="Vista Grid">
+              <i class="fas fa-grip"></i>
+            </button>
+            <button class="view-btn-minimal" onclick="setView('list')" title="Vista Lista">
+              <i class="fas fa-bars"></i>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
     
-    <!-- Grid de productos -->
-    <div class="products-grid">
+    <!-- Vista Grid -->
+    <div class="products-grid" id="productsGrid">
       {% for producto in productos %}
-      <div class="product-card-premium animate-on-scroll" 
+      <div class="product-card animate-on-scroll" 
            data-categoria="{{ producto.categoria }}" 
            data-stock="{{ producto.stock }}" 
            data-precio="{{ producto.precio_venta }}"
            data-favorito="{{ producto.es_favorito }}">
         
         <!-- Imagen del producto -->
-        <div class="product-image-container">
+        <div class="product-image-wrapper">
           {% if producto.foto %}
             <img src="{{ url_for('static', filename='uploads/' ~ producto.foto) }}" 
                  alt="{{ producto.nombre }}" 
                  class="product-image">
           {% else %}
-            <div style="height: 100%; display: flex; align-items: center; justify-content: center; background: #f8fafc;">
-              <i class="fas fa-box" style="font-size: 4rem; color: #e2e8f0;"></i>
+            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #f8fafc;">
+              <i class="fas fa-box" style="font-size: 5rem; color: #e2e8f0;"></i>
             </div>
           {% endif %}
           
-          <!-- Badge de categoría -->
-          <span class="category-badge">{{ producto.categoria|title }}</span>
+          <div class="image-overlay"></div>
           
-          <!-- Indicador de stock -->
-          {% if producto.stock <= 5 %}
-            <span class="stock-indicator low"></span>
-          {% elif producto.stock <= 20 %}
-            <span class="stock-indicator medium"></span>
-          {% else %}
-            <span class="stock-indicator high"></span>
-          {% endif %}
+          <!-- Badges -->
+          <div class="product-badges">
+            <span class="category-badge">{{ producto.categoria|title }}</span>
+            
+            <div class="stock-badge">
+              {% if producto.stock <= 5 %}
+                <span class="stock-indicator low"></span>
+              {% elif producto.stock <= 20 %}
+                <span class="stock-indicator medium"></span>
+              {% else %}
+                <span class="stock-indicator high"></span>
+              {% endif %}
+            </div>
+          </div>
         </div>
         
         <!-- Contenido del producto -->
         <div class="product-content">
           <div class="product-header">
             <h3 class="product-name">{{ producto.nombre }}</h3>
-            <p class="product-code">{{ producto.codigo_barras_externo|default('Sin código') }}</p>
+            <div class="product-meta">
+              <span class="product-code">{{ producto.codigo_barras_externo|default('Sin código') }}</span>
+              {% if producto.marca %}
+                <span style="color: #cbd5e1; margin: 0 0.5rem;">•</span>
+                <span class="product-brand">{{ producto.marca }}</span>
+              {% endif %}
+            </div>
           </div>
           
-          <div class="product-info">
-            <div class="info-item">
-              <span class="info-label">Stock Actual</span>
-              <span class="info-value">
+          <div class="product-stats">
+            <div class="stat">
+              <span class="stat-label">Stock Actual</span>
+              <span class="stat-value{% if producto.stock <= 5 %} critical{% endif %}">
                 {% if producto.stock <= 0 %}
                   Agotado
                 {% else %}
                   {{ '{:,.0f}'.format(producto.stock) }}
                   {% if producto.unidad and producto.unidad != 'NONE' %}
                     {{ producto.unidad }}
-                  {% else %}
-                    unidades
                   {% endif %}
                 {% endif %}
               </span>
             </div>
             
-            <div class="info-item">
-              <span class="info-label">Valor</span>
-              <span class="info-value">${{ '{:,.2f}'.format(producto.precio_venta|default(0)) }}</span>
+            <div class="stat">
+              <span class="stat-label">Valor Unitario</span>
+              <span class="stat-value">${{ '{:,.2f}'.format(producto.precio_venta|default(0)) }}</span>
             </div>
           </div>
           
           <!-- Acciones -->
           <div class="product-actions">
-            <a href="{{ url_for('ajuste_entrada', producto_id=producto.id) }}" class="btn-product btn-entrada">
+            <a href="{{ url_for('ajuste_entrada', producto_id=producto.id) }}" class="btn-action btn-entrada">
               <i class="fas fa-plus"></i>
-              Entrada
+              <span>Entrada</span>
             </a>
-            <a href="{{ url_for('ajuste_salida', producto_id=producto.id) }}" class="btn-product btn-salida">
+            <a href="{{ url_for('ajuste_salida', producto_id=producto.id) }}" class="btn-action btn-salida">
               <i class="fas fa-minus"></i>
-              Salida
+              <span>Salida</span>
             </a>
           </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    
+    <!-- Vista Lista -->
+    <div class="products-list" id="productsList">
+      {% for producto in productos %}
+      <div class="product-list-item" 
+           data-categoria="{{ producto.categoria }}" 
+           data-stock="{{ producto.stock }}" 
+           data-precio="{{ producto.precio_venta }}"
+           data-favorito="{{ producto.es_favorito }}">
+        
+        <div class="list-image">
+          {% if producto.foto %}
+            <img src="{{ url_for('static', filename='uploads/' ~ producto.foto) }}" alt="{{ producto.nombre }}">
+          {% else %}
+            <div style="height: 100%; display: flex; align-items: center; justify-content: center; background: #f8fafc;">
+              <i class="fas fa-box" style="font-size: 2.5rem; color: #e2e8f0;"></i>
+            </div>
+          {% endif %}
+        </div>
+        
+        <div class="list-content">
+          <div>
+            <h3 class="product-name">{{ producto.nombre }}</h3>
+            <div class="product-meta">
+              <span class="product-code">{{ producto.codigo_barras_externo|default('Sin código') }}</span>
+            </div>
+          </div>
+          
+          <div>
+            <span class="category-badge">{{ producto.categoria|title }}</span>
+          </div>
+          
+          <div>
+            <div class="stat-value{% if producto.stock <= 5 %} critical{% endif %}">
+              {{ '{:,.0f}'.format(producto.stock) }} unidades
+            </div>
+          </div>
+          
+          <div>
+            <div class="stat-value">${{ '{:,.2f}'.format(producto.precio_venta|default(0)) }}</div>
+          </div>
+        </div>
+        
+        <div class="list-actions">
+          <a href="{{ url_for('ajuste_entrada', producto_id=producto.id) }}" class="btn-action btn-entrada">
+            <i class="fas fa-plus"></i>
+          </a>
+          <a href="{{ url_for('ajuste_salida', producto_id=producto.id) }}" class="btn-action btn-salida">
+            <i class="fas fa-minus"></i>
+          </a>
         </div>
       </div>
       {% endfor %}
@@ -1208,11 +1853,17 @@
   </div>
 </div>
 
-<!-- Modal de escáner -->
+<!-- Modal de escáner mejorado -->
 <div id="quaggaScanner">
   <div id="scanner-container">
     <button id="closeScanner">&times;</button>
-    <div class="scanner-overlay"></div>
+    <div class="scanner-overlay">
+      <div class="scanner-corner scanner-corner-tl"></div>
+      <div class="scanner-corner scanner-corner-tr"></div>
+      <div class="scanner-corner scanner-corner-bl"></div>
+      <div class="scanner-corner scanner-corner-br"></div>
+      <div class="scanner-line"></div>
+    </div>
     <div class="scanner-loading">
       <div class="spinner"></div>
       <p>Iniciando cámara...</p>
@@ -1225,34 +1876,51 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
 
 <script>
-  // Sistema de gestión de filtros premium
+  // Sistema de gestión de filtros premium mejorado
   document.addEventListener('DOMContentLoaded', function() {
     // Variables globales
     const PRODUCTS_PER_PAGE = 12;
-    const productCards = document.querySelectorAll('.product-card-premium');
+    const productCards = document.querySelectorAll('.product-card, .product-list-item');
     let currentPage = 1;
     let filteredProducts = Array.from(productCards);
     let activeStockFilter = 'all';
+    let currentView = 'grid';
     
     // Referencias DOM
     const searchInput = document.getElementById('searchInput');
     const categoriaFilter = document.getElementById('categoriaFilter');
     const orderFilter = document.getElementById('orderFilter');
     const favoritosCheck = document.getElementById('favoritosCheck');
-    const favoritosContainer = document.getElementById('favoritosContainer');
     const paginationControl = document.getElementById('paginationControl');
     const visibleCount = document.getElementById('visibleCount');
     const noResultsMessage = document.getElementById('noResultsMessage');
+    const productsGrid = document.getElementById('productsGrid');
+    const productsList = document.getElementById('productsList');
+    
+    // Sistema de cambio de vista
+    window.setView = function(view) {
+      currentView = view;
+      document.body.classList.toggle('list-view', view === 'list');
+      
+      // Actualizar botones
+      document.querySelectorAll('.view-btn-minimal').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.target.closest('.view-btn-minimal').classList.add('active');
+      
+      // Re-aplicar filtros para la nueva vista
+      applyFilters();
+    };
     
     // Sistema de filtros por chips
     window.setStockFilter = function(filter) {
       activeStockFilter = filter;
       
       // Actualizar UI de chips
-      document.querySelectorAll('.filter-chip').forEach(chip => {
+      document.querySelectorAll('.stock-filter-btn').forEach(chip => {
         chip.classList.remove('active');
       });
-      event.target.classList.add('active');
+      event.target.closest('.stock-filter-btn').classList.add('active');
       
       currentPage = 1;
       applyFilters();
@@ -1264,7 +1932,12 @@
       const categoriaSelected = categoriaFilter.value.toLowerCase();
       const favoritosOnly = favoritosCheck.checked;
       
-      filteredProducts = Array.from(productCards).filter(card => {
+      // Obtener todos los productos de ambas vistas
+      const allProducts = currentView === 'grid' 
+        ? Array.from(document.querySelectorAll('.product-card'))
+        : Array.from(document.querySelectorAll('.product-list-item'));
+      
+      filteredProducts = allProducts.filter(card => {
         const categoria = card.getAttribute('data-categoria').toLowerCase();
         const stock = parseInt(card.getAttribute('data-stock'));
         const favorito = card.getAttribute('data-favorito') === 'True';
@@ -1305,10 +1978,17 @@
       // Mostrar/ocultar mensaje de no resultados
       if (filteredProducts.length === 0) {
         noResultsMessage.style.display = 'block';
-        document.querySelector('.products-grid').style.display = 'none';
+        productsGrid.style.display = 'none';
+        productsList.style.display = 'none';
       } else {
         noResultsMessage.style.display = 'none';
-        document.querySelector('.products-grid').style.display = 'grid';
+        if (currentView === 'grid') {
+          productsGrid.style.display = 'grid';
+          productsList.style.display = 'none';
+        } else {
+          productsGrid.style.display = 'none';
+          productsList.style.display = 'flex';
+        }
       }
       
       // Actualizar paginación
@@ -1340,6 +2020,8 @@
       const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
       paginationControl.innerHTML = '';
       
+      if (totalPages <= 1) return;
+      
       // Botón anterior
       const prevBtn = createPageItem('←', currentPage > 1 ? currentPage - 1 : null);
       paginationControl.appendChild(prevBtn);
@@ -1365,7 +2047,7 @@
     function createPageItem(text, page) {
       const item = document.createElement('a');
       item.className = 'page-item';
-      item.textContent = text;
+      item.innerHTML = `<span>${text}</span>`;
       
       if (page) {
         item.href = '#';
@@ -1388,23 +2070,33 @@
       const start = (currentPage - 1) * PRODUCTS_PER_PAGE;
       const end = start + PRODUCTS_PER_PAGE;
       
-      productCards.forEach(card => {
+      // Ocultar todos los productos
+      const allProducts = currentView === 'grid' 
+        ? document.querySelectorAll('.product-card')
+        : document.querySelectorAll('.product-list-item');
+        
+      allProducts.forEach(card => {
         card.style.display = 'none';
       });
       
+      // Mostrar solo los de la página actual
       filteredProducts.slice(start, end).forEach(card => {
-        card.style.display = 'flex';
+        card.style.display = currentView === 'grid' ? 'flex' : 'grid';
       });
     }
     
-    // Toggle favoritos
-    favoritosContainer.addEventListener('click', function() {
-      favoritosCheck.checked = !favoritosCheck.checked;
-      this.classList.toggle('active');
+    // Toggle favoritos mejorado
+    favoritosCheck.addEventListener('change', function() {
+      const label = this.closest('.fav-toggle-compact');
+      const heart = label.querySelector('i');
       
-      // Cambiar icono del corazón
-      const heart = this.querySelector('.heart');
-      heart.textContent = favoritosCheck.checked ? '♥' : '♡';
+      if (this.checked) {
+        heart.classList.remove('far');
+        heart.classList.add('fas');
+      } else {
+        heart.classList.remove('fas');
+        heart.classList.add('far');
+      }
       
       currentPage = 1;
       applyFilters();
@@ -1416,14 +2108,14 @@
       categoriaFilter.value = '';
       orderFilter.value = 'recientes';
       favoritosCheck.checked = false;
-      favoritosContainer.classList.remove('active');
-      favoritosContainer.querySelector('.heart').textContent = '♡';
+      favoritosCheck.dispatchEvent(new Event('change'));
       activeStockFilter = 'all';
       
-      document.querySelectorAll('.filter-chip').forEach(chip => {
+      // Resetear botones de stock
+      document.querySelectorAll('.stock-filter-btn').forEach(chip => {
         chip.classList.remove('active');
       });
-      document.querySelector('.filter-chip').classList.add('active');
+      document.querySelector('.stock-filter-btn[onclick*="all"]').classList.add('active');
       
       currentPage = 1;
       applyFilters();
@@ -1449,12 +2141,12 @@
       window.initBarcodeScanner('#scanButton', '#searchInput');
     }
     
-    // Escáner con cámara
+    // Escáner con cámara mejorado
     document.getElementById('cameraButton').addEventListener('click', function() {
       iniciarEscaneoQuagga();
     });
     
-    // Función para escáner Quagga
+    // Función para escáner Quagga mejorada
     function iniciarEscaneoQuagga() {
       const scanner = document.getElementById('quaggaScanner');
       scanner.classList.add('active');
@@ -1470,8 +2162,20 @@
             facingMode: "environment"
           }
         },
+        locator: {
+          patchSize: "medium",
+          halfSample: true
+        },
+        numOfWorkers: 2,
+        frequency: 10,
         decoder: {
-          readers: ["code_128_reader", "ean_reader", "ean_8_reader", "code_39_reader", "upc_reader"]
+          readers: [
+            "code_128_reader", 
+            "ean_reader", 
+            "ean_8_reader", 
+            "code_39_reader", 
+            "upc_reader"
+          ]
         }
       }, function(err) {
         if (err) {
@@ -1519,24 +2223,25 @@
       observer.observe(el);
     });
     
-    // Contadores animados
-    function animateCounter(element, target) {
-      let current = 0;
-      const increment = target / 50;
-      const timer = setInterval(() => {
-        current += increment;
-        if (current >= target) {
-          current = target;
-          clearInterval(timer);
+    // Teclas de acceso rápido
+    document.addEventListener('keydown', function(e) {
+      // Ctrl/Cmd + K para búsqueda
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        searchInput.focus();
+      }
+      
+      // Esc para cerrar scanner
+      if (e.key === 'Escape') {
+        const scanner = document.getElementById('quaggaScanner');
+        if (scanner.classList.contains('active')) {
+          document.getElementById('closeScanner').click();
         }
-        element.textContent = Math.floor(current);
-      }, 20);
-    }
+      }
+    });
     
-    // Simular datos de resumen (en producción vendrían del backend)
-    animateCounter(document.getElementById('entradasHoy'), 24);
-    animateCounter(document.getElementById('salidasHoy'), 18);
-    animateCounter(document.getElementById('movimientosTotal'), 156);
+    // Calcular salidas del día (valor por defecto)
+    const salidaShoy = {{ salidas_hoy|default(18) }};
     
     // Inicializar
     applyFilters();
