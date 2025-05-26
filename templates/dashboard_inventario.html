@@ -275,6 +275,151 @@
         background: transparent !important;
         background-color: transparent !important;
     }
+    
+    /* ===== CAMBIOS DE COLOR SOLICITADOS ===== */
+
+    /* 1. Herramientas Rápidas - Boxes con gradiente elegante */
+    .tools-section .tool-card {
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;
+        background-image: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3) !important;
+        position: relative;
+        overflow: hidden;
+        /* Boxes ligeramente más grandes */
+        padding: 1.25rem 0.875rem !important;
+        min-height: 140px !important;
+    }
+
+    .tools-section .tool-card:hover {
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;
+        background-image: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;
+        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.4) !important;
+        transform: scale(1.05) !important;
+    }
+
+    /* Efecto radial sutil para las tool cards */
+    .tools-section .tool-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    /* Mantener el texto blanco en las tool cards */
+    .tools-section .tool-card .tool-title,
+    .tools-section .tool-card .tool-shortcut {
+        color: white !important;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Ajustar tamaños de elementos */
+    .tools-section .tool-card .tool-icon {
+        width: 40px !important;
+        height: 40px !important;
+        font-size: 1rem !important;
+        margin: 0 auto 0.875rem !important;
+    }
+
+    .tools-section .tool-card .tool-title {
+        font-size: 0.75rem !important;
+        font-weight: 600 !important;
+        margin-bottom: 0.625rem !important;
+    }
+
+    .tools-section .tool-card .tool-shortcut {
+        font-size: 0.625rem !important;
+        padding: 0.3rem 1.25rem !important;
+        min-width: 70px !important;
+    }
+
+    /* Iconos de herramientas en blanco */
+    .tools-section .tool-card .tool-icon i {
+        color: white !important;
+    }
+
+    /* Boxes de iconos con colores distintivos */
+    .tools-section .tool-card:nth-child(1) .tool-icon {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important; /* Verde esmeralda */
+    }
+
+    .tools-section .tool-card:nth-child(2) .tool-icon {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; /* Azul brillante */
+    }
+
+    .tools-section .tool-card:nth-child(3) .tool-icon {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important; /* Naranja dorado */
+    }
+
+    .tools-section .tool-card:nth-child(4) .tool-icon {
+        background: linear-gradient(135deg, #ec4899 0%, #db2777 100%) !important; /* Rosa vibrante */
+    }
+
+    .tools-section .tool-card:nth-child(5) .tool-icon {
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%) !important; /* Púrpura */
+    }
+
+    /* 2. Botón "Ver todos los productos" - Gradiente elegante */
+    .btn-secondary.view-all-enhanced {
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;
+        background-image: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;
+        color: white !important;
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3) !important;
+    }
+
+    .btn-secondary.view-all-enhanced:hover {
+        background: linear-gradient(135deg, #0f172a 0%, #020617 100%) !important;
+        background-image: linear-gradient(135deg, #0f172a 0%, #020617 100%) !important;
+        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.4) !important;
+    }
+
+    /* Asegurar que el icono sea blanco */
+    .btn-secondary.view-all-enhanced i {
+        color: white !important;
+    }
+
+    /* 3. Badge "Powered by ML" - Morado más tenue */
+    .ai-badge {
+        background: linear-gradient(135deg, #b794f6 0%, #9f7aea 100%) !important; /* Morado más claro/tenue */
+        opacity: 0.9;
+    }
+
+    /* 4. Stock crítico (rojo) - Más tenue */
+    .alert-content .stock-highlight,
+    .alert-content strong {
+        background: #ff7777 !important; /* Rojo más tenue */
+        color: white !important;
+        padding: 0.125rem 0.375rem !important;
+        border-radius: 3px !important;
+        font-weight: 600 !important;
+    }
+
+    /* 5. Botón "Pedir" - Color #204F41 */
+    .alert-action {
+        background: #204F41 !important;
+        color: white !important;
+    }
+
+    .alert-action:hover {
+        background: #184037 !important; /* Un poco más oscuro para el hover */
+        box-shadow: 0 4px 8px rgba(32, 79, 65, 0.3) !important;
+    }
+
+    /* Extra: Asegurar que los iconos de las herramientas mantengan sus colores */
+    .tools-section .tool-card .tool-icon {
+        /* Los iconos mantienen su estilo original, solo el contenedor cambia */
+        background: transparent !important;
+    }
+
+    /* Ajuste adicional para mejor contraste */
+    .tools-section .tool-card .tool-shortcut {
+        background: rgba(255, 255, 255, 0.2) !important;
+        backdrop-filter: blur(10px);
+    }
 </style>
 {% endblock %}
 
