@@ -1,1131 +1,1292 @@
 {% extends 'base.html' %}
 
 {% block title %}
-  Ajuste de Stock
+  Ajuste de Stock - OptiMax
 {% endblock %}
 
 {% block content %}
 <style>
-  /* Sistema de Diseño Apple - Adaptado del dashboard_inventario.html */
+  /* ===== SISTEMA DE DISEÑO PREMIUM ===== */
   :root {
-    --font-apple: -apple-system, BlinkMacSystemFont, 'SF Pro Text', Helvetica, Arial, sans-serif;
+    /* Paleta Premium Dark */
+    --premium-black: #0a0a0a;
+    --premium-dark: #0f172a;
+    --premium-dark-secondary: #1e293b;
+    --premium-gray: #334155;
+    --premium-gray-light: #64748b;
+    --premium-gray-lighter: #94a3b8;
+    --premium-silver: #cbd5e1;
+    --premium-white: #ffffff;
     
-    /* Colores esenciales */
-    --text-color: #1d1d1f;
-    --text-secondary: #555555; /* Cambiado a color más oscuro para mejor legibilidad */
-    --background: #ffffff;
-    --light-background: #f5f5f7;
-    --separator: rgba(0, 0, 0, 0.1);
-    --accent: #e52e2e;
-    --accent-hover: #c51818;
-    --accent-light: rgba(229, 46, 46, 0.1);
+    /* Colores de acento */
+    --accent-emerald: #10b981;
+    --accent-emerald-dark: #059669;
+    --accent-blue: #3b82f6;
+    --accent-blue-dark: #2563eb;
+    --accent-amber: #f59e0b;
+    --accent-rose: #ec4899;
+    --accent-purple: #8b5cf6;
     
-    /* Colores de estado */
-    --green: #2ecc71;
-    --orange: #f39c12;
-    --red: #e74c3c;
-    --blue: #1a237e;
-    --gray-500: #777777; /* Cambiado a color más oscuro para mejor legibilidad */
-    --gray-600: #86868b;
-    --gray-300: #d1d1d6;
+    /* Gradientes premium */
+    --gradient-dark: linear-gradient(135deg, #0f172a 0%, #020617 100%);
+    --gradient-emerald: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    --gradient-blue: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    --gradient-subtle: linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0) 100%);
+    
+    /* Espaciado */
+    --space-xs: 0.5rem;
+    --space-sm: 1rem;
+    --space-md: 1.5rem;
+    --space-lg: 2rem;
+    --space-xl: 3rem;
+    --space-2xl: 4rem;
+    
+    /* Transiciones */
+    --transition-fast: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Sombras premium */
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+    --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.16);
+    --shadow-glow: 0 0 40px rgba(16, 185, 129, 0.15);
+  }
+
+  /* Reset y base */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
   }
 
   body {
-    font-family: var(--font-apple);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #fafbfc;
+    color: var(--premium-dark);
+    line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    line-height: 1.5;
-    color: var(--text-color);
-    background-color: var(--background);
   }
 
-  /* Contenedor principal con estilo Apple */
-  .ajuste-stock-container {
-    max-width: 1200px;
+  /* Container principal */
+  .stock-adjustment-container {
+    max-width: 1400px;
     margin: 0 auto;
-    padding: 36px 24px;
+    padding: var(--space-lg) var(--space-md);
   }
 
-  /* Tipografía */
-  h1 {
-    font-size: 32px;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-    margin-bottom: 8px;
-    color: var(--text-color);
+  /* ===== HERO SECTION PREMIUM ===== */
+  .hero-section {
+    background: var(--gradient-dark);
+    border-radius: 24px;
+    padding: var(--space-2xl);
+    margin-bottom: var(--space-xl);
+    position: relative;
+    overflow: hidden;
   }
-  
-  .page-description {
-    font-size: 17px;
-    color: #86868b; /* Más claro para la descripción de la página */
-    margin-bottom: 28px;
+
+  /* Efecto de brillo sutil */
+  .hero-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 60%);
+    animation: rotateGlow 20s linear infinite;
+  }
+
+  @keyframes rotateGlow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--space-xl);
+    align-items: center;
+  }
+
+  .hero-text h1 {
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--premium-white);
+    margin-bottom: var(--space-sm);
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+
+  .hero-text p {
+    font-size: 1.25rem;
+    color: var(--premium-silver);
+    margin-bottom: var(--space-lg);
     max-width: 600px;
-    font-weight: 400; /* Algo más ligero */
+    line-height: 1.6;
   }
 
-  /* Encabezado de página - MODIFICADO PARA ALINEACIÓN PERFECTA */
-  .page-header {
+  /* Stats minimalistas */
+  .hero-stats {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start; /* Cambiado a flex-start */
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
+    gap: var(--space-xl);
   }
-  
-  .page-title {
-    font-size: 32px;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-    margin: 0;
-    margin-bottom: 8px; /* Espacio para la descripción */
-    color: var(--text-color);
-  }
-  
-  .header-title-container {
+
+  .stat-item {
     display: flex;
     flex-direction: column;
+    gap: var(--space-xs);
   }
-  
-  .header-actions {
-    display: flex;
-    gap: 1rem;
-    padding-top: 8px; /* Ajuste para alinear con la primera línea del título */
-    align-items: center; /* Asegura alineación vertical de botones */
+
+  .stat-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--accent-emerald);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
   }
-  
-  /* Estilos comunes para los botones de acción - UNIFICADOS */
-  .btn-action {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.75rem;
-    padding: 0.75rem 1.25rem;
-    border-radius: 980px;
-    font-weight: 500;
-    font-size: 0.95rem;
-    transition: all 0.2s ease;
-    text-decoration: none;
-    cursor: pointer;
-    border: none;
-    height: 44px; /* Altura fija para todos los botones */
-    white-space: nowrap; /* Evita que el texto se rompa */
+
+  .stat-label {
+    font-size: 0.875rem;
+    color: var(--premium-silver);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
-  
-  .btn-action i, 
-  .btn-action span {
+
+  /* Botón hero */
+  .hero-action {
+    background: var(--gradient-emerald);
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    font-weight: 600;
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    vertical-align: middle;
-    line-height: 1;
+    gap: var(--space-sm);
+    text-decoration: none;
+    transition: var(--transition-smooth);
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
   }
-  
-  /* Botón Volver estilo historial de movimientos */
-  .btn-volver {
-    background-color: var(--blue);
-    color: #ffffff;
-    box-shadow: 0 2px 4px rgba(26, 35, 126, 0.3);
-  }
-  
-  .btn-volver:hover {
-    background-color: #151c64;
+
+  .hero-action:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(26, 35, 126, 0.4);
-    color: #ffffff;
-  }
-  
-  /* Botón Historial */
-  .btn-historial {
-    background-color: var(--accent);
-    color: white;
-    box-shadow: 0 2px 4px rgba(229, 46, 46, 0.3);
-  }
-  
-  .btn-historial:hover {
-    background-color: var(--accent-hover);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(229, 46, 46, 0.4);
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
     color: white;
   }
 
-  /* Filtros y búsqueda con estilo Apple - MODIFICADO */
-  .filters-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between; /* Distribuir equitativamente */
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-    width: 100%; /* Asegurar ancho completo */
-  }
-  
-  .filter-item {
-    flex: 1;
-    min-width: 180px;
+  /* Gráfico decorativo */
+  .hero-visual {
+    width: 300px;
+    height: 300px;
+    background: var(--gradient-subtle);
+    border-radius: 20px;
     display: flex;
     align-items: center;
+    justify-content: center;
+    position: relative;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
-  
-  .filter-item select {
+
+  .hero-visual-icon {
+    font-size: 8rem;
+    color: var(--accent-emerald);
+    opacity: 0.8;
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+  }
+
+  /* ===== BARRA DE FILTROS PREMIUM ===== */
+  .filters-bar {
+    background: white;
+    border-radius: 16px;
+    padding: var(--space-md);
+    margin-bottom: var(--space-lg);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+  }
+
+  .filters-content {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--space-md);
+    align-items: center;
+  }
+
+  /* Búsqueda premium */
+  .search-premium {
+    position: relative;
+    flex: 1;
+  }
+
+  .search-premium input {
     width: 100%;
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    font-size: 0.95rem;
-    font-family: var(--font-apple);
-    background-color: #f5f5f7;
-    color: var(--text-color);
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236c757d' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 1rem center;
-    background-size: 12px;
-    padding-right: 2.5rem;
-    transition: all 0.2s ease;
+    padding: 1rem 1rem 1rem 3.5rem;
+    background: #f8fafc;
+    border: 2px solid transparent;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: var(--transition-fast);
+    color: var(--premium-dark);
   }
-  
-  .filter-item select:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(229, 46, 46, 0.15);
+
+  .search-premium input:focus {
     outline: none;
+    border-color: var(--accent-emerald);
+    background: white;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
   }
-  
-  /* Búsqueda con estilo Apple - ADAPTADO DE CAMBIAR PRECIOS */
-  .search-container {
-    display: flex;
-    gap: 0.75rem;
-    margin-bottom: 150px; /* MODIFICADO: Igual que en cambiar-precios */
-    position: relative;
-    align-items: center;
-  }
-  
-  .search-box {
-    flex: 1;
-    position: relative;
-  }
-  
-  .search-box i {
+
+  .search-premium i {
     position: absolute;
     left: 1.25rem;
     top: 50%;
     transform: translateY(-50%);
-    color: var(--gray-600);
-    font-size: 1.1rem;
-    z-index: 5;
+    color: var(--premium-gray-light);
+    font-size: 1.125rem;
+  }
+
+  /* Controles de filtro */
+  .filter-controls {
+    display: flex;
+    gap: var(--space-sm);
+    align-items: center;
+  }
+
+  /* Chip filters */
+  .filter-chips {
+    display: flex;
+    gap: var(--space-xs);
+  }
+
+  .filter-chip {
+    padding: 0.5rem 1rem;
+    background: #f1f5f9;
+    border: 2px solid transparent;
+    border-radius: 10px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--premium-gray);
+    cursor: pointer;
+    transition: var(--transition-fast);
+    white-space: nowrap;
+  }
+
+  .filter-chip:hover {
+    background: #e2e8f0;
+    transform: translateY(-1px);
+  }
+
+  .filter-chip.active {
+    background: var(--gradient-emerald);
+    color: white;
+    border-color: var(--accent-emerald);
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+  }
+
+  /* Dropdown moderno */
+  .filter-dropdown {
+    position: relative;
+  }
+
+  .filter-dropdown select {
+    appearance: none;
+    padding: 0.75rem 2.5rem 0.75rem 1rem;
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--premium-dark);
+    cursor: pointer;
+    transition: var(--transition-fast);
+  }
+
+  .filter-dropdown select:hover {
+    border-color: var(--premium-silver);
+  }
+
+  .filter-dropdown select:focus {
+    outline: none;
+    border-color: var(--accent-emerald);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+  }
+
+  .filter-dropdown::after {
+    content: '\f078';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--premium-gray-light);
     pointer-events: none;
   }
-  
-  .search-box input {
-    width: 100%;
-    padding: 0.75rem 1rem 0.75rem 3rem;
-    border-radius: 8px;
-    border: 1px solid var(--gray-300);
-    font-size: 1rem;
-    height: 48px;
-    transition: all 0.2s ease;
-    font-weight: 400;
-    background-color: var(--light-background);
-  }
-  
-  .search-box input:focus {
-    background-color: white;
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(229, 46, 46, 0.15);
-    outline: none;
-  }
-  
-  .search-actions {
+
+  /* Botones de acción */
+  .action-buttons {
     display: flex;
-    gap: 0.5rem;
+    gap: var(--space-xs);
   }
-  
-  .icon-btn {
+
+  .btn-icon {
     width: 48px;
     height: 48px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: var(--light-background);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    color: var(--premium-gray);
     cursor: pointer;
-    transition: all 0.2s ease;
-    padding: 0;
+    transition: var(--transition-fast);
   }
-  
-  .icon-btn:hover {
-    background-color: white;
+
+  .btn-icon:hover {
+    border-color: var(--accent-emerald);
+    color: var(--accent-emerald);
     transform: translateY(-2px);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-md);
   }
-  
-  .icon-btn.scan-active {
-    background-color: rgba(229, 46, 46, 0.1);
-    border-color: var(--accent);
-    animation: blink 1s infinite;
+
+  .btn-icon.active {
+    background: var(--gradient-emerald);
+    border-color: var(--accent-emerald);
+    color: white;
   }
-  
-  @keyframes blink {
-    0% { opacity: 1; }
-    50% { opacity: 0.6; }
-    100% { opacity: 1; }
-  }
-  
-  /* Estilos para el corazón exactamente como en productos.html */
-  .heart-icon {
-    font-size: 24px;
+
+  /* Favoritos toggle premium */
+  .favorites-toggle {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: 0.75rem 1.25rem;
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
     cursor: pointer;
-    display: inline-block;
-    transition: transform 0.2s ease, color 0.2s ease;
+    transition: var(--transition-fast);
+    user-select: none;
   }
-  
-  .heart-icon:hover {
-    transform: scale(1.1);
+
+  .favorites-toggle:hover {
+    border-color: var(--accent-rose);
+    background: #fef2f2;
   }
-  
-  .heart-icon.active {
-    color: var(--red);
+
+  .favorites-toggle.active {
+    background: var(--accent-rose);
+    border-color: var(--accent-rose);
+    color: white;
   }
-  
-  .heart-icon:not(.active) {
-    color: var(--gray-500);
+
+  .favorites-toggle .heart {
+    font-size: 1.125rem;
+    transition: var(--transition-fast);
   }
-  
-  /* Contenedor para el checkbox de favoritos - ADAPTADO DE CAMBIAR PRECIOS */
-  .form-heart-container {
+
+  .favorites-toggle.active .heart {
+    animation: heartBeat 0.5s ease-out;
+  }
+
+  @keyframes heartBeat {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+  }
+
+  /* ===== SECCIÓN DE RESUMEN ===== */
+  .summary-section {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-md);
+    margin-bottom: var(--space-xl);
+  }
+
+  .summary-card {
+    background: white;
+    border-radius: 16px;
+    padding: var(--space-lg);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: var(--transition-smooth);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .summary-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--gradient-emerald);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+  }
+
+  .summary-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .summary-card:hover::before {
+    transform: scaleX(1);
+  }
+
+  .summary-icon {
+    width: 48px;
+    height: 48px;
+    background: var(--gradient-emerald);
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
-    cursor: pointer;
-    background-color: var(--light-background);
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    margin-bottom: var(--space-sm);
+  }
+
+  .summary-icon i {
+    font-size: 1.25rem;
+    color: white;
+  }
+
+  .summary-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--premium-dark);
+    margin-bottom: 0.25rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .summary-label {
+    font-size: 0.875rem;
+    color: var(--premium-gray-light);
+  }
+
+  /* ===== GRID DE PRODUCTOS PREMIUM ===== */
+  .products-section {
+    margin-bottom: var(--space-xl);
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-lg);
+  }
+
+  .section-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--premium-dark);
+  }
+
+  .view-toggle {
+    display: flex;
+    gap: var(--space-xs);
+    background: #f1f5f9;
+    padding: 0.25rem;
+    border-radius: 10px;
+  }
+
+  .view-toggle button {
+    padding: 0.5rem 1rem;
+    background: transparent;
+    border: none;
     border-radius: 8px;
-    padding: 0 16px;
-    height: 48px;
-    transition: all 0.2s ease;
-    user-select: none;
+    color: var(--premium-gray);
+    cursor: pointer;
+    transition: var(--transition-fast);
   }
-  
-  .form-heart-container:hover {
-    background-color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+
+  .view-toggle button.active {
+    background: white;
+    color: var(--premium-dark);
+    box-shadow: var(--shadow-sm);
   }
-  
-  .form-heart-container.active {
-    background-color: rgba(231, 76, 60, 0.1);
-    border-color: var(--red);
-  }
-  
-  .form-heart-check-input {
-    display: none;
-  }
-  
-  /* Contador de resultados */
-  .products-summary {
-    font-size: 0.95rem;
-    color: var(--text-secondary);
-    margin-bottom: 1.5rem;
-    font-weight: 500; /* Añadido para mejor legibilidad */
-  }
-  
+
   /* Grid de productos */
   .products-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2rem;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: var(--space-lg);
   }
-  
-  .product-card {
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 12px;
+
+  /* Tarjeta de producto premium */
+  .product-card-premium {
+    background: white;
+    border-radius: 20px;
     overflow: hidden;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    background-color: white;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: var(--transition-smooth);
     position: relative;
-    height: 450px; /* Altura fija para todas las tarjetas */
     display: flex;
     flex-direction: column;
   }
-  
-  .product-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+
+  .product-card-premium:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-xl);
   }
-  
-  .product-img-container {
-    height: 180px;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: var(--light-background);
+
+  /* Imagen del producto */
+  .product-image-container {
     position: relative;
+    height: 200px;
+    overflow: hidden;
+    background: #f8fafc;
   }
-  
-  .product-img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-    transition: transform 0.3s ease;
+
+  .product-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: var(--transition-slow);
   }
-  
-  .product-card:hover .product-img {
+
+  .product-card-premium:hover .product-image {
     transform: scale(1.05);
   }
-  
-  .category-tag {
+
+  /* Badge de categoría */
+  .category-badge {
     position: absolute;
-    top: 0.75rem;
-    right: 0.75rem;
-    padding: 0.4rem 0.75rem;
-    border-radius: 980px;
+    top: 1rem;
+    left: 1rem;
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 10px;
     font-size: 0.75rem;
-    font-weight: 500;
-    background-color: white;
-    color: var(--text-color);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    font-weight: 600;
+    color: var(--premium-dark);
+    box-shadow: var(--shadow-sm);
   }
-  
-  .product-body {
-    padding: 1.25rem;
+
+  /* Stock indicator */
+  .stock-indicator {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.9);
+  }
+
+  .stock-indicator.high { background: var(--accent-emerald); }
+  .stock-indicator.medium { background: var(--accent-amber); }
+  .stock-indicator.low { background: #ef4444; }
+
+  /* Contenido del producto */
+  .product-content {
+    padding: var(--space-lg);
+    flex: 1;
     display: flex;
     flex-direction: column;
-    flex-grow: 1;
   }
-  
-  .product-title {
-    font-size: 1.1rem;
+
+  .product-header {
+    margin-bottom: var(--space-sm);
+  }
+
+  .product-name {
+    font-size: 1.125rem;
     font-weight: 600;
-    margin-bottom: 0.75rem;
-    color: var(--text-color);
+    color: var(--premium-dark);
+    margin-bottom: 0.25rem;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    height: 2.6rem;
-    min-height: 2.6rem;
   }
-  
+
+  .product-code {
+    font-size: 0.875rem;
+    color: var(--premium-gray-light);
+    font-family: 'SF Mono', 'Monaco', monospace;
+  }
+
+  /* Info del producto */
   .product-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-lg);
+    padding-top: var(--space-sm);
+    border-top: 1px solid #f1f5f9;
+  }
+
+  .info-item {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
-    flex-grow: 1;
+    gap: 0.25rem;
   }
-  
-  .product-info-item {
+
+  .info-label {
+    font-size: 0.75rem;
+    color: var(--premium-gray-light);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .info-value {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--premium-dark);
+  }
+
+  /* Acciones del producto */
+  .product-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-sm);
+    margin-top: auto;
+  }
+
+  .btn-product {
+    padding: 0.875rem;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.875rem;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-    font-weight: 500; /* Añadido para mejor legibilidad */
-    height: 1.5rem; /* Altura fija para cada ítem de información */
-    min-height: 1.5rem;
-  }
-  
-  .product-info-icon {
-    width: 16px;
-    text-align: center;
-    color: var(--text-secondary);
-  }
-  
-  .stock-badge {
-    display: inline;
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--text-color);
-  }
-  
-  .product-footer {
-    display: flex;
-    gap: 0.75rem;
-    margin-top: auto; /* Empuja los botones hacia el fondo de la tarjeta */
-    min-height: 40px; /* Altura mínima para los botones */
-  }
-  
-  .product-btn {
-    flex: 1;
-    padding: 0.75rem 0.5rem;
-    text-align: center;
-    border-radius: 980px;
-    font-weight: 500;
-    font-size: 0.875rem;
+    justify-content: center;
+    gap: var(--space-xs);
     cursor: pointer;
-    transition: all 0.2s ease;
+    border: 2px solid transparent;
+    transition: var(--transition-fast);
     text-decoration: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    border: none;
   }
-  
+
   .btn-entrada {
-    background-color: rgba(46, 204, 113, 0.2);
-    color: #1a7742; /* Más oscuro que var(--green) para mejor contraste */
-    border: 1px solid rgba(46, 204, 113, 0.3);
-    font-weight: 600;
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--accent-emerald-dark);
+    border-color: rgba(16, 185, 129, 0.2);
   }
-  
+
   .btn-entrada:hover {
-    background-color: rgba(46, 204, 113, 0.3);
+    background: var(--gradient-emerald);
+    color: white;
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(46, 204, 113, 0.25);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
   }
-  
+
   .btn-salida {
-    background-color: rgba(231, 76, 60, 0.2);
-    color: #c0392b; /* Más oscuro que var(--red) para mejor contraste */
-    border: 1px solid rgba(231, 76, 60, 0.3);
-    font-weight: 600;
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+    border-color: rgba(239, 68, 68, 0.2);
   }
-  
+
   .btn-salida:hover {
-    background-color: rgba(231, 76, 60, 0.3);
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(231, 76, 60, 0.25);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
   }
-  
-  /* Paginación con estilo Apple */
-  .pagination-container {
-    display: flex;
-    justify-content: center;
-    margin-top: 2rem;
+
+  /* ===== ESTADO VACÍO ===== */
+  .empty-state {
+    text-align: center;
+    padding: var(--space-2xl) var(--space-lg);
+    background: white;
+    border-radius: 20px;
+    box-shadow: var(--shadow-sm);
+    margin: var(--space-xl) 0;
   }
-  
-  .pagination {
-    display: flex;
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    gap: 0.5rem;
-  }
-  
-  .page-item {
-    margin: 0;
-  }
-  
-  .page-link {
+
+  .empty-illustration {
+    width: 200px;
+    height: 200px;
+    margin: 0 auto var(--space-lg);
+    background: var(--gradient-subtle);
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0.5rem 1rem;
-    border-radius: 980px;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    color: var(--text-color);
-    text-decoration: none;
-    transition: all 0.2s ease;
+  }
+
+  .empty-illustration i {
+    font-size: 5rem;
+    color: var(--premium-silver);
+  }
+
+  .empty-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--premium-dark);
+    margin-bottom: var(--space-sm);
+  }
+
+  .empty-description {
+    color: var(--premium-gray-light);
+    margin-bottom: var(--space-lg);
+  }
+
+  /* ===== PAGINACIÓN PREMIUM ===== */
+  .pagination-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: var(--space-xl);
+  }
+
+  .pagination-premium {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    background: white;
+    padding: 0.5rem;
+    border-radius: 14px;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .page-item {
     min-width: 40px;
     height: 40px;
-    font-size: 0.95rem;
-  }
-  
-  .page-link:hover {
-    background-color: var(--light-background);
-    transform: translateY(-2px);
-  }
-  
-  .page-item.active .page-link {
-    background-color: var(--accent);
-    color: white;
-    border-color: var(--accent);
-  }
-  
-  .page-item.disabled .page-link {
-    color: var(--text-secondary);
-    pointer-events: none;
-    opacity: 0.5;
-  }
-  
-  .pagination-info {
-    text-align: center;
-    color: var(--text-secondary);
-    font-size: 0.875rem;
-    margin-top: 0.75rem;
-    font-weight: 500; /* Añadido para mejor legibilidad */
-  }
-  
-  /* Estilos específicos para mantener alineación consistente */
-  .product-code,
-  .product-stock,
-  .product-price {
-    height: 1.8rem;
-    line-height: 1.8rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  #noResultsMessage {
-    display: none;
-    text-align: center;
-    padding: 3rem 2rem;
-    background-color: var(--light-background);
-    border-radius: 12px;
-    margin-bottom: 2rem;
-    opacity: 0;
-    transform: translateY(10px);
-    transition: opacity 0.3s ease, transform 0.3s ease;
-  }
-  
-  #noResultsMessage.visible {
-    display: block;
-    opacity: 1;
-    transform: translateY(0);
-  }
-  
-  #noResultsMessage i {
-    font-size: 3rem;
-    color: var(--text-secondary);
-    margin-bottom: 1rem;
-  }
-  
-  #noResultsMessage h4 {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-bottom: 0.75rem;
-    color: var(--text-color);
-  }
-  
-  #noResultsMessage p {
-    font-size: 1rem;
-    color: var(--text-secondary);
-    margin-bottom: 1.5rem;
-    font-weight: 500; /* Añadido para mejor legibilidad */
-  }
-  
-  #resetFilters {
-    display: inline-block;
-    padding: 0.5rem 0.9rem;
-    border-radius: 980px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
     font-weight: 500;
-    font-size: 0.85rem;
-    background-color: white;
-    color: var(--text-color);
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    font-size: 0.875rem;
+    color: var(--premium-gray);
     cursor: pointer;
-    transition: all 0.2s ease;
-    text-align: center;
+    transition: var(--transition-fast);
+    text-decoration: none;
   }
-  
-  #resetFilters:hover {
-    background-color: #f0f0f0;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+
+  .page-item:hover {
+    background: #f1f5f9;
+    color: var(--premium-dark);
   }
-  
-  /* Código adicional para manejo de escáner */
+
+  .page-item.active {
+    background: var(--gradient-emerald);
+    color: white;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+  }
+
+  .page-item.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* ===== ANIMACIONES ===== */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-on-scroll {
+    animation: fadeInUp 0.6s ease-out forwards;
+    opacity: 0;
+  }
+
+  /* Stagger animation */
+  .product-card-premium:nth-child(1) { animation-delay: 0.1s; }
+  .product-card-premium:nth-child(2) { animation-delay: 0.15s; }
+  .product-card-premium:nth-child(3) { animation-delay: 0.2s; }
+  .product-card-premium:nth-child(4) { animation-delay: 0.25s; }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 1200px) {
+    .summary-section {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .hero-content {
+      grid-template-columns: 1fr;
+      text-align: center;
+    }
+    
+    .hero-text h1 {
+      font-size: 2rem;
+    }
+    
+    .hero-visual {
+      display: none;
+    }
+    
+    .filters-content {
+      grid-template-columns: 1fr;
+    }
+    
+    .filter-controls {
+      flex-wrap: wrap;
+    }
+    
+    .summary-section {
+      grid-template-columns: 1fr;
+    }
+    
+    .products-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* ===== SCANNER MODAL MEJORADO ===== */
   #quaggaScanner {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(20px);
     z-index: 9999;
     display: none;
+    align-items: center;
+    justify-content: center;
   }
-  
+
   #quaggaScanner.active {
-    display: block;
+    display: flex;
   }
-  
+
   #scanner-container {
-    width: 100%;
-    max-width: 640px;
-    height: 480px;
-    margin: 50px auto;
-    position: relative;
-    border: 3px solid var(--accent);
-    border-radius: 12px;
+    width: 90%;
+    max-width: 600px;
+    height: 400px;
+    background: black;
+    border-radius: 20px;
     overflow: hidden;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
   }
-  
+
   #closeScanner {
     position: absolute;
-    top: 20px;
-    right: 20px;
-    width: 40px;
-    height: 40px;
-    background: white;
+    top: 1rem;
+    right: 1rem;
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 20px;
-    color: var(--text-color);
+    color: white;
+    font-size: 1.25rem;
     cursor: pointer;
-    z-index: 10000;
-    border: none;
+    z-index: 10;
+    transition: var(--transition-fast);
   }
-  
-  /* Responsive Media Queries */
-  @media (max-width: 992px) {
-    .products-grid {
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    }
+
+  #closeScanner:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
   }
-  
-  @media (max-width: 768px) {
-    .ajuste-stock-container {
-      padding: 24px 16px;
-    }
-    
-    .page-header {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 1rem;
-    }
-    
-    .header-actions {
-      width: 100%;
-    }
-    
-    .filters-container {
-      flex-direction: column;
-    }
-    
-    .product-card {
-      max-width: 100%;
-    }
-    
-    .product-img-container {
-      height: 160px;
-    }
-    
-    .search-container {
-      flex-direction: column;
-    }
-    
-    .search-actions {
-      width: 100%;
-      justify-content: flex-end;
-    }
+
+  /* Scanner overlay */
+  .scanner-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 280px;
+    height: 180px;
+    border: 2px solid var(--accent-emerald);
+    border-radius: 12px;
+    pointer-events: none;
+    z-index: 5;
+  }
+
+  .scanner-overlay::before,
+  .scanner-overlay::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border: 3px solid var(--accent-emerald);
+  }
+
+  .scanner-overlay::before {
+    top: -3px;
+    left: -3px;
+    border-right: none;
+    border-bottom: none;
+  }
+
+  .scanner-overlay::after {
+    bottom: -3px;
+    right: -3px;
+    border-left: none;
+    border-top: none;
+  }
+
+  /* Loading animation para scanner */
+  .scanner-loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    text-align: center;
+  }
+
+  .scanner-loading .spinner {
+    width: 48px;
+    height: 48px;
+    border: 3px solid rgba(255, 255, 255, 0.2);
+    border-top-color: var(--accent-emerald);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
   }
 </style>
 
-<div class="ajuste-stock-container">
-  <!-- Encabezado con título y acciones -->
-  <div class="page-header">
-    <div class="header-title-container">
-      <h1 class="page-title">Ajuste de Stock</h1>
-      <p class="page-description">Registra entradas y salidas de mercancía.</p>
-    </div>
-    <div class="header-actions">
-      <!-- Botón Volver con clase btn-action y btn-volver -->
-      <a href="{{ url_for('dashboard_inventario') }}" class="btn-action btn-volver">
-        <i class="fas fa-arrow-left"></i>
-        <span>Volver</span>
-      </a>
-      <!-- Botón Historial con clase btn-action y btn-historial -->
-      <a href="{{ url_for('historial_movimientos') }}" class="btn-action btn-historial" id="btnHistorial">
-        <i class="fas fa-history"></i>
-        <span>Historial</span>
-      </a>
-    </div>
-  </div>
-  
-  <!-- Filtros y búsqueda - MODIFICADO PARA ELIMINAR FONDO GRIS -->
-  <div class="filters-container">
-    <div class="filter-item">
-      <select class="form-select" id="categoriaFilter">
-        <option value="">Todas las categorías</option>
-        {% for categoria in categorias %}
-          <option value="{{ categoria }}">{{ categoria|title }}</option>
-        {% endfor %}
-      </select>
-    </div>
-    <div class="filter-item">
-      <select class="form-select" id="stockFilter">
-        <option value="">Todos los niveles de stock</option>
-        <option value="low">Stock bajo (0-5)</option>
-        <option value="medium">Stock medio (6-20)</option>
-        <option value="high">Stock alto (20+)</option>
-      </select>
-    </div>
-    <div class="filter-item">
-      <select class="form-select" id="orderFilter">
-        <option value="recientes">Más recientes</option>
-        <option value="alfabetico">Alfabético (A-Z)</option>
-        <option value="stock-asc">Stock (menor a mayor)</option>
-        <option value="stock-desc">Stock (mayor a menor)</option>
-      </select>
-    </div>
-  </div>
-  
-  <!-- Barra de búsqueda adaptada al estilo de cambiar_precios.html -->
-  <div class="search-container">
-    <div class="search-box">
-      <i class="fas fa-search"></i>
-      <input type="text" id="searchInput" placeholder="Buscar por nombre, código o categoría...">
-    </div>
-    <div class="search-actions">
-      <!-- Filtro solo favoritos igual que en cambiar-precios -->
-      <div class="form-heart-container" id="favoritosContainer">
-        <input class="form-heart-check-input" type="checkbox" id="favoritosCheck">
-        <span class="heart-icon" id="heartIcon">&#9825;</span>
-        <span style="font-size: 0.95rem; font-weight: 500;">Solo favoritos</span>
+<div class="stock-adjustment-container">
+  <!-- Hero Section Premium -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <div class="hero-text">
+        <h1>Centro de Ajuste de Stock</h1>
+        <p>Gestiona entradas y salidas de inventario con precisión. Mantén el control total de tu stock en tiempo real.</p>
+        
+        <div class="hero-stats">
+          <div class="stat-item">
+            <div class="stat-value">{{ productos|length }}</div>
+            <div class="stat-label">Productos Activos</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">{{ productos|selectattr('stock', 'le', 5)|list|length }}</div>
+            <div class="stat-label">Stock Crítico</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">{{ categorias|length }}</div>
+            <div class="stat-label">Categorías</div>
+          </div>
+        </div>
       </div>
-      <!-- Botón de escaneo con pistola de código de barras -->
-      <button class="icon-btn" id="scanButton" title="Escanear con pistola">
-        <img src="{{ url_for('static', filename='img/3.png') }}" alt="Escanear con Lector" style="width: 24px; height: 24px;">
-      </button>
-      <!-- Botón de escaneo con cámara - Especificamos directamente la función en el atributo onclick -->
-      <button class="icon-btn" id="cameraButton" title="Escanear con cámara">
-        <img src="{{ url_for('static', filename='img/4.png') }}" alt="Escanear con Cámara" style="width: 24px; height: 24px;">
+      
+      <div class="hero-visual">
+        <i class="fas fa-boxes-stacked hero-visual-icon"></i>
+      </div>
+    </div>
+  </section>
+
+  <!-- Barra de filtros premium -->
+  <div class="filters-bar">
+    <div class="filters-content">
+      <!-- Búsqueda premium -->
+      <div class="search-premium">
+        <i class="fas fa-search"></i>
+        <input type="text" id="searchInput" placeholder="Buscar productos por nombre, código o categoría...">
+      </div>
+      
+      <!-- Controles de filtro -->
+      <div class="filter-controls">
+        <!-- Chips de filtros rápidos -->
+        <div class="filter-chips">
+          <button class="filter-chip" onclick="setStockFilter('all')">Todos</button>
+          <button class="filter-chip" onclick="setStockFilter('low')">Stock Bajo</button>
+          <button class="filter-chip" onclick="setStockFilter('medium')">Stock Medio</button>
+          <button class="filter-chip" onclick="setStockFilter('high')">Stock Alto</button>
+        </div>
+        
+        <!-- Dropdowns -->
+        <div class="filter-dropdown">
+          <select id="categoriaFilter">
+            <option value="">Todas las categorías</option>
+            {% for categoria in categorias %}
+              <option value="{{ categoria }}">{{ categoria|title }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        
+        <div class="filter-dropdown">
+          <select id="orderFilter">
+            <option value="recientes">Más recientes</option>
+            <option value="alfabetico">Alfabético</option>
+            <option value="stock-asc">Stock ↑</option>
+            <option value="stock-desc">Stock ↓</option>
+          </select>
+        </div>
+        
+        <!-- Acciones -->
+        <div class="action-buttons">
+          <!-- Toggle favoritos -->
+          <div class="favorites-toggle" id="favoritosContainer">
+            <input type="checkbox" id="favoritosCheck" style="display: none;">
+            <span class="heart">♡</span>
+            <span>Favoritos</span>
+          </div>
+          
+          <!-- Botones de escaneo -->
+          <button class="btn-icon" id="scanButton" title="Escanear con pistola">
+            <img src="{{ url_for('static', filename='img/3.png') }}" alt="Scanner" style="width: 20px;">
+          </button>
+          
+          <button class="btn-icon" id="cameraButton" title="Escanear con cámara">
+            <img src="{{ url_for('static', filename='img/4.png') }}" alt="Camera" style="width: 20px;">
+          </button>
+          
+          <!-- Historial -->
+          <a href="{{ url_for('historial_movimientos') }}" class="btn-icon" title="Ver historial">
+            <i class="fas fa-history"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Resumen de información -->
+  <section class="summary-section">
+    <div class="summary-card animate-on-scroll">
+      <div class="summary-icon">
+        <i class="fas fa-plus"></i>
+      </div>
+      <div class="summary-value" id="entradasHoy">0</div>
+      <div class="summary-label">Entradas hoy</div>
+    </div>
+    
+    <div class="summary-card animate-on-scroll">
+      <div class="summary-icon" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+        <i class="fas fa-minus"></i>
+      </div>
+      <div class="summary-value" id="salidasHoy">0</div>
+      <div class="summary-label">Salidas hoy</div>
+    </div>
+    
+    <div class="summary-card animate-on-scroll">
+      <div class="summary-icon" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">
+        <i class="fas fa-chart-line"></i>
+      </div>
+      <div class="summary-value" id="movimientosTotal">0</div>
+      <div class="summary-label">Movimientos totales</div>
+    </div>
+    
+    <div class="summary-card animate-on-scroll">
+      <div class="summary-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+        <i class="fas fa-exclamation-triangle"></i>
+      </div>
+      <div class="summary-value" id="alertasActivas">{{ productos|selectattr('stock', 'le', 5)|list|length }}</div>
+      <div class="summary-label">Alertas activas</div>
+    </div>
+  </section>
+
+  <!-- Mensaje cuando no hay resultados -->
+  <div id="noResultsMessage" style="display: none;">
+    <div class="empty-state">
+      <div class="empty-illustration">
+        <i class="fas fa-search"></i>
+      </div>
+      <h3 class="empty-title">No se encontraron productos</h3>
+      <p class="empty-description">Intenta ajustar los filtros o buscar con otros términos</p>
+      <button class="hero-action" onclick="resetFilters()">
+        <i class="fas fa-undo"></i>
+        Restablecer filtros
       </button>
     </div>
   </div>
-  
-  <!-- Resumen de productos mostrados -->
-  <div class="products-summary" id="productsCounter">
-    Mostrando <span id="visibleCount">{{ productos|length }}</span> de <span id="totalCount">{{ productos|length }}</span> productos
-  </div>
-  
-  <!-- Mensaje de sin resultados -->
-  <div id="noResultsMessage">
-    <i class="fas fa-search mb-3"></i>
-    <h4>No se encontraron productos</h4>
-    <p>Intenta modificar los filtros o la búsqueda</p>
-    <button id="resetFilters">
-      Restablecer
-    </button>
-  </div>
-  
-  <!-- Grid de productos -->
-  <div class="products-grid">
-    {% for producto in productos %}
-      <div class="product-card" data-categoria="{{ producto.categoria }}" data-stock="{{ producto.stock }}" data-precio="{{ producto.precio_venta }}" data-favorito="{{ producto.es_favorito }}">
-        <div class="product-img-container">
+
+  <!-- Sección de productos -->
+  <section class="products-section">
+    <div class="section-header">
+      <h2 class="section-title">
+        <span id="visibleCount">{{ productos|length }}</span> productos disponibles
+      </h2>
+      
+      <div class="view-toggle">
+        <button class="active"><i class="fas fa-th"></i> Grid</button>
+        <button><i class="fas fa-list"></i> Lista</button>
+      </div>
+    </div>
+    
+    <!-- Grid de productos -->
+    <div class="products-grid">
+      {% for producto in productos %}
+      <div class="product-card-premium animate-on-scroll" 
+           data-categoria="{{ producto.categoria }}" 
+           data-stock="{{ producto.stock }}" 
+           data-precio="{{ producto.precio_venta }}"
+           data-favorito="{{ producto.es_favorito }}">
+        
+        <!-- Imagen del producto -->
+        <div class="product-image-container">
           {% if producto.foto %}
-            <img src="{{ url_for('static', filename='uploads/' ~ producto.foto) }}" alt="{{ producto.nombre }}" class="product-img">
+            <img src="{{ url_for('static', filename='uploads/' ~ producto.foto) }}" 
+                 alt="{{ producto.nombre }}" 
+                 class="product-image">
           {% else %}
-            <img src="{{ url_for('static', filename='img/default_product.jpg') }}" alt="Imagen predeterminada" class="product-img">
+            <div style="height: 100%; display: flex; align-items: center; justify-content: center; background: #f8fafc;">
+              <i class="fas fa-box" style="font-size: 4rem; color: #e2e8f0;"></i>
+            </div>
+          {% endif %}
+          
+          <!-- Badge de categoría -->
+          <span class="category-badge">{{ producto.categoria|title }}</span>
+          
+          <!-- Indicador de stock -->
+          {% if producto.stock <= 5 %}
+            <span class="stock-indicator low"></span>
+          {% elif producto.stock <= 20 %}
+            <span class="stock-indicator medium"></span>
+          {% else %}
+            <span class="stock-indicator high"></span>
           {% endif %}
         </div>
-        <div class="category-tag">
-          {{ producto.categoria|title }}
-        </div>
-        <div class="product-body">
-          <h3 class="product-title">{{ producto.nombre }}</h3>
+        
+        <!-- Contenido del producto -->
+        <div class="product-content">
+          <div class="product-header">
+            <h3 class="product-name">{{ producto.nombre }}</h3>
+            <p class="product-code">{{ producto.codigo_barras_externo|default('Sin código') }}</p>
+          </div>
+          
           <div class="product-info">
-            <div class="product-info-item product-code">
-              <!-- Código de barras -->
-              <span style="font-weight: 500;">{{ producto.codigo_barras_externo }}</span>
-            </div>
-            <div class="product-info-item product-stock">
-              <!-- Stock -->
-              <span style="font-weight: 500;">
-                Stock actual: 
-                <span class="stock-badge">
-                  {% if producto.stock <= 0 %}
-                    Sin stock
+            <div class="info-item">
+              <span class="info-label">Stock Actual</span>
+              <span class="info-value">
+                {% if producto.stock <= 0 %}
+                  Agotado
+                {% else %}
+                  {{ '{:,.0f}'.format(producto.stock) }}
+                  {% if producto.unidad and producto.unidad != 'NONE' %}
+                    {{ producto.unidad }}
                   {% else %}
-                    {% if producto.stock == producto.stock|int %}
-                      {% if producto.stock|int >= 1000 %}
-                        {{ "{:,}".format(producto.stock|int).replace(',', ',') }}
-                      {% else %}
-                        {{ producto.stock|int }}
-                      {% endif %}
-                    {% else %}
-                      {% if producto.stock >= 1000 %}
-                        {{ "{:,.3f}".format(producto.stock).replace(',', ',') }}
-                      {% else %}
-                        {{ '{:.3f}'.format(producto.stock) }}
-                      {% endif %}
-                    {% endif %}
-                    {% if producto.unidad and producto.unidad != 'NONE' %}
-                      {{ producto.unidad }}
-                    {% else %}
-                      {% if producto.stock == 1 %}pieza{% else %}piezas{% endif %}
-                    {% endif %}
+                    unidades
                   {% endif %}
-                </span>
+                {% endif %}
               </span>
             </div>
-            <!-- Se elimina la sección del precio aquí -->
+            
+            <div class="info-item">
+              <span class="info-label">Valor</span>
+              <span class="info-value">${{ '{:,.2f}'.format(producto.precio_venta|default(0)) }}</span>
+            </div>
           </div>
-          <div class="product-footer">
-            <a href="{{ url_for('ajuste_entrada', producto_id=producto.id) }}" class="product-btn btn-entrada">
-              <i class="fas fa-plus"></i> Entrada
+          
+          <!-- Acciones -->
+          <div class="product-actions">
+            <a href="{{ url_for('ajuste_entrada', producto_id=producto.id) }}" class="btn-product btn-entrada">
+              <i class="fas fa-plus"></i>
+              Entrada
             </a>
-            <a href="{{ url_for('ajuste_salida', producto_id=producto.id) }}" class="product-btn btn-salida">
-              <i class="fas fa-minus"></i> Salida
+            <a href="{{ url_for('ajuste_salida', producto_id=producto.id) }}" class="btn-product btn-salida">
+              <i class="fas fa-minus"></i>
+              Salida
             </a>
           </div>
         </div>
       </div>
-    {% endfor %}
-  </div>
-  
-  <!-- Paginación -->
-  <div class="pagination-container">
-    <ul class="pagination" id="paginationControl">
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Paginación premium -->
+  <div class="pagination-wrapper">
+    <div class="pagination-premium" id="paginationControl">
       <!-- Se llenará con JavaScript -->
-    </ul>
-  </div>
-  <div class="pagination-info" id="paginationInfo">
-    Mostrando 10 productos por página
+    </div>
   </div>
 </div>
 
-<!-- Contenedor para escáner Quagga -->
+<!-- Modal de escáner -->
 <div id="quaggaScanner">
-  <button id="closeScanner">&times;</button>
-  <div id="scanner-container"></div>
+  <div id="scanner-container">
+    <button id="closeScanner">&times;</button>
+    <div class="scanner-overlay"></div>
+    <div class="scanner-loading">
+      <div class="spinner"></div>
+      <p>Iniciando cámara...</p>
+    </div>
+  </div>
 </div>
 
-<!-- Scripts necesarios -->
+<!-- Scripts -->
 <script src="{{ url_for('static', filename='js/barcode-scanner.js') }}"></script>
-<!-- Incluir Quagga.js para el escáner de códigos de barras con cámara -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
 
 <script>
+  // Sistema de gestión de filtros premium
   document.addEventListener('DOMContentLoaded', function() {
     // Variables globales
-    const PRODUCTS_PER_PAGE = 10;
-    const productCards = document.querySelectorAll('.product-card');
-    const totalProducts = productCards.length;
+    const PRODUCTS_PER_PAGE = 12;
+    const productCards = document.querySelectorAll('.product-card-premium');
     let currentPage = 1;
     let filteredProducts = Array.from(productCards);
+    let activeStockFilter = 'all';
     
-    // Referencias a elementos DOM
+    // Referencias DOM
     const searchInput = document.getElementById('searchInput');
     const categoriaFilter = document.getElementById('categoriaFilter');
-    const stockFilter = document.getElementById('stockFilter');
     const orderFilter = document.getElementById('orderFilter');
     const favoritosCheck = document.getElementById('favoritosCheck');
+    const favoritosContainer = document.getElementById('favoritosContainer');
     const paginationControl = document.getElementById('paginationControl');
-    const paginationInfo = document.getElementById('paginationInfo');
+    const visibleCount = document.getElementById('visibleCount');
     const noResultsMessage = document.getElementById('noResultsMessage');
-    const resetFiltersBtn = document.getElementById('resetFilters');
-    const productsCounter = document.getElementById('productsCounter');
-    const visibleCountSpan = document.getElementById('visibleCount');
-    const totalCountSpan = document.getElementById('totalCount');
-    const scanButton = document.getElementById('scanButton');
-    const cameraButton = document.getElementById('cameraButton');
     
-    // Inicializar contador
-    totalCountSpan.textContent = totalProducts;
-    
-    // Formateo de números ya aplicado directamente en la plantilla Jinja2
-    
-    // Inicializar el escáner de códigos de barras con pistola
-    if (window.initBarcodeScanner) {
-      window.initBarcodeScanner('#scanButton', '#searchInput', {
-        threshold: 150,
-        timeoutDuration: 2000
+    // Sistema de filtros por chips
+    window.setStockFilter = function(filter) {
+      activeStockFilter = filter;
+      
+      // Actualizar UI de chips
+      document.querySelectorAll('.filter-chip').forEach(chip => {
+        chip.classList.remove('active');
       });
-    }
+      event.target.classList.add('active');
+      
+      currentPage = 1;
+      applyFilters();
+    };
     
-    // Observador del valor de searchInput para activar búsqueda automáticamente al escanear
-    let prevInputValue = '';
-    const checkForScannerInput = setInterval(() => {
-      if (searchInput && searchInput.value !== prevInputValue) {
-        prevInputValue = searchInput.value;
-        // Disparar evento de input para activar la búsqueda
-        const inputEvent = new Event('input', { bubbles: true });
-        searchInput.dispatchEvent(inputEvent);
-      }
-    }, 100);  // revisar cada 100ms
-    
-    // Implementación de Quagga.js para el escáner de cámara
-    function iniciarEscaneoQuagga() {
-      const scanner = document.getElementById('quaggaScanner');
-      const closeButton = document.getElementById('closeScanner');
-      
-      // Mostrar el escáner
-      scanner.classList.add('active');
-      
-      // Configurar Quagga
-      Quagga.init({
-        inputStream: {
-          name: "Live",
-          type: "LiveStream",
-          target: document.getElementById('scanner-container'),
-          constraints: {
-            width: 640,
-            height: 480,
-            facingMode: "environment" // Usar cámara trasera si está disponible
-          }
-        },
-        locator: {
-          patchSize: "medium",
-          halfSample: true
-        },
-        numOfWorkers: navigator.hardwareConcurrency || 4,
-        decoder: {
-          readers: [
-            "code_128_reader",
-            "ean_reader",
-            "ean_8_reader",
-            "code_39_reader",
-            "code_39_vin_reader",
-            "codabar_reader",
-            "upc_reader",
-            "upc_e_reader",
-            "i2of5_reader"
-          ],
-          debug: {
-            showCanvas: true,
-            showPatches: true,
-            showFoundPatches: true,
-            showSkeleton: true,
-            showLabels: true,
-            showPatchLabels: true,
-            showRemainingPatchLabels: true
-          }
-        },
-        locate: true
-      }, function(err) {
-        if (err) {
-          console.error("Error al iniciar Quagga:", err);
-          alert("No se pudo acceder a la cámara. Verifique los permisos.");
-          scanner.classList.remove('active');
-          return;
-        }
-        
-        // Iniciar Quagga
-        Quagga.start();
-      });
-      
-      // Detectar código de barras
-      Quagga.onDetected(function(result) {
-        if (result && result.codeResult && result.codeResult.code) {
-          const code = result.codeResult.code;
-          console.log("Código detectado:", code);
-          
-          // Detener Quagga y cerrar el escáner
-          Quagga.stop();
-          scanner.classList.remove('active');
-          
-          // Asignar el código al campo de búsqueda y disparar búsqueda
-          if (searchInput) {
-            searchInput.value = code;
-            // Disparar evento de input para activar la búsqueda
-            const inputEvent = new Event('input', { bubbles: true });
-            searchInput.dispatchEvent(inputEvent);
-          }
-        }
-      });
-      
-      // Botón para cerrar el escáner manualmente
-      closeButton.addEventListener('click', function() {
-        Quagga.stop();
-        scanner.classList.remove('active');
-      });
-    }
-    
-    // Asignar el evento de clic al botón de cámara
-    if (cameraButton) {
-      cameraButton.addEventListener('click', function() {
-        iniciarEscaneoQuagga();
-      });
-    }
-    
-    // Al cargar la página, almacenar el orden original de los productos
-    const originalProductOrder = Array.from(document.querySelectorAll('.product-card'));
-    
-    // Función para aplicar el ordenamiento de manera consistente
-    function sortProducts() {
-      const orderValue = orderFilter.value;
-      const productsGridElement = document.querySelector('.products-grid');
-      
-      // Vaciar el contenedor primero
-      while (productsGridElement.firstChild) {
-        productsGridElement.removeChild(productsGridElement.firstChild);
-      }
-      
-      // Crear una copia de los productos filtrados para ordenar
-      let productsToSort = [...filteredProducts];
-      
-      // Ordenar según la opción seleccionada
-      if (orderValue === 'recientes') {
-        // Usar el orden original en que los productos venían del servidor
-        productsToSort.sort((a, b) => {
-          return originalProductOrder.indexOf(a) - originalProductOrder.indexOf(b);
-        });
-      } 
-      else if (orderValue === 'alfabetico') {
-        productsToSort.sort((a, b) => {
-          const titleA = a.querySelector('.product-title').textContent.toLowerCase();
-          const titleB = b.querySelector('.product-title').textContent.toLowerCase();
-          return titleA.localeCompare(titleB);
-        });
-      } 
-      else if (orderValue === 'stock-asc') {
-        productsToSort.sort((a, b) => {
-          const stockA = parseInt(a.getAttribute('data-stock') || '0');
-          const stockB = parseInt(b.getAttribute('data-stock') || '0');
-          return stockA - stockB;
-        });
-      } 
-      else if (orderValue === 'stock-desc') {
-        productsToSort.sort((a, b) => {
-          const stockA = parseInt(a.getAttribute('data-stock') || '0');
-          const stockB = parseInt(b.getAttribute('data-stock') || '0');
-          return stockB - stockA;
-        });
-      } 
-      else if (orderValue === 'precio-asc') {
-        productsToSort.sort((a, b) => {
-          const precioA = parseFloat(a.getAttribute('data-precio') || '0');
-          const precioB = parseFloat(b.getAttribute('data-precio') || '0');
-          return precioA - precioB;
-        });
-      } 
-      else if (orderValue === 'precio-desc') {
-        productsToSort.sort((a, b) => {
-          const precioA = parseFloat(a.getAttribute('data-precio') || '0');
-          const precioB = parseFloat(b.getAttribute('data-precio') || '0');
-          return precioB - precioA;
-        });
-      }
-      
-      // Reordenar físicamente en el DOM
-      productsToSort.forEach(card => {
-        productsGridElement.appendChild(card);
-      });
-      
-      return productsToSort;
-    }
-    
-    // Función principal para aplicar filtros y paginación
-    function applyFiltersAndPagination() {
+    // Aplicar filtros
+    function applyFilters() {
       const searchTerm = searchInput.value.toLowerCase();
       const categoriaSelected = categoriaFilter.value.toLowerCase();
-      const stockSelected = stockFilter.value;
       const favoritosOnly = favoritosCheck.checked;
       
-      // Aplicar filtros
       filteredProducts = Array.from(productCards).filter(card => {
         const categoria = card.getAttribute('data-categoria').toLowerCase();
         const stock = parseInt(card.getAttribute('data-stock'));
         const favorito = card.getAttribute('data-favorito') === 'True';
-        const title = card.querySelector('.product-title').textContent.toLowerCase();
-        const code = card.querySelector('.product-info-item span').textContent.toLowerCase();
+        const name = card.querySelector('.product-name').textContent.toLowerCase();
+        const code = card.querySelector('.product-code').textContent.toLowerCase();
         
         // Filtro de búsqueda
         const matchesSearch = !searchTerm || 
-                            title.includes(searchTerm) || 
+                            name.includes(searchTerm) || 
                             code.includes(searchTerm) || 
                             categoria.includes(searchTerm);
         
         // Filtro de categoría
-        const matchesCategoria = !categoriaSelected || categoriaSelected === '' || categoria === categoriaSelected;
+        const matchesCategoria = !categoriaSelected || categoria === categoriaSelected;
         
         // Filtro de stock
         let matchesStock = true;
-        if (stockSelected === 'low') {
+        if (activeStockFilter === 'low') {
           matchesStock = stock <= 5;
-        } else if (stockSelected === 'medium') {
+        } else if (activeStockFilter === 'medium') {
           matchesStock = stock > 5 && stock <= 20;
-        } else if (stockSelected === 'high') {
+        } else if (activeStockFilter === 'high') {
           matchesStock = stock > 20;
         }
         
@@ -1135,214 +1296,250 @@
         return matchesSearch && matchesCategoria && matchesStock && matchesFavoritos;
       });
       
-      // Ordenar productos utilizando la función dedicada
-      filteredProducts = sortProducts();
+      // Ordenar
+      sortProducts();
       
-      // Actualizar contador de resultados
-      visibleCountSpan.textContent = filteredProducts.length;
+      // Actualizar contador
+      visibleCount.textContent = filteredProducts.length;
       
-      // Mostrar mensaje de no resultados si es necesario
+      // Mostrar/ocultar mensaje de no resultados
       if (filteredProducts.length === 0) {
-        noResultsMessage.classList.add('visible');
+        noResultsMessage.style.display = 'block';
+        document.querySelector('.products-grid').style.display = 'none';
       } else {
-        noResultsMessage.classList.remove('visible');
+        noResultsMessage.style.display = 'none';
+        document.querySelector('.products-grid').style.display = 'grid';
       }
       
       // Actualizar paginación
       updatePagination();
-      
-      // Mostrar productos de la página actual
       showCurrentPage();
-      
-      // El formateo de números ya se aplica en la plantilla
     }
     
-    // Función para actualizar la paginación
+    // Ordenar productos
+    function sortProducts() {
+      const orderValue = orderFilter.value;
+      
+      filteredProducts.sort((a, b) => {
+        switch(orderValue) {
+          case 'alfabetico':
+            return a.querySelector('.product-name').textContent
+              .localeCompare(b.querySelector('.product-name').textContent);
+          case 'stock-asc':
+            return parseInt(a.getAttribute('data-stock')) - parseInt(b.getAttribute('data-stock'));
+          case 'stock-desc':
+            return parseInt(b.getAttribute('data-stock')) - parseInt(a.getAttribute('data-stock'));
+          default:
+            return 0;
+        }
+      });
+    }
+    
+    // Actualizar paginación
     function updatePagination() {
-      const totalFilteredProducts = filteredProducts.length;
-      const totalPages = Math.ceil(totalFilteredProducts / PRODUCTS_PER_PAGE);
-      
-      // Asegurar que la página actual es válida
-      if (currentPage > totalPages) {
-        currentPage = totalPages > 0 ? totalPages : 1;
-      }
-      
-      // Actualizar controles de paginación
+      const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
       paginationControl.innerHTML = '';
       
-      // Botón "Anterior"
-      const prevLi = document.createElement('li');
-      prevLi.className = 'page-item' + (currentPage === 1 ? ' disabled' : '');
-      const prevLink = document.createElement('a');
-      prevLink.className = 'page-link';
-      prevLink.href = '#';
-      prevLink.textContent = 'Anterior';
-      if (currentPage > 1) {
-        prevLink.addEventListener('click', (e) => {
-          e.preventDefault();
-          currentPage--;
-          applyFiltersAndPagination();
-        });
-      }
-      prevLi.appendChild(prevLink);
-      paginationControl.appendChild(prevLi);
+      // Botón anterior
+      const prevBtn = createPageItem('←', currentPage > 1 ? currentPage - 1 : null);
+      paginationControl.appendChild(prevBtn);
       
-      // Números de página
-      // Mostrar hasta 5 páginas, priorizando la actual y sus vecinas
-      let startPage = Math.max(1, currentPage - 2);
-      let endPage = Math.min(totalPages, startPage + 4);
-      if (endPage - startPage < 4 && startPage > 1) {
-        startPage = Math.max(1, endPage - 4);
+      // Páginas
+      for (let i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+          const pageBtn = createPageItem(i, i);
+          if (i === currentPage) pageBtn.classList.add('active');
+          paginationControl.appendChild(pageBtn);
+        } else if (i === currentPage - 3 || i === currentPage + 3) {
+          const dots = createPageItem('...', null);
+          paginationControl.appendChild(dots);
+        }
       }
       
-      for (let i = startPage; i <= endPage; i++) {
-        const pageLi = document.createElement('li');
-        pageLi.className = 'page-item' + (i === currentPage ? ' active' : '');
-        const pageLink = document.createElement('a');
-        pageLink.className = 'page-link';
-        pageLink.href = '#';
-        pageLink.textContent = i;
-        pageLink.addEventListener('click', (e) => {
-          e.preventDefault();
-          currentPage = i;
-          applyFiltersAndPagination();
-        });
-        pageLi.appendChild(pageLink);
-        paginationControl.appendChild(pageLi);
-      }
-      
-      // Botón "Siguiente"
-      const nextLi = document.createElement('li');
-      nextLi.className = 'page-item' + (currentPage === totalPages || totalPages === 0 ? ' disabled' : '');
-      const nextLink = document.createElement('a');
-      nextLink.className = 'page-link';
-      nextLink.href = '#';
-      nextLink.textContent = 'Siguiente';
-      if (currentPage < totalPages) {
-        nextLink.addEventListener('click', (e) => {
-          e.preventDefault();
-          currentPage++;
-          applyFiltersAndPagination();
-        });
-      }
-      nextLi.appendChild(nextLink);
-      paginationControl.appendChild(nextLi);
-      
-      // Actualizar información de paginación
-      if (totalPages <= 1) {
-        paginationInfo.textContent = `Mostrando ${totalFilteredProducts} productos`;
-      } else {
-        const productsOnThisPage = Math.min(PRODUCTS_PER_PAGE, 
-          (currentPage < totalPages) ? PRODUCTS_PER_PAGE : totalFilteredProducts - ((totalPages - 1) * PRODUCTS_PER_PAGE));
-        paginationInfo.textContent = `Mostrando ${productsOnThisPage} productos por página`;
-      }
-      
-      // Ocultar paginación si no hay productos o solo hay una página
-      paginationControl.style.display = totalPages <= 1 ? 'none' : 'flex';
+      // Botón siguiente
+      const nextBtn = createPageItem('→', currentPage < totalPages ? currentPage + 1 : null);
+      paginationControl.appendChild(nextBtn);
     }
     
-    // Función para mostrar los productos de la página actual
-    function showCurrentPage() {
-      const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
-      const endIndex = Math.min(startIndex + PRODUCTS_PER_PAGE, filteredProducts.length);
+    // Crear elemento de paginación
+    function createPageItem(text, page) {
+      const item = document.createElement('a');
+      item.className = 'page-item';
+      item.textContent = text;
       
-      // Ocultar todos los productos
+      if (page) {
+        item.href = '#';
+        item.addEventListener('click', (e) => {
+          e.preventDefault();
+          currentPage = page;
+          updatePagination();
+          showCurrentPage();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      } else {
+        item.classList.add('disabled');
+      }
+      
+      return item;
+    }
+    
+    // Mostrar página actual
+    function showCurrentPage() {
+      const start = (currentPage - 1) * PRODUCTS_PER_PAGE;
+      const end = start + PRODUCTS_PER_PAGE;
+      
       productCards.forEach(card => {
         card.style.display = 'none';
       });
       
-      // Mostrar solo los productos de la página actual
-      for (let i = startIndex; i < endIndex; i++) {
-        filteredProducts[i].style.display = 'block';
-      }
-    }
-    
-    // Adaptar el manejo del corazón al estilo de cambiar-precios
-    const heartIcon = document.getElementById('heartIcon');
-    const favoritosContainer = document.getElementById('favoritosContainer');
-    
-    if (favoritosCheck && heartIcon && favoritosContainer) {
-      // Función para actualizar el estado visual del botón
-      function updateFavoritosButtonState() {
-        if (favoritosCheck.checked) {
-          heartIcon.innerHTML = '&#9829;'; // Corazón lleno
-          heartIcon.classList.add('active');
-          favoritosContainer.classList.add('active');
-        } else {
-          heartIcon.innerHTML = '&#9825;'; // Corazón vacío
-          heartIcon.classList.remove('active');
-          favoritosContainer.classList.remove('active');
-        }
-      }
-      
-      // Evento de clic en el contenedor completo
-      favoritosContainer.addEventListener('click', function() {
-        favoritosCheck.checked = !favoritosCheck.checked;
-        updateFavoritosButtonState();
-        currentPage = 1;
-        applyFiltersAndPagination();
-      });
-      
-      // Evento de cambio en el checkbox
-      favoritosCheck.addEventListener('change', function() {
-        updateFavoritosButtonState();
+      filteredProducts.slice(start, end).forEach(card => {
+        card.style.display = 'flex';
       });
     }
     
-    // Eventos de filtros
-    searchInput.addEventListener('input', function() {
-      currentPage = 1; // Resetear a la primera página
-      applyFiltersAndPagination();
-    });
-    
-    categoriaFilter.addEventListener('change', function() {
+    // Toggle favoritos
+    favoritosContainer.addEventListener('click', function() {
+      favoritosCheck.checked = !favoritosCheck.checked;
+      this.classList.toggle('active');
+      
+      // Cambiar icono del corazón
+      const heart = this.querySelector('.heart');
+      heart.textContent = favoritosCheck.checked ? '♥' : '♡';
+      
       currentPage = 1;
-      applyFiltersAndPagination();
+      applyFilters();
     });
     
-    stockFilter.addEventListener('change', function() {
-      currentPage = 1;
-      applyFiltersAndPagination();
-    });
-    
-    orderFilter.addEventListener('change', function() {
-      currentPage = 1;
-      applyFiltersAndPagination();
-    });
-    
-    // Manejar el botón de reset de filtros
-    resetFiltersBtn.addEventListener('click', function() {
+    // Reset filtros
+    window.resetFilters = function() {
       searchInput.value = '';
       categoriaFilter.value = '';
-      stockFilter.value = '';
       orderFilter.value = 'recientes';
       favoritosCheck.checked = false;
-      heartIcon.innerHTML = '&#9825;'; // Corazón vacío
-      heartIcon.classList.remove('active');
       favoritosContainer.classList.remove('active');
+      favoritosContainer.querySelector('.heart').textContent = '♡';
+      activeStockFilter = 'all';
+      
+      document.querySelectorAll('.filter-chip').forEach(chip => {
+        chip.classList.remove('active');
+      });
+      document.querySelector('.filter-chip').classList.add('active');
+      
       currentPage = 1;
-      applyFiltersAndPagination();
+      applyFilters();
+    };
+    
+    // Event listeners
+    searchInput.addEventListener('input', () => {
+      currentPage = 1;
+      applyFilters();
     });
     
-    // Inicializar visualización
-    applyFiltersAndPagination();
+    categoriaFilter.addEventListener('change', () => {
+      currentPage = 1;
+      applyFilters();
+    });
     
-    // Animación para tarjetas de productos
-    function applyCardAnimations() {
-      productCards.forEach((card, index) => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(20px)';
+    orderFilter.addEventListener('change', () => {
+      applyFilters();
+    });
+    
+    // Inicializar escáner
+    if (window.initBarcodeScanner) {
+      window.initBarcodeScanner('#scanButton', '#searchInput');
+    }
+    
+    // Escáner con cámara
+    document.getElementById('cameraButton').addEventListener('click', function() {
+      iniciarEscaneoQuagga();
+    });
+    
+    // Función para escáner Quagga
+    function iniciarEscaneoQuagga() {
+      const scanner = document.getElementById('quaggaScanner');
+      scanner.classList.add('active');
+      
+      Quagga.init({
+        inputStream: {
+          name: "Live",
+          type: "LiveStream",
+          target: document.getElementById('scanner-container'),
+          constraints: {
+            width: 640,
+            height: 480,
+            facingMode: "environment"
+          }
+        },
+        decoder: {
+          readers: ["code_128_reader", "ean_reader", "ean_8_reader", "code_39_reader", "upc_reader"]
+        }
+      }, function(err) {
+        if (err) {
+          console.error(err);
+          alert("No se pudo acceder a la cámara");
+          scanner.classList.remove('active');
+          return;
+        }
         
-        setTimeout(() => {
-          card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-          card.style.opacity = '1';
-          card.style.transform = 'translateY(0)';
-        }, 50 * index);
+        document.querySelector('.scanner-loading').style.display = 'none';
+        Quagga.start();
+      });
+      
+      Quagga.onDetected(function(result) {
+        const code = result.codeResult.code;
+        Quagga.stop();
+        scanner.classList.remove('active');
+        searchInput.value = code;
+        searchInput.dispatchEvent(new Event('input'));
       });
     }
     
-    // Aplicar animaciones
-    applyCardAnimations();
+    // Cerrar escáner
+    document.getElementById('closeScanner').addEventListener('click', function() {
+      Quagga.stop();
+      document.getElementById('quaggaScanner').classList.remove('active');
+    });
+    
+    // Animaciones al scroll
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver(function(entries) {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, observerOptions);
+    
+    document.querySelectorAll('.animate-on-scroll').forEach(el => {
+      observer.observe(el);
+    });
+    
+    // Contadores animados
+    function animateCounter(element, target) {
+      let current = 0;
+      const increment = target / 50;
+      const timer = setInterval(() => {
+        current += increment;
+        if (current >= target) {
+          current = target;
+          clearInterval(timer);
+        }
+        element.textContent = Math.floor(current);
+      }, 20);
+    }
+    
+    // Simular datos de resumen (en producción vendrían del backend)
+    animateCounter(document.getElementById('entradasHoy'), 24);
+    animateCounter(document.getElementById('salidasHoy'), 18);
+    animateCounter(document.getElementById('movimientosTotal'), 156);
+    
+    // Inicializar
+    applyFilters();
   });
 </script>
 {% endblock %}
