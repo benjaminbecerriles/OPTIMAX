@@ -1,12 +1,12 @@
 import os
 import uuid
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta, date, time
 from flask import (
     Blueprint, render_template, request, redirect, 
     url_for, flash, session, jsonify, send_file
 )
 from werkzeug.utils import secure_filename
-from sqlalchemy import desc
+from sqlalchemy import desc, and_, func
 from models import db
 from models.models import Producto
 # Usar solo las funciones que existen en tu utils.py
@@ -181,6 +181,31 @@ def ajuste_stock():
     
     empresa_id = session.get('user_id')
     
+    # ===== CALCULAR SALIDAS DE HOY =====
+    # Obtener el inicio del día de hoy (00:00:00)
+    hoy_inicio = datetime.combine(datetime.now().date(), time.min)
+    
+    # Contar las salidas del día
+    salidas_hoy = MovimientoInventario.query.join(Producto).filter(
+        and_(
+            MovimientoInventario.tipo_movimiento == 'SALIDA',
+            MovimientoInventario.fecha_movimiento >= hoy_inicio,
+            Producto.empresa_id == empresa_id,
+            MovimientoInventario.motivo != 'corrección de costo'  # Excluir correcciones
+        )
+    ).count()
+    
+    # ===== OPCIONAL: CALCULAR MÁS ESTADÍSTICAS =====
+    # Entradas de hoy
+    entradas_hoy = MovimientoInventario.query.join(Producto).filter(
+        and_(
+            MovimientoInventario.tipo_movimiento == 'ENTRADA',
+            MovimientoInventario.fecha_movimiento >= hoy_inicio,
+            Producto.empresa_id == empresa_id,
+            MovimientoInventario.motivo != 'corrección de costo'
+        )
+    ).count()
+    
     # Obtener todos los productos aprobados de la empresa
     productos = Producto.query.filter_by(
         empresa_id=empresa_id, 
@@ -198,7 +223,9 @@ def ajuste_stock():
     return render_template(
         'ajuste_stock.html',
         productos=productos,
-        categorias=categorias_lista
+        categorias=categorias_lista,
+        salidas_hoy=salidas_hoy,  # IMPORTANTE: Pasar el valor real
+        entradas_hoy=entradas_hoy  # Opcional
     )
 
 @new_ajuste_stock_bp.route('/new-ajuste-inventario', methods=['GET'])
