@@ -24,6 +24,10 @@
     --shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
     --transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
     --blue: #1a237e; /* Añadido: Azul para botón volver igual que en ajuste_stock */
+    --color-green-dark: #1F4034; /* Verde oscuro para notas */
+    --color-orange: #f59e0b; /* Naranja para caducidad */
+    --color-blue-medium: #3b82f6; /* Azul medio para comprobante */
+    --color-purple: #8b5cf6; /* Morado para costo */
   }
   
   body {
@@ -115,6 +119,47 @@
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(26, 35, 126, 0.4);
     color: #ffffff;
+  }
+  
+  /* Botón Confirmar Entrada - NUEVO DISEÑO AZUL OSCURO */
+  .btn-confirm {
+    padding: 1rem 2rem;
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
+    text-decoration: none;
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .btn-confirm:hover {
+    background: linear-gradient(135deg, #0f172a 0%, #020617 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.35);
+    color: white;
+  }
+  
+  .btn-confirm:active {
+    transform: translateY(0);
+  }
+  
+  .btn-confirm i {
+    font-size: 1.125rem;
+  }
+  
+  /* Contenedor para el botón debajo del formulario */
+  .form-actions {
+    margin-top: 2rem;
+    padding: 0 24px 24px;
   }
   
   .btn-primary {
@@ -310,11 +355,43 @@
     font-size: 16px;
   }
   
-  .form-check {
+  /* Estilos unificados para todas las opciones con iconos */
+  .option-with-icon {
+    display: flex;
+    align-items: center;
+    padding: 14px 16px;
+    padding-left: 40px;
+    position: relative;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-color);
+  }
+  
+  .option-icon {
+    position: absolute;
+    left: 16px;
+    font-size: 16px;
+    width: 16px;
+    text-align: center;
+  }
+  
+  /* Colores específicos para cada icono */
+  .option-icon.fa-dollar-sign {
+    color: var(--color-purple);
+  }
+  
+  .option-icon.fa-calendar-times {
+    color: var(--color-orange);
+  }
+  
+  /* Estilos para form-check dentro de option-with-icon */
+  .option-with-icon .form-check {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 8px;
+    margin: 0;
+    padding: 0;
+    width: 100%;
   }
   
   .form-check-input {
@@ -324,6 +401,7 @@
     border-radius: 4px;
     border: 1px solid var(--color-border);
     transition: var(--transition);
+    flex-shrink: 0;
   }
   
   .form-check-input:checked {
@@ -334,6 +412,10 @@
   .form-check-label {
     font-size: 15px;
     color: var(--text-color);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
   }
   
   /* Input con unidad */
@@ -395,18 +477,20 @@
     border-radius: 0 10px 10px 0;
   }
   
-  /* Toggle para caducidad - Estilo Apple */
+  /* Toggle para caducidad - Estilo Apple MEJORADO */
   .toggle-container {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 16px;
+    width: 100%;
   }
   
   .toggle-label {
     font-size: 14px;
     font-weight: 500;
     color: var(--text-color);
+    display: flex;
+    align-items: center;
   }
   
   /* Toggle estilo Apple */
@@ -499,7 +583,7 @@
     border-color: var(--color-accent);
   }
   
-  /* Secciones colapsables estilo Apple */
+  /* Secciones colapsables estilo Apple MEJORADO */
   .collapse-section {
     margin-bottom: 16px;
     border: 1px solid var(--color-border);
@@ -509,6 +593,7 @@
   
   .collapse-header {
     padding: 14px 16px;
+    padding-left: 40px;
     background-color: var(--color-card);
     cursor: pointer;
     display: flex;
@@ -518,18 +603,43 @@
     font-weight: 500;
     color: var(--text-color);
     user-select: none;
+    position: relative;
   }
   
   .collapse-header:hover {
     background-color: #f5f5f7;
   }
   
-  .collapse-header i {
+  .collapse-header span {
+    display: flex;
+    align-items: center;
+  }
+  
+  .collapse-header i.fa-chevron-down,
+  .collapse-header i.fa-chevron-up {
     color: var(--text-secondary);
     transition: transform 0.3s ease;
   }
   
-  .collapse-header.active i {
+  /* Iconos de las secciones colapsables con posición absoluta */
+  .collapse-header .fa-sticky-note,
+  .collapse-header .fa-file-invoice {
+    position: absolute;
+    left: 16px;
+    font-size: 16px;
+    width: 16px;
+    text-align: center;
+  }
+  
+  .collapse-header .fa-sticky-note {
+    color: var(--color-green-dark);
+  }
+  
+  .collapse-header .fa-file-invoice {
+    color: var(--color-blue-medium);
+  }
+  
+  .collapse-header.active i.fa-chevron-down {
     transform: rotate(180deg);
   }
   
@@ -655,18 +765,9 @@
 </style>
 
 <div class="entry-container">
-  <!-- Encabezado con título y acciones -->
+  <!-- Encabezado con título sin acciones -->
   <div class="page-header">
     <h1 class="page-title">Registrar Entrada</h1>
-    <div class="header-actions">
-      <a href="{{ url_for('ajuste_stock') }}" class="btn-icon btn-volver">
-        <i class="fas fa-arrow-left"></i>
-        <span>Volver</span>
-      </a>
-      <button type="submit" form="entradaForm" class="btn-icon btn-primary">
-        <span>Confirmar entrada</span>
-      </button>
-    </div>
   </div>
   
   <!-- Diseño de dos columnas con misma altura -->
@@ -793,11 +894,14 @@
           <!-- Opciones de costo -->
           <div class="form-section">
             <div class="form-group">
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="mantener_costo_anterior" name="mantener_costo_anterior" checked>
-                <label class="form-check-label" for="mantener_costo_anterior" id="mantenerCostoLabel">
-                  Mantener costo anterior ({% if ultima_entrada and ultima_entrada.costo_unitario %}${{ ultima_entrada.costo_unitario|round(2) }}{% else %}${{ producto.costo|round(2) }}{% endif %} por {% if producto.unidad and producto.unidad != 'NONE' %}{{ producto.unidad }}{% else %}pieza{% endif %})
-                </label>
+              <div class="option-with-icon">
+                <i class="fas fa-dollar-sign option-icon"></i>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="mantener_costo_anterior" name="mantener_costo_anterior" checked>
+                  <label class="form-check-label" for="mantener_costo_anterior" id="mantenerCostoLabel">
+                    Mantener costo anterior ({% if ultima_entrada and ultima_entrada.costo_unitario %}${{ ultima_entrada.costo_unitario|round(2) }}{% else %}${{ producto.costo|round(2) }}{% endif %} por {% if producto.unidad and producto.unidad != 'NONE' %}{{ producto.unidad }}{% else %}pieza{% endif %})
+                  </label>
+                </div>
               </div>
               
               <div id="costoContainer" style="display:none;">
@@ -825,12 +929,17 @@
           
           <!-- Sección de caducidad con toggle estilo Apple -->
           <div class="form-section">
-            <div class="toggle-container">
-              <span class="toggle-label">Fecha de caducidad</span>
-              <label class="toggle-switch">
-                <input type="checkbox" id="toggle_caducidad" onchange="toggleCaducidad()">
-                <span class="toggle-slider"></span>
-              </label>
+            <div class="option-with-icon">
+              <i class="fas fa-calendar-times option-icon"></i>
+              <div class="toggle-container">
+                <span class="toggle-label">
+                  Fecha de caducidad
+                </span>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="toggle_caducidad" onchange="toggleCaducidad()">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
             </div>
             
             <input type="hidden" id="toggle_caducidad_estado" name="toggle_caducidad_estado" value="DESACTIVADO">
@@ -884,7 +993,8 @@
           <!-- Opciones adicionales colapsables -->
           <div class="collapse-section">
             <div class="collapse-header" onclick="toggleCollapse('notasSection')">
-              <span><i class="fas fa-sticky-note" style="margin-right:8px;"></i> Notas adicionales</span>
+              <i class="fas fa-sticky-note"></i>
+              <span>Notas adicionales</span>
               <i class="fas fa-chevron-down"></i>
             </div>
             <div class="collapse-content" id="notasSection">
@@ -895,7 +1005,8 @@
           
           <div class="collapse-section">
             <div class="collapse-header" onclick="toggleCollapse('comprobanteSection')">
-              <span><i class="fas fa-file-invoice" style="margin-right:8px;"></i> Adjuntar comprobante</span>
+              <i class="fas fa-file-invoice"></i>
+              <span>Adjuntar comprobante</span>
               <i class="fas fa-chevron-down"></i>
             </div>
             <div class="collapse-content" id="comprobanteSection">
@@ -903,6 +1014,14 @@
               <input type="file" class="form-control" id="comprobante" name="comprobante">
             </div>
           </div>
+        </div>
+        
+        <!-- Botón Confirmar Entrada - Movido aquí dentro del formulario -->
+        <div class="form-actions">
+          <button type="submit" class="btn-icon btn-confirm">
+            <i class="fas fa-check-circle"></i>
+            <span>Confirmar entrada</span>
+          </button>
         </div>
       </div>
     </form>

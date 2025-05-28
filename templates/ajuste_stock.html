@@ -144,6 +144,57 @@
     letter-spacing: -0.03em;
     line-height: 1.1;
     text-shadow: none;
+    cursor: pointer;
+    position: relative;
+    display: inline-block;
+  }
+
+  /* Gradiente animado al hover - sin desaparecer el texto */
+  .hero-text h1::after {
+    content: attr(data-text);
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 50%, #3b82f6 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    animation: gradientMove 1.5s ease infinite;
+  }
+
+  .hero-text h1:hover::after {
+    opacity: 1;
+  }
+
+  @keyframes gradientMove {
+    0% { background-position: 0% center; }
+    100% { background-position: 200% center; }
+  }
+
+  /* Palabras individuales para animación de revelado */
+  .hero-text h1 .word {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(15px);
+    animation: wordReveal 0.3s ease forwards;
+  }
+
+  .hero-text h1 .word:nth-child(1) { animation-delay: 0.03s; }
+  .hero-text h1 .word:nth-child(2) { animation-delay: 0.06s; }
+  .hero-text h1 .word:nth-child(3) { animation-delay: 0.09s; }
+  .hero-text h1 .word:nth-child(4) { animation-delay: 0.12s; }
+  .hero-text h1 .word:nth-child(5) { animation-delay: 0.15s; }
+
+  @keyframes wordReveal {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   .hero-text p {
@@ -152,7 +203,59 @@
     margin-bottom: var(--space-sm);
     max-width: 600px;
     line-height: 1.6;
+    cursor: pointer;
+    position: relative;
+    display: inline-block;
   }
+
+  /* Gradiente animado al hover para descripción */
+  .hero-text p::after {
+    content: attr(data-text);
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, #64748b 0%, #94a3b8 50%, #64748b 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    animation: gradientMove 1.5s ease infinite;
+  }
+
+  .hero-text p:hover::after {
+    opacity: 1;
+  }
+
+  /* Palabras individuales para la descripción */
+  .hero-text p .word {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(15px);
+    animation: wordReveal 0.3s ease forwards;
+  }
+
+  .hero-text p .word:nth-child(1) { animation-delay: 0.2s; }
+  .hero-text p .word:nth-child(2) { animation-delay: 0.23s; }
+  .hero-text p .word:nth-child(3) { animation-delay: 0.26s; }
+  .hero-text p .word:nth-child(4) { animation-delay: 0.29s; }
+  .hero-text p .word:nth-child(5) { animation-delay: 0.32s; }
+  .hero-text p .word:nth-child(6) { animation-delay: 0.35s; }
+  .hero-text p .word:nth-child(7) { animation-delay: 0.38s; }
+  .hero-text p .word:nth-child(8) { animation-delay: 0.41s; }
+  .hero-text p .word:nth-child(9) { animation-delay: 0.44s; }
+  .hero-text p .word:nth-child(10) { animation-delay: 0.47s; }
+  .hero-text p .word:nth-child(11) { animation-delay: 0.5s; }
+  .hero-text p .word:nth-child(12) { animation-delay: 0.53s; }
+  .hero-text p .word:nth-child(13) { animation-delay: 0.56s; }
+  .hero-text p .word:nth-child(14) { animation-delay: 0.59s; }
+  .hero-text p .word:nth-child(15) { animation-delay: 0.62s; }
+  .hero-text p .word:nth-child(16) { animation-delay: 0.65s; }
+  .hero-text p .word:nth-child(17) { animation-delay: 0.68s; }
+  .hero-text p .word:nth-child(18) { animation-delay: 0.71s; }
 
   /* Stats minimalistas */
   .hero-stats {
@@ -165,6 +268,20 @@
     flex-direction: column;
     gap: 0.125rem;
     position: relative;
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+    animation: statReveal 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  .stat-item:nth-child(1) { animation-delay: 0.75s; }
+  .stat-item:nth-child(2) { animation-delay: 0.85s; }
+  .stat-item:nth-child(3) { animation-delay: 0.95s; }
+
+  @keyframes statReveal {
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
   }
 
   .stat-item::after {
@@ -189,6 +306,20 @@
     line-height: 1;
     font-variant-numeric: tabular-nums;
     text-shadow: none;
+    animation: valueSlideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    opacity: 0;
+    transform: translateY(15px);
+  }
+
+  .stat-item:nth-child(1) .stat-value { animation-delay: 0.8s; }
+  .stat-item:nth-child(2) .stat-value { animation-delay: 0.9s; }
+  .stat-item:nth-child(3) .stat-value { animation-delay: 1.0s; }
+
+  @keyframes valueSlideUp {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   .stat-label {
@@ -196,7 +327,20 @@
     color: var(--premium-gray-light);
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    opacity: 1;
+    opacity: 0;
+    transform: translateY(8px);
+    animation: labelFade 0.3s ease forwards;
+  }
+
+  .stat-item:nth-child(1) .stat-label { animation-delay: 0.85s; }
+  .stat-item:nth-child(2) .stat-label { animation-delay: 0.95s; }
+  .stat-item:nth-child(3) .stat-label { animation-delay: 1.05s; }
+
+  @keyframes labelFade {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   /* Visual decorativo */
@@ -807,7 +951,7 @@
   .list-image img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
   }
 
   /* Contenido principal con grid mejorado */
@@ -1946,8 +2090,33 @@
   <section class="hero-section">
     <div class="hero-content">
       <div class="hero-text">
-        <h1>Centro de Ajuste de Stock</h1>
-        <p>Gestiona entradas y salidas de inventario con precisión. Mantén el control total de tu stock en tiempo real.</p>
+        <h1 data-text="Centro de Ajuste de Stock">
+          <span class="word">Centro</span>
+          <span class="word">de</span>
+          <span class="word">Ajuste</span>
+          <span class="word">de</span>
+          <span class="word">Stock</span>
+        </h1>
+        <p data-text="Gestiona entradas y salidas de inventario con precisión. Mantén el control total de tu stock en tiempo real.">
+          <span class="word">Gestiona</span>
+          <span class="word">entradas</span>
+          <span class="word">y</span>
+          <span class="word">salidas</span>
+          <span class="word">de</span>
+          <span class="word">inventario</span>
+          <span class="word">con</span>
+          <span class="word">precisión.</span>
+          <span class="word">Mantén</span>
+          <span class="word">el</span>
+          <span class="word">control</span>
+          <span class="word">total</span>
+          <span class="word">de</span>
+          <span class="word">tu</span>
+          <span class="word">stock</span>
+          <span class="word">en</span>
+          <span class="word">tiempo</span>
+          <span class="word">real.</span>
+        </p>
         
         <div class="hero-stats">
           <div class="stat-item">
