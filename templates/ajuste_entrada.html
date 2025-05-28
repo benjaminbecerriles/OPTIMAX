@@ -28,6 +28,7 @@
     --color-orange: #f59e0b; /* Naranja para caducidad */
     --color-blue-medium: #3b82f6; /* Azul medio para comprobante */
     --color-purple: #8b5cf6; /* Morado para costo */
+    --premium-dark: #0f172a; /* Añadido para el título */
   }
   
   body {
@@ -55,12 +56,63 @@
     margin-bottom: 3rem; /* Aumentado el espacio entre título y paneles */
   }
   
+  /* TÍTULO CON ESTILO DE AJUSTE_STOCK.HTML */
   .page-title {
-    font-size: 32px;
-    font-weight: 600;
-    letter-spacing: -0.02em;
+    font-size: 32px; /* Manteniendo el tamaño original */
+    font-weight: 800;
+    color: var(--premium-dark);
     margin: 0;
-    color: var(--text-color);
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    text-shadow: none;
+    cursor: pointer;
+    position: relative;
+    display: inline-block;
+  }
+  
+  /* Gradiente animado al hover - sin desaparecer el texto */
+  .page-title::after {
+    content: attr(data-text);
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 50%, #3b82f6 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    animation: gradientMove 1.5s ease infinite;
+  }
+  
+  .page-title:hover::after {
+    opacity: 1;
+  }
+  
+  @keyframes gradientMove {
+    0% { background-position: 0% center; }
+    100% { background-position: 200% center; }
+  }
+  
+  /* Palabras individuales para animación de revelado */
+  .page-title .word {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(15px);
+    animation: wordReveal 0.3s ease forwards;
+  }
+  
+  .page-title .word:nth-child(1) { animation-delay: 0.03s; }
+  .page-title .word:nth-child(2) { animation-delay: 0.06s; }
+  
+  @keyframes wordReveal {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
   
   .header-actions {
@@ -355,43 +407,13 @@
     font-size: 16px;
   }
   
-  /* Estilos unificados para todas las opciones con iconos */
-  .option-with-icon {
-    display: flex;
-    align-items: center;
-    padding: 14px 16px;
-    padding-left: 40px;
-    position: relative;
-    font-size: 15px;
-    font-weight: 500;
-    color: var(--text-color);
-  }
-  
-  .option-icon {
-    position: absolute;
-    left: 16px;
-    font-size: 16px;
-    width: 16px;
-    text-align: center;
-  }
-  
-  /* Colores específicos para cada icono */
-  .option-icon.fa-dollar-sign {
-    color: var(--color-purple);
-  }
-  
-  .option-icon.fa-calendar-times {
-    color: var(--color-orange);
-  }
-  
-  /* Estilos para form-check dentro de option-with-icon */
-  .option-with-icon .form-check {
+  /* Estilos generales para form-check (usado en otras partes) */
+  .form-check {
     display: flex;
     align-items: center;
     gap: 10px;
     margin: 0;
-    padding: 0;
-    width: 100%;
+    padding: 14px 0;
   }
   
   .form-check-input {
@@ -402,6 +424,7 @@
     border: 1px solid var(--color-border);
     transition: var(--transition);
     flex-shrink: 0;
+    cursor: pointer;
   }
   
   .form-check-input:checked {
@@ -412,10 +435,13 @@
   .form-check-label {
     font-size: 15px;
     color: var(--text-color);
+    font-weight: 500;
     display: flex;
     align-items: center;
     gap: 8px;
     margin: 0;
+    cursor: pointer;
+    user-select: none;
   }
   
   /* Input con unidad */
@@ -440,17 +466,22 @@
   
   /* Dropdown para costo */
   #costoContainer {
-    margin-top: 16px;
-    padding-top: 16px;
-    border-top: 1px solid var(--color-border);
+    margin-top: 8px;
+    padding-top: 0;
+    border-top: none;
   }
   
-  .input-group {
-    display: flex;
-    position: relative;
-    box-shadow: var(--shadow-sm);
-    border-radius: 10px;
-    overflow: hidden;
+  .aligned-cost-field {
+    padding-left: 40px;
+    padding-right: 16px;
+  }
+  
+  .aligned-cost-field .form-label {
+    margin-bottom: 8px;
+  }
+  
+  .aligned-cost-field .input-group {
+    max-width: 300px;
   }
   
   .input-group-text {
@@ -475,22 +506,6 @@
     width: 1%;
     min-width: 0;
     border-radius: 0 10px 10px 0;
-  }
-  
-  /* Toggle para caducidad - Estilo Apple MEJORADO */
-  .toggle-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-  }
-  
-  .toggle-label {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--text-color);
-    display: flex;
-    align-items: center;
   }
   
   /* Toggle estilo Apple */
@@ -539,15 +554,15 @@
     transform: translateX(20px);
   }
   
-  /* Selección de caducidad - Azul en lugar de rojo */
+  /* Selección de caducidad */
   .expiry-options {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    padding: 16px;
-    background-color: var(--color-background);
-    border-radius: 10px;
-    margin-top: 12px;
+    padding: 0;
+    background-color: transparent;
+    border-radius: 0;
+    margin-top: 0;
   }
   
   .expiry-option {
@@ -621,6 +636,41 @@
     transition: transform 0.3s ease;
   }
   
+  /* Variante de header con toggle integrado */
+  .collapse-header-with-toggle {
+    padding: 14px 16px;
+    padding-left: 40px;
+    background-color: var(--color-card);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-color);
+    user-select: none;
+    position: relative;
+  }
+  
+  .collapse-header-with-toggle:hover {
+    background-color: #f5f5f7;
+  }
+  
+  .collapse-header-with-toggle > i {
+    position: absolute;
+    left: 16px;
+    font-size: 16px;
+    width: 16px;
+    text-align: center;
+  }
+  
+  .collapse-header-with-toggle .fa-dollar-sign {
+    color: var(--color-purple);
+  }
+  
+  .collapse-header-with-toggle .fa-calendar-times {
+    color: var(--color-orange);
+  }
+  
   /* Iconos de las secciones colapsables con posición absoluta */
   .collapse-header .fa-sticky-note,
   .collapse-header .fa-file-invoice {
@@ -647,6 +697,33 @@
     padding: 16px;
     border-top: 1px solid var(--color-border);
     display: none;
+    animation: slideDown 0.3s ease-out;
+  }
+  
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Ajuste para texto largo en headers con toggle */
+  .collapse-header-with-toggle > span {
+    flex: 1;
+    margin-right: 10px;
+  }
+  
+  /* Ajuste especial para el contenido de costo */
+  .collapse-content .input-group {
+    max-width: 300px;
+  }
+  
+  .collapse-content .form-label {
+    margin-bottom: 8px;
   }
   
   /* Notificación centrada estilo Apple */
@@ -767,7 +844,10 @@
 <div class="entry-container">
   <!-- Encabezado con título sin acciones -->
   <div class="page-header">
-    <h1 class="page-title">Registrar Entrada</h1>
+    <h1 class="page-title" data-text="Registrar Entrada">
+      <span class="word">Registrar</span>
+      <span class="word">Entrada</span>
+    </h1>
   </div>
   
   <!-- Diseño de dos columnas con misma altura -->
@@ -891,60 +971,50 @@
             </div>
           </div>
           
-          <!-- Opciones de costo -->
-          <div class="form-section">
-            <div class="form-group">
-              <div class="option-with-icon">
-                <i class="fas fa-dollar-sign option-icon"></i>
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" id="mantener_costo_anterior" name="mantener_costo_anterior" checked>
-                  <label class="form-check-label" for="mantener_costo_anterior" id="mantenerCostoLabel">
-                    Mantener costo anterior ({% if ultima_entrada and ultima_entrada.costo_unitario %}${{ ultima_entrada.costo_unitario|round(2) }}{% else %}${{ producto.costo|round(2) }}{% endif %} por {% if producto.unidad and producto.unidad != 'NONE' %}{{ producto.unidad }}{% else %}pieza{% endif %})
-                  </label>
-                </div>
+          <!-- Sección de costo colapsable -->
+          <div class="collapse-section">
+            <div class="collapse-header-with-toggle">
+              <i class="fas fa-dollar-sign"></i>
+              <span id="mantenerCostoLabel">Mantener costo anterior ({% if ultima_entrada and ultima_entrada.costo_unitario %}${{ ultima_entrada.costo_unitario|round(2) }}{% else %}${{ producto.costo|round(2) }}{% endif %} por {% if producto.unidad and producto.unidad != 'NONE' %}{{ producto.unidad }}{% else %}pieza{% endif %})</span>
+              <label class="toggle-switch">
+                <input type="checkbox" id="mantener_costo_anterior" name="mantener_costo_anterior" checked onchange="toggleCostoSection()">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="collapse-content" id="costoSection" style="display:none;">
+              <label for="costo_unitario" class="form-label">Nuevo costo (por 
+                {% if producto.unidad and producto.unidad != 'NONE' %}
+                  {{ producto.unidad }}
+                {% else %}
+                  pieza
+                {% endif %})
+              </label>
+              <div class="input-group">
+                <span class="input-group-text">$</span>
+                <input type="text" 
+                       class="form-control" 
+                       id="costo_unitario" 
+                       name="costo_unitario" 
+                       oninput="formatCostRealtime(this)"
+                       value="{{ producto.costo|round(2) }}">
               </div>
-              
-              <div id="costoContainer" style="display:none;">
-                <label for="costo_unitario" class="form-label">Nuevo costo (por 
-                  {% if producto.unidad and producto.unidad != 'NONE' %}
-                    {{ producto.unidad }}
-                  {% else %}
-                    pieza
-                  {% endif %})
-                </label>
-                <div class="input-group">
-                  <span class="input-group-text">$</span>
-                  <input type="text" 
-                         class="form-control" 
-                         id="costo_unitario" 
-                         name="costo_unitario" 
-                         oninput="formatCostRealtime(this)"
-                         value="{{ producto.costo|round(2) }}">
-                </div>
-                <input type="hidden" id="actualizar_costo" name="actualizar_costo" value="on">
-                <input type="hidden" id="costo_unitario_real" name="costo_unitario_real" value="{{ producto.costo|round(2) }}">
-              </div>
+              <input type="hidden" id="actualizar_costo" name="actualizar_costo" value="on">
+              <input type="hidden" id="costo_unitario_real" name="costo_unitario_real" value="{{ producto.costo|round(2) }}">
             </div>
           </div>
           
-          <!-- Sección de caducidad con toggle estilo Apple -->
-          <div class="form-section">
-            <div class="option-with-icon">
-              <i class="fas fa-calendar-times option-icon"></i>
-              <div class="toggle-container">
-                <span class="toggle-label">
-                  Fecha de caducidad
-                </span>
-                <label class="toggle-switch">
-                  <input type="checkbox" id="toggle_caducidad" onchange="toggleCaducidad()">
-                  <span class="toggle-slider"></span>
-                </label>
-              </div>
+          <!-- Sección de caducidad colapsable -->
+          <div class="collapse-section">
+            <div class="collapse-header-with-toggle">
+              <i class="fas fa-calendar-times"></i>
+              <span>Fecha de caducidad</span>
+              <label class="toggle-switch">
+                <input type="checkbox" id="toggle_caducidad" onchange="toggleCaducidadSection()">
+                <span class="toggle-slider"></span>
+              </label>
             </div>
-            
-            <input type="hidden" id="toggle_caducidad_estado" name="toggle_caducidad_estado" value="DESACTIVADO">
-            
-            <div id="caducidadOpcionesContainer" style="display:none;">
+            <div class="collapse-content" id="caducidadSection" style="display:none;">
+              <input type="hidden" id="toggle_caducidad_estado" name="toggle_caducidad_estado" value="DESACTIVADO">
               <div class="expiry-options">
                 <div class="expiry-option">
                   <input type="radio" name="caducidad_lapso" id="cad1dia" value="1 día">
@@ -1340,34 +1410,41 @@
       }
     }
     
-    // Toggle costo
-    const mantenerCostoCheck = document.getElementById('mantener_costo_anterior');
-    const costoContainer = document.getElementById('costoContainer');
-    const costoUnitarioInput = document.getElementById('costo_unitario');
-    
-    if (mantenerCostoCheck && costoContainer) {
-      mantenerCostoCheck.addEventListener('change', function() {
-        costoContainer.style.display = this.checked ? 'none' : 'block';
+    // Toggle costo - Nueva función
+    window.toggleCostoSection = function() {
+      const toggleCosto = document.getElementById('mantener_costo_anterior');
+      const costoSection = document.getElementById('costoSection');
+      const costoUnitarioInput = document.getElementById('costo_unitario');
+      
+      if (!toggleCosto.checked) {
+        // Si se desactiva (NO mantener costo), mostrar la sección con animación
+        costoSection.style.display = 'block';
+        costoSection.style.animation = 'slideDown 0.3s ease-out';
         
-        // Si se muestra el campo, formatear el valor inicial
-        if (!this.checked && costoUnitarioInput) {
-          // Inicializar el formato al mostrar
+        // Formatear el valor inicial
+        if (costoUnitarioInput) {
           formatCostRealtime(costoUnitarioInput);
         }
-      });
+      } else {
+        // Si se activa (mantener costo), ocultar la sección
+        costoSection.style.display = 'none';
+      }
     }
     
-    // Toggle caducidad - Función global
-    window.toggleCaducidad = function() {
+    // Toggle caducidad - Nueva función
+    window.toggleCaducidadSection = function() {
       const toggleCaducidad = document.getElementById('toggle_caducidad');
-      const caducidadOpcionesContainer = document.getElementById('caducidadOpcionesContainer');
+      const caducidadSection = document.getElementById('caducidadSection');
       const toggleCaducidadEstado = document.getElementById('toggle_caducidad_estado');
       
       if (toggleCaducidad.checked) {
-        caducidadOpcionesContainer.style.display = 'block';
+        // Si se activa, mostrar la sección con animación
+        caducidadSection.style.display = 'block';
+        caducidadSection.style.animation = 'slideDown 0.3s ease-out';
         toggleCaducidadEstado.value = 'ACTIVADO';
       } else {
-        caducidadOpcionesContainer.style.display = 'none';
+        // Si se desactiva, ocultar la sección
+        caducidadSection.style.display = 'none';
         toggleCaducidadEstado.value = 'DESACTIVADO';
       }
     }
@@ -1407,6 +1484,7 @@
     updateUnitText();
     
     // Formatear el campo de costo inicial si está disponible
+    const costoUnitarioInput = document.getElementById('costo_unitario');
     if (costoUnitarioInput) {
       // Aplicar formato inicial si es necesario
       const costoValue = costoUnitarioInput.value.trim();
@@ -1476,14 +1554,16 @@
         }
         
         // 2. Validar costo si no se mantiene el anterior
-        if (!mantenerCostoCheck.checked && costoUnitarioInput) {
+        const mantenerCostoToggle = document.getElementById('mantener_costo_anterior');
+        const costoUnitarioInput2 = document.getElementById('costo_unitario');
+        if (mantenerCostoToggle && !mantenerCostoToggle.checked && costoUnitarioInput2) {
           // Primero verificar que no comience con punto decimal
-          const costoValor = costoUnitarioInput.value.replace(/,/g, '').trim();
+          const costoValor = costoUnitarioInput2.value.replace(/,/g, '').trim();
           
           if (costoValor.startsWith('.')) {
             event.preventDefault();
             showFormatNotification();
-            costoUnitarioInput.focus();
+            costoUnitarioInput2.focus();
             return false;
           }
           
@@ -1495,7 +1575,7 @@
             if (isNaN(costoNumerico) || costoNumerico < 0) {
               event.preventDefault();
               alert('El costo unitario no puede ser negativo.');
-              costoUnitarioInput.focus();
+              costoUnitarioInput2.focus();
               return false;
             }
           }
@@ -1526,7 +1606,9 @@
         // Activar toggle de caducidad y seleccionar el lapso
         const toggleCaducidad = document.getElementById('toggle_caducidad');
         toggleCaducidad.checked = true;
-        toggleCaducidad.dispatchEvent(new Event('change'));
+        
+        // Mostrar la sección
+        toggleCaducidadSection();
         
         radioLapso.checked = true;
       }
