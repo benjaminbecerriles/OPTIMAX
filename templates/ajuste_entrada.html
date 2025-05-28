@@ -10,7 +10,7 @@
   :root {
     --font-system: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', Helvetica, Arial, sans-serif;
     --text-color: #1d1d1f;
-    --text-secondary: #86868b;
+    --text-secondary: #6b7280; /* Gris neutral sin tinte azul */
     --color-background: #f5f5f7;
     --color-card: #ffffff;
     --color-border: rgba(0, 0, 0, 0.1);
@@ -29,6 +29,7 @@
     --color-blue-medium: #3b82f6; /* Azul medio para comprobante */
     --color-purple: #8b5cf6; /* Morado para costo */
     --premium-dark: #0f172a; /* Añadido para el título */
+    --premium-gray-light: #6b7280; /* Gris neutral sin tinte azul */
   }
   
   body {
@@ -43,31 +44,64 @@
   }
   
   .entry-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 36px 24px;
+    width: 100%;
+    margin: 0;
+    padding: 1.5rem 0 2.25rem; /* Solo padding vertical */
+    animation: fadeIn 0.6s ease-out;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
   
   /* Encabezado de página - Como en ajuste_stock.html */
   .page-header {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 3rem; /* Aumentado el espacio entre título y paneles */
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start; /* Cambiado de center a flex-start */
+    margin-bottom: 2.5rem; /* Balance óptimo - boxes más arriba */
+    text-align: left; /* Cambiado de center a left */
+    position: relative;
+    z-index: 1;
+    max-width: 1200px; /* Mismo ancho que two-column-layout */
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 1.5rem; /* Mismo padding que entry-container */
+  }
+  
+
+  /* Efecto hover sutil al pasar por el header */
+  .page-header:hover .page-title {
+    transform: translateX(3px); /* Movimiento sutil hacia la derecha */
+  }
+  
+  .page-header:hover .page-description {
+    transform: translateX(3px); /* Mismo movimiento para la descripción */
+    transition-delay: 0.05s; /* Pequeño retraso para efecto cascada */
   }
   
   /* TÍTULO CON ESTILO DE AJUSTE_STOCK.HTML */
   .page-title {
-    font-size: 32px; /* Manteniendo el tamaño original */
-    font-weight: 800;
+    font-size: 34px; /* Ligeramente reducido para mejor proporción */
+    font-weight: 900; /* Aumentado para más peso visual */
     color: var(--premium-dark);
     margin: 0;
-    letter-spacing: -0.03em;
-    line-height: 1.1;
+    padding: 0; /* Asegurar que no haya padding */
+    letter-spacing: -0.04em;
+    line-height: 1; /* Compacto pero sin que se superpongan */
     text-shadow: none;
     cursor: pointer;
     position: relative;
-    display: inline-block;
+    display: block; /* Cambiado de inline-block a block */
+    transition: transform 0.3s ease;
   }
   
   /* Gradiente animado al hover - sin desaparecer el texto */
@@ -86,6 +120,7 @@
     opacity: 0;
     transition: opacity 0.3s ease;
     animation: gradientMove 1.5s ease infinite;
+    display: block; /* Añadido para asegurar que sea block */
   }
   
   .page-title:hover::after {
@@ -114,6 +149,58 @@
       transform: translateY(0);
     }
   }
+  
+  /* Descripción debajo del título - NUEVO */
+  .page-description {
+    font-size: 1.0625rem; /* Ligeramente reducido de 1.125rem */
+    color: #4b5563; /* Gris más oscuro sin tinte azul */
+    margin-top: 0.5rem; /* Balance final perfecto entre proximidad y separación */
+    margin-bottom: 0;
+    padding: 0; /* Asegurar que no haya padding */
+    line-height: 1.4; /* Más compacto */
+    font-weight: 500; /* Aumentado para mejor legibilidad */
+    cursor: pointer;
+    position: relative;
+    display: block; /* Cambiado de inline-block a block */
+    transition: transform 0.3s ease;
+  }
+
+  /* Gradiente animado al hover para descripción */
+  .page-description::after {
+    content: attr(data-text);
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, #4b5563 0%, #6b7280 50%, #4b5563 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    animation: gradientMove 1.5s ease infinite;
+    display: block; /* Añadido para asegurar que sea block */
+  }
+
+  .page-description:hover::after {
+    opacity: 1;
+  }
+
+  /* Palabras individuales para la descripción */
+  .page-description .word {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(15px);
+    animation: wordReveal 0.3s ease forwards;
+  }
+
+  .page-description .word:nth-child(1) { animation-delay: 0.07s; }
+  .page-description .word:nth-child(2) { animation-delay: 0.09s; }
+  .page-description .word:nth-child(3) { animation-delay: 0.11s; }
+  .page-description .word:nth-child(4) { animation-delay: 0.13s; }
+  .page-description .word:nth-child(5) { animation-delay: 0.15s; }
   
   .header-actions {
     display: flex;
@@ -231,7 +318,19 @@
     grid-template-columns: 320px 1fr;
     grid-auto-rows: minmax(min-content, max-content);
     gap: 24px;
-    margin-bottom: 24px;
+    opacity: 0;
+    transform: translateY(10px);
+    animation: contentFadeIn 0.5s ease-out 0.2s forwards;
+    max-width: 1200px;
+    margin: 0 auto 24px; /* Centrado con margin bottom */
+    padding: 0 1.5rem; /* Mismo padding que el header */
+  }
+  
+  @keyframes contentFadeIn {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
   
   /* Panel de producto */
@@ -664,7 +763,8 @@
   }
   
   .collapse-header-with-toggle .fa-dollar-sign {
-    color: var(--color-purple);
+    color: #000000; /* Negro en lugar de morado */
+    font-weight: 900; /* Negritas */
   }
   
   .collapse-header-with-toggle .fa-calendar-times {
@@ -810,6 +910,7 @@
   @media (max-width: 992px) {
     .two-column-layout {
       grid-template-columns: 1fr;
+      padding: 0 1rem; /* Padding reducido en móvil */
     }
     
     .form-row {
@@ -820,13 +921,25 @@
   
   @media (max-width: 768px) {
     .entry-container {
-      padding: 20px 16px;
+      padding: 1rem 0 1.25rem; /* Solo padding vertical en móvil */
     }
     
     .page-header {
       flex-direction: column;
-      gap: 16px;
-      margin-bottom: 2rem;
+      gap: 0; /* Eliminado también en móvil */
+      margin-bottom: 1.5rem; /* Ajustado proporcionalmente en móvil */
+      text-align: left; /* Mantener alineación izquierda en móvil */
+      padding: 0 1rem; /* Ajustado padding en móvil */
+    }
+    
+    .page-title {
+      font-size: 26px; /* Más pequeño en móvil */
+      line-height: 1;
+    }
+    
+    .page-description {
+      font-size: 0.9375rem; /* Más pequeño en móvil */
+      margin-top: 0.5rem; /* Consistente con el diseño principal */
     }
     
     .header-actions {
@@ -848,6 +961,13 @@
       <span class="word">Registrar</span>
       <span class="word">Entrada</span>
     </h1>
+    <p class="page-description" data-text="Añade stock a tu inventario">
+      <span class="word">Añade</span>
+      <span class="word">stock</span>
+      <span class="word">a</span>
+      <span class="word">tu</span>
+      <span class="word">inventario</span>
+    </p>
   </div>
   
   <!-- Diseño de dos columnas con misma altura -->
