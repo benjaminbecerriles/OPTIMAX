@@ -1,5 +1,6 @@
 from datetime import datetime, date, timedelta
 from models import db
+from sqlalchemy import Numeric
 
 class MovimientoInventario(db.Model):
     """
@@ -14,7 +15,7 @@ class MovimientoInventario(db.Model):
     tipo_movimiento = db.Column(db.String(20), nullable=False)
     
     # Cantidad de unidades
-    cantidad = db.Column(db.Float, nullable=False, default=0)
+    cantidad = db.Column(db.Numeric(10, 2), nullable=False, default=0)
     
     # Motivo del movimiento (compra, venta, merma, etc.)
     motivo = db.Column(db.String(100), nullable=True)
@@ -23,7 +24,7 @@ class MovimientoInventario(db.Model):
     fecha_movimiento = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     
     # Costo unitario (solo para ENTRADA)
-    costo_unitario = db.Column(db.Float, nullable=True)
+    costo_unitario = db.Column(db.Numeric(10, 2), nullable=True)
     
     # Número de lote (solo para ENTRADA)
     numero_lote = db.Column(db.String(50), nullable=True)
@@ -80,10 +81,10 @@ class LoteInventario(db.Model):
     numero_lote = db.Column(db.String(50), nullable=False)
     
     # Costo unitario del lote
-    costo_unitario = db.Column(db.Float, nullable=False, default=0)
+    costo_unitario = db.Column(db.Numeric(10, 2), nullable=False, default=0)
     
     # Stock actual del lote
-    stock = db.Column(db.Float, nullable=False, default=0)
+    stock = db.Column(db.Numeric(10, 2), nullable=False, default=0)
     
     # Fecha de entrada
     fecha_entrada = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
@@ -185,7 +186,7 @@ class LoteMovimientoRelacion(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     
     # Cantidad afectada del lote
-    cantidad = db.Column(db.Float, nullable=False, default=0)
+    cantidad = db.Column(db.Numeric(10, 2), nullable=False, default=0)
     
     # Relaciones
     movimiento_id = db.Column(db.Integer, db.ForeignKey('movimiento_inventario.id'), nullable=False)

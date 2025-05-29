@@ -1,6 +1,7 @@
 import os
 import uuid
 from datetime import datetime, timedelta, date, time
+from decimal import Decimal, InvalidOperation
 from flask import (
     Blueprint, render_template, request, redirect, 
     url_for, flash, session, jsonify, send_file
@@ -29,6 +30,39 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'pdf', 'doc', 'docx',
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def safe_decimal(value, default='0.00'):
+    """
+    Convierte un valor a Decimal de forma segura, manejando casos especiales.
+    """
+    if value is None or value == '':
+        return Decimal(default)
+    
+    # Si ya es un Decimal, devolverlo
+    if isinstance(value, Decimal):
+        return value.quantize(Decimal('0.01'))
+    
+    # Convertir a string para procesamiento
+    str_value = str(value).strip()
+    
+    # Casos especiales
+    if str_value == '':
+        return Decimal(default)
+    
+    # Remover comas de miles (1,234.56 → 1234.56)
+    str_value = str_value.replace(',', '')
+    
+    # Normalizar punto final (10. → 10.00)
+    if str_value.endswith('.'):
+        str_value += '00'
+    
+    try:
+        decimal_value = Decimal(str_value)
+        # Redondear a 2 decimales
+        return decimal_value.quantize(Decimal('0.01'))
+    except (InvalidOperation, ValueError):
+        # Si no se puede convertir, usar valor por defecto
+        return Decimal(default)
 
 # Funciones auxiliares para gestión de lotes
 def obtener_proximo_numero_lote(producto_id):
@@ -88,14 +122,14 @@ def aplicar_salida_lotes(producto_id, cantidad, metodo='auto'):
     
     Args:
         producto_id: ID del producto
-        cantidad: Cantidad a reducir
+        cantidad: Cantidad a reducir (Decimal)
         metodo: 'auto' (selección inteligente), 'fifo' o 'lifo'
         
     Returns:
         lista de diccionarios con lotes afectados y cantidades
     """
-    # Asegurar que cantidad sea un float
-    cantidad = float(cantidad)
+    # Asegurar que cantidad sea un Decimal
+    cantidad = safe_decimal(cantidad)
     
     lotes = obtener_lotes_activos(producto_id)
     
@@ -141,23 +175,25 @@ def aplicar_salida_lotes(producto_id, cantidad, metodo='auto'):
         if cantidad_restante <= 0:
             break
         
-        # Cantidad a reducir de este lote
-        reduccion = min(lote.stock, cantidad_restante)
+        # Cantidad a reducir de este lote (usando Decimal)
+        stock_lote = safe_decimal(lote.stock)
+        reduccion = min(stock_lote, cantidad_restante)
         cantidad_restante -= reduccion
         
         # Registrar lote afectado
         lotes_afectados.append({
             'id': lote.id,
             'numero_lote': lote.numero_lote,
-            'cantidad_afectada': reduccion,
-            'stock_actual': lote.stock - reduccion,
-            'costo_unitario': lote.costo_unitario,
+            'cantidad_afectada': float(reduccion),  # Convertir a float para compatibilidad
+            'stock_actual': float(stock_lote - reduccion),
+            'costo_unitario': float(safe_decimal(lote.costo_unitario)),
             'fecha_caducidad': lote.fecha_caducidad
         })
         
-        # Actualizar stock del lote
-        lote.stock -= reduccion
-        if lote.stock <= 0:
+        # Actualizar stock del lote (convertir a float para BD)
+        nuevo_stock = stock_lote - reduccion
+        lote.stock = float(nuevo_stock)
+        if nuevo_stock <= 0:
             lote.esta_activo = False
     
     # Guardar cambios
@@ -181,6 +217,31 @@ def ajuste_stock():
     
     empresa_id = session.get('user_id')
     
+    # ===== CALCULAR SALIDAS DE HOY =====
+    # Obtener el inicio del día de hoy (00:00:00)
+    hoy_inicio = datetime.combine(datetime.now().date(), time.min)
+    
+    # Contar las salidas del día
+    salidas_hoy = MovimientoInventario.query.join(Producto).filter(
+        and_(
+            MovimientoInventario.tipo_movimiento == 'SALIDA',
+            MovimientoInventario.fecha_movimiento >= hoy_inicio,
+            Producto.empresa_id == empresa_id,
+            MovimientoInventario.motivo != 'corrección de costo'  # Excluir correcciones
+        )
+    ).count()
+    
+    # ===== OPCIONAL: CALCULAR MÁS ESTADÍSTICAS =====
+    # Entradas de hoy
+    entradas_hoy = MovimientoInventario.query.join(Producto).filter(
+        and_(
+            MovimientoInventario.tipo_movimiento == 'ENTRADA',
+            MovimientoInventario.fecha_movimiento >= hoy_inicio,
+            Producto.empresa_id == empresa_id,
+            MovimientoInventario.motivo != 'corrección de costo'
+        )
+    ).count()
+    
     # Obtener todos los productos aprobados de la empresa
     productos = Producto.query.filter_by(
         empresa_id=empresa_id, 
@@ -198,7 +259,9 @@ def ajuste_stock():
     return render_template(
         'ajuste_stock.html',
         productos=productos,
-        categorias=categorias_lista
+        categorias=categorias_lista,
+        salidas_hoy=salidas_hoy,  # IMPORTANTE: Pasar el valor real
+        entradas_hoy=entradas_hoy  # Opcional
     )
 
 @new_ajuste_stock_bp.route('/new-ajuste-inventario', methods=['GET'])
@@ -323,13 +386,13 @@ def ajuste_entrada(producto_id):
     ).first()
     
     # Si no existe lote de registro, crearlo
-    if not lote_registro and producto.stock > 0:
+    if not lote_registro and safe_decimal(producto.stock) > 0:
         # Crear lote de registro y movimiento inicial
         try:
             movimiento, lote = crear_lote_registro(
                 producto=producto,
-                cantidad=producto.stock,
-                costo=producto.costo,
+                cantidad=safe_decimal(producto.stock),
+                costo=safe_decimal(producto.costo),
                 fecha_caducidad=producto.fecha_caducidad if producto.has_caducidad else None,
                 usuario_id=empresa_id
             )
@@ -361,22 +424,22 @@ def ajuste_entrada(producto_id):
     
     if request.method == 'POST':
         try:
-            # Obtener datos del formulario
-            cantidad = float(request.form.get('cantidad', 1))
+            # Obtener datos del formulario usando safe_decimal
+            cantidad = safe_decimal(request.form.get('cantidad', '1'))
             motivo = request.form.get('motivo', 'compra')
             mantener_costo_anterior = request.form.get('mantener_costo_anterior') == 'on'
             
             # Determinar el costo unitario
             if mantener_costo_anterior and ultima_entrada and ultima_entrada.costo_unitario:
-                costo_unitario = ultima_entrada.costo_unitario
+                costo_unitario = safe_decimal(ultima_entrada.costo_unitario)
             else:
                 # MODIFICADO: Intenta obtener el valor del campo oculto primero
                 costo_unitario_real = request.form.get('costo_unitario_real')
                 if costo_unitario_real:
-                    costo_unitario = float(costo_unitario_real)
+                    costo_unitario = safe_decimal(costo_unitario_real)
                 else:
                     # Fallback al campo original
-                    costo_unitario = float(request.form.get('costo_unitario', producto.costo))
+                    costo_unitario = safe_decimal(request.form.get('costo_unitario', str(producto.costo)))
             
             actualizar_costo = request.form.get('actualizar_costo') == 'on'
             notas = request.form.get('notas', '')
@@ -443,10 +506,10 @@ def ajuste_entrada(producto_id):
             nuevo_movimiento = MovimientoInventario(
                 producto_id=producto_id,
                 tipo_movimiento='ENTRADA',
-                cantidad=cantidad,
+                cantidad=float(cantidad),  # Convertir a float para la base de datos
                 motivo=motivo,
                 fecha_movimiento=datetime.now(),
-                costo_unitario=costo_unitario,
+                costo_unitario=float(costo_unitario),  # Convertir a float para la base de datos
                 numero_lote=proximo_lote,
                 fecha_caducidad=fecha_caducidad,
                 notas=notas if request.form.get('toggle_notas_estado') == 'ACTIVADO' else None,
@@ -459,21 +522,22 @@ def ajuste_entrada(producto_id):
             nuevo_lote = LoteInventario(
                 producto_id=producto_id,
                 numero_lote=proximo_lote,
-                costo_unitario=costo_unitario,
-                stock=cantidad,
+                costo_unitario=float(costo_unitario),  # Convertir a float para la base de datos
+                stock=float(cantidad),  # Convertir a float para la base de datos
                 fecha_entrada=datetime.now(),
                 fecha_caducidad=fecha_caducidad,
                 esta_activo=True
             )
             db.session.add(nuevo_lote)
             
-            # 3. Actualizar stock del producto
-            stock_anterior = producto.stock
-            producto.stock += cantidad
+            # 3. Actualizar stock del producto usando operaciones seguras con Decimal
+            stock_anterior = safe_decimal(producto.stock)
+            nuevo_stock = stock_anterior + cantidad
+            producto.stock = float(nuevo_stock)  # Convertir a float para la base de datos
             
             # 4. Actualizar costo general si se marcó la opción
             if actualizar_costo:
-                producto.costo = costo_unitario
+                producto.costo = float(costo_unitario)  # Convertir a float para la base de datos
             
             # Guardar todos los cambios
             db.session.commit()
@@ -497,7 +561,7 @@ def ajuste_entrada(producto_id):
         proximo_lote=proximo_lote,
         ultimo_lote=ultimo_lote.numero_lote if ultimo_lote else None,
         ultima_entrada=ultima_entrada,
-        costo_anterior=ultima_entrada.costo_unitario if ultima_entrada else producto.costo,
+        costo_anterior=float(ultima_entrada.costo_unitario) if ultima_entrada else float(producto.costo),
         historial=historial
     )
 
@@ -524,13 +588,13 @@ def new_ajuste_entrada(producto_id):
     ).first()
     
     # Si no existe lote de registro, crearlo
-    if not lote_registro and producto.stock > 0:
+    if not lote_registro and safe_decimal(producto.stock) > 0:
         # Crear lote de registro y movimiento inicial
         try:
             movimiento, lote = crear_lote_registro(
                 producto=producto,
-                cantidad=producto.stock,
-                costo=producto.costo,
+                cantidad=safe_decimal(producto.stock),
+                costo=safe_decimal(producto.costo),
                 fecha_caducidad=producto.fecha_caducidad if producto.has_caducidad else None,
                 usuario_id=empresa_id
             )
@@ -562,22 +626,22 @@ def new_ajuste_entrada(producto_id):
     
     if request.method == 'POST':
         try:
-            # Obtener datos del formulario
-            cantidad = float(request.form.get('cantidad', 1))
+            # Obtener datos del formulario usando safe_decimal
+            cantidad = safe_decimal(request.form.get('cantidad', '1'))
             motivo = request.form.get('motivo', 'compra')
             mantener_costo_anterior = request.form.get('mantener_costo_anterior') == 'on'
             
             # Determinar el costo unitario
             if mantener_costo_anterior and ultima_entrada and ultima_entrada.costo_unitario:
-                costo_unitario = ultima_entrada.costo_unitario
+                costo_unitario = safe_decimal(ultima_entrada.costo_unitario)
             else:
                 # MODIFICADO: Intenta obtener el valor del campo oculto primero
                 costo_unitario_real = request.form.get('costo_unitario_real')
                 if costo_unitario_real:
-                    costo_unitario = float(costo_unitario_real)
+                    costo_unitario = safe_decimal(costo_unitario_real)
                 else:
                     # Fallback al campo original
-                    costo_unitario = float(request.form.get('costo_unitario', producto.costo))
+                    costo_unitario = safe_decimal(request.form.get('costo_unitario', str(producto.costo)))
             
             actualizar_costo = request.form.get('actualizar_costo') == 'on'
             notas = request.form.get('notas', '')
@@ -644,10 +708,10 @@ def new_ajuste_entrada(producto_id):
             nuevo_movimiento = MovimientoInventario(
                 producto_id=producto_id,
                 tipo_movimiento='ENTRADA',
-                cantidad=cantidad,
+                cantidad=float(cantidad),  # Convertir a float para la base de datos
                 motivo=motivo,
                 fecha_movimiento=datetime.now(),
-                costo_unitario=costo_unitario,
+                costo_unitario=float(costo_unitario),  # Convertir a float para la base de datos
                 numero_lote=proximo_lote,
                 fecha_caducidad=fecha_caducidad,
                 notas=notas if request.form.get('toggle_notas_estado') == 'ACTIVADO' else None,
@@ -660,21 +724,22 @@ def new_ajuste_entrada(producto_id):
             nuevo_lote = LoteInventario(
                 producto_id=producto_id,
                 numero_lote=proximo_lote,
-                costo_unitario=costo_unitario,
-                stock=cantidad,
+                costo_unitario=float(costo_unitario),  # Convertir a float para la base de datos
+                stock=float(cantidad),  # Convertir a float para la base de datos
                 fecha_entrada=datetime.now(),
                 fecha_caducidad=fecha_caducidad,
                 esta_activo=True
             )
             db.session.add(nuevo_lote)
             
-            # 3. Actualizar stock del producto
-            stock_anterior = producto.stock
-            producto.stock += cantidad
+            # 3. Actualizar stock del producto usando operaciones seguras con Decimal
+            stock_anterior = safe_decimal(producto.stock)
+            nuevo_stock = stock_anterior + cantidad
+            producto.stock = float(nuevo_stock)  # Convertir a float para la base de datos
             
             # 4. Actualizar costo general si se marcó la opción
             if actualizar_costo:
-                producto.costo = costo_unitario
+                producto.costo = float(costo_unitario)  # Convertir a float para la base de datos
             
             # Guardar todos los cambios
             db.session.commit()
@@ -698,7 +763,7 @@ def new_ajuste_entrada(producto_id):
         proximo_lote=proximo_lote,
         ultimo_lote=ultimo_lote.numero_lote if ultimo_lote else None,
         ultima_entrada=ultima_entrada,
-        costo_anterior=ultima_entrada.costo_unitario if ultima_entrada else producto.costo,
+        costo_anterior=float(ultima_entrada.costo_unitario) if ultima_entrada else float(producto.costo),
         historial=historial
     )
 
@@ -724,13 +789,13 @@ def ajuste_salida(producto_id):
         numero_lote="Lote de Registro"
     ).first()
     
-    if not lote_registro and producto.stock > 0:
+    if not lote_registro and safe_decimal(producto.stock) > 0:
         # Crear lote de registro y movimiento inicial
         try:
             movimiento, lote = crear_lote_registro(
                 producto=producto,
-                cantidad=producto.stock,
-                costo=producto.costo,
+                cantidad=safe_decimal(producto.stock),
+                costo=safe_decimal(producto.costo),
                 fecha_caducidad=producto.fecha_caducidad if producto.has_caducidad else None,
                 usuario_id=empresa_id
             )
@@ -755,9 +820,8 @@ def ajuste_salida(producto_id):
     
     if request.method == 'POST':
         try:
-            # Obtener datos del formulario
-            # MODIFICADO: Cambiado de int a float
-            cantidad = float(request.form.get('cantidad', 1))
+            # Obtener datos del formulario usando safe_decimal
+            cantidad = safe_decimal(request.form.get('cantidad', '1'))
             motivo = request.form.get('motivo', 'ajuste')
             # Usar método auto por defecto (ya no depende del formulario)
             metodo_descuento = 'auto'
@@ -769,8 +833,9 @@ def ajuste_salida(producto_id):
                 flash('La cantidad debe ser mayor que cero.', 'danger')
                 return redirect(url_for('ajuste_salida', producto_id=producto_id))
             
-            if cantidad > producto.stock:
-                flash(f'No hay suficiente stock disponible. Stock actual: {producto.stock}', 'danger')
+            stock_actual = safe_decimal(producto.stock)
+            if cantidad > stock_actual:
+                flash(f'No hay suficiente stock disponible. Stock actual: {stock_actual}', 'danger')
                 return redirect(url_for('ajuste_salida', producto_id=producto_id))
             
             # 1. Aplicar la salida a los lotes correspondientes usando el método inteligente
@@ -780,7 +845,7 @@ def ajuste_salida(producto_id):
             nuevo_movimiento = MovimientoInventario(
                 producto_id=producto_id,
                 tipo_movimiento='SALIDA',
-                cantidad=cantidad,
+                cantidad=float(cantidad),  # Convertir a float para la base de datos
                 motivo=motivo,
                 fecha_movimiento=datetime.now(),
                 metodo_descuento=metodo_descuento,
@@ -790,9 +855,9 @@ def ajuste_salida(producto_id):
             )
             db.session.add(nuevo_movimiento)
             
-            # 3. Actualizar stock del producto
-            stock_anterior = producto.stock
-            producto.stock -= cantidad
+            # 3. Actualizar stock del producto usando operaciones seguras con Decimal
+            nuevo_stock = stock_actual - cantidad
+            producto.stock = float(nuevo_stock)  # Convertir a float para la base de datos
             
             # 4. Registrar la relación entre el movimiento y los lotes afectados
             for lote_info in lotes_afectados:
@@ -849,13 +914,13 @@ def new_ajuste_salida(producto_id):
         numero_lote="Lote de Registro"
     ).first()
     
-    if not lote_registro and producto.stock > 0:
+    if not lote_registro and safe_decimal(producto.stock) > 0:
         # Crear lote de registro y movimiento inicial
         try:
             movimiento, lote = crear_lote_registro(
                 producto=producto,
-                cantidad=producto.stock,
-                costo=producto.costo,
+                cantidad=safe_decimal(producto.stock),
+                costo=safe_decimal(producto.costo),
                 fecha_caducidad=producto.fecha_caducidad if producto.has_caducidad else None,
                 usuario_id=empresa_id
             )
@@ -880,9 +945,8 @@ def new_ajuste_salida(producto_id):
     
     if request.method == 'POST':
         try:
-            # Obtener datos del formulario
-            # MODIFICADO: Cambiado de int a float
-            cantidad = float(request.form.get('cantidad', 1))
+            # Obtener datos del formulario usando safe_decimal
+            cantidad = safe_decimal(request.form.get('cantidad', '1'))
             motivo = request.form.get('motivo', 'ajuste')
             # Usar método auto por defecto (ya no depende del formulario)
             metodo_descuento = 'auto'
@@ -894,8 +958,9 @@ def new_ajuste_salida(producto_id):
                 flash('La cantidad debe ser mayor que cero.', 'danger')
                 return redirect(url_for('new_ajuste_stock.new_ajuste_salida', producto_id=producto_id))
             
-            if cantidad > producto.stock:
-                flash(f'No hay suficiente stock disponible. Stock actual: {producto.stock}', 'danger')
+            stock_actual = safe_decimal(producto.stock)
+            if cantidad > stock_actual:
+                flash(f'No hay suficiente stock disponible. Stock actual: {stock_actual}', 'danger')
                 return redirect(url_for('new_ajuste_stock.new_ajuste_salida', producto_id=producto_id))
             
             # 1. Aplicar la salida a los lotes correspondientes usando el método inteligente
@@ -905,7 +970,7 @@ def new_ajuste_salida(producto_id):
             nuevo_movimiento = MovimientoInventario(
                 producto_id=producto_id,
                 tipo_movimiento='SALIDA',
-                cantidad=cantidad,
+                cantidad=float(cantidad),  # Convertir a float para la base de datos
                 motivo=motivo,
                 fecha_movimiento=datetime.now(),
                 metodo_descuento=metodo_descuento,
@@ -915,9 +980,9 @@ def new_ajuste_salida(producto_id):
             )
             db.session.add(nuevo_movimiento)
             
-            # 3. Actualizar stock del producto
-            stock_anterior = producto.stock
-            producto.stock -= cantidad
+            # 3. Actualizar stock del producto usando operaciones seguras con Decimal
+            nuevo_stock = stock_actual - cantidad
+            producto.stock = float(nuevo_stock)  # Convertir a float para la base de datos
             
             # 4. Registrar la relación entre el movimiento y los lotes afectados
             for lote_info in lotes_afectados:
@@ -972,8 +1037,10 @@ def ajuste_confirmacion(movimiento_id):
     
     # Obtener datos adicionales según el tipo de movimiento
     if movimiento.tipo_movimiento == 'ENTRADA':
-        # Calcular el costo total
-        costo_total = movimiento.cantidad * movimiento.costo_unitario
+        # Calcular el costo total usando Decimal para precisión
+        cantidad_decimal = safe_decimal(movimiento.cantidad)
+        costo_decimal = safe_decimal(movimiento.costo_unitario)
+        costo_total = float(cantidad_decimal * costo_decimal)  # Convertir a float para la plantilla
         
         # Obtener el lote creado
         lotes_afectados = [
@@ -983,8 +1050,8 @@ def ajuste_confirmacion(movimiento_id):
             ).first()
         ]
         
-        # Stock anterior
-        stock_anterior = producto.stock - movimiento.cantidad
+        # Stock anterior usando operaciones seguras con Decimal
+        stock_anterior = float(safe_decimal(producto.stock) - safe_decimal(movimiento.cantidad))
         
     else:  # SALIDA
         costo_total = None
@@ -1024,8 +1091,8 @@ def ajuste_confirmacion(movimiento_id):
                     'fecha_caducidad': lote.fecha_caducidad
                 })
         
-        # Stock anterior
-        stock_anterior = producto.stock + movimiento.cantidad
+        # Stock anterior usando operaciones seguras con Decimal
+        stock_anterior = float(safe_decimal(producto.stock) + safe_decimal(movimiento.cantidad))
     
     return render_template(
         'ajuste_confirmacion.html',
@@ -1056,8 +1123,10 @@ def new_ajuste_confirmacion(movimiento_id):
     
     # Obtener datos adicionales según el tipo de movimiento
     if movimiento.tipo_movimiento == 'ENTRADA':
-        # Calcular el costo total
-        costo_total = movimiento.cantidad * movimiento.costo_unitario
+        # Calcular el costo total usando Decimal para precisión
+        cantidad_decimal = safe_decimal(movimiento.cantidad)
+        costo_decimal = safe_decimal(movimiento.costo_unitario)
+        costo_total = float(cantidad_decimal * costo_decimal)  # Convertir a float para la plantilla
         
         # Obtener el lote creado
         lotes_afectados = [
@@ -1067,8 +1136,8 @@ def new_ajuste_confirmacion(movimiento_id):
             ).first()
         ]
         
-        # Stock anterior
-        stock_anterior = producto.stock - movimiento.cantidad
+        # Stock anterior usando operaciones seguras con Decimal
+        stock_anterior = float(safe_decimal(producto.stock) - safe_decimal(movimiento.cantidad))
         
     else:  # SALIDA
         costo_total = None
@@ -1108,8 +1177,8 @@ def new_ajuste_confirmacion(movimiento_id):
                     'fecha_caducidad': lote.fecha_caducidad
                 })
         
-        # Stock anterior
-        stock_anterior = producto.stock + movimiento.cantidad
+        # Stock anterior usando operaciones seguras con Decimal
+        stock_anterior = float(safe_decimal(producto.stock) + safe_decimal(movimiento.cantidad))
     
     return render_template(
         'new_ajuste_confirmacion.html',
@@ -1188,12 +1257,16 @@ def crear_lote_registro(producto, cantidad, costo, fecha_caducidad=None, usuario
     
     Args:
         producto: Instancia del producto
-        cantidad: Cantidad inicial
-        costo: Costo unitario
+        cantidad: Cantidad inicial (Decimal)
+        costo: Costo unitario (Decimal)
         fecha_caducidad: Fecha de caducidad (opcional)
         usuario_id: ID del usuario que realiza la acción
     """
     try:
+        # Asegurar que cantidad y costo sean Decimal
+        cantidad = safe_decimal(cantidad)
+        costo = safe_decimal(costo)
+        
         # Procesar la fecha de caducidad si el producto tiene activada la opción
         if producto.has_caducidad and producto.metodo_caducidad and not fecha_caducidad:
             caducidad_lapso = producto.metodo_caducidad
@@ -1229,10 +1302,10 @@ def crear_lote_registro(producto, cantidad, costo, fecha_caducidad=None, usuario
         movimiento = MovimientoInventario(
             producto_id=producto.id,
             tipo_movimiento='ENTRADA',
-            cantidad=cantidad,
+            cantidad=float(cantidad),  # Convertir a float para la base de datos
             motivo='Registro inicial',
             fecha_movimiento=datetime.now(),
-            costo_unitario=costo,
+            costo_unitario=float(costo),  # Convertir a float para la base de datos
             numero_lote="Lote de Registro",
             fecha_caducidad=fecha_caducidad,
             usuario_id=usuario_id or producto.empresa_id
@@ -1243,8 +1316,8 @@ def crear_lote_registro(producto, cantidad, costo, fecha_caducidad=None, usuario
         lote = LoteInventario(
             producto_id=producto.id,
             numero_lote="Lote de Registro",
-            costo_unitario=costo,
-            stock=cantidad,
+            costo_unitario=float(costo),  # Convertir a float para la base de datos
+            stock=float(cantidad),  # Convertir a float para la base de datos
             fecha_entrada=datetime.now(),
             fecha_caducidad=fecha_caducidad,
             esta_activo=True

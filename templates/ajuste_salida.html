@@ -10,7 +10,7 @@
   :root {
     --font-system: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', Helvetica, Arial, sans-serif;
     --text-color: #1d1d1f;
-    --text-secondary: #86868b;
+    --text-secondary: #6b7280; /* Gris neutral sin tinte azul */
     --color-background: #f5f5f7;
     --color-card: #ffffff;
     --color-border: rgba(0, 0, 0, 0.1);
@@ -23,7 +23,10 @@
     --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
     --shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
     --transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
-    --blue: #1a237e; /* Añadido: Azul para botón volver igual que en ajuste_stock */
+    --blue: #1a237e; /* Azul para botón volver */
+    --color-green-dark: #1F4034; /* Verde oscuro para notas */
+    --premium-dark: #0f172a; /* Para el título */
+    --premium-gray-light: #6b7280; /* Gris neutral sin tinte azul */
   }
   
   body {
@@ -38,94 +41,202 @@
   }
   
   .entry-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 36px 24px;
+    width: 100%;
+    margin: 0;
+    padding: 1.5rem 0 2.25rem; /* Solo padding vertical */
+    animation: fadeIn 0.6s ease-out;
   }
   
-  /* Encabezado de página - Como en ajuste_stock.html */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Encabezado de página - Como en ajuste_entrada.html */
   .page-header {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 3rem; /* Aumentado el espacio entre título y paneles */
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start; /* Alineado a la izquierda */
+    margin-bottom: 2.5rem; /* Balance óptimo */
+    text-align: left;
+    position: relative;
+    z-index: 1;
+    max-width: 1200px; /* Mismo ancho que two-column-layout */
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 1.5rem; /* Mismo padding que entry-container */
   }
   
+  /* Efecto hover sutil al pasar por el header */
+  .page-header:hover .page-title {
+    transform: translateX(3px); /* Movimiento sutil hacia la derecha */
+  }
+  
+  .page-header:hover .page-description {
+    transform: translateX(3px); /* Mismo movimiento para la descripción */
+    transition-delay: 0.05s; /* Pequeño retraso para efecto cascada */
+  }
+  
+  /* TÍTULO CON ESTILO DE AJUSTE_ENTRADA.HTML */
   .page-title {
-    font-size: 32px;
-    font-weight: 600;
-    letter-spacing: -0.02em;
+    font-size: 34px; /* Ligeramente reducido para mejor proporción */
+    font-weight: 900; /* Aumentado para más peso visual */
+    color: var(--premium-dark);
     margin: 0;
-    color: var(--text-color);
-  }
-  
-  .header-actions {
-    display: flex;
-    gap: 1rem;
-    padding-top: 8px;
-  }
-  
-  /* Botones con estilo Apple */
-  .btn-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.75rem;
-    padding: 0.75rem 1.25rem;
-    border-radius: 980px;
-    font-weight: 500;
-    font-size: 0.95rem;
-    transition: var(--transition);
-    text-decoration: none;
+    padding: 0;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    text-shadow: none;
     cursor: pointer;
-    border: none;
-    text-align: center;
+    position: relative;
+    display: block;
+    transition: transform 0.3s ease;
   }
   
-  .btn-icon i, 
-  .btn-icon span {
+  /* Gradiente animado al hover - sin desaparecer el texto */
+  .page-title::after {
+    content: attr(data-text);
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, #ff3b30 0%, #ff6b60 50%, #ff3b30 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    animation: gradientMove 1.5s ease infinite;
+    display: block;
+  }
+  
+  .page-title:hover::after {
+    opacity: 1;
+  }
+  
+  @keyframes gradientMove {
+    0% { background-position: 0% center; }
+    100% { background-position: 200% center; }
+  }
+  
+  /* Palabras individuales para animación de revelado */
+  .page-title .word {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(15px);
+    animation: wordReveal 0.3s ease forwards;
+  }
+  
+  .page-title .word:nth-child(1) { animation-delay: 0.03s; }
+  .page-title .word:nth-child(2) { animation-delay: 0.06s; }
+  
+  @keyframes wordReveal {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Descripción debajo del título */
+  .page-description {
+    font-size: 1.0625rem;
+    color: #4b5563; /* Gris más oscuro sin tinte azul */
+    margin-top: 0.5rem;
+    margin-bottom: 0;
+    padding: 0;
+    line-height: 1.4;
+    font-weight: 500;
+    cursor: pointer;
+    position: relative;
+    display: block;
+    transition: transform 0.3s ease;
+  }
+
+  /* Gradiente animado al hover para descripción */
+  .page-description::after {
+    content: attr(data-text);
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, #4b5563 0%, #6b7280 50%, #4b5563 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    animation: gradientMove 1.5s ease infinite;
+    display: block;
+  }
+
+  .page-description:hover::after {
+    opacity: 1;
+  }
+
+  /* Palabras individuales para la descripción */
+  .page-description .word {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(15px);
+    animation: wordReveal 0.3s ease forwards;
+  }
+
+  .page-description .word:nth-child(1) { animation-delay: 0.07s; }
+  .page-description .word:nth-child(2) { animation-delay: 0.09s; }
+  .page-description .word:nth-child(3) { animation-delay: 0.11s; }
+  .page-description .word:nth-child(4) { animation-delay: 0.13s; }
+  .page-description .word:nth-child(5) { animation-delay: 0.15s; }
+  
+  /* Botón Confirmar Salida - NUEVO DISEÑO ROJO OSCURO */
+  .btn-confirm {
+    padding: 1rem 2rem;
+    background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
     display: inline-flex;
     align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
+    text-decoration: none;
+    width: 100%;
     justify-content: center;
-    vertical-align: middle;
-    line-height: 1;
   }
   
-  .btn-outline {
-    background-color: var(--color-card);
-    color: var(--text-color);
-    border: 1px solid var(--color-border);
-  }
-  
-  .btn-outline:hover {
-    background-color: #f2f2f2;
+  .btn-confirm:hover {
+    background: linear-gradient(135deg, #991b1b 0%, #7f1d1d 100%);
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-  
-  /* Botón Volver estilo ajuste_stock.html */
-  .btn-volver {
-    background-color: var(--blue);
-    color: #ffffff;
-    box-shadow: 0 2px 4px rgba(26, 35, 126, 0.3);
-  }
-  
-  .btn-volver:hover {
-    background-color: #151c64;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(26, 35, 126, 0.4);
-    color: #ffffff;
-  }
-  
-  .btn-primary {
-    background-color: var(--color-primary);
+    box-shadow: 0 8px 20px rgba(220, 38, 38, 0.35);
     color: white;
   }
   
-  .btn-primary:hover {
-    background-color: #d12323;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(229, 46, 46, 0.25);
+  .btn-confirm:active {
+    transform: translateY(0);
+  }
+  
+  .btn-confirm i {
+    font-size: 1.125rem;
+  }
+  
+  /* Contenedor para el botón debajo del formulario */
+  .form-actions {
+    margin-top: 2rem;
+    padding: 0 24px 24px;
   }
   
   /* Diseño de dos columnas con misma altura */
@@ -134,7 +245,19 @@
     grid-template-columns: 320px 1fr;
     grid-auto-rows: minmax(min-content, max-content);
     gap: 24px;
-    margin-bottom: 24px;
+    opacity: 0;
+    transform: translateY(10px);
+    animation: contentFadeIn 0.5s ease-out 0.2s forwards;
+    max-width: 1200px;
+    margin: 0 auto 24px; /* Centrado con margin bottom */
+    padding: 0 1.5rem; /* Mismo padding que el header */
+  }
+  
+  @keyframes contentFadeIn {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
   
   /* Panel de producto */
@@ -143,7 +266,7 @@
     border-radius: var(--border-radius);
     box-shadow: var(--shadow-sm);
     overflow: hidden;
-    height: auto; /* Altura automática */
+    height: auto;
     display: flex;
     flex-direction: column;
   }
@@ -290,6 +413,12 @@
     box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.15);
   }
   
+  /* Estilo para campos con error */
+  .form-control.error {
+    border-color: var(--color-danger);
+    box-shadow: 0 0 0 3px rgba(255, 59, 48, 0.15);
+  }
+  
   /* Select con ícono */
   .select-container {
     position: relative;
@@ -308,32 +437,6 @@
     color: var(--text-secondary);
     pointer-events: none;
     font-size: 16px;
-  }
-  
-  .form-check {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 8px;
-  }
-  
-  .form-check-input {
-    width: 18px;
-    height: 18px;
-    margin: 0;
-    border-radius: 4px;
-    border: 1px solid var(--color-border);
-    transition: var(--transition);
-  }
-  
-  .form-check-input:checked {
-    background-color: var(--color-accent);
-    border-color: var(--color-accent);
-  }
-  
-  .form-check-label {
-    font-size: 15px;
-    color: var(--text-color);
   }
   
   /* Input con unidad */
@@ -397,7 +500,7 @@
     border-color: var(--color-primary);
   }
   
-  /* Secciones colapsables estilo Apple */
+  /* Secciones colapsables estilo Apple MEJORADO */
   .collapse-section {
     margin-bottom: 16px;
     border: 1px solid var(--color-border);
@@ -407,6 +510,7 @@
   
   .collapse-header {
     padding: 14px 16px;
+    padding-left: 40px;
     background-color: var(--color-card);
     cursor: pointer;
     display: flex;
@@ -416,18 +520,35 @@
     font-weight: 500;
     color: var(--text-color);
     user-select: none;
+    position: relative;
   }
   
   .collapse-header:hover {
     background-color: #f5f5f7;
   }
   
-  .collapse-header i {
+  .collapse-header span {
+    display: flex;
+    align-items: center;
+  }
+  
+  .collapse-header i.fa-chevron-down,
+  .collapse-header i.fa-chevron-up {
     color: var(--text-secondary);
     transition: transform 0.3s ease;
   }
   
-  .collapse-header.active i {
+  /* Iconos de las secciones colapsables con posición absoluta */
+  .collapse-header .fa-sticky-note {
+    position: absolute;
+    left: 16px;
+    font-size: 16px;
+    width: 16px;
+    text-align: center;
+    color: var(--color-green-dark);
+  }
+  
+  .collapse-header.active i.fa-chevron-down {
     transform: rotate(180deg);
   }
   
@@ -435,6 +556,18 @@
     padding: 16px;
     border-top: 1px solid var(--color-border);
     display: none;
+    animation: slideDown 0.3s ease-out;
+  }
+  
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
   
   /* Notificación centrada estilo Apple */
@@ -521,6 +654,7 @@
   @media (max-width: 992px) {
     .two-column-layout {
       grid-template-columns: 1fr;
+      padding: 0 1rem;
     }
     
     .form-row {
@@ -531,19 +665,25 @@
   
   @media (max-width: 768px) {
     .entry-container {
-      padding: 20px 16px;
+      padding: 1rem 0 1.25rem;
     }
     
     .page-header {
       flex-direction: column;
-      gap: 16px;
-      margin-bottom: 2rem;
+      gap: 0;
+      margin-bottom: 1.5rem;
+      text-align: left;
+      padding: 0 1rem;
     }
     
-    .header-actions {
-      width: 100%;
-      justify-content: space-between;
-      padding-top: 0;
+    .page-title {
+      font-size: 26px;
+      line-height: 1;
+    }
+    
+    .page-description {
+      font-size: 0.9375rem;
+      margin-top: 0.5rem;
     }
     
     .product-image-container {
@@ -553,18 +693,20 @@
 </style>
 
 <div class="entry-container">
-  <!-- Encabezado con título y acciones -->
+  <!-- Encabezado con título sin acciones -->
   <div class="page-header">
-    <h1 class="page-title">Registrar Salida</h1>
-    <div class="header-actions">
-      <a href="{{ url_for('ajuste_stock') }}" class="btn-icon btn-volver">
-        <i class="fas fa-arrow-left"></i>
-        <span>Volver</span>
-      </a>
-      <button type="submit" form="salidaForm" class="btn-icon btn-primary">
-        <span>Confirmar salida</span>
-      </button>
-    </div>
+    <h1 class="page-title" data-text="Registrar Salida">
+      <span class="word">Registrar</span>
+      <span class="word">Salida</span>
+    </h1>
+    <p class="page-description" data-text="Reduce el stock de tu inventario">
+      <span class="word">Reduce</span>
+      <span class="word">el</span>
+      <span class="word">stock</span>
+      <span class="word">de</span>
+      <span class="word">tu</span>
+      <span class="word">inventario</span>
+    </p>
   </div>
   
   <!-- Diseño de dos columnas con misma altura -->
@@ -715,7 +857,8 @@
           <!-- Notas adicionales como sección colapsable -->
           <div class="collapse-section">
             <div class="collapse-header" onclick="toggleCollapse('notasSection')">
-              <span><i class="fas fa-sticky-note" style="margin-right:8px;"></i> Notas adicionales</span>
+              <i class="fas fa-sticky-note"></i>
+              <span>Notas adicionales</span>
               <i class="fas fa-chevron-down"></i>
             </div>
             <div class="collapse-content" id="notasSection">
@@ -723,6 +866,14 @@
               <textarea class="form-control" id="notas" name="notas" rows="2" placeholder="Información adicional..."></textarea>
             </div>
           </div>
+        </div>
+        
+        <!-- Botón Confirmar Salida - Movido aquí dentro del formulario -->
+        <div class="form-actions">
+          <button type="submit" class="btn-icon btn-confirm">
+            <i class="fas fa-check-circle"></i>
+            <span>Confirmar salida</span>
+          </button>
         </div>
       </div>
     </form>
@@ -749,14 +900,85 @@
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     // =========================================
+    // FUNCIONES AUXILIARES PARA DECIMAL
+    // =========================================
+    
+    // Función para normalizar y validar entrada de números
+    function normalizeNumberInput(value) {
+      if (!value || value.trim() === '') {
+        return { valid: false, value: '', isEmpty: true };
+      }
+      
+      let normalizedValue = value.trim();
+      
+      // Casos especiales que rechazamos
+      if (normalizedValue.startsWith('.')) {
+        return { valid: false, value: normalizedValue, startsWithDot: true };
+      }
+      
+      // Reemplazar comas por puntos (10,5 → 10.5)
+      normalizedValue = normalizedValue.replace(/,(?=\d)/g, '.');
+      
+      // Remover comas de miles (1,234.56 → 1234.56)
+      normalizedValue = normalizedValue.replace(/,(?=\d{3})/g, '');
+      
+      // Normalizar punto final (10. → 10.00)
+      if (normalizedValue.endsWith('.')) {
+        normalizedValue += '00';
+      }
+      
+      // Verificar que sea un número válido
+      const numericValue = parseFloat(normalizedValue);
+      if (isNaN(numericValue)) {
+        return { valid: false, value: normalizedValue, invalidNumber: true };
+      }
+      
+      // Verificar que sea positivo
+      if (numericValue <= 0) {
+        return { valid: false, value: normalizedValue, notPositive: true };
+      }
+      
+      return { 
+        valid: true, 
+        value: normalizedValue,
+        numericValue: numericValue,
+        formattedValue: numericValue.toFixed(2)
+      };
+    }
+    
+    // =========================================
     // Notificación centrada mejorada
     // =========================================
     const notificationOverlay = document.getElementById('notificationOverlay');
     const notificationButton = document.getElementById('notificationButton');
     
-    // Función para mostrar notificación centrada
-    window.showFormatNotification = function() {
+    // Función para mostrar notificación centrada personalizada
+    window.showCustomNotification = function(options = {}) {
       if (notificationOverlay) {
+        const titleEl = notificationOverlay.querySelector('.notification-title');
+        const messageEl = notificationOverlay.querySelector('.notification-message');
+        const exampleEl = notificationOverlay.querySelector('.notification-example');
+        const iconEl = notificationOverlay.querySelector('.notification-icon i');
+        
+        // Configurar contenido
+        if (titleEl) titleEl.textContent = options.title || 'Error de validación';
+        if (messageEl) messageEl.textContent = options.message || 'Por favor corrige los errores indicados.';
+        
+        // Mostrar u ocultar ejemplo
+        if (exampleEl) {
+          if (options.example) {
+            exampleEl.innerHTML = options.example;
+            exampleEl.style.display = 'block';
+          } else {
+            exampleEl.style.display = 'none';
+          }
+        }
+        
+        // Configurar ícono
+        if (iconEl) {
+          iconEl.className = options.icon || 'fas fa-exclamation-circle';
+        }
+        
         notificationOverlay.classList.add('active');
         
         // Auto-cerrar después de 5 segundos
@@ -764,6 +986,16 @@
           hideFormatNotification();
         }, 5000);
       }
+    };
+    
+    // Función para mostrar notificación de formato (la original)
+    window.showFormatNotification = function() {
+      showCustomNotification({
+        title: 'Formato incorrecto',
+        message: 'Debe incluir un dígito antes del punto decimal.',
+        example: '<span style="font-weight: 600;">Ejemplo:</span> 0.123 <span style="color: #4CAF50;">✓</span>&nbsp;&nbsp;&nbsp;<span style="text-decoration: line-through;">.123</span> <span style="color: #FF5252;">✗</span>',
+        icon: 'fas fa-exclamation-circle'
+      });
     };
     
     // Función para ocultar notificación
@@ -826,14 +1058,16 @@
         
         if (unidad === 'pieza') {
           // Si es 'pieza', cambia a plural cuando es más de 1
-          unidadIndicator.textContent = parseFloat(cantidadInput.value.replace(/,/g, '')) === 1 ? 'PIEZA' : 'PIEZAS';
+          const cantidad = parseFloat(cantidadInput.value.replace(/,/g, '')) || 1;
+          unidadIndicator.textContent = cantidad === 1 ? 'PIEZA' : 'PIEZAS';
         } else {
           // Mantener unidad existente (KG, L, etc.)
           unidadIndicator.textContent = unidad.toUpperCase();
         }
       {% else %}
         // Para productos sin unidad específica, usar pieza/piezas
-        unidadIndicator.textContent = parseFloat(cantidadInput.value.replace(/,/g, '')) === 1 ? 'PIEZA' : 'PIEZAS';
+        const cantidad = parseFloat(cantidadInput.value.replace(/,/g, '')) || 1;
+        unidadIndicator.textContent = cantidad === 1 ? 'PIEZA' : 'PIEZAS';
       {% endif %}
     }
     
@@ -954,7 +1188,7 @@
     window.toggleCollapse = function(id) {
       const content = document.getElementById(id);
       const header = content.previousElementSibling;
-      const icon = header.querySelector('i.fas.fa-chevron-down, i.fas.fa-chevron-up');
+      const icon = header.querySelector('i.fa-chevron-down, i.fa-chevron-up');
       
       if (content.style.display === 'block') {
         content.style.display = 'none';
@@ -981,22 +1215,42 @@
     updateUnitText();
     
     // =========================================
-    // VALIDACIÓN DEL FORMULARIO
+    // VALIDACIÓN DEL FORMULARIO MEJORADA
     // =========================================
     const form = document.getElementById('salidaForm');
     
     if (form) {
       form.addEventListener('submit', function(event) {
+        let isValid = true;
+        const errors = [];
+        
         // 1. Validar cantidad
         if (cantidadInput) {
           let cantidadValor = cantidadInput.value.trim().replace(/,/g, '');
+          
+          if (cantidadValor === '') {
+            event.preventDefault();
+            cantidadInput.classList.add('error');
+            showCustomNotification({
+              title: 'Campo obligatorio',
+              message: 'La cantidad a reducir es obligatoria.',
+              icon: 'fas fa-exclamation-triangle'
+            });
+            cantidadInput.focus();
+            return false;
+          }
           
           // Verificar si es un número válido y mayor que cero
           let numeroValido = parseFloat(cantidadValor);
           
           if (isNaN(numeroValido) || numeroValido <= 0) {
             event.preventDefault();
-            alert('La cantidad debe ser mayor que cero.');
+            cantidadInput.classList.add('error');
+            showCustomNotification({
+              title: 'Valor inválido',
+              message: 'La cantidad debe ser un número mayor que cero.',
+              icon: 'fas fa-exclamation-circle'
+            });
             cantidadInput.focus();
             return false;
           }
@@ -1005,16 +1259,24 @@
           const stockMaximo = {{ producto.stock }};
           if (numeroValido > stockMaximo) {
             event.preventDefault();
-            alert(`La cantidad no puede ser mayor que el stock disponible (${stockMaximo}).`);
+            cantidadInput.classList.add('error');
+            showCustomNotification({
+              title: 'Stock insuficiente',
+              message: `La cantidad no puede ser mayor que el stock disponible (${stockMaximo}).`,
+              icon: 'fas fa-exclamation-triangle'
+            });
             cantidadInput.focus();
             return false;
           }
+          
+          cantidadInput.classList.remove('error');
           
           // Validaciones específicas según el tipo de unidad
           if (esUnidadDecimal) {
             // Para unidades decimales, verificar que no inicie con punto
             if (cantidadValor.startsWith('.')) {
               event.preventDefault();
+              cantidadInput.classList.add('error');
               showFormatNotification();
               cantidadInput.focus();
               return false;
@@ -1025,7 +1287,13 @@
               const parts = cantidadValor.split('.');
               if (parts[1] && parts[1].length > 3) {
                 event.preventDefault();
-                alert('La cantidad no puede tener más de 3 decimales.');
+                cantidadInput.classList.add('error');
+                showCustomNotification({
+                  title: 'Demasiados decimales',
+                  message: 'La cantidad no puede tener más de 3 decimales.',
+                  example: '<span style="font-weight: 600;">Máximo permitido:</span> 123.456',
+                  icon: 'fas fa-exclamation-circle'
+                });
                 cantidadInput.focus();
                 return false;
               }
@@ -1037,7 +1305,13 @@
             // Para piezas, verificar que sea un número entero
             if (Math.floor(numeroValido) !== numeroValido) {
               event.preventDefault();
-              alert('La cantidad debe ser un número entero para este tipo de producto.');
+              cantidadInput.classList.add('error');
+              showCustomNotification({
+                title: 'Solo números enteros',
+                message: 'La cantidad debe ser un número entero para este tipo de producto.',
+                example: '<span style="font-weight: 600;">Válido:</span> 5, 10, 25 <span style="color: #4CAF50;">✓</span><br><span style="font-weight: 600;">Inválido:</span> 5.5, 10.2 <span style="color: #FF5252;">✗</span>',
+                icon: 'fas fa-exclamation-circle'
+              });
               cantidadInput.focus();
               return false;
             }
@@ -1047,7 +1321,14 @@
           }
         }
         
-        return true;
+        return isValid;
+      });
+    }
+    
+    // Remover clase de error cuando el usuario empiece a corregir
+    if (cantidadInput) {
+      cantidadInput.addEventListener('input', function() {
+        this.classList.remove('error');
       });
     }
   });
