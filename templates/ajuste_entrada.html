@@ -486,6 +486,12 @@
     box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.15);
   }
   
+  /* Estilo para campos con error */
+  .form-control.error {
+    border-color: var(--color-danger);
+    box-shadow: 0 0 0 3px rgba(255, 59, 48, 0.15);
+  }
+  
   /* Select con ícono */
   .select-container {
     position: relative;
@@ -1238,14 +1244,85 @@
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     // =========================================
+    // FUNCIONES AUXILIARES PARA DECIMAL
+    // =========================================
+    
+    // Función para normalizar y validar entrada de números
+    function normalizeNumberInput(value) {
+      if (!value || value.trim() === '') {
+        return { valid: false, value: '', isEmpty: true };
+      }
+      
+      let normalizedValue = value.trim();
+      
+      // Casos especiales que rechazamos
+      if (normalizedValue.startsWith('.')) {
+        return { valid: false, value: normalizedValue, startsWithDot: true };
+      }
+      
+      // Reemplazar comas por puntos (10,5 → 10.5)
+      normalizedValue = normalizedValue.replace(/,(?=\d)/g, '.');
+      
+      // Remover comas de miles (1,234.56 → 1234.56)
+      normalizedValue = normalizedValue.replace(/,(?=\d{3})/g, '');
+      
+      // Normalizar punto final (10. → 10.00)
+      if (normalizedValue.endsWith('.')) {
+        normalizedValue += '00';
+      }
+      
+      // Verificar que sea un número válido
+      const numericValue = parseFloat(normalizedValue);
+      if (isNaN(numericValue)) {
+        return { valid: false, value: normalizedValue, invalidNumber: true };
+      }
+      
+      // Verificar que sea positivo
+      if (numericValue <= 0) {
+        return { valid: false, value: normalizedValue, notPositive: true };
+      }
+      
+      return { 
+        valid: true, 
+        value: normalizedValue,
+        numericValue: numericValue,
+        formattedValue: numericValue.toFixed(2)
+      };
+    }
+    
+    // =========================================
     // Notificación centrada mejorada
     // =========================================
     const notificationOverlay = document.getElementById('notificationOverlay');
     const notificationButton = document.getElementById('notificationButton');
     
-    // Función para mostrar notificación centrada
-    window.showFormatNotification = function() {
+    // Función para mostrar notificación centrada personalizada
+    window.showCustomNotification = function(options = {}) {
       if (notificationOverlay) {
+        const titleEl = notificationOverlay.querySelector('.notification-title');
+        const messageEl = notificationOverlay.querySelector('.notification-message');
+        const exampleEl = notificationOverlay.querySelector('.notification-example');
+        const iconEl = notificationOverlay.querySelector('.notification-icon i');
+        
+        // Configurar contenido
+        if (titleEl) titleEl.textContent = options.title || 'Error de validación';
+        if (messageEl) messageEl.textContent = options.message || 'Por favor corrige los errores indicados.';
+        
+        // Mostrar u ocultar ejemplo
+        if (exampleEl) {
+          if (options.example) {
+            exampleEl.innerHTML = options.example;
+            exampleEl.style.display = 'block';
+          } else {
+            exampleEl.style.display = 'none';
+          }
+        }
+        
+        // Configurar ícono
+        if (iconEl) {
+          iconEl.className = options.icon || 'fas fa-exclamation-circle';
+        }
+        
         notificationOverlay.classList.add('active');
         
         // Auto-cerrar después de 5 segundos
@@ -1253,6 +1330,16 @@
           hideFormatNotification();
         }, 5000);
       }
+    };
+    
+    // Función para mostrar notificación de formato (la original)
+    window.showFormatNotification = function() {
+      showCustomNotification({
+        title: 'Formato incorrecto',
+        message: 'Debe incluir un dígito antes del punto decimal.',
+        example: '<span style="font-weight: 600;">Ejemplo:</span> 0.123 <span style="color: #4CAF50;">✓</span>&nbsp;&nbsp;&nbsp;<span style="text-decoration: line-through;">.123</span> <span style="color: #FF5252;">✗</span>',
+        icon: 'fas fa-exclamation-circle'
+      });
     };
     
     // Función para ocultar notificación
@@ -1344,18 +1431,20 @@
         
         if (unidad === 'pieza') {
           // Si es 'pieza', cambia a plural cuando es más de 1
-          unidadIndicator.textContent = parseFloat(cantidadInput.value.replace(/,/g, '')) === 1 ? 'PIEZA' : 'PIEZAS';
+          const cantidad = parseFloat(cantidadInput.value.replace(/,/g, '')) || 1;
+          unidadIndicator.textContent = cantidad === 1 ? 'PIEZA' : 'PIEZAS';
         } else {
           // Mantener unidad existente (KG, L, etc.)
           unidadIndicator.textContent = unidad.toUpperCase();
         }
       {% else %}
         // Para productos sin unidad específica, usar pieza/piezas
-        unidadIndicator.textContent = parseFloat(cantidadInput.value.replace(/,/g, '')) === 1 ? 'PIEZA' : 'PIEZAS';
+        const cantidad = parseFloat(cantidadInput.value.replace(/,/g, '')) || 1;
+        unidadIndicator.textContent = cantidad === 1 ? 'PIEZA' : 'PIEZAS';
       {% endif %}
     }
     
-    // Formatear número con comas para los miles
+    // Formatear número con comas para los miles - RESTAURADO AL ORIGINAL
     function formatQuantityWithCommas(input) {
       // Guardar posición del cursor
       const start = input.selectionStart || 0;
@@ -1367,17 +1456,17 @@
       
       // Si es unidad decimal, permitir punto
       if (esUnidadDecimal) {
-        // Truncar exceso de decimales si hay más de 3
+        // Truncar exceso de decimales si hay más de 2
         if (value.includes('.')) {
           const parts = value.split('.');
-          if (parts[1] && parts[1].length > 3) {
-            // Cortar a 3 decimales máximo
-            value = parts[0] + '.' + parts[1].substring(0, 3);
+          if (parts[1] && parts[1].length > 2) {
+            // Cortar a 2 decimales máximo
+            value = parts[0] + '.' + parts[1].substring(0, 2);
           }
         }
         
-        // Permitir números y un solo punto decimal con exactamente 3 decimales máximo
-        const decimalPattern = /^(\d+)(\.\d{0,3})?$/;
+        // Permitir números y un solo punto decimal con exactamente 2 decimales máximo
+        const decimalPattern = /^(\d+)(\.\d{0,2})?$/;
         const match = value.match(decimalPattern);
         
         if (match && match[1]) {
@@ -1431,7 +1520,7 @@
       updateUnitText();
     }
     
-    // Validación del formato para el campo cantidad
+    // Validación del formato para el campo cantidad - RESTAURADO AL ORIGINAL
     if (cantidadInput) {
       // Configurar evento input para formateo
       cantidadInput.addEventListener('input', function(e) {
@@ -1469,7 +1558,7 @@
     }
 
     // =========================================
-    // FORMATEO DE COSTO
+    // FORMATEO DE COSTO - RESTAURADO AL ORIGINAL
     // =========================================
     // Función para formatear costo en tiempo real
     window.formatCostRealtime = function(input) {
@@ -1541,9 +1630,24 @@
         costoSection.style.display = 'block';
         costoSection.style.animation = 'slideDown 0.3s ease-out';
         
-        // Formatear el valor inicial
-        if (costoUnitarioInput) {
-          formatCostRealtime(costoUnitarioInput);
+        // Configurar eventos si no están configurados
+        if (costoUnitarioInput && !costoUnitarioInput.dataset.eventsConfigured) {
+          costoUnitarioInput.addEventListener('input', function(e) {
+            const valor = e.target.value;
+            if (valor.startsWith('.')) {
+              e.target.value = e.target.dataset.lastValidValue || '';
+              showFormatNotification();
+            } else {
+              e.target.dataset.lastValidValue = valor;
+            }
+          });
+          
+          costoUnitarioInput.addEventListener('blur', function(e) {
+            formatCostOnBlur(e.target);
+          });
+          
+          costoUnitarioInput.dataset.eventsConfigured = 'true';
+          costoUnitarioInput.dataset.lastValidValue = costoUnitarioInput.value;
         }
       } else {
         // Si se activa (mantener costo), ocultar la sección
@@ -1603,7 +1707,7 @@
     // Inicializar la visualización de unidad
     updateUnitText();
     
-    // Formatear el campo de costo inicial si está disponible
+    // Formatear el campo de costo inicial y configurar eventos - RESTAURADO AL ORIGINAL
     const costoUnitarioInput = document.getElementById('costo_unitario');
     if (costoUnitarioInput) {
       // Aplicar formato inicial si es necesario
@@ -1614,44 +1718,71 @@
     }
     
     // =========================================
-    // VALIDACIÓN DEL FORMULARIO
+    // VALIDACIÓN DEL FORMULARIO MEJORADA
     // =========================================
     const form = document.getElementById('entradaForm');
     
     if (form) {
       form.addEventListener('submit', function(event) {
         let isValid = true;
+        const errors = [];
         
-        // 1. Validar cantidad
+        // 1. Validar cantidad - ADAPTADO AL FORMATO ORIGINAL
         if (cantidadInput) {
           let cantidadValor = cantidadInput.value.trim().replace(/,/g, '');
+          
+          if (cantidadValor === '') {
+            event.preventDefault();
+            cantidadInput.classList.add('error');
+            showCustomNotification({
+              title: 'Campo obligatorio',
+              message: 'La cantidad a añadir es obligatoria.',
+              icon: 'fas fa-exclamation-triangle'
+            });
+            cantidadInput.focus();
+            return false;
+          }
           
           // Verificar si es un número válido y mayor que cero
           let numeroValido = parseFloat(cantidadValor);
           
           if (isNaN(numeroValido) || numeroValido <= 0) {
             event.preventDefault();
-            alert('La cantidad debe ser mayor que cero.');
+            cantidadInput.classList.add('error');
+            showCustomNotification({
+              title: 'Valor inválido',
+              message: 'La cantidad debe ser un número mayor que cero.',
+              icon: 'fas fa-exclamation-circle'
+            });
             cantidadInput.focus();
             return false;
           }
+          
+          cantidadInput.classList.remove('error');
           
           // Validaciones específicas según el tipo de unidad
           if (esUnidadDecimal) {
             // Para unidades decimales, verificar que no inicie con punto
             if (cantidadValor.startsWith('.')) {
               event.preventDefault();
+              cantidadInput.classList.add('error');
               showFormatNotification();
               cantidadInput.focus();
               return false;
             }
             
-            // Verificar que no tenga más de 3 decimales
+            // Verificar que no tenga más de 2 decimales
             if (cantidadValor.includes('.')) {
               const parts = cantidadValor.split('.');
-              if (parts[1] && parts[1].length > 3) {
+              if (parts[1] && parts[1].length > 2) {
                 event.preventDefault();
-                alert('La cantidad no puede tener más de 3 decimales.');
+                cantidadInput.classList.add('error');
+                showCustomNotification({
+                  title: 'Demasiados decimales',
+                  message: 'La cantidad no puede tener más de 2 decimales.',
+                  example: '<span style="font-weight: 600;">Máximo permitido:</span> 123.45',
+                  icon: 'fas fa-exclamation-circle'
+                });
                 cantidadInput.focus();
                 return false;
               }
@@ -1663,7 +1794,13 @@
             // Para piezas, verificar que sea un número entero
             if (Math.floor(numeroValido) !== numeroValido) {
               event.preventDefault();
-              alert('La cantidad debe ser un número entero para este tipo de producto.');
+              cantidadInput.classList.add('error');
+              showCustomNotification({
+                title: 'Solo números enteros',
+                message: 'La cantidad debe ser un número entero para este tipo de producto.',
+                example: '<span style="font-weight: 600;">Válido:</span> 5, 10, 25 <span style="color: #4CAF50;">✓</span><br><span style="font-weight: 600;">Inválido:</span> 5.5, 10.2 <span style="color: #FF5252;">✗</span>',
+                icon: 'fas fa-exclamation-circle'
+              });
               cantidadInput.focus();
               return false;
             }
@@ -1673,15 +1810,28 @@
           }
         }
         
-        // 2. Validar costo si no se mantiene el anterior
+        // 2. Validar costo si no se mantiene el anterior - ADAPTADO AL FORMATO ORIGINAL
         const mantenerCostoToggle = document.getElementById('mantener_costo_anterior');
         const costoUnitarioInput2 = document.getElementById('costo_unitario');
         if (mantenerCostoToggle && !mantenerCostoToggle.checked && costoUnitarioInput2) {
           // Primero verificar que no comience con punto decimal
           const costoValor = costoUnitarioInput2.value.replace(/,/g, '').trim();
           
+          if (costoValor === '') {
+            event.preventDefault();
+            costoUnitarioInput2.classList.add('error');
+            showCustomNotification({
+              title: 'Campo obligatorio',
+              message: 'El nuevo costo es obligatorio cuando no se mantiene el costo anterior.',
+              icon: 'fas fa-dollar-sign'
+            });
+            costoUnitarioInput2.focus();
+            return false;
+          }
+          
           if (costoValor.startsWith('.')) {
             event.preventDefault();
+            costoUnitarioInput2.classList.add('error');
             showFormatNotification();
             costoUnitarioInput2.focus();
             return false;
@@ -1692,13 +1842,23 @@
           if (costoUnitarioReal) {
             const costoNumerico = parseFloat(costoUnitarioReal.value);
             
-            if (isNaN(costoNumerico) || costoNumerico < 0) {
+            if (isNaN(costoNumerico) || costoNumerico <= 0) {
               event.preventDefault();
-              alert('El costo unitario no puede ser negativo.');
+              costoUnitarioInput2.classList.add('error');
+              showCustomNotification({
+                title: 'Valor inválido',
+                message: 'El costo unitario debe ser mayor que cero.',
+                icon: 'fas fa-dollar-sign'
+              });
               costoUnitarioInput2.focus();
               return false;
             }
           }
+          
+          costoUnitarioInput2.classList.remove('error');
+        } else if (costoUnitarioInput2) {
+          // Si se mantiene el costo anterior, remover cualquier clase de error
+          costoUnitarioInput2.classList.remove('error');
         }
         
         // 3. Verificar que se seleccione un lapso de caducidad si está activado
@@ -1707,12 +1867,30 @@
           const lapsoSeleccionado = document.querySelector('input[name="caducidad_lapso"]:checked');
           if (!lapsoSeleccionado) {
             event.preventDefault();
-            alert('Selecciona un lapso de caducidad.');
+            showCustomNotification({
+              title: 'Selección requerida',
+              message: 'Selecciona un lapso de caducidad.',
+              icon: 'fas fa-calendar-times'
+            });
             return false;
           }
         }
         
         return isValid;
+      });
+    }
+    
+    // Remover clase de error cuando el usuario empiece a corregir
+    if (cantidadInput) {
+      cantidadInput.addEventListener('input', function() {
+        this.classList.remove('error');
+      });
+    }
+    
+    const costoInput = document.getElementById('costo_unitario');
+    if (costoInput) {
+      costoInput.addEventListener('input', function() {
+        this.classList.remove('error');
       });
     }
     
