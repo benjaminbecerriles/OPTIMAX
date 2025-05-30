@@ -1,3 +1,7 @@
+# IMPORTANTE: Este archivo YA usa Numeric(10,2) correctamente
+# Todos los campos monetarios tienen precisión de 2 decimales
+# Compatible con Mercado Pago y otras terminales de pago
+
 from datetime import datetime, date, timedelta
 from models import db
 from sqlalchemy import Numeric
@@ -14,8 +18,8 @@ class MovimientoInventario(db.Model):
     # Tipo de movimiento: ENTRADA o SALIDA
     tipo_movimiento = db.Column(db.String(20), nullable=False)
     
-    # Cantidad de unidades
-    cantidad = db.Column(db.Numeric(10, 2), nullable=False, default=0)
+    # Cantidad de unidades - NUMERIC para precisión
+    cantidad = db.Column(db.Numeric(10, 2), nullable=False, default=0.00)
     
     # Motivo del movimiento (compra, venta, merma, etc.)
     motivo = db.Column(db.String(100), nullable=True)
@@ -23,7 +27,7 @@ class MovimientoInventario(db.Model):
     # Fecha del movimiento
     fecha_movimiento = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     
-    # Costo unitario (solo para ENTRADA)
+    # Costo unitario (solo para ENTRADA) - NUMERIC para precisión
     costo_unitario = db.Column(db.Numeric(10, 2), nullable=True)
     
     # Número de lote (solo para ENTRADA)
@@ -80,11 +84,11 @@ class LoteInventario(db.Model):
     # Número de lote (formato: "Lote #X" o "Lote de Registro" para el inicial)
     numero_lote = db.Column(db.String(50), nullable=False)
     
-    # Costo unitario del lote
-    costo_unitario = db.Column(db.Numeric(10, 2), nullable=False, default=0)
+    # Costo unitario del lote - NUMERIC para precisión
+    costo_unitario = db.Column(db.Numeric(10, 2), nullable=False, default=0.00)
     
-    # Stock actual del lote
-    stock = db.Column(db.Numeric(10, 2), nullable=False, default=0)
+    # Stock actual del lote - NUMERIC para precisión
+    stock = db.Column(db.Numeric(10, 2), nullable=False, default=0.00)
     
     # Fecha de entrada
     fecha_entrada = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
@@ -185,8 +189,8 @@ class LoteMovimientoRelacion(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     
-    # Cantidad afectada del lote
-    cantidad = db.Column(db.Numeric(10, 2), nullable=False, default=0)
+    # Cantidad afectada del lote - NUMERIC para precisión
+    cantidad = db.Column(db.Numeric(10, 2), nullable=False, default=0.00)
     
     # Relaciones
     movimiento_id = db.Column(db.Integer, db.ForeignKey('movimiento_inventario.id'), nullable=False)
