@@ -68,22 +68,46 @@ def process_image(request, UPLOAD_FOLDER, BASE_DIR, allowed_file_func=None):
     # A. Si hay un archivo subido, úsalo y retorna de inmediato
     if file and file.filename and allowed_file_func(file.filename):
         original_name = secure_filename(file.filename)
-        ext = original_name.rsplit('.', 1)[1].lower()
+        # CORRECCIÓN: Manejo seguro de extensión
+        if '.' in original_name:
+            ext = original_name.rsplit('.', 1)[1].lower()
+        else:
+            # Si no tiene extensión, intentar detectar por MIME type
+            mime_type = file.content_type
+            if mime_type == 'image/jpeg':
+                ext = 'jpg'
+            elif mime_type == 'image/png':
+                ext = 'png'
+            elif mime_type == 'image/gif':
+                ext = 'gif'
+            elif mime_type == 'image/webp':
+                ext = 'webp'
+            else:
+                ext = 'jpg'  # Default
+        
         unique_name = f"{uuid.uuid4().hex}.{ext}"
         
         if not os.path.exists(UPLOAD_FOLDER):
             os.makedirs(UPLOAD_FOLDER)
         filepath = os.path.join(UPLOAD_FOLDER, unique_name)
-        file.save(filepath)
-        return unique_name
+        
+        try:
+            file.save(filepath)
+            return unique_name
+        except Exception as e:
+            print(f"Error guardando archivo: {e}")
+            # Continuar con otras opciones si falla
     
     # B. Si hay displayed_url válida, úsala
     if displayed_url:
         # Caso 1: URL local completa (/static/uploads/...)
-        if displayed_url.startswith("/static/uploads/"):
-            img_filename = displayed_url.split("/uploads/")[1]
-            if os.path.exists(os.path.join(UPLOAD_FOLDER, img_filename)):
-                return img_filename
+        if displayed_url.startswith("/static/uploads/") and "/uploads/" in displayed_url:
+            # CORRECCIÓN: Verificar que split producirá al menos 2 elementos
+            parts = displayed_url.split("/uploads/")
+            if len(parts) > 1:
+                img_filename = parts[1]
+                if os.path.exists(os.path.join(UPLOAD_FOLDER, img_filename)):
+                    return img_filename
         
         # Caso 2: Solo nombre de archivo
         elif "/" not in displayed_url:
@@ -94,9 +118,20 @@ def process_image(request, UPLOAD_FOLDER, BASE_DIR, allowed_file_func=None):
         elif displayed_url.startswith(("http://", "https://")):
             # Extraer nombre si existe en URL
             filename = os.path.basename(displayed_url.split("?")[0])
-            if not filename or not allowed_file_func(filename):
-                # Generar nombre aleatorio
-                ext = "jpg"  # Default 
+            
+            # CORRECCIÓN: Verificar extensión de forma segura
+            if '.' in filename:
+                name_parts = filename.rsplit('.', 1)
+                if len(name_parts) > 1 and allowed_file_func(filename):
+                    # Usar el nombre existente
+                    pass
+                else:
+                    # Generar nombre con extensión segura
+                    ext = "jpg"
+                    filename = f"{uuid.uuid4().hex}.{ext}"
+            else:
+                # Sin extensión, generar nombre completo
+                ext = "jpg"
                 filename = f"{uuid.uuid4().hex}.{ext}"
             
             # Verificar si ya existe (cacheada)
@@ -104,14 +139,18 @@ def process_image(request, UPLOAD_FOLDER, BASE_DIR, allowed_file_func=None):
             if not os.path.exists(filepath):
                 # Intento rápido de descarga sin bloquear
                 try:
-                    r = requests.get(displayed_url, timeout=3.0)
+                    headers = {
+                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+                    }
+                    r = requests.get(displayed_url, headers=headers, timeout=5.0)
                     if r.status_code == 200:
                         os.makedirs(os.path.dirname(filepath), exist_ok=True)
                         with open(filepath, 'wb') as f:
                             f.write(r.content)
                         return filename
-                except:
-                    pass  # Si falla, continúa sin error
+                except Exception as e:
+                    print(f"Error descargando imagen desde {displayed_url}: {e}")
+                    # Continuar sin error
             else:
                 return filename
     
@@ -122,7 +161,7 @@ def process_image(request, UPLOAD_FOLDER, BASE_DIR, allowed_file_func=None):
             return ia_foto_filename
     
     # D. Usar imagen predeterminada según categoría
-    categoria_norm = request.form.get("categoria_existente", "otros").lower()
+    categoria_norm = request.form.get("categoria_existente", "otros").lower() if request.form else "otros"
     
     if "botanas" in categoria_norm or "dulces" in categoria_norm or "snacks" in categoria_norm:
         default_img = "default_snack.jpg"
@@ -138,10 +177,14 @@ def process_image(request, UPLOAD_FOLDER, BASE_DIR, allowed_file_func=None):
     if os.path.exists(default_path):
         dest_path = os.path.join(UPLOAD_FOLDER, default_img)
         if not os.path.exists(dest_path):
-            shutil.copy2(default_path, dest_path)
+            try:
+                shutil.copy2(default_path, dest_path)
+            except Exception as e:
+                print(f"Error copiando imagen predeterminada: {e}")
         return default_img
     
-    return None  # Si todo falla
+    # Si absolutamente todo falla, retornar el nombre de la imagen por defecto
+    return "default_product.jpg"
 
 def download_image_optimized(url, filepath, timeout=5.0):
     """Versión optimizada de descarga de imágenes."""

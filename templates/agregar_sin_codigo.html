@@ -789,6 +789,11 @@
 <!-- SCRIPTS -->
 <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 <script>
+  // CONSTANTES DE VALIDACIÓN
+  const MAX_STOCK_VALUE = 99999999;  // 8 dígitos máximo para integer
+  const MAX_PRICE_VALUE = 99999999.99;  // 8 dígitos antes del decimal
+  const MAX_NAME_LENGTH = 100;  // Longitud máxima del nombre
+
   // Cache de códigos generados para evitar duplicados
   const generatedCodes = new Set();
   
@@ -918,6 +923,86 @@
         }
       });
     }
+
+    // Event listener para carga de imágenes
+    const fotoInput = document.getElementById("fotoInput");
+    if (fotoInput) {
+      fotoInput.addEventListener("change", function(e) {
+        if (this.files && this.files[0]) {
+          const file = this.files[0];
+          
+          // Validar tamaño
+          if (file.size > 5 * 1024 * 1024) { // 5MB
+            showCenteredNotification("La imagen es demasiado grande (máximo 5MB).");
+            this.value = ""; // Limpiar el input
+            return;
+          }
+          
+          // Validar tipo MIME
+          const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+          if (!validTypes.includes(file.type)) {
+            showCenteredNotification("Tipo de archivo no válido. Solo se permiten imágenes JPG, PNG, GIF o WebP.");
+            this.value = ""; // Limpiar el input
+            return;
+          }
+          
+          // Mostrar progreso para archivos grandes
+          const imageProgressContainer = document.querySelector(".image-upload-progress");
+          const imageProgressBar = document.getElementById("imageProgressBar");
+          
+          if (file.size > 1 * 1024 * 1024 && imageProgressContainer && imageProgressBar) { // 1MB
+            imageProgressContainer.style.display = "block";
+            
+            // Simulación de progreso
+            let progress = 0;
+            const interval = setInterval(() => {
+              progress += 5;
+              if (progress > 100) {
+                clearInterval(interval);
+                imageProgressContainer.style.display = "none";
+              } else {
+                imageProgressBar.style.width = `${progress}%`;
+              }
+            }, 50);
+          }
+          
+          // Crear blob URL para vista previa inmediata
+          const objectURL = URL.createObjectURL(file);
+          const fotoPlaceholder = document.getElementById("fotoPlaceholder");
+          
+          if (fotoPlaceholder) {
+            fotoPlaceholder.innerHTML = `
+              <img src="${objectURL}" alt="Foto Local Seleccionada">
+              <button type="button" class="remove-image" id="removeImageBtn">&times;</button>
+            `;
+            fotoPlaceholder.classList.add("has-image");
+          }
+          
+          // Limpiar campos de imagen IA ya que ahora hay una imagen local
+          const iaFilenameInput = document.getElementById("ia_foto_filename");
+          const displayedUrlInput = document.getElementById("displayed_image_url");
+          
+          if (iaFilenameInput) iaFilenameInput.value = "";
+          if (displayedUrlInput) displayedUrlInput.value = "";
+          
+          attachRemoveImageListener();
+        }
+      });
+    }
+
+    // Validación en tiempo real para el campo de stock
+    document.getElementById('stock').addEventListener('input', function() {
+        const value = parseInt(this.value.replace(/,/g, ""));
+        if (!isNaN(value) && value > MAX_STOCK_VALUE) {
+            this.classList.add("is-invalid");
+            // Mostrar mensaje temporal
+            const feedback = this.nextElementSibling;
+            if (feedback && feedback.classList.contains("invalid-feedback")) {
+                feedback.textContent = `El stock no puede ser mayor a ${MAX_STOCK_VALUE.toLocaleString()} unidades`;
+                feedback.style.display = "block";
+            }
+        }
+    });
   });
 
   /* ===========================================================
@@ -1025,7 +1110,7 @@
     }
   }
 
-function validateForm(e) {
+  function validateForm(e) {
     e.preventDefault(); // Detener envío para validación
     
     // Asegurarse de que el código de barras esté presente
@@ -1048,6 +1133,10 @@ function validateForm(e) {
         nombreFeedback.style.display = "block";
       }
       isValid = false;
+    } else if (nombreInput.value.length > MAX_NAME_LENGTH) {
+      nombreInput.classList.add("is-invalid");
+      showCenteredNotification(`El nombre del producto no puede exceder ${MAX_NAME_LENGTH} caracteres`);
+      isValid = false;
     } else {
       nombreInput.classList.remove("is-invalid");
       const nombreFeedback = nombreInput.nextElementSibling;
@@ -1056,8 +1145,10 @@ function validateForm(e) {
       }
     }
     
-    // Validar stock
+    // Validar stock - NUEVA VALIDACIÓN DE RANGO
     const stockInput = document.getElementById('stock');
+    const stockValue = parseInt(stockInput.value.replace(/,/g, ""));
+    
     if (!stockInput.value.trim()) {
       stockInput.classList.add("is-invalid");
       const stockFeedback = stockInput.nextElementSibling;
@@ -1065,13 +1156,17 @@ function validateForm(e) {
         stockFeedback.style.display = "block";
       }
       isValid = false;
-    } else if (!/^\d+$/.test(stockInput.value.replace(/,/g, ""))) {
+    } else if (isNaN(stockValue)) {
       stockInput.classList.add("is-invalid");
-      const stockFeedback = stockInput.nextElementSibling;
-      if (stockFeedback && stockFeedback.classList.contains("invalid-feedback")) {
-        stockFeedback.style.display = "block";
-      }
       showCenteredNotification("El stock inicial debe ser un número entero");
+      isValid = false;
+    } else if (stockValue > MAX_STOCK_VALUE) {
+      stockInput.classList.add("is-invalid");
+      showCenteredNotification(`El stock no puede ser mayor a ${MAX_STOCK_VALUE.toLocaleString()} unidades`);
+      isValid = false;
+    } else if (stockValue < 0) {
+      stockInput.classList.add("is-invalid");
+      showCenteredNotification("El stock no puede ser negativo");
       isValid = false;
     } else {
       stockInput.classList.remove("is-invalid");
@@ -1081,14 +1176,28 @@ function validateForm(e) {
       }
     }
     
-    // Validar costo
+    // Validar costo - NUEVA VALIDACIÓN DE RANGO
     const costoInput = document.getElementById('costo');
+    const costoValue = parseFloat(costoInput.value.replace(/[$,]/g, ""));
+    
     if (!costoInput.value.trim() || costoInput.value === "$") {
       costoInput.classList.add("is-invalid");
       const costoFeedback = costoInput.nextElementSibling;
       if (costoFeedback && costoFeedback.classList.contains("invalid-feedback")) {
         costoFeedback.style.display = "block";
       }
+      isValid = false;
+    } else if (isNaN(costoValue)) {
+      costoInput.classList.add("is-invalid");
+      showCenteredNotification("El costo debe ser un número válido");
+      isValid = false;
+    } else if (costoValue > MAX_PRICE_VALUE) {
+      costoInput.classList.add("is-invalid");
+      showCenteredNotification(`El costo no puede ser mayor a $${MAX_PRICE_VALUE.toLocaleString()}`);
+      isValid = false;
+    } else if (costoValue < 0) {
+      costoInput.classList.add("is-invalid");
+      showCenteredNotification("El costo no puede ser negativo");
       isValid = false;
     } else {
       costoInput.classList.remove("is-invalid");
@@ -1098,14 +1207,28 @@ function validateForm(e) {
       }
     }
     
-    // Validar precio
+    // Validar precio - NUEVA VALIDACIÓN DE RANGO
     const precioInput = document.getElementById('precio_venta');
+    const precioValue = parseFloat(precioInput.value.replace(/[$,]/g, ""));
+    
     if (!precioInput.value.trim() || precioInput.value === "$") {
       precioInput.classList.add("is-invalid");
       const precioFeedback = precioInput.nextElementSibling;
       if (precioFeedback && precioFeedback.classList.contains("invalid-feedback")) {
         precioFeedback.style.display = "block";
       }
+      isValid = false;
+    } else if (isNaN(precioValue)) {
+      precioInput.classList.add("is-invalid");
+      showCenteredNotification("El precio debe ser un número válido");
+      isValid = false;
+    } else if (precioValue > MAX_PRICE_VALUE) {
+      precioInput.classList.add("is-invalid");
+      showCenteredNotification(`El precio no puede ser mayor a $${MAX_PRICE_VALUE.toLocaleString()}`);
+      isValid = false;
+    } else if (precioValue < 0) {
+      precioInput.classList.add("is-invalid");
+      showCenteredNotification("El precio no puede ser negativo");
       isValid = false;
     } else {
       precioInput.classList.remove("is-invalid");
@@ -1236,6 +1359,14 @@ function validateForm(e) {
       return;
     }
     
+    // NUEVA VALIDACIÓN: Verificar límite máximo
+    const numericValue = parseFloat(value);
+    if (!isNaN(numericValue) && numericValue > MAX_PRICE_VALUE) {
+      showCenteredNotification(`El valor no puede ser mayor a $${MAX_PRICE_VALUE.toLocaleString()}`);
+      // Truncar al valor máximo
+      value = MAX_PRICE_VALUE.toString();
+    }
+    
     const match = value.match(moneyPattern);
     if (match) {
       let intPart = match[1];
@@ -1281,27 +1412,31 @@ function validateForm(e) {
    */
   function attachRemoveImageListener() {
     const fotoPlaceholder = document.getElementById("fotoPlaceholder");
+    if (!fotoPlaceholder) return;
+    
     const btnRemove = fotoPlaceholder.querySelector(".remove-image");
     
     if (btnRemove) {
-      btnRemove.addEventListener("click", function (e) {
+      // Remover listeners anteriores para evitar duplicados
+      const newBtnRemove = btnRemove.cloneNode(true);
+      btnRemove.parentNode.replaceChild(newBtnRemove, btnRemove);
+      
+      newBtnRemove.addEventListener("click", function (e) {
         e.stopPropagation(); // Prevenir burbujas de eventos
         
-        // Recrear menú con estructura correcta
-        fotoPlaceholder.innerHTML = `
-          <button type="button" class="no-image-icon" id="btnCargarFoto">&#8942;</button>
-          <div class="foto-dropdown" id="fotoDropdown" style="display:none;">
-            <button type="button" class="dropdown-item btn btn-secondary" id="dropdownCargarFoto">Cargar imagen</button>
-            <button type="button" class="dropdown-item btn btn-secondary" id="dropdownGenerarIA">Generar con IA</button>
-          </div>`;
+        // Limpiar todos los campos relacionados con imágenes
+        const fotoInput = document.getElementById("fotoInput");
+        const iaFilenameInput = document.getElementById("ia_foto_filename");
+        const displayedUrlInput = document.getElementById("displayed_image_url");
+        
+        if (fotoInput) fotoInput.value = "";
+        if (iaFilenameInput) iaFilenameInput.value = "";
+        if (displayedUrlInput) displayedUrlInput.value = "";
+        
+        // Restaurar el placeholder
+        resetPhotoPlaceholder();
         
         fotoPlaceholder.classList.remove("has-image");
-        document.getElementById("ia_foto_filename").value = "";
-        document.getElementById("fotoInput").value = "";
-        document.getElementById("displayed_image_url").value = "";
-        
-        // Importante: vincular eventos al menú recién creado
-        setTimeout(bindPhotoEvents, 0);
       });
     }
   }
@@ -1380,6 +1515,27 @@ function validateForm(e) {
     // Configurar el observador para observar cambios en los hijos
     observer.observe(fotoPlaceholder, { childList: true, subtree: true });
   }
+
+  // Nueva función helper para resetear el placeholder de forma segura
+  function resetPhotoPlaceholder(errorMessage) {
+    const fotoPlaceholder = document.getElementById("fotoPlaceholder");
+    if (!fotoPlaceholder) return;
+    
+    fotoPlaceholder.innerHTML = `
+      <button type="button" class="no-image-icon" id="btnCargarFoto">&#8942;</button>
+      <div class="foto-dropdown" id="fotoDropdown" style="display:none;">
+        <button type="button" class="dropdown-item btn btn-secondary" id="dropdownCargarFoto">Cargar imagen</button>
+        <button type="button" class="dropdown-item btn btn-secondary" id="dropdownGenerarIA">Generar con IA</button>
+      </div>
+    `;
+    
+    if (errorMessage) {
+      showCenteredNotification(errorMessage);
+    }
+    
+    // Dar tiempo para que el DOM se actualice antes de asignar eventos
+    setTimeout(bindPhotoEvents, 0);
+  }
   
   function generatePhotoWithIA() {
     const nombreInput = document.getElementById("nombre");
@@ -1408,8 +1564,12 @@ function validateForm(e) {
     `;
     
     // Mostrar barra de progreso
-    imageProgressContainer.style.display = "block";
-    imageProgressBar.style.width = "0%";
+    if (imageProgressContainer) {
+      imageProgressContainer.style.display = "block";
+      if (imageProgressBar) {
+        imageProgressBar.style.width = "0%";
+      }
+    }
     
     // Simulación de progreso para feedback visual
     let progress = 0;
@@ -1418,22 +1578,23 @@ function validateForm(e) {
       if (progress > 95) {
         progress = 95; // Mantener en 95% hasta que termine
       }
-      imageProgressBar.style.width = `${progress}%`;
+      if (imageProgressBar) {
+        imageProgressBar.style.width = `${progress}%`;
+      }
     }, 100);
     
     // Llamada a la API con parámetro adicional para forzar búsqueda nueva
     const queryParams = {
       nombre: nombreInput.value.trim(),
-      forceSearch: true, // Este es el nuevo parámetro para forzar la búsqueda
-      cacheBuster: Date.now() // Evitar caché en navegador para solicitudes únicas
+      forceSearch: true,
+      cacheBuster: Date.now()
     };
     
-    // Usar el caché de navegador para peticiones idénticas
     fetch("/api/buscar-imagen", {
       method: "POST",
       headers: { 
         "Content-Type": "application/json",
-        "Cache-Control": "max-age=3600"  // Cachear por 1 hora
+        "Cache-Control": "max-age=3600"
       },
       body: JSON.stringify(queryParams)
     })
@@ -1446,11 +1607,15 @@ function validateForm(e) {
     .then(data => {
       // Limpiar intervalo y completar barra
       clearInterval(interval);
-      imageProgressBar.style.width = "100%";
+      if (imageProgressBar) {
+        imageProgressBar.style.width = "100%";
+      }
       
       // Ocultar barra después de 500ms
       setTimeout(() => {
-        imageProgressContainer.style.display = "none";
+        if (imageProgressContainer) {
+          imageProgressContainer.style.display = "none";
+        }
       }, 500);
       
       if (data.status === "success" && data.image_url) {
@@ -1463,59 +1628,40 @@ function validateForm(e) {
           `;
           fotoPlaceholder.classList.add("has-image");
 
-          // Guardar el nombre del archivo y la URL
-          document.getElementById("ia_foto_filename").value = data.filename || "";
-          document.getElementById("displayed_image_url").value = data.image_url;
+          // Guardar el nombre del archivo y la URL de forma segura
+          const iaFilenameInput = document.getElementById("ia_foto_filename");
+          const displayedUrlInput = document.getElementById("displayed_image_url");
+          
+          if (iaFilenameInput) {
+            iaFilenameInput.value = data.filename || "";
+          }
+          if (displayedUrlInput) {
+            displayedUrlInput.value = data.image_url || "";
+          }
 
           attachRemoveImageListener();
         };
         
         testImg.onerror = function() {
           console.error("No se pudo cargar la imagen:", data.image_url);
-          fotoPlaceholder.innerHTML = `
-            <button type="button" class="no-image-icon" id="btnCargarFoto">&#8942;</button>
-            <div class="foto-dropdown" id="fotoDropdown" style="display:none;">
-              <button type="button" class="dropdown-item btn btn-secondary" id="dropdownCargarFoto">Cargar imagen</button>
-              <button type="button" class="dropdown-item btn btn-secondary" id="dropdownGenerarIA">Generar con IA</button>
-            </div>
-          `;
-          showCenteredNotification("La imagen no pudo cargarse. Intenta de nuevo o carga una imagen manualmente.");
-          setTimeout(bindPhotoEvents, 0);
+          resetPhotoPlaceholder("La imagen no pudo cargarse. Intenta de nuevo o carga una imagen manualmente.");
         };
         
         // Iniciar la carga de la imagen
         testImg.src = data.image_url;
       } else {
-        // Reconstruir menú con estructura correcta en caso de error
-        fotoPlaceholder.innerHTML = `
-          <button type="button" class="no-image-icon" id="btnCargarFoto">&#8942;</button>
-          <div class="foto-dropdown" id="fotoDropdown" style="display:none;">
-            <button type="button" class="dropdown-item btn btn-secondary" id="dropdownCargarFoto">Cargar imagen</button>
-            <button type="button" class="dropdown-item btn btn-secondary" id="dropdownGenerarIA">Generar con IA</button>
-          </div>
-        `;
-        showCenteredNotification(data.message || "No se pudo obtener la imagen");
-        // Dar tiempo para que el DOM se actualice antes de asignar eventos
-        setTimeout(bindPhotoEvents, 0);
+        resetPhotoPlaceholder(data.message || "No se pudo obtener la imagen");
       }
     })
     .catch(error => {
       // Limpiar intervalo y ocultar barra
       clearInterval(interval);
-      imageProgressContainer.style.display = "none";
+      if (imageProgressContainer) {
+        imageProgressContainer.style.display = "none";
+      }
       
       console.error("Error al buscar la imagen:", error);
-      // Reconstruir menú con estructura correcta en caso de error
-      fotoPlaceholder.innerHTML = `
-        <button type="button" class="no-image-icon" id="btnCargarFoto">&#8942;</button>
-        <div class="foto-dropdown" id="fotoDropdown" style="display:none;">
-          <button type="button" class="dropdown-item btn btn-secondary" id="dropdownCargarFoto">Cargar imagen</button>
-          <button type="button" class="dropdown-item btn btn-secondary" id="dropdownGenerarIA">Generar con IA</button>
-        </div>
-      `;
-      showCenteredNotification("Ocurrió un error al buscar la imagen: " + error.message);
-      // Dar tiempo para que el DOM se actualice antes de asignar eventos
-      setTimeout(bindPhotoEvents, 0);
+      resetPhotoPlaceholder("Ocurrió un error al buscar la imagen: " + error.message);
     });
   }
 
@@ -1620,54 +1766,5 @@ function validateForm(e) {
       validateBarcodeInput();
     }
   });
-
-  // Manejo optimizado de carga de imágenes
-  const fotoInput = document.getElementById("fotoInput");
-  if (fotoInput) {
-    fotoInput.addEventListener("change", function(e) {
-      if (this.files && this.files[0]) {
-        const file = this.files[0];
-        if (file.size > 5 * 1024 * 1024) { // 5MB
-          showCenteredNotification("La imagen es demasiado grande (máximo 5MB).");
-          return;
-        }
-        
-        // Mostrar progreso para archivos grandes
-        const imageProgressContainer = document.querySelector(".image-upload-progress");
-        const imageProgressBar = document.getElementById("imageProgressBar");
-        
-        if (file.size > 1 * 1024 * 1024) { // 1MB
-          imageProgressContainer.style.display = "block";
-          
-          // Simulación de progreso (ya que no hay evento real)
-          let progress = 0;
-          const interval = setInterval(() => {
-            progress += 5;
-            if (progress > 100) {
-              clearInterval(interval);
-              imageProgressContainer.style.display = "none";
-            } else {
-              imageProgressBar.style.width = `${progress}%`;
-            }
-          }, 50);
-        }
-        
-        // Crear blob URL para vista previa inmediata
-        const objectURL = URL.createObjectURL(file);
-        const fotoPlaceholder = document.getElementById("fotoPlaceholder");
-        
-        fotoPlaceholder.innerHTML = `
-          <img src="${objectURL}" alt="Foto Local Seleccionada">
-          <button type="button" class="remove-image" id="removeImageBtn">&times;</button>
-        `;
-        fotoPlaceholder.classList.add("has-image");
-        
-        // NO guardar objectURL como displayed_image_url para archivos locales
-        document.getElementById("displayed_image_url").value = "";
-        
-        attachRemoveImageListener();
-      }
-    });
-  }
 </script>
 {% endblock %}

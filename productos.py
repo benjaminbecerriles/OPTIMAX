@@ -11,6 +11,7 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment
 from sqlalchemy import or_
 from werkzeug.utils import secure_filename
+from decimal import Decimal
 
 from database import db
 from models.models import Producto, CatalogoGlobal
@@ -58,6 +59,9 @@ def truncar_url(url, max_length=95):
     if not url or len(url) <= max_length:
         return url
     
+    # Convertir a string por si acaso
+    url = str(url)
+    
     # Verificar si es una URL externa
     if url.startswith(('http://', 'https://')):
         try:
@@ -75,45 +79,70 @@ def truncar_url(url, max_length=95):
             # Calcular cuánto espacio queda para el path y query
             remaining = max_length - len(base) - 4  # -4 para "/..."
             
-            # Extraer el nombre del archivo
-            filename = path.split('/')[-1] if '/' in path else path
+            # Extraer el nombre del archivo de forma segura
+            if '/' in path:
+                path_parts = path.split('/')
+                filename = path_parts[-1] if path_parts else ""
+            else:
+                filename = path
             
             # Si hay espacio para el nombre completo y no hay query
-            if len(filename) <= remaining and not query:
+            if filename and len(filename) <= remaining and not query:
                 return f"{base}/.../{filename}"
             
             # Si hay query, incluirla parcialmente si hay espacio
-            if query and len(filename) + len(query) + 1 <= remaining:  # +1 por el "?"
+            if query and filename and len(filename) + len(query) + 1 <= remaining:  # +1 por el "?"
                 return f"{base}/.../{filename}?{query}"
             
             # Si no hay espacio suficiente para todo, truncar adecuadamente
-            if len(filename) <= remaining:
+            if filename and len(filename) <= remaining:
                 return f"{base}/.../{filename}"
             
             # Si el nombre es demasiado largo, truncarlo
-            return f"{base}/.../{filename[:remaining]}"
-        except:
-            # Si hay algún error, caer al método original pero preservando el dominio
-            pass
+            if filename:
+                return f"{base}/.../{filename[:remaining]}"
+            else:
+                return f"{base}/..."
+                
+        except Exception as e:
+            print(f"Error al parsear URL {url}: {e}")
+            # Si hay algún error, caer al método simple
     
-    # Método original para URLs que no son externas o en caso de error
+    # Método simple para URLs locales o en caso de error
     try:
         # Intentar preservar al menos el dominio para URLs externas
         if url.startswith(('http://', 'https://')):
-            from urllib.parse import urlparse
-            parsed = urlparse(url)
-            domain = parsed.netloc
-            if domain and len(domain) + 8 <= max_length:  # 8 caracteres para "https://" y "..."
-                return f"{parsed.scheme}://{domain}/..."
+            # Buscar el tercer slash
+            count = 0
+            pos = -1
+            for i, char in enumerate(url):
+                if char == '/':
+                    count += 1
+                    if count == 3:
+                        pos = i
+                        break
             
+            if pos > 0 and pos < max_length - 4:
+                domain_part = url[:pos]
+                return f"{domain_part}/..."
     except:
         pass
     
-    # Si todo falla, usar el método original
-    nombre_archivo = url.split('/')[-1]
+    # Si todo falla, usar el método más simple y seguro
+    if '/' in url:
+        parts = url.split('/')
+        nombre_archivo = parts[-1] if parts else url
+    else:
+        nombre_archivo = url
+        
     if len(nombre_archivo) > max_length:
-        return nombre_archivo[-max_length:]
-    return nombre_archivo
+        # Tomar los últimos caracteres para preservar la extensión
+        return "..." + nombre_archivo[-(max_length-3):]
+    elif len(url) > max_length:
+        # Si el nombre es corto pero la URL completa es larga
+        return ".../" + nombre_archivo
+    else:
+        return url
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -594,6 +623,11 @@ def agregar_sin_codigo():
             precio_str = request.form.get("precio_venta", "$0").strip()
             marca = request.form.get("marca", "").strip()
             
+            # VALIDACIÓN: Verificar longitud del nombre
+            if len(nombre) > 100:
+                flash('El nombre del producto no puede exceder 100 caracteres', 'danger')
+                return redirect(url_for('productos.agregar_sin_codigo'))
+            
             # Obtener el código de barras externo del formulario
             codigo_barras_externo = request.form.get("codigo_barras_externo", "").strip()
             
@@ -621,29 +655,61 @@ def agregar_sin_codigo():
             has_caducidad = (request.form.get("toggle_caducidad_estado", "DESACTIVADO") == "ACTIVADO")
             caducidad_lapso = request.form.get("caducidad_lapso", None) if has_caducidad else None
             
-            # Parse numéricos
+            # Parse numéricos con VALIDACIÓN DE RANGOS
             try:
-                stock_int = int(stock_str)
-            except:
-                stock_int = 0
+                stock_int = int(stock_str.replace(",", ""))  # Remover comas antes de convertir
+                
+                # VALIDACIÓN: Verificar rango del stock
+                if stock_int < 0:
+                    flash('El stock no puede ser negativo', 'danger')
+                    return redirect(url_for('productos.agregar_sin_codigo'))
+                    
+                if stock_int > 99999999:  # Máximo 8 dígitos
+                    flash('El stock no puede ser mayor a 99,999,999 unidades', 'danger')
+                    return redirect(url_for('productos.agregar_sin_codigo'))
+                    
+            except ValueError:
+                flash('El stock debe ser un número entero válido', 'danger')
+                return redirect(url_for('productos.agregar_sin_codigo'))
             
+            # Parse y validación de costo
             costo_val = parse_money(costo_str)
+            
+            # VALIDACIÓN: Verificar rango del costo
+            if costo_val < 0:
+                flash('El costo no puede ser negativo', 'danger')
+                return redirect(url_for('productos.agregar_sin_codigo'))
+                
+            if costo_val > Decimal('99999999.99'):
+                flash('El costo no puede ser mayor a $99,999,999.99', 'danger')
+                return redirect(url_for('productos.agregar_sin_codigo'))
+            
+            # Parse y validación de precio
             precio_val = parse_money(precio_str)
             
-            # Manejo de imagen
+            # VALIDACIÓN: Verificar rango del precio
+            if precio_val < 0:
+                flash('El precio no puede ser negativo', 'danger')
+                return redirect(url_for('productos.agregar_sin_codigo'))
+                
+            if precio_val > Decimal('99999999.99'):
+                flash('El precio no puede ser mayor a $99,999,999.99', 'danger')
+                return redirect(url_for('productos.agregar_sin_codigo'))
+            
+            # Manejo de imagen - USANDO LA VERSIÓN MEJORADA
             foto_final = process_image(request, UPLOAD_FOLDER, BASE_DIR)
             if not foto_final:
                 foto_final = "default_product.jpg"
             
             # Usar la función para truncar la URL para asegurar que quepa en la columna
-            url_imagen_truncada = truncar_url(request.form.get("displayed_image_url", "").strip(), 95)
+            url_imagen_truncada = truncar_url(request.form.get("displayed_image_url", "").strip(), 295)
                 
             # Crear el producto con solo los campos válidos
             nuevo = Producto(
                 nombre=nombre,
                 stock=stock_int,
-                costo=costo_val, 
-                precio_venta=precio_val,
+                costo=float(costo_val),  # Convertir Decimal a float para la BD
+                precio_venta=float(precio_val),  # Convertir Decimal a float para la BD
                 categoria=categoria_normalizada,
                 # MODIFICADO: Usar la nueva función de color de categoría
                 categoria_color=get_category_color(categoria_normalizada),
@@ -660,6 +726,9 @@ def agregar_sin_codigo():
                 # Eliminados los campos que no existen en el modelo
                 # tipo_medida, unidad_medida, fabricacion, origen
             )
+            
+            # IMPORTANTE: Actualizar precio_final basado en precio_venta
+            nuevo.actualizar_precio_final()
             
             # Guardar en la base de datos
             db.session.add(nuevo)
@@ -723,12 +792,29 @@ def agregar_sin_codigo():
             response.set_cookie('pagina_origen', 'agregar_sin_codigo', max_age=300)  # Cookie válida por 5 minutos
             return response
             
+        except ValueError as ve:
+            # Error de conversión de valores
+            db.session.rollback()
+            flash(f'Error en los valores ingresados: {str(ve)}', 'danger')
+            print(f"ERROR de valores al guardar producto: {str(ve)}")
+            return redirect(url_for('productos.agregar_sin_codigo'))
+            
         except Exception as e:
             db.session.rollback()
-            flash(f'Error al guardar el producto: {str(e)}', 'danger')
+            
+            # Manejo especial para errores de base de datos
+            error_message = str(e)
+            if "numeric field overflow" in error_message:
+                flash('Error: Los valores ingresados son demasiado grandes. Por favor, verifica los montos.', 'danger')
+            elif "value too long for type character varying" in error_message:
+                flash('Error: Uno de los textos ingresados es demasiado largo. Por favor, acorta los textos.', 'danger')
+            elif "list index out of range" in error_message:
+                flash('Error al procesar la imagen. Por favor, intenta con otra imagen o sin imagen.', 'danger')
+            else:
+                flash(f'Error al guardar el producto: {str(e)}', 'danger')
+                
             print(f"ERROR al guardar producto sin código: {str(e)}")
-        
-        return redirect(url_for('productos.ver_productos'))
+            return redirect(url_for('productos.agregar_sin_codigo'))
         
     else:
         # GET - Cargar página de agregar producto sin código
