@@ -1,9 +1,7 @@
 # models/__init__.py
 
-from flask_sqlalchemy import SQLAlchemy
-
-# Aquí creamos LA instancia única de SQLAlchemy
-db = SQLAlchemy()
+# Importar la instancia de db desde database.py en lugar de crear una nueva
+from database import db
 
 print("=== LOADED NEW MODELS WITH USELIST=FALSE ===")
 

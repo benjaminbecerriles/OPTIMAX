@@ -1,12 +1,7 @@
 print("=== LOADED NEW MODELS WITH USELIST=FALSE ===")
 
-# IMPORTANTE: Todos los campos monetarios usan Numeric(10,2) para precisión
-# Compatible con terminales de pago como Mercado Pago
-# Los valores siempre se guardan con 2 decimales exactos (10.00, 99.99, etc.)
-
 from . import db
 from datetime import datetime, date
-from sqlalchemy import Numeric
 
 class Empresa(db.Model):
     __tablename__ = 'empresa'
@@ -57,14 +52,14 @@ class Producto(db.Model):
     # Campos básicos
     # AHORA: Se cambió de nullable=False a nullable=True
     nombre = db.Column(db.String(100), nullable=True)
-    # MODIFICADO: Cambiado de Float a Numeric para precisión monetaria
-    stock = db.Column(db.Numeric(10, 2), default=0.00)
-    costo = db.Column(db.Numeric(10, 2), default=0.00)
-    precio_venta = db.Column(db.Numeric(10, 2), default=0.00)
+    # MODIFICADO: Cambiado de Integer a Float para permitir cantidades decimales
+    stock = db.Column(db.Float, default=0.0)
+    costo = db.Column(db.Float, default=0.0)
+    precio_venta = db.Column(db.Float, default=0.0)
     
     # ===== NUEVO CAMPO CRÍTICO PARA PUNTO DE VENTA =====
     # Este campo se actualiza automáticamente y siempre contiene el precio real que debe cobrarse
-    precio_final = db.Column(db.Numeric(10, 2), default=0.00, nullable=False)
+    precio_final = db.Column(db.Float, default=0.0, nullable=False)
     
     categoria = db.Column(db.String(100), nullable=True)
 
@@ -100,9 +95,8 @@ class Producto(db.Model):
     ubicacion_tipo = db.Column(db.String(20), nullable=True)  # 'global', 'categoria', 'marca', 'individual'
     ubicacion_grupo = db.Column(db.String(100), nullable=True)  # Nombre de la categoría o marca si aplica
     
-    # MODIFICADO: Cambiado de Float a Numeric
-    tasa_impuesto = db.Column(db.Numeric(5, 2), default=0.00)
-    descuento = db.Column(db.Numeric(5, 2), default=0.00)
+    tasa_impuesto = db.Column(db.Float, default=0.0)
+    descuento = db.Column(db.Float, default=0.0)
 
     # Lógica de Caducidad
     has_caducidad = db.Column(db.Boolean, default=False)
@@ -158,8 +152,7 @@ class Producto(db.Model):
     tipo_descuento = db.Column(db.String(20), nullable=True)
     
     # Valor del descuento (porcentaje o cantidad) - Debe ser positivo
-    # MODIFICADO: Cambiado de Float a Numeric
-    valor_descuento = db.Column(db.Numeric(10, 2), default=0.00, nullable=False)
+    valor_descuento = db.Column(db.Float, default=0.0, nullable=False)
     
     # Fecha de inicio del descuento (opcional)
     fecha_inicio_descuento = db.Column(db.DateTime, nullable=True)
@@ -196,15 +189,13 @@ class Producto(db.Model):
         Calcula el precio final con el descuento aplicado.
         NOTA: Este método ahora es principalmente para validación, 
         ya que precio_final se mantiene actualizado automáticamente.
-        
-        Maneja correctamente valores Decimal para precisión monetaria.
         """
         if not self.tiene_descuento or self.valor_descuento <= 0:
             return self.precio_venta
             
         if self.tipo_descuento == 'percentage':
             # Aplicar porcentaje (asegurar que no exceda 100%)
-            porcentaje = min(float(self.valor_descuento), 100.0) / 100.0
+            porcentaje = min(self.valor_descuento, 100.0) / 100.0
             return self.precio_venta * (1 - porcentaje)
         else:
             # Aplicar monto fijo (asegurar que no sea negativo)
@@ -222,10 +213,8 @@ class Producto(db.Model):
         """
         Método seguro para cambiar el precio de venta.
         Actualiza automáticamente el precio_final.
-        
-        Ahora maneja correctamente valores Decimal sin conversión
         """
-        self.precio_venta = nuevo_precio
+        self.precio_venta = float(nuevo_precio)
         self.actualizar_precio_final()
         return self.precio_final
     
@@ -235,14 +224,14 @@ class Producto(db.Model):
         ACTUALIZA AUTOMÁTICAMENTE precio_final.
         
         Args:
-            valor (Decimal o float): Valor del descuento (porcentaje o cantidad fija)
+            valor (float): Valor del descuento (porcentaje o cantidad fija)
             tipo (str): 'percentage' o 'fixed'
             origen (str): 'global', 'categoria', 'marca', 'individual'
             grupo_id (str): Para descuentos de categoría o marca, el nombre del grupo
         """
         self.tiene_descuento = True
         self.tipo_descuento = tipo
-        self.valor_descuento = valor  # SQLAlchemy convierte automáticamente a Decimal
+        self.valor_descuento = float(valor)
         self.origen_descuento = origen
         self.descuento_grupo_id = grupo_id
         self.fecha_aplicacion_descuento = datetime.utcnow()
@@ -259,7 +248,7 @@ class Producto(db.Model):
         """
         self.tiene_descuento = False
         self.tipo_descuento = None
-        self.valor_descuento = 0.00  # SQLAlchemy lo convierte a Decimal(0.00)
+        self.valor_descuento = 0.0
         self.origen_descuento = None
         self.descuento_grupo_id = None
         self.fecha_inicio_descuento = None

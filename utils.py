@@ -5,6 +5,7 @@ import shutil
 import threading
 import requests
 from werkzeug.utils import secure_filename
+from decimal import Decimal, InvalidOperation
 
 def normalizar_categoria(cat):
     """Elimina acentos, pone en minúscula y quita espacios extras."""
@@ -18,7 +19,7 @@ def normalizar_categoria(cat):
 
 def normalize_categoria_if_needed(categoria):
     """
-    Normaliza la categoría solo si es necesario (si no es None).
+    Normaliza la categoría solo si es necesaria (si no es None).
     Similar a normalizar_categoria pero verifica si es None primero.
     """
     if categoria is None:
@@ -175,14 +176,41 @@ def async_download_image(url, filepath):
     thread.start()
 
 def parse_money(value_str):
-    """Convierte un string con formato monetario a float."""
+    """
+    Convierte un string con formato monetario a Decimal con precisión de 2 decimales.
+    Compatible con el sistema de precisión decimal usado en ajuste_stock.py.
+    
+    Ejemplos:
+        "$100.50" -> Decimal('100.50')
+        "$1,234.56" -> Decimal('1234.56')
+        "45.7" -> Decimal('45.70')
+        "" -> Decimal('0.00')
+    """
+    if not value_str or value_str == '':
+        return Decimal('0.00')
+    
+    # Convertir a string si no lo es
+    value_str = str(value_str).strip()
+    
+    # Remover símbolo de moneda si existe
     if value_str.startswith("$"):
         value_str = value_str[1:]
+    
+    # Remover comas de miles
     value_str = value_str.replace(",", "")
+    
+    # Manejar cadena vacía después de limpiar
+    if not value_str:
+        return Decimal('0.00')
+    
     try:
-        return float(value_str)
-    except:
-        return 0.0
+        # Crear Decimal y redondear a 2 decimales
+        decimal_value = Decimal(value_str)
+        # Quantize asegura exactamente 2 decimales
+        return decimal_value.quantize(Decimal('0.01'))
+    except (InvalidOperation, ValueError):
+        # Si falla la conversión, retornar 0.00
+        return Decimal('0.00')
 
 def ensure_default_images(BASE_DIR, UPLOAD_FOLDER):
     """Asegura que todas las imágenes predeterminadas estén disponibles."""
